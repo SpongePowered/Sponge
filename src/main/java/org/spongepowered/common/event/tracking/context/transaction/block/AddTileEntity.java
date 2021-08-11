@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.block;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -36,34 +38,70 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
+import org.spongepowered.common.world.BlockChange;
 
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 @DefaultQualifier(NonNull.class)
 public final class AddTileEntity extends BlockEventBasedTransaction {
 
     final BlockEntity added;
-    final SpongeBlockSnapshot oldSnapshot;
-    final SpongeBlockSnapshot addedSnapshot;
+    private @MonotonicNonNull SpongeBlockSnapshot oldSnapshot;
+    private @MonotonicNonNull SpongeBlockSnapshot addedSnapshot;
+    private final Supplier<ServerLevel> worldSupplier;
+    private final Supplier<LevelChunk> chunkSupplier;
 
-    public AddTileEntity(
-        final BlockEntity added,
-        final SpongeBlockSnapshot attachedSnapshot,
-        final SpongeBlockSnapshot existing
-    ) {
-        super(existing.getBlockPos(), (BlockState) existing.state(), ((ServerWorld) added.getLevel()).key());
-        this.added = added;
-        this.addedSnapshot = attachedSnapshot;
+    public AddTileEntity(final BlockEntity blockEntity, final Supplier<ServerLevel> worldSupplier, final Supplier<LevelChunk> chunkSupplier) {
+        super(blockEntity.getBlockPos().immutable(), chunkSupplier.get().getBlockState(blockEntity.getBlockPos()),
+            ((ServerWorld) worldSupplier.get()).key());
+        this.added = blockEntity;
+        this.worldSupplier = worldSupplier;
+        this.chunkSupplier = chunkSupplier;
+    }
+
+    @Override
+    protected void captureState() {
+        super.captureState();
+        final @Nullable BlockEntity existingTile = this.chunkSupplier.get().getBlockEntity(this.affectedPosition, LevelChunk.EntityCreationType.CHECK);
+        final SpongeBlockSnapshot added = TrackingUtil.createPooledSnapshot(
+            this.originalState,
+            this.affectedPosition,
+            BlockChangeFlags.NONE,
+            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
+            this.added,
+            this.worldSupplier,
+            Optional::empty, Optional::empty
+        );
+        final SpongeBlockSnapshot existing = TrackingUtil.createPooledSnapshot(
+            this.originalState,
+            this.affectedPosition,
+            BlockChangeFlags.NONE,
+            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
+            existingTile,
+            this.worldSupplier,
+            Optional::empty,
+            Optional::empty
+        );
+        existing.blockChange = BlockChange.MODIFY;
         this.oldSnapshot = existing;
+        this.addedSnapshot = added;
+    }
+
+    @Override
+    public Optional<AbsorbingFlowStep> parentAbsorber() {
+        return Optional.of((ctx, tx) -> tx.acceptTileAddition(this.added));
     }
 
     @Override
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
-        @Nullable GameTransaction<@NonNull ?> parent
+        @Nullable final GameTransaction<@NonNull ?> parent
     ) {
         return Optional.empty();
     }
@@ -75,7 +113,7 @@ public final class AddTileEntity extends BlockEventBasedTransaction {
     }
 
     @Override
-    public void restore(PhaseContext<?> context, ChangeBlockEvent.All event) {
+    public void restore(final PhaseContext<@NonNull ?> context, final ChangeBlockEvent.All event) {
         this.oldSnapshot.restore(true, BlockChangeFlags.NONE);
     }
 

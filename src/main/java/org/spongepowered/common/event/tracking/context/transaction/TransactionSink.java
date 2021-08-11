@@ -68,6 +68,7 @@ import org.spongepowered.common.event.tracking.context.transaction.block.Prepare
 import org.spongepowered.common.event.tracking.context.transaction.block.RemoveBlockEntity;
 import org.spongepowered.common.event.tracking.context.transaction.block.ReplaceBlockEntity;
 import org.spongepowered.common.event.tracking.context.transaction.block.ScheduleUpdateTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ClickCreativeMenuTransaction;
@@ -84,6 +85,8 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Sel
 import org.spongepowered.common.event.tracking.context.transaction.inventory.SetCarriedItemTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.SetPlayerContainerTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ShiftCraftingResultTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.world.EntityPerformingDropsTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -91,6 +94,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
+import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -102,18 +106,18 @@ import java.util.function.Supplier;
  * {@link GameTransaction game transactions} that are being created and recorded
  * such that they all <i>mostly flow</i> through the same function of calling
  * some {@code create} function and successively a
- * {@link #logTransaction(GameTransaction)}.
+ * {@link #logTransaction(StatefulTransaction)}.
  *
  * <p>Most transactions are singularly contained, but some transactions are
  * markers for transaction boundaries and absorb certain transactions.
  *
- * @see TransactionFlow#parentAbsorber()
+ * @see StatefulTransaction#parentAbsorber()
  */
 @SuppressWarnings({"Deprecation", "DeprecatedIsStillUsed"})
 interface TransactionSink {
 
     @Deprecated
-    void logTransaction(GameTransaction<@NonNull ?> transaction);
+    void logTransaction(StatefulTransaction transaction);
 
     EffectTransactor pushEffect(final ResultingTransactionBySideEffect effect);
 
@@ -219,7 +223,7 @@ interface TransactionSink {
         if (proposed == null) {
             return false;
         }
-        this.logTransaction(this.createTileReplacementTransaction(pos, existing, proposed, worldSupplier));
+        this.logTransaction(new ReplaceBlockEntity(pos, existing, proposed, worldSupplier));
         return true;
     }
 
@@ -235,78 +239,28 @@ interface TransactionSink {
     default AddTileEntity createTileAdditionTransaction(final BlockEntity tileentity,
         final Supplier<ServerLevel> worldSupplier, final LevelChunk chunk
     ) {
-        final BlockPos pos = tileentity.getBlockPos().immutable();
-        final BlockState currentBlock = chunk.getBlockState(pos);
-        final @Nullable BlockEntity existingTile = chunk.getBlockEntity(pos, LevelChunk.EntityCreationType.CHECK);
+        final Supplier<LevelChunk> weaklyReferencedSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier(chunk, "LevelChunk");
 
-        final SpongeBlockSnapshot added = TrackingUtil.createPooledSnapshot(
-            currentBlock,
-            pos,
-            BlockChangeFlags.NONE,
-            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
-            tileentity,
-            worldSupplier,
-            Optional::empty, Optional::empty
-        );
-        final SpongeBlockSnapshot existing = TrackingUtil.createPooledSnapshot(
-            currentBlock,
-            pos,
-            BlockChangeFlags.NONE,
-            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
-            existingTile,
-            worldSupplier,
-            Optional::empty,
-            Optional::empty
-        );
-        existing.blockChange = BlockChange.MODIFY;
-
-        return new AddTileEntity(tileentity, added, existing);
+        return new AddTileEntity(tileentity, worldSupplier, weaklyReferencedSupplier);
     }
 
     default boolean logTileRemoval(final @Nullable BlockEntity tileentity, final Supplier<ServerLevel> worldSupplier) {
         if (tileentity == null) {
             return false;
         }
-        this.logTransaction(this.createTileRemovalTransaction(tileentity, worldSupplier));
+        this.logTransaction(new RemoveBlockEntity(tileentity, worldSupplier));
         return true;
     }
 
-
-    default ReplaceBlockEntity createTileReplacementTransaction(final BlockPos pos, final @Nullable BlockEntity existing,
-        final BlockEntity proposed, final Supplier<ServerLevel> worldSupplier
-    ) {
-        final BlockState currentState = worldSupplier.get().getBlockState(pos);
-        final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
-            currentState,
-            pos,
-            BlockChangeFlags.NONE,
-            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
-            existing,
-            worldSupplier,
-            Optional::empty, Optional::empty
-        );
-        snapshot.blockChange = BlockChange.MODIFY;
-
-        return new ReplaceBlockEntity(proposed, existing, snapshot);
+    default @Nullable EffectTransactor ensureEntityDropTransactionEffect(final Entity entity) {
+        final EntityPerformingDropsTransaction transaction = new EntityPerformingDropsTransaction(entity);
+        this.logTransaction(transaction);
+        if (transaction.recorded()) {
+            return this.pushEffect(new ResultingTransactionBySideEffect(EntityPerformingDropsEffect.getInstance()));
+        }
+        return null;
     }
 
-    default RemoveBlockEntity createTileRemovalTransaction(final BlockEntity tileentity,
-        final Supplier<ServerLevel> worldSupplier
-    ) {
-        final BlockState currentState = tileentity.getBlockState();
-        final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
-            currentState,
-            tileentity.getBlockPos().immutable(),
-            BlockChangeFlags.NONE,
-            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
-            tileentity,
-            worldSupplier,
-            Optional::empty, Optional::empty
-        );
-        snapshot.blockChange = BlockChange.MODIFY;
-
-        return new RemoveBlockEntity(tileentity, snapshot);
-    }
 
     /**
      * Called with a created {@link SlotTransaction} that's been created and

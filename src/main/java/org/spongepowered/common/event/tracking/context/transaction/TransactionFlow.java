@@ -36,8 +36,7 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Cra
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.SetPlayerContainerTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ShiftCraftingResultTransaction;
-
-import java.util.Optional;
+import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
 
 /**
  * A flow is a transaction being constructed or transformed in flight between
@@ -70,19 +69,6 @@ public interface TransactionFlow {
     @FunctionalInterface
     interface AbsorbingFlowStep {
         boolean absorb(final PhaseContext<@NonNull ?> context, final TransactionFlow transaction);
-    }
-
-    /**
-     * Simple function used to verify whether this particular transaction has a
-     * behavior of being "merged" or "absorbed" by an already-recorded
-     * transaction. This has uses for cases where "fire-and-forget" tend to have
-     * unnatural recording behaviors that are non-deterministic based on their
-     * root alone, and often times need to be gathered by some parent target.
-     *
-     * @return The absorbing function, if meant to be absorbed
-     */
-    default Optional<AbsorbingFlowStep> parentAbsorber() {
-        return Optional.empty();
     }
 
     default boolean absorbSpawnEntity(
@@ -143,10 +129,6 @@ public interface TransactionFlow {
         final PhaseContext<@NonNull ?> context,
         final PlayerInventoryTransaction playerInventoryTransaction
     ) {
-        return false;
-    }
-
-    default boolean shouldHaveBeenAbsorbed() {
         return false;
     }
 }

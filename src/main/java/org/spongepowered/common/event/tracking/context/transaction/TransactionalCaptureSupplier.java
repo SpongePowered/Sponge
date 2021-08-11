@@ -26,15 +26,6 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.CombatEntry;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -43,16 +34,12 @@ import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
-import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
-import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Objects;
@@ -61,7 +48,6 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 
 @SuppressWarnings("rawtypes")
 public final class TransactionalCaptureSupplier implements ICaptureSupplier, TransactionSink, Iterable<GameTransaction<@NonNull ?>> {
@@ -125,10 +111,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
     @SuppressWarnings("DeprecatedIsStillUsed")
     @Deprecated
     @Override
-    public void logTransaction(final GameTransaction<@NonNull ?> transaction) {
+    public void logTransaction(final StatefulTransaction transaction) {
+        // todo - abstract the rest of this out into StatefulTransaction
         if (this.head == null) {
-            this.head = transaction;
-            this.tail = transaction;
+            final GameTransaction<@NonNull ?> gameTransaction = transaction.recordState();
+            this.head = gameTransaction;
+            this.tail = gameTransaction;
             return;
         }
         final Optional<TransactionFlow.AbsorbingFlowStep> absorbingFlowStep = transaction.parentAbsorber();
@@ -145,110 +133,18 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
         if (transaction.shouldHaveBeenAbsorbed()) {
             SpongeCommon.logger().warn("Logged transaction without event transaction!", new Exception());
         }
+        // Finally, mark the transaction as recorded, does any setup handling with regards to capturing details
+        // that otherwise would've been expensive to perform possibly later.
+        final GameTransaction<@NonNull ?> gameTransaction = transaction.recordState();
         if (this.effect != null) {
-            this.effect.addChild(this.context, transaction);
+            this.effect.addChild(this.context, gameTransaction);
         } else {
-            transaction.previous = this.tail;
+            gameTransaction.previous = this.tail;
             if (this.tail != null) {
-                this.tail.next = transaction;
+                this.tail.next = gameTransaction;
             }
-            this.tail = transaction;
+            this.tail = gameTransaction;
         }
-    }
-
-    @Override
-    public boolean logTileAddition(
-        final BlockEntity tileEntity,
-        final Supplier<ServerLevel> worldSupplier, final LevelChunk chunk
-    ) {
-        if (this.tail != null) {
-            final boolean newRecorded = this.tail.acceptTileAddition(tileEntity);
-            if (newRecorded) {
-                return true;
-            }
-        }
-        return TransactionSink.super.logTileAddition(tileEntity, worldSupplier, chunk);
-    }
-
-    @Override
-    public boolean logTileRemoval(final @Nullable BlockEntity tileentity, final Supplier<ServerLevel> worldSupplier) {
-        if (tileentity == null) {
-            return false;
-        }
-        if (this.tail != null) {
-            final boolean newRecorded = this.tail.acceptTileRemoval(tileentity);
-            if (newRecorded) {
-                return true;
-            }
-            // Need to traverse children by "most recent" transactions to "oldest"
-            // to verify which transaction could potentially absorb the tile removed
-            final Iterator<GameTransaction<@NonNull ?>> iterator = this.tail.reverseChildIterator();
-            while (iterator.hasNext()) {
-                if (iterator.next().acceptTileRemoval(tileentity)) {
-                    return true;
-                }
-            }
-        }
-        return TransactionSink.super.logTileRemoval(tileentity, worldSupplier);
-    }
-
-    @Override
-    public boolean logTileReplacement(
-        final BlockPos pos, final @Nullable BlockEntity existing, final @Nullable BlockEntity proposed,
-        final Supplier<ServerLevel> worldSupplier
-    ) {
-        if (proposed == null) {
-            return false;
-        }
-        if (this.tail != null) {
-            final boolean newRecorded = this.tail.acceptTileReplacement(existing, proposed);
-            if (newRecorded) {
-                return true;
-            }
-            final Iterator<GameTransaction<@NonNull ?>> iterator = this.tail.reverseChildIterator();
-            while (iterator.hasNext()) {
-                if (iterator.next().acceptTileReplacement(existing, proposed)) {
-                    return true;
-                }
-            }
-        }
-        return TransactionSink.super.logTileReplacement(pos, existing, proposed, worldSupplier);
-    }
-
-    @SuppressWarnings({"ConstantConditions"})
-    public @Nullable EffectTransactor ensureEntityDropTransactionEffect(final Entity entity) {
-        if (this.tail != null) {
-            if (this.tail.acceptEntityDrops(entity)) {
-                return null;
-            }
-        }
-        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) entity.level);
-        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
-        final CompoundTag tag = new CompoundTag();
-        entity.saveWithoutId(tag);
-        final @Nullable DamageSource lastAttacker;
-        if (entity instanceof LivingEntity) {
-            final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) entity).getCombatTracker()).invoker$getMostSignificantFall();
-            if (entry != null) {
-                lastAttacker = ((CombatEntryAccessor) entry).accessor$source();
-            } else {
-                lastAttacker = null;
-            }
-        } else {
-            lastAttacker = null;
-        }
-        final WeakReference<@Nullable DamageSource> ref = new WeakReference<>(lastAttacker);
-        final Supplier<Optional<DamageSource>> attacker = () -> {
-            final @Nullable DamageSource damageSource = ref.get();
-            // Yes, I know, we're effectively
-            if (damageSource == null) {
-                return Optional.empty();
-            }
-            return Optional.of(damageSource);
-        };
-        final EntityPerformingDropsTransaction transaction = new EntityPerformingDropsTransaction(worldSupplier, entity, tag, attacker);
-        this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(EntityPerformingDropsEffect.getInstance()));
     }
 
     public void completeBlockDrops(final @Nullable EffectTransactor context) {

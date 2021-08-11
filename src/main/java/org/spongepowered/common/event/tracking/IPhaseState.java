@@ -67,8 +67,8 @@ import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
-import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.block.ChangeBlock;
+import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;

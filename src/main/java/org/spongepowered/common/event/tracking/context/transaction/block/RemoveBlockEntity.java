@@ -26,39 +26,67 @@ package org.spongepowered.common.event.tracking.context.transaction.block;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
+import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 @DefaultQualifier(NonNull.class)
 public final class RemoveBlockEntity extends BlockEventBasedTransaction {
 
-    final BlockEntity removed;
-    final SpongeBlockSnapshot tileSnapshot;
+    private final BlockEntity removed;
+    private final Supplier<ServerLevel> levelSupplier;
+    private @MonotonicNonNull SpongeBlockSnapshot tileSnapshot;
 
-    public RemoveBlockEntity(final BlockEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
-        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.state(), attachedSnapshot.world());
+    public RemoveBlockEntity(final BlockEntity removed, final Supplier<ServerLevel> levelSupplier) {
+        super(removed.getBlockPos().immutable(), removed.getBlockState(),
+            ((ServerWorld) levelSupplier.get()).key());
         this.removed = removed;
-        this.tileSnapshot = attachedSnapshot;
+        this.levelSupplier = levelSupplier;
+    }
+
+    @Override
+    protected void captureState() {
+        super.captureState();
+        final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
+            this.originalState,
+            this.affectedPosition,
+            BlockChangeFlags.NONE,
+            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
+            this.removed,
+            this.levelSupplier,
+            Optional::empty, Optional::empty
+        );
+        snapshot.blockChange = BlockChange.MODIFY;
+        this.tileSnapshot = snapshot;
+    }
+
+    @Override
+    public Optional<AbsorbingFlowStep> parentAbsorber() {
+        return Optional.of((ctx, tx) -> tx.acceptTileRemoval(this.removed));
     }
 
     @Override
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
-        @Nullable GameTransaction<@NonNull ?> parent
+        @Nullable final GameTransaction<@NonNull ?> parent
     ) {
         return Optional.empty();
     }
@@ -72,7 +100,7 @@ public final class RemoveBlockEntity extends BlockEventBasedTransaction {
     }
 
     @Override
-    public void restore(PhaseContext<?> context, ChangeBlockEvent.All event) {
+    public void restore(final PhaseContext<?> context, final ChangeBlockEvent.All event) {
         this.tileSnapshot.restore(true, BlockChangeFlags.NONE);
     }
 

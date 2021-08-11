@@ -22,14 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.world;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.CombatEntry;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
@@ -37,10 +40,15 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.HarvestEntityEvent;
+import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
+import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
+import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
@@ -48,21 +56,51 @@ import java.util.function.Supplier;
 
 public final class EntityPerformingDropsTransaction extends WorldBasedTransaction<HarvestEntityEvent> {
 
-    final Supplier<ServerLevel> worldSupplier;
+    private @MonotonicNonNull Supplier<ServerLevel> worldSupplier;
     final Entity destroyingEntity;
-    final CompoundTag entityTag;
-    final Supplier<Optional<DamageSource>> lastAttacker;
+    private @MonotonicNonNull CompoundTag entityTag;
+    private @MonotonicNonNull Supplier<Optional<DamageSource>> lastAttacker;
 
-    EntityPerformingDropsTransaction(
-        final Supplier<ServerLevel> worldSupplier,
-        final Entity destroyingEntity, final CompoundTag entityTag,
-        final Supplier<Optional<DamageSource>> lastAttacker
-    ) {
-        super(TransactionTypes.ENTITY_DEATH_DROPS.get(), ((org.spongepowered.api.world.server.ServerWorld) worldSupplier.get()).key());
-        this.worldSupplier = worldSupplier;
+    public EntityPerformingDropsTransaction(final Entity destroyingEntity) {
+        super(TransactionTypes.ENTITY_DEATH_DROPS.get(), ((org.spongepowered.api.world.server.ServerWorld) destroyingEntity.level).key());
         this.destroyingEntity = destroyingEntity;
-        this.entityTag = entityTag;
-        this.lastAttacker = lastAttacker;
+    }
+
+    @Override
+    protected void captureState() {
+        super.captureState();
+        final Entity entity = this.destroyingEntity;
+        this.worldSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier((ServerLevel) entity.level, "ServerLevel");
+
+        final CompoundTag tag = new CompoundTag();
+        entity.saveWithoutId(tag);
+        this.entityTag = tag;
+
+        final @Nullable DamageSource lastAttacker;
+        if (entity instanceof LivingEntity) {
+            final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) entity).getCombatTracker()).invoker$getMostSignificantFall();
+            if (entry != null) {
+                lastAttacker = ((CombatEntryAccessor) entry).accessor$source();
+            } else {
+                lastAttacker = null;
+            }
+        } else {
+            lastAttacker = null;
+        }
+        final WeakReference<@Nullable DamageSource> ref = new WeakReference<>(lastAttacker);
+        this.lastAttacker = () -> {
+            final @Nullable DamageSource damageSource = ref.get();
+            // Yes, I know, we're effectively
+            if (damageSource == null) {
+                return Optional.empty();
+            }
+            return Optional.of(damageSource);
+        };
+    }
+
+    @Override
+    public Optional<AbsorbingFlowStep> parentAbsorber() {
+        return Optional.of((ctx, tx) -> tx.acceptEntityDrops(this.destroyingEntity));
     }
 
     @Override

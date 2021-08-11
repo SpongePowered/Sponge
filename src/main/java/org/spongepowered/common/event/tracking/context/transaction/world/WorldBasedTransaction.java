@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.world;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 
 import java.util.Optional;
@@ -46,12 +47,12 @@ public abstract class WorldBasedTransaction<E extends Event & Cancellable> exten
     }
 
     @Override
-    Optional<ResourceKey> worldKey() {
+    public final Optional<ResourceKey> worldKey() {
         return Optional.of(this.worldKey);
     }
 
     @Override
-    boolean shouldBuildEventAndRestartBatch(
+    protected boolean shouldBuildEventAndRestartBatch(
         final GameTransaction<@NonNull ?> pointer, final PhaseContext<@NonNull ?> context
     ) {
         return super.shouldBuildEventAndRestartBatch(pointer, context) || !pointer.worldKey().map(this.worldKey::equals).orElse(false);

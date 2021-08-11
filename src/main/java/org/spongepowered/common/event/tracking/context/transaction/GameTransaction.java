@@ -48,7 +48,7 @@ import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 
 @DefaultQualifier(NonNull.class)
-public abstract class GameTransaction<E extends Event & Cancellable> implements TransactionFlow {
+public abstract class GameTransaction<E extends Event & Cancellable> implements TransactionFlow, StatefulTransaction {
 
     private final TransactionType<? extends E> transactionType;
     protected boolean cancelled = false;
@@ -59,6 +59,7 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
     // LinkedList node definitions
     @Nullable GameTransaction<@NonNull ?> previous;
     @Nullable GameTransaction<@NonNull ?> next;
+    private boolean recorded = false;
 
     protected GameTransaction(final TransactionType<? extends E> transactionType) {
         this.transactionType = transactionType;
@@ -144,11 +145,11 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
         }
     }
 
-    Optional<ResourceKey> worldKey() {
+    public Optional<ResourceKey> worldKey() {
         return Optional.empty();
     }
 
-    boolean shouldBuildEventAndRestartBatch(final GameTransaction<@NonNull ?> pointer, final PhaseContext<@NonNull ?> context) {
+    protected boolean shouldBuildEventAndRestartBatch(final GameTransaction<@NonNull ?> pointer, final PhaseContext<@NonNull ?> context) {
         return this.getTransactionType() != pointer.getTransactionType();
     }
 
@@ -163,6 +164,22 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
 
     final Iterator<GameTransaction<@NonNull ?>> reverseChildIterator() {
         return this.sideEffects != null ? new ReverseChildIterator(this.sideEffects.descendingIterator()) : Collections.emptyIterator();
+    }
+
+    @Override
+    public final boolean recorded() {
+        return this.recorded;
+    }
+
+    @Override
+    public final GameTransaction<E> recordState() {
+        this.captureState();
+        this.recorded = true;
+        return this;
+    }
+
+    protected void captureState() {
+
     }
 
     private static class ChildIterator implements Iterator<GameTransaction<@NonNull ?>> {
