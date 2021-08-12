@@ -33,7 +33,7 @@ import org.spongepowered.common.event.tracking.context.transaction.type.Transact
 
 public final class SpongeRegistryTypes {
 
-    public static final RegistryType<TransactionType<?>> TRANSACTION_TYPE = SpongeRegistryTypes.spongeKey("transaction_type");
+    public static final RegistryType<TransactionType<?>> TRACKER_TRANSACTION_TYPE = SpongeRegistryTypes.spongeKey("tracker_transaction_type");
 
     public static final RegistryType<SpawnType> SPAWN_TYPE = SpongeRegistryTypes.spongeKey("spawn_type");
 
