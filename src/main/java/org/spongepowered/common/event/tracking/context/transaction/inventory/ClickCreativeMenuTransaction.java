@@ -78,15 +78,12 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
 
         // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.originalCursor, ItemStackSnapshot.empty());
-        final ClickContainerEvent.Creative event;
         if (entities.isEmpty()) {
-            event= SpongeEventFactory.createClickContainerEventCreativeSet(cause, (Container) this.menu,
-                        cursorTransaction, Optional.ofNullable(this.slot), slotTransactions);
-        } else {
-            event= SpongeEventFactory.createClickContainerEventCreativeDrop(cause, (Container) this.menu,
-                    cursorTransaction, entities, Optional.ofNullable(this.slot), slotTransactions);
+            return Optional.of(SpongeEventFactory.createClickContainerEventCreativeSet(cause, (Container) this.menu,
+                        cursorTransaction, Optional.ofNullable(this.slot), slotTransactions));
         }
-        return Optional.of(event);
+        return Optional.of(SpongeEventFactory.createClickContainerEventCreativeDrop(cause, (Container) this.menu,
+                cursorTransaction, this.creativeStack, entities, Optional.ofNullable(this.slot), slotTransactions));
     }
 
     @Override
