@@ -76,7 +76,7 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
     private static Set<Class<?>> containersFailedCapture = new ReferenceOpenHashSet<>();
 
     @MonotonicNonNull List<net.minecraft.world.entity.Entity> entities;
-    @MonotonicNonNull private List<SlotTransaction> acceptedTransactions;
+    @MonotonicNonNull protected List<SlotTransaction> acceptedTransactions;
     // Crafting Preview
     @MonotonicNonNull private CraftingInventory craftingInventory;
     @MonotonicNonNull private CraftingContainer craftingContainer;

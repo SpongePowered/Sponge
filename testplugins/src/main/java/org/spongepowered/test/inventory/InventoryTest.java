@@ -146,6 +146,9 @@ public final class InventoryTest implements LoadableModule {
             this.plugin.logger().info("{} {} {}", event.getClass().getSimpleName(), event.inventory().getClass().getSimpleName(), event.cause());
             if (event instanceof ClickContainerEvent) {
                 final Transaction<ItemStackSnapshot> cursor = ((ClickContainerEvent) event).cursorTransaction();
+                ((ClickContainerEvent) event).slot().ifPresent(clicked -> {
+                    this.plugin.logger().info("  Clicked: {}", InventoryTest.slotName(clicked));
+                });
                 this.plugin.logger().info("  Cursor: {}x{}->{}x{}", cursor.original().type().key(RegistryTypes.ITEM_TYPE), cursor.original().quantity(),
                         cursor.finalReplacement().type().key(RegistryTypes.ITEM_TYPE), cursor.finalReplacement().quantity());
                 if (event instanceof CraftItemEvent.Preview) {
@@ -157,16 +160,18 @@ public final class InventoryTest implements LoadableModule {
                     final ItemStackSnapshot craft = ((CraftItemEvent.Craft) event).crafted();
                     this.plugin.logger().info("  Craft: {}x{}", craft.type().key(RegistryTypes.ITEM_TYPE), craft.quantity());
                 }
-                if (event instanceof DropItemEvent.Dispense) {
-                    this.plugin.logger().info("  Dropping: {} entities", ((DropItemEvent.Dispense) event).entities().size());
-                }
             }
+            if (event instanceof ChangeInventoryEvent.Drop) {
+                final Slot hand = ((ChangeInventoryEvent.Drop) event).hand();
+                this.plugin.logger().info("  Hand: {}", InventoryTest.slotName(hand));
+            }
+            if (event instanceof DropItemEvent.Dispense) {
+                this.plugin.logger().info("  Dropping: {} entities", ((DropItemEvent.Dispense) event).entities().size());
+            }
+
             for (final SlotTransaction slotTrans : event.transactions()) {
-                final Optional<Integer> idx = slotTrans.slot().get(Keys.SLOT_INDEX);
-                final Optional<EquipmentType> equipmentType = slotTrans.slot().get(Keys.EQUIPMENT_TYPE);
-                final String slot = idx.map(String::valueOf).orElse(equipmentType.map(t -> t.key(RegistryTypes.EQUIPMENT_TYPE).asString()).orElse("?"));
                 this.plugin.logger().info("  SlotTr: {}x{}->{}x{}[{}]", slotTrans.original().type().key(RegistryTypes.ITEM_TYPE), slotTrans.original().quantity(),
-                        slotTrans.finalReplacement().type().key(RegistryTypes.ITEM_TYPE), slotTrans.finalReplacement().quantity(), slot);
+                        slotTrans.finalReplacement().type().key(RegistryTypes.ITEM_TYPE), slotTrans.finalReplacement().quantity(), InventoryTest.slotName(slotTrans.slot()));
             }
         }
 
@@ -200,6 +205,12 @@ public final class InventoryTest implements LoadableModule {
 //                    event.craftingInventory().capacity(),
 //                    event.recipe().map(Recipe::getKey).map(ResourceKey::asString).orElse("no recipe"));
         }
+    }
+
+    private static String slotName(Slot clicked) {
+        final Optional<Integer> idx = clicked.get(Keys.SLOT_INDEX);
+        final Optional<EquipmentType> equipmentType = clicked.get(Keys.EQUIPMENT_TYPE);
+        return idx.map(String::valueOf).orElse(equipmentType.map(t -> t.key(RegistryTypes.EQUIPMENT_TYPE).asString()).orElse("?"));
     }
 
     @Override

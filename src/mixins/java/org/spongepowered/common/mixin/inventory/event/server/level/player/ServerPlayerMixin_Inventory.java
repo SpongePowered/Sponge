@@ -98,17 +98,18 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     }
 
     @Override
-    protected void impl$onBroadcastCreativeActionResult(final boolean param0, final CallbackInfoReturnable<Boolean> cir) {
+    protected void impl$beforeRemoveItem(final boolean param0, final CallbackInfoReturnable<Boolean> cir) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        this.inventory$effectTransactor = transactor.logDropFromPlayerInventory((Player) (Object) this, param0);
+        this.inventory$effectTransactor = transactor.logDropFromPlayerInventory((ServerPlayer) (Object) this, param0);
     }
 
     @Override
-    protected ItemEntity impl$onBroadcastCreativeActionResult(final Player player, final ItemStack param0, final boolean param1, final boolean param2, final boolean dropAll) {
+    protected ItemEntity impl$onPlayerDrop(final Player player, final ItemStack param0, final boolean param1, final boolean param2, final boolean dropAll) {
         try (final EffectTransactor ignored = this.inventory$effectTransactor) {
             return player.drop(param0, param1, param2);
         } finally {
+            this.containerMenu.broadcastChanges(); // for capture
             this.inventory$effectTransactor = null;
         }
     }

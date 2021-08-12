@@ -73,6 +73,7 @@ import org.spongepowered.common.event.tracking.phase.packet.inventory.DoubleClic
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DropInventoryState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemOutsideWindowState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemWithHotkeyState;
+import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemInsideWindowState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.EnchantItemPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.MiddleInventoryClickState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.OpenInventoryState;
@@ -146,6 +147,7 @@ public final class PacketPhase {
         static final BasicInventoryPacketState MIDDLE_INVENTORY_CLICK = new MiddleInventoryClickState();
         static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW = new DropItemOutsideWindowState(
                 Constants.Networking.MODE_CLICK | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_OUTSIDE_WINDOW);
+        static final BasicInventoryPacketState DROP_ITEM_INSIDE_WINDOW = new DropItemInsideWindowState();
         static final BasicInventoryPacketState DROP_ITEM_WITH_HOTKEY = new DropItemWithHotkeyState();
         static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW_NOOP = new DropItemOutsideWindowState(
                 Constants.Networking.MODE_DROP | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_OUTSIDE_WINDOW);
@@ -181,7 +183,7 @@ public final class PacketPhase {
                 .add(Inventory.SECONDARY_INVENTORY_CLICK)
                 .add(Inventory.MIDDLE_INVENTORY_CLICK)
                 .add(Inventory.DROP_ITEM_OUTSIDE_WINDOW)
-                .add(Inventory.DROP_ITEM_WITH_HOTKEY)
+                .add(Inventory.DROP_ITEM_INSIDE_WINDOW)
                 .add(Inventory.DROP_ITEM_OUTSIDE_WINDOW_NOOP)
                 .add(Inventory.DROP_ITEMS)
                 .add(Inventory.DROP_INVENTORY)
@@ -362,7 +364,7 @@ public final class PacketPhase {
             .build();
 
     private static final ImmutableMap<ServerboundPlayerActionPacket.Action, IPhaseState<? extends PacketContext<?>>> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<ServerboundPlayerActionPacket.Action, IPhaseState<? extends PacketContext<?>>>builder()
-            .put(ServerboundPlayerActionPacket.Action.DROP_ITEM, PacketPhase.Inventory.DROP_ITEM_WITH_HOTKEY)
+            .put(ServerboundPlayerActionPacket.Action.DROP_ITEM, Inventory.DROP_ITEM_WITH_HOTKEY)
             .put(ServerboundPlayerActionPacket.Action.DROP_ALL_ITEMS, PacketPhase.Inventory.DROP_ITEM_WITH_HOTKEY)
             .put(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
             .put(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, PacketPhase.General.INTERACTION)

@@ -24,91 +24,56 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
-import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
-import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.List;
 import java.util.Optional;
 
-public class DropFromPlayerInventoryTransaction extends ContainerBasedTransaction {
+public class DropFromPlayerInventoryTransaction extends InventoryBasedTransaction {
 
     private final ServerPlayer player;
     private final boolean dropAll;
     private final @Nullable Slot slot;
-    private final @Nullable ItemStackSnapshot originalItem;
-    private final ItemStackSnapshot originalCursor;
 
-    public DropFromPlayerInventoryTransaction(final Player player, final boolean dropAll) {
-        super(player.containerMenu);
-        this.player = (ServerPlayer) player;
+    public DropFromPlayerInventoryTransaction(final ServerPlayer player, final boolean dropAll) {
+        super((Inventory) player.inventory);
+        this.player = player;
         this.dropAll = dropAll;
-        this.originalCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         this.slot = ((PlayerInventory) player.inventory).equipment().slot(EquipmentTypes.MAIN_HAND).orElse(null);
-        this.originalItem = this.slot == null ? null : this.slot.peek().createSnapshot();
     }
 
     @Override
-    Optional<ClickContainerEvent> createInventoryEvent(
-        final List<SlotTransaction> slotTransactions, final ImmutableList<Entity> entities,
-        final PhaseContext<@NonNull ?> context,
-        final Cause cause
-    ) {
-        if (this.slot != null) {
-            final ItemStackSnapshot item = this.slot.peek().createSnapshot();
-            slotTransactions.add(new SlotTransaction(this.slot, this.originalItem, item));
+    Optional<ChangeInventoryEvent> createInventoryEvent(final List<SlotTransaction> slotTransactions,
+            final List<Entity> entities, final PhaseContext<@NonNull ?> context,
+            final Cause currentCause) {
+        TrackingUtil.setCreatorReference(entities, this.player);
+        if (this.dropAll) {
+            return Optional.of(SpongeEventFactory.createChangeInventoryEventDropFull(currentCause, entities, this.slot,  this.inventory, slotTransactions));
         }
-
-        final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.originalCursor, this.originalCursor);
-
-        final @Nullable ClickContainerEvent event = context.createContainerEvent(cause, this.player, (Container) this.menu,
-                cursorTransaction, slotTransactions, entities, dropAll ? 1 : 0, this.slot);
-
-        return Optional.of(event);
+        return Optional.of(SpongeEventFactory.createChangeInventoryEventDropSingle(currentCause, entities, this.slot, this.inventory, slotTransactions));
     }
 
     @Override
-    public void restore(final PhaseContext<@NonNull ?> context, final ClickContainerEvent event) {
+    public void restore(final PhaseContext<@NonNull ?> context, final ChangeInventoryEvent event) {
         this.handleEventResults(this.player, event);
     }
 
     @Override
-    public void postProcessEvent(PhaseContext<@NonNull ?> context, ClickContainerEvent event) {
+    public void postProcessEvent(PhaseContext<@NonNull ?> context, ChangeInventoryEvent event) {
         this.handleEventResults(this.player, event);
-    }
-
-    @Override
-    boolean isContainerEventAllowed(final PhaseContext<@NonNull ?> context) {
-        if (!(context instanceof InventoryPacketContext)) {
-            return false;
-        }
-        final Packet<?> packet = ((InventoryPacketContext) context).getPacket();
-        if (packet instanceof ServerboundContainerClickPacket) {
-            final int containerId = ((InventoryPacketContext) context).<ServerboundContainerClickPacket>getPacket().getContainerId();
-            return containerId != this.player.containerMenu.containerId;
-        }
-        if (packet instanceof ServerboundPlayerActionPacket) {
-            return context.getSource(ServerPlayer.class).map(p -> p == this.player).orElse(false);
-        }
-        return false;
     }
 
 }

@@ -349,7 +349,7 @@ interface TransactionSink {
     }
 
 
-    default EffectTransactor logDropFromPlayerInventory(final Player player, final boolean dropAll) {
+    default EffectTransactor logDropFromPlayerInventory(final ServerPlayer player, final boolean dropAll) {
         final DropFromPlayerInventoryTransaction transaction = new DropFromPlayerInventoryTransaction(player, dropAll);
         this.logTransaction(transaction);
         return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));

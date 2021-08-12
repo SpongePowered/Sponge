@@ -29,6 +29,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -36,8 +37,8 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,8 +60,12 @@ public class SetCarriedItemTransaction extends InventoryBasedTransaction {
     }
 
     @Override
-    Optional<ChangeInventoryEvent> createInventoryEvent(final List<SlotTransaction> slotTransactions, final PhaseContext<@NonNull ?> context,
+    Optional<ChangeInventoryEvent> createInventoryEvent(final List<SlotTransaction> slotTransactions,
+            final List<Entity> entities, final PhaseContext<@NonNull ?> context,
             final Cause cause) {
+        if (!entities.isEmpty()) {
+            SpongeCommon.logger().warn("Entities are being captured but not being processed");
+        }
         if (this.newSlot == null || this.prevSlot == null) {
             return Optional.empty();
         }
@@ -73,12 +78,12 @@ public class SetCarriedItemTransaction extends InventoryBasedTransaction {
     public void restore(final PhaseContext<@NonNull ?> context, final ChangeInventoryEvent event) {
         this.player.connection.send(new ClientboundSetCarriedItemPacket(this.prevSlotId));
         this.player.inventory.selected = this.prevSlotId;
-        PacketPhaseUtil.handleSlotRestore(this.player, null, event.transactions(), event.isCancelled());
+        this.handleEventResults(this.player, event);
     }
 
     @Override
     public void postProcessEvent(final PhaseContext<@NonNull ?> context, final ChangeInventoryEvent event) {
-        PacketPhaseUtil.handleSlotRestore(this.player, null, event.transactions(), event.isCancelled());
+        this.handleEventResults(this.player, event);
     }
 
 }
