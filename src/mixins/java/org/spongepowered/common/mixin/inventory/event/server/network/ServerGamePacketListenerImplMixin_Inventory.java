@@ -174,7 +174,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
 
         try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, recipe, player, (CraftingInventory) craftInv)) {
             recipeBookMenu.handlePlacement(shift, recipe, player);
-            ((TrackedContainerBridge) player.containerMenu).bridge$detectAndSendChanges(true);
+            player.containerMenu.broadcastChanges();
         }
     }
 
