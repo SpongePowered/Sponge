@@ -1,0 +1,27 @@
+modLoader = "javafml"
+loaderVersion = "[36,)"
+license = "MIT License"
+
+issueTrackerURL="https://github.com/SpongePowered/Sponge/issues"
+
+[[mods]]
+modId = "spongeforge"
+version = "${version}"
+displayName = "SpongeForge"
+credits="SpongePowered and Contributors"
+authors="SpongePowered"
+description = "${description}"
+
+[[dependencies.spongeforge]]
+modId = "forge"
+mandatory = true
+versionRange = "[36,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.spongeforge]]
+modId = "sponge"
+mandatory = true
+versionRange = "[8.0.0,)"
+ordering = "AFTER"
+side = "BOTH"

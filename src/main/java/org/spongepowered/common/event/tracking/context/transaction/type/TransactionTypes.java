@@ -62,6 +62,6 @@ public final class TransactionTypes {
     }
 
     private static <T extends Event & Cancellable> DefaultedRegistryReference<TransactionType<T>> key(final ResourceKey location) {
-        return RegistryKey.of(SpongeRegistryTypes.TRANSACTION_TYPE, location).asDefaultedReference(() -> Sponge.game().registries());
+        return RegistryKey.of(SpongeRegistryTypes.TRACKER_TRANSACTION_TYPE, location).asDefaultedReference(() -> Sponge.game().registries());
     }
 }

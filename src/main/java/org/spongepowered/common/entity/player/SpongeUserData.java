@@ -55,14 +55,21 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.UserInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
+import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.permission.SubjectCollection;
+import org.spongepowered.api.service.permission.SubjectData;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.util.RespawnLocation;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
@@ -71,6 +78,7 @@ import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
+import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.world.entity.player.BedLocationHolderBridge;
 import org.spongepowered.common.data.DataUtil;
@@ -78,6 +86,8 @@ import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.profile.SpongeGameProfile;
+import org.spongepowered.common.service.server.permission.BridgeSubject;
+import org.spongepowered.common.service.server.permission.SubjectHelper;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.FileUtil;
@@ -97,14 +107,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 /**
  * Also see SpongeDataHolderMixin
+ *
+ * TODO: Ideally, this should not implement User, but does so to support DataHolders... for now
+ *  Our Data system should treat Players and Users the same as they are effectively the same
+ *  store - just one represents a player that is online, the other, a player that is offline.
+ *  There should be no difference between the two.
  */
 public final class SpongeUserData implements Identifiable, DataSerializable, BedLocationHolderBridge, SpongeMutableDataHolder,
-        DataCompoundHolder, VanishableBridge, GameProfileHolderBridge {
+        DataCompoundHolder, VanishableBridge, GameProfileHolderBridge, User, BridgeSubject {
 
     private final Map<ResourceKey, RespawnLocation> spawnLocations = Maps.newHashMap();
 
@@ -160,6 +176,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         this.profile = profile;
         this.compound = tag;
         this.readCompound(this.compound);
+        SubjectHelper.applySubject((SubjectBridge) (Object) this, PermissionService.SUBJECTS_USER);
     }
 
     public User asUser() {
@@ -250,6 +267,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         return this.profile.getId();
     }
 
+    @Override
     public String name() {
         return this.profile.getName();
     }
@@ -269,18 +287,22 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
             .set(Constants.Entity.Player.SPAWNS, this.spawnLocations);
     }
 
+    @Override
     public boolean canEquip(final EquipmentType type) {
         return true;
     }
 
+    @Override
     public boolean canEquip(final EquipmentType type, final @Nullable ItemStack equipment) {
         return true;
     }
 
+    @Override
     public Optional<ItemStack> equipped(final EquipmentType type) {
         throw new MissingImplementationException("SpongeUser", "equipped");
     }
 
+    @Override
     public boolean equip(final EquipmentType type, final @Nullable ItemStack equipment) {
         if (this.canEquip(type, equipment)) {
             this.loadInventory();
@@ -290,14 +312,17 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         return false;
     }
 
+    @Override
     public UserInventory inventory() {
         return this.loadInventory();
     }
 
+    @Override
     public EquipmentInventory equipment() {
         return this.inventory().equipment();
     }
 
+    @Override
     public ItemStack itemInHand(final HandType handType) {
         if (handType == HandTypes.MAIN_HAND.get()) {
             this.equipped(EquipmentTypes.MAIN_HAND.get()).orElseThrow(IllegalStateException::new);
@@ -307,38 +332,47 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         throw new IllegalArgumentException("Invalid hand " + handType);
     }
 
+    @Override
     public ItemStack head() {
         return this.equipped(EquipmentTypes.HEAD.get()).orElseThrow(IllegalStateException::new);
     }
 
+    @Override
     public void setHead(final ItemStack helmet) {
         this.equip(EquipmentTypes.HEAD.get(), helmet);
     }
 
+    @Override
     public ItemStack chest() {
         return this.equipped(EquipmentTypes.CHEST.get()).orElseThrow(IllegalStateException::new);
     }
 
+    @Override
     public void setChest(final ItemStack chestplate) {
         this.equip(EquipmentTypes.CHEST.get(), chestplate);
     }
 
+    @Override
     public ItemStack legs() {
         return this.equipped(EquipmentTypes.LEGS.get()).orElseThrow(IllegalStateException::new);
     }
 
+    @Override
     public void setLegs(final ItemStack leggings) {
         this.equip(EquipmentTypes.LEGS.get(), leggings);
     }
 
+    @Override
     public ItemStack feet() {
         return this.equipped(EquipmentTypes.FEET.get()).orElseThrow(IllegalStateException::new);
     }
 
+    @Override
     public void setFeet(final ItemStack boots) {
         this.equip(EquipmentTypes.FEET.get(), boots);
     }
 
+    @Override
     public void setItemInHand(final HandType handType, final @Nullable ItemStack itemInHand) {
         if (handType == HandTypes.MAIN_HAND.get()) {
             this.setEquippedItem(EquipmentTypes.MAIN_HAND, itemInHand);
@@ -421,30 +455,36 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         throw new MissingImplementationException("SpongeUser", "setEquippedItem");
     }
 
+    @Override
     public org.spongepowered.api.profile.GameProfile profile() {
         return SpongeGameProfile.of(this.profile);
     }
 
+    @Override
     public boolean isOnline() {
         return this.player().isPresent();
     }
 
+    @Override
     public Optional<ServerPlayer> player() {
         return Optional.ofNullable((ServerPlayer) SpongeCommon.server().getPlayerList().getPlayer(this.profile.getId()));
     }
 
+    @Override
     public Vector3d position() {
         return this.player()
                 .map(Player::position)
                 .orElseGet(() -> new Vector3d(this.x, this.y, this.z));
     }
 
+    @Override
     public ResourceKey worldKey() {
         final Optional<ServerPlayer> player = this.player();
         return player.map(serverPlayer -> serverPlayer.world().key()).orElseGet(() -> this.worldKey);
 
     }
 
+    @Override
     public boolean setLocation(final ResourceKey key, final Vector3d position) {
         Preconditions.checkNotNull(key);
         Preconditions.checkNotNull(position);
@@ -463,12 +503,14 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         return true;
     }
 
+    @Override
     public Vector3d rotation() {
         return this.player()
                 .map(Entity::rotation)
                 .orElseGet(() -> new Vector3d(this.pitch, this.yaw, 0));
     }
 
+    @Override
     public void setRotation(final Vector3d rotation) {
         Preconditions.checkNotNull(rotation, "Rotation was null!");
         final Optional<ServerPlayer> playerOpt = this.player();
@@ -481,6 +523,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         this.yaw = ((float) rotation.y()) % 360.0F;
     }
 
+    @Override
     public Inventory enderChestInventory() {
         final Optional<ServerPlayer> playerOpt = this.player();
         if (playerOpt.isPresent()) {
@@ -631,4 +674,10 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         this.invulnerable = invulnerable;
         this.markDirty();
     }
+
+    @Override
+    public String identifier() {
+        return this.name();
+    }
+
 }

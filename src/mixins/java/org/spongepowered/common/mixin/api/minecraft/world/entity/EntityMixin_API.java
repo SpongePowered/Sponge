@@ -24,21 +24,21 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
-import com.google.common.base.Preconditions;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
@@ -61,7 +61,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
@@ -70,7 +69,6 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Objects;
@@ -79,6 +77,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.entity.Entity.class)
 @Implements(@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entity$", remap = Remap.NONE))
@@ -113,6 +113,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract Component shadow$getDisplayName();
     @Shadow public abstract void shadow$setRemoved(Entity.RemovalReason var1);
     @Shadow public abstract void shadow$discard();
+    @Shadow public abstract void shadow$lookAt(EntityAnchorArgument.Anchor param0, Vec3 param1);
     // @formatter:on
 
     @Override
@@ -325,6 +326,13 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         // note: this implementation will be changing with contextual data
         final Optional<Boolean> optional = entity.get(Keys.VANISH);
         return (!optional.isPresent() || !optional.get()) && !((VanishableBridge) entity).bridge$isVanished();
+    }
+
+    @Override
+    public void lookAt(final Vector3d targetPos) {
+        final Vec3 vec = VecHelper.toVanillaVector3d(targetPos);
+        // TODO Should we expose FEET to the API?
+        this.shadow$lookAt(EntityAnchorArgument.Anchor.EYES, vec);
     }
 
     @Override

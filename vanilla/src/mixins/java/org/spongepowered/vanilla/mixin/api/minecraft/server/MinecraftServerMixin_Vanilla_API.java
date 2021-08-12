@@ -39,27 +39,28 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.vanilla.VanillaServer;
-import org.spongepowered.vanilla.world.VanillaWorldManager;
+import org.spongepowered.vanilla.world.server.VanillaWorldManager;
 
 import java.net.Proxy;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla_API implements VanillaServer {
 
-    private VanillaWorldManager vanilla_api$worldManager;
+    private SpongeWorldManager vanilla$worldManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void vanilla$setupSpongeFields(Thread p_i232576_1_, RegistryAccess.RegistryHolder p_i232576_2_, LevelStorageSource.LevelStorageAccess p_i232576_3_,
-                                           WorldData p_i232576_4_, PackRepository p_i232576_5_, Proxy p_i232576_6_, DataFixer p_i232576_7_,
-                                           ServerResources p_i232576_8_, MinecraftSessionService p_i232576_9_, GameProfileRepository p_i232576_10_,
-                                           GameProfileCache p_i232576_11_, ChunkProgressListenerFactory p_i232576_12_, CallbackInfo ci) {
+            WorldData p_i232576_4_, PackRepository p_i232576_5_, Proxy p_i232576_6_, DataFixer p_i232576_7_,
+            ServerResources p_i232576_8_, MinecraftSessionService p_i232576_9_, GameProfileRepository p_i232576_10_,
+            GameProfileCache p_i232576_11_, ChunkProgressListenerFactory p_i232576_12_, CallbackInfo ci) {
 
-        this.vanilla_api$worldManager = new VanillaWorldManager((MinecraftServer) (Object) this);
+        this.vanilla$worldManager = new VanillaWorldManager((MinecraftServer) (Object) this);
     }
 
     @Override
-    public VanillaWorldManager worldManager() {
-        return this.vanilla_api$worldManager;
+    public SpongeWorldManager worldManager() {
+        return this.vanilla$worldManager;
     }
 }

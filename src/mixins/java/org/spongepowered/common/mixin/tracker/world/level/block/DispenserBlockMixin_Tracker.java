@@ -25,6 +25,13 @@
 package org.spongepowered.common.mixin.tracker.world.level.block;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.BlockSourceImpl;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -45,20 +52,15 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.MemoizedSupplier;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSourceImpl;
-import net.minecraft.core.dispenser.DispenseItemBehavior;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import java.util.function.Supplier;
 
 @Mixin(DispenserBlock.class)
-public class DispenserBlockMixin_Tracker {
-    private ItemStack tracker$originalItem = ItemStack.EMPTY;
+public abstract class DispenserBlockMixin_Tracker {
+    private Supplier<ItemStack> tracker$originalItem = () -> ItemStack.EMPTY;
     private PhaseContext<?> tracker$context = PhaseContext.empty();
 
     @Inject(method = "dispenseFrom", at = @At(value = "HEAD"))
@@ -93,7 +95,8 @@ public class DispenserBlockMixin_Tracker {
             locals = LocalCapture.CAPTURE_FAILSOFT
     )
     private void tracker$storeOriginalItem(final ServerLevel worldIn, final BlockPos pos, final CallbackInfo ci, final BlockSourceImpl source, final DispenserBlockEntity dispenser, final int slotIndex, final ItemStack dispensedItem, final DispenseItemBehavior behavior) {
-        this.tracker$originalItem = ItemStackUtil.cloneDefensiveNative(dispensedItem);
+        final ItemStack tracker$originalItem = ItemStackUtil.cloneDefensiveNative(dispensedItem);
+        this.tracker$originalItem = () -> tracker$originalItem;
     }
 
 
@@ -117,13 +120,13 @@ public class DispenserBlockMixin_Tracker {
             final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.currentCause(), ImmutableList.of(snapshot), original);
             SpongeCommon.post(dropEvent);
             if (dropEvent.isCancelled()) {
-                dispenserTileEntity.setItem(index, this.tracker$originalItem);
+                dispenserTileEntity.setItem(index, this.tracker$originalItem.get());
                 return;
             }
 
             dispenserTileEntity.setItem(index, stack);
         } finally {
-            this.tracker$originalItem = ItemStack.EMPTY;
+            this.tracker$originalItem = () -> ItemStack.EMPTY;
         }
     }
 }

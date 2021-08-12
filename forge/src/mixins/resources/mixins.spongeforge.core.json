@@ -1,0 +1,39 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "org.spongepowered.forge.mixin.core",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "priority": 1301,
+    "mixins": [
+        "api.event.EventMixin_Forge",
+        "api.event.block.ChangeBlockEvent_AllMixin_Forge",
+        "api.event.entity.ChangeEntityWorldEvent_PreMixin_Forge",
+        "api.event.entity.ChangeEventWorldEvent_PostMixin_Forge",
+        "commands.CommandsMixin_Forge",
+        "world.entity.EntityMixin_Forge",
+        "minecraftforge.MinecraftForgeMixin_Forge",
+        "minecraftforge.event.entity.EntityTravelToDimensionEventMixin_Forge",
+        "minecraftforge.event.entity.player.PlayerEvent_PlayerChangedDimensionEventMixin_Forge",
+        "minecraftforge.event.world.BlockEvent_BreakEventMixin_Forge",
+        "minecraftforge.event.world.BlockEventMixin_Forge",
+        "minecraftforge.fml.BrandingControlMixin_Forge",
+        "minecraftforge.fml.FMLModContainerMixin_Forge",
+        "minecraftforge.fml.ModContainerMixin_Forge",
+        "minecraftforge.util.ITeleporterMixin_Forge",
+        "server.BootstrapMixin_Forge",
+        "server.MainMixin_Forge",
+        "server.MinecraftServerMixin_Forge",
+        "server.level.ServerLevelMixin_Timings_Forge",
+        "server.level.ServerPlayerMixin_Forge",
+        "world.entity.item.ItemEntityMixin_Forge",
+        "world.entity.projectile.ThrownEnderpealMixin_Forge",
+        "world.entity.vehicle.BoatMixin_Forge",
+        "world.level.LevelMixin_Forge",
+        "world.level.storage.LevelStorageSourceMixin_Forge"
+    ],
+    "client": [
+        "client.MinecraftMixin_Forge",
+        "client.main.MainMixin_Forge"
+    ]
+}

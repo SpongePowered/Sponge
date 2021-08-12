@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command.result;
 
-import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -33,6 +32,7 @@ import org.spongepowered.api.command.CommandResult;
 public final class SpongeCommandResultBuilder implements CommandResult.Builder {
 
     private int result;
+    private boolean isSuccess = true;
     private @Nullable Component errorMessage;
 
     @Override
@@ -44,18 +44,20 @@ public final class SpongeCommandResultBuilder implements CommandResult.Builder {
     @Override
     public CommandResult.@NonNull Builder error(final @Nullable Component errorMessage) {
         this.errorMessage = errorMessage;
+        this.isSuccess = false;
         return this;
     }
 
     @Override
     public @NonNull CommandResult build() {
-        return new SpongeCommandResult(this.errorMessage == null && this.result != 0, this.result, this.errorMessage);
+        return new SpongeCommandResult(this.isSuccess, this.result, this.errorMessage);
     }
 
     @Override
     public CommandResult.@NonNull Builder reset() {
         this.result = 0;
         this.errorMessage = null;
+        this.isSuccess = true;
         return this;
     }
 

@@ -82,13 +82,14 @@ public final class NetherPortalType extends VanillaPortalType {
     }
 
     @Override
-    public void generatePortal(final ServerLocation location, final Axis axis) {
+    public boolean generatePortal(final ServerLocation location, final Axis axis) {
         Objects.requireNonNull(location);
         Direction.Axis mcAxis = AxisUtil.getFor(axis);
         if (mcAxis == Direction.Axis.Y) {
             mcAxis = Direction.Axis.X;
         }
         PortalHelper.generateNetherPortal((ServerLevel) location.world(), location.blockX(), location.blockY(), location.blockZ(), mcAxis, true);
+        return true;
     }
 
     @Override
@@ -109,14 +110,14 @@ public final class NetherPortalType extends VanillaPortalType {
             return false;
         }
 
-        final PlatformTeleporter teleporter = new Teleporter(destination, generateDestinationPortal, this);
+        final PortalLogic teleporter = new Teleporter(destination, generateDestinationPortal, this);
 
         ((EntityAccessor) entity).accessor$portalEntrancePos(VecHelper.toBlockPos(entity.blockPosition()));
         return ((EntityBridge) entity).bridge$changeDimension((ServerLevel) destination.world(), teleporter) != null;
 
     }
 
-    static final class Teleporter implements PlatformTeleporter {
+    static final class Teleporter implements PortalLogic {
 
         private final ServerLocation originalDestination;
         private final boolean generateDestinationPortal;
@@ -130,9 +131,8 @@ public final class NetherPortalType extends VanillaPortalType {
 
         @Override
         public @Nullable PortalInfo getPortalInfo(final net.minecraft.world.entity.Entity entity,
-                final ServerLevel currentWorld,
                 final ServerLevel targetWorld,
-                final Vector3d currentPosition) {
+                final Function<ServerLevel, PortalInfo> defaultPortalInfo) {
             Optional<PortalInfo> portal = NetherPortalType.findPortalInternal(this.originalDestination)
                     .map(x -> this.createNetherPortalInfo(entity, targetWorld, x.minCorner, x));
 
@@ -159,8 +159,8 @@ public final class NetherPortalType extends VanillaPortalType {
         }
 
         @Override
-        public net.minecraft.world.entity.Entity performTeleport(final net.minecraft.world.entity.Entity entity, final ServerLevel currentWorld,
-                final ServerLevel targetWorld, final float xRot, final Function<Boolean, net.minecraft.world.entity.Entity> teleportLogic) {
+        public net.minecraft.world.entity.Entity placeEntity(final net.minecraft.world.entity.Entity entity, final ServerLevel currentWorld,
+                final ServerLevel targetWorld, final float yRot, final Function<Boolean, net.minecraft.world.entity.Entity> teleportLogic) {
             return teleportLogic.apply(false);
         }
 

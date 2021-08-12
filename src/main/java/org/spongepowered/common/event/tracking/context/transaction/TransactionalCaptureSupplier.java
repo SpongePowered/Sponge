@@ -53,7 +53,7 @@ import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
 import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -248,7 +248,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         snapshot.blockChange = BlockChange.MODIFY;
 
-        return new ReplaceTileEntity(proposed, existing, snapshot);
+        return new ReplaceBlockEntity(proposed, existing, snapshot);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -275,7 +275,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     }
 
     public void logBlockEvent(final BlockState state, final TrackedWorldBridge serverWorld, final BlockPos pos,
-        final TrackerBlockEventDataBridge blockEvent
+        final TrackableBlockEventDataBridge blockEvent
     ) {
         final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
         final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
@@ -359,7 +359,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
     }
 
-    private RemoveTileEntity createTileRemovalTransaction(final BlockEntity tileentity,
+    private RemoveBlockEntity createTileRemovalTransaction(final BlockEntity tileentity,
         final Supplier<ServerLevel> worldSupplier
     ) {
         final BlockState currentState = tileentity.getBlockState();
@@ -374,7 +374,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         snapshot.blockChange = BlockChange.MODIFY;
 
-        return new RemoveTileEntity(tileentity, snapshot);
+        return new RemoveBlockEntity(tileentity, snapshot);
     }
 
     private AddTileEntity createTileAdditionTransaction(final BlockEntity tileentity,

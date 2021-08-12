@@ -26,10 +26,9 @@ package org.spongepowered.vanilla.launch;
 
 import com.google.inject.Stage;
 import net.minecraft.server.Bootstrap;
-import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.applaunch.util.MixinLoggerInjector;
 
@@ -61,7 +60,7 @@ public class IntegrationTestLaunch extends VanillaLaunch {
         // Attach logger capture (kinda janky, but will save us from having to write xml for a one-off situation)
         // This matches various regexes, configured in MixinLoggerInjector
         this.capturedMessages = MixinLoggerInjector.captureLogger();
-        SpongeBootstrap.perform("integration tests", this::performIntegrationTests);
+        VanillaBootstrap.perform("integration tests", this::performIntegrationTests);
     }
 
 
@@ -72,7 +71,7 @@ public class IntegrationTestLaunch extends VanillaLaunch {
             Bootstrap.validate();
 
             // Prepare Sponge
-            final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
+            final Lifecycle lifecycle = Launch.instance().lifecycle();
             lifecycle.establishGlobalRegistries();
             lifecycle.establishDataProviders();
             lifecycle.callRegisterDataEvent();

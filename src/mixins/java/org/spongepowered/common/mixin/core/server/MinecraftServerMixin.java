@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.server;
 
 import co.aikar.timings.Timing;
 import co.aikar.timings.sponge.ServerTimingsHandler;
+import co.aikar.timings.sponge.TimingsManager;
 import com.google.inject.Injector;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
@@ -65,17 +66,16 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
-import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import co.aikar.timings.sponge.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
@@ -83,6 +83,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
@@ -107,6 +108,9 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract boolean shadow$isRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract PackRepository shadow$getPackRepository();
+    @Shadow protected abstract void shadow$detectBundledResources();
+
+    @Shadow protected abstract void loadLevel();
     // @formatter:on
 
     private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
@@ -198,9 +202,20 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             try {
                 levelSave.close();
             } catch (final IOException e) {
-                LOGGER.error("Failed to unlock level {}", levelSave.getLevelId(), e);
+                MinecraftServerMixin.LOGGER.error("Failed to unlock level {}", levelSave.getLevelId(), e);
             }
         }
+    }
+
+    /**
+     * Render localized/formatted chat components
+     *
+     * @param input original component
+     */
+    @Inject(method = "sendMessage", at = @At("HEAD"), cancellable = true)
+    private void impl$useTranslatingLogger(final net.minecraft.network.chat.Component input, final UUID sender, final CallbackInfo ci) {
+        MinecraftServerMixin.LOGGER.info(input);
+        ci.cancel();
     }
 
     @ModifyConstant(method = "tickServer", constant = @Constant(intValue = 6000, ordinal = 0))

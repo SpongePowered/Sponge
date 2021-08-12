@@ -25,8 +25,8 @@
 package org.spongepowered.vanilla.launch.plugin;
 
 import com.google.inject.Injector;
-import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.inject.plugin.PluginModule;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.InvalidPluginException;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginEnvironment;
@@ -42,9 +42,6 @@ public final class JavaPluginLoader extends JVMPluginLoader<JVMPluginContainer> 
 
     private static final MethodHandles.Lookup SPONGE_LOOKUP = MethodHandles.lookup();
 
-    public JavaPluginLoader() {
-    }
-
     @Override
     public Optional<JVMPluginContainer> createPluginContainer(final PluginCandidate<JVMPluginResource> candidate, final PluginEnvironment environment) {
         return Optional.of(new ModuleAwareJVMPluginContainer(candidate));
@@ -59,7 +56,7 @@ public final class JavaPluginLoader extends JVMPluginLoader<JVMPluginContainer> 
                 modular.initializeLookup(MethodHandles.privateLookupIn(pluginClass, JavaPluginLoader.SPONGE_LOOKUP));
             }
 
-            final Injector parentInjector = SpongeBootstrap.injector();
+            final Injector parentInjector = Launch.instance().lifecycle().platformInjector();
             if (parentInjector != null) {
                 final Injector childInjector = parentInjector.createChildInjector(new PluginModule(container, pluginClass));
                 return childInjector.getInstance(pluginClass);

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import co.aikar.timings.sponge.TimingHistory;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.entity.EntityTickList;
 import org.spongepowered.asm.mixin.Final;
@@ -35,7 +36,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.world.level.entity.EntityTickListAccessor;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin_Timings;
-import co.aikar.timings.sponge.TimingHistory;
 
 import java.util.function.BooleanSupplier;
 
@@ -43,7 +43,7 @@ import java.util.function.BooleanSupplier;
 public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implements ServerLevelBridge {
 
     // @formatter:off
-    @Shadow @Final private EntityTickList entityTickList;
+    @Shadow @Final EntityTickList entityTickList;
     // @formatter:on
 
     @Inject(method = "tick", at = @At(value = "HEAD"))

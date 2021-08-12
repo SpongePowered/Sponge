@@ -25,6 +25,7 @@
 package org.spongepowered.common.registry;
 
 import co.aikar.timings.TimingsFactory;
+import co.aikar.timings.sponge.SpongeTimingsFactory;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.ResourceKey;
@@ -33,8 +34,10 @@ import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.adventure.SpongeComponents;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
+import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
@@ -44,6 +47,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.network.channel.ChannelExceptionHandler;
@@ -67,14 +71,17 @@ import org.spongepowered.api.util.Range;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.blockray.RayTrace;
-import org.spongepowered.api.util.orientation.Orientation;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.WorldTypeEffect;
+import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
+import org.spongepowered.api.world.biome.BiomeSampler;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.biome.provider.multinoise.MultiNoiseConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
+import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
@@ -82,13 +89,11 @@ import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
 import org.spongepowered.api.world.generation.config.noise.SlideConfig;
 import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;
 import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
+import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
+import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.biome.BiomeSampler;
-import org.spongepowered.api.world.WorldTypeEffect;
-import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.server.ServerLocationCreator;
 import org.spongepowered.api.world.server.WorldTemplate;
-import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.volume.archetype.entity.EntityArchetypeEntry;
 import org.spongepowered.api.world.volume.block.BlockVolumeFactory;
 import org.spongepowered.api.world.weather.Weather;
@@ -97,11 +102,13 @@ import org.spongepowered.common.advancement.criterion.SpongeAndCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeOrCriterion;
 import org.spongepowered.common.adventure.AudiencesFactory;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.command.SpongeCommandCompletionFactory;
 import org.spongepowered.common.command.manager.SpongeCommandCauseFactory;
 import org.spongepowered.common.command.parameter.SpongeParameterFactory;
 import org.spongepowered.common.command.parameter.managed.factory.SpongeVariableValueParametersFactory;
 import org.spongepowered.common.command.registrar.tree.builder.SpongeCommandTreeBuilderFactory;
+import org.spongepowered.common.command.result.SpongeCommandResultFactory;
 import org.spongepowered.common.command.selector.SpongeSelectorFactory;
 import org.spongepowered.common.data.manipulator.ImmutableDataManipulatorFactory;
 import org.spongepowered.common.data.manipulator.MutableDataManipulatorFactory;
@@ -109,13 +116,13 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.datapack.SpongeDataPackType;
 import org.spongepowered.common.event.SpongeEventListenerRegistration;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
+import org.spongepowered.common.item.SpongeItemStack;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.util.SpongeItemStackComparatorFactory;
 import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlerFactory;
 import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.profile.SpongeProfilePropertyFactory;
-import co.aikar.timings.sponge.SpongeTimingsFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
 import org.spongepowered.common.service.server.permission.SpongeNodeTree;
@@ -124,17 +131,19 @@ import org.spongepowered.common.tag.SpongeTagTemplateFactory;
 import org.spongepowered.common.util.SpongeAABB;
 import org.spongepowered.common.util.SpongeDamageSourceFactory;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
-import org.spongepowered.common.util.SpongeOrientation;
 import org.spongepowered.common.util.SpongeRange;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.SpongeTransform;
 import org.spongepowered.common.util.raytrace.SpongeRayTraceFactory;
+import org.spongepowered.common.world.SpongeWorldTypeEffect;
 import org.spongepowered.common.world.biome.SpongeAttributedBiome;
 import org.spongepowered.common.world.biome.SpongeBiomeAttributesFactory;
 import org.spongepowered.common.world.biome.SpongeBiomeProviderFactory;
+import org.spongepowered.common.world.biome.SpongeBiomeSamplerFactory;
 import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
 import org.spongepowered.common.world.biome.provider.multinoise.SpongeMultiNoiseConfigFactory;
 import org.spongepowered.common.world.generation.SpongeChunkGeneratorFactory;
+import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfig;
 import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
 import org.spongepowered.common.world.generation.config.flat.SpongeLayerConfigFactory;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
@@ -142,14 +151,13 @@ import org.spongepowered.common.world.generation.config.noise.SpongeSamplingConf
 import org.spongepowered.common.world.generation.config.noise.SpongeSlideConfigFactory;
 import org.spongepowered.common.world.generation.config.structure.SpongeSeparatedStructureConfigFactory;
 import org.spongepowered.common.world.generation.config.structure.SpongeSpacedStructureConfigFactory;
-import org.spongepowered.common.world.server.SpongeServerLocation;
+import org.spongepowered.common.world.generation.config.structure.SpongeStructureGenerationConfig;
 import org.spongepowered.common.world.schematic.SpongePaletteReferenceFactory;
-import org.spongepowered.common.world.volume.archetype.entity.SpongeEntityArchetypeEntryFactory;
-import org.spongepowered.common.world.biome.SpongeBiomeSamplerFactory;
-import org.spongepowered.common.world.SpongeWorldTypeEffect;
+import org.spongepowered.common.world.server.SpongeServerLocation;
+import org.spongepowered.common.world.server.SpongeServerLocationCreatorFactory;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
-import org.spongepowered.common.world.server.SpongeServerLocationCreatorFactory;
+import org.spongepowered.common.world.volume.archetype.entity.SpongeEntityArchetypeEntryFactory;
 import org.spongepowered.common.world.volume.block.SpongeBlockVolumeFactory;
 import org.spongepowered.common.world.weather.SpongeWeather;
 
@@ -187,6 +195,9 @@ public final class SpongeFactoryProvider implements FactoryProvider {
         return this;
     }
 
+    /**
+     * Order matters, be careful...
+     */
     public void registerDefaultFactories() {
         this
                 .registerFactory(ResourceKey.Factory.class, new SpongeResourceKeyFactory())
@@ -252,6 +263,11 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(NodeTree.Factory.class, new SpongeNodeTree.FactoryImpl())
                 .registerFactory(TagTemplate.Factory.class, new SpongeTagTemplateFactory())
                 .registerFactory(EventListenerRegistration.Factory.class, new SpongeEventListenerRegistration.FactoryImpl())
+                .registerFactory(FlatGeneratorConfig.Factory.class, new SpongeFlatGeneratorConfig.FactoryImpl())
+                .registerFactory(StructureGenerationConfig.Factory.class, new SpongeStructureGenerationConfig.FactoryImpl())
+                .registerFactory(CommandResult.Factory.class, new SpongeCommandResultFactory())
+                .registerFactory(ItemStack.Factory.class, new SpongeItemStack.FactoryImpl())
+                .registerFactory(BlockSnapshot.Factory.class, new SpongeBlockSnapshot.FactoryImpl())
         ;
     }
 }

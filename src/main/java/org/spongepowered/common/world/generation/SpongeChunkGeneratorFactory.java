@@ -24,6 +24,12 @@
  */
 package org.spongepowered.common.world.generation;
 
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.ConfigurableChunkGenerator;
@@ -33,12 +39,6 @@ import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAcce
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.Objects;
-import net.minecraft.core.Registry;
-import net.minecraft.world.level.levelgen.FlatLevelSource;
-import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
-import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 
 @SuppressWarnings("unchecked")
 public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory {
@@ -51,7 +51,7 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
     @Override
     public <T extends NoiseGeneratorConfig> ConfigurableChunkGenerator<T> noise(final BiomeProvider provider, final T config) {
         return (ConfigurableChunkGenerator<T>) (Object) new NoiseBasedChunkGenerator((net.minecraft.world.level.biome.BiomeSource) Objects
-                .requireNonNull(provider, "provider"), BootstrapProperties.dimensionGeneratorSettings.seed(), () ->
+                .requireNonNull(provider, "provider"), BootstrapProperties.worldGenSettings.seed(), () ->
                 (NoiseGeneratorSettings) (Object) Objects.requireNonNull(config, "config"));
     }
 
@@ -66,20 +66,20 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
     public ConfigurableChunkGenerator<NoiseGeneratorConfig> overworld() {
         return (ConfigurableChunkGenerator<NoiseGeneratorConfig>) (Object) WorldGenSettings.makeDefaultOverworld(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY),
             BootstrapProperties.registries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY),
-            BootstrapProperties.dimensionGeneratorSettings.seed());
+            BootstrapProperties.worldGenSettings.seed());
     }
 
     @Override
     public ConfigurableChunkGenerator<NoiseGeneratorConfig> theNether() {
         return (ConfigurableChunkGenerator<NoiseGeneratorConfig>) DimensionTypeAccessor.invoker$defaultNetherGenerator(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY),
             BootstrapProperties.registries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY),
-            BootstrapProperties.dimensionGeneratorSettings.seed());
+            BootstrapProperties.worldGenSettings.seed());
     }
 
     @Override
     public ConfigurableChunkGenerator<NoiseGeneratorConfig> theEnd() {
         return (ConfigurableChunkGenerator<NoiseGeneratorConfig>) DimensionTypeAccessor.invoker$defaultEndGenerator(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY),
             BootstrapProperties.registries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY),
-            BootstrapProperties.dimensionGeneratorSettings.seed());
+            BootstrapProperties.worldGenSettings.seed());
     }
 }

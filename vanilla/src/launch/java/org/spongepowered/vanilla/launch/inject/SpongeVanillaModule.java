@@ -25,13 +25,19 @@
 package org.spongepowered.vanilla.launch.inject;
 
 import com.google.inject.AbstractModule;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.event.EventManager;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.vanilla.launch.VanillaPlatform;
+import org.spongepowered.vanilla.launch.command.VanillaCommandManager;
 import org.spongepowered.vanilla.launch.event.VanillaEventManager;
 
 public final class SpongeVanillaModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        this.bind(Platform.class).to(VanillaPlatform.class);
         this.bind(EventManager.class).to(VanillaEventManager.class);
+        this.bind(SpongeCommandManager.class).to(VanillaCommandManager.class);
     }
 }

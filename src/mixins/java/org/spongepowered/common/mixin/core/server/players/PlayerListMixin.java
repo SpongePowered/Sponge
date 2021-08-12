@@ -94,6 +94,7 @@ import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.entity.player.LoginPermissions;
+import org.spongepowered.common.entity.player.SpongeUserView;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.server.PerWorldBorderListener;
@@ -278,7 +279,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final Vector3d rotation = player.rotation();
         // player.connection() cannot be used here, because it's still be null at this point
         final ServerSideConnection connection = (ServerSideConnection) networkManager.getPacketListener();
-        final User user = player.user();
+
+        // The user is not yet in the player list, so we need to make special provision.
+        final User user = SpongeUserView.createLoginEventUser(player);
 
         final Cause cause = Cause.of(EventContext.empty(), connection, user);
         final ServerSideConnectionEvent.Login event = SpongeEventFactory.createServerSideConnectionEventLogin(cause, disconnectMessage,

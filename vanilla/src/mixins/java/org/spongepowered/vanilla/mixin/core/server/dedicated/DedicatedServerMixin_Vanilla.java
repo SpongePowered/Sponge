@@ -25,31 +25,25 @@
 package org.spongepowered.vanilla.mixin.core.server.dedicated;
 
 import net.minecraft.server.dedicated.DedicatedServer;
-import org.spongepowered.api.Server;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
-import org.spongepowered.vanilla.VanillaServer;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.vanilla.mixin.core.server.MinecraftServerMixin_Vanilla;
 
 @Mixin(DedicatedServer.class)
-@Implements(@Interface(iface = Server.class, prefix = "server$"))
-public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_Vanilla implements VanillaServer {
+public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_Vanilla {
 
     @Inject(method = "initServer", at = @At("HEAD"))
     private void vanilla$runEngineStartLifecycle(final CallbackInfoReturnable<Boolean> cir) {
         // Save config now that registries have been initialized
         ConfigHandle.setSaveSuppressed(false);
 
-        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.establishServerServices();
-
 
         lifecycle.establishServerFeatures();
 
@@ -59,15 +53,9 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_
 
     @Inject(method = "initServer", at = @At("RETURN"))
     private void vanilla$callStartedEngineAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
-        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.callStartedEngineEvent(this);
 
         lifecycle.callLoadedGameEvent();
-    }
-
-    @Override
-    protected void loadLevel() {
-        this.shadow$detectBundledResources();
-        this.worldManager().loadLevel();
     }
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command.registrar;
 
+import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -43,6 +44,7 @@ import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.SpongeParameterizedCommand;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
+import org.spongepowered.common.command.exception.SpongeCommandResultException;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.plugin.PluginContainer;
@@ -58,7 +60,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class SpongeParameterizedCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<Command.Parameterized> {
+public final class SpongeParameterizedCommandRegistrar implements BrigadierBasedRegistrar<Command.Parameterized> {
 
     public static final CommandRegistrarType<Command.Parameterized> TYPE = new SpongeCommandRegistrarType<>(
             Command.Parameterized.class,
@@ -114,11 +116,26 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
             final @NonNull CommandMapping mapping,
             final @NonNull String command,
             final @NonNull String arguments) throws CommandException {
+        return this.process(cause, mapping, command,
+                this.commandManager().getDispatcher().parse(this.createCommandString(command, arguments), (CommandSourceStack) cause));
+    }
+
+    @Override
+    public SpongeCommandDispatcher dispatcher() {
+        return this.commandManager().getDispatcher();
+    }
+
+    @Override
+    public @NonNull CommandResult process(
+            final @NonNull CommandCause cause,
+            final @NonNull CommandMapping mapping,
+            final @NonNull String command,
+            final @NonNull ParseResults<CommandSourceStack> arguments) throws CommandException {
         try {
             final SpongeCommandDispatcher dispatcher = this.commandManager().getDispatcher();
-            return CommandResult.builder().result(
-                    dispatcher.execute(
-                            dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause))).build();
+            return CommandResult.builder().result(dispatcher.execute(arguments)).build();
+        } catch (final SpongeCommandResultException ex) {
+            return ex.result();
         } catch (final SpongeCommandSyntaxException ex) {
             throw ex.getCause();
         } catch (final CommandSyntaxException e) {

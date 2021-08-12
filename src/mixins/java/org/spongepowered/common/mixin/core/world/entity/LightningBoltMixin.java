@@ -43,7 +43,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
@@ -73,12 +73,12 @@ public abstract class LightningBoltMixin extends EntityMixin {
         if (!this.impl$effect && ((World) world).contains(pos.getX(), pos.getY(), pos.getZ())) {
             final Vector3i pos3i = VecHelper.toVector3i(pos);
             final Transaction<BlockSnapshot> transaction = new Transaction<>(
-                SpongeBlockSnapshotBuilder.pooled()
+                SpongeBlockSnapshot.BuilderImpl.pooled()
                     .blockState(world.getBlockState(pos))
                     .world((ServerLevel) world)
                     .position(pos3i)
                     .build(),
-                SpongeBlockSnapshotBuilder.pooled()
+                SpongeBlockSnapshot.BuilderImpl.pooled()
                     .blockState(blockState)
                     .world((ServerLevel) world)
                     .position(pos3i)

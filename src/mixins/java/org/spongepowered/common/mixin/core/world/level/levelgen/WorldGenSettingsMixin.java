@@ -24,16 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.level.levelgen;
 
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBridge;
-import org.spongepowered.common.server.BootstrapProperties;
-
-import java.util.Random;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -44,6 +34,16 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBridge;
+import org.spongepowered.common.server.BootstrapProperties;
+
+import java.util.Random;
 
 @Mixin(WorldGenSettings.class)
 public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
@@ -71,24 +71,28 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
 
     @Redirect(method = "guardExperimental", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/MappedRegistry;get(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"))
     private Object impl$useBootstrapDimensionRegistryForGuard(MappedRegistry registry, ResourceKey<LevelStem> registryKey) {
-        if (BootstrapProperties.dimensionGeneratorSettings == null) {
-            BootstrapProperties.dimensionGeneratorSettings = (WorldGenSettings) (Object) this;
+        if (BootstrapProperties.worldGenSettings == null) {
+            BootstrapProperties.worldGenSettings = (WorldGenSettings) (Object) this;
         }
 
-        if (BootstrapProperties.dimensionGeneratorSettings == (Object) this) {
+        if (BootstrapProperties.worldGenSettings == (Object) this) {
             return registry.get(registryKey);
         }
 
-        return BootstrapProperties.dimensionGeneratorSettings.dimensions().get(registryKey);
+        return BootstrapProperties.worldGenSettings.dimensions().get(registryKey);
     }
 
     @Redirect(method = "overworld", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/MappedRegistry;get(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"))
     private Object impl$useBootstrapDimensionRegistryForGenerator(MappedRegistry registry, ResourceKey<LevelStem> registryKey) {
-        if (BootstrapProperties.dimensionGeneratorSettings == (Object) this) {
+        if (BootstrapProperties.worldGenSettings == null) {
+            BootstrapProperties.worldGenSettings = (WorldGenSettings) (Object) this;
+        }
+        
+        if (BootstrapProperties.worldGenSettings == (Object) this) {
             return registry.get(registryKey);
         }
 
-        return BootstrapProperties.dimensionGeneratorSettings.dimensions().get(registryKey);
+        return BootstrapProperties.worldGenSettings.dimensions().get(registryKey);
     }
 
     /**
@@ -101,7 +105,7 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
         final WorldGenSettings dimensionGeneratorSettings =
                 new WorldGenSettings(i, true, false, withOverworld(p_242751_0_, DimensionType.defaultDimensions(p_242751_0_, p_242751_1_,
                         p_242751_2_, i), makeDefaultOverworld(p_242751_1_, p_242751_2_, i)));
-        BootstrapProperties.dimensionGeneratorSettings = dimensionGeneratorSettings;
+        BootstrapProperties.worldGenSettings = dimensionGeneratorSettings;
         return dimensionGeneratorSettings;
     }
 }

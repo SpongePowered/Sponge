@@ -31,9 +31,9 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
+import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
 import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.List;

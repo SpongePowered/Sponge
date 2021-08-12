@@ -55,13 +55,8 @@ import net.minecraft.commands.synchronization.brigadier.FloatArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.IntegerArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.LongArgumentSerializer;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.phys.Vec2;
@@ -162,8 +157,6 @@ import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientations;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.placeholder.PlaceholderParsers;
-import org.spongepowered.api.registry.Registry;
-import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
@@ -172,8 +165,6 @@ import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultTypes;
-import org.spongepowered.api.tag.FluidTypeTags;
-import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.tag.TagType;
 import org.spongepowered.api.tag.TagTypes;
 import org.spongepowered.api.util.Color;
@@ -297,6 +288,7 @@ import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOr
 import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
+import org.spongepowered.common.economy.SpongeTransactionType;
 import org.spongepowered.common.tag.SpongeTagType;
 import org.spongepowered.common.util.SpongeOrientation;
 import org.spongepowered.common.util.VecHelper;
@@ -304,6 +296,7 @@ import org.spongepowered.common.world.SpongeChunkRegenerateFlag;
 import org.spongepowered.common.world.SpongeLightType;
 import org.spongepowered.common.world.portal.EndPortalType;
 import org.spongepowered.common.world.portal.NetherPortalType;
+import org.spongepowered.common.world.portal.UnknownPortalType;
 import org.spongepowered.common.world.schematic.SpongePaletteType;
 import org.spongepowered.common.world.server.SpongeTicketType;
 import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
@@ -777,6 +770,7 @@ public final class SpongeRegistryLoaders {
         return RegistryLoader.of(l -> {
             l.add(PortalTypes.END, EndPortalType::new);
             l.add(PortalTypes.NETHER, NetherPortalType::new);
+            l.add(PortalTypes.UNKNOWN, UnknownPortalType::new);
         });
     }
 
@@ -891,6 +885,14 @@ public final class SpongeRegistryLoaders {
             l.add(TicketTypes.PORTAL, k -> (TicketType<?>) net.minecraft.server.level.TicketType.PORTAL);
             l.add(TicketTypes.POST_TELEPORT, k -> (TicketType<?>) net.minecraft.server.level.TicketType.POST_TELEPORT);
         });
+    }
+
+    public static RegistryLoader<org.spongepowered.api.service.economy.transaction.TransactionType> transactionType() {
+        return RegistryLoader.of(l -> l.mapping(SpongeTransactionType::new, m -> {
+                m.add(org.spongepowered.api.service.economy.transaction.TransactionTypes.DEPOSIT);
+                m.add(org.spongepowered.api.service.economy.transaction.TransactionTypes.TRANSFER);
+                m.add(org.spongepowered.api.service.economy.transaction.TransactionTypes.WITHDRAW);
+            }));
     }
 
     public static RegistryLoader<ValidationType> validationType() {

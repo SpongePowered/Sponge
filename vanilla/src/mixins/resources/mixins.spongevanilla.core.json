@@ -9,28 +9,29 @@
         "client.gui.screens.TitleScreenMixin_Vanilla",
         "client.multiplayer.ClientHandshakePacketListenerImplMixin_Vanilla",
         "client.multiplayer.ClientPacketListenerMixin_Vanilla",
+        "client.renderer.entity.EntityRenderDispatcherMixin_Vanilla",
         "client.server.IntegratedServerMixin_Vanilla"
     ],
     "server": [
-        "server.dedicated.DedicatedServerMixin_Vanilla",
-        "server.dedicated.DedicatedServer_1_Mixin_Vanilla"
+        "server.dedicated.DedicatedServer_1_Mixin_Vanilla",
+        "server.dedicated.DedicatedServerMixin_Vanilla"
     ],
     "mixins": [
         "CrashReportMixin_Vanilla",
         "brigadier.exceptions.CommandSyntaxExceptionMixin_Vanilla",
-        "core.MappedRegistryMixin_Vanilla",
-        "core.RegistryMixin_Vanilla",
-        "core.WritableRegistryMixin_Vanilla",
-        "entity.item.minecart.EnderPearlEntityMixin_Vanilla",
-        "entity.player.EntityMixin_Vanilla",
         "server.BootstrapMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",
         "server.level.ServerPlayerMixin_Vanilla",
         "server.network.ServerGamePacketListenerImplMixin_Vanilla",
-        "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
         "server.network.ServerLoginPacketListenerImpl_1Mixin_Vanilla",
-        "world.entity.vehicle.AbstractMinecartContainerMixin_Vanilla",
-        "server.level.ServerLevelMixin_Vanilla"
+        "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
+        "world.entity.EntityMixin_Vanilla",
+        "world.entity.ai.attributes.DefaultAttributesMixin",
+        "world.entity.item.ItemEntityMixin_Vanilla",
+        "world.entity.projectile.ThrownEnderpearlMixin_Vanilla",
+        "world.entity.vehicle.BoatMixin_Vanilla",
+        "world.level.portal.PortalForcerMixin_Vanilla",
+        "world.level.storage.LevelStorageSourceMixin_Vanilla"
     ],
     "overwrites": {
         "conformVisibility": true

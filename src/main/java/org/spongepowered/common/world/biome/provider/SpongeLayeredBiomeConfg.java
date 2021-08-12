@@ -108,7 +108,7 @@ public final class SpongeLayeredBiomeConfg extends AbstractBiomeProviderConfig i
 
         @Override
         public Builder reset() {
-            this.seed = BootstrapProperties.dimensionGeneratorSettings.seed();
+            this.seed = BootstrapProperties.worldGenSettings.seed();
             this.biomes.clear();
             this.largeBiomes = false;
             return this;

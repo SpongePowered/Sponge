@@ -36,9 +36,10 @@ import net.minecraft.server.level.ServerLevel;
 public final class EndPortalType extends VanillaPortalType {
 
     @Override
-    public void generatePortal(final ServerLocation location, final Axis axis) {
+    public boolean generatePortal(final ServerLocation location, final Axis axis) {
         Objects.requireNonNull(location);
         PortalHelper.generateEndPortal((ServerLevel) location.world(), location.blockX(), location.blockY(), location.blockZ(), true);
+        return true;
     }
 
     @Override

@@ -168,7 +168,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public User user() {
-        return new SpongeUserView(this.uuid);
+        return SpongeUserView.create(this.uuid);
     }
 
     @Override

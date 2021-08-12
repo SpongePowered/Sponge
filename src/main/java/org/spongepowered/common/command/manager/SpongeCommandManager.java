@@ -27,8 +27,6 @@ package org.spongepowered.common.command.manager;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import io.leangen.geantyref.GenericTypeReflector;
-import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mojang.brigadier.Command;
@@ -36,12 +34,15 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.leangen.geantyref.GenericTypeReflector;
+import io.leangen.geantyref.TypeToken;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.util.ComponentMessageThrowable;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -62,19 +63,19 @@ import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.command.ExecuteCommandEvent;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.adventure.CallbackCommand;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
@@ -82,8 +83,8 @@ import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
 import org.spongepowered.common.command.registrar.tree.builder.RootCommandTreeNode;
+import org.spongepowered.common.command.result.SpongeCommandResult;
 import org.spongepowered.common.command.sponge.SpongeCommand;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
@@ -112,8 +113,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public final class SpongeCommandManager implements CommandManager.Mutable {
+public abstract class SpongeCommandManager implements CommandManager.Mutable {
 
+    private static final CommandResult UNKNOWN_ERROR = new SpongeCommandResult(false, 0, null);
     private static final boolean ALWAYS_PRINT_STACKTRACES = System.getProperty("sponge.command.alwaysPrintStacktraces") != null;
 
     private final Game game;
@@ -303,7 +305,8 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
         }
     }
 
-    public CommandResult process(final CommandCause cause, final String arguments) throws CommandException, CommandSyntaxException {
+    public CommandResult process(final CommandCause cause, final String arguments)
+            throws CommandException, CommandSyntaxException {
         final String[] splitArg = arguments.split(" ", 2);
         final String originalCommand = splitArg[0];
         final String originalArgs = splitArg.length == 2 ? splitArg[1] : "";
@@ -321,18 +324,15 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
                 false
         );
         if (this.game.eventManager().post(preEvent)) {
-            return preEvent.result().orElse(CommandResult.empty());
+            return preEvent.result().orElse(SpongeCommandManager.UNKNOWN_ERROR);
         }
         command = preEvent.command();
         args = preEvent.arguments();
 
         final SpongeCommandMapping mapping = this.commandMappings.get(command.toLowerCase());
         if (mapping == null) {
-            // no command.
-            // TextColors.RED,
             throw new CommandException(Component.text("Unknown command. Type /help for a list of commands."));
         }
-        // For when the phase tracker comes back online
         final Object source = cause.cause().root();
 
         final CommandResult result;
@@ -341,7 +341,8 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
         try (final CommandPhaseContext context = GeneralPhase.State.COMMAND
             .createPhaseContext(PhaseTracker.getInstance())
             .source(source)
-            .command(args)) {
+            .command(args)
+            .commandMapping(mapping)) {
             if (source instanceof ServerPlayer) {
                 final ServerPlayer serverPlayer = (ServerPlayer) source;
                 context.creator(serverPlayer.uniqueId());
@@ -354,15 +355,23 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
             //}
             context.buildAndSwitch();
             try {
-                result = mapping.registrar().process(cause, mapping, command, args);
+                result = this.processCommand(cause, mapping, arguments, command, args);
             } catch (final CommandException exception) {
-                final CommandResult errorResult = CommandResult.builder().result(0).error(
-                    exception.componentMessage()).build();
+                final CommandResult errorResult = CommandResult.builder().result(0)
+                        .error(exception.componentMessage()).build();
                 this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
                 if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
                     this.prettyPrintThrowableError(exception, command, args, cause);
                 }
                 throw exception;
+            } catch (final CommandSyntaxException cse) {
+                final CommandResult errorResult = CommandResult.builder().result(0)
+                        .error(SpongeAdventure.asAdventure(cse.getRawMessage())).build();
+                this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
+                if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
+                    this.prettyPrintThrowableError(cse, command, args, cause);
+                }
+                throw cse;
             } catch (final net.minecraft.commands.CommandRuntimeException ex) {
                 final CommandResult errorResult = CommandResult.builder().result(0).error(
                     SpongeAdventure.asAdventure(ex.getComponent())).build();
@@ -397,10 +406,22 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
             }
 
             this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, result);
-            result.errorMessage().ifPresent(x -> cause.sendMessage(Identity.nil(), x));
+            if (!result.isSuccess()) {
+                cause.sendMessage(Identity.nil(), result.errorMessage()
+                        .map(x -> x.colorIfAbsent(NamedTextColor.RED))
+                        .orElseGet(() ->
+                    Component.text()
+                            .content(String.format("An empty error result was returned while executing the command \"%s\"", arguments))
+                            .color(NamedTextColor.RED)
+                            .build()));
+            }
             return result;
         }
     }
+
+    // Used to support the Forge event for all commands.
+    protected abstract CommandResult processCommand(final CommandCause cause, final CommandMapping mapping,
+            final String original, final String command, final String args) throws Throwable;
 
     @Override
     public <T extends Subject & Audience> @NonNull CommandResult process(
@@ -490,6 +511,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
                     return Collections.emptyList();
                 }
 
+                frame.pushCause(mapping);
                 return mapping.registrar().complete(CommandCause.create(), mapping, command, splitArg[1]);
             }
 

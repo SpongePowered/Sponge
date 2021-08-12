@@ -26,7 +26,6 @@ package org.spongepowered.vanilla.launch.plugin;
 
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.InvalidPluginException;
 import org.spongepowered.plugin.PluginCandidate;
@@ -63,45 +62,17 @@ public final class VanillaPluginManager implements SpongePluginManager {
 
     @Override
     public Optional<PluginContainer> fromInstance(final Object instance) {
-        Objects.requireNonNull(instance);
-
-        return Optional.ofNullable(this.instancesToPlugins.get(instance));
+        return Optional.ofNullable(this.instancesToPlugins.get(Objects.requireNonNull(instance, "instance")));
     }
 
     @Override
     public Optional<PluginContainer> plugin(final String id) {
-        Objects.requireNonNull(id);
-
-        return Optional.ofNullable(this.plugins.get(id));
+        return Optional.ofNullable(this.plugins.get(Objects.requireNonNull(id, "id")));
     }
 
     @Override
     public Collection<PluginContainer> plugins() {
         return Collections.unmodifiableCollection(this.sortedPlugins);
-    }
-
-    @Override
-    public boolean isLoaded(final String id) {
-        Objects.requireNonNull(id);
-
-        return this.plugins.containsKey(id);
-    }
-
-    @Override
-    public void addPlugin(final PluginContainer plugin) {
-        Objects.requireNonNull(plugin);
-
-        this.plugins.put(plugin.metadata().id(), plugin);
-        this.instancesToPlugins.put(plugin.instance(), plugin);
-        this.sortedPlugins.add(plugin);
-    }
-
-    @Override
-    public void addDummyPlugin(final DummyPluginContainer plugin) {
-        Objects.requireNonNull(plugin);
-
-        this.plugins.put(plugin.metadata().id(), plugin);
-        this.sortedPlugins.add(plugin);
     }
 
     public void loadPlugins(final VanillaPluginPlatform platform) {
@@ -118,7 +89,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
             for (final PluginCandidate<PluginResource> candidate : candidates) {
                 PluginContainer plugin = this.plugins.get(candidate.metadata().id());
                 if (plugin != null) {
-                    if (plugin instanceof DummyPluginContainer) {
+                    if (plugin instanceof VanillaDummyPluginContainer) {
                         continue;
                     }
                     // TODO Print nasty message or do something about the dupe otherwise?
@@ -142,5 +113,14 @@ public final class VanillaPluginManager implements SpongePluginManager {
         }
 
         platform.logger().info("Loaded plugin(s): {}", this.sortedPlugins.stream().map(p -> p.metadata().id()).collect(Collectors.toList()));
+    }
+
+    public void addPlugin(final PluginContainer plugin) {
+        this.plugins.put(plugin.metadata().id(), Objects.requireNonNull(plugin, "plugin"));
+        this.sortedPlugins.add(plugin);
+
+        if (!(plugin instanceof VanillaDummyPluginContainer)) {
+            this.instancesToPlugins.put(plugin.instance(), plugin);
+        }
     }
 }

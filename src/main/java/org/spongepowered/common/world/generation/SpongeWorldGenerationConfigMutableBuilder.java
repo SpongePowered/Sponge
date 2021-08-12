@@ -25,15 +25,15 @@
 package org.spongepowered.common.world.generation;
 
 import com.mojang.serialization.Lifecycle;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.Registry;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 
 public final class SpongeWorldGenerationConfigMutableBuilder implements WorldGenerationConfig.Mutable.Builder {
 
@@ -60,7 +60,7 @@ public final class SpongeWorldGenerationConfigMutableBuilder implements WorldGen
 
     @Override
     public WorldGenerationConfig.Mutable.Builder reset() {
-        final WorldGenSettings defaultSettings = BootstrapProperties.dimensionGeneratorSettings;
+        final WorldGenSettings defaultSettings = BootstrapProperties.worldGenSettings;
         this.seed = defaultSettings.seed();
         this.generateFeatures = defaultSettings.generateFeatures();
         this.generateBonusChest = defaultSettings.generateBonusChest();

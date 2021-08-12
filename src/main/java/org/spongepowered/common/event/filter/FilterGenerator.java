@@ -51,6 +51,7 @@ import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.filter.cause.After;
 import org.spongepowered.api.event.filter.cause.All;
 import org.spongepowered.api.event.filter.cause.Before;
+import org.spongepowered.api.event.filter.cause.ContextValue;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Last;
 import org.spongepowered.api.event.filter.cause.Root;
@@ -65,6 +66,7 @@ import org.spongepowered.common.event.filter.delegate.AfterCauseFilterSourceDele
 import org.spongepowered.common.event.filter.delegate.AllCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.BeforeCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.CancellationEventFilterDelegate;
+import org.spongepowered.common.event.filter.delegate.ContextValueFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.ExcludeSubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FirstCauseFilterSourceDelegate;
@@ -360,6 +362,7 @@ public class FilterGenerator {
         CAUSE_ROOT(Root.class, RootCauseFilterSourceDelegate::new),
         GETTER(Getter.class, GetterFilterSourceDelegate::new),
         GET_VALUE(GetValue.class, GetValueFilterSourceDelegate::new),
+        CONTEXT_VALUE(ContextValue.class, ContextValueFilterSourceDelegate::new),
         ;
 
         private static final Map<Class<? extends Annotation>, ParameterSource> BY_CLAZZ;

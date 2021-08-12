@@ -33,6 +33,7 @@ import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
+import org.spongepowered.common.command.exception.SpongeCommandResultException;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 
 import java.util.Objects;
@@ -52,10 +53,7 @@ public final class SpongeCommandExecutorWrapper implements Command<CommandSource
             final CommandResult result = Objects.requireNonNull(this.executor.execute(spongeCommandContext),
                     "A CommandResult was expected, but the command returned null instead. Report this to the plugin author!");
             if (!result.isSuccess()) {
-                final Component errorMessage = result.errorMessage().orElse(
-                        Component.text("An unknown error occurred while executing the command ")
-                        .append(Component.text(context.getInput())));
-                throw new SpongeCommandSyntaxException(new CommandException(errorMessage), spongeCommandContext);
+                throw new SpongeCommandResultException(result);
             }
             return result.result();
         } catch (final CommandException e) {

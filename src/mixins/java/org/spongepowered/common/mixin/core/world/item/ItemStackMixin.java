@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.item;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
@@ -34,18 +36,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.data.DataHolderProcessor;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 
-import javax.annotation.Nullable;
-
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.ItemStack;
-
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.item.ItemStack.class)
 public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataCompoundHolder {
@@ -59,19 +59,19 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
     // @formatter:on
 
     @Override
-    public <E> DataTransactionResult bridge$offer(final Key<@NonNull ? extends Value<E>> key, final E value) {
-        if (this.emptyCacheFlag) {
-            return DataTransactionResult.failNoData();
-        }
-        return SpongeDataHolderBridge.super.bridge$offer(key, value);
-    }
-
-    @Override
     public <E> Optional<E> bridge$get(final Key<@NonNull ? extends Value<E>> key) {
         if (this.emptyCacheFlag) {
             return Optional.empty();
         }
-        return SpongeDataHolderBridge.super.bridge$get(key);
+        return DataHolderProcessor.bridge$get(this, key);
+    }
+
+    @Override
+    public <E> DataTransactionResult bridge$offer(final Key<@NonNull ? extends Value<E>> key, final E value) {
+        if (this.emptyCacheFlag) {
+            return DataTransactionResult.failNoData();
+        }
+        return DataHolderProcessor.bridge$offer(this, key, value);
     }
 
     @Override
@@ -79,7 +79,7 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
         if (this.emptyCacheFlag) {
             return DataTransactionResult.failNoData();
         }
-        return SpongeDataHolderBridge.super.bridge$remove(key);
+        return DataHolderProcessor.bridge$remove(this, key);
     }
 
     @Override

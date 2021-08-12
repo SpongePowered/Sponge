@@ -57,13 +57,14 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
-import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.service.server.permission.BridgeSubject;
 import org.spongepowered.common.service.server.permission.SubjectHelper;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -74,12 +75,19 @@ import java.util.function.Function;
  * Also see SubjectMixin
  */
 @DefaultQualifier(NonNull.class)
-public final class SpongeUserView implements User, BridgeSubject {
+public abstract class SpongeUserView implements User, BridgeSubject {
 
-    private final UUID uuid;
+    protected final UUID uuid;
 
-    @SuppressWarnings("ConstantConditions") 
-    public SpongeUserView(final UUID uuid) {
+    public static User create(final UUID uuid) {
+        return new SpongeUserView.Standard(uuid);
+    }
+
+    public static User createLoginEventUser(final ServerPlayer serverPlayer) {
+        return new SpongeUserView.Login(serverPlayer);
+    }
+
+    protected SpongeUserView(final UUID uuid) {
         this.uuid = uuid;
         SubjectHelper.applySubject((SubjectBridge) (Object) this, PermissionService.SUBJECTS_USER);
     }
@@ -343,18 +351,7 @@ public final class SpongeUserView implements User, BridgeSubject {
         this.backingObject(playerFunc, userFunc);
     }
 
-    @SuppressWarnings("ConstantConditions")
-    private DataHolder.Mutable dataHolderBackingObject() {
-        final @Nullable ServerPlayer serverPlayer = (ServerPlayer) SpongeCommon.server().getPlayerList().getPlayer(this.uuid);
-        if (serverPlayer != null) {
-            return serverPlayer;
-        }
-        final SpongeUserData user = ((SpongeServer) SpongeCommon.server()).userManager().userFromCache(this.uuid);
-        if (user != null) {
-            return user;
-        }
-        throw new IllegalStateException("Player is not online and user is not loaded - it must be loaded from the UserManager.");
-    }
+    protected abstract DataHolder.Mutable dataHolderBackingObject();
 
     private <T> T backingObject(final Function<? super ServerPlayer, T> playerFunc, final Function<? super SpongeUserData, T> userFunc) {
         final DataHolder.Mutable mutable = this.dataHolderBackingObject();
@@ -371,6 +368,46 @@ public final class SpongeUserView implements User, BridgeSubject {
         default Void apply(final T t) {
             this.accept(t);
             return null;
+        }
+
+    }
+
+    final static class Standard extends SpongeUserView {
+
+        Standard(final UUID uuid) {
+            super(uuid);
+        }
+
+        @SuppressWarnings("ConstantConditions")
+        protected DataHolder.Mutable dataHolderBackingObject() {
+            final @Nullable ServerPlayer serverPlayer = (ServerPlayer) SpongeCommon.server().getPlayerList().getPlayer(this.uuid);
+            if (serverPlayer != null) {
+                return serverPlayer;
+            }
+            final SpongeUserData user = ((SpongeServer) SpongeCommon.server()).userManager().userFromCache(this.uuid);
+            if (user != null) {
+                return user;
+            }
+            throw new IllegalStateException("Player is not online and user is not loaded - it must be loaded from the UserManager.");
+        }
+    }
+
+    final static class Login extends SpongeUserView {
+
+        private final WeakReference<ServerPlayer> player;
+
+        Login(final ServerPlayer serverPlayer) {
+            super(serverPlayer.uniqueId());
+            this.player = new WeakReference<>(serverPlayer);
+        }
+
+        @Override
+        protected DataHolder.Mutable dataHolderBackingObject() {
+            final @Nullable ServerPlayer player = this.player.get();
+            if (player == null) {
+                throw new IllegalStateException("The Player is no longer available, do not store this object!");
+            }
+            return player;
         }
 
     }

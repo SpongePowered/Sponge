@@ -1,0 +1,99 @@
+/*
+ * This file is part of Sponge, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package org.spongepowered.forge.mixin.core.minecraftforge.event.world;
+
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraftforge.event.world.BlockEvent;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.block.transaction.Operations;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.forge.launch.bridge.event.ForgeEventBridge_Forge;
+import org.spongepowered.math.vector.Vector3i;
+
+import java.util.Collections;
+
+@Mixin(value = BlockEvent.BreakEvent.class, remap = false)
+public abstract class BlockEvent_BreakEventMixin_Forge extends BlockEventMixin_Forge implements ForgeEventBridge_Forge {
+
+    @Override
+    public void bridge$syncFrom(final Event event) {
+        if (event instanceof ChangeBlockEvent.All) {
+            final ChangeBlockEvent.All changeBlockEventAll = (ChangeBlockEvent.All) event;
+            final Vector3i pos = VecHelper.toVector3i(this.shadow$getPos());
+            if (changeBlockEventAll.isCancelled() ||
+                    changeBlockEventAll.transactions()
+                            .stream()
+                            .filter(x -> x.original().position().equals(pos))
+                            .anyMatch(x -> !x.isValid() || x.operation() != Operations.BREAK.get() || x.custom().isPresent())) {
+                ((net.minecraftforge.eventbus.api.Event) (Object) this).setCanceled(true);
+            }
+        }
+    }
+
+    @Override
+    public void bridge$syncTo(final Event event) {
+        if (event instanceof ChangeBlockEvent.All && ((net.minecraftforge.eventbus.api.Event) (Object) this).isCanceled()) {
+            final Vector3i pos = VecHelper.toVector3i(this.shadow$getPos());
+            ((ChangeBlockEvent.All) event).transactions(Operations.BREAK.get()).filter(x -> x.original().position().equals(pos))
+                    .forEach(x -> x.setValid(false));
+        }
+    }
+
+    @Override
+    public @Nullable Event bridge$createSpongeEvent() {
+        final LevelAccessor accessor = this.shadow$getWorld();
+        if (accessor instanceof ServerWorld) {
+            final ServerWorld serverWorld = (ServerWorld) accessor;
+            final BlockTransaction transaction = new BlockTransaction(
+                    SpongeBlockSnapshot.BuilderImpl
+                            .pooled()
+                            .world(serverWorld.key())
+                            .position(VecHelper.toVector3i(this.shadow$getPos()))
+                            .blockState((BlockState) this.shadow$getState())
+                            .build(),
+                    SpongeBlockSnapshot.BuilderImpl
+                            .pooled()
+                            .world(serverWorld.key())
+                            .position(VecHelper.toVector3i(this.shadow$getPos()))
+                            .blockState(BlockState.builder().blockType(BlockTypes.AIR.get()).build())
+                            .build(),
+                    Operations.BREAK.get()
+            );
+            return SpongeEventFactory.createChangeBlockEventAll(PhaseTracker.getCauseStackManager().currentCause(),
+                    Collections.singletonList(transaction), serverWorld);
+        }
+        return null;
+    }
+}

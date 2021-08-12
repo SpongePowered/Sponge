@@ -24,44 +24,37 @@
  */
 package org.spongepowered.vanilla.mixin.core.client;
 
+import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.server.IntegratedServer;
-import org.objectweb.asm.Opcodes;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.VanillaPackResources;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
-import org.spongepowered.common.applaunch.config.core.ConfigHandle;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.entity.player.ClientType;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.vanilla.client.VanillaClient;
+import org.spongepowered.vanilla.util.WindowUtils;
 
-import javax.annotation.Nullable;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Mixin(Minecraft.class)
-public abstract class MinecraftMixin_Vanilla implements VanillaClient {
+public abstract class MinecraftMixin_Vanilla implements MinecraftBridge, VanillaClient {
 
-    @Shadow @Nullable private IntegratedServer singleplayerServer;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void vanilla$callStartedEngineAndLoadedGame(CallbackInfo ci) {
-        // Save config now that registries have been initialized
-        ConfigHandle.setSaveSuppressed(false);
-
-        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
-        lifecycle.callStartedEngineEvent(this);
-        
-        lifecycle.callLoadedGameEvent();
+    @Override
+    public ClientType bridge$getClientType() {
+        return ClientType.SPONGE_VANILLA;
     }
 
     @Inject(method = "run", at = @At("HEAD"))
     private void vanilla$establishRegistriesAndStartingEngine(CallbackInfo ci) {
-        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.establishGlobalRegistries();
         lifecycle.establishDataProviders();
         lifecycle.callRegisterDataEvent();
@@ -70,24 +63,17 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
         lifecycle.callStartingEngineEvent(this);
     }
 
-    @Inject(method = "destroy", at = @At("HEAD"))
-    private void vanilla$callStoppingEngineEvent(CallbackInfo ci) {
-        SpongeBootstrap.lifecycle().callStoppingEngineEvent(this);
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/VanillaPackResources;getResource(Lnet/minecraft/server/packs/PackType;Lnet/minecraft/resources/ResourceLocation;)Ljava/io/InputStream;"))
+    private InputStream vanilla$skipLoadingVanillaIcon(final VanillaPackResources vanillaPackResources, final PackType param0, final ResourceLocation param1) {
+        return null;
     }
 
-    @Redirect(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;singleplayerServer:Lnet/minecraft/client/server/IntegratedServer;", opcode =
-            Opcodes.PUTFIELD))
-    private void vanilla$storeTemporaryServerRed(Minecraft minecraft, IntegratedServer server) {
-        ((MinecraftBridge) minecraft).bridge$setTemporaryIntegratedServer(this.singleplayerServer);
-        this.singleplayerServer = null;
-    }
-
-    @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("TAIL"))
-    private void vanilla$nullServerRefAndPhaseTracker(Screen screenIn, CallbackInfo ci) {
-        ((MinecraftBridge) this).bridge$setTemporaryIntegratedServer(null);
-        try {
-            PhaseTracker.SERVER.setThread(null);
-        } catch (IllegalAccessException ignore) {
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;setIcon(Ljava/io/InputStream;Ljava/io/InputStream;)V"))
+    private void vanilla$useSpongeIcon(final Window window, final InputStream param0, final InputStream param1) {
+        try (final InputStream stream = this.getClass().getClassLoader().getResourceAsStream("spongie_icon.png")) {
+            WindowUtils.setWindowIcon(window.getWindow(), stream);
+        } catch (final IOException e) {
+            e.printStackTrace();
         }
     }
 }

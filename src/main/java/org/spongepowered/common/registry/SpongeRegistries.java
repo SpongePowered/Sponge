@@ -43,7 +43,7 @@ public final class SpongeRegistries {
 
         holder.createRegistry(RegistryTypes.ACCOUNT_DELETION_RESULT_TYPE, SpongeRegistryLoaders.accountDeletionResultType());
         holder.createRegistry(RegistryTypes.BAN_TYPE, SpongeRegistryLoaders.banType());
-        holder.createRegistry(SpongeRegistryTypes.TRANSACTION_TYPE, SpongeRegistryLoaders.blockTransactionTypes());
+        holder.createRegistry(SpongeRegistryTypes.TRACKER_TRANSACTION_TYPE, SpongeRegistryLoaders.blockTransactionTypes());
         holder.createRegistry(RegistryTypes.BODY_PART, SpongeRegistryLoaders.bodyPart());
         holder.createRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, SpongeRegistryLoaders.valueParameter());
         holder.createRegistry(RegistryTypes.CLICK_TYPE, SpongeRegistryLoaders.clickType());
@@ -84,7 +84,8 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.SKIN_PART, SpongeRegistryLoaders.skinPart());
         holder.createRegistry(RegistryTypes.SPAWN_TYPE, SpongeRegistryLoaders.spawnType());
         holder.createRegistry(RegistryTypes.TELEPORT_HELPER_FILTER, SpongeRegistryLoaders.teleportHelperFilter(), true);
-        holder.createRegistry(RegistryTypes.TICKET_TYPE, SpongeRegistryLoaders.ticketType().values());
+        holder.createRegistry(RegistryTypes.TICKET_TYPE, SpongeRegistryLoaders.ticketType());
+        holder.createRegistry(RegistryTypes.TRANSACTION_TYPE, SpongeRegistryLoaders.transactionType());
         holder.createRegistry(SpongeRegistryTypes.VALIDATION_TYPE, SpongeRegistryLoaders.validationType());
         holder.createRegistry(RegistryTypes.WEATHER_TYPE, SpongeRegistryLoaders.weather());
         holder.createRegistry(RegistryTypes.DATA_FORMAT, SpongeRegistryLoaders.dataFormat());

@@ -43,12 +43,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -65,22 +62,20 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.TimingBridge;
-import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
-import org.spongepowered.common.bridge.world.level.block.TrackedBlockBridge;
+import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.block.TrackableBlockBridge;
 import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.chunk.TrackedLevelChunkBridge;
@@ -95,7 +90,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
-import org.spongepowered.common.event.tracking.context.transaction.RemoveTileEntity;
+import org.spongepowered.common.event.tracking.context.transaction.RemoveBlockEntity;
 import org.spongepowered.common.event.tracking.context.transaction.effect.CheckBlockPostPlacementIsSameEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
 import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyClientEffect;
@@ -129,25 +124,24 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implements TrackedWorldBridge {
 
     // @formatting:off
-    @Shadow @Final private List<ServerPlayer> players;
+    @Shadow @Final List<ServerPlayer> players;
     // @formatting:on
 
     @SuppressWarnings("UnresolvedMixinReference")
     @Redirect(
-        // This normally would target this.entityTickList.forEach((var2x) ->
-        // but we don't have lambda syntax support yet.
-        method = "*",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/server/level/ServerLevel;guardEntityTick(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V"
-        )
+            // This normally would target this.entityTickList.forEach((var2x) ->
+            // but we don't have lambda syntax support yet.
+            method = "*",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/server/level/ServerLevel;guardEntityTick(Ljava/util/function/Consumer;"
+                            + "Lnet/minecraft/world/entity/Entity;)V")
     )
     private void tracker$wrapNormalEntityTick(final ServerLevel level, final Consumer<Entity> entityUpdateConsumer,
         final Entity entity
@@ -287,14 +281,14 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     ) {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
         final BlockEventData blockEventData = (BlockEventData) data;
-        final TrackerBlockEventDataBridge blockEvent = (TrackerBlockEventDataBridge) blockEventData;
+        final TrackableBlockEventDataBridge blockEvent = (TrackableBlockEventDataBridge) blockEventData;
         // Short circuit phase states who do not track during block events
         if (currentContext.ignoresBlockEvent()) {
             return list.add(blockEventData);
         }
 
         final BlockState state = this.shadow$getBlockState(pos);
-        if (((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
+        if (((TrackableBridge) blockIn).bridge$allowsBlockEventCreation()) {
             blockEvent.bridge$setSourceUserUUID(currentContext.getActiveUserUUID());
             if (((BlockStateBridge) state).bridge$hasTileEntity()) {
                 blockEvent.bridge$setTileEntity((BlockEntity) this.shadow$getBlockEntity(pos));
@@ -311,7 +305,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
         // Short circuit any additional handling. We've associated enough with the BlockEvent to
         // allow tracking to take place for other/future phases
-        if (!((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
+        if (!((TrackableBridge) blockIn).bridge$allowsBlockEventCreation()) {
             return list.add((BlockEventData) data);
         }
         // In pursuant with our block updates management, we chose to
@@ -552,7 +546,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     public SpongeBlockSnapshot bridge$createSnapshot(final net.minecraft.world.level.block.state.BlockState state, final BlockPos pos,
         final BlockChangeFlag updateFlag
     ) {
-        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
+        final SpongeBlockSnapshot.BuilderImpl builder = SpongeBlockSnapshot.BuilderImpl.pooled();
         builder.reset();
         builder.blockState(state)
             .world((ServerLevel) (Object) this)
@@ -599,7 +593,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
      * </ul>
      * After which, we may be able to appropriately associate the {@link net.minecraft.world.level.block.entity.BlockEntity}
      * being removed with either an existing {@link ChangeBlock},
-     * or generate a new {@link RemoveTileEntity} transaction
+     * or generate a new {@link RemoveBlockEntity} transaction
      * that would otherwise be able to associate with either the current {@link IPhaseState} or a parent {@link GameTransaction}
      * if this call is the result of a {@link org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect}..
      *
@@ -697,7 +691,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         final LevelChunk targetChunk = this.shadow$getChunkAt(immutableTarget);
         final BlockState targetBlockState = targetChunk.getBlockState(immutableTarget);
         // Sponge - Shortcircuit if the block has no neighbor logic
-        if (!((TrackedBlockBridge) targetBlockState.getBlock()).bridge$overridesNeighborNotificationLogic()) {
+        if (!((TrackableBlockBridge) targetBlockState.getBlock()).bridge$overridesNeighborNotificationLogic()) {
             return;
         }
         // Sponge End

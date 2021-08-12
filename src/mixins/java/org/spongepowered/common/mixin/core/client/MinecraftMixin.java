@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.client;
 
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.RegistryAccess;
@@ -38,6 +39,7 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,22 +47,26 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
-import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
+
+import javax.annotation.Nullable;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 
     // @formatter:off
     @Shadow private Thread gameThread;
+    @Shadow @Nullable private IntegratedServer singleplayerServer;
     // @formatter:on
 
     private IntegratedServer impl$temporaryIntegratedServer;
@@ -79,6 +85,17 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         }
     }
 
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void impl$callStartedEngineAndLoadedGame(CallbackInfo ci) {
+        // Save config now that registries have been initialized
+        ConfigHandle.setSaveSuppressed(false);
+
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
+        lifecycle.callStartedEngineEvent(this);
+
+        lifecycle.callLoadedGameEvent();
+    }
+
     @Inject(method = "runTick", at = @At("TAIL"))
     private void impl$tickClientScheduler(final boolean renderWorldIn, final CallbackInfo ci) {
         this.scheduler().tick();
@@ -94,14 +111,30 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         this.impl$temporaryIntegratedServer = server;
     }
 
-    @Override
-    public ClientType bridge$getClientType() {
-        return ClientType.SPONGE_VANILLA;
+    @Inject(method = "destroy", at = @At("HEAD"))
+    private void impl$callStoppingEngineEvent(CallbackInfo ci) {
+        Launch.instance().lifecycle().callStoppingEngineEvent(this);
+    }
+
+    @Redirect(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;singleplayerServer:Lnet/minecraft/client/server/IntegratedServer;", opcode =
+            Opcodes.PUTFIELD))
+    private void impl$storeTemporaryServerRef(Minecraft minecraft, IntegratedServer server) {
+        ((MinecraftBridge) minecraft).bridge$setTemporaryIntegratedServer(this.singleplayerServer);
+        this.singleplayerServer = null;
+    }
+
+    @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("TAIL"))
+    private void impl$nullServerRefAndPhaseTracker(Screen screenIn, CallbackInfo ci) {
+        ((MinecraftBridge) this).bridge$setTemporaryIntegratedServer(null);
+        try {
+            PhaseTracker.SERVER.setThread(null);
+        } catch (IllegalAccessException ignore) {
+        }
     }
 
     @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;shutdownExecutors()V"))
     private void impl$callStoppedGame(final CallbackInfo ci) {
-        SpongeBootstrap.lifecycle().callStoppedGameEvent();
+        Launch.instance().lifecycle().callStoppedGameEvent();
     }
 
     @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/resources/RegistryReadOps;"))
@@ -116,7 +149,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
         final WorldData saveData = levelSave.getDataTag(p_237284_1_, p_237284_2_);
         BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(), saveData.getDifficulty(), true, saveData.isHardcore(),
-            saveData.getAllowCommands(), 10, p_238181_1_);
+                saveData.getAllowCommands(), 10, p_238181_1_);
         return saveData;
     }
 
@@ -130,18 +163,10 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         BootstrapProperties.setIsNewLevel(true);
     }
 
-    // TODO createLevel
-//    @Inject(method = "*", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;encodeStart(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;"))
-//    private void impl$serializeDelayedDataPackOnCreate(final String param0, final LevelSettings param1, final RegistryAccess.RegistryHolder param2, WorldGenSettings param3,
-//            final LevelStorageSource.LevelStorageAccess f1, final RegistryAccess.RegistryHolder f2, final ResourceManager f3, final DataPackConfig f4,
-//            final CallbackInfoReturnable<WorldData> cir) {
-//        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
-//    }
-
     @Redirect(method = "makeServerStem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
     private Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
         final Path datapackDir = levelSave.getLevelPath(folderName);
-        SpongeBootstrap.lifecycle().callRegisterDataPackValueEvent(datapackDir);
+        Launch.instance().lifecycle().callRegisterDataPackValueEvent(datapackDir);
         return datapackDir;
     }
 }

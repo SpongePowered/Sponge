@@ -46,6 +46,10 @@ public final class SpongeNoiseGeneratorConfig {
         public int bedrockRoofY, bedrockFloorY, seaLevel, minSurfaceLevel;
         public boolean aquifers, noiseCaves, deepslate, oreVeins, noodleCaves;
 
+        public BuilderImpl() {
+            this.reset();
+        }
+
         @Override
         public NoiseGeneratorConfig.Builder structureConfig(final StructureGenerationConfig config) {
             this.structureConfig = Objects.requireNonNull(config, "config");
