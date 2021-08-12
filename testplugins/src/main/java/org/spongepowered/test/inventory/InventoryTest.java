@@ -162,8 +162,12 @@ public final class InventoryTest implements LoadableModule {
                 }
             }
             if (event instanceof ChangeInventoryEvent.Drop) {
-                final Slot hand = ((ChangeInventoryEvent.Drop) event).hand();
+                final Slot hand = ((ChangeInventoryEvent.Drop) event).slot();
                 this.plugin.logger().info("  Hand: {}", InventoryTest.slotName(hand));
+            }
+            if (event instanceof ClickContainerEvent.Creative.Drop) {
+                final ItemStackSnapshot stack = ((ClickContainerEvent.Creative.Drop) event).droppedStack();
+                this.plugin.logger().info("  Creative Drop: {}x{}", stack.type().key(RegistryTypes.ITEM_TYPE), stack.quantity());
             }
             if (event instanceof DropItemEvent.Dispense) {
                 this.plugin.logger().info("  Dropping: {} entities", ((DropItemEvent.Dispense) event).entities().size());
