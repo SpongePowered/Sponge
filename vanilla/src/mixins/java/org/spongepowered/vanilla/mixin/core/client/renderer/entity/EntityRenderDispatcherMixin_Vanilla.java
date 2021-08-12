@@ -36,6 +36,8 @@ import java.util.Map;
 
 @Mixin(EntityRenderDispatcher.class)
 public abstract class EntityRenderDispatcherMixin_Vanilla {
+    // TODO: Check human rendering
+    /*
     @Redirect(
             method = "<init>",
             at = @At(
@@ -50,4 +52,5 @@ public abstract class EntityRenderDispatcherMixin_Vanilla {
         // means we do not need to register a custom renderer
         return !(type != HumanEntity.TYPE && !renderers.containsKey(type));
     }
+    */
 }

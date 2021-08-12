@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level.block;
 
-import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,24 +35,21 @@ import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
 @Mixin(Blocks.class)
 public abstract class BlocksMixin_Tracker {
 
-    @Redirect(method = "register",
+    @Redirect(method = "<clinit>",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/core/Registry;register(Lnet/minecraft/core/Registry;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;"
+            target = "Lnet/minecraft/world/level/block/Block;getLootTable()Lnet/minecraft/resources/ResourceLocation;"
         )
     )
-    private static Object impl$initializeTrackerState(final Registry<Object> registry, final String key, final Object toRegister) {
-        final Object registered = Registry.register(registry, key, toRegister);
-
-        final Block block = (Block) toRegister;
+    private static ResourceLocation impl$initializeTrackerState(final Block block) {
         final boolean randomlyTicking = block.isRandomlyTicking(block.defaultBlockState());
 
         // TODO Not the best check but the tracker options only matter during block ticks...
         if (randomlyTicking) {
-            final RegistryBackedTrackableBridge<Block> trackableBridge = (RegistryBackedTrackableBridge<Block>) toRegister;
+            final RegistryBackedTrackableBridge<Block> trackableBridge = (RegistryBackedTrackableBridge<Block>) block;
             trackableBridge.bridge$refreshTrackerStates();
         }
 
-        return registered;
+        return block.getLootTable();
     }
 }
