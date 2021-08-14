@@ -143,11 +143,11 @@ public final class GeneratorMain {
                 context.relativeClass("block.entity", "BlockEntityType"),
                 Registry.BLOCK_ENTITY_TYPE_REGISTRY
             ),
-            /*new RegistryEntriesValidator<>( // TODO: Chunk statuses are not yet updated
+            new RegistryEntriesValidator<>(
                 "world.chunk",
                 "ChunkStates",
                 Registry.CHUNK_STATUS_REGISTRY
-            ),*/
+            ),
             /*new RegistryEntriesValidator<>( // todo: has special ordering
                 "item.inventory",
                 "ContainerTypes",
