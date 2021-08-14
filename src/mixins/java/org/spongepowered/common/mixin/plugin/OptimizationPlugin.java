@@ -53,6 +53,7 @@ public class OptimizationPlugin extends AbstractMixinConfigPlugin {
 
     // So that any additional optimizations can be added in succession.
     private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<OptimizationCategory, Boolean>> builder()
+            .put("org.spongepowered.common.mixin.optimization.entity.EntityMixin_Optimization_Collision", optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
 // TODO investigate what is still relevant and add them back
 //            .put("org.spongepowered.common.mixin.optimization.SpongeImplHooksMixin_Item_Pre_Merge",
 //                    optimizationCategory -> optimizationCategory.dropsPreMerge)
