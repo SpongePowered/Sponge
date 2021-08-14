@@ -47,6 +47,7 @@ public abstract class MobEffectInstanceMixin_API implements PotionEffect {
     @Shadow private int amplifier;
     @Shadow private boolean ambient;
     @Shadow private boolean visible;
+    @Shadow private boolean showIcon;
     // @formatter:on
 
     @Override
@@ -75,6 +76,11 @@ public abstract class MobEffectInstanceMixin_API implements PotionEffect {
     }
 
     @Override
+    public boolean showsIcon() {
+        return this.showIcon;
+    }
+
+    @Override
     public int contentVersion() {
         return Constants.Sponge.Potion.CURRENT_VERSION;
     }
@@ -90,6 +96,7 @@ public abstract class MobEffectInstanceMixin_API implements PotionEffect {
                 .set(Constants.Item.Potions.POTION_DURATION, this.duration)
                 .set(Constants.Item.Potions.POTION_AMPLIFIER, this.amplifier)
                 .set(Constants.Item.Potions.POTION_AMBIANCE, this.ambient)
-                .set(Constants.Item.Potions.POTION_SHOWS_PARTICLES, this.visible);
+                .set(Constants.Item.Potions.POTION_SHOWS_PARTICLES, this.visible)
+                .set(Constants.Item.Potions.POTION_SHOWS_ICON, this.showIcon);
     }
 }
