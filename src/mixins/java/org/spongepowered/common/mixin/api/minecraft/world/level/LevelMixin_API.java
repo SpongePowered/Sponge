@@ -195,7 +195,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public Vector3i max() {
-        return Constants.World.BIOME_MAX;
+        return Constants.World.BLOCK_MAX;
     }
 
     @Override
