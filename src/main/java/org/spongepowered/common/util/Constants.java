@@ -424,10 +424,8 @@ public final class Constants {
     public static final class World {
 
         public static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
-        public static final Vector3i BIOME_MIN = new Vector3i(Constants.World.BLOCK_MIN.x(), 0, Constants.World.BLOCK_MIN.z());
         public static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
         public static final Vector3i BLOCK_SIZE = Constants.World.BLOCK_MAX.sub(Constants.World.BLOCK_MIN).add(Vector3i.ONE);
-        public static final Vector3i BIOME_MAX = new Vector3i(Constants.World.BLOCK_MAX.x(), 256, Constants.World.BLOCK_MAX.z());
         public static final EnumSet<net.minecraft.core.Direction> NOTIFY_DIRECTION_SET = EnumSet
             .of(net.minecraft.core.Direction.WEST, net.minecraft.core.Direction.EAST, net.minecraft.core.Direction.DOWN,
                 net.minecraft.core.Direction.UP, net.minecraft.core.Direction.NORTH, net.minecraft.core.Direction.SOUTH);
