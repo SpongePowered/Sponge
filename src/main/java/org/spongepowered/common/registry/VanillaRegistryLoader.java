@@ -278,10 +278,10 @@ final class VanillaRegistryLoader {
             l.add(Triggers.USED_TOTEM, k -> (Trigger) CriteriaTriggers.USED_TOTEM);
             l.add(Triggers.VILLAGER_TRADE, k -> (Trigger) CriteriaTriggers.TRADE);
             final DefaultedRegistryReference<Trigger<?>> dummyKey =
-                    RegistryKey.of(RegistryTypes.TRIGGER, ResourceKey.sponge("dummy")).asDefaultedReference(() -> Sponge.game());
+                    RegistryKey.of(RegistryTypes.TRIGGER, ResourceKey.sponge("dummy")).asDefaultedReference(Sponge::game);
             l.add(dummyKey, k -> (Trigger) (Object) SpongeDummyTrigger.DUMMY_TRIGGER);
             final DefaultedRegistryReference<Trigger<?>> scoreKey =
-                    RegistryKey.of(RegistryTypes.TRIGGER, ResourceKey.sponge("score")).asDefaultedReference(() -> Sponge.game());
+                    RegistryKey.of(RegistryTypes.TRIGGER, ResourceKey.sponge("score")).asDefaultedReference(Sponge::game);
             l.add(scoreKey, k -> (Trigger) (Object) SpongeScoreTrigger.SCORE_TRIGGER);
         });
     }
