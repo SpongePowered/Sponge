@@ -93,9 +93,7 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
 
     @Override
     public <V extends T> V value(final ResourceKey key) {
-        Objects.requireNonNull(key, "key");
-
-        final V value = (V) this.get((ResourceLocation) (Object) key);
+        final V value = (V) this.get((ResourceLocation) (Object) Objects.requireNonNull(key, "key"));
         if (value == null) {
             throw new ValueNotFoundException(String.format("No value was found for key '%s'!", key));
         }

@@ -330,7 +330,7 @@ public final class WorldTest {
         final String owner = player.name();
         final Random random = player.world().random();
 
-        final List<RegistryReference<Biome>> allBiomes = Sponge.server().registries().registry(RegistryTypes.BIOME)
+        final List<RegistryReference<Biome>> allBiomes = Sponge.server().registry(RegistryTypes.BIOME)
                 .streamEntries()
                 .map(RegistryEntry::asReference)
                 .collect(Collectors.toList());

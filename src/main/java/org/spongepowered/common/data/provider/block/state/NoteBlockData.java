@@ -50,11 +50,11 @@ public final class NoteBlockData {
                         .supports(h -> h.getBlock() instanceof NoteBlock)
                     .create(Keys.NOTE_PITCH)
                         .get(h -> {
-                            final MappedRegistry<NotePitch> registry = (MappedRegistry<NotePitch>) (Object) Sponge.game().registries().registry(RegistryTypes.NOTE_PITCH);
+                            final MappedRegistry<NotePitch> registry = (MappedRegistry<NotePitch>) (Object) Sponge.game().registry(RegistryTypes.NOTE_PITCH);
                             return registry.byId(h.getValue(NoteBlock.NOTE));
                         })
                         .set((h, v) -> {
-                            final MappedRegistry<NotePitch> registry = (MappedRegistry<NotePitch>) (Object) Sponge.game().registries().registry(RegistryTypes.NOTE_PITCH);
+                            final MappedRegistry<NotePitch> registry = (MappedRegistry<NotePitch>) (Object) Sponge.game().registry(RegistryTypes.NOTE_PITCH);
                             return h.setValue(NoteBlock.NOTE, registry.getId(v));
                         })
                         .supports(h -> h.getBlock() instanceof NoteBlock);

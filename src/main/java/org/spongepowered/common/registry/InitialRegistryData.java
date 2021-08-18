@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 
-abstract class InitialRegistryData<T> {
+public abstract class InitialRegistryData<T> {
     abstract Map<ResourceKey, T> keyToValue();
 
     abstract @Nullable Map<ResourceKey, Integer> keyToId();

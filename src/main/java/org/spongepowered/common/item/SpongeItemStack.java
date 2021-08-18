@@ -183,7 +183,7 @@ public final class SpongeItemStack  {
             final int count = container.getInt(Constants.ItemStack.COUNT).get();
             this.quantity(count);
 
-            final ItemType itemType = container.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE, SpongeCommon.game().registries()).get();
+            final ItemType itemType = container.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE, SpongeCommon.game()).get();
             this.itemType(itemType);
 
             if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
@@ -277,7 +277,7 @@ public final class SpongeItemStack  {
             }
             final int count = container.getInt(Constants.ItemStack.COUNT).get();
             final ItemType itemType =
-                container.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE, SpongeCommon.game().registries()).orElseThrow(() -> new IllegalStateException(
+                container.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE, SpongeCommon.game()).orElseThrow(() -> new IllegalStateException(
                     "Unable to find item with id: "));
             final net.minecraft.world.item.ItemStack itemStack = new net.minecraft.world.item.ItemStack((Item) itemType, count);
             if (container.contains(Constants.Sponge.UNSAFE_NBT)) {

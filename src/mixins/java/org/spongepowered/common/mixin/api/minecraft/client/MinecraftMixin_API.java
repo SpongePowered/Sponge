@@ -28,15 +28,20 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.Connection;
+import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.client.LocalServer;
 import org.spongepowered.api.entity.living.player.client.LocalPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.network.ClientSideConnection;
+import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryScope;
+import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.world.client.ClientWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,17 +49,22 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.registry.InitialRegistryData;
+import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.ClientScheduler;
 import org.spongepowered.common.util.LocaleCache;
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
 @Mixin(Minecraft.class)
-public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Runnable> implements SpongeClient {
+public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Runnable> implements SpongeClient, SpongeRegistryHolder {
 
     // @formatter:off
     @Shadow public net.minecraft.client.multiplayer.ClientLevel level;
@@ -65,7 +75,7 @@ public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Run
     // @formatter:on
 
     private final ClientScheduler api$scheduler = new ClientScheduler();
-    private final RegistryHolder api$registryHolder = new SpongeRegistryHolder();
+    private final RegistryHolderLogic api$registryHolder = new RegistryHolderLogic();
 
     public MinecraftMixin_API(String name) {
         super(name);
@@ -122,18 +132,40 @@ public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Run
     }
 
     @Override
-    public RegistryScope registryScope() {
-        return RegistryScope.ENGINE;
-    }
-
-    @Override
-    public RegistryHolder registries() {
-        return this.api$registryHolder;
-    }
-
-    @Override
     public Locale locale() {
         return LocaleCache.getLocale(this.options.languageCode);
+    }
+
+    @Override
+    public <T> Registry<T> registry(final RegistryType<T> type) {
+        return this.api$registryHolder.registry(Objects.requireNonNull(type, "type"));
+    }
+
+    @Override
+    public <T> Optional<Registry<T>> findRegistry(final RegistryType<T> type) {
+        return this.api$registryHolder.findRegistry(Objects.requireNonNull(type, "type"));
+    }
+
+    @Override
+    public Stream<Registry<?>> streamRegistries(final ResourceKey root) {
+        return this.api$registryHolder.streamRegistries(Objects.requireNonNull(root, "root"));
+    }
+
+    @Override
+    public void setRootMinecraftRegistry(final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> registry) {
+        this.api$registryHolder.setRootMinecraftRegistry(registry);
+    }
+
+    @Override
+    public <T> Registry<T> createRegistry(final RegistryType<T> type, @org.checkerframework.checker.nullness.qual.Nullable
+    final InitialRegistryData<T> defaultValues, final boolean isDynamic,
+        @org.checkerframework.checker.nullness.qual.Nullable final BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback) {
+        return this.api$registryHolder.createRegistry(type, defaultValues, isDynamic, callback);
+    }
+
+    @Override
+    public <T> void wrapTagHelperAsRegistry(final RegistryType<Tag<T>> type, final StaticTagHelper<T> helper) {
+        this.api$registryHolder.wrapTagHelperAsRegistry(type, helper);
     }
 
 }

@@ -139,7 +139,7 @@ public final class SchematicUpdater2_to_3 implements DataContentUpdater {
                 }
                 final int z = (biomeIndex % (width * length)) / width;
                 final int x = (biomeIndex % (width * length)) % width;
-                final Biome type = biomePalette.get(bVal, Sponge.server().registries()).get();
+                final Biome type = biomePalette.get(bVal, Sponge.server()).get();
                 // Stupid to do this, but eh, for all y positions, they have the same biome, this'll work.
 
                 for (int y = yMin; y <= yMax; y++) {

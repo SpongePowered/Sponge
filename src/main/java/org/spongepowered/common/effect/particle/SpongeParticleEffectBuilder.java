@@ -61,10 +61,10 @@ public final class SpongeParticleEffectBuilder extends AbstractDataBuilder<Parti
             return Optional.empty();
         }
         ParticleType particleType =
-                container.getRegistryValue(Constants.Particles.PARTICLE_TYPE, RegistryTypes.PARTICLE_TYPE, Sponge.game().registries()).get();
+                container.getRegistryValue(Constants.Particles.PARTICLE_TYPE, RegistryTypes.PARTICLE_TYPE, Sponge.game()).get();
         Map<ParticleOption<?>, Object> options = new HashMap<>();
         container.getViewList(Constants.Particles.PARTICLE_OPTIONS).get().forEach(view -> {
-            ParticleOption<?> option = view.getRegistryValue(Constants.Particles.PARTICLE_OPTION_KEY, RegistryTypes.PARTICLE_OPTION, Sponge.game().registries()).get();
+            ParticleOption<?> option = view.getRegistryValue(Constants.Particles.PARTICLE_OPTION_KEY, RegistryTypes.PARTICLE_OPTION, Sponge.game()).get();
             Object value;
             if (option.valueType().isAssignableFrom(DataSerializable.class)) {
                 value = view.getSerializable(Constants.Particles.PARTICLE_OPTION_VALUE, (Class<? extends DataSerializable>) option.valueType()).get();

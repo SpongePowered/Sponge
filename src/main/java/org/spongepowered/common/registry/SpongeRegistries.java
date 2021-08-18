@@ -29,6 +29,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.economy.Currency;
 import org.spongepowered.common.accessor.tags.BlockTagsAccessor;
@@ -100,6 +101,6 @@ public final class SpongeRegistries {
         holder.wrapTagHelperAsRegistry(RegistryTypes.FLUID_TYPE_TAGS, (StaticTagHelper<FluidType>) (Object) FluidTagsAccessor.accessor$HELPER());
     }
 
-    public static void registerServerRegistries(final SpongeRegistryHolder holder) {
+    public static void registerServerRegistries(final RegistryHolder holder) {
     }
 }

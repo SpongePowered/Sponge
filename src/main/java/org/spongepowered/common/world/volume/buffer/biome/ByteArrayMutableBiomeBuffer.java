@@ -60,7 +60,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
     public ByteArrayMutableBiomeBuffer(final Palette<Biome, Biome> palette, final byte[] biomes, final Vector3i start, final Vector3i size) {
         super(start, size);
         this.biomes = biomes;
-        this.palette = palette.asMutable(Sponge.game().registries());
+        this.palette = palette.asMutable(Sponge.game());
     }
 
     @Override
@@ -76,8 +76,8 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         this.checkRange(x, y, z);
 
         final byte biomeId = this.biomes[this.getIndex(x, y, z)];
-        return this.palette.get(biomeId & 255, Sponge.server().registries())
-            .orElseGet(() -> Biomes.OCEAN.get(Sponge.server().registries())
+        return this.palette.get(biomeId & 255, Sponge.server())
+            .orElseGet(() -> Biomes.OCEAN.get(Sponge.server())
             );
     }
 
@@ -124,8 +124,8 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
                 .mapToObj(z -> IntStream.range(min.y(), max.y() + 1)
                     .mapToObj(y -> VolumeElement.of((BiomeVolume.Mutable) this, () -> {
                         final byte biomeId = biomes[this.getIndex(x, y, z)];
-                        return this.palette.get(biomeId & 255, Sponge.server().registries())
-                            .orElseGet(() -> Sponge.server().registries()
+                        return this.palette.get(biomeId & 255, Sponge.server())
+                            .orElseGet(() -> Sponge.server()
                                 .registry(RegistryTypes.BIOME)
                                 .value(Biomes.OCEAN)
                             );

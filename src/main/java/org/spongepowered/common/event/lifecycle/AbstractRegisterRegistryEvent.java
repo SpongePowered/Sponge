@@ -31,9 +31,11 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryEvent;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.common.registry.RegistryLoader;
+import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 
 import java.util.Map;
@@ -78,7 +80,7 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
 
         @Override
         protected SpongeRegistryHolder getHolder() {
-            return (SpongeRegistryHolder) this.game.registries();
+            return (SpongeRegistryHolder) this.game;
         }
     }
 
@@ -101,7 +103,7 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
 
         @Override
         protected SpongeRegistryHolder getHolder() {
-            return (SpongeRegistryHolder) this.engine.registries();
+            return (SpongeRegistryHolder) this.engine;
         }
     }
 
@@ -121,7 +123,7 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
 
         @Override
         protected SpongeRegistryHolder getHolder() {
-            return (SpongeRegistryHolder) this.game.server().worldManager().world(this.worldKey).get().registries();
+            return (SpongeRegistryHolder) this.game.server().worldManager().world(this.worldKey).get();
         }
     }
 }

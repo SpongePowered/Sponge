@@ -241,7 +241,7 @@ public final class CommandTest {
                         .addParameter(
                                 Parameter.registryElement(
                                         typeToken,
-                                        commandContext -> Sponge.game().registries(),
+                                        commandContext -> Sponge.game(),
                                         RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER,
                                         "sponge"
                                 ).key(commandParameterKey).build())

@@ -103,7 +103,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         final SpongeEntityArchetypeBuilder builder = SpongeEntityArchetypeBuilder.pooled();
         if (container.contains(Constants.Sponge.EntityArchetype.ENTITY_TYPE)) {
             builder.type(container.getRegistryValue(Constants.Sponge.EntityArchetype.ENTITY_TYPE, RegistryTypes.ENTITY_TYPE,
-                Sponge.game().registries()).orElseThrow(() -> new InvalidDataException("Could not deserialize an EntityType!")));
+                Sponge.game()).orElseThrow(() -> new InvalidDataException("Could not deserialize an EntityType!")));
         } else {
             throw new InvalidDataException("Missing the EntityType! Cannot re-construct an EntityArchetype!");
         }

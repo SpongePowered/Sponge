@@ -551,7 +551,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     public void init() {
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final Set<TypeToken<?>> usedTokens = new HashSet<>();
-        Sponge.game().registries().registry(RegistryTypes.COMMAND_REGISTRAR_TYPE).streamEntries().forEach(entry -> {
+        Sponge.game().registry(RegistryTypes.COMMAND_REGISTRAR_TYPE).streamEntries().forEach(entry -> {
             final CommandRegistrarType<?> type = entry.value();
             // someone's gonna do it, let's not let them take us down.
             final TypeToken<?> handledType = type.handledType();

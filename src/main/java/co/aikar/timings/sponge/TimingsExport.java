@@ -183,8 +183,7 @@ class TimingsExport extends Thread {
                         JSONUtil.singleObjectPair(entry.getValue(), entry.getKey())))
                 .add("blockentity", JSONUtil.mapArrayToObject(blockEntityTypeSet, (blockEntityType) ->
                     {
-                        final ResourceKey resourceKey =
-                                Sponge.game().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(blockEntityType);
+                        final ResourceKey resourceKey = Sponge.game().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(blockEntityType);
                         return JSONUtil.singleObjectPair(TimingsPls.getBlockEntityId(blockEntityType), resourceKey);
                     })
                 )

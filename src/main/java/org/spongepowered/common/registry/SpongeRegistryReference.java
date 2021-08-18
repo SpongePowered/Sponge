@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.registry;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Engine;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
@@ -33,14 +31,9 @@ import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.util.EngineUtil;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-
 
 public class SpongeRegistryReference<T> extends SpongeRegistryKey<T> implements RegistryReference<T> {
 
@@ -49,52 +42,25 @@ public class SpongeRegistryReference<T> extends SpongeRegistryKey<T> implements 
     }
 
     @Override
-    public T get(final RegistryHolder holder) {
-        T found = this.getFromHolder(Objects.requireNonNull(holder, "holder"));
-        if (found == null) {
-            if (holder instanceof Engine) {
-                found = this.getFromHolder(SpongeCommon.game().registries());
-            } else if (holder instanceof World) {
-                found = this.getFromHolder(EngineUtil.determineEngine().registries());
-
-                if (found == null) {
-                    found = this.getFromHolder(SpongeCommon.game().registries());
-                }
+    public T get(final RegistryHolder... holders) {
+        for (final RegistryHolder holder : Objects.requireNonNull(holders, "holders")) {
+            final Registry<T> registry = holder.findRegistry(this.registry()).orElse(null);
+            if (registry != null) {
+                return registry.value(this.location());
             }
         }
-
-        if (found == null) {
-            throw new ValueNotFoundException(String.format("No value found for key '%s'", this.location()));
-        }
-
-        return found;
+        throw new ValueNotFoundException(String.format("No value found for key '%s'", this.location()));
     }
 
     @Override
-    public T get(final RegistryHolder holder, final Set<RegistryHolder> alternatives) {
-        Objects.requireNonNull(holder, "holder");
-        Objects.requireNonNull(alternatives, "alternatives");
-
-        T found = this.getFromHolder(holder);
-        if (found == null) {
-            for (final RegistryHolder alternative : alternatives) {
-                found = this.getFromHolder(alternative);
-                if (found != null) {
-                    break;
-                }
+    public Optional<T> find(final RegistryHolder... holders) {
+        for (final RegistryHolder holder : Objects.requireNonNull(holders, "holders")) {
+            final Registry<T> registry = holder.findRegistry(this.registry()).orElse(null);
+            if (registry != null) {
+                return registry.findValue(this.location());
             }
         }
-
-        if (found == null) {
-            throw new ValueNotFoundException(String.format("No value found for key '%s'", this.location()));
-        }
-
-        return found;
-    }
-
-    private @Nullable T getFromHolder(final RegistryHolder holder) {
-        final Optional<Registry<T>> regOpt = holder.findRegistry(this.registry());
-        return (T) regOpt.flatMap(entries -> entries.findValue(this.location())).orElse(null);
+        return Optional.empty();
     }
 
     public static final class FactoryImpl implements RegistryReference.Factory {

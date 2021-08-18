@@ -30,7 +30,6 @@ import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -53,8 +52,6 @@ public interface ServerLevelBridge {
     void bridge$triggerExplosion(Explosion explosion);
 
     void bridge$setManualSave(boolean state);
-
-    RegistryHolder bridge$registries();
 
     BlockSnapshot bridge$createSnapshot(int x, int y, int z);
 

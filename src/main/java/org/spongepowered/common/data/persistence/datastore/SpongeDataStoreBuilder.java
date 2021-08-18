@@ -124,7 +124,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
             final Function<DataQuery, Optional<?>> keyDeserializer;
             final Optional<RegistryType<Object>> registryTypeForKey = SpongeDataManager.INSTANCE.findRegistryTypeFor((Class) keyType);
             if (registryTypeForKey.isPresent()) {
-                keyDeserializer = key -> registryTypeForKey.flatMap(regType -> Sponge.game().registries().findRegistry(regType))
+                keyDeserializer = key -> registryTypeForKey.flatMap(regType -> Sponge.game().findRegistry(regType))
                                                            .flatMap(r -> r.findValue(ResourceKey.resolve(key.toString())));
             } else if (((Class<?>) keyType).isEnum()) {
                 keyDeserializer = key -> Optional.ofNullable(Enum.valueOf(((Class<? extends Enum>) keyType), key.toString()));

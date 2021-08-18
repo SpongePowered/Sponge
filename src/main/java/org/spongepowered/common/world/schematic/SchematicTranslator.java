@@ -195,7 +195,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         final Vector3i offset = new Vector3i(offsetArray[0], offsetArray[1], offsetArray[2]);
         final SpongeArchetypeVolume archetypeVolume = new SpongeArchetypeVolume(
             offset, new Vector3i(width, height, length),
-            Sponge.server().registries()
+            Sponge.server()
         );
 
         updatedView.getView(Constants.Sponge.Schematic.BLOCK_CONTAINER)
@@ -232,7 +232,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         return view -> {
             final String typeId = view.getString(Constants.Sponge.Schematic.ENTITIES_ID).get();
             final ResourceKey key = ResourceKey.resolve(typeId);
-            final Optional<EntityType<@NonNull ?>> entityType = Sponge.game().registries().registry(
+            final Optional<EntityType<@NonNull ?>> entityType = Sponge.game().registry(
                 RegistryTypes.ENTITY_TYPE).findValue(key);
             return entityType.map(type -> {
                 final List<Double> pos = view.getDoubleList(Constants.Sponge.Schematic.ENTITIES_POS)
@@ -258,7 +258,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                     "Schematic not abiding by format, all BlockEntities must have an x y z pos"));
             blockEntityData.getString(Constants.Sponge.Schematic.BLOCKENTITY_ID)
                 .map(ResourceKey::resolve)
-                .map(key -> Sponge.game().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).findValue(key))
+                .map(key -> Sponge.game().registry(RegistryTypes.BLOCK_ENTITY_TYPE).findValue(key))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .ifPresent(type -> {
@@ -292,7 +292,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         // that space for nothing so we use a sensible default instead
         palette = new MutableBimapPalette<>(
             PaletteTypes.BLOCK_STATE_PALETTE.get(),
-            Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE),
+            Sponge.game().registry(RegistryTypes.BLOCK_TYPE),
             RegistryTypes.BLOCK_TYPE,
             paletteKeys.size()
         );
@@ -388,7 +388,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             final int y = index / i1;
             final int z = (index % i1) / width;
             final int x = (index % i1) % width;
-            final Type state = palette.get(value, Sponge.game().registries()).get();
+            final Type state = palette.get(value, Sponge.game()).get();
             setter.apply(buffer, x + offset.x(), y + offset.y(), z + offset.z(), state);
 
             index++;
@@ -435,7 +435,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         if (schematic.blockPalette().highestId() != 0) {
             final DataView blockData = data.createView(Constants.Sponge.Schematic.BLOCK_CONTAINER);
             final Palette.Mutable<BlockState, BlockType> palette = schematic.blockPalette().asMutable(
-                Sponge.server().registries());
+                Sponge.server());
             try (final ByteArrayOutputStream buffer = new ByteArrayOutputStream(width * height * length)) {
                 for (int y = 0; y < height; y++) {
                     final int y0 = yMin + y;
@@ -486,7 +486,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         if (schematic.biomePalette().highestId() != 0) {
             final DataView biomeContainer = data.createView(Constants.Sponge.Schematic.BIOME_CONTAINER);
             final Palette.Mutable<Biome, Biome> biomePalette = schematic.biomePalette().asMutable(
-                Sponge.game().registries());
+                Sponge.game());
 
             try (final ByteArrayOutputStream buffer = new ByteArrayOutputStream(width * height * length)) {
                 for (int y = 0; y < height; y++) {

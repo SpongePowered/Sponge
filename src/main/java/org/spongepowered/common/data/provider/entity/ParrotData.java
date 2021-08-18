@@ -44,11 +44,11 @@ public final class ParrotData {
                     .create(Keys.PARROT_TYPE)
                         .get(h -> {
                             final int type = h.getVariant();
-                            final MappedRegistry<ParrotType> registry = (MappedRegistry<ParrotType>) (Object) Sponge.game().registries().registry(RegistryTypes.PARROT_TYPE);
+                            final MappedRegistry<ParrotType> registry = (MappedRegistry<ParrotType>) (Object) Sponge.game().registry(RegistryTypes.PARROT_TYPE);
                             return registry.byId(type);
                         })
                         .set((h, v) -> {
-                            final MappedRegistry<ParrotType> registry = (MappedRegistry<ParrotType>) (Object) Sponge.game().registries().registry(RegistryTypes.PARROT_TYPE);
+                            final MappedRegistry<ParrotType> registry = (MappedRegistry<ParrotType>) (Object) Sponge.game().registry(RegistryTypes.PARROT_TYPE);
                             h.setVariant(registry.getId(v));
                         });
     }

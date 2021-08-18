@@ -291,7 +291,7 @@ public final class TagTest {
                 .executor(ctx -> {
                     final TagType<@NonNull ?> tagType = ctx.requireOne(TAG_TYPE);
 
-                    final List<Component> contents = Sponge.game().registries().registry(tagType.tagRegistry()).streamEntries()
+                    final List<Component> contents = Sponge.game().registry(tagType.tagRegistry()).streamEntries()
                             .map(RegistryEntry::key)
                             .map(ResourceKey::toString)
                             .map(s -> Component.text(s, NamedTextColor.AQUA))
@@ -365,13 +365,13 @@ public final class TagTest {
 
     private static <T extends Taggable<@NonNull T>> void sendTags(final Audience audience, final T taggable) {
         final Collection<Tag<T>> tags = taggable.tags();
-        final String taggableKey = Sponge.game().registries().registry(taggable.tagType().taggableRegistry()).valueKey(taggable).toString();
+        final String taggableKey = Sponge.game().registry(taggable.tagType().taggableRegistry()).valueKey(taggable).toString();
         if (tags.isEmpty()) {
             audience.sendMessage(Component.text(taggableKey + " has no tags", NamedTextColor.RED));
             return;
         }
         audience.sendMessage(Component.text(taggableKey + " has tags:", NamedTextColor.GREEN));
         tags.forEach(tag -> audience.sendMessage(Component.text(" - " +
-                Sponge.game().registries().registry(taggable.tagType().tagRegistry()).valueKey(tag).toString(), NamedTextColor.BLUE)));
+                Sponge.game().registry(taggable.tagType().tagRegistry()).valueKey(tag).toString(), NamedTextColor.BLUE)));
     }
 }

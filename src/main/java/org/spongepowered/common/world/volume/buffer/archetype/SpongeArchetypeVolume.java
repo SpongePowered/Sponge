@@ -98,7 +98,7 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         this.blocks = blocks;
         this.blockEntities = new MutableMapBlockEntityArchetypeBuffer(blocks);
         this.biomes = new ByteArrayMutableBiomeBuffer(
-            biomePalette.asImmutable().asMutable(Sponge.server().registries()),
+            biomePalette.asImmutable().asMutable(Sponge.server()),
             start,
             size
         );

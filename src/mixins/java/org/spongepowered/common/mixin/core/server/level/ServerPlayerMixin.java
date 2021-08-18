@@ -338,7 +338,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     public Set<SkinPart> bridge$getSkinParts() {
         final int mask = this.shadow$getEntityData().get(DATA_PLAYER_MODE_CUSTOMISATION);
         if (this.impl$skinPartMask != mask) {
-            this.impl$skinParts = Sponge.game().registries().registry(RegistryTypes.SKIN_PART).stream()
+            this.impl$skinParts = Sponge.game().registry(RegistryTypes.SKIN_PART).stream()
                     .map(part -> (SpongeSkinPart) part)
                     .filter(part -> part.test(mask))
                     .collect(ImmutableSet.toImmutableSet());
@@ -723,7 +723,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         final ServerboundClientInformationPacketAccessor $packet = (ServerboundClientInformationPacketAccessor) packet;
         final Locale newLocale = LocaleCache.getLocale($packet.accessor$language());
 
-        final ImmutableSet<SkinPart> skinParts = Sponge.game().registries().registry(RegistryTypes.SKIN_PART).stream()
+        final ImmutableSet<SkinPart> skinParts = Sponge.game().registry(RegistryTypes.SKIN_PART).stream()
                 .map(part -> (SpongeSkinPart) part)
                 .filter(part -> part.test(packet.getModelCustomisation()))
                 .collect(ImmutableSet.toImmutableSet());

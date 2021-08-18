@@ -75,7 +75,7 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
             return Optional.empty();
         }
         String effectName = container.getString(Constants.Item.Potions.POTION_TYPE).get();
-        Optional<PotionEffectType> optional = Sponge.game().registries().registry(RegistryTypes.POTION_EFFECT_TYPE).findValue(ResourceKey.resolve(effectName));
+        Optional<PotionEffectType> optional = Sponge.game().registry(RegistryTypes.POTION_EFFECT_TYPE).findValue(ResourceKey.resolve(effectName));
         if (!optional.isPresent()) {
             throw new InvalidDataException("The container has an invalid potion type name: " + effectName);
         }

@@ -61,7 +61,7 @@ public final class ParticleTest {
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ParticleType> particleType =
                 Parameter.registryElement(TypeToken.get(ParticleType.class),
-                        (ctx) -> Sponge.game().registries(),
+                        (ctx) -> Sponge.game(),
                         RegistryTypes.PARTICLE_TYPE,
                         "minecraft",
                         "sponge")

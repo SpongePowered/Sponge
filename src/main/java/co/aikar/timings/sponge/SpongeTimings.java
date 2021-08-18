@@ -81,7 +81,7 @@ public final class SpongeTimings {
     }
 
     public static Timing blockTiming(final BlockType block) {
-        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey(block);
+        final ResourceKey resourceKey = Sponge.game().registry(RegistryTypes.BLOCK_TYPE).valueKey(block);
         return SpongeTimingsFactory.ofSafe("## Scheduled Block: " + resourceKey);
     }
 }

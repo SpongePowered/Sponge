@@ -47,7 +47,7 @@ public final class TerracottaData {
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_TERRACOTTA.get(h))
                         .supports(h -> {
-                            final ResourceKey key = Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey(((BlockType)h));
+                            final ResourceKey key = Sponge.game().registry(RegistryTypes.BLOCK_TYPE).valueKey(((BlockType)h));
                             if (!key.namespace().equals(PluginManager.MINECRAFT_PLUGIN_ID)) {
                                 return false;
                             }

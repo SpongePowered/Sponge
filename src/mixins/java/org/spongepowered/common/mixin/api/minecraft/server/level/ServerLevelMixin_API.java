@@ -95,7 +95,8 @@ import java.util.UUID;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerLevel.class)
-public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowered.api.world.server.ServerWorld, ServerLocation> implements org.spongepowered.api.world.server.ServerWorld, SpongeLocationBaseDataHolder {
+public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowered.api.world.server.ServerWorld, ServerLocation> implements
+    org.spongepowered.api.world.server.ServerWorld, SpongeLocationBaseDataHolder {
 
     // @formatter:off
     @Shadow @Final private ServerTickList<Block> blockTicks;
@@ -279,16 +280,6 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Override
     public void setWeather(final WeatherType type, final Ticks ticks) {
         ((ServerWorldProperties) this.shadow$getLevelData()).setWeather(Objects.requireNonNull(type, "type"), Objects.requireNonNull(ticks, "ticks"));
-    }
-
-    @Override
-    public RegistryScope registryScope() {
-        return RegistryScope.WORLD;
-    }
-
-    @Override
-    public RegistryHolder registries() {
-        return ((ServerLevelBridge) this).bridge$registries();
     }
 
     @Override

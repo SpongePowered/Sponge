@@ -45,12 +45,15 @@ import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -59,11 +62,13 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.recipe.RecipeManager;
 import org.spongepowered.api.map.MapStorage;
 import org.spongepowered.api.profile.GameProfileManager;
+import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.registry.RegistryScope;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.ServiceProvider;
+import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.teleport.TeleportHelper;
@@ -86,6 +91,8 @@ import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.map.SpongeMapStorage;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
+import org.spongepowered.common.registry.InitialRegistryData;
+import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.user.SpongeUserManager;
@@ -102,10 +109,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 @Mixin(MinecraftServer.class)
 @Implements(value = @Interface(iface = Server.class, prefix = "server$", remap = Remap.NONE))
-public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLoop<TickTask> implements SpongeServer {
+public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLoop<TickTask> implements SpongeServer, SpongeRegistryHolder {
 
     // @formatter:off
     @Shadow @Final public long[] tickTimes;
@@ -138,7 +147,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     private ServerScoreboard api$scoreboard;
     private SpongeGameProfileManager api$profileManager;
     private MapStorage api$mapStorage;
-    private RegistryHolder api$registryHolder;
+    private RegistryHolderLogic api$registryHolder;
     private SpongeUserManager api$userManager;
 
     public MinecraftServerMixin_API(final String name) {
@@ -156,7 +165,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
         this.api$playerDataHandler = new SpongePlayerDataManager(this);
         this.api$teleportHelper = new SpongeTeleportHelper();
         this.api$mapStorage = new SpongeMapStorage();
-        this.api$registryHolder = new SpongeRegistryHolder(p_i232576_2_);
+        this.api$registryHolder = new RegistryHolderLogic(p_i232576_2_);
         this.api$userManager = new SpongeUserManager((MinecraftServer) (Object) this);
     }
 
@@ -437,17 +446,38 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public RegistryScope registryScope() {
-        return RegistryScope.ENGINE;
-    }
-
-    @Override
-    public RegistryHolder registries() {
-        return this.api$registryHolder;
-    }
-
-    @Override
     public MapStorage mapStorage() {
         return this.api$mapStorage;
+    }
+
+    @Override
+    public <T> Registry<T> registry(final RegistryType<T> type) {
+        return this.api$registryHolder.registry(Objects.requireNonNull(type, "type"));
+    }
+
+    @Override
+    public <T> Optional<Registry<T>> findRegistry(final RegistryType<T> type) {
+        return this.api$registryHolder.findRegistry(Objects.requireNonNull(type, "type"));
+    }
+
+    @Override
+    public Stream<Registry<?>> streamRegistries(final ResourceKey root) {
+        return this.api$registryHolder.streamRegistries(Objects.requireNonNull(root, "root"));
+    }
+
+    @Override
+    public void setRootMinecraftRegistry(final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> registry) {
+        this.api$registryHolder.setRootMinecraftRegistry(registry);
+    }
+
+    @Override
+    public <T> Registry<T> createRegistry(final RegistryType<T> type, @Nullable final InitialRegistryData<T> defaultValues, final boolean isDynamic,
+        @Nullable final BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback) {
+        return this.api$registryHolder.createRegistry(type, defaultValues, isDynamic, callback);
+    }
+
+    @Override
+    public <T> void wrapTagHelperAsRegistry(final RegistryType<Tag<T>> type, final StaticTagHelper<T> helper) {
+        this.api$registryHolder.wrapTagHelperAsRegistry(type, helper);
     }
 }

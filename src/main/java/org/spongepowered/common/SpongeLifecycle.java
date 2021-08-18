@@ -108,11 +108,10 @@ public final class SpongeLifecycle implements Lifecycle {
 
     @Override
     public void establishGlobalRegistries() {
-        final SpongeRegistryHolder holder = (SpongeRegistryHolder) this.game.registries();
         // Need to do this here to prevent classloading Registry too early...
-        holder.setRootMinecraftRegistry((Registry<Registry<?>>) Registry.REGISTRY);
+        ((SpongeRegistryHolder) this.game).setRootMinecraftRegistry((Registry<Registry<?>>) Registry.REGISTRY);
 
-        SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder) this.game.registries());
+        SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder) this.game);
 
         this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
         this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
@@ -179,7 +178,7 @@ public final class SpongeLifecycle implements Lifecycle {
 
     @Override
     public void establishServerRegistries(final Server server) {
-        SpongeRegistries.registerServerRegistries((SpongeRegistryHolder) server.registries());
+        SpongeRegistries.registerServerRegistries(server);
 
         this.game.eventManager().post(new AbstractRegisterRegistryEvent.EngineScopedImpl<>(Cause.of(EventContext.empty(), this.game), this.game,
          server));

@@ -1406,9 +1406,9 @@ public final class DataTest  {
     private static String getHolderName(final DataHolder holder) {
         String value = "";
         if (holder instanceof BlockState) {
-            value = RegistryTypes.BLOCK_TYPE.keyFor(Sponge.game().registries(), ((BlockState) holder).type()).value();
+            value = RegistryTypes.BLOCK_TYPE.keyFor(Sponge.game(), ((BlockState) holder).type()).value();
         } else if (holder instanceof ItemStack) {
-            value = RegistryTypes.ITEM_TYPE.keyFor(Sponge.game().registries(), ((ItemStack) holder).type()).value();
+            value = RegistryTypes.ITEM_TYPE.keyFor(Sponge.game(), ((ItemStack) holder).type()).value();
         }
         return String.format("%s[%s]", holder.getClass().getSimpleName(), value);
     }
