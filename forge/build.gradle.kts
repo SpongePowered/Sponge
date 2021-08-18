@@ -1,5 +1,20 @@
+buildscript {
+    repositories {
+        maven("https://repo.spongepowered.org/repository/maven-public") {
+            name = "sponge"
+        }
+    }
+    dependencies {
+        classpath("net.fabricmc:tiny-remapper") {
+            version {
+                branch = "mixinRemap"
+            }
+        }
+    }
+}
+
 plugins {
-    id("dev.architectury.loom") version "0.7.2-SNAPSHOT"
+    id("dev.architectury.loom") version "0.7.3-SNAPSHOT"
     id("implementation-structure")
     id("templated-resources")
 }
@@ -247,6 +262,12 @@ tasks {
         from(forgeMixins.output)
     }
 
+    remapJar {
+        remapOptions {
+            // this.extension(net.fabricmc.tinyremapper.extension.mixin.MixinExtension())
+        }
+    }
+
     /* shadowJar {
         mergeServiceFiles()
 
@@ -282,6 +303,13 @@ tasks {
     assemble {
         dependsOn(shadowJar)
     }*/
+}
+
+afterEvaluate {
+    tasks.compileJava {
+        val mixinApArgs = setOf("outRefMapFile", "defaultObfuscationEnv", "outMapFileNamedIntermediary", "inMapFileNamedIntermediary")
+        options.compilerArgs.removeIf { mixinApArgs.any { mixin -> it.contains(mixin)} }
+    }
 }
 
 license {

@@ -87,6 +87,14 @@ if (spongeForgeEnabledInCi.toBoolean()) {
     project(":SpongeForge").projectDir = file("forge")
 }
 
+// Bring in Logic's tiny-remapper fork
+sourceControl {
+    // Mirror of https://github.com/LogicFan/tiny-remapper/tree/mixinRemap
+    gitRepository(uri("https://github.com/zml2008/tiny-remapper.git")) {
+        producesModule("net.fabricmc:tiny-remapper")
+    }
+}
+
 // Include properties from API project (with api prefix)
 val apiProps = file("SpongeAPI/gradle.properties")
 if (apiProps.exists()) {
