@@ -50,8 +50,9 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     // @formatter:off
     @Shadow public abstract net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> shadow$key();
     @Shadow @Nullable public abstract ResourceLocation shadow$getKey(T p_177774_1_);
-    @Shadow @Nullable public abstract T get(@org.checkerframework.checker.nullness.qual.Nullable ResourceLocation p_82594_1_);
+    @Shadow public abstract Optional<T> shadow$getOptional(@Nullable net.minecraft.resources.ResourceLocation param0);
     // @formatter:on
+
 
     @Override
     public RegistryType<T> type() {
@@ -79,26 +80,18 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
 
     @Override
     public <V extends T> Optional<RegistryEntry<V>> findEntry(final ResourceKey key) {
-        Objects.requireNonNull(key, "key");
-
-        return ((RegistryBridge<V>) this).bridge$get(key);
+        return ((RegistryBridge<V>) this).bridge$get(Objects.requireNonNull(key, "key"));
     }
 
     @Override
     public <V extends T> Optional<V> findValue(final ResourceKey key) {
-        Objects.requireNonNull(key, "key");
-
-        return Optional.ofNullable((V) this.get((ResourceLocation) (Object) key));
+        return (Optional<V>) this.shadow$getOptional((ResourceLocation) (Object) Objects.requireNonNull(key, "key"));
     }
 
     @Override
     public <V extends T> V value(final ResourceKey key) {
-        final V value = (V) this.get((ResourceLocation) (Object) Objects.requireNonNull(key, "key"));
-        if (value == null) {
-            throw new ValueNotFoundException(String.format("No value was found for key '%s'!", key));
-        }
-
-        return value;
+        return (V) this.shadow$getOptional((ResourceLocation) (Object) Objects.requireNonNull(key, "key"))
+            .orElseThrow(() -> new ValueNotFoundException(String.format("No value was found for key '%s'!", key)));
     }
 
     @Override
@@ -118,9 +111,6 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
 
     @Override
     public <V extends T> Optional<RegistryEntry<V>> register(final ResourceKey key, final V value) {
-        Objects.requireNonNull(key, "key");
-        Objects.requireNonNull(value, "value");
-
         return Optional.empty();
     }
 }
