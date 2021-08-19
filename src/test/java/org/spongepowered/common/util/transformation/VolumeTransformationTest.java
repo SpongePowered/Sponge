@@ -104,7 +104,6 @@ public final class VolumeTransformationTest {
 
         final SpongeFactoryProvider factoryProvider = game.factoryProvider();
         final SpongeBuilderProvider builderProvider = game.builderProvider();
-        final StubRegistryHolder testholder = game.registries();
         // Set up Rotations
         final StubbedRegistry<Rotation> rotation = new StubbedRegistry<>(
             () -> RegistryTypes.ROTATION,
@@ -131,14 +130,14 @@ public final class VolumeTransformationTest {
         factoryProvider.registerFactory(PaletteReference.Factory.class, new SpongePaletteReferenceFactory());
         // and finally, set up the resourcekey stuff
         factoryProvider.registerFactory(ResourceKey.Factory.class, new StubRegistryFactory());
-        testholder.register(rotation);
-        testholder.register(blocktypes);
-        testholder.register(biomes);
-        testholder.register(paletteTypeRegistry);
+        game.register(rotation);
+        game.register(blocktypes);
+        game.register(biomes);
+        game.register(paletteTypeRegistry);
         final StubbedRegistry<Mirror> mirror = new StubbedRegistry<>(
             () -> RegistryTypes.MIRROR, (k) -> Mockito.mock(Mirror.class));
         StubMirror.registerDefaults(mirror);
-        testholder.register(mirror);
+        game.register(mirror);
 
         builderProvider.register(Transformation.Builder.class, SpongeTransformationBuilder::new);
         builderProvider.register(StreamOptions.Builder.class, SpongeStreamOptionsBuilder::new);
@@ -238,7 +237,7 @@ public final class VolumeTransformationTest {
         final Vector3i rawMax = max.max(min);
         final Vector3i size = rawMax.sub(rawMin).add(Vector3i.ONE);
         final Vector3i relativeMin = rawMin.sub(origin);
-        final RegistryHolder holder = Sponge.game().registries();
+        final RegistryHolder holder = Sponge.game();
         final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(relativeMin, size, holder);
 
         final StubbedRegistry<BlockType> blockRegistry = (StubbedRegistry<BlockType>) RegistryTypes.BLOCK_TYPE.get();
