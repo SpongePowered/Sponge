@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.network.protocol.game.ClientboundContainerClosePacket;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -100,6 +101,8 @@ public class CloseMenuTransaction extends MenuBasedTransaction<InteractContainer
         if (event instanceof ChangeInventoryEvent) {
             PacketPhaseUtil.handleSlotRestore(this.player, this.menu, ((ChangeInventoryEvent) event).transactions(), event.isCancelled());
         }
+
+        this.player.inventoryMenu.broadcastChanges(); // prevent double capture
     }
 
     @Override
@@ -118,17 +121,20 @@ public class CloseMenuTransaction extends MenuBasedTransaction<InteractContainer
 
     @Override
     public void postProcessEvent(final PhaseContext<@NonNull ?> context, final InteractContainerEvent event) {
-        // actually close container now
-        if (this.clientSource) {
-            this.player.doCloseContainer(); // Already closed on client
-        } else {
-            this.player.closeContainer(); // Also send packet
+        if (!this.clientSource) {
+            // Server closed send packet to client
+            this.player.connection.send(new ClientboundContainerClosePacket(this.player.containerMenu.containerId));
         }
+        // Finish closing container
+        this.player.containerMenu = this.player.inventoryMenu;
+
         // And restore cursor if needed
         PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction());
         if (event instanceof ChangeInventoryEvent) {
             PacketPhaseUtil.handleSlotRestore(this.player, this.menu, ((ChangeInventoryEvent) event).transactions(), event.isCancelled());
         }
+
+        this.player.inventoryMenu.broadcastChanges(); // prevent double capture
     }
 
     @Override

@@ -61,9 +61,9 @@ public class DropFromPlayerInventoryTransaction extends InventoryBasedTransactio
             final Cause currentCause) {
         TrackingUtil.setCreatorReference(entities, this.player);
         if (this.dropAll) {
-            return Optional.of(SpongeEventFactory.createChangeInventoryEventDropFull(currentCause, entities, this.slot,  this.inventory, slotTransactions));
+            return Optional.of(SpongeEventFactory.createChangeInventoryEventDropFull(currentCause, entities, this.inventory, this.slot, slotTransactions));
         }
-        return Optional.of(SpongeEventFactory.createChangeInventoryEventDropSingle(currentCause, entities, this.slot, this.inventory, slotTransactions));
+        return Optional.of(SpongeEventFactory.createChangeInventoryEventDropSingle(currentCause, entities, this.inventory, this.slot, slotTransactions));
     }
 
     @Override

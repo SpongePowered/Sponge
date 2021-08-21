@@ -135,7 +135,8 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (final EffectTransactor ignored = transactor.logCloseInventory(player, true)) {
-            this.player.doCloseContainer();
+            this.player.containerMenu.removed(player);
+            this.player.containerMenu.broadcastChanges();
         }
     }
 

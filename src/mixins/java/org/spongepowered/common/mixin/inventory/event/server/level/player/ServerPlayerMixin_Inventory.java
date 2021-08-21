@@ -130,7 +130,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
             ctx.buildAndSwitch();
             try (final EffectTransactor ignored = ctx.getTransactor().logCloseInventory(player, true)) {
                 container.removed(player); // Drop & capture cursor item
-                this.inventoryMenu.broadcastChanges(); // capture
+                container.broadcastChanges();
             }
         }
     }
