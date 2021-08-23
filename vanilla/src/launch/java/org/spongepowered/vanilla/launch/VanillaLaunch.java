@@ -32,6 +32,7 @@ import com.google.inject.Stage;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.mapping.SpongeMappingManager;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResourceLocatorService;
 import org.spongepowered.plugin.metadata.PluginMetadata;
@@ -39,6 +40,7 @@ import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.launch.inject.SpongeVanillaModule;
 import org.spongepowered.vanilla.launch.plugin.VanillaDummyPluginContainer;
+import org.spongepowered.vanilla.launch.mapping.VanillaMappingManager;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 import java.io.IOException;
@@ -54,12 +56,14 @@ public abstract class VanillaLaunch extends Launch {
 
     private final Stage injectionStage;
     private final VanillaPluginManager pluginManager;
+    private final VanillaMappingManager mappingManager;
     private PluginContainer vanillaPlugin;
 
     protected VanillaLaunch(final VanillaPluginPlatform pluginPlatform, final Stage injectionStage) {
         super(pluginPlatform);
         this.injectionStage = injectionStage;
         this.pluginManager = new VanillaPluginManager();
+        this.mappingManager = new VanillaMappingManager();
     }
 
     @Override
@@ -90,6 +94,11 @@ public abstract class VanillaLaunch extends Launch {
         return this.pluginManager;
     }
 
+    @Override
+    public SpongeMappingManager mappingManager() {
+        return this.mappingManager;
+    }
+    
     @Override
     public Injector createInjector() {
         final List<Module> modules = Lists.newArrayList(
