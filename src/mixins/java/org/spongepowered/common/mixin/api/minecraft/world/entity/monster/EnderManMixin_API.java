@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
+import net.minecraft.world.entity.monster.EnderMan;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Enderman;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
-import net.minecraft.world.entity.monster.EnderMan;
 
 @Mixin(EnderMan.class)
 public abstract class EnderManMixin_API extends MonsterMixin_API implements Enderman {
@@ -38,7 +39,7 @@ public abstract class EnderManMixin_API extends MonsterMixin_API implements Ende
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.screaming().asImmutable());
+        values.add(this.requireValue(Keys.IS_SCREAMING).asImmutable());
 
         return values;
     }

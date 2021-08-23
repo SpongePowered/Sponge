@@ -34,6 +34,8 @@ public interface BaseCommandBlockAccessor {
 
     @Accessor("successCount") void accessor$successCount(final int successCount);
 
+    @Accessor("trackOutput") boolean accessor$trackOutput();
+
     @Accessor("lastOutput") Component accessor$lastOutput();
 
     @Accessor("command") void accessor$command(final String command);

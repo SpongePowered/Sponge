@@ -24,23 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
-import org.spongepowered.api.data.value.Value;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
-import java.util.Set;
-import net.minecraft.world.entity.projectile.ThrowableProjectile;
 
 @Mixin(ThrowableProjectile.class)
-public abstract class ThrowableProjectileMixin_API extends EntityMixin_API implements Projectile {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        this.shooter().map(Value::asImmutable).ifPresent(values::add);
-
-        return values;
-    }
+public abstract class ThrowableProjectileMixin_API extends ProjectileMixin_API implements Projectile {
 
 }

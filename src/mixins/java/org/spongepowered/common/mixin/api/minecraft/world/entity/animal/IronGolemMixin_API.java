@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.golem.IronGolem;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +38,7 @@ public abstract class IronGolemMixin_API extends AbstractGolemMixin_API implemen
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.playerCreated().asImmutable());
+        values.add(this.requireValue(Keys.IS_PLAYER_CREATED).asImmutable());
 
         return values;
     }

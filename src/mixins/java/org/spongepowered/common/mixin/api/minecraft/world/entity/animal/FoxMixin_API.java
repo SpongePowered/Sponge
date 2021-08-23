@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Fox;
 import org.spongepowered.asm.mixin.Implements;
@@ -53,17 +54,16 @@ public abstract class FoxMixin_API extends AnimalMixin_API implements Fox {
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.foxType().asImmutable());
-        values.add(this.sitting().asImmutable());
-        values.add(this.faceplanted().asImmutable());
-        values.add(this.defending().asImmutable());
-        values.add(this.sleeping().asImmutable());
-        values.add(this.pouncing().asImmutable());
-        values.add(this.crouching().asImmutable());
-        values.add(this.interested().asImmutable());
+        values.add(this.requireValue(Keys.FOX_TYPE).asImmutable());
+        values.add(this.requireValue(Keys.IS_CROUCHING).asImmutable());
+        values.add(this.requireValue(Keys.IS_DEFENDING).asImmutable());
+        values.add(this.requireValue(Keys.IS_FACEPLANTED).asImmutable());
+        values.add(this.requireValue(Keys.IS_INTERESTED).asImmutable());
+        values.add(this.requireValue(Keys.IS_POUNCING).asImmutable());
+        values.add(this.requireValue(Keys.IS_SLEEPING).asImmutable());
 
-        this.firstTrusted().map(Value::asImmutable).ifPresent(values::add);
-        this.secondTrusted().map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.FIRST_TRUSTED).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.SECOND_TRUSTED).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

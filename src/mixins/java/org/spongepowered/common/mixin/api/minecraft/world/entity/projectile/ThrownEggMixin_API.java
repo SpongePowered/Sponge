@@ -29,6 +29,6 @@ import org.spongepowered.api.entity.projectile.Egg;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ThrownEgg.class)
-public abstract class ThrownEggMixin_API extends ThrowableProjectileMixin_API implements Egg {
+public abstract class ThrownEggMixin_API extends ThrowableItemProjectileMixin_API implements Egg {
 
 }

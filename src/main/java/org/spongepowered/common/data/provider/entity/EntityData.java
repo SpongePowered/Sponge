@@ -67,7 +67,13 @@ public final class EntityData {
                     .create(Keys.BASE_SIZE)
                         .get(h -> (double) h.getBbWidth())
                     .create(Keys.BASE_VEHICLE)
-                        .get(h -> (org.spongepowered.api.entity.Entity) h.getRootVehicle())
+                        .get(h -> {
+                            final Entity rootVehicle = h.getRootVehicle();
+                            if (rootVehicle == h) {
+                                return null;
+                            }
+                            return (org.spongepowered.api.entity.Entity) rootVehicle;
+                        })
                     .create(Keys.CUSTOM_NAME)
                         .get(h -> h.hasCustomName() ? SpongeAdventure.asAdventure(h.getCustomName()) : null)
                         .set((h, v) -> h.setCustomName(SpongeAdventure.asVanilla(v)))

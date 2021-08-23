@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.raider.illager.Pillager;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +38,7 @@ public abstract class PillagerMixin_API extends AbstractIllagerMixin_API impleme
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.chargingCrossbow().asImmutable());
+        values.add(this.requireValue(Keys.IS_CHARGING_CROSSBOW).asImmutable());
 
         return values;
     }

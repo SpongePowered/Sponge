@@ -24,10 +24,22 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.projectile.Arrow.class)
 public abstract class ArrowMixin_API extends AbstractArrowMixin_API implements Arrow {
 
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.requireValue(Keys.POTION_EFFECTS).asImmutable());
+
+        return values;
+    }
 }

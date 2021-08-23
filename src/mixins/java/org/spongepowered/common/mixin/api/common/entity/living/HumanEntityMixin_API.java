@@ -25,12 +25,16 @@
 package org.spongepowered.common.mixin.api.common.entity.living;
 
 import com.mojang.authlib.GameProfile;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.PathfinderMobMixin_API;
+
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Mixin(value = HumanEntity.class, remap = false)
@@ -55,5 +59,14 @@ public abstract class HumanEntityMixin_API extends PathfinderMobMixin_API implem
         Objects.requireNonNull(minecraftAccount);
 
         return ((HumanEntity) (Object) this).getOrLoadSkin(minecraftAccount);
+    }
+
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        this.getValue(Keys.SKIN_PROFILE_PROPERTY).map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
     }
 }

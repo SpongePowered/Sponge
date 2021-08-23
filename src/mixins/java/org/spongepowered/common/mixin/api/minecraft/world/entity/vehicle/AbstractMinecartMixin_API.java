@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.vehicle;
 
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.minecart.MinecartLike;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
+
 import java.util.Set;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
 
 @Mixin(AbstractMinecart.class)
 public abstract class AbstractMinecartMixin_API extends EntityMixin_API implements MinecartLike {
@@ -38,12 +40,14 @@ public abstract class AbstractMinecartMixin_API extends EntityMixin_API implemen
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.onRail().asImmutable());
-        values.add(this.swiftness().asImmutable());
-        values.add(this.potentialMaxSpeed().asImmutable());
-        values.add(this.slowsUnoccupied().asImmutable());
-        values.add(this.airborneVelocityModifier().asImmutable());
-        values.add(this.derailedVelocityModifier().asImmutable());
+        values.add(this.requireValue(Keys.AIRBORNE_VELOCITY_MODIFIER).asImmutable());
+        values.add(this.requireValue(Keys.DERAILED_VELOCITY_MODIFIER).asImmutable());
+        values.add(this.requireValue(Keys.IS_ON_RAIL).asImmutable());
+        values.add(this.requireValue(Keys.MINECART_BLOCK_OFFSET).asImmutable());
+        values.add(this.requireValue(Keys.POTENTIAL_MAX_SPEED).asImmutable());
+        values.add(this.requireValue(Keys.SLOWS_UNOCCUPIED).asImmutable());
+
+        this.getValue(Keys.BLOCK_STATE).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

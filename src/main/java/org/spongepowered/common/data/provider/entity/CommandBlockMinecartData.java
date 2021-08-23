@@ -54,7 +54,7 @@ public final class CommandBlockMinecartData {
                         .get(h -> h.getCommandBlock().getSuccessCount())
                         .set((h, v) -> ((BaseCommandBlockAccessor) h.getCommandBlock()).accessor$successCount(v))
                     .create(Keys.TRACKS_OUTPUT)
-                        .get(h -> h.getCommandBlock().isTrackOutput())
+                        .get(h -> ((BaseCommandBlockAccessor) h.getCommandBlock()).accessor$trackOutput())
                         .set((h, v) -> h.getCommandBlock().setTrackOutput(v));
     }
     // @formatter:on

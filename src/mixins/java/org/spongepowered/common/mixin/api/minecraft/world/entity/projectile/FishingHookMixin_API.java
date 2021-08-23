@@ -24,24 +24,22 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
+import net.minecraft.world.entity.projectile.FishingHook;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.FishingBobber;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
+
 import java.util.Set;
-import net.minecraft.world.entity.projectile.FishingHook;
 
 @Mixin(FishingHook.class)
-public abstract class FishingHookMixin_API extends EntityMixin_API implements FishingBobber {
+public abstract class FishingHookMixin_API extends ProjectileMixin_API implements FishingBobber {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // Projectile
-        this.shooter().map(Value::asImmutable).ifPresent(values::add);
-
-        this.targetEntity().map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.TARGET_ENTITY).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

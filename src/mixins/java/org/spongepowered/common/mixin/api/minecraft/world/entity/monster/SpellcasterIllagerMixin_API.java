@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
+import net.minecraft.world.entity.monster.SpellcasterIllager;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.raider.illager.spellcaster.Spellcaster;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Set;
-import net.minecraft.world.entity.monster.SpellcasterIllager;
 
 @Mixin(SpellcasterIllager.class)
 public abstract class SpellcasterIllagerMixin_API extends AbstractIllagerMixin_API implements Spellcaster {
@@ -53,9 +54,8 @@ public abstract class SpellcasterIllagerMixin_API extends AbstractIllagerMixin_A
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.castingTime().asImmutable());
-
-        this.currentSpell().map(Value::asImmutable).ifPresent(values::add);
+        values.add(this.requireValue(Keys.CASTING_TIME).asImmutable());
+        values.add(this.requireValue(Keys.CURRENT_SPELL).asImmutable());
 
         return values;
     }

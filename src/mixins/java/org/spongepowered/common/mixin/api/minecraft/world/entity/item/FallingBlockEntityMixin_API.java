@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.item;
 
+import net.minecraft.world.entity.item.FallingBlockEntity;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
+
 import java.util.Set;
-import net.minecraft.world.entity.item.FallingBlockEntity;
 
 @Mixin(FallingBlockEntity.class)
 public abstract class FallingBlockEntityMixin_API extends EntityMixin_API implements FallingBlock {
@@ -38,13 +40,13 @@ public abstract class FallingBlockEntityMixin_API extends EntityMixin_API implem
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.blockState().asImmutable());
-        values.add(this.damagePerBlock().asImmutable());
-        values.add(this.maxFallDamage().asImmutable());
-        values.add(this.placeAsBlock().asImmutable());
-        values.add(this.dropAsItem().asImmutable());
-        values.add(this.fallTime().asImmutable());
-        values.add(this.hurtEntities().asImmutable());
+        values.add(this.requireValue(Keys.BLOCK_STATE).asImmutable());
+        values.add(this.requireValue(Keys.CAN_DROP_AS_ITEM).asImmutable());
+        values.add(this.requireValue(Keys.CAN_HURT_ENTITIES).asImmutable());
+        values.add(this.requireValue(Keys.CAN_PLACE_AS_BLOCK).asImmutable());
+        values.add(this.requireValue(Keys.DAMAGE_PER_BLOCK).asImmutable());
+        values.add(this.requireValue(Keys.FALL_TIME).asImmutable());
+        values.add(this.requireValue(Keys.MAX_FALL_DAMAGE).asImmutable());
 
         return values;
     }

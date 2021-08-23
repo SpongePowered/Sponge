@@ -24,21 +24,22 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
+import net.minecraft.world.entity.animal.MushroomCow;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.cow.Mooshroom;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
-import net.minecraft.world.entity.animal.MushroomCow;
 
 @Mixin(MushroomCow.class)
-public abstract class MushroomCowMixin_API extends AnimalMixin_API implements Mooshroom {
+public abstract class MushroomCowMixin_API extends CowMixin_API implements Mooshroom {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.mooshroomType().asImmutable());
+        values.add(this.requireValue(Keys.MOOSHROOM_TYPE).asImmutable());
 
         return values;
     }

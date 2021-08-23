@@ -22,25 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
+import org.spongepowered.common.mixin.api.minecraft.world.entity.TamableAnimalMixin_API;
 
-import java.util.Set;
+@Mixin(net.minecraft.world.entity.animal.ShoulderRidingEntity.class)
+public abstract class ShoulderRidingEntityMixin_API extends TamableAnimalMixin_API {
 
-@Mixin(net.minecraft.world.entity.projectile.Projectile.class)
-public abstract class ProjectileMixin_API extends EntityMixin_API implements Projectile {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        this.getValue(Keys.SHOOTER).map(Value::asImmutable).ifPresent(values::add);
-
-        return values;
-    }
 }

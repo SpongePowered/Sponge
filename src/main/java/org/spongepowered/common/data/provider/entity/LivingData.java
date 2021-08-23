@@ -153,7 +153,7 @@ public final class LivingData {
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
                             final Collection<MobEffectInstance> effects = h.getActiveEffects();
-                            return effects.isEmpty() ? null : PotionEffectUtil.copyAsPotionEffects(effects);
+                            return PotionEffectUtil.copyAsPotionEffects(effects);
                         })
                         .set((h, v) -> {
                             h.removeAllEffects();
@@ -161,7 +161,6 @@ public final class LivingData {
                                 h.addEffect(PotionEffectUtil.copyAsEffectInstance(effect));
                             }
                         })
-                        .delete(LivingEntity::removeAllEffects)
                     .create(Keys.SCALE)
                         .get(h -> (double) h.getScale())
                     .create(Keys.STUCK_ARROWS)

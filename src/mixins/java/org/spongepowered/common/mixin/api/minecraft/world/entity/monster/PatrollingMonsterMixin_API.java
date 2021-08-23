@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
+import net.minecraft.world.entity.monster.PatrollingMonster;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Patroller;
 import org.spongepowered.asm.mixin.Implements;
@@ -34,7 +36,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Set;
-import net.minecraft.world.entity.monster.PatrollingMonster;
 
 @Mixin(PatrollingMonster.class)
 @Implements(@Interface(iface = Patroller.class, prefix = "patroller$", remap = Remap.NONE))
@@ -53,10 +54,9 @@ public abstract class PatrollingMonsterMixin_API extends MonsterMixin_API implem
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.leader().asImmutable());
-        values.add(this.patrolling().asImmutable());
+        values.add(this.requireValue(Keys.IS_PATROLLING).asImmutable());
 
-        this.targetPosition().map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.TARGET_POSITION).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

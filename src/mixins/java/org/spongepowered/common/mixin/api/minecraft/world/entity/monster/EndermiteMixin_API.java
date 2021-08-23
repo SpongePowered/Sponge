@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Endermite;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +38,7 @@ public abstract class EndermiteMixin_API extends MonsterMixin_API implements End
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.expirationDelay().asImmutable());
+        this.getValue(Keys.DESPAWN_DELAY).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

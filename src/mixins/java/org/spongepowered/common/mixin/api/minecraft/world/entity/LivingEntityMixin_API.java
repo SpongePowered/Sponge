@@ -31,6 +31,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -70,12 +71,22 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.health().asImmutable());
-        values.add(this.maxHealth().asImmutable());
-        values.add(this.lastAttacker().asImmutable());
-        values.add(this.headRotation().asImmutable());
+        values.add(this.requireValue(Keys.ABSORPTION).asImmutable());
+        values.add(this.requireValue(Keys.ACTIVE_ITEM).asImmutable());
+        values.add(this.requireValue(Keys.BODY_ROTATIONS).asImmutable());
+        values.add(this.requireValue(Keys.CHEST_ROTATION).asImmutable());
+        values.add(this.requireValue(Keys.HEAD_ROTATION).asImmutable());
+        values.add(this.requireValue(Keys.HEALTH).asImmutable());
+        values.add(this.requireValue(Keys.IS_ELYTRA_FLYING).asImmutable());
+        values.add(this.requireValue(Keys.LAST_DAMAGE_RECEIVED).asImmutable());
+        values.add(this.requireValue(Keys.MAX_HEALTH).asImmutable());
+        values.add(this.requireValue(Keys.POTION_EFFECTS).asImmutable());
+        values.add(this.requireValue(Keys.SCALE).asImmutable());
+        values.add(this.requireValue(Keys.STUCK_ARROWS).asImmutable());
+        values.add(this.requireValue(Keys.WALKING_SPEED).asImmutable());
 
-        this.lastDamageReceived().map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.CAN_GRIEF).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.LAST_ATTACKER).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

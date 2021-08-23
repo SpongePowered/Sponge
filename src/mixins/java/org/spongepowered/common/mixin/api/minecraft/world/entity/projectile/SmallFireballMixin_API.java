@@ -24,10 +24,22 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.projectile.SmallFireball.class)
 public abstract class SmallFireballMixin_API extends FireballMixin_API implements SmallFireball {
 
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.requireValue(Keys.CAN_GRIEF).asImmutable());
+
+        return values;
+    }
 }

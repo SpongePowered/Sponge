@@ -24,10 +24,22 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.zombie.Zombie;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.monster.Zombie.class)
 public abstract class ZombieMixin_API extends MonsterMixin_API implements Zombie {
 
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.requireValue(Keys.IS_ADULT).asImmutable());
+
+        return values;
+    }
 }

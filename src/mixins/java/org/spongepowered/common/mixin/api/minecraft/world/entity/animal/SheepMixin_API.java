@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Sheep;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +38,8 @@ public abstract class SheepMixin_API extends AnimalMixin_API implements Sheep {
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.color().asImmutable());
+        values.add(this.requireValue(Keys.DYE_COLOR).asImmutable());
+        values.add(this.requireValue(Keys.IS_SHEARED).asImmutable());
 
         return values;
     }

@@ -24,35 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.vehicle;
 
-import org.spongepowered.api.data.value.Value;
+import net.minecraft.world.entity.vehicle.MinecartSpawner;
 import org.spongepowered.api.entity.vehicle.minecart.SpawnerMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
-import net.minecraft.world.entity.vehicle.MinecartSpawner;
-
 @Mixin(MinecartSpawner.class)
 public abstract class MinecartSpawnerMixin_API extends AbstractMinecartMixin_API implements SpawnerMinecart {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        // BlockOccupiedMinecart
-        values.add(this.block().asImmutable());
-
-        // Spawner
-        values.add(this.remainingDelay().asImmutable());
-        values.add(this.minimumSpawnDelay().asImmutable());
-        values.add(this.maximumSpawnDelay().asImmutable());
-        values.add(this.spawnCount().asImmutable());
-        values.add(this.maximumNearbyEntities().asImmutable());
-        values.add(this.requiredPlayerRange().asImmutable());
-        values.add(this.spawnRange().asImmutable());
-        values.add(this.nextEntityToSpawn().asImmutable());
-        values.add(this.possibleEntitiesToSpawn().asImmutable());
-
-        return values;
-    }
 
 }

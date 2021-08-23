@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
 import static java.util.Objects.requireNonNull;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -34,6 +35,7 @@ import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.projectile.ProjectileUtil;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.animal.AbstractGolemMixin_API;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -44,8 +46,9 @@ public abstract class ShulkerMixin_API extends AbstractGolemMixin_API implements
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.color().asImmutable());
-        values.add(this.hangingDirection().asImmutable());
+        values.add(this.requireValue(Keys.DIRECTION).asImmutable());
+
+        this.getValue(Keys.DYE_COLOR).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.vehicle;
 
+import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
+import net.minecraft.world.level.BaseCommandBlock;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.minecart.CommandBlockMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Set;
-import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
-import net.minecraft.world.level.BaseCommandBlock;
 
 @Mixin(MinecartCommandBlock.class)
 public abstract class MinecartCommandBlockMixin_API extends AbstractMinecartMixin_API implements CommandBlockMinecart {
@@ -49,8 +50,11 @@ public abstract class MinecartCommandBlockMixin_API extends AbstractMinecartMixi
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // BlockOccupiedMinecart
-        values.add(this.block().asImmutable());
+        values.add(this.requireValue(Keys.COMMAND).asImmutable());
+        values.add(this.requireValue(Keys.SUCCESS_COUNT).asImmutable());
+        values.add(this.requireValue(Keys.TRACKS_OUTPUT).asImmutable());
+
+        this.getValue(Keys.LAST_COMMAND_OUTPUT).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

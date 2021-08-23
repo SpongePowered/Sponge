@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.vehicle;
 
+import net.minecraft.world.entity.vehicle.MinecartFurnace;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.minecart.FurnaceMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
-import net.minecraft.world.entity.vehicle.MinecartFurnace;
 
 @Mixin(MinecartFurnace.class)
 public abstract class MinecartFurnaceMixin_API extends AbstractMinecartMixin_API implements FurnaceMinecart {
@@ -38,10 +39,7 @@ public abstract class MinecartFurnaceMixin_API extends AbstractMinecartMixin_API
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // BlockOccupiedMinecart
-        values.add(this.block().asImmutable());
-
-        values.add(this.fuelDuration().asImmutable());
+        values.add(this.requireValue(Keys.FUEL).asImmutable());
 
         return values;
     }

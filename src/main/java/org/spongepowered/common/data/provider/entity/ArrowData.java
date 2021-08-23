@@ -46,9 +46,6 @@ public final class ArrowData {
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
                             final Set<MobEffectInstance> effects = ((ArrowAccessor) h).accessor$effects();
-                            if (effects.isEmpty()) {
-                                return null;
-                            }
                             return effects.stream()
                                     .map(effect -> (PotionEffect) new MobEffectInstance(effect.getEffect(), effect.getDuration(),
                                             effect.getAmplifier(), effect.isAmbient(), effect.isVisible()))

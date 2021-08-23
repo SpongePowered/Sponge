@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.slime.Slime;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,7 +39,8 @@ public abstract class SlimeMixin_API extends MobMixin_API implements Slime {
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.size().asImmutable());
+        values.add(this.requireValue(Keys.SCALE).asImmutable());
+        values.add(this.requireValue(Keys.SIZE).asImmutable());
 
         return values;
     }

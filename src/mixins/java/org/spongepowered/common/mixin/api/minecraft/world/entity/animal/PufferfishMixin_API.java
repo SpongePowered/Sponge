@@ -24,10 +24,22 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.aquatic.fish.Pufferfish;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.animal.Pufferfish.class)
 public abstract class PufferfishMixin_API extends AbstractFishMixin_API implements Pufferfish {
 
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.requireValue(Keys.SCALE).asImmutable());
+
+        return values;
+    }
 }

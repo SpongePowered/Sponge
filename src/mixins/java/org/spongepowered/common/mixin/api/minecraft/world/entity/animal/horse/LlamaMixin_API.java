@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.horse;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.horse.llama.Llama;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,10 +38,8 @@ public abstract class LlamaMixin_API extends AbstractChestedHorseMixin_API imple
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.llamaType().asImmutable());
-        values.add(this.strength().asImmutable());
-
-        this.tamer().map(Value::asImmutable).ifPresent(values::add);
+        values.add(this.requireValue(Keys.LLAMA_TYPE).asImmutable());
+        values.add(this.requireValue(Keys.STRENGTH).asImmutable());
 
         return values;
     }

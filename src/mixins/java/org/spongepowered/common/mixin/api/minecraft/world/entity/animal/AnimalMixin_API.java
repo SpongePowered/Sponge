@@ -25,12 +25,14 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
 import net.minecraft.server.level.ServerLevel;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.AgableMobMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.animal.Animal.class)
@@ -46,10 +48,7 @@ public abstract class AnimalMixin_API extends AgableMobMixin_API implements Anim
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.breedingCooldown().asImmutable());
-        values.add(this.canBreed().asImmutable());
-
-        this.breeder().map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.BREEDER).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

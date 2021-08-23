@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Cat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.TamableAnimalMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.animal.Cat.class)
@@ -37,17 +39,16 @@ public abstract class CatMixin_API extends TamableAnimalMixin_API implements Cat
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // Sittable
-        values.add(this.sitting().asImmutable());
-
-        // Meow
-        values.add(this.catType().asImmutable());
-        values.add(this.lyingDown().asImmutable());
-        values.add(this.relaxed().asImmutable());
-        values.add(this.collarColor().asImmutable());
-        values.add(this.hissing().asImmutable());
-        values.add(this.beggingForFood().asImmutable());
-        values.add(this.purring().asImmutable());
+        values.add(this.requireValue(Keys.CAT_TYPE).asImmutable());
+        values.add(this.requireValue(Keys.DYE_COLOR).asImmutable());
+        // TODO MissingImplementationException
+        // values.add(this.requireValue(Keys.IS_BEGGING_FOR_FOOD).asImmutable());
+        // TODO MissingImplementationException
+        // values.add(this.requireValue(Keys.IS_HISSING).asImmutable());
+        values.add(this.requireValue(Keys.IS_LYING_DOWN).asImmutable());
+        // TODO MissingImplementationException
+        // values.add(this.requireValue(Keys.IS_PURRING).asImmutable());
+        values.add(this.requireValue(Keys.IS_RELAXED).asImmutable());
 
         return values;
     }

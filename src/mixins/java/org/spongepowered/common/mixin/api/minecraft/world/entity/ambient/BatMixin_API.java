@@ -24,10 +24,22 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.ambient;
 
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Bat;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.ambient.Bat.class)
 public abstract class BatMixin_API extends AmbientCreatureMixin_API implements Bat {
 
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.requireValue(Keys.IS_SLEEPING).asImmutable());
+
+        return values;
+    }
 }

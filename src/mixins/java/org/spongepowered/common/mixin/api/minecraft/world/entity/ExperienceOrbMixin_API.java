@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +38,7 @@ public abstract class ExperienceOrbMixin_API extends EntityMixin_API implements 
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.experience().asImmutable());
+        values.add(this.requireValue(Keys.EXPERIENCE).asImmutable());
 
         return values;
     }

@@ -25,24 +25,11 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.vehicle;
 
 
-import org.spongepowered.api.data.value.Value;
+import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import org.spongepowered.api.entity.vehicle.minecart.carrier.CarrierMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
-import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
-
 @Mixin(AbstractMinecartContainer.class)
 public abstract class AbstractMinecartContainerMixin_API<M extends CarrierMinecart<M>> extends AbstractMinecartMixin_API implements CarrierMinecart<M> {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        // BlockOccupiedMinecart
-        values.add(this.block().asImmutable());
-
-        return values;
-    }
 
 }

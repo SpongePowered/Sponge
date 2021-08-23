@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
@@ -35,8 +38,6 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.goal.GoalSelector;
 
 @SuppressWarnings("unchecked")
 @Mixin(Mob.class)
@@ -61,9 +62,12 @@ public abstract class MobMixin_API extends LivingEntityMixin_API implements Agen
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.aiEnabled().asImmutable());
+        values.add(this.requireValue(Keys.DOMINANT_HAND).asImmutable());
+        values.add(this.requireValue(Keys.IS_AI_ENABLED).asImmutable());
+        values.add(this.requireValue(Keys.IS_PERSISTENT).asImmutable());
 
-        this.targetEntity().map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.LEASH_HOLDER).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.TARGET_ENTITY).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

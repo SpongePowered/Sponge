@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.vehicle;
 
+import net.minecraft.world.entity.vehicle.MinecartTNT;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 
 import java.util.Set;
-import net.minecraft.world.entity.vehicle.MinecartTNT;
 
 @Mixin(MinecartTNT.class)
 public abstract class MinecartTNTMixin_API extends AbstractMinecartMixin_API implements TNTMinecart {
@@ -44,15 +45,10 @@ public abstract class MinecartTNTMixin_API extends AbstractMinecartMixin_API imp
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // BlockOccupiedMinecart
-        values.add(this.block().asImmutable());
+        values.add(this.requireValue(Keys.FUSE_DURATION).asImmutable());
+        values.add(this.requireValue(Keys.TICKS_REMAINING).asImmutable());
 
-        // FusedExplosive
-        values.add(this.primed().asImmutable());
-        values.add(this.fuseDuration().asImmutable());
-
-        // Explosive
-        this.explosionRadius().map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.EXPLOSION_RADIUS).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

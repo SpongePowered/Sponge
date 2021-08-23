@@ -24,21 +24,22 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.horse;
 
+import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.horse.PackHorse;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.animal.AnimalMixin_API;
+
 import java.util.Set;
-import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 
 @Mixin(AbstractChestedHorse.class)
-public abstract class AbstractChestedHorseMixin_API extends AnimalMixin_API implements PackHorse {
+public abstract class AbstractChestedHorseMixin_API extends AbstractHorseMixin_API implements PackHorse {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.hasChest().asImmutable());
+        values.add(this.requireValue(Keys.HAS_CHEST).asImmutable());
 
         return values;
     }

@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.raider.Ravager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.raid.RaiderMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.monster.Ravager.class)
@@ -37,13 +39,12 @@ public abstract class RavagerMixin_API extends RaiderMixin_API implements Ravage
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.attackTime().asImmutable());
-        values.add(this.roaringTime().asImmutable());
-        values.add(this.stunnedTime().asImmutable());
-
-        values.add(this.stunned().asImmutable());
-        values.add(this.roaring().asImmutable());
-        values.add(this.immobilized().asImmutable());
+        values.add(this.requireValue(Keys.ATTACK_TIME).asImmutable());
+        values.add(this.requireValue(Keys.IS_IMMOBILIZED).asImmutable());
+        values.add(this.requireValue(Keys.IS_ROARING).asImmutable());
+        values.add(this.requireValue(Keys.IS_STUNNED).asImmutable());
+        values.add(this.requireValue(Keys.ROARING_TIME).asImmutable());
+        values.add(this.requireValue(Keys.STUNNED_TIME).asImmutable());
 
         return values;
     }

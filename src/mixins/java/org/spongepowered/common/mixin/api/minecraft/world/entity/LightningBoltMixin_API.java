@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.weather.LightningBolt;
 import org.spongepowered.asm.mixin.Mixin;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.LightningBolt.class)
@@ -36,8 +38,8 @@ public abstract class LightningBoltMixin_API extends EntityMixin_API implements 
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.isEffectOnly().asImmutable());
-        values.add(this.expirationDelay().asImmutable());
+        values.add(this.requireValue(Keys.DESPAWN_DELAY).asImmutable());
+        values.add(this.requireValue(Keys.IS_EFFECT_ONLY).asImmutable());
 
         return values;
     }
