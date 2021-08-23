@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
 public final class PluginsFolderLocator extends AbstractJarFileLocator {
     private static final Logger LOGGER = LogManager.getLogger();
 
+    @Override
     public List<IModFile> scanMods() {
         final List<Path> pluginDirectories = AppLaunch.pluginPlatform().pluginDirectories();
 
@@ -70,10 +71,12 @@ public final class PluginsFolderLocator extends AbstractJarFileLocator {
                 this.modJars.compute(f, (mf, fs) -> this.createFileSystem(mf))).collect(Collectors.toList());
     }
 
+    @Override
     public String name() {
         return "plugins directory";
     }
 
+    @Override
     public void initArguments(final Map<String, ?> arguments) {
     }
 }

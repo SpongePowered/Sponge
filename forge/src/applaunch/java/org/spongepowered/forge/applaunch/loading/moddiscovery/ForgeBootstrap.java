@@ -26,13 +26,17 @@ package org.spongepowered.forge.applaunch.loading.moddiscovery;
 
 import cpw.mods.gross.Java9ClassLoaderUtil;
 import cpw.mods.modlauncher.Launcher;
+import cpw.mods.modlauncher.api.IEnvironment;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileLocator;
 import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
 import net.minecraftforge.forgespi.locating.ModFileFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryManager;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryModFileFactory;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryModFileInfoParser;
 import org.spongepowered.forge.applaunch.plugin.ForgePluginPlatform;
@@ -47,7 +51,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+// works with SpongeForgeBootstrapService to make this whole thing go
 public final class ForgeBootstrap extends AbstractJarFileLocator {
+
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final Path INVALID_PATH = Paths.get("This", "Path", "Should", "Never", "Exist", "Because", "That", "Would", "Be", "Stupid", "CON", "AUX", "/dev/null"); // via ModDiscoverer, thanks :)
 
     // Paths that will not be loaded through the TCL
@@ -56,6 +63,8 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
         "org/spongepowered/common/applaunch/",
         "org/spongepowered/forge/applaunch/",
     };
+
+    private LibraryManager libraryManager;
 
     @Override
     public List<IModFile> scanMods() {
@@ -77,6 +86,13 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
             final ModFile spongeforge = ModFile.newFMLInstance(Paths.get(ForgeBootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI()), this);
             this.modJars.compute(spongeforge, (mf, fs) -> this.createFileSystem(mf));
             jars.add(spongeforge);
+            final IModFile spongeForgeAsLanguageProvider = LanguageLoaderModFileFactory.INSTANCE.build(
+                Paths.get(ForgeBootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI()),
+                this,
+                LibraryModFileInfoParser.INSTANCE
+            );
+            this.modJars.compute(spongeForgeAsLanguageProvider, (mf, fs) -> this.modJars.get(spongeforge));
+            jars.add(spongeForgeAsLanguageProvider);
         } catch (final URISyntaxException ex) {
             throw new RuntimeException(ex);
         }
@@ -96,7 +112,19 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
                 }
             }
         } else {
-            // TODO We need to pull down our specific libraries (ala SV's installer), put into /libraries, then inject them into the TCL
+            try {
+                this.libraryManager.validate();
+            } catch (final Exception ex) {
+                throw new RuntimeException("Failed to download and validate Sponge libraries", ex); // todo: more specific?
+            }
+            this.libraryManager.finishedProcessing();
+            for (final LibraryManager.Library library : this.libraryManager.getAll().values()) {
+                final Path path = library.getFile();
+                ForgeBootstrap.LOGGER.debug("Adding jar {} to classpath as a library", path);
+                final IModFile file = LibraryModFileFactory.INSTANCE.build(path, this, LibraryModFileInfoParser.INSTANCE);
+                this.modJars.compute(file, (mf, fs) -> this.createFileSystem(mf));
+                jars.add(file);
+            }
         }
 
         return jars;
@@ -108,7 +136,7 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
     }
 
     @Override
-    public Path findPath(IModFile modFile, String... path) {
+    public Path findPath(final IModFile modFile, final String... path) {
         final Path foundPath = super.findPath(modFile, path);
         if (this.isTCLExcluded(foundPath)) {
             return ForgeBootstrap.INVALID_PATH;
@@ -128,9 +156,13 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
 
     @Override
     public void initArguments(final Map<String, ?> arguments) {
-        final ForgePluginPlatform platform = new ForgePluginPlatform(Launcher.INSTANCE.environment());
-        AppLaunch.setPluginPlatform(platform);
-        platform.init();
+        ForgePluginPlatform.bootstrap(Launcher.INSTANCE.environment());
+        this.libraryManager = new LibraryManager(
+            true,
+            Launcher.INSTANCE.environment().getProperty(IEnvironment.Keys.GAMEDIR.get())
+                .orElseThrow(() -> new IllegalStateException("No game directory was available")).resolve("sponge-libraries"),
+            ForgeBootstrap.class.getResource("libraries.json")
+        );
     }
 
     private boolean isTCLExcluded(final Path excluded) {

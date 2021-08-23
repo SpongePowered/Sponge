@@ -190,7 +190,6 @@ public final class SpongeConfigs {
             return;
         }
 
-
         try {
             final ConfigurationTransformation xform = ConfigurationTransformation.chain(
                     new FileMovingConfigurationTransformation(SpongeConfigs.MIGRATE_SPONGE_PATHS, SpongeConfigs.createLoader(commonFile), true),

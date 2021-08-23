@@ -22,20 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.applaunch.loading.moddiscovery.library;
+package org.spongepowered.forge.applaunch.loading.moddiscovery.library.model.sponge;
 
-import net.minecraftforge.forgespi.locating.IModFile;
-import net.minecraftforge.forgespi.locating.IModLocator;
-import net.minecraftforge.forgespi.locating.ModFileFactory;
+import java.util.List;
+import java.util.Objects;
 
-import java.nio.file.Path;
+public final class Libraries {
 
-public final class LibraryModFileFactory implements ModFileFactory {
+    public List<Dependency> dependencies;
 
-    public static final LibraryModFileFactory INSTANCE = new LibraryModFileFactory();
+    public static final class Dependency {
 
-    @Override
-    public IModFile build(final Path path, final IModLocator locator, final ModFileInfoParser parser) {
-        return new SelectableTypeModFile(path, locator, parser, IModFile.Type.LIBRARY);
+        public String group, module, version, md5;
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.group, this.module);
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || this.getClass() != o.getClass()) {
+                return false;
+            }
+            final Dependency that = (Dependency) o;
+            return this.group.equals(that.group) &&
+                this.module.equals(that.module);
+        }
     }
 }

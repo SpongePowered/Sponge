@@ -24,18 +24,29 @@
  */
 package org.spongepowered.forge.applaunch.loading.moddiscovery.library;
 
-import net.minecraftforge.forgespi.locating.IModFile;
-import net.minecraftforge.forgespi.locating.IModLocator;
-import net.minecraftforge.forgespi.locating.ModFileFactory;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
-import java.nio.file.Path;
+final class AsyncUtils {
 
-public final class LibraryModFileFactory implements ModFileFactory {
+    private AsyncUtils() {
+    }
 
-    public static final LibraryModFileFactory INSTANCE = new LibraryModFileFactory();
+    static <T> CompletableFuture<T> asyncFailableFuture(final Callable<T> action, final Executor executor) {
+        final CompletableFuture<T> future = new CompletableFuture<>();
+        executor.execute(() -> {
+            try {
+                future.complete(action.call());
+            } catch (final Exception ex) {
+                future.completeExceptionally(ex);
+            }
+        });
+        return future;
+    }
 
-    @Override
-    public IModFile build(final Path path, final IModLocator locator, final ModFileInfoParser parser) {
-        return new SelectableTypeModFile(path, locator, parser, IModFile.Type.LIBRARY);
+    @SuppressWarnings("unchecked")
+    static <T extends Throwable, R> R sneakyThrow(final Throwable original) throws T {
+        throw (T) original;
     }
 }

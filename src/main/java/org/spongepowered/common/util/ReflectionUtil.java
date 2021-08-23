@@ -56,7 +56,7 @@ import java.util.List;
  */
 public final class ReflectionUtil {
 
-    public static final Marker STUPID_REFLECTION = MarkerManager.getMarker("REFLECTION_BULLSHIT");
+    public static final Marker STUPID_REFLECTION = MarkerManager.getMarker("REFLECTION_SCANNING");
     private static final Class<?>[] NEIGHBOR_CHANGED_METHOD_ARGS = {
         BlockState.class,
         Level.class,

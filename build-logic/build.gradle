@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.google.code.gson:gson:2.8.6")
+    api("com.google.code.gson:gson:2.8.7")
     implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.0")
 }
 

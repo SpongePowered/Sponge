@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.installer;
+package org.spongepowered.forge.applaunch.loading.moddiscovery.library;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import org.spongepowered.vanilla.installer.model.sponge.Libraries;
-import org.spongepowered.vanilla.installer.model.sponge.SonatypeResponse;
-import org.tinylog.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.forge.applaunch.loading.moddiscovery.library.model.sponge.Libraries;
+import org.spongepowered.forge.applaunch.loading.moddiscovery.library.model.sponge.SonatypeResponse;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -43,8 +44,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -52,7 +53,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+// copied from SV
 public final class LibraryManager {
+
+    public static final String SPONGE_NEXUS_DOWNLOAD_URL = "https://repo.spongepowered.org/service/rest/v1/search/assets?md5=%s&maven"
+        + ".groupId=%s&maven.artifactId=%s&maven.baseVersion=%s&maven.extension=jar";
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final boolean checkLibraryHashes;
     private final Path rootDirectory;
@@ -62,8 +68,8 @@ public final class LibraryManager {
 
     public LibraryManager(final boolean checkLibraryHashes, final Path rootDirectory, final URL librariesUrl) {
         this.checkLibraryHashes = checkLibraryHashes;
-        this.rootDirectory = rootDirectory;
-        this.librariesUrl = librariesUrl;
+        this.rootDirectory = Objects.requireNonNull(rootDirectory, "rootDirectory");
+        this.librariesUrl = Objects.requireNonNull(librariesUrl, "librariesUrl");
 
         this.libraries = new LinkedHashMap<>();
         final int availableCpus = Runtime.getRuntime().availableProcessors();
@@ -89,8 +95,7 @@ public final class LibraryManager {
     }
 
     public void validate() throws Exception {
-        Logger.info("Scanning and verifying libraries in '{}'. Please wait, this may take a moment...",
-            LauncherCommandLine.librariesDirectory.toAbsolutePath());
+        LibraryManager.LOGGER.info("Scanning and verifying libraries in '{}'. Please wait, this may take a moment...", this.rootDirectory);
 
         final Gson gson = new Gson();
 
@@ -116,7 +121,7 @@ public final class LibraryManager {
 
                 if (Files.exists(depFile)) {
                     if (!checkHashes) {
-                        Logger.info("Detected existing '{}', skipping hash checks...", depFile);
+                        LibraryManager.LOGGER.info("Detected existing '{}', skipping hash checks...", depFile);
                         downloadedDeps.add(new Library(dependency.group + "-" + dependency.module, depFile));
                         return null;
                     }
@@ -126,16 +131,16 @@ public final class LibraryManager {
                     final String fileMd5 = InstallerUtils.toHexString(md5.digest(bytes));
 
                     if (dependency.md5.equals(fileMd5)) {
-                        Logger.debug("'{}' verified!", depFile);
+                        LibraryManager.LOGGER.debug("'{}' verified!", depFile);
                     } else {
-                        Logger.error("Checksum verification failed: Expected {}, {}. Deleting cached '{}'...",
+                        LibraryManager.LOGGER.error("Checksum verification failed: Expected {}, {}. Deleting cached '{}'...",
                             dependency.md5, fileMd5, depFile);
                         Files.delete(depFile);
 
                         final SonatypeResponse response = this.getResponseFor(gson, dependency);
 
                         if (response.items.isEmpty()) {
-                            failures.add("No data received from '" + new URL(String.format(Constants.Libraries.SPONGE_NEXUS_DOWNLOAD_URL,
+                            failures.add("No data received from '" + new URL(String.format(LibraryManager.SPONGE_NEXUS_DOWNLOAD_URL,
                                 dependency.md5, dependency.group,
                                 dependency.module, dependency.version)) + "'!");
                             return null;
@@ -149,7 +154,7 @@ public final class LibraryManager {
                     final SonatypeResponse response = this.getResponseFor(gson, dependency);
 
                     if (response.items.isEmpty()) {
-                        failures.add("No data received from '" + new URL(String.format(Constants.Libraries.SPONGE_NEXUS_DOWNLOAD_URL,
+                        failures.add("No data received from '" + new URL(String.format(LibraryManager.SPONGE_NEXUS_DOWNLOAD_URL,
                             dependency.md5, dependency.group,
                             dependency.module, dependency.version)) + "'!");
                         return null;
@@ -174,15 +179,15 @@ public final class LibraryManager {
         CompletableFuture.allOf(operations.toArray(new CompletableFuture<?>[0])).handle((result, err) -> {
             if (err != null) {
                 failures.add(err.getMessage());
-                Logger.error(err, "Failed to download library");
+                LibraryManager.LOGGER.error("Failed to download library", err);
             }
             return result;
         }).join();
 
         if (!failures.isEmpty()) {
-            Logger.error("Failed to download some libraries:");
+            LibraryManager.LOGGER.error("Failed to download some libraries:");
             for (final String message : failures) {
-                Logger.error(message);
+                LibraryManager.LOGGER.error(message);
             }
             System.exit(-1);
         }
@@ -193,7 +198,7 @@ public final class LibraryManager {
     }
 
     private SonatypeResponse getResponseFor(final Gson gson, final Libraries.Dependency dependency) throws IOException {
-        final URL requestUrl = new URL(String.format(Constants.Libraries.SPONGE_NEXUS_DOWNLOAD_URL, dependency.md5, dependency.group,
+        final URL requestUrl = new URL(String.format(LibraryManager.SPONGE_NEXUS_DOWNLOAD_URL, dependency.md5, dependency.group,
             dependency.module, dependency.version));
 
         final HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
@@ -226,7 +231,7 @@ public final class LibraryManager {
         }
 
         if (!successful) {
-            Logger.warn("Failed to shut down library preparation pool in 10 seconds, forcing shutdown now.");
+            LibraryManager.LOGGER.warn("Failed to shut down library preparation pool in 10 seconds, forcing shutdown now.");
             this.preparationWorker.shutdownNow();
         }
     }

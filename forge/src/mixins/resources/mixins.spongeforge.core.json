@@ -2,6 +2,7 @@
     "required": true,
     "minVersion": "0.8",
     "package": "org.spongepowered.forge.mixin.core",
+    "plugin": "org.spongepowered.forge.mixin.plugin.ForgeCoreMixinConfigPlugin",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "priority": 1301,

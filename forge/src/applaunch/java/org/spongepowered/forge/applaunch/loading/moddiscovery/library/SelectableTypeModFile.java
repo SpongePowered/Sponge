@@ -24,18 +24,26 @@
  */
 package org.spongepowered.forge.applaunch.loading.moddiscovery.library;
 
-import net.minecraftforge.forgespi.locating.IModFile;
+import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
 import net.minecraftforge.forgespi.locating.ModFileFactory;
 
 import java.nio.file.Path;
 
-public final class LibraryModFileFactory implements ModFileFactory {
+/**
+ * TODO This class will still print warnings due to lack of manifest entries but is a stopgap
+*       until we decide to roll out own implementation
+ */
+public final class SelectableTypeModFile extends ModFile {
+    private final Type type;
 
-    public static final LibraryModFileFactory INSTANCE = new LibraryModFileFactory();
+    public SelectableTypeModFile(final Path file, final IModLocator locator, final ModFileFactory.ModFileInfoParser parser, final Type type) {
+        super(file, locator, parser);
+        this.type = type;
+    }
 
     @Override
-    public IModFile build(final Path path, final IModLocator locator, final ModFileInfoParser parser) {
-        return new SelectableTypeModFile(path, locator, parser, IModFile.Type.LIBRARY);
+    public Type getType() {
+        return this.type;
     }
 }

@@ -38,7 +38,7 @@ import net.fabricmc.accesswidener.AccessWidenerReader;
 import net.fabricmc.accesswidener.AccessWidenerVisitor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
@@ -67,7 +67,7 @@ public class AccessWidenerTransformationService implements ITransformationServic
     private final AccessWidenerReader reader = new AccessWidenerReader(this.widener);
     private OptionSpec<String> configSpec;
 
-    @NotNull
+    @NonNull
     @Override
     public String name() {
         return AccessWidenerTransformationService.NAME;
@@ -109,7 +109,7 @@ public class AccessWidenerTransformationService implements ITransformationServic
 
     @Override
     @SuppressWarnings("rawtypes") // :(
-    public @NotNull List<ITransformer> transformers() {
+    public @NonNull List<ITransformer> transformers() {
         return Collections.singletonList(new AWTransformer(this.widener));
     }
 
@@ -136,7 +136,7 @@ public class AccessWidenerTransformationService implements ITransformationServic
         }
 
         @Override
-        public @NotNull ClassNode transform(final ClassNode input, final ITransformerVotingContext context) {
+        public @NonNull ClassNode transform(final ClassNode input, final ITransformerVotingContext context) {
             AccessWidenerTransformationService.LOGGER.debug("Transforming {}", context.getClassName());
             final ClassNode output = new ClassNode(Opcodes.ASM9);
             final ClassVisitor visitor = AccessWidenerVisitor.createClassVisitor(Opcodes.ASM9, output, this.widener);
@@ -145,14 +145,14 @@ public class AccessWidenerTransformationService implements ITransformationServic
         }
 
         @Override
-        public @NotNull TransformerVoteResult castVote(final ITransformerVotingContext context) {
+        public @NonNull TransformerVoteResult castVote(final ITransformerVotingContext context) {
             final TransformerVoteResult result = context.getReason().equals(ITransformerActivity.CLASSLOADING_REASON) ? TransformerVoteResult.YES : TransformerVoteResult.NO;
             AccessWidenerTransformationService.LOGGER.debug("Voting on {} with reason {}, result: {}", context.getClassName(), context.getReason(), result);
             return result;
         }
 
         @Override
-        public @NotNull Set<Target> targets() {
+        public @NonNull Set<Target> targets() {
             final Set<String> classNames = this.widener.getTargets();
             final Set<Target> targets = new HashSet<>(classNames.size());
             for (final String clazz : classNames) {

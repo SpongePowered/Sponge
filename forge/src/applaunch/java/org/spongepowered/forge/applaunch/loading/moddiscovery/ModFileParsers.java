@@ -60,7 +60,7 @@ public final class ModFileParsers {
     }
 
     public static IModFileInfo dummySpongeModParser(final String fileName, final IModFile iModFile) {
-        final ModFile modFile = (ModFile)iModFile;
+        final ModFile modFile = (ModFile) iModFile;
         AppLaunch.logger().debug("Considering sponge platform candidate {}", modFile.getFilePath());
         final Path modsjson = modFile.getLocator().findPath(modFile, fileName + ".toml");
         if (!Files.exists(modsjson)) {

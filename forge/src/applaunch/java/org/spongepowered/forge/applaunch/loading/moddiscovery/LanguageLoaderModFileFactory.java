@@ -22,26 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.applaunch.loading.moddiscovery.library;
+package org.spongepowered.forge.applaunch.loading.moddiscovery;
 
-import net.minecraftforge.fml.loading.moddiscovery.ModFile;
+import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
 import net.minecraftforge.forgespi.locating.ModFileFactory;
+import org.spongepowered.forge.applaunch.loading.moddiscovery.library.SelectableTypeModFile;
 
 import java.nio.file.Path;
 
-/**
- * TODO This class will still print warnings due to lack of manifest entries but is a stopgap
-*       until we decide to roll out own implementation
- */
-public final class LibraryModFile extends ModFile {
+public final class LanguageLoaderModFileFactory implements ModFileFactory {
 
-    public LibraryModFile(final Path file, final IModLocator locator, final ModFileFactory.ModFileInfoParser parser) {
-        super(file, locator, parser);
+    public static final LanguageLoaderModFileFactory INSTANCE = new LanguageLoaderModFileFactory();
+
+    private LanguageLoaderModFileFactory() {
     }
 
     @Override
-    public Type getType() {
-        return Type.LIBRARY;
+    public IModFile build(final Path path, final IModLocator locator, final ModFileInfoParser parser) {
+        return new SelectableTypeModFile(path, locator, parser, IModFile.Type.LANGPROVIDER);
     }
+
 }

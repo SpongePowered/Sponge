@@ -5,7 +5,6 @@ pluginManagement {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
-        maven("https://maven.architectury.dev/")
     }
 
     plugins {
@@ -87,11 +86,10 @@ if (spongeForgeEnabledInCi.toBoolean()) {
     project(":SpongeForge").projectDir = file("forge")
 }
 
-// Bring in Logic's tiny-remapper fork
+// Bring in a newer architectury t-r
 sourceControl {
-    // Mirror of https://github.com/LogicFan/tiny-remapper/tree/mixinRemap
     gitRepository(uri("https://github.com/zml2008/tiny-remapper.git")) {
-        producesModule("net.fabricmc:tiny-remapper")
+        producesModule("dev.architectury:tiny-remapper")
     }
 }
 

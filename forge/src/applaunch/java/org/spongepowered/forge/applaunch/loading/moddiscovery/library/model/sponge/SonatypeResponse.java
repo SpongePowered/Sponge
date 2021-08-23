@@ -22,20 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.applaunch.loading.moddiscovery.library;
+package org.spongepowered.forge.applaunch.loading.moddiscovery.library.model.sponge;
 
-import net.minecraftforge.forgespi.locating.IModFile;
-import net.minecraftforge.forgespi.locating.IModLocator;
-import net.minecraftforge.forgespi.locating.ModFileFactory;
+import java.net.URL;
+import java.util.List;
 
-import java.nio.file.Path;
+public final class SonatypeResponse {
 
-public final class LibraryModFileFactory implements ModFileFactory {
+    public List<Item> items;
+    public String continuationToken;
 
-    public static final LibraryModFileFactory INSTANCE = new LibraryModFileFactory();
+    public static final class Item {
 
-    @Override
-    public IModFile build(final Path path, final IModLocator locator, final ModFileInfoParser parser) {
-        return new SelectableTypeModFile(path, locator, parser, IModFile.Type.LIBRARY);
+        public URL downloadUrl;
+        public String path, id, repository, format;
+        public Checksum checksum;
+    }
+
+    public static final class Checksum {
+
+        public String sha1, md5;
     }
 }
