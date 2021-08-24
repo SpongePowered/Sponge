@@ -25,6 +25,7 @@
 package org.spongepowered.forge.applaunch.loading.moddiscovery;
 
 import cpw.mods.gross.Java9ClassLoaderUtil;
+import cpw.mods.modlauncher.Environment;
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.IEnvironment;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -40,6 +41,7 @@ import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryMan
 import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryModFileFactory;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryModFileInfoParser;
 import org.spongepowered.forge.applaunch.plugin.ForgePluginPlatform;
+import org.spongepowered.forge.applaunch.service.ForgeProductionBootstrap;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -156,11 +158,12 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
 
     @Override
     public void initArguments(final Map<String, ?> arguments) {
-        ForgePluginPlatform.bootstrap(Launcher.INSTANCE.environment());
+        final Environment env = Launcher.INSTANCE.environment();
+        ForgePluginPlatform.bootstrap(env);
         this.libraryManager = new LibraryManager(
-            true,
-            Launcher.INSTANCE.environment().getProperty(IEnvironment.Keys.GAMEDIR.get())
-                .orElseThrow(() -> new IllegalStateException("No game directory was available")).resolve("sponge-libraries"),
+            env.getProperty(ForgeProductionBootstrap.Keys.CHECK_LIBRARY_HASHES.get()).orElse(true),
+            env.getProperty(ForgeProductionBootstrap.Keys.LIBRARIES_DIRECTORY.get())
+                .orElseThrow(() -> new IllegalStateException("no libraries available")),
             ForgeBootstrap.class.getResource("libraries.json")
         );
     }

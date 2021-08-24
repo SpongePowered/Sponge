@@ -31,7 +31,8 @@
         "world.entity.projectile.ThrownEnderpealMixin_Forge",
         "world.entity.vehicle.BoatMixin_Forge",
         "world.level.LevelMixin_Forge",
-        "world.level.storage.LevelStorageSourceMixin_Forge"
+        "world.level.storage.LevelStorageSourceMixin_Forge",
+        "world.level.block.FireBlockMixin_Forge"
     ],
     "client": [
         "client.MinecraftMixin_Forge",

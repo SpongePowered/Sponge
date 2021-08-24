@@ -33,7 +33,8 @@
         "world.entity.vehicle.BoatMixin_Vanilla",
         "world.level.LevelMixin_Vanilla",
         "world.level.portal.PortalForcerMixin_Vanilla",
-        "world.level.storage.LevelStorageSourceMixin_Vanilla"
+        "world.level.storage.LevelStorageSourceMixin_Vanilla",
+        "world.level.block.FireBlockMixin_Vanilla"
     ],
     "overwrites": {
         "conformVisibility": true
