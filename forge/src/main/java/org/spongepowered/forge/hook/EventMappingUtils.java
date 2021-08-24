@@ -22,29 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.network;
+package org.spongepowered.forge.hook;
 
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
-import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerImplBridge;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.event.world.BlockEvent;
+import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.common.util.VecHelper;
 
-@Mixin(targets = "net/minecraft/server/network/ServerLoginPacketListenerImpl$1")
-public abstract class ServerLoginPacketListenerImpl_1Mixin extends Thread {
+import java.util.Optional;
+import java.util.function.Function;
 
-    @Shadow @Final
-    private ServerLoginPacketListenerImpl this$0;
+public final class EventMappingUtils {
 
-    @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
-            remap = false, cancellable = true)
-    private void impl$fireAuthEvent(final CallbackInfo ci) {
-        if (((ServerLoginPacketListenerImplBridge) this.this$0).bridge$fireAuthEvent()) {
-            ci.cancel();
-        }
+    private EventMappingUtils() {
     }
+
+    public static Function<BlockTransaction, BlockEvent.BreakEvent> extractBlockBreak(final ChangeBlockEvent.All thisEvent) {
+        final Optional<Player> player = thisEvent.cause().first(Player.class);
+        return x -> new BlockEvent.BreakEvent((Level) thisEvent.world(),
+            VecHelper.toBlockPos(x.original().position()),
+            (BlockState) x.original().state(),
+            player.orElseGet(() -> FakePlayerFactory.getMinecraft((ServerLevel) thisEvent.world())));
+    }
+
 }

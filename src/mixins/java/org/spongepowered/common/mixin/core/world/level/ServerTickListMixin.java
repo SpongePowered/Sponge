@@ -30,6 +30,7 @@ import net.minecraft.world.level.TickNextTickData;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -60,6 +61,25 @@ public abstract class ServerTickListMixin<T> {
     DO NOT REORDER THIS INJECT AFTER THE REDIRECT ON QUEUE;ADD DUE TO MIXIN BUG
     https://github.com/SpongePowered/Mixin/issues/493
      */
+    @Group(name = "markDataAsCompleted", min = 1, max = 1)
+    @Inject(
+        method = "tick",
+        at = @At(
+            value = "INVOKE",
+            target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V",
+            remap = false,
+            shift = At.Shift.AFTER
+        ),
+        locals = LocalCapture.CAPTURE_FAILSOFT,
+        require = 0,
+        expect = 0
+    )
+    private void impl$markDataAsCompleted$mixin083(CallbackInfo ci, int var0, ServerChunkCache var1, Iterator var2, TickNextTickData var4) {
+        this.impl$markDataAsCompleted$mixin082(ci, var0, var1, var4);
+    }
+
+    // todo: a way to avoid this warning?
+    @Group(name = "markDataAsCompleted", min = 1, max = 1)
     @SuppressWarnings("unchecked")
     @Inject(
         method = "tick",
@@ -69,11 +89,11 @@ public abstract class ServerTickListMixin<T> {
             remap = false,
             shift = At.Shift.AFTER
         ),
-        locals = LocalCapture.CAPTURE_FAILHARD
+        locals = LocalCapture.CAPTURE_FAILSOFT,
+        require = 0,
+        expect = 0
     )
-    private void impl$markDataAsCompleted(CallbackInfo ci, int var0,
-        ServerChunkCache var1, Iterator var2,
-        TickNextTickData var4) {
+    private void impl$markDataAsCompleted$mixin082(CallbackInfo ci, int var0, ServerChunkCache var1, TickNextTickData var4) {
         ((TickNextTickDataBridge<T>) var4).bridge$setState(ScheduledUpdate.State.FINISHED);
     }
 

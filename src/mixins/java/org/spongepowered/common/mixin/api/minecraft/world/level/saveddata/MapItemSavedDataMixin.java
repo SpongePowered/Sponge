@@ -135,15 +135,20 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void impl$setMapId(final String mapname, final CallbackInfo ci) {
-        final String id = mapname.substring(Constants.Map.MAP_PREFIX.length());
-        try {
-            this.impl$mapId = Integer.parseInt(id);
-        } catch (final NumberFormatException e) {
-            SpongeCommon.logger().error("Map id could not be got from map name, (" + mapname + ")", e);
+        final int underscore = mapname.lastIndexOf('_');
+        if (underscore != -1) {
+            final String id = mapname.substring(underscore + 1);
+            try {
+                this.impl$mapId = Integer.parseInt(id);
+                final SpongeMapStorage mapStorage = (SpongeMapStorage) Sponge.server().mapStorage();
+                mapStorage.addMapInfo((MapInfo) this);
+                this.impl$uuid = mapStorage.requestUUID(this.impl$mapId);
+                return;
+            } catch (final NumberFormatException e) {
+                // ignored
+            }
         }
-        final SpongeMapStorage mapStorage = (SpongeMapStorage) Sponge.server().mapStorage();
-        mapStorage.addMapInfo((MapInfo) this);
-        this.impl$uuid = mapStorage.requestUUID(this.impl$mapId);
+        SpongeCommon.logger().error("Map id could not be got from map name, (" + mapname + ")");
     }
 
     @Override 

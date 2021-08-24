@@ -24,22 +24,15 @@
  */
 package org.spongepowered.forge.mixin.core.api.event.block;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.Event;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.forge.hook.EventMappingUtils;
 import org.spongepowered.forge.launch.bridge.event.SpongeEventBridge_Forge;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Mixin(value = ChangeBlockEvent.All.class, remap = false)
@@ -48,14 +41,10 @@ public interface ChangeBlockEvent_AllMixin_Forge extends SpongeEventBridge_Forge
     @Override
     default @Nullable Collection<? extends Event> bridge$createForgeEvents() {
         final ChangeBlockEvent.All thisEvent = ((ChangeBlockEvent.All) this);
-        final Optional<Player> player = thisEvent.cause().first(Player.class);
         // TODO: Other event types may go here - break is a PoC.
         return thisEvent.transactions(Operations.BREAK.get())
-                .map(x -> new BlockEvent.BreakEvent((Level) thisEvent.world(),
-                        VecHelper.toBlockPos(x.original().position()),
-                        (BlockState) x.original().state(),
-                        player.orElseGet(() -> FakePlayerFactory.getMinecraft((ServerLevel) thisEvent.world())))
-                ).collect(Collectors.toList());
+            .map(EventMappingUtils.extractBlockBreak(thisEvent))
+            .collect(Collectors.toList());
     }
 
 }

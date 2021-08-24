@@ -45,7 +45,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-public class SpongeForgeBootstrapService implements ITransformationService {
+public class ForgeProductionBootstrap implements ITransformationService {
 
     public static final String NAME = "spongeforge";
 
@@ -55,7 +55,7 @@ public class SpongeForgeBootstrapService implements ITransformationService {
     @NonNull
     @Override
     public String name() {
-        return SpongeForgeBootstrapService.NAME;
+        return ForgeProductionBootstrap.NAME;
     }
 
     @Override
@@ -93,7 +93,7 @@ public class SpongeForgeBootstrapService implements ITransformationService {
             final Optional<AccessWidenerTransformationService> aw = environment.getProperty(AccessWidenerTransformationService.INSTANCE.get());
             if (aw.isPresent()) {
                 // todo: actually read this from the jar manifest
-                aw.get().offerResource(SpongeForgeBootstrapService.class.getResource("/common.accesswidener"), "SpongeForge injected");
+                aw.get().offerResource(ForgeProductionBootstrap.class.getResource("/common.accesswidener"), "SpongeForge injected");
             }
         }
     }

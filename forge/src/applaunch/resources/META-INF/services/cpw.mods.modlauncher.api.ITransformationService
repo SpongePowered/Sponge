@@ -1,2 +1,2 @@
 org.spongepowered.forge.applaunch.service.AccessWidenerTransformationService
-org.spongepowered.forge.applaunch.service.SpongeForgeBootstrapService
+org.spongepowered.forge.applaunch.service.ForgeProductionBootstrap

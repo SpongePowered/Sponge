@@ -37,7 +37,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.Predicate;
 
 // just a way to get on the TCL nice and early
-public class ForgeCoreMixinConfigPlugin extends AbstractMixinConfigPlugin {
+public class ForgeCoreProductionPlugin extends AbstractMixinConfigPlugin {
 
     // :(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
     private static final String[] FORCED_ALLOWED_PACKAGES = {
@@ -47,7 +47,7 @@ public class ForgeCoreMixinConfigPlugin extends AbstractMixinConfigPlugin {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public ForgeCoreMixinConfigPlugin() {
+    public ForgeCoreProductionPlugin() {
         if (FMLEnvironment.production) { // the language loading is on an isolated CL, so we have to init again
             // todo: too tired for gradle
             try {
@@ -55,7 +55,7 @@ public class ForgeCoreMixinConfigPlugin extends AbstractMixinConfigPlugin {
                     .getMethod("bootstrap", Environment.class)
                     .invoke(null, Launcher.INSTANCE.environment());
             } catch (final ClassNotFoundException | InvocationTargetException | IllegalAccessException | NoSuchMethodException ex) {
-                ForgeCoreMixinConfigPlugin.LOGGER.error("Failed to bootstrap the Forge plugin platform on TCL", ex);
+                ForgeCoreProductionPlugin.LOGGER.error("Failed to bootstrap the Forge plugin platform on TCL", ex);
             }
 
             try {
@@ -64,7 +64,7 @@ public class ForgeCoreMixinConfigPlugin extends AbstractMixinConfigPlugin {
                 targetPackageFilter.setAccessible(true);
                 final Predicate<String> existing = (Predicate<String>) targetPackageFilter.get(tcl);
                 final Predicate<String> better = pkg -> {
-                    for (final String prefix : ForgeCoreMixinConfigPlugin.FORCED_ALLOWED_PACKAGES) {
+                    for (final String prefix : ForgeCoreProductionPlugin.FORCED_ALLOWED_PACKAGES) {
                         if (pkg.startsWith(prefix)) {
                             return true;
                         }
@@ -73,7 +73,7 @@ public class ForgeCoreMixinConfigPlugin extends AbstractMixinConfigPlugin {
                 };
                 targetPackageFilter.set(tcl, better);
             } catch (final NoSuchFieldException | IllegalAccessException ex) {
-                ForgeCoreMixinConfigPlugin.LOGGER.error("Failed to fix TCL package filter", ex);
+                ForgeCoreProductionPlugin.LOGGER.error("Failed to fix TCL package filter", ex);
             }
         }
     }

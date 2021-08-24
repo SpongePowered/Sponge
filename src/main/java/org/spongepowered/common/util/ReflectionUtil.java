@@ -117,6 +117,9 @@ public final class ReflectionUtil {
         } catch (final NoSuchMethodException e) {
             SpongeCommon.logger().fatal(ReflectionUtil.STUPID_REFLECTION, "Could not find desired method {} under environment method name {}", methodName, targetMethodForEnvironment);
             return true;
+        } catch (final NoClassDefFoundError e) {
+            SpongeCommon.logger().fatal(ReflectionUtil.STUPID_REFLECTION, "Failed to load class in {} while scanning desired method {} under environment method name {}", targetClass, methodName, targetMethodForEnvironment);
+            return true;
         }
 
     }
