@@ -21,7 +21,7 @@ buildscript {
                 attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.SHADOWED))
             }
             version {
-                branch = "fix/next-inheritance"
+                branch = "next"
             }
         }
     }
@@ -283,6 +283,11 @@ tasks {
     named("runServer", RunGameTask::class) {
         standardInput = System.`in`
     }
+    named("remapSourcesJar", net.fabricmc.loom.task.RemapSourcesJarTask::class) {
+        inputs.files(configurations.compileClasspath)
+                .ignoreEmptyDirectories()
+                .withPropertyName("sourceClasspathWhyDoesLoomNotDoThis")
+    }
 
     fun fixLoomCorruptedMixinJsonsAndRemapAccessWidener(jar: File, remapper: org.objectweb.asm.commons.Remapper) {
         // strip the refmap attribute that loom forcibly adds to our json files
@@ -451,6 +456,9 @@ publishing {
             }
             artifact(sourcesJar) {
                 builtBy(tasks.named("remapSourcesJar"))
+            }
+            artifact(tasks.named("remapShadowJar")) {
+                builtBy(tasks.named("remapShadowJar"))
             }
             artifact(forgeAppLaunchJar.get())
             artifact(forgeLaunchJar.get())
