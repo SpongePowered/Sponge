@@ -27,7 +27,6 @@ package org.spongepowered.forge.applaunch.loading.moddiscovery;
 import cpw.mods.gross.Java9ClassLoaderUtil;
 import cpw.mods.modlauncher.Environment;
 import cpw.mods.modlauncher.Launcher;
-import cpw.mods.modlauncher.api.IEnvironment;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileLocator;
 import net.minecraftforge.fml.loading.moddiscovery.ModFile;
@@ -36,13 +35,13 @@ import net.minecraftforge.forgespi.locating.IModLocator;
 import net.minecraftforge.forgespi.locating.ModFileFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryManager;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryModFileFactory;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryModFileInfoParser;
 import org.spongepowered.forge.applaunch.plugin.ForgePluginPlatform;
 import org.spongepowered.forge.applaunch.service.ForgeProductionBootstrap;
 
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -51,6 +50,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 // works with SpongeForgeBootstrapService to make this whole thing go
@@ -67,6 +68,7 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
     };
 
     private LibraryManager libraryManager;
+    private final Set<IModFile> dummyModFiles = ConcurrentHashMap.newKeySet();
 
     @Override
     public List<IModFile> scanMods() {
@@ -75,19 +77,18 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
         final List<IModFile> jars = new ArrayList<>();
 
         try {
-            final ModFile spongeapi = this.newDummySpongeFile(Paths.get(ForgeBootstrap.class.getProtectionDomain().getCodeSource().getLocation()
-                    .toURI()), this, "spongeapimod");
-            this.modJars.compute(spongeapi, (mf, fs) -> this.createFileSystem(mf));
-            jars.add(spongeapi);
-
-            final ModFile sponge = this.newDummySpongeFile(Paths.get(ForgeBootstrap.class.getProtectionDomain().getCodeSource().getLocation()
-                    .toURI()), this, "spongemod");
-            this.modJars.compute(sponge, (mf, fs) -> this.createFileSystem(mf));
-            jars.add(sponge);
-
             final ModFile spongeforge = ModFile.newFMLInstance(Paths.get(ForgeBootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI()), this);
             this.modJars.compute(spongeforge, (mf, fs) -> this.createFileSystem(mf));
             jars.add(spongeforge);
+
+            final ModFile spongeapi = this.newDummySpongeFile(spongeforge, this, "spongeapimod");
+            jars.add(spongeapi);
+            this.dummyModFiles.add(spongeapi);
+
+            final ModFile sponge = this.newDummySpongeFile(spongeforge, this, "spongemod");
+            jars.add(sponge);
+            this.dummyModFiles.add(sponge);
+
             final IModFile spongeForgeAsLanguageProvider = LanguageLoaderModFileFactory.INSTANCE.build(
                 Paths.get(ForgeBootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI()),
                 this,
@@ -139,6 +140,10 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
 
     @Override
     public Path findPath(final IModFile modFile, final String... path) {
+        if (this.dummyModFiles.contains(modFile)) {
+            return ForgeBootstrap.INVALID_PATH;
+        }
+
         final Path foundPath = super.findPath(modFile, path);
         if (this.isTCLExcluded(foundPath)) {
             return ForgeBootstrap.INVALID_PATH;
@@ -149,11 +154,20 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
 
     @Override
     public void scanFile(final IModFile file, final Consumer<Path> pathConsumer) {
+        if (this.dummyModFiles.contains(file)) {
+            return;
+        }
+
         super.scanFile(file, path -> {
             if (!this.isTCLExcluded(path)) {
                 pathConsumer.accept(path);
             }
         });
+    }
+
+    @Override
+    public boolean isValid(final IModFile modFile) {
+        return this.dummyModFiles.contains(modFile) || super.isValid(modFile);
     }
 
     @Override
@@ -183,10 +197,14 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
      */
     private boolean isLibrary(final Path path) {
         final String completePath = path.toString();
-        return completePath.contains("kyori") || completePath.contains("SpongeAPI\\build\\libs");
+        return completePath.contains("kyori") || completePath.contains("SpongeAPI" + File.separator + "build" + File.separator + "libs");
     }
 
-    private ModFile newDummySpongeFile(final Path path, final IModLocator locator, final String fileName) {
-        return (ModFile) ModFileFactory.FACTORY.build(path, locator, file -> ModFileParsers.dummySpongeModParser(fileName, file));
+    private ModFile newDummySpongeFile(final IModFile parent, final IModLocator locator, final String fileName) throws URISyntaxException {
+        return (ModFile) ModFileFactory.FACTORY.build(
+            ForgeBootstrap.INVALID_PATH,
+            locator,
+            file -> ModFileParsers.dummySpongeModParser(parent, fileName, file)
+        );
     }
 }

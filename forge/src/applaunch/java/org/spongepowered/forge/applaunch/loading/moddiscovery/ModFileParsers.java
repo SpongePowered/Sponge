@@ -59,10 +59,10 @@ public final class ModFileParsers {
         }
     }
 
-    public static IModFileInfo dummySpongeModParser(final String fileName, final IModFile iModFile) {
+    public static IModFileInfo dummySpongeModParser(final IModFile realModFile, final String fileName, final IModFile iModFile) {
         final ModFile modFile = (ModFile) iModFile;
         AppLaunch.logger().debug("Considering sponge platform candidate {}", modFile.getFilePath());
-        final Path modsjson = modFile.getLocator().findPath(modFile, fileName + ".toml");
+        final Path modsjson = modFile.getLocator().findPath(realModFile, fileName + ".toml");
         if (!Files.exists(modsjson)) {
             AppLaunch.logger().warn("Sponge platform file '{}' is missing the '{}' file", modFile, fileName + ".toml");
             return null;
