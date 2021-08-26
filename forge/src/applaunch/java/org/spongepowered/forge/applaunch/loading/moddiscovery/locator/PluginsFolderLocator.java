@@ -35,6 +35,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.ModFileParsers;
 
+import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -61,14 +62,24 @@ public final class PluginsFolderLocator extends AbstractJarFileLocator {
     }
 
     private List<IModFile> scanForModsIn(final Path pluginsDirectory) {
-        List<Path> excluded = ModDirTransformerDiscoverer.allExcluded();
-        return LamdbaExceptionUtils.uncheck(() ->
-                Files.list(pluginsDirectory)).filter((p) ->
-                !excluded.contains(p)).sorted(Comparator.comparing((path) ->
-                StringUtils.toLowerCase(path.getFileName().toString()))).filter((p) ->
-                StringUtils.toLowerCase(p.getFileName().toString()).endsWith(".jar")).map((p) ->
-                ModFileParsers.newPluginInstance(p, this, "plugins")).peek((f) ->
-                this.modJars.compute(f, (mf, fs) -> this.createFileSystem(mf))).collect(Collectors.toList());
+        final List<Path> excluded = ModDirTransformerDiscoverer.allExcluded();
+        return LamdbaExceptionUtils.uncheck(() -> Files.list(pluginsDirectory))
+            .filter((p) -> !excluded.contains(p))
+            .sorted(Comparator.comparing((path) -> StringUtils.toLowerCase(path.getFileName().toString())))
+            .filter((p) -> StringUtils.toLowerCase(p.getFileName().toString()).endsWith(".jar"))
+            .map((p) -> ModFileParsers.newPluginInstance(p, this, "plugins"))
+            .peek((f) -> this.modJars.compute(f, (mf, fs) -> this.createFileSystem(mf)))
+            .filter(f -> {
+                if (!f.identifyMods()) {
+                    final FileSystem fs = this.modJars.remove(f);
+                    if (fs != null) {
+                        LamdbaExceptionUtils.uncheck(fs::close);
+                    }
+                    return false;
+                }
+                return true;
+            })
+            .collect(Collectors.toList());
     }
 
     @Override
