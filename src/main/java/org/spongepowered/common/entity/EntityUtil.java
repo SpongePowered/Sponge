@@ -161,19 +161,6 @@ public final class EntityUtil {
         // Sponge End
     }
 
-    public static boolean processEntitySpawnsFromEvent(final SpawnEntityEvent event, final Supplier<Optional<UUID>> entityCreatorSupplier) {
-        boolean spawnedAny = false;
-        for (final org.spongepowered.api.entity.Entity entity : event.entities()) {
-            // Here is where we need to handle the custom items potentially having custom entities
-            spawnedAny = EntityUtil.processEntitySpawn(entity, entityCreatorSupplier, e ->  e.level.addFreshEntity(e));
-        }
-        return spawnedAny;
-    }
-
-    public static boolean processEntitySpawnsFromEvent(final PhaseContext<?> context, final SpawnEntityEvent destruct) {
-        return EntityUtil.processEntitySpawnsFromEvent(destruct, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
-    }
-
     public static boolean processEntitySpawn(final org.spongepowered.api.entity.Entity entity, final Supplier<Optional<UUID>> supplier, final Consumer<Entity> spawner) {
         final Entity minecraftEntity = (Entity) entity;
         if (minecraftEntity instanceof ItemEntity) {

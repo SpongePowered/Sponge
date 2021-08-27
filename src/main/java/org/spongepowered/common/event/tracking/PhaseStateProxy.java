@@ -36,6 +36,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.storage.loot.LootContext;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.block.transaction.Operation;
@@ -44,6 +45,11 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
+import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -51,13 +57,14 @@ import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
-import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.block.ChangeBlock;
+import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
 import org.spongepowered.common.world.BlockChange;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -280,7 +287,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().getSpawnTypeForTransaction(this.asContext(), entityToSpawn);
     }
 
-    default SpawnEntityEvent createSpawnEvent(final GameTransaction<@NonNull ?> parent,
+    default SpawnEntityEvent createSpawnEvent(final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect,
         final Cause currentCause
     ) {
@@ -305,5 +312,22 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
 
     default boolean isApplyingStreams() {
         return this.getState().isApplyingStreams();
+    }
+
+    default Supplier<ResourceKey> attemptWorldKey() {
+        return this.getState().attemptWorldKey(this.asContext());
+    }
+
+    default @Nullable ClickContainerEvent createContainerEvent(
+        final Cause cause, final ServerPlayer playerMP,
+        final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
+        final List<SlotTransaction> slotTransactions, final List<org.spongepowered.api.entity.Entity> capturedEntities,
+        final int usedButton, final @Nullable Slot slot
+    ) {
+        return this.getState().createContainerEvent(this.asContext(), cause, playerMP, openContainer, transaction, slotTransactions, capturedEntities, usedButton, slot);
+    }
+
+    default boolean doesContainerCaptureEntitySpawn(final Entity entityIn) {
+        return this.getState().doesContainerCaptureEntitySpawn(this.asContext(), entityIn);
     }
 }

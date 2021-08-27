@@ -73,4 +73,9 @@ public final class ResourcePackState extends BasicPacketState {
         SpongeCommon.post(
             SpongeEventFactory.createResourcePackStatusEvent(PhaseTracker.getCauseStackManager().currentCause(), pack, (ServerPlayer) player, status));
     }
+
+    @Override
+    protected boolean alwaysUnwinds() {
+        return true;
+    }
 }

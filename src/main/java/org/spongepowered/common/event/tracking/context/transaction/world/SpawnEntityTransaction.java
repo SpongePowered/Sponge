@@ -22,8 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.world;
 
+import com.google.common.collect.ImmutableList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -35,17 +43,11 @@ import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.block.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.math.vector.Vector3d;
-
-import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
 
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -54,11 +56,11 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @DefaultQualifier(NonNull.class)
-public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEvent> {
+public final class SpawnEntityTransaction extends WorldBasedTransaction<SpawnEntityEvent> {
 
     final Supplier<ServerLevel> worldSupplier;
-    final CompoundTag entityTag;
-    final Entity entityToSpawn;
+    @MonotonicNonNull CompoundTag entityTag;
+    public final Entity entityToSpawn;
     final Vector3d originalPosition;
     final Supplier<SpawnType> deducedSpawnType;
 
@@ -76,15 +78,21 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
         }
     }
 
-    SpawnEntityTransaction(final Supplier<ServerLevel> worldSupplier, final Entity entityToSpawn,
+    public SpawnEntityTransaction(
+        final Supplier<ServerLevel> worldSupplier, final Entity entityToSpawn,
         final Supplier<SpawnType> deducedSpawnType
     ) {
         super(TransactionTypes.SPAWN_ENTITY.get(), ((org.spongepowered.api.world.server.ServerWorld) worldSupplier.get()).key());
         this.worldSupplier = worldSupplier;
         this.entityToSpawn = entityToSpawn;
-        this.entityTag = entityToSpawn.saveWithoutId(new CompoundTag());
         this.originalPosition = new Vector3d(entityToSpawn.getX(), entityToSpawn.getY(), entityToSpawn.getZ());
         this.deducedSpawnType = deducedSpawnType;
+    }
+
+    @Override
+    protected void captureState() {
+        super.captureState();
+        this.entityTag = this.entityToSpawn.saveWithoutId(new CompoundTag());
     }
 
     @Override
@@ -106,11 +114,16 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     }
 
     @Override
-    boolean shouldBuildEventAndRestartBatch(
+    protected boolean shouldBuildEventAndRestartBatch(
         final GameTransaction<@NonNull ?> pointer, final PhaseContext<@NonNull ?> context
     ) {
         return super.shouldBuildEventAndRestartBatch(pointer, context)
             || this.deducedSpawnType != ((SpawnEntityTransaction) pointer).deducedSpawnType;
+    }
+
+    @Override
+    public Optional<AbsorbingFlowStep> parentAbsorber() {
+        return Optional.of((ctx, tx) -> tx.absorbSpawnEntity(ctx, this));
     }
 
     @Override
@@ -131,7 +144,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     }
 
     @Override
-    public void restore() {
+    public void restore(final PhaseContext<@NonNull ?> context, final SpawnEntityEvent event) {
         final ServerLevel serverWorld = this.worldSupplier.get();
         if (((ServerLevelAccessor) serverWorld).accessor$tickingEntities()) {
             // More than likely we could also be needing to remove the entity from both the entities to add

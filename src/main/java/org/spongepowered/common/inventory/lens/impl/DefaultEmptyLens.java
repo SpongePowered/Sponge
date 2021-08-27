@@ -86,11 +86,6 @@ public class DefaultEmptyLens implements Lens {
         return null;
     }
 
-    @Override
-    public Map<Key<?>, Object> getDataAt(int index) {
-        return Collections.emptyMap();
-    }
-
     @Override public Map<Key<?>, Object> getDataFor(Lens lens) {
         return Collections.emptyMap();
     }

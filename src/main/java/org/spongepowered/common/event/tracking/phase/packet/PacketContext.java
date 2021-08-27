@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.network.protocol.Packet;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -31,20 +32,20 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.effect.BroadcastInventoryChangesEffect;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.util.PrettyPrinter;
-
-import net.minecraft.network.protocol.Packet;
 
 @SuppressWarnings("unchecked")
 public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     @SuppressWarnings("NullableProblems") protected net.minecraft.server.level.ServerPlayer packetPlayer; // Set by packetPlayer(EntityPlayerMP)
     @Nullable Packet<?> packet;
-    private ItemStackSnapshot cursor = ItemStackSnapshot.empty();
     private ItemStack itemUsed = ItemStack.empty();
     private ItemStackSnapshot itemUsedSnapshot = ItemStackSnapshot.empty();
     private @Nullable HandType handUsed;
-    private boolean ignoreCreative;
     private boolean interactItemChanged;
 
     protected PacketContext(final PacketState<P> state, final PhaseTracker tracker) {
@@ -61,16 +62,6 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         return (P) this;
     }
 
-    public P cursor(final ItemStackSnapshot snapshot) {
-        this.cursor = snapshot;
-        return (P) this;
-    }
-
-    public P ignoreCreative(final boolean creative) {
-        this.ignoreCreative = creative;
-        return (P) this;
-    }
-
     public net.minecraft.server.level.ServerPlayer getPacketPlayer() {
         return this.packetPlayer;
     }
@@ -82,14 +73,6 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     public <K extends Packet<?>> K getPacket() {
         return (K) this.packet;
-    }
-
-    public ItemStackSnapshot getCursor() {
-        return this.cursor;
-    }
-
-    public boolean getIgnoringCreative() {
-        return this.ignoreCreative;
     }
 
     public P itemUsed(final ItemStack stack) {
@@ -130,9 +113,28 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "PacketPlayer", this.packetPlayer)
             .add(s + "- %s: %s", "Packet", this.packet)
-            .add(s + "- %s: %s", "IgnoreCreative", this.ignoreCreative)
             .add(s + "- %s: %s", "ItemStackUsed", this.itemUsed);
 
+    }
+
+    @Override
+    public boolean hasCaptures() {
+        if (((PacketState) this.state).alwaysUnwinds()) {
+            return true;
+        }
+        return super.hasCaptures();
+    }
+
+    @Override
+    public void close() {
+        // Make sure to call any broadcast changes to capture any inventory transactions
+        // for events
+        final TransactionalCaptureSupplier transactor = this.getTransactor();
+        transactor.logPlayerInventoryChange(this.packetPlayer, PlayerInventoryTransaction.EventCreator.STANDARD);
+        try (EffectTransactor ignored = BroadcastInventoryChangesEffect.transact(transactor)) {
+            this.packetPlayer.containerMenu.broadcastChanges();
+        }
+        super.close();
     }
 
     @Override
@@ -140,11 +142,9 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         super.reset();
         this.packetPlayer = null;
         this.packet = null;
-        this.cursor = ItemStackSnapshot.empty();
         this.itemUsed = ItemStack.empty();
         this.itemUsedSnapshot = ItemStackSnapshot.empty();
         this.handUsed = null;
-        this.ignoreCreative = false;
         this.interactItemChanged = false;
     }
 }

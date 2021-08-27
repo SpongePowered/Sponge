@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.block;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.LinkedListMultimap;
@@ -44,14 +44,16 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
+import org.spongepowered.common.event.tracking.context.transaction.world.WorldBasedTransaction;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEvent.All> {
+abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBlockEvent.All> {
 
     final BlockPos affectedPosition;
     final BlockState originalState;

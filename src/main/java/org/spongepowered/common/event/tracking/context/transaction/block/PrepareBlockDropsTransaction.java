@@ -22,74 +22,77 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.block;
 
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.util.PrettyPrinter;
-
-import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 
-public class ScheduleUpdateTransaction extends BlockEventBasedTransaction {
+public final class PrepareBlockDropsTransaction extends BlockEventBasedTransaction {
 
-    private final TickNextTickData<?> data;
-    private final SpongeBlockSnapshot original;
+    private final SpongeBlockSnapshot originalState;
 
-
-    ScheduleUpdateTransaction(final SpongeBlockSnapshot original, final TickNextTickData<?> data) {
-        super(original.getBlockPos(), (BlockState) original.state(), original.world());
-        this.data = data;
-        this.original = original;
+    public PrepareBlockDropsTransaction(
+        final BlockPos affectedPosition, final BlockState originalState, final SpongeBlockSnapshot original
+    ) {
+        super(affectedPosition, originalState, original.world());
+        this.originalState = original;
     }
 
     @Override
     protected SpongeBlockSnapshot getResultingSnapshot() {
-        return this.getOriginalSnapshot();
+        return null;
     }
 
     @Override
     protected SpongeBlockSnapshot getOriginalSnapshot() {
-        return this.original;
+        return this.originalState;
     }
 
     @Override
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
-        final @Nullable GameTransaction<@NonNull ?> parent
+        @Nullable final GameTransaction<@NonNull ?> parent
     ) {
-        return Optional.empty();
+        return Optional.of((context, frame) -> frame.pushCause(this.originalState));
     }
 
     @Override
     public void addToPrinter(final PrettyPrinter printer) {
-        printer.add("AddBlockEvent")
-            .add(" %s : %s", "Original Block", this.original)
-            .add(" %s : %s", "Original State", this.originalState)
-            .add(" %s : %s", "EventData", this.data);
+
     }
 
     @Override
-    public void restore() {
-        ((TickNextTickDataBridge<?>) this.data).bridge$cancelForcibly();
+    public void restore(final PhaseContext<?> context, final ChangeBlockEvent.All event) {
+        this.originalState.restore(true, BlockChangeFlagManager.fromNativeInt(Constants.BlockChangeFlags.FORCED_RESTORE));
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", ScheduleUpdateTransaction.class.getSimpleName() + "[", "]")
-            .add("scheduledUpdate=" + this.data)
-            .add("original=" + this.original)
+        return new StringJoiner(", ", PrepareBlockDropsTransaction.class.getSimpleName() + "[", "]")
             .add("affectedPosition=" + this.affectedPosition)
             .add("originalState=" + this.originalState)
             .add("worldKey=" + this.worldKey)
             .add("cancelled=" + this.cancelled)
+            .add("originalState=" + this.originalState)
             .toString();
     }
+
+    @Override
+    public Optional<AbsorbingFlowStep> parentAbsorber() {
+        return Optional.of((ctx, tx) -> tx.absorbBlockDropsPreparation(ctx, this));
+    }
+
 }

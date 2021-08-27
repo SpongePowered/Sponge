@@ -29,7 +29,6 @@ import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
@@ -41,7 +40,7 @@ import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
-import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.world.BlockChange;
 

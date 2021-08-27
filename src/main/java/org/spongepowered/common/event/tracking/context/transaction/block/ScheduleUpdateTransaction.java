@@ -22,32 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.block;
 
-import net.minecraft.world.level.BlockEventData;
+import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 
-public class AddBlockEventTransaction extends BlockEventBasedTransaction {
+public class ScheduleUpdateTransaction extends BlockEventBasedTransaction {
 
-    private final BlockEventData blockEvent;
+    private final TickNextTickData<?> data;
     private final SpongeBlockSnapshot original;
 
 
-    AddBlockEventTransaction(final SpongeBlockSnapshot original, final TrackableBlockEventDataBridge blockEvent) {
+    public ScheduleUpdateTransaction(final SpongeBlockSnapshot original, final TickNextTickData<?> data) {
         super(original.getBlockPos(), (BlockState) original.state(), original.world());
-        this.blockEvent = (BlockEventData) blockEvent;
+        this.data = data;
         this.original = original;
     }
 
@@ -73,18 +74,18 @@ public class AddBlockEventTransaction extends BlockEventBasedTransaction {
         printer.add("AddBlockEvent")
             .add(" %s : %s", "Original Block", this.original)
             .add(" %s : %s", "Original State", this.originalState)
-            .add(" %s : %s", "EventData", this.blockEvent);
+            .add(" %s : %s", "EventData", this.data);
     }
 
     @Override
-    public void restore() {
-        this.original.getServerWorld().ifPresent(world -> ((ServerLevelAccessor) world).accessor$blockEvents().remove(this.blockEvent));
+    public void restore(PhaseContext<?> context, ChangeBlockEvent.All event) {
+        ((TickNextTickDataBridge<?>) this.data).bridge$cancelForcibly();
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", AddBlockEventTransaction.class.getSimpleName() + "[", "]")
-            .add("blockEvent=" + this.blockEvent)
+        return new StringJoiner(", ", ScheduleUpdateTransaction.class.getSimpleName() + "[", "]")
+            .add("scheduledUpdate=" + this.data)
             .add("original=" + this.original)
             .add("affectedPosition=" + this.affectedPosition)
             .add("originalState=" + this.originalState)

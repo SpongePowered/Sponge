@@ -309,6 +309,44 @@ import org.spongepowered.math.vector.Vector2d;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.ComponentArgument;
+import net.minecraft.commands.arguments.CompoundTagArgument;
+import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.GameProfileArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.ScoreHolderArgument;
+import net.minecraft.commands.arguments.UuidArgument;
+import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.commands.arguments.coordinates.RotationArgument;
+import net.minecraft.commands.arguments.coordinates.Vec2Argument;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.commands.synchronization.brigadier.DoubleArgumentSerializer;
+import net.minecraft.commands.synchronization.brigadier.FloatArgumentSerializer;
+import net.minecraft.commands.synchronization.brigadier.IntegerArgumentSerializer;
+import net.minecraft.commands.synchronization.brigadier.LongArgumentSerializer;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.phys.Vec2;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Comparator;
@@ -341,8 +379,12 @@ public final class SpongeRegistryLoaders {
         return RegistryLoader.of(l -> {
             l.add(TransactionTypes.BLOCK, k -> new BlockTransactionType());
             l.add(TransactionTypes.ENTITY_DEATH_DROPS, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
+            l.add(TransactionTypes.CLICK_CONTAINER_EVENT, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
             l.add(TransactionTypes.NEIGHBOR_NOTIFICATION, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
             l.add(TransactionTypes.SPAWN_ENTITY, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
+            l.add(TransactionTypes.CHANGE_INVENTORY_EVENT, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
+            l.add(TransactionTypes.SLOT_CHANGE, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
+            l.add(TransactionTypes.INTERACT_CONTAINER_EVENT, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
         });
     }
 

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
@@ -41,7 +41,9 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeNotificationTicket;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
+import org.spongepowered.common.event.tracking.context.transaction.world.WorldBasedTransaction;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3i;
@@ -51,7 +53,7 @@ import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEvent> {
+public final class NeighborNotification extends WorldBasedTransaction<NotifyNeighborBlockEvent> {
     final BlockState original;
     final BlockPos notifyPos;
     final Block sourceBlock;
@@ -64,7 +66,7 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
     private Supplier<SpongeBlockSnapshot> targetSnapshot;
     private Supplier<NotificationTicket> ticketSupplier;
 
-    NeighborNotification(
+    public NeighborNotification(
         final Supplier<ServerLevel> serverWorldSupplier,
         final BlockState notifyState, final BlockPos notifyPos,
         final Block sourceBlock, final BlockPos sourcePos,
@@ -113,7 +115,7 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
     public String toString() {
         return new StringJoiner(
             ", ",
-            org.spongepowered.common.event.tracking.context.transaction.NeighborNotification.class.getSimpleName() + "[",
+            NeighborNotification.class.getSimpleName() + "[",
             "]"
         )
             .add("notifyState=" + this.originalState)
@@ -159,7 +161,7 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
     }
 
     @Override
-    public void restore() {
+    public void restore(PhaseContext<?> context, NotifyNeighborBlockEvent event) {
 
     }
 

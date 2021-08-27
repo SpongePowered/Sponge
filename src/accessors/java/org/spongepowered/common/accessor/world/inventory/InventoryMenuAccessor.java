@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.world.inventory;
 
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.InventoryMenu;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,5 +34,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface InventoryMenuAccessor {
 
     @Accessor("craftSlots") CraftingContainer accessor$craftSlots();
+    @Accessor("owner") Player accessor$owner();
 
 }

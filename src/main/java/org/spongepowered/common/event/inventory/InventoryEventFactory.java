@@ -24,11 +24,7 @@
  */
 package org.spongepowered.common.event.inventory;
 
-import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
-
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
-import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
@@ -47,6 +43,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.trading.Merchant;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -55,29 +52,28 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
-import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
 import org.spongepowered.api.event.item.inventory.TransferInventoryEvent;
 import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
-import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
@@ -93,17 +89,14 @@ import java.util.function.Supplier;
 public class InventoryEventFactory {
 
 
-    public static boolean callPlayerChangeInventoryPickupPreEvent(final Player player, final ItemEntity itemToPickup, final int pickupDelay) {
+    public static boolean callPlayerChangeInventoryPickupPreEvent(final Player player, final ItemEntity itemToPickup) {
         final ItemStack stack = itemToPickup.getItem();
-        final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
-        causeStackManager.pushCause(player);
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
         final ChangeInventoryEvent.Pickup.Pre event =
                 SpongeEventFactory.createChangeInventoryEventPickupPre(
-                    causeStackManager.currentCause(),
+                        PhaseTracker.getCauseStackManager().currentCause(),
                         Optional.empty(), Collections.singletonList(snapshot), ((Inventory) player.inventory), (Item) itemToPickup, snapshot);
         SpongeCommon.post(event);
-        causeStackManager.popCause();
         if (event.isCancelled()) {
             return false;
         }
@@ -114,48 +107,27 @@ public class InventoryEventFactory {
                 return false;
             }
 
-            boolean fullTransfer = true;
-            final TrackedInventoryBridge capture = (TrackedInventoryBridge) player.inventory;
-            capture.bridge$setCaptureInventory(true);
-            for (final ItemStackSnapshot item : list) {
-                final org.spongepowered.api.item.inventory.ItemStack itemStack = item.createStack();
-                player.inventory.add(ItemStackUtil.toNative(itemStack));
-                if (!itemStack.isEmpty()) {
-                    fullTransfer = false;
-                    break;
+            final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+            final TransactionalCaptureSupplier transactor = context.getTransactor();
+            try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, PlayerInventoryTransaction.EventCreator.PICKUP)) {
+                for (final ItemStackSnapshot item : list) {
+                    final org.spongepowered.api.item.inventory.ItemStack itemStack = item.createStack();
+                    player.inventory.add(ItemStackUtil.toNative(itemStack));
+                    if (!itemStack.isEmpty()) {
+                        // Modified pickup items do not fit inventory - pre-cancel ChangeInventoryEvent.Pickup
+                        ignored.parent.markCancelled();
+                        return false;
+                    }
                 }
+            }
 
-            }
-            capture.bridge$setCaptureInventory(false);
-            if (!fullTransfer) {
-                for (final SlotTransaction trans : capture.bridge$getCapturedSlotTransactions()) {
-                    trans.slot().set(trans.original().createStack());
-                }
-                return false;
-            }
-            if (!InventoryEventFactory.callPlayerChangeInventoryPickupEvent(player, capture)) {
+            if (!TrackingUtil.processBlockCaptures(context)) {
                 return false;
             }
             itemToPickup.getItem().setCount(0);
         }
         return true;
     }
-
-
-    public static boolean callPlayerChangeInventoryPickupEvent(final Player player, final TrackedInventoryBridge inventory) {
-        if (inventory.bridge$getCapturedSlotTransactions().isEmpty()) {
-            return true;
-        }
-        PhaseTracker.getCauseStackManager().pushCause(player);
-        final ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(PhaseTracker.getCauseStackManager().currentCause(), (Inventory) player.containerMenu,
-                inventory.bridge$getCapturedSlotTransactions());
-        SpongeCommon.post(event);
-        PhaseTracker.getCauseStackManager().popCause();
-        InventoryEventFactory.applyTransactions(event);
-        inventory.bridge$getCapturedSlotTransactions().clear();
-        return !event.isCancelled();
-    }
-
 
     public static ItemStack callInventoryPickupEvent(final Container inventory, final ItemEntity item, final ItemStack stack) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -219,7 +191,7 @@ public class InventoryEventFactory {
         }
         final ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(PhaseTracker.getCauseStackManager().currentCause(), spongeInventory, trans);
         SpongeCommon.post(event);
-        InventoryEventFactory.applyTransactions(event);
+        PacketPhaseUtil.handleSlotRestore(null, null, event.transactions(), event.isCancelled());
         return !event.isCancelled();
     }
 
@@ -240,54 +212,6 @@ public class InventoryEventFactory {
         return trans;
     }
 
-
-
-    private static void applyTransactions(final ChangeInventoryEvent.Pickup event) {
-        if (event.isCancelled()) {
-            for (final SlotTransaction trans : event.transactions()) {
-                trans.slot().set(trans.original().createStack());
-            }
-            return;
-        }
-        for (final SlotTransaction trans : event.transactions()) {
-            if (!trans.isValid()) {
-                trans.slot().set(trans.original().createStack());
-            } else if (trans.custom().isPresent()) {
-                trans.slot().set(trans.finalReplacement().createStack());
-            }
-        }
-    }
-
-
-    public static ClickContainerEvent.Creative callCreativeClickContainerEvent(final ServerPlayer player, final ServerboundSetCreativeModeSlotPacket packetIn) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
-            // Due to this, we can only send the original item that was clicked in slot
-            final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.empty(), ItemStackSnapshot.empty());
-            org.spongepowered.api.item.inventory.Slot slot = null;
-            final List<SlotTransaction> captures = ((TrackedInventoryBridge) player.containerMenu).bridge$getCapturedSlotTransactions();
-            if (captures.isEmpty() && packetIn.getSlotNum() >= 0 && packetIn.getSlotNum() < player.containerMenu.slots.size()) {
-                slot = ((InventoryAdapter)player.containerMenu).inventoryAdapter$getSlot(packetIn.getSlotNum()).orElse(null);
-                if (slot != null) {
-                    final ItemStackSnapshot clickedItem = ItemStackUtil.snapshotOf(slot.peek());
-                    final ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(packetIn.getItem());
-                    final SlotTransaction slotTransaction = new SlotTransaction(slot, clickedItem, replacement);
-                    captures.add(slotTransaction);
-                }
-            }
-            final ClickContainerEvent.Creative event =
-                    SpongeEventFactory.createClickContainerEventCreative(frame.currentCause(), (org.spongepowered.api.item.inventory.Container) player.containerMenu, cursorTransaction,
-                            Optional.ofNullable(slot),
-                            new ArrayList<>(captures));
-            captures.clear();
-            ((TrackedInventoryBridge) player.containerMenu).bridge$setCaptureInventory(false);
-            SpongeCommon.post(event);
-            frame.popCause();
-            return event;
-        }
-    }
-
     public static boolean callInteractContainerOpenEvent(final ServerPlayer player) {
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.empty(), newCursor);
@@ -299,12 +223,8 @@ public class InventoryEventFactory {
             player.closeContainer();
             return false;
         }
-        // TODO - determine if/how we want to fire inventory events outside of click packet handlers
-        //((ContainerBridge) player.openContainer).bridge$setCaptureInventory(true);
         // Custom cursor
-        if (event.cursorTransaction().custom().isPresent()) {
-            handleCustomCursor(player, event.cursorTransaction().finalReplacement());
-        }
+        PacketPhaseUtil.handleCursorRestore(player, event.cursorTransaction());
         return true;
     }
 
@@ -471,58 +391,6 @@ public class InventoryEventFactory {
         return remaining;
     }
 
-    public static CraftItemEvent.Preview callCraftEventPre(final Player player, final CraftingInventory inventory,
-            final SlotTransaction previewTransaction, final @Nullable CraftingRecipe recipe, final AbstractContainerMenu container, final List<SlotTransaction> transactions) {
-        final CraftItemEvent.Preview event = SpongeEventFactory
-                .createCraftItemEventPreview(PhaseTracker.getCauseStackManager().currentCause(), inventory, (Inventory) container, previewTransaction, Optional.ofNullable(recipe), transactions);
-        SpongeCommon.post(event);
-        PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
-        if (player instanceof ServerPlayer) {
-            if (event.preview().custom().isPresent() || event.isCancelled() || !event.preview().isValid()) {
-                ItemStackSnapshot stack = event.preview().finalReplacement();
-                if (event.isCancelled() || !event.preview().isValid()) {
-                    stack = event.preview().original();
-                }
-                // Resend modified output
-                ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(0, 0, ItemStackUtil.fromSnapshotToNative(stack)));
-            }
-
-        }
-        return event;
-    }
-
-
-    public static CraftItemEvent.Craft callCraftEventPost(final Player player, final CraftingInventory inventory, final ItemStackSnapshot result,
-            final @Nullable CraftingRecipe recipe, final AbstractContainerMenu container, final List<SlotTransaction> transactions) {
-        // Get previous cursor if captured
-        ItemStack previousCursor = ((TrackedContainerBridge) container).bridge$getPreviousCursor();
-        if (previousCursor == null) {
-            previousCursor = player.inventory.getCarried(); // or get the current one
-        }
-        final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackUtil.snapshotOf(previousCursor), ItemStackUtil.snapshotOf(player.inventory.getCarried()));
-        final org.spongepowered.api.item.inventory.Slot slot = inventory.result();
-        final CraftItemEvent.Craft event = SpongeEventFactory.createCraftItemEventCraft(PhaseTracker.getCauseStackManager().currentCause(),
-                ContainerUtil.fromNative(container), result, inventory, cursorTransaction, Optional.ofNullable(recipe), Optional.of(slot), transactions);
-        SpongeCommon.post(event);
-
-        final boolean capture = ((TrackedInventoryBridge) container).bridge$capturingInventory();
-        ((TrackedInventoryBridge) container).bridge$setCaptureInventory(false);
-        // handle slot-transactions
-        PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
-        if (event.isCancelled() || !event.cursorTransaction().isValid() || event.cursorTransaction().custom().isPresent()) {
-            // handle cursor-transaction
-            final ItemStackSnapshot newCursor = event.isCancelled() || event.cursorTransaction().isValid() ? event.cursorTransaction().original() : event.cursorTransaction().finalReplacement();
-            player.inventory.setCarried(ItemStackUtil.fromSnapshotToNative(newCursor));
-            if (player instanceof ServerPlayer) {
-                ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, player.inventory.getCarried()));
-            }
-        }
-
-        transactions.clear();
-        ((TrackedInventoryBridge) container).bridge$setCaptureInventory(capture);
-        return event;
-    }
-
     public static UpdateAnvilEvent callUpdateAnvilEvent(final AnvilMenu anvil, final ItemStack slot1, final ItemStack slot2, final ItemStack result, final String name, final int levelCost, final int materialCost) {
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(result));
         final UpdateAnvilEventCost costs = new UpdateAnvilEventCost(levelCost, materialCost);
@@ -531,7 +399,6 @@ public class InventoryEventFactory {
         SpongeCommon.post(event);
         return event;
     }
-
 
     public static ChangeEntityEquipmentEvent callChangeEntityEquipmentEvent(
             final LivingEntity entity, final ItemStackSnapshot before, final ItemStackSnapshot after, final Slot slot) {
@@ -608,12 +475,7 @@ public class InventoryEventFactory {
         SpongeCommon.post(event);
 
         PacketPhaseUtil.handleSlotRestore(playerIn, container, event.transactions(), event.isCancelled());
-        if (event.isCancelled() || !event.cursorTransaction().isValid()) {
-            PacketPhaseUtil.handleCustomCursor(playerIn, event.cursorTransaction().original());
-        } else if (event.cursorTransaction().custom().isPresent()) {
-            PacketPhaseUtil.handleCustomCursor(playerIn, event.cursorTransaction().finalReplacement());
-        }
-
+        PacketPhaseUtil.handleCursorRestore(playerIn, event.cursorTransaction());
         return event;
     }
 

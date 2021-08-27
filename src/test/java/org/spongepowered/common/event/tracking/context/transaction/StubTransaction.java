@@ -24,38 +24,33 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
+import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.type.NoOpTransactionType;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 
-@DefaultQualifier(NonNull.class)
-public final class AddTileEntity extends BlockEventBasedTransaction {
+public class StubTransaction extends GameTransaction<StubEvent> {
 
-    final BlockEntity added;
-    final SpongeBlockSnapshot oldSnapshot;
-    final SpongeBlockSnapshot addedSnapshot;
+    private static final TransactionType<StubEvent> TYPE = new NoOpTransactionType<>(true, "stub");
+    private final String name;
 
-    AddTileEntity(final BlockEntity added,
-        final SpongeBlockSnapshot attachedSnapshot,
-        final SpongeBlockSnapshot existing
-    ) {
-        super(existing.getBlockPos(), (BlockState) existing.state(), ((ServerWorld) added.getLevel()).key());
-        this.added = added;
-        this.addedSnapshot = attachedSnapshot;
-        this.oldSnapshot = existing;
+    protected StubTransaction() {
+        super(StubTransaction.TYPE);
+        this.name = "Stub";
+    }
+
+    protected StubTransaction(String name) {
+        super(StubTransaction.TYPE);
+        this.name = name;
     }
 
     @Override
@@ -66,34 +61,36 @@ public final class AddTileEntity extends BlockEventBasedTransaction {
     }
 
     @Override
-    public void addToPrinter(final PrettyPrinter printer) {
-        printer.add("AddTileEntity")
-            .addWrapped(120, " %s : %s", this.affectedPosition, ((BlockEntityBridge) this.added).bridge$getPrettyPrinterString());
+    public void addToPrinter(PrettyPrinter printer) {
+
     }
 
     @Override
-    public void restore() {
-        this.oldSnapshot.restore(true, BlockChangeFlags.NONE);
+    public Optional<StubEvent> generateEvent(
+        PhaseContext<@NonNull ?> context, @Nullable GameTransaction<@NonNull ?> parent,
+        ImmutableList<GameTransaction<StubEvent>> gameTransactions, Cause currentCause
+    ) {
+        return Optional.empty();
     }
 
     @Override
-    protected SpongeBlockSnapshot getResultingSnapshot() {
-        return this.addedSnapshot;
+    public void restore(
+        PhaseContext<@NonNull ?> context, StubEvent event
+    ) {
+
     }
 
     @Override
-    protected SpongeBlockSnapshot getOriginalSnapshot() {
-        return this.oldSnapshot;
+    public boolean markCancelledTransactions(
+        StubEvent event, ImmutableList<? extends GameTransaction<StubEvent>> gameTransactions
+    ) {
+        return false;
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", AddTileEntity.class.getSimpleName() + "[", "]")
-            .add("added=" + this.added)
-            .add("affectedPosition=" + this.affectedPosition)
-            .add("originalState=" + this.originalState)
-            .add("worldKey=" + this.worldKey)
-            .add("cancelled=" + this.cancelled)
+        return new StringJoiner(", ", StubTransaction.class.getSimpleName() + "[", "]")
+            .add("name='" + this.name + "'")
             .toString();
     }
 }

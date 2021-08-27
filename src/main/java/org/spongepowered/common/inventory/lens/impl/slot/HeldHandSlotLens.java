@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.lens.impl.slot;
 
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
@@ -120,11 +121,6 @@ public class HeldHandSlotLens extends AbstractLens implements SlotLens {
     @Override
     public Lens getLens(int index) {
         return this;
-    }
-
-    @Override
-    public Map<Key<?>, Object> getDataAt(int index) {
-        return Collections.emptyMap();
     }
 
     @Override

@@ -64,6 +64,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -94,20 +95,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
-import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.food.FoodDataBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.util.DamageEventUtil;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.util.ExperienceHolderUtil;
 
 import javax.annotation.Nullable;
@@ -158,7 +162,6 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     // @formatter: on
 
     private boolean impl$affectsSpawning = true;
-    private boolean impl$shouldRestoreInventory = false;
     protected final boolean impl$isFake = ((PlatformEntityBridge) (net.minecraft.world.entity.player.Player) (Object) this).bridge$isFakePlayer();
 
     @Override
@@ -169,16 +172,6 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     @Override
     public void bridge$setAffectsSpawning(final boolean affectsSpawning) {
         this.impl$affectsSpawning = affectsSpawning;
-    }
-
-    @Override
-    public void bridge$shouldRestoreInventory(final boolean restore) {
-        this.impl$shouldRestoreInventory = restore;
-    }
-
-    @Override
-    public boolean bridge$shouldRestoreInventory() {
-        return this.impl$shouldRestoreInventory;
     }
 
     @Override
@@ -595,6 +588,12 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                             if(itemstack1.isEmpty()) {
                                 this.shadow$setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                             }
+                            // Sponge Start
+                            final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+                            final TransactionalCaptureSupplier transactor = context.getTransactor();
+                            transactor.logPlayerInventoryChange((net.minecraft.world.entity.player.Player) (Object) this, PlayerInventoryTransaction.EventCreator.STANDARD);
+                            this.inventoryMenu.broadcastChanges(); // capture
+                            // Spong End
                         }
 
                         if (targetEntity instanceof LivingEntity) {

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.block;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,9 +30,11 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.effect.BlockAddedEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.CheckBlockPostPlacementIsSameEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ChunkChangeCompleteEffect;
@@ -55,14 +57,15 @@ import java.util.function.BiConsumer;
 @DefaultQualifier(NonNull.class)
 public final class ChangeBlock extends BlockEventBasedTransaction {
 
-    final SpongeBlockSnapshot original;
+    public final SpongeBlockSnapshot original;
     final int originalOpacity;
     final BlockState newState;
     final SpongeBlockChangeFlag blockChangeFlag;
     @Nullable public BlockEntity queuedRemoval;
     @Nullable public BlockEntity queuedAdd;
 
-    ChangeBlock(final SpongeBlockSnapshot attachedSnapshot, final BlockState newState,
+    public ChangeBlock(
+        final SpongeBlockSnapshot attachedSnapshot, final BlockState newState,
         final SpongeBlockChangeFlag blockChange
     ) {
         super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.state(), attachedSnapshot.world());
@@ -151,7 +154,7 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
     }
 
     @Override
-    public void restore() {
+    public void restore(PhaseContext<?> context, ChangeBlockEvent.All event) {
         this.original.restore(true, BlockChangeFlagManager.fromNativeInt(Constants.BlockChangeFlags.FORCED_RESTORE));
     }
 
@@ -184,7 +187,9 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
     }
 
     @Override
-    boolean acceptDrops(final PrepareBlockDropsTransaction transaction) {
+    public boolean absorbBlockDropsPreparation(
+        final PhaseContext<@NonNull ?> context, final PrepareBlockDropsTransaction transaction
+    ) {
         return this.original.blockChange == BlockChange.BREAK
             && this.affectedPosition.equals(transaction.affectedPosition)
             && this.original.state() == transaction.getOriginalSnapshot().state();

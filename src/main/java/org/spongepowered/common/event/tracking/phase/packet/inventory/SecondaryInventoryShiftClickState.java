@@ -24,37 +24,46 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.Constants;
 
-import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 import java.util.Optional;
 
 public final class SecondaryInventoryShiftClickState extends BasicInventoryPacketState {
 
     public SecondaryInventoryShiftClickState() {
-        super(Constants.Networking.MODE_SHIFT_CLICK | Constants.Networking.BUTTON_SECONDARY,
-            Constants.Networking.MASK_NORMAL);
+        super(
+            Constants.Networking.MODE_SHIFT_CLICK | Constants.Networking.BUTTON_SECONDARY,
+            Constants.Networking.MASK_NORMAL
+        );
     }
 
     @Override
-    public ClickContainerEvent createInventoryEvent(final ServerPlayer playerMP, final Container openContainer,
+    public ClickContainerEvent createContainerEvent(
+        final InventoryPacketContext context, final Cause cause,
+        final ServerPlayer serverPlayer, final Container openContainer,
         final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
-        final @Nullable Slot slot) {
-        return SpongeEventFactory.createClickContainerEventShiftSecondary(
-            PhaseTracker.getCauseStackManager().currentCause(),
-            openContainer, transaction, Optional.ofNullable(slot), slotTransactions);
+        @Nullable final Slot slot
+    ) {
 
+        if (!capturedEntities.isEmpty()) {
+            SpongeCommon.logger().warn("Entities are being captured but not being processed");
+        }
+        return SpongeEventFactory.createClickContainerEventShiftSecondary(cause,
+            openContainer, transaction, Optional.ofNullable(slot), slotTransactions
+        );
     }
 }

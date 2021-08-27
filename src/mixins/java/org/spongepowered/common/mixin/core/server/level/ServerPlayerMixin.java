@@ -173,7 +173,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     private Scoreboard impl$scoreboard = Sponge.game().server().serverScoreboard().get();
     @Nullable private Boolean impl$keepInventory = null;
     // Used to restore original item received in a packet after canceling an event
-    private ItemStack impl$packetItem = ItemStack.EMPTY;
     private int impl$viewDistance;
     private int impl$skinPartMask;
     private Set<SkinPart> impl$skinParts = ImmutableSet.of();
@@ -205,11 +204,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public Tristate bridge$permDefault(final String permission) {
         return Tristate.FALSE;
-    }
-
-    @Override
-    public void bridge$setPacketItem(final ItemStack itemstack) {
-        this.impl$packetItem = itemstack;
     }
 
     @Override
@@ -754,15 +748,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         this.impl$viewDistance = viewDistance;
         this.bridge$setLanguage(newLocale);
         this.impl$language = newLocale;
-    }
-
-    @Override
-    public void bridge$restorePacketItem(final InteractionHand hand) {
-        if (this.impl$packetItem.isEmpty()) {
-            return;
-        }
-        this.shadow$setItemInHand(hand, this.impl$packetItem);
-        this.containerMenu.broadcastChanges();
     }
 
     /**
