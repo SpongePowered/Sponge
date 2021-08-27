@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.scores;
 
-import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,7 +31,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.bridge.world.scores.ScoreboardBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
@@ -71,10 +69,7 @@ public abstract class ObjectiveMixin implements ObjectiveBridge {
         if (this.impl$spongeScoreboard == null) {
             SpongeCommon.logger().warn("Returning objective cause null!");
             ci.cancel();
-            return;
         }
-        this.impl$spongeScoreboard.setDisplayName(SpongeAdventure.asAdventure(name));
-        ci.cancel();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -87,9 +82,6 @@ public abstract class ObjectiveMixin implements ObjectiveBridge {
         if (this.impl$spongeScoreboard == null) {
             SpongeCommon.logger().warn("Returning render objective cause null!");
             ci.cancel();
-            return;
         }
-        this.impl$spongeScoreboard.setDisplayMode((ObjectiveDisplayMode) (Object) type);
-        ci.cancel();
     }
 }
