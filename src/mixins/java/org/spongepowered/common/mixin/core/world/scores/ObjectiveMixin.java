@@ -73,8 +73,8 @@ public abstract class ObjectiveMixin implements ObjectiveBridge {
             ci.cancel();
             return;
         }
-        this.impl$spongeScoreboard.setDisplayName(SpongeAdventure.asAdventure(name));
-        ci.cancel();
+
+        this.impl$spongeScoreboard.storeDisplayName(SpongeAdventure.asAdventure(name));
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -89,7 +89,7 @@ public abstract class ObjectiveMixin implements ObjectiveBridge {
             ci.cancel();
             return;
         }
-        this.impl$spongeScoreboard.setDisplayMode((ObjectiveDisplayMode) (Object) type);
-        ci.cancel();
+
+        this.impl$spongeScoreboard.storeDisplayMode((ObjectiveDisplayMode) (Object) type);
     }
 }
