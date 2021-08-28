@@ -35,6 +35,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.NestedTableEntry;
 import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.item.DiggerItemAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -155,11 +156,11 @@ public final class ItemStackData {
                     .create(Keys.LORE)
                         .get(h -> {
                             final CompoundTag tag = h.getTag();
-                            if (tag == null || tag.contains(Constants.Item.ITEM_DISPLAY)) {
+                            if (tag == null || !tag.contains(Constants.Item.ITEM_DISPLAY)) {
                                 return null;
                             }
-
-                            final ListTag list = tag.getList(Constants.Item.ITEM_LORE, Constants.NBT.TAG_STRING);
+                            final CompoundTag displayCompound = tag.getCompound(Constants.Item.ITEM_DISPLAY);
+                            final ListTag list = displayCompound.getList(Constants.Item.ITEM_LORE, Constants.NBT.TAG_STRING);
                             return list.isEmpty() ? null : SpongeAdventure.json(list.stream().collect(NBTCollectors.toStringList()));
                         })
                         .set((h, v) -> {
