@@ -21,7 +21,7 @@ buildscript {
                 attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.SHADOWED))
             }
             version {
-                branch = "next"
+                branch = "fix/mappings-refresh"
             }
         }
     }
@@ -299,6 +299,7 @@ tasks {
                 json = gson.fromJson(it, com.google.gson.JsonObject::class.java)
             }
             json.remove("refmap")
+            zipEntry.compressedSize = -1
             dest.putNextEntry(zipEntry)
             dest.bufferedWriter(Charsets.UTF_8).also {
                 gson.toJson(json, it)
@@ -314,6 +315,7 @@ tasks {
             val output = StringWriter().also {
                 net.fabricmc.accesswidener.AccessWidenerWriter(srg).write(it)
             }.toString()
+            zipEntry.compressedSize = -1
             dest.putNextEntry(zipEntry)
             dest.writer(Charsets.UTF_8).also {
                 it.write(output)
