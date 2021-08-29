@@ -296,18 +296,18 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
     public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTemplate, WorldTemplate.Builder> implements WorldTemplate.Builder {
 
-        @Nullable protected Component displayName;
-        @Nullable protected RegistryReference<WorldType> worldType;
-        @Nullable protected ChunkGenerator generator;
-        @Nullable protected WorldGenerationConfig generationConfig;
-        @Nullable protected RegistryReference<GameMode> gameMode;
-        @Nullable protected RegistryReference<Difficulty> difficulty;
-        @Nullable protected SerializationBehavior serializationBehavior;
-        @Nullable protected Integer viewDistance;
-        @Nullable protected Vector3i spawnPosition;
-        @Nullable protected Boolean hardcore, pvp, commands;
+        @Nullable Component displayName;
+        @Nullable RegistryReference<WorldType> worldType;
+        @Nullable ChunkGenerator generator;
+        @Nullable WorldGenerationConfig generationConfig;
+        @Nullable RegistryReference<GameMode> gameMode;
+        @Nullable RegistryReference<Difficulty> difficulty;
+        @Nullable SerializationBehavior serializationBehavior;
+        @Nullable Integer viewDistance;
+        @Nullable Vector3i spawnPosition;
+        @Nullable Boolean hardcore, pvp, commands;
 
-        protected boolean loadOnStartup, performsSpawnLogic;
+        boolean loadOnStartup, performsSpawnLogic;
 
         @Override
         public Builder displayName(final @Nullable Component displayName) {

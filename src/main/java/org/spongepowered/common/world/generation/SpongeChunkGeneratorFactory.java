@@ -37,6 +37,7 @@ import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
+import org.spongepowered.common.util.SeedUtil;
 
 import java.util.Objects;
 
@@ -60,6 +61,11 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
         return (ConfigurableChunkGenerator<T>) (Object) new NoiseBasedChunkGenerator((net.minecraft.world.level.biome.BiomeSource)
                 Objects.requireNonNull(provider, "provider"), seed, () -> (NoiseGeneratorSettings) (Object) Objects.requireNonNull(config,
             "config"));
+    }
+
+    @Override
+    public <T extends NoiseGeneratorConfig> ConfigurableChunkGenerator<T> noise(final BiomeProvider provider, final String seed, final T config) {
+        return this.noise(provider, SeedUtil.compute(seed), config);
     }
 
     @Override
