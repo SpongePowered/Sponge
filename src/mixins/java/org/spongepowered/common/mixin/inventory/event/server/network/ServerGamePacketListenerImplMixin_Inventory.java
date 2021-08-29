@@ -51,6 +51,7 @@ import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
@@ -159,6 +160,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         return result;
     }
 
+    @Group(name = "lambda$handlePlaceRecipe", min = 1, max = 1)
     @SuppressWarnings({"UnresolvedMixinReference", "unchecked", "rawtypes"})
     @Redirect(method = "lambda$handlePlaceRecipe$10",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
@@ -177,6 +179,14 @@ public class ServerGamePacketListenerImplMixin_Inventory {
             recipeBookMenu.handlePlacement(shift, recipe, player);
             player.containerMenu.broadcastChanges();
         }
+    }
+
+    @Group(name = "lambda$handlePlaceRecipe", min = 1, max = 1)
+    @SuppressWarnings({"UnresolvedMixinReference", "rawtypes"})
+    @Redirect(method = "lambda$handlePlaceRecipe$11",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
+    private void impl$onPlaceRecipeForge(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final ServerPlayer player) {
+        this.impl$onPlaceRecipe(recipeBookMenu, shift, recipe, player);
     }
 
     @Inject(method = "handleSelectTrade", at = @At("RETURN"))

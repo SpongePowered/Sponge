@@ -105,11 +105,10 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     }
 
     @Override
-    protected ItemEntity impl$onPlayerDrop(final Player player, final ItemStack param0, final boolean param1, final boolean param2, final boolean dropAll) {
+    protected void impl$onPlayerDrop(boolean param0, CallbackInfoReturnable<Boolean> cir) {
         try (final EffectTransactor ignored = this.inventory$effectTransactor) {
-            return player.drop(param0, param1, param2);
-        } finally {
             this.containerMenu.broadcastChanges(); // for capture
+        } finally {
             this.inventory$effectTransactor = null;
         }
     }

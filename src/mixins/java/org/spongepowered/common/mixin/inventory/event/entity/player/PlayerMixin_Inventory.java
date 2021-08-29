@@ -83,10 +83,9 @@ public abstract class PlayerMixin_Inventory extends LivingEntityMixin_Inventory 
     protected void impl$beforeRemoveItem(final boolean param0, final CallbackInfoReturnable<Boolean> cir) {
     }
 
-    @Redirect(method = "drop(Z)Z",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"))
-    protected ItemEntity impl$onPlayerDrop(final Player player, final ItemStack param0, final boolean param1, final boolean param2, final boolean dropAll) {
-        return player.drop(param0, param1, param2);
+    @Inject(method = "drop(Z)Z",
+            at = @At(value = "RETURN"))
+    protected void impl$onPlayerDrop(final boolean param0, final CallbackInfoReturnable<Boolean> cir) {
     }
 
     @Redirect(method = "remove", at = @At(value = "INVOKE",
