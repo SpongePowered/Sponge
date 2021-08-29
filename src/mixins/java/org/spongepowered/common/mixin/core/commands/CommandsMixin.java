@@ -64,6 +64,7 @@ import org.spongepowered.common.util.CommandUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -208,57 +209,57 @@ public abstract class CommandsMixin implements CommandsBridge {
             final CommandSourceStack sourceButTyped,
             final Map<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> commandNodeToSuggestionNode
     ) {
-        if (SpongeNodePermissionCache.canUse(
-                rootCommandNode instanceof RootCommandNode, this.impl$commandManager.getDispatcher(), commandNode, sourceButTyped)) {
-
-            boolean shouldContinue = true;
-            if (commandNode instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) commandNode).isComplex()) {
-                shouldContinue = false;
-                final ServerPlayer e = (ServerPlayer) sourceButTyped.getEntity();
-                final boolean hasCustomSuggestionsAlready = CommandUtil.checkForCustomSuggestions(rootSuggestion);
-                final CommandNode<SharedSuggestionProvider> finalCommandNode = ((SpongeArgumentCommandNode<?>) commandNode).getComplexSuggestions(
-                        rootSuggestion,
-                        commandNodeToSuggestionNode,
-                        this.impl$playerNodeCache.get(e),
-                        !hasCustomSuggestionsAlready
-                );
-                if (!this.impl$getChildrenFromNode(commandNode).isEmpty()) {
-                    this.shadow$fillUsableCommands(commandNode, finalCommandNode, sourceButTyped, commandNodeToSuggestionNode);
-                }
-            }
-
-            if (shouldContinue) {
-                // If we've already created the node, then just attach what we already have.
-                final ServerPlayer e = (ServerPlayer) sourceButTyped.getEntity();
-                final List<CommandNode<SharedSuggestionProvider>> suggestionProviderCommandNode = this.impl$playerNodeCache.get(e).get(commandNode);
-                if (suggestionProviderCommandNode != null) {
-                    shouldContinue = false;
-                    boolean hasCustomSuggestionsAlready = CommandUtil.checkForCustomSuggestions(rootSuggestion);
-                    for (final CommandNode<SharedSuggestionProvider> node : suggestionProviderCommandNode) {
-                        // If we have custom suggestions, we need to limit it to one node, otherwise we trigger a bug
-                        // in the client where it'll send more than one custom suggestion request - which is fine, except
-                        // the client will then ignore all but one of them. This is a problem because we then end up with
-                        // no suggestions - CompletableFuture.allOf(...) will contain an exception if a future is cancelled,
-                        // meaning thenRun(...) does not run, which is how displaying the suggestions works...
-                        //
-                        // Because we don't control the client, we have to work around it here.
-                        if (hasCustomSuggestionsAlready && node instanceof ArgumentCommandNode) {
-                            final ArgumentCommandNode<SharedSuggestionProvider, ?> argNode = (ArgumentCommandNode<SharedSuggestionProvider, ?>) node;
-                            if (argNode.getCustomSuggestions() != null) {
-                                // Rebuild the node without the custom suggestions.
-                                rootSuggestion.addChild(this.impl$cloneArgumentCommandNodeWithoutSuggestions(argNode));
-                                continue;
-                            }
-                        } else if (node instanceof ArgumentCommandNode && ((ArgumentCommandNode<?, ?>) node).getCustomSuggestions() != null) {
-                            hasCustomSuggestionsAlready = true; // no more custom suggestions
+        final ServerPlayer e = (ServerPlayer) sourceButTyped.getEntity();
+        final Map<CommandNode<CommandSourceStack>, List<CommandNode<SharedSuggestionProvider>>> playerNodes = this.impl$playerNodeCache.get(e);
+        final List<CommandNode<SharedSuggestionProvider>> existingNodes = playerNodes.get(commandNode);
+        if (existingNodes != null) {
+            if (!existingNodes.isEmpty()) {
+                boolean hasCustomSuggestionsAlready = CommandUtil.checkForCustomSuggestions(rootSuggestion);
+                for (final CommandNode<SharedSuggestionProvider> node : existingNodes) {
+                    // If we have custom suggestions, we need to limit it to one node, otherwise we trigger a bug
+                    // in the client where it'll send more than one custom suggestion request - which is fine, except
+                    // the client will then ignore all but one of them. This is a problem because we then end up with
+                    // no suggestions - CompletableFuture.allOf(...) will contain an exception if a future is cancelled,
+                    // meaning thenRun(...) does not run, which is how displaying the suggestions works...
+                    //
+                    // Because we don't control the client, we have to work around it here.
+                    if (hasCustomSuggestionsAlready && node instanceof ArgumentCommandNode) {
+                        final ArgumentCommandNode<SharedSuggestionProvider, ?> argNode = (ArgumentCommandNode<SharedSuggestionProvider, ?>) node;
+                        if (argNode.getCustomSuggestions() != null) {
+                            // Rebuild the node without the custom suggestions.
+                            rootSuggestion.addChild(this.impl$cloneArgumentCommandNodeWithoutSuggestions(argNode));
+                            continue;
                         }
-                        rootSuggestion.addChild(node);
+                    } else if (node instanceof ArgumentCommandNode && ((ArgumentCommandNode<?, ?>) node).getCustomSuggestions() != null) {
+                        hasCustomSuggestionsAlready = true; // no more custom suggestions
                     }
+                    rootSuggestion.addChild(node);
                 }
             }
-            return shouldContinue;
+            // If empty, we have a node won't resolve (even if not complex), so we ignore it.
+            return false;
+        } else if (!SpongeNodePermissionCache.canUse(
+                rootCommandNode instanceof RootCommandNode, this.impl$commandManager.getDispatcher(), commandNode, sourceButTyped)) {
+            playerNodes.put(commandNode, Collections.emptyList());
+            return false;
         }
-        return false;
+
+        if (commandNode instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) commandNode).isComplex()) {
+            final boolean hasCustomSuggestionsAlready = CommandUtil.checkForCustomSuggestions(rootSuggestion);
+            final CommandNode<SharedSuggestionProvider> finalCommandNode = ((SpongeArgumentCommandNode<?>) commandNode).getComplexSuggestions(
+                    rootSuggestion,
+                    commandNodeToSuggestionNode,
+                    playerNodes,
+                    !hasCustomSuggestionsAlready
+            );
+            if (!this.impl$getChildrenFromNode(commandNode).isEmpty()) {
+                this.shadow$fillUsableCommands(commandNode, finalCommandNode, sourceButTyped, commandNodeToSuggestionNode);
+            }
+            return false;
+        }
+
+        // Normal node, handle it normally. We don't add to the playerNodeCache - the commandNodeToSuggestionNode map handles this.
+        return true;
     }
 
     @Redirect(method = "fillUsableCommands", at = @At(value = "INVOKE",
