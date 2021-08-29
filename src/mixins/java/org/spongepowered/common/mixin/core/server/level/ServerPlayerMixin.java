@@ -56,7 +56,6 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Unit;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -177,6 +176,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     private int impl$skinPartMask;
     private Set<SkinPart> impl$skinParts = ImmutableSet.of();
     private final PlayerOwnBorderListener impl$borderListener = new PlayerOwnBorderListener((net.minecraft.server.level.ServerPlayer) (Object) this);
+    private boolean impl$sleepingIgnored;
 
     @Override
     public net.minecraft.network.chat.@Nullable Component bridge$getConnectionMessageToSend() {
@@ -354,7 +354,17 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         this.impl$skinPartMask = mask;
     }
 
-        /*
+    @Override
+    public boolean bridge$sleepingIgnored() {
+        return this.impl$sleepingIgnored;
+    }
+
+    @Override
+    public void bridge$setSleepingIgnored(final boolean sleepingIgnored) {
+        this.impl$sleepingIgnored = sleepingIgnored;
+    }
+
+    /*
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
     private void impl$onPlayerActive(final CallbackInfo ci) {
         ((ServerPlayNetHandlerBridge) this.connection).bridge$resendLatestResourcePackRequest();

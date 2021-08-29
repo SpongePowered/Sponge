@@ -905,6 +905,10 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Inject(method = "stopSleeping", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;clearSleepingPos()V"))
     private void impl$callFinishSleepingEvent(CallbackInfo ci) {
+        if (this.level.isClientSide) {
+            return;
+        }
+
         final Optional<BlockPos> sleepingPos = this.shadow$getSleepingPos();
         if (!sleepingPos.isPresent()) {
             return;
