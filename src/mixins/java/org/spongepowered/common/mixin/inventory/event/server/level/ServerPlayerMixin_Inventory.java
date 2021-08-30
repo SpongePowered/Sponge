@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.event.server.level.player;
+package org.spongepowered.common.mixin.inventory.event.server.level;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -155,16 +155,6 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     @Override
     protected void inventory$onHandleHandSwap(final Map<EquipmentSlot, ItemStack> map, final CallbackInfo ci) {
         // For players ChangeInventoryEvent.SwapHand is called somewhere else
-    }
-
-    @Override
-    protected void inventory$onElytraUse(final CallbackInfo ci) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-        final TransactionalCaptureSupplier transactor = context.getTransactor();
-        final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;
-        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, PlayerInventoryTransaction.EventCreator.STANDARD)) {
-            player.inventoryMenu.broadcastChanges(); // capture
-        }
     }
 
     @Override

@@ -43,7 +43,7 @@
         "event.entity.LivingEntityMixin_Inventory",
         "event.entity.player.PlayerMixin_Inventory",
         "event.inventory.container.EnchantmentContainerMixin_Inventory",
-        "event.server.level.player.ServerPlayerMixin_Inventory",
+        "event.server.level.ServerPlayerMixin_Inventory",
         "event.server.network.ServerGamePacketListenerImplMixin_Inventory",
         "event.world.ContainersMixin_Inventory",
         "event.world.entity.item.ItemEntityMixin_Inventory",

@@ -40,7 +40,6 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -80,32 +79,6 @@ public abstract class LivingEntityMixin_Inventory extends Entity {
         if (customMainHand || customOffHand) {
             ci.cancel(); // If canceled or customized let handleEquipmentChanges send packets instead
         }
-    }
-
-    @Group(name = "inventory$onElytraUse", min = 1, max = 1)
-    @Inject(
-        method = "updateFallFlying",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/item/ItemStack;hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Consumer;)V",
-            shift = At.Shift.AFTER
-        )
-    )
-    protected void inventory$onElytraUse(final CallbackInfo ci) {
-    }
-
-    @SuppressWarnings("UnresolvedMixinReference")
-    @Group(name = "inventory$onElytraUse", min = 1, max = 1)
-    @Inject(
-            method = "updateFallFlying",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/item/ItemStack;elytraFlightTick(Lnet/minecraft/world/entity/LivingEntity;I)Z",
-                    shift = At.Shift.AFTER
-            )
-    )
-    protected void inventory$onElytraUseForge(final CallbackInfo ci) {
-        this.inventory$onElytraUse(ci);
     }
 
     @Inject(method = "handleEquipmentChanges",

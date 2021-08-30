@@ -39,24 +39,17 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MerchantMenu;
-import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -158,35 +151,6 @@ public class ServerGamePacketListenerImplMixin_Inventory {
             player.inventoryMenu.broadcastChanges();
         }
         return result;
-    }
-
-    @Group(name = "lambda$handlePlaceRecipe", min = 1, max = 1)
-    @SuppressWarnings({"UnresolvedMixinReference", "unchecked", "rawtypes"})
-    @Redirect(method = "lambda$handlePlaceRecipe$10",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
-    private void impl$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final ServerPlayer player) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-        final TransactionalCaptureSupplier transactor = context.getTransactor();
-
-        final Inventory craftInv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
-        if (!(craftInv instanceof CraftingInventory)) {
-            recipeBookMenu.handlePlacement(shift, recipe, player);
-            SpongeCommon.logger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
-            return;
-        }
-
-        try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, recipe, player, (CraftingInventory) craftInv)) {
-            recipeBookMenu.handlePlacement(shift, recipe, player);
-            player.containerMenu.broadcastChanges();
-        }
-    }
-
-    @Group(name = "lambda$handlePlaceRecipe", min = 1, max = 1)
-    @SuppressWarnings({"UnresolvedMixinReference", "rawtypes"})
-    @Redirect(method = "lambda$handlePlaceRecipe$11",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
-    private void impl$onPlaceRecipeForge(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final ServerPlayer player) {
-        this.impl$onPlaceRecipe(recipeBookMenu, shift, recipe, player);
     }
 
     @Inject(method = "handleSelectTrade", at = @At("RETURN"))
