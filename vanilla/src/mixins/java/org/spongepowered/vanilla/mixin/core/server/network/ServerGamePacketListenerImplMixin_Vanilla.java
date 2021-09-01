@@ -75,7 +75,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
     @Shadow @Final private MinecraftServer server;
 
     @Inject(method = "handleCustomPayload", at = @At(value = "HEAD"))
-    private void onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
+    private void vanilla$onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
         // For some reason, "ServerboundCustomPayloadPacket" is released in the processPacket
         // method of its class, only applicable to this packet, so just retain here.
         ((ServerboundCustomPayloadPacketAccessor) packet).accessor$data().retain();
@@ -126,7 +126,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
     @SuppressWarnings({"UnresolvedMixinReference", "unchecked", "rawtypes"})
     @Redirect(method = "lambda$handlePlaceRecipe$10",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
-    private void impl$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final net.minecraft.server.level.ServerPlayer player) {
+    private void vanilla$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final net.minecraft.server.level.ServerPlayer player) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
 

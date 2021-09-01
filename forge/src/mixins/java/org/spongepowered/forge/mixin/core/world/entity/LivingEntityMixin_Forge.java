@@ -41,7 +41,7 @@ public abstract class LivingEntityMixin_Forge {
                     shift = At.Shift.AFTER
             )
     )
-    protected void inventory$onElytraUse(final CallbackInfo ci) {
+    protected void forge$onElytraUse(final CallbackInfo ci) {
     }
 
 }

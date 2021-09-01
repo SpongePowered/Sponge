@@ -79,7 +79,7 @@ public abstract class ServerPlayerMixin_Vanilla extends LivingEntityMixin_Vanill
 
     // override from LivingEntityMixin_Vanilla
     @Override
-    protected void inventory$onElytraUse(final CallbackInfo ci) {
+    protected void vanilla$onElytraUse(final CallbackInfo ci) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;

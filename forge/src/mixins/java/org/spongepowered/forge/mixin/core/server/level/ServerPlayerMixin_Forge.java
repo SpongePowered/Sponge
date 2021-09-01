@@ -63,7 +63,7 @@ public abstract class ServerPlayerMixin_Forge extends LivingEntityMixin_Forge {
 
     // override from LivingEntityMixin_Forge
     @Override
-    protected void inventory$onElytraUse(final CallbackInfo ci) {
+    protected void forge$onElytraUse(final CallbackInfo ci) {
         final PhaseContext<?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;

@@ -41,7 +41,7 @@ public abstract class LivingEntityMixin_Vanilla extends EntityMixin_Vanilla {
                     shift = At.Shift.AFTER
             )
     )
-    protected void inventory$onElytraUse(final CallbackInfo ci) {
+    protected void vanilla$onElytraUse(final CallbackInfo ci) {
     }
 
 }
