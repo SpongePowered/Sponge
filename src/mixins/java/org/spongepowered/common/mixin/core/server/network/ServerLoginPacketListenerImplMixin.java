@@ -151,6 +151,8 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                         try {
                             this.server.getPlayerList()
                                     .placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile));
+                            // invalidate just to be sure there is no user cached for the online player anymore
+                            Sponge.server().userManager().removeFromCache(this.gameProfile.getId());
                         } catch (final Exception e) {
                             throw new RuntimeException(e);
                         }
