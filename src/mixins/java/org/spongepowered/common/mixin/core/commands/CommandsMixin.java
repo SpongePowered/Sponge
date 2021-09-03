@@ -238,7 +238,9 @@ public abstract class CommandsMixin implements CommandsBridge {
             }
             // If empty, we have a node won't resolve (even if not complex), so we ignore it.
             return false;
-        } else if (!SpongeNodePermissionCache.canUse(
+        // If we have already processed this node and it appears in the suggestion node list, prevent a potentially costly
+        // canUse check as we know we can already use it.
+        } else if (!commandNodeToSuggestionNode.containsKey(commandNode) && !SpongeNodePermissionCache.canUse(
                 rootCommandNode instanceof RootCommandNode, this.impl$commandManager.getDispatcher(), commandNode, sourceButTyped)) {
             playerNodes.put(commandNode, Collections.emptyList());
             return false;
