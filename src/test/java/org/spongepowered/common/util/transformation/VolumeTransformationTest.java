@@ -222,8 +222,8 @@ public final class VolumeTransformationTest {
                 StubRotations.CLOCKWISE_90
             ),
             Arguments.of(
-                Vector3i.from(-27, -40, -30),
-                Vector3i.from(91, 11, 57),
+                Vector3i.from(-11, -4, -10),
+                Vector3i.from(21, 11, 17),
                 Vector3i.from(-6, 2, -4),
                 Vector3i.from(1, -3, -1),
                 8,
