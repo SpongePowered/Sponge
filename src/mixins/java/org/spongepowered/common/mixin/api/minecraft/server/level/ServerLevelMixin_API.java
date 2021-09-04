@@ -232,7 +232,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public Collection<org.spongepowered.api.entity.Entity> entities() {
-        return (Collection< org.spongepowered.api.entity.Entity>) (Object) Collections.unmodifiableCollection(this.entitiesById.values());
+        return (Collection< org.spongepowered.api.entity.Entity>) (Object) ImmutableList.copyOf(this.entitiesById.values());
     }
 
     @Override
