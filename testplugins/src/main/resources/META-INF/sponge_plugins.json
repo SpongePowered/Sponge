@@ -213,6 +213,12 @@
             "name": "Lifecycle Test",
             "entrypoint": "org.spongepowered.test.lifecycle.LifecycleTest",
             "description": "Lifecycle Testing"
+        },
+        {
+            "id": "entityvolumetest",
+            "name": "Entity Volume test",
+            "entrypoint": "org.spongepowered.test.entity.EntityVolumeTest",
+            "description": "Entity Volume Testing"
         }
     ]
 }

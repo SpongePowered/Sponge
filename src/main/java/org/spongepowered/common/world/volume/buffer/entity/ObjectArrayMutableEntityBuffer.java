@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.volume.buffer.entity;
 
+import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -182,6 +183,11 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
         return this.entities.stream()
             .filter(entity -> uuid.equals(entity.uniqueId()))
             .findFirst();
+    }
+
+    @Override
+    public Collection<? extends Entity> entities() {
+        return ImmutableList.copyOf(this.entities);
     }
 
     @Override

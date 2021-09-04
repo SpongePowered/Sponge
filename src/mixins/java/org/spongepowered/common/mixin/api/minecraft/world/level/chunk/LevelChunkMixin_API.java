@@ -371,6 +371,11 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
         return (Optional) Arrays.stream(this.entitySections).flatMap(Collection::stream).filter(x -> x.getUUID().equals(uuid)).findAny();
     }
 
+    @Override
+    public Collection<? extends Entity> entities() {
+        return (Collection<? extends Entity>) (Object) Arrays.stream(this.entitySections).flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public <T extends Entity> Collection<? extends T> entities(final Class<? extends T> entityClass, final AABB box, @Nullable final Predicate<? super T> predicate) {

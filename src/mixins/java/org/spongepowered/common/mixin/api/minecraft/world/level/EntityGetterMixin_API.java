@@ -50,6 +50,7 @@ public interface EntityGetterMixin_API extends EntityVolume {
     @Shadow List<net.minecraft.world.entity.Entity> shadow$getEntities(@Nullable net.minecraft.world.entity.Entity p_175674_1_, net.minecraft.world.phys.AABB p_175674_2_, @Nullable Predicate<? super net.minecraft.world.entity.Entity> p_175674_3_);
     @Shadow<T extends net.minecraft.world.entity.Entity> List<T> shadow$getEntitiesOfClass(Class<? extends T> p_175647_1_, net.minecraft.world.phys.AABB p_175647_2_, @Nullable Predicate<? super T> p_175647_3_);
     @Shadow List<? extends net.minecraft.world.entity.player.Player> shadow$players();
+    @Shadow List<net.minecraft.world.entity.Entity> shadow$getEntities(@Nullable net.minecraft.world.entity.Entity param0, net.minecraft.world.phys.AABB param1);
     //@formatter:on
 
     @Override
@@ -81,6 +82,11 @@ public interface EntityGetterMixin_API extends EntityVolume {
     @Override
     default Collection<? extends Player> players() {
         return Collections.unmodifiableCollection((List<? extends Player>) (List<?>) this.shadow$players());
+    }
+
+    @Override
+    default Collection<? extends Entity> entities() {
+        return (Collection<? extends Entity>) (Object) this.shadow$getEntities(null, VecHelper.toMinecraftAABB(AABB.of(this.min(), this.max())));
     }
 
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
