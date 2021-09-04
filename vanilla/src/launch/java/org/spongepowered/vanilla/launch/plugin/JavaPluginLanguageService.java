@@ -49,7 +49,7 @@ public final class JavaPluginLanguageService extends JVMPluginLanguageService {
     }
 
     @Override
-    public Container loadMetadataContainer(final Environment environment, final InputStream stream) throws Exception{
+    public Container loadMetadataContainer(final Environment environment, final InputStream stream) throws Exception {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         return MetadataParser.read(reader, MetadataParser.gsonBuilder().create());
     }

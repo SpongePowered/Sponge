@@ -188,14 +188,15 @@ public final class VanillaPluginPlatform implements PluginPlatform {
 
                 for (final PluginResource pluginResource : resourcesEntry.getValue()) {
                     try {
-                        final List<PluginCandidate<PluginResource>> candidates =
-                                languageService.createPluginCandidates(this.standardEnvironment, pluginResource);
+                        final List<PluginCandidate<PluginResource>> candidates = languageService.createPluginCandidates(this.standardEnvironment,
+                                pluginResource);
                         if (candidates.isEmpty()) {
                             continue;
                         }
 
                         this.pluginCandidates.computeIfAbsent(languageService, k -> new LinkedList<>()).addAll(candidates);
-                    } catch (final Exception ignored) {
+                    } catch (final Exception ex) {
+                        ex.printStackTrace();
                     }
                 }
             }
