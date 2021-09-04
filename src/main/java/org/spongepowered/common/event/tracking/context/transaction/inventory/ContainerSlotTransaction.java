@@ -57,4 +57,8 @@ public class ContainerSlotTransaction extends ContainerBasedTransaction {
         return false;
     }
 
+    @Override
+    public boolean shouldHaveBeenAbsorbed() {
+        return true;
+    }
 }

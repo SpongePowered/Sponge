@@ -131,7 +131,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
             }
         }
         if (transaction.shouldHaveBeenAbsorbed()) {
-            SpongeCommon.logger().warn("Logged transaction without event transaction!", new Exception());
+            SpongeCommon.logger().warn("Logged transaction without event transaction!", new Exception(transaction.getClass().getName()));
         }
         // Finally, mark the transaction as recorded, does any setup handling with regards to capturing details
         // that otherwise would've been expensive to perform possibly later.

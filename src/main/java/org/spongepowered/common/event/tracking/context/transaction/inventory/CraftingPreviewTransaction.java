@@ -24,11 +24,27 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.crafting.RecipeType;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.item.inventory.CraftItemEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.inventory.util.ContainerUtil;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
+import java.util.List;
 import java.util.Optional;
 
 public class CraftingPreviewTransaction extends ContainerBasedTransaction {
@@ -52,7 +68,21 @@ public class CraftingPreviewTransaction extends ContainerBasedTransaction {
     }
 
     @Override
+    Optional<ClickContainerEvent> createInventoryEvent(final List<SlotTransaction> slotTransactions, final ImmutableList<Entity> entities,
+            final PhaseContext<@NonNull ?> context, final Cause currentCause) {
+        if (slotTransactions.isEmpty()) {
+            return Optional.empty();
+        }
+        final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.player.inventory.getCarried());
+        final SlotTransaction previewTransaction = this.getPreviewTransaction(this.craftingInventory.result(), slotTransactions);
+        final Optional<CraftingRecipe> recipe = player.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots, player.level).map(CraftingRecipe.class::cast);
+        final CraftItemEvent.Preview event = SpongeEventFactory.createCraftItemEventPreview(currentCause,
+                ContainerUtil.fromNative(this.menu), this.craftingInventory, new Transaction<>(cursor, cursor), previewTransaction, recipe, Optional.empty(), slotTransactions);
+        return Optional.of(event);
+    }
+
+    @Override
     public boolean shouldHaveBeenAbsorbed() {
-        return true;
+        return false;
     }
 }
