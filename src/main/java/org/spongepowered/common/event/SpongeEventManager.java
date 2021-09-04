@@ -197,7 +197,8 @@ public class SpongeEventManager implements EventManager {
         return String.join(", ", errors);
     }
 
-    private void register(RegisteredListener<? extends Event> handler) {
+    private void 
+        (RegisteredListener<? extends Event> handler) {
         register(Collections.singletonList(handler));
     }
 
@@ -327,18 +328,18 @@ public class SpongeEventManager implements EventManager {
 
     @Override
     public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, Order order, EventListener<? super T> listener) {
-        registerListener(plugin, eventClass, Order.DEFAULT, false, listener);
+        registerListener(plugin, eventClass, order, false, listener);
     }
 
     @Override
     public <T extends Event> void registerListener(Object plugin, TypeToken<T> eventType, Order order, EventListener<? super T> listener) {
-        registerListener(plugin, eventType, Order.DEFAULT, false, listener);
+        registerListener(plugin, eventType, order, false, listener);
     }
 
     @Override
     public <T extends Event> void registerListener(Object plugin, Class<T> eventClass, Order order, boolean beforeModifications,
             EventListener<? super T> listener) {
-        registerListener(plugin, TypeToken.of(eventClass), Order.DEFAULT, false, listener);
+        registerListener(plugin, TypeToken.of(eventClass), order, beforeModifications, listener);
     }
 
     @Override
