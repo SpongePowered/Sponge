@@ -197,8 +197,7 @@ public class SpongeEventManager implements EventManager {
         return String.join(", ", errors);
     }
 
-    private void 
-        (RegisteredListener<? extends Event> handler) {
+    private void register(RegisteredListener<? extends Event> handler) {
         register(Collections.singletonList(handler));
     }
 
