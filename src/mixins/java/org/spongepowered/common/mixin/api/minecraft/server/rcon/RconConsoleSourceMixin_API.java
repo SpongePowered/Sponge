@@ -26,9 +26,11 @@ package org.spongepowered.common.mixin.api.minecraft.server.rcon;
 
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.pointer.Pointers;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.rcon.RconConsoleSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.network.RconConnection;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,6 +45,11 @@ import java.util.UUID;
 @Mixin(RconConsoleSource.class)
 public abstract class RconConsoleSourceMixin_API implements RconConsoleSourceBridge, RconConnection {
 
+    private static final String API$IDENTIFIER = "Recon";
+    private static final Pointers API$POINTERS = Pointers.builder()
+        .withStatic(Identity.NAME, RconConsoleSourceMixin_API.API$IDENTIFIER)
+        .build();
+
     // @formatter:off
     @Shadow public abstract void shadow$sendMessage(net.minecraft.network.chat.Component param0, UUID param1);
     // @formatter:on
@@ -50,7 +57,7 @@ public abstract class RconConsoleSourceMixin_API implements RconConsoleSourceBri
     @Override
     public String identifier() {
         // RCon no longer has an identifier on the class, but it passes this to its CommandSource
-        return "Recon";
+        return RconConsoleSourceMixin_API.API$IDENTIFIER;
     }
 
     @Override
@@ -59,7 +66,7 @@ public abstract class RconConsoleSourceMixin_API implements RconConsoleSourceBri
     }
 
     @Override
-    public void setAuthorized(boolean authorized) {
+    public void setAuthorized(final boolean authorized) {
         ((RconClientAccessor) this.bridge$getClient()).accessor$authed(authorized);
     }
 
@@ -78,8 +85,15 @@ public abstract class RconConsoleSourceMixin_API implements RconConsoleSourceBri
         ((RemoteConnection)this.bridge$getClient()).close();
     }
 
+    // Audience
+
     @Override
     public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
         this.shadow$sendMessage(SpongeAdventure.asVanilla(message), identity.uuid());
+    }
+
+    @Override
+    public @NotNull Pointers pointers() {
+        return RconConsoleSourceMixin_API.API$POINTERS;
     }
 }

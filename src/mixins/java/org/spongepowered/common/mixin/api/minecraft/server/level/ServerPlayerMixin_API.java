@@ -35,6 +35,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
+import net.kyori.adventure.title.TitlePart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.protocol.Packet;
@@ -319,7 +320,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (!SpongeCommon.post(event)) {
             event.chatFormatter().ifPresent(formatter ->
                 event.audience().map(SpongeAdventure::unpackAudiences).ifPresent(targets -> {
-                    for (Audience target : targets) {
+                    for (final Audience target : targets) {
                         formatter.format(this, target, event.message(), event.originalMessage()).ifPresent(formattedMessage ->
                             target.sendMessage(this, formattedMessage));
                     }
@@ -431,6 +432,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
                         .withDynamic(Identity.NAME, () -> ((net.minecraft.server.level.ServerPlayer) (Object) this).getGameProfile().getName())
                         .withDynamic(Identity.DISPLAY_NAME, () -> this.displayName().get())
                         .withDynamic(Identity.UUID, ((Entity) (Object) this)::getUUID)
+                        .withDynamic(Identity.LOCALE, this::locale)
                         .withStatic(PermissionChecker.POINTER, permission -> SpongeAdventure.asAdventure(this.permissionValue(permission)))
                         .build();
                 } else {
@@ -484,6 +486,24 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         }
         this.connection.send(new ClientboundSetTitlesPacket(ClientboundSetTitlesPacket.Type.SUBTITLE, SpongeAdventure.asVanilla(title.subtitle())));
         this.connection.send(new ClientboundSetTitlesPacket(ClientboundSetTitlesPacket.Type.TITLE, SpongeAdventure.asVanilla(title.title())));
+    }
+
+    @Override
+    public <T> void sendTitlePart(final @NotNull TitlePart<T> part, final @NotNull T value) {
+        if (this.impl$isFake) {
+            return;
+        }
+        Objects.requireNonNull(value, "value");
+        if (part == TitlePart.TITLE) {
+            this.connection.send(new ClientboundSetTitlesPacket(ClientboundSetTitlesPacket.Type.TITLE, SpongeAdventure.asVanilla((Component) value)));
+        } else if (part == TitlePart.SUBTITLE) {
+            this.connection.send(new ClientboundSetTitlesPacket(ClientboundSetTitlesPacket.Type.SUBTITLE, SpongeAdventure.asVanilla((Component) value)));
+        } else if (part == TitlePart.TIMES) {
+            final Title.Times times = (Title.Times) value;
+            this.connection.send(new ClientboundSetTitlesPacket(this.api$durationToTicks(times.fadeIn()), this.api$durationToTicks(times.stay()), this.api$durationToTicks(times.fadeOut())));
+        } else {
+            throw new IllegalArgumentException("Unknown TitlePart '" + part + "'");
+        }
     }
 
     @Override
