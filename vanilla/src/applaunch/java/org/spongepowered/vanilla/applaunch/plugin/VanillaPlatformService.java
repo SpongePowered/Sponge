@@ -31,7 +31,7 @@ import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.asm.launch.MixinLaunchPlugin;
+import org.spongepowered.asm.launch.MixinLaunchPluginLegacy;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResource;
@@ -72,7 +72,7 @@ public final class VanillaPlatformService implements ITransformationService {
         VanillaPlatformService.pluginPlatform.locatePluginResources();
         VanillaPlatformService.pluginPlatform.createPluginCandidates();
         final AccessWidenerTransformationService accessWidener = environment.getProperty(AccessWidenerTransformationService.INSTANCE.get()).orElse(null);
-        final ILaunchPluginService mixin = environment.findLaunchPlugin(MixinLaunchPlugin.NAME).orElse(null);
+        final ILaunchPluginService mixin = environment.findLaunchPlugin(MixinLaunchPluginLegacy.NAME).orElse(null);
 
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
