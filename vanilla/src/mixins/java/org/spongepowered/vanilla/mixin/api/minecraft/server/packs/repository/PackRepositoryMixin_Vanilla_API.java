@@ -22,37 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject.plugin;
+package org.spongepowered.vanilla.mixin.api.minecraft.server.packs.repository;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Scopes;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.inject.InjectionPointProvider;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule;
+import net.minecraft.server.packs.repository.PackRepository;
+import org.spongepowered.api.resource.pack.Pack;
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.vanilla.bridge.server.packs.repository.PackRepositoryBridge_Vanilla;
 
-/**
- * A module installed for each plugin.
- */
-public final class PluginModule extends AbstractModule {
+import java.util.Objects;
 
-    private final PluginContainer container;
-    private final Class<?> pluginClass;
-
-    public PluginModule(final PluginContainer container, final Class<?> pluginClass) {
-        this.container = container;
-        this.pluginClass = pluginClass;
-    }
+@Mixin(PackRepository.class)
+public abstract class PackRepositoryMixin_Vanilla_API implements org.spongepowered.api.resource.pack.PackRepository {
 
     @Override
-    protected void configure() {
-        this.bind(this.pluginClass).in(Scopes.SINGLETON);
-
-        this.install(new InjectionPointProvider());
-
-        this.bind(PluginContainer.class).toInstance(this.container);
-        this.bind(Logger.class).toInstance(this.container.logger());
-
-        this.install(new PluginConfigurationModule());
+    public Pack pack(final PluginContainer container) {
+        return (Pack) ((PackRepositoryBridge_Vanilla) this).bridge$pack(Objects.requireNonNull(container, "container"));
     }
 }

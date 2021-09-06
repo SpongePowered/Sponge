@@ -38,6 +38,7 @@ import org.spongepowered.plugin.builtin.jvm.JVMKeys;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -128,7 +129,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
     }
 
     public Map<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> getCandidates() {
-        return this.pluginCandidates;
+        return Collections.unmodifiableMap(this.pluginCandidates);
     }
 
     public void initialize() {
@@ -195,7 +196,6 @@ public final class VanillaPluginPlatform implements PluginPlatform {
                         if (candidates.isEmpty()) {
                             continue;
                         }
-
                         this.pluginCandidates.computeIfAbsent(languageService, k -> new LinkedList<>()).addAll(candidates);
                     } catch (final Exception ex) {
                         ex.printStackTrace();

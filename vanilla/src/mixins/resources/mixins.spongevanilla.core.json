@@ -35,7 +35,8 @@
         "world.level.LevelMixin_Vanilla",
         "world.level.portal.PortalForcerMixin_Vanilla",
         "world.level.storage.LevelStorageSourceMixin_Vanilla",
-        "world.level.block.FireBlockMixin_Vanilla"
+        "world.level.block.FireBlockMixin_Vanilla",
+        "server.packs.repository.PackRepositoryMixin_Vanilla"
     ],
     "overwrites": {
         "conformVisibility": true

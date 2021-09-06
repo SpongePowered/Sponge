@@ -63,8 +63,8 @@ import org.spongepowered.api.item.recipe.RecipeManager;
 import org.spongepowered.api.map.MapStorage;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.registry.Registry;
-import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.resource.ResourceManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.ServiceProvider;
@@ -119,6 +119,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     // @formatter:off
     @Shadow @Final public long[] tickTimes;
     @Shadow @Final protected WorldData worldData;
+    @Shadow private ServerResources resources;
 
     @Shadow public abstract net.minecraft.world.item.crafting.RecipeManager shadow$getRecipeManager();
     @Shadow public abstract PlayerList shadow$getPlayerList();
@@ -136,6 +137,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     @Shadow public abstract boolean shadow$isSpawningAnimals();
     @Shadow public abstract boolean shadow$isNetherEnabled();
     @Shadow public abstract Commands shadow$getCommands();
+    @Shadow public abstract PackRepository shadow$getPackRepository();
     // @formatter:on
 
     private Iterable<? extends Audience> audiences;
@@ -404,6 +406,16 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     @Override
     public CauseStackManager causeStackManager() {
         return PhaseTracker.getCauseStackManager();
+    }
+
+    @Override
+    public org.spongepowered.api.resource.pack.PackRepository packRepository() {
+        return (org.spongepowered.api.resource.pack.PackRepository) this.shadow$getPackRepository();
+    }
+
+    @Override
+    public ResourceManager resourceManager() {
+        return (ResourceManager) this.resources.getResourceManager();
     }
 
     @Override

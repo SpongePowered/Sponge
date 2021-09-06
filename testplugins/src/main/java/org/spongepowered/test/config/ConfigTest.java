@@ -27,8 +27,6 @@ package org.spongepowered.test.config;
 import com.google.inject.Inject;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.api.asset.Asset;
-import org.spongepowered.api.asset.AssetId;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.apache.logging.log4j.Logger;
@@ -42,15 +40,14 @@ import org.spongepowered.configurate.reference.ValueReference;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
+import java.net.URL;
+
 @Plugin("configtest")
 public final class ConfigTest implements LoadableModule {
 
     private final Logger logger;
     private final ConfigurationReference<CommentedConfigurationNode> reference;
     private ValueReference<ExampleConfiguration, CommentedConfigurationNode> config;
-
-    @Inject @AssetId("test.txt") private Asset testOne;
-    @Inject @AssetId("test2.txt") private Asset secondTest;
 
     @Inject
     ConfigTest(final Logger logger, final @DefaultConfig(sharedRoot = true) ConfigurationReference<CommentedConfigurationNode> reference) {
@@ -60,7 +57,9 @@ public final class ConfigTest implements LoadableModule {
 
     @Listener
     public void onConstruction(final ConstructPluginEvent event) {
-        this.logger.info("Asset one: {}, asset two: {}", this.testOne.url(), this.secondTest.url());
+        final URL testOne = this.getClass().getResource("/configtest/test.txt");
+        final URL testTwo = this.getClass().getResource("/configtest/test2.txt");
+        this.logger.info("Asset one: {}, asset two: {}", testOne, testTwo);
         try {
             this.config = this.reference.referenceTo(ExampleConfiguration.class);
             this.reference.save();

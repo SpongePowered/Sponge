@@ -225,6 +225,12 @@
             "name": "Entity Volume test",
             "entrypoint": "org.spongepowered.test.entity.EntityVolumeTest",
             "description": "Entity Volume Testing"
+        },
+        {
+            "id": "packtest",
+            "name": "Pack Test",
+            "entrypoint": "org.spongepowered.test.pack.PackTest",
+            "description": "Pack Testing"
         }
     ]
 }

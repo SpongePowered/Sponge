@@ -22,30 +22,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.asset;
+package org.spongepowered.common.resource;
 
-import org.spongepowered.api.asset.Asset;
-import org.spongepowered.plugin.PluginContainer;
+import net.minecraft.server.packs.resources.Resource;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.resource.ResourcePath;
 
-import java.net.URL;
+import java.io.IOException;
+import java.io.InputStream;
 
-public final class SpongeAsset implements Asset {
+public final class SpongeResource implements org.spongepowered.api.resource.Resource {
 
-    private final PluginContainer plugin;
-    private final URL url;
+    private final ResourcePath path;
+    private InputStream stream;
 
-    SpongeAsset(final PluginContainer plugin, final URL url) {
-        this.plugin = plugin;
-        this.url = url;
+    public SpongeResource(final Resource resource) {
+        this.path = new SpongeResourcePath((ResourceKey) (Object) resource.getLocation());
+        this.stream = resource.getInputStream();
+    }
+
+    public SpongeResource(final ResourcePath path, final InputStream stream) {
+        this.path = path;
+        this.stream = stream;
+
     }
 
     @Override
-    public PluginContainer owner() {
-        return this.plugin;
+    public ResourcePath path() {
+        return this.path;
     }
 
     @Override
-    public URL url() {
-        return this.url;
+    public InputStream inputStream() {
+        if (this.stream == null) {
+            throw new IllegalStateException("Attempt made to access the data of a resource after it has been closed!");
+        }
+        return this.stream;
+    }
+
+    @Override
+    public void close() throws IOException {
+        try {
+            this.stream.close();
+        } finally {
+            this.stream = null;
+        }
     }
 }

@@ -27,6 +27,7 @@ package org.spongepowered.vanilla.launch.plugin;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.apache.logging.log4j.Level;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.InvalidPluginException;
@@ -46,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -61,11 +63,15 @@ public final class VanillaPluginManager implements SpongePluginManager {
     private final Map<String, PluginContainer> plugins;
     private final Map<Object, PluginContainer> instancesToPlugins;
     private final List<PluginContainer> sortedPlugins;
+    private final Map<String, Set<PluginResource>> locatedResources;
+    private final Map<PluginContainer, PluginResource> containerToResource;
 
     public VanillaPluginManager() {
         this.plugins = new Object2ObjectOpenHashMap<>();
         this.instancesToPlugins = new IdentityHashMap<>();
         this.sortedPlugins = new ArrayList<>();
+        this.locatedResources = new Object2ObjectOpenHashMap<>();
+        this.containerToResource = new Object2ObjectOpenHashMap<>();
     }
 
     @Override
@@ -85,6 +91,8 @@ public final class VanillaPluginManager implements SpongePluginManager {
 
     @SuppressWarnings("unchecked")
     public void loadPlugins(final VanillaPluginPlatform platform) {
+        this.locatedResources.putAll(platform.getResources());
+
         final Map<PluginCandidate<PluginResource>, PluginLanguageService<PluginResource>> pluginLanguageLookup = new HashMap<>();
         final Map<PluginLanguageService<PluginResource>, PluginLoader<PluginResource, PluginContainer>> pluginLoaders = new HashMap<>();
 
@@ -146,7 +154,9 @@ public final class VanillaPluginManager implements SpongePluginManager {
                 final PluginLanguageService<PluginResource> languageService = pluginLanguageLookup.get(candidate);
                 final PluginLoader<PluginResource, PluginContainer> pluginLoader = pluginLoaders.get(languageService);
                 try {
-                    this.addPlugin(pluginLoader.loadPlugin(platform.getStandardEnvironment(), candidate, launchClassloader));
+                    final PluginContainer container = pluginLoader.loadPlugin(platform.getStandardEnvironment(), candidate, launchClassloader);
+                    this.addPlugin(container);
+                    this.containerToResource.put(container, candidate.resource());
                 } catch (final InvalidPluginException e) {
                     failedInstances.put(candidate, "Failed to construct: see stacktrace(s) above this message for details.");
                     e.printStackTrace();
@@ -165,6 +175,15 @@ public final class VanillaPluginManager implements SpongePluginManager {
         if (!(plugin instanceof VanillaDummyPluginContainer)) {
             this.instancesToPlugins.put(plugin.instance(), plugin);
         }
+    }
+
+    public Map<String, Set<PluginResource>> locatedResources() {
+        return Collections.unmodifiableMap(this.locatedResources);
+    }
+
+    @Nullable
+    public PluginResource resource(final PluginContainer container) {
+        return this.containerToResource.get(container);
     }
 
     private boolean stillValid(final PluginCandidate<PluginResource> candidate, final Map<PluginCandidate<PluginResource>, String> consequential) {

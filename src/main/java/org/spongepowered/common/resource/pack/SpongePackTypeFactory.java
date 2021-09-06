@@ -22,37 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject.plugin;
+package org.spongepowered.common.resource.pack;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Scopes;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.inject.InjectionPointProvider;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.api.resource.pack.PackType;
 
-/**
- * A module installed for each plugin.
- */
-public final class PluginModule extends AbstractModule {
+public final class SpongePackTypeFactory implements PackType.Factory {
 
-    private final PluginContainer container;
-    private final Class<?> pluginClass;
-
-    public PluginModule(final PluginContainer container, final Class<?> pluginClass) {
-        this.container = container;
-        this.pluginClass = pluginClass;
+    @Override
+    public PackType client() {
+        return (PackType) (Object) net.minecraft.server.packs.PackType.CLIENT_RESOURCES;
     }
 
     @Override
-    protected void configure() {
-        this.bind(this.pluginClass).in(Scopes.SINGLETON);
-
-        this.install(new InjectionPointProvider());
-
-        this.bind(PluginContainer.class).toInstance(this.container);
-        this.bind(Logger.class).toInstance(this.container.logger());
-
-        this.install(new PluginConfigurationModule());
+    public PackType server() {
+        return (PackType) (Object) net.minecraft.server.packs.PackType.SERVER_DATA;
     }
+
 }
