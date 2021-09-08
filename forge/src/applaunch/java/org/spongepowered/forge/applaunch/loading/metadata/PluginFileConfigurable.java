@@ -62,7 +62,7 @@ public final class PluginFileConfigurable implements IConfigurable {
         }
 
         if ("loaderVersion".equals(query)) {
-            return (Optional<T>) Optional.of(this.container.loader().version());
+            return (Optional<T>) Optional.of(this.container.loader().version().toString());
         }
 
         if ("license".equals(query)) {

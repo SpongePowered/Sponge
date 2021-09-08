@@ -59,7 +59,7 @@ public final class PluginDependencyConfigurable implements IConfigurable {
             return (Optional<T>) Optional.of(!this.dependency.optional());
         }
         if ("versionRange".equals(query)) {
-            return (Optional<T>) Optional.of(this.dependency.version());
+            return (Optional<T>) Optional.of(this.dependency.version().toString());
         }
         if ("ordering".equals(query)) {
             return (Optional<T>) Optional.of(this.loadToOrdering(this.dependency.loadOrder()).toString());
