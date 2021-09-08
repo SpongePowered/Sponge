@@ -28,6 +28,7 @@ import com.google.common.base.CaseFormat;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.FrameType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -343,7 +344,14 @@ final class VanillaRegistryLoader {
         return this.holder.createRegistry(type, () -> {
             final Map<ResourceKey, A> map = new HashMap<>();
             for (final Map.Entry<I, String> value : byName.entrySet()) {
-                map.put(ResourceKey.sponge(value.getValue()), (A) value.getKey());
+                final String rawId = value.getValue();
+                // To address Vanilla shortcomings, some mods will manually prefix their modid onto values they put into Vanilla registry-like
+                // registrars. We need to account for that possibility
+                if (rawId.contains(":")) {
+                    map.put((ResourceKey) (Object) new ResourceLocation(rawId), (A) value.getKey());
+                } else {
+                    map.put(ResourceKey.sponge(rawId), (A) value.getKey());
+                }
             }
             return map;
         }, false);
