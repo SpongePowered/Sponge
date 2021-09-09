@@ -73,7 +73,7 @@ public abstract class NaturalSpawnerMixin {
         final int tick = NaturalSpawnerMixin.impl$getSpawningTickRate(classification, level);
         // Unknown category/use default
         if (tick == -1) {
-            return ((NaturalSpawner_SpawnStateBridge) manager).bridge$canSpawnForCategoryInWorld(classification, level);
+            return ((NaturalSpawner_SpawnStateAccessor) manager).canSpawnForCategory(classification);
         }
         // Turn off spawns
         if (tick == 0) {
