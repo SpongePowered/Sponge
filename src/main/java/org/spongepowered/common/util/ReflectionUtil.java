@@ -57,7 +57,7 @@ import java.util.List;
  */
 public final class ReflectionUtil {
 
-    public static final Marker STUPID_REFLECTION = MarkerManager.getMarker("REFLECTION_SCANNING");
+    public static final Marker REFLECTION_SCANNING = MarkerManager.getMarker("REFLECTION_SCANNING");
     private static final Class<?>[] NEIGHBOR_CHANGED_METHOD_ARGS = {
         BlockState.class,
         Level.class,
@@ -128,10 +128,11 @@ public final class ReflectionUtil {
             final Class<?> declaringClass = targetClass.getMethod(targetMethodForEnvironment, methodParameters).getDeclaringClass();
             return !ignoredClass.equals(declaringClass);
         } catch (final NoSuchMethodException e) {
-            SpongeCommon.logger().fatal(ReflectionUtil.STUPID_REFLECTION, "Could not find desired method {} under environment method name {}", methodName, targetMethodForEnvironment);
+            SpongeCommon.logger().fatal(ReflectionUtil.REFLECTION_SCANNING, "Could not find desired method {} in class {} under environment method "
+                + "name {}", methodName, targetClass.getSimpleName(), targetMethodForEnvironment);
             return true;
         } catch (final NoClassDefFoundError e) {
-            SpongeCommon.logger().fatal(ReflectionUtil.STUPID_REFLECTION, "Failed to load class in {} while scanning desired method {} under environment method name {}", targetClass, methodName, targetMethodForEnvironment);
+            SpongeCommon.logger().fatal(ReflectionUtil.REFLECTION_SCANNING, "Failed to load class in {} while scanning desired method {} under environment method name {}", targetClass, methodName, targetMethodForEnvironment);
             return true;
         }
 
