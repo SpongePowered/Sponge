@@ -61,16 +61,12 @@ public final class Main {
         this.pluginPlatform.setVersion(implementationVersion == null ? "dev" : implementationVersion);
         this.pluginPlatform.setBaseDirectory(AppCommandLine.gameDirectory);
 
-        final Path modsDirectory = AppCommandLine.gameDirectory.resolve("mods");
-        if (Files.notExists(modsDirectory)) {
-            Files.createDirectories(modsDirectory);
-        }
         final Path pluginsDirectory = AppCommandLine.gameDirectory.resolve("plugins");
-        final List<Path> pluginDirectories = new ArrayList<>();
-        pluginDirectories.add(modsDirectory);
-        if (Files.exists(pluginsDirectory)) {
-            pluginDirectories.add(pluginsDirectory);
+        if (Files.notExists(pluginsDirectory)) {
+            Files.createDirectories(pluginsDirectory);
         }
+        final List<Path> pluginDirectories = new ArrayList<>();
+        pluginDirectories.add(pluginsDirectory);
         this.pluginPlatform.setPluginDirectories(pluginDirectories);
         this.pluginPlatform.setMetadataFilePath(PluginPlatformConstants.METADATA_FILE_LOCATION);
 

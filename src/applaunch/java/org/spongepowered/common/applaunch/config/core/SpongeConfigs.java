@@ -100,7 +100,6 @@ public final class SpongeConfigs {
      *
      * @return global config
      */
-    @SuppressWarnings("deprecation") // getGlobalInheritable
     public static ConfigHandle<CommonConfig> getCommon() {
         if (SpongeConfigs.sponge == null) {
             SpongeConfigs.initLock.lock();
@@ -118,13 +117,8 @@ public final class SpongeConfigs {
         return SpongeConfigs.sponge;
     }
 
-
     // Config-internal
     // everything below here should (mostly) not be directly accessed
-
-    public static HoconConfigurationLoader createLoader(final Path path) throws IOException {
-        return SpongeConfigs.createLoader(path, SpongeConfigs.OPTIONS);
-    }
 
     public static HoconConfigurationLoader createLoader(final Path path, final ConfigurationOptions options) throws IOException {
         Files.createDirectories(path.getParent());
@@ -137,7 +131,7 @@ public final class SpongeConfigs {
 
     public static <T extends Config> ConfigHandle<T> create(final Class<T> instance, final @Nullable Supplier<ConfigurationTransformation> versionModifier, final String fileName) {
         try {
-            final HoconConfigurationLoader loader = SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(fileName));
+            final HoconConfigurationLoader loader = SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(fileName), SpongeConfigs.OPTIONS);
             final ConfigHandle<T> handle = new ConfigHandle<>(instance, versionModifier, loader);
             handle.load();
             return handle;
@@ -192,9 +186,10 @@ public final class SpongeConfigs {
 
         try {
             final ConfigurationTransformation xform = ConfigurationTransformation.chain(
-                    new FileMovingConfigurationTransformation(SpongeConfigs.MIGRATE_SPONGE_PATHS, SpongeConfigs.createLoader(commonFile), true),
-                    new FileMovingConfigurationTransformation(SpongeConfigs.MIGRATE_METRICS_PATHS, SpongeConfigs.createLoader(metricsFile), true));
-            final ConfigurationLoader<CommentedConfigurationNode> globalLoader = SpongeConfigs.createLoader(oldGlobalFile);
+                    new FileMovingConfigurationTransformation(SpongeConfigs.MIGRATE_SPONGE_PATHS, SpongeConfigs.createLoader(commonFile, SpongeConfigs.OPTIONS), true),
+                    new FileMovingConfigurationTransformation(SpongeConfigs.MIGRATE_METRICS_PATHS, SpongeConfigs.createLoader(metricsFile, SpongeConfigs.OPTIONS),
+                            true));
+            final ConfigurationLoader<CommentedConfigurationNode> globalLoader = SpongeConfigs.createLoader(oldGlobalFile, SpongeConfigs.OPTIONS);
 
             Files.copy(oldGlobalFile, oldGlobalFile.resolveSibling(SpongeConfigs.GLOBAL_NAME + ".old-backup"));
             final CommentedConfigurationNode source = globalLoader.load();

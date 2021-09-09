@@ -24,22 +24,13 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
+import org.spongepowered.common.applaunch.config.core.TokenHoldingString;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.common.applaunch.config.core.TokenHoldingString;
 
 @ConfigSerializable
 public final class GeneralCategory {
-
-    @Setting("plugins-dir")
-    @Comment("Additional directory to search for plugins, relative to the \n"
-            + "execution root or specified as an absolute path. \n"
-            + "Note that the default: \"${CANONICAL_MODS_DIR}/plugins\" \n"
-            + "is going to search for a plugins folder in the mods directory. \n"
-            + "If you wish for the plugins folder to reside in the root game \n"
-            + "directory, change the value to \"${CANONICAL_GAME_DIR}/plugins\".")
-    public TokenHoldingString pluginsDir = TokenHoldingString.of("${CANONICAL_MODS_DIR}/plugins");
 
     @Setting("config-dir")
     @Comment("The directory for Sponge plugin configurations, relative to the  \n"

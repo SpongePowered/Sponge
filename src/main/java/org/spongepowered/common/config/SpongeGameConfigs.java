@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.config;
 
+import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -45,7 +46,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import net.minecraft.world.level.Level;
 
 /**
  * SpongeCommon configurations that need to interact with game state
@@ -115,8 +115,8 @@ public final class SpongeGameConfigs {
             }
         }
         try {
-            final InheritableConfigHandle<WorldConfig> config = new InheritableConfigHandle<>(WorldConfig.class, BaseConfig::transformation, SpongeConfigs.createLoader(configPath),
-                    SpongeGameConfigs.getGlobalInheritable());
+            final InheritableConfigHandle<WorldConfig> config = new InheritableConfigHandle<>(WorldConfig.class, BaseConfig::transformation,
+                    SpongeConfigs.createLoader(configPath, SpongeConfigs.OPTIONS), SpongeGameConfigs.getGlobalInheritable());
             config.load();
             return config;
         } catch (final IOException ex) {
@@ -155,7 +155,7 @@ public final class SpongeGameConfigs {
                     try {
                         SpongeGameConfigs.global = new InheritableConfigHandle<>(GlobalConfig.class,
                                 BaseConfig::transformation,
-                                SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(GlobalConfig.FILE_NAME)), null);
+                                SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(GlobalConfig.FILE_NAME), SpongeConfigs.OPTIONS), null);
                         SpongeGameConfigs.global.load();
                     } catch (final IOException e) {
                         SpongeGameConfigs.LOGGER.error("Unable to load global world configuration in {}. Sponge will run with default settings",
