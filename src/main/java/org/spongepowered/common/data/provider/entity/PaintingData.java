@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.api.scheduler.Task;
@@ -80,7 +81,7 @@ public final class PaintingData {
                                     players.add(player);
                                 }
                                 for (final ServerPlayer player : players) {
-                                    SpongeCommon.serverScheduler().submit(Task.builder()
+                                    Sponge.server().scheduler().submit(Task.builder()
                                             .plugin(Launch.instance().commonPlugin())
                                             .delay(new SpongeTicks(SpongeGameConfigs.getForWorld(h.level).get().entity.painting.respawnDelay))
                                             .execute(() -> {

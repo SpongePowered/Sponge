@@ -175,7 +175,7 @@ public final class SpongeUserManager implements UserManager {
 
     @Override
     public CompletableFuture<Boolean> delete(final UUID uuid) {
-        if (SpongeCommon.server().getPlayerList().getPlayer(Objects.requireNonNull(uuid, "uuid")) != null) {
+        if (((MinecraftServer) Sponge.server()).getPlayerList().getPlayer(Objects.requireNonNull(uuid, "uuid")) != null) {
             // cannot delete live player.
             return CompletableFuture.completedFuture(false);
         }

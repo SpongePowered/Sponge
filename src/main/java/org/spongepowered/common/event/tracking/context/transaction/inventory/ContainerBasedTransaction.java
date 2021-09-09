@@ -37,6 +37,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -283,7 +284,7 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
                     SpongeEventFactory.createCraftItemEventCraft(PhaseTracker.getCauseStackManager().currentCause(),
                             ContainerUtil.fromNative(this.menu), craftedItem, this.craftingInventory, event.cursorTransaction(),
                             Optional.ofNullable(this.onTakeRecipe), Optional.of(this.craftingInventory.result()), event.transactions());
-            SpongeCommon.post(craftEvent);
+            Sponge.eventManager().post(craftEvent);
             this.handleEventResults(player, craftEvent);
             if (craftEvent.isCancelled() && this.shiftCraftingResult != null) {
                 this.shiftCraftingResult.setCount(0);
@@ -300,7 +301,7 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
             final CraftItemEvent.Preview previewEvent = SpongeEventFactory
                     .createCraftItemEventPreview(event.cause(), (Container) this.menu, this.craftingInventory, event.cursorTransaction(), previewTransaction, recipe, Optional.empty(), event
                             .transactions());
-            SpongeCommon.post(previewEvent);
+            Sponge.eventManager().post(previewEvent);
             this.handleEventResults(player, previewEvent);
 
             if (player instanceof ServerPlayer && previewEvent instanceof CraftItemEvent.Preview) {

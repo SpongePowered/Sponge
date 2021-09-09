@@ -44,6 +44,7 @@ import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -228,7 +229,7 @@ public final class TrackingUtil {
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(block, pos, BlockChangeFlags.NONE);
             final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(PhaseTracker.getCauseStackManager().currentCause(), snapshot);
-            SpongeCommon.post(event);
+            Sponge.eventManager().post(event);
             if (event.isCancelled()) {
                 return;
             }
@@ -264,7 +265,7 @@ public final class TrackingUtil {
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(blockState, pos, BlockChangeFlags.NONE);
             final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(PhaseTracker.getCauseStackManager().currentCause(), snapshot);
-            SpongeCommon.post(event);
+            Sponge.eventManager().post(event);
             if (event.isCancelled()) {
                 return;
             }
@@ -303,7 +304,7 @@ public final class TrackingUtil {
             final TickBlockEvent
                 event =
                 SpongeEventFactory.createTickBlockEventRandom(PhaseTracker.getCauseStackManager().currentCause(), currentTickBlock);
-            SpongeCommon.post(event);
+            Sponge.eventManager().post(event);
             if (event.isCancelled()) {
                 return;
             }
@@ -339,7 +340,7 @@ public final class TrackingUtil {
             final TickBlockEvent
                 event =
                 SpongeEventFactory.createTickBlockEventRandom(PhaseTracker.getCauseStackManager().currentCause(), currentTickBlock);
-            SpongeCommon.post(event);
+            Sponge.eventManager().post(event);
             if (event.isCancelled()) {
                 return;
             }

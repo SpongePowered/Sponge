@@ -28,10 +28,10 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.common.SpongeCommon;
 import co.aikar.timings.util.JSONUtil;
 import co.aikar.timings.util.LoadingMap;
 import co.aikar.timings.util.MRUMapCache;
@@ -262,7 +262,7 @@ public class TimingHistory {
         final double avg;
 
         PingRecord() {
-            final Collection<ServerPlayer> onlinePlayers = SpongeCommon.game().server().onlinePlayers();
+            final Collection<ServerPlayer> onlinePlayers = Sponge.server().onlinePlayers();
             int totalPing = 0;
             for (ServerPlayer player : onlinePlayers) {
                 totalPing += player.connection().latency();

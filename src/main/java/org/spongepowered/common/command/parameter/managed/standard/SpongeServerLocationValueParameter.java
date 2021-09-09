@@ -39,6 +39,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -75,7 +76,7 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
     }
 
     private Stream<String> complete(final String currentInput) {
-        return SpongeCommon.game().server().worldManager().worlds()
+        return Sponge.server().worldManager().worlds()
                 .stream()
                 .map(ServerWorld::key)
                 .map(ResourceKey::formatted)
@@ -89,7 +90,7 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
         ServerWorld serverWorld;
         try {
             final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
-            serverWorld = SpongeCommon.game().server().worldManager()
+            serverWorld = Sponge.server().worldManager()
                     .world(resourceLocation)
                     .orElseThrow(() -> reader.createException(
                             Component.text("Could not get world with key \"" + resourceLocation.toString() + "\"")));

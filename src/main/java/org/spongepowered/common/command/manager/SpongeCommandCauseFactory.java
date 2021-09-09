@@ -28,12 +28,14 @@ import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
@@ -57,7 +59,7 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final Cause cause = frame.currentCause();
             final CommandSource iCommandSource =
-                    cause.first(CommandSource.class).orElseGet(() -> SpongeCommon.game().systemSubject());
+                    cause.first(CommandSource.class).orElseGet(() -> (CommandSource) Sponge.systemSubject());
             final CommandSourceStack commandSource;
             if (iCommandSource instanceof CommandSourceProviderBridge) {
                 // We know about this one so we can create it using the factory method on the source.
@@ -87,12 +89,12 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
                                 .map(rot -> new Vec2((float) rot.x(), (float) rot.y()))
                                 .orElse(Vec2.ZERO),
                         context.get(EventContextKeys.LOCATION).map(x -> (ServerLevel) x.world())
-                                .orElseGet(() -> locatable == null ? SpongeCommon.server().getLevel(Level.OVERWORLD) :
+                                .orElseGet(() -> locatable == null ? ((MinecraftServer) Sponge.server()).getLevel(Level.OVERWORLD) :
                                         (ServerLevel) locatable.serverLocation().world()),
                         4,
                         name,
                         displayName,
-                        SpongeCommon.server(),
+                        (MinecraftServer) Sponge.server(),
                         iCommandSource instanceof Entity ? (net.minecraft.world.entity.Entity) iCommandSource : null
                 );
             }

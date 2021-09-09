@@ -29,6 +29,7 @@ import com.google.common.collect.Multimap;
 import io.leangen.geantyref.TypeToken;
 import com.google.gson.JsonObject;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
@@ -122,7 +123,7 @@ public class SpongeCriterionTrigger implements CriterionTrigger<SpongeFilteredTr
                     continue;
                 }
             }
-            SpongeCommon.post(event);
+            Sponge.eventManager().post(event);
             if (event.result()) {
                 listener.run(playerAdvancements);
             }

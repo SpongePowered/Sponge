@@ -33,6 +33,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
@@ -143,7 +144,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     private boolean isConstructing;
 
     public static SpongeUserData create(final GameProfile profile) throws IOException {
-        final ServerLevel world = SpongeCommon.server().overworld();
+        final ServerLevel world = ((MinecraftServer) Sponge.server()).overworld();
         if (world == null) {
             SpongeCommon.logger().warn("Overworld not initialized, cannot create users!");
             throw new IllegalStateException("Overworld not initialized, cannot create users!");
@@ -180,7 +181,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     }
 
     public User asUser() {
-        return ((SpongeServer) SpongeCommon.server()).userManager().asUser(this);
+        return ((SpongeServer) Sponge.server()).userManager().asUser(this);
     }
 
     private void reset() {
@@ -425,12 +426,12 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         if (this.isConstructing) {
             return;
         }
-        ((SpongeServer) SpongeCommon.server()).userManager().markDirty(this);
+        ((SpongeServer) Sponge.server()).userManager().markDirty(this);
     }
 
     public void save() throws IOException {
         synchronized (this) {
-            final SpongeUserManager userManager = ((SpongeServer) SpongeCommon.server()).userManager();
+            final SpongeUserManager userManager = ((SpongeServer) Sponge.server()).userManager();
             final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.server()).accessor$storageSource();
             final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.uniqueId() + ".dat").toFile();
             this.writeCompound(this.compound);
@@ -467,7 +468,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     @Override
     public Optional<ServerPlayer> player() {
-        return Optional.ofNullable((ServerPlayer) SpongeCommon.server().getPlayerList().getPlayer(this.profile.getId()));
+        return Sponge.server().player(this.profile.getId());
     }
 
     @Override

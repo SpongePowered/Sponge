@@ -32,6 +32,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operation;
@@ -71,7 +72,7 @@ abstract class BlockEventBasedTransaction extends WorldBasedTransaction<ChangeBl
         final ImmutableList<GameTransaction<ChangeBlockEvent.All>> transactions,
         final Cause currentCause
     ) {
-        final Optional<ServerWorld> o = ((SpongeServer) SpongeCommon.server()).worldManager().world(this.worldKey);
+        final Optional<ServerWorld> o = ((SpongeServer) Sponge.server()).worldManager().world(this.worldKey);
         if (!o.isPresent()) {
             return Optional.empty();
         }

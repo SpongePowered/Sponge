@@ -58,6 +58,7 @@ import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -314,7 +315,7 @@ public final class PacketPhase {
             final ServerboundUseItemOnPacket blockPlace = (ServerboundUseItemOnPacket) packet;
             final BlockPos blockPos = blockPlace.getHitResult().getBlockPos();
             final Direction front = blockPlace.getHitResult().getDirection();
-            final MinecraftServer server = SpongeCommon.server();
+            final MinecraftServer server = (MinecraftServer) Sponge.server();
             if (blockPos.getY() < server.getMaxBuildHeight() - 1 || front != Direction.UP && blockPos.getY() < server.getMaxBuildHeight()) {
                 return PacketPhase.General.PLACE_BLOCK;
             }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent;
@@ -70,8 +71,8 @@ public final class ResourcePackState extends BasicPacketState {
         if (pack == null) {
             return;
         }
-        SpongeCommon.post(
-            SpongeEventFactory.createResourcePackStatusEvent(PhaseTracker.getCauseStackManager().currentCause(), pack, (ServerPlayer) player, status));
+        Sponge.eventManager().post(SpongeEventFactory.createResourcePackStatusEvent(PhaseTracker.getCauseStackManager().currentCause(), pack,
+                (ServerPlayer) player, status));
     }
 
     @Override

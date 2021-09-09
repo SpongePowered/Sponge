@@ -26,6 +26,7 @@ package org.spongepowered.common.advancement.criterion;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -96,7 +97,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
             event = SpongeEventFactory.createCriterionEventScoreChange(
                     cause, advancement, this.criterion(), player, lastScore, score);
         }
-        if (SpongeCommon.post(event)) {
+        if (Sponge.eventManager().post(event)) {
             return this.get();
         }
         SpongeScoreCriterion.BYPASS_EVENT = true;

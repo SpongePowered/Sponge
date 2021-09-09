@@ -24,7 +24,7 @@
  */
 package co.aikar.timings.sponge;
 
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.api.Sponge;
 
 class UnsafeTimingHandler extends TimingHandler {
 
@@ -33,7 +33,7 @@ class UnsafeTimingHandler extends TimingHandler {
     }
 
     private static void checkThread() {
-        if (!SpongeCommon.server().isSameThread()) {
+        if (!Sponge.server().onMainThread()) {
             throw new IllegalStateException("Calling Timings from Async Operation");
         }
     }

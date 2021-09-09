@@ -38,6 +38,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.core.Registry;
+import net.minecraft.server.MinecraftServer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.ResourceKey;
@@ -116,11 +117,11 @@ class TimingsExport extends Thread {
         listeners.send(Component.text("Preparing Timings Report...", NamedTextColor.GREEN));
         TimingsExport.lastReport = now;
 
-        Platform platform = SpongeCommon.game().platform();
+        Platform platform = Sponge.platform();
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
                 .add("version", platform.container(IMPLEMENTATION).metadata().version())
-                .add("maxplayers", SpongeCommon.game().server().maxPlayers())
+                .add("maxplayers", Sponge.server().maxPlayers())
                 .add("start", TimingsManager.timingStart / 1000)
                 .add("end", System.currentTimeMillis() / 1000)
                 .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
@@ -128,7 +129,7 @@ class TimingsExport extends Thread {
             builder.add("server", TimingsExport.getServerName())
                     .add("motd", PlainTextComponentSerializer.plainText().serialize(Sponge.server().motd()))
                     .add("online-mode", Sponge.server().isOnlineModeEnabled())
-                    .add("icon", SpongeCommon.server().getStatus().getFavicon());
+                    .add("icon", ((MinecraftServer) Sponge.server()).getStatus().getFavicon());
         }
 
         final Runtime runtime = Runtime.getRuntime();
@@ -197,7 +198,7 @@ class TimingsExport extends Thread {
 
         // Information about loaded plugins
 
-        builder.add("plugins", JSONUtil.mapArrayToObject(SpongeCommon.game().pluginManager().plugins(), (plugin) -> {
+        builder.add("plugins", JSONUtil.mapArrayToObject(Sponge.pluginManager().plugins(), (plugin) -> {
             final @Nullable URL homepageUrl = plugin.metadata().links().homepage().orElse(null);
             final String homepage = homepageUrl != null ? homepageUrl.toString() : "<not specified>";
             return JSONUtil.objectBuilder().add(plugin.metadata().id(), JSONUtil.objectBuilder()

@@ -281,7 +281,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     @Override
     public void updateCommandTreeForPlayer(final @NonNull ServerPlayer player) {
         Objects.requireNonNull(player, "player");
-        SpongeCommon.server().getCommands().sendCommands((net.minecraft.server.level.ServerPlayer) player);
+        ((MinecraftServer) Sponge.server()).getCommands().sendCommands((net.minecraft.server.level.ServerPlayer) player);
     }
 
     @Override

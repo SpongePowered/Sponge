@@ -27,6 +27,7 @@ package co.aikar.timings.sponge;
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
 import com.google.common.collect.EvictingQueue;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.common.SpongeCommon;
 import co.aikar.timings.util.LoadingMap;
@@ -87,7 +88,7 @@ public final class TimingsManager {
                 handler.processTick(violated);
             }
 
-            TimingHistory.playerTicks += SpongeCommon.game().server().onlinePlayers().size();
+            TimingHistory.playerTicks += Sponge.server().onlinePlayers().size();
             TimingHistory.timedTicks++;
             // Generate TPS/Ping/Tick reports every minute
         }

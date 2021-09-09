@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -54,7 +56,7 @@ final class CompassItemData {
                             final Optional<ResourceKey<Level>> dimension = CompassItem.getLodestoneDimension(tag);
                             if (dimension.isPresent()) {
                                 return ServerLocation.of(
-                                    (ServerWorld) SpongeCommon.server().getLevel(dimension.get()),
+                                    (ServerWorld) ((MinecraftServer) Sponge.server()).getLevel(dimension.get()),
                                     VecHelper.toVector3d(NbtUtils.readBlockPos(tag.getCompound("LodestonePos")))
                                 );
                             }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.entity.player;
 
+import net.minecraft.server.MinecraftServer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -59,6 +60,7 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.service.server.permission.BridgeSubject;
 import org.spongepowered.common.service.server.permission.SubjectHelper;
+import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.lang.ref.WeakReference;
@@ -380,11 +382,11 @@ public abstract class SpongeUserView implements User, BridgeSubject {
 
         @SuppressWarnings("ConstantConditions")
         protected DataHolder.Mutable dataHolderBackingObject() {
-            final @Nullable ServerPlayer serverPlayer = (ServerPlayer) SpongeCommon.server().getPlayerList().getPlayer(this.uuid);
+            final @Nullable ServerPlayer serverPlayer = (ServerPlayer) ((MinecraftServer) Sponge.server()).getPlayerList().getPlayer(this.uuid);
             if (serverPlayer != null) {
                 return serverPlayer;
             }
-            final SpongeUserData user = ((SpongeServer) SpongeCommon.server()).userManager().userFromCache(this.uuid);
+            final SpongeUserData user = ((SpongeUserManager) Sponge.server().userManager()).userFromCache(this.uuid);
             if (user != null) {
                 return user;
             }

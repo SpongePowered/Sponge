@@ -27,6 +27,8 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
@@ -489,7 +491,7 @@ public final class PhaseTracker implements CauseStackManager {
         this.enforceMainThread();
         if (this.cached_cause == null || this.cached_ctx == null) {
             if (this.cause.isEmpty()) {
-                this.cached_cause = Cause.of(this.currentContext(), SpongeCommon.game());
+                this.cached_cause = Cause.of(this.currentContext(), Sponge.game());
             } else {
                 this.cached_cause = Cause.of(this.currentContext(), this.cause);
             }
@@ -742,7 +744,7 @@ public final class PhaseTracker implements CauseStackManager {
             throw new IllegalStateException(String.format(
                 "CauseStackManager called from off main thread (current='%s', expected='%s')!",
                 ThreadUtil.getDescription(Thread.currentThread()),
-                ThreadUtil.getDescription(SpongeCommon.server().getRunningThread())
+                ThreadUtil.getDescription(((MinecraftServer) Sponge.server()).getRunningThread())
             ));
         }
         this.checkProviders();

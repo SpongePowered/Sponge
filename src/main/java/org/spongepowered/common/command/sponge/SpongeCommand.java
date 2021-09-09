@@ -36,6 +36,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -282,7 +283,7 @@ public class SpongeCommand {
                         user.require(Keys.DISPLAY_NAME)
                             .color(TextColor.color(SpongeCommand.LIGHT_BLUE))
                             .hoverEvent(HoverEvent.showText(Component.text(user.uniqueId().toString())))).orElse(SpongeCommand.EMPTY);
-            }, SpongeCommon.server());
+            }, (MinecraftServer) Sponge.server());
         }
         return CompletableFuture.completedFuture(SpongeCommand.EMPTY);
     }
@@ -307,7 +308,7 @@ public class SpongeCommand {
                             .append(Component.newline())
                             .append(Component.text("Notifier: ", TextColor.color(SpongeCommand.MINT)))
                             .append(notifier.join())
-                            .build()), SpongeCommon.server());
+                            .build()), (MinecraftServer) Sponge.server());
                 return CommandResult.success();
             })
             .build();
@@ -343,7 +344,7 @@ public class SpongeCommand {
                                     .append(Component.newline())
                                     .append(Component.text("Notifier: ", TextColor.color(SpongeCommand.MINT)))
                                     .append(notifier.join())
-                                    .build()), SpongeCommon.server());
+                                    .build()), (MinecraftServer) Sponge.server());
                         return CommandResult.success();
                     }).orElseGet(() -> CommandResult.error(Component.text("Failed to find any block in range", NamedTextColor.RED)));
             })
@@ -374,7 +375,7 @@ public class SpongeCommand {
                                     .append(Component.newline())
                                     .append(Component.text("Notifier: ", TextColor.color(SpongeCommand.MINT)))
                                     .append(notifier.join())
-                                    .build()), SpongeCommon.server());
+                                    .build()), (MinecraftServer) Sponge.server());
                         return CommandResult.success();
                     }).orElseGet(() -> CommandResult.error(Component.text("Failed to find any block in range", NamedTextColor.RED)));
             })
@@ -390,7 +391,7 @@ public class SpongeCommand {
     private Command.Parameterized chunksSubcommand() {
         final Command.Parameterized globalCommand = Command.builder()
                 .executor(context -> {
-                    for (final ServerWorld world : SpongeCommon.game().server().worldManager().worlds()) {
+                    for (final ServerWorld world : Sponge.server().worldManager().worlds()) {
                         context.sendMessage(Identity.nil(), Component.text().content("World: ")
                                         .append(Component.text(world.key().toString(), NamedTextColor.GREEN))
                                         .append(Component.newline())
@@ -480,15 +481,15 @@ public class SpongeCommand {
         final Optional<PluginContainer> pluginContainer = context.one(this.pluginContainerKey);
         final RefreshGameEvent event = SpongeEventFactory.createRefreshGameEvent(
                 PhaseTracker.getCauseStackManager().currentCause(),
-                SpongeCommon.game()
+                Sponge.game()
         );
         if (pluginContainer.isPresent()) {
             // just send the reload event to that
             context.sendMessage(Identity.nil(), Component.text("Sending refresh event to " + pluginContainer.get().metadata().id() + ", please wait..."));
-            ((SpongeEventManager) SpongeCommon.game().eventManager()).postToPlugin(event, pluginContainer.get());
+            ((SpongeEventManager) Sponge.eventManager()).postToPlugin(event, pluginContainer.get());
         } else {
             context.sendMessage(Identity.nil(), Component.text("Sending refresh event to all plugins, please wait..."));
-            SpongeCommon.game().eventManager().post(event);
+            Sponge.eventManager().post(event);
         }
 
         context.sendMessage(Identity.nil(), Component.text("Completed plugin refresh."));
@@ -565,7 +566,7 @@ public class SpongeCommand {
     }
 
     private @NonNull CommandResult tpsExecutor(final CommandContext context) {
-        if (SpongeCommon.game().isServerAvailable()) {
+        if (Sponge.isServerAvailable()) {
             final List<Component> tps = new ArrayList<>();
             for (final ServerWorld world : Sponge.server().worldManager().worlds()) {
                 final TextComponent.Builder builder =
@@ -576,8 +577,8 @@ public class SpongeCommand {
             }
 
             tps.add(Component.newline());
-            tps.add(this.appendTickTime(SpongeCommon.server().tickTimes, Component.text().content("Overall: ")).build());
-            SpongeCommon.game().serviceProvider()
+            tps.add(this.appendTickTime(((MinecraftServer) Sponge.server()).tickTimes, Component.text().content("Overall: ")).build());
+            Sponge.serviceProvider()
               .paginationService()
               .builder()
               .contents(tps)

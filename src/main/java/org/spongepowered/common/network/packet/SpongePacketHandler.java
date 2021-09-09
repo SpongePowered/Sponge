@@ -28,14 +28,15 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.api.network.EngineConnectionTypes;
 import org.spongepowered.api.network.channel.packet.PacketChannel;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
@@ -97,7 +98,7 @@ public final class SpongePacketHandler {
                         return;
                     }
 
-                    final DimensionType dimensionType = SpongeCommon.server().registryAccess().dimensionTypes().get(packet.dimensionLogic);
+                    final DimensionType dimensionType = ((MinecraftServer) Sponge.server()).registryAccess().dimensionTypes().get(packet.dimensionLogic);
                     ((LevelBridge) world).bridge$adjustDimensionLogic(dimensionType);
                 }
         );
@@ -107,11 +108,11 @@ public final class SpongePacketHandler {
             final Optional<UUID> owner,
             final Optional<UUID> notifier
     ) {
-        final String ownerName = owner.map(x -> SpongeCommon.server().getProfileCache().get(x))
+        final String ownerName = owner.map(x -> ((MinecraftServer) Sponge.server()).getProfileCache().get(x))
                 .filter(Objects::nonNull)
                 .map(GameProfile::getName)
                 .orElse("");
-        final String notifierName = notifier.map(x -> SpongeCommon.server().getProfileCache().get(x))
+        final String notifierName = notifier.map(x -> ((MinecraftServer) Sponge.server()).getProfileCache().get(x))
                 .filter(Objects::nonNull)
                 .map(GameProfile::getName)
                 .orElse("");
