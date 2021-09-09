@@ -56,7 +56,9 @@ public abstract class NaturalSpawnerMixin {
         world.getProfiler().push("spawner");
 
         for (final MobCategory entityclassification : SPAWNING_CATEGORIES) {
-            if ((spawnFriendlies || !entityclassification.isFriendly()) && (spawnEnemies || entityclassification.isFriendly()) && (doMobSpawning || !entityclassification.isPersistent()) && NaturalSpawnerMixin.impl$usePerWorldSpawnRules(manager, entityclassification, world)) {
+            if ((spawnFriendlies || !entityclassification.isFriendly()) && (spawnEnemies || entityclassification.isFriendly()) && (doMobSpawning || !entityclassification.isPersistent()) && NaturalSpawnerMixin.impl$canSpawnInLevel(manager, entityclassification, world)) {
+                //                 spawnCategoryForChunk(var0, param0, param1, (param1x, param2x, param3x) -> param2.canSpawn(param1x, param2x,
+                //                 param3x), (param1x, param2x) -> param2.afterSpawn(param1x, param2x));
                 NaturalSpawnerMixin.spawnCategoryForChunk(entityclassification, world, chunk,
                         (p_234969_1_, p_234969_2_, p_234969_3_) -> ((NaturalSpawner_SpawnStateAccessor) manager).invoker$canSpawn(p_234969_1_, p_234969_2_, p_234969_3_),
                         (p_234970_1_, p_234970_2_) -> ((NaturalSpawner_SpawnStateAccessor) manager).invoker$afterSpawn(p_234970_1_, p_234970_2_)
@@ -67,12 +69,17 @@ public abstract class NaturalSpawnerMixin {
         world.getProfiler().pop();
     }
 
-    private static boolean impl$usePerWorldSpawnRules(final NaturalSpawner.SpawnState manager, final MobCategory classification, final ServerLevel world) {
-        final int tick = NaturalSpawnerMixin.impl$getSpawningTickRate(classification, world);
+    private static boolean impl$canSpawnInLevel(final NaturalSpawner.SpawnState manager, final MobCategory classification, final ServerLevel level) {
+        final int tick = NaturalSpawnerMixin.impl$getSpawningTickRate(classification, level);
+        // Unknown category/use default
+        if (tick == -1) {
+            return ((NaturalSpawner_SpawnStateBridge) manager).bridge$canSpawnForCategoryInWorld(classification, level);
+        }
+        // Turn off spawns
         if (tick == 0) {
             return false;
         }
-        return world.getGameTime() % tick  == 0L && ((NaturalSpawner_SpawnStateBridge) manager).bridge$canSpawnForCategoryInWorld(classification, world);
+        return level.getGameTime() % tick  == 0L && ((NaturalSpawner_SpawnStateBridge) manager).bridge$canSpawnForCategoryInWorld(classification, level);
     }
 
     private static int impl$getSpawningTickRate(final MobCategory classification, final ServerLevel world) {
@@ -89,7 +96,7 @@ public abstract class NaturalSpawnerMixin {
             case WATER_AMBIENT:
                 return tickRates.aquaticAmbient;
             default:
-                throw new IllegalStateException("Unexpected value: " + classification);
+                return -1;
         }
     }
 }
