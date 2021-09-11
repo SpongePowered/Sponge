@@ -1,8 +1,8 @@
-import java.io.StringWriter
 import net.fabricmc.loom.LoomGradleExtension
 import net.fabricmc.loom.task.RemapJarTask
 import net.fabricmc.loom.task.RunGameTask
 import org.zeroturnaround.zip.transform.ZipEntryTransformer
+import java.io.StringWriter
 
 buildscript {
     repositories {
@@ -178,9 +178,15 @@ dependencies {
     val timingsVersion: String by project
     val log4jVersion: String by project
 
-    api(project(":", configuration = "launch"))
-    implementation(project(":", configuration = "accessors"))
-    implementation(project(commonProject.path))
+    api(project(":", configuration = "launch")) {
+        exclude(group = "org.spongepowered", module = "mixin")
+    }
+    implementation(project(":", configuration = "accessors")) {
+        exclude(group = "org.spongepowered", module = "mixin")
+    }
+    implementation(project(commonProject.path)) {
+        exclude(group = "org.spongepowered", module = "mixin")
+    }
 
     forgeMixinsImplementation(project(commonProject.path))
 
