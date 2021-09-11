@@ -32,6 +32,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import io.leangen.geantyref.GenericTypeReflector;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.event.Cancellable;
@@ -370,12 +371,9 @@ public abstract class SpongeEventManager implements EventManager {
                     if (event instanceof AbstractEvent) {
                         ((AbstractEvent) event).currentOrder = handler.getOrder();
                     }
-                    SpongeCommon.setActivePlugin(handler.getPlugin());
                     handler.handle(event);
                 } catch (final Throwable e) {
                     SpongeCommon.logger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
-                } finally {
-                    SpongeCommon.setActivePlugin(null);
                 }
             }
             if (event instanceof AbstractEvent) {
@@ -386,22 +384,19 @@ public abstract class SpongeEventManager implements EventManager {
         TimingsManager.PLUGIN_EVENT_HANDLER.startTimingIfSync();
         for (@SuppressWarnings("rawtypes") final RegisteredListener handler : handlers) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
-                    final PhaseContext<?> context = this.createPluginContext(handler);
+                    final PhaseContext<@NonNull ?> context = SpongeEventManager.createPluginContext(handler.getPlugin());
                     final Timing timings = handler.getTimingsHandler()) {
                 frame.pushCause(handler.getPlugin());
                 if (context != null) {
                     context.buildAndSwitch();
                 }
-                timings.startTimingIfSync();
                 if (event instanceof AbstractEvent) {
                     ((AbstractEvent) event).currentOrder = handler.getOrder();
                 }
-                SpongeCommon.setActivePlugin(handler.getPlugin());
+                timings.startTimingIfSync();
                 handler.handle(event);
             } catch (final Throwable e) {
                 SpongeCommon.logger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin().metadata().id(), e);
-            } finally {
-                SpongeCommon.setActivePlugin(null);
             }
         }
         if (event instanceof AbstractEvent) {
@@ -410,10 +405,10 @@ public abstract class SpongeEventManager implements EventManager {
         return event instanceof Cancellable && ((Cancellable) event).isCancelled();
     }
 
-    private @Nullable EventListenerPhaseContext createPluginContext(final RegisteredListener<?> handler) {
+    public static @Nullable EventListenerPhaseContext createPluginContext(final PluginContainer plugin) {
         if (PhaseTracker.getInstance().getPhaseContext().allowsEventListener()) {
             return PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext(PhaseTracker.getInstance())
-                    .source(handler.getPlugin());
+                    .source(plugin);
         }
         return null;
     }

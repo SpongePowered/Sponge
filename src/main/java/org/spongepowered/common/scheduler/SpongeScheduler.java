@@ -25,6 +25,7 @@
 package org.spongepowered.common.scheduler;
 
 import co.aikar.timings.Timing;
+import co.aikar.timings.sponge.TimingsManager;
 import com.google.common.collect.Sets;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledTask;
@@ -33,7 +34,6 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.launch.Launch;
-import co.aikar.timings.sponge.TimingsManager;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Iterator;
@@ -265,7 +265,6 @@ public abstract class SpongeScheduler implements Scheduler {
                     context.buildAndSwitch();
                 }
                 try {
-                    SpongeCommon.setActivePlugin(task.owner());
                     task.task.consumer().accept(task);
                 } catch (final Throwable t) {
                     SpongeCommon.logger().error("The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
@@ -275,7 +274,6 @@ public abstract class SpongeScheduler implements Scheduler {
                 if (!task.isCancelled()) {
                     task.setState(SpongeScheduledTask.ScheduledTaskState.RUNNING);
                 }
-                SpongeCommon.setActivePlugin(null);
                 this.onTaskCompletion(task);
             }
         });

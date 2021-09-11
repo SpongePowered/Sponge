@@ -24,27 +24,6 @@
  */
 package org.spongepowered.common.inventory.custom;
 
-import org.apache.commons.lang3.Validate;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.ContainerType;
-import org.spongepowered.api.item.inventory.ContainerTypes;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.LensCreator;
-import org.spongepowered.common.inventory.lens.impl.DefaultEmptyLens;
-import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
-import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
-import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.minecraft.FurnaceInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.inventory.lens.slots.SlotLens;
-import org.spongepowered.math.vector.Vector2i;
-
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
@@ -71,26 +50,47 @@ import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.SmokerMenu;
 import net.minecraft.world.inventory.StonecutterMenu;
 import net.minecraft.world.item.trading.Merchant;
+import org.apache.commons.lang3.Validate;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.ContainerType;
+import org.spongepowered.api.item.inventory.ContainerTypes;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.type.ViewableInventory;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.LensCreator;
+import org.spongepowered.common.inventory.lens.impl.DefaultEmptyLens;
+import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
+import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
+import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.minecraft.FurnaceInventoryLens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
+import org.spongepowered.math.vector.Vector2i;
+import org.spongepowered.plugin.PluginContainer;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder,
-                                                       ViewableInventory.Builder.DummyStep,
-                                                       ViewableInventory.Builder.EndStep {
-
+public final class SpongeViewableInventoryBuilder implements ViewableInventory.Builder, ViewableInventory.Builder.DummyStep, ViewableInventory.Builder.EndStep {
     private ContainerType type;
 
     private Map<Integer, Slot> slotDefinitions;
     private Slot lastSlot;
 
+    private PluginContainer plugin;
     private Carrier carrier;
     private UUID identity;
 
@@ -215,6 +215,13 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         this.lastSlot.set(item.createStack());
         return this;
     }
+
+    @Override
+    public EndStep plugin(final PluginContainer plugin) {
+        this.plugin = Objects.requireNonNull(plugin, "plugin");
+        return this;
+    }
+
     public EndStep identity(UUID uuid) {
         this.identity = uuid;
         return this;
@@ -259,14 +266,20 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     @Override
     public ViewableInventory build() {
-        ViewableCustomInventory inventory = new ViewableCustomInventory(this.type,
-            SpongeViewableInventoryBuilder.containerTypeInfo.get(this.type), this.info.size, this.finalLens, this.finalProvider, this.finalInventories, this.identity, this.carrier);
+        if (this.plugin == null) {
+            throw new IllegalStateException("Plugin has not been set on this builder!");
+        }
+
+        final ViewableCustomInventory inventory = new ViewableCustomInventory(this.plugin, this.type, SpongeViewableInventoryBuilder.containerTypeInfo
+                .get(this.type), this.info.size, this.finalLens, this.finalProvider, this.finalInventories, this.identity, this.carrier);
         if (this.slotDefinitions.isEmpty()) {
             inventory.vanilla();
         }
         return ((ViewableInventory) inventory);
     }
+
     public ViewableInventory.Builder reset() {
+        this.plugin = null;
         this.type = null;
         this.info = null;
 

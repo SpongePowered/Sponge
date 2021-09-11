@@ -24,36 +24,39 @@
  */
 package org.spongepowered.common.inventory.custom;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.ContainerType;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.SimpleContainerData;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.ContainerType;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.plugin.PluginContainer;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 // TODO how to do ticking for "fake" furnace type inventories?
 public class ViewableCustomInventory extends CustomInventory implements MenuProvider {
 
-    private ContainerType type;
-    private SpongeViewableInventoryBuilder.ContainerTypeInfo info;
+    private final ContainerType type;
+    private final SpongeViewableInventoryBuilder.ContainerTypeInfo info;
     private boolean vanilla = false;
 
-    private Set<Player> viewers = new HashSet<>();
+    private final Set<Player> viewers = new HashSet<>();
     private final SimpleContainerData data;
 
-    public ViewableCustomInventory(ContainerType type, SpongeViewableInventoryBuilder.ContainerTypeInfo info, int size, Lens lens, SlotLensProvider provider, List<Inventory> inventories, @Nullable UUID identity, @Nullable Carrier carrier) {
-        super(size, lens, provider, inventories, identity, carrier);
+    public ViewableCustomInventory(final PluginContainer plugin, final ContainerType type,
+            final SpongeViewableInventoryBuilder.ContainerTypeInfo info, final int size, final Lens lens, final SlotLensProvider provider,
+            final List<Inventory> inventories, @Nullable final UUID identity, @Nullable final Carrier carrier) {
+        super(plugin, size, lens, provider, inventories, identity, carrier);
         this.type = type;
         this.info = info;
         this.data = this.info.dataProvider.get();
@@ -69,12 +72,12 @@ public class ViewableCustomInventory extends CustomInventory implements MenuProv
     }
 
     @Override
-    public void startOpen(Player player) {
+    public void startOpen(final Player player) {
         this.viewers.add(player); // TODO check if this is always called
     }
 
     @Override
-    public void stopOpen(Player player) {
+    public void stopOpen(final Player player) {
         this.viewers.remove(player);  // TODO check if this is always called
     }
 

@@ -270,7 +270,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(SpongeCommon.activePlugin());
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
 
             final net.minecraft.server.level.ServerLevel originalWorld = (ServerLevel) this.shadow$getCommandSenderWorld();
@@ -843,7 +842,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             final PhaseTracker phaseTracker, final Vector3d originalDestinationPosition) {
         final boolean hasMovementContext = phaseTracker.currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE);
         if (!hasMovementContext) {
-            phaseTracker.pushCause(SpongeCommon.activePlugin());
             phaseTracker.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
         }
 
