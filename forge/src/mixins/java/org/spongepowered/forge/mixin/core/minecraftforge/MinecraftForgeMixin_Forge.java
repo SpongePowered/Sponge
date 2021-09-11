@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.forge.launch.event.ForgeEventManager;
+import org.spongepowered.forge.launch.event.SpongeEventBus;
 
 @Mixin(MinecraftForge.class)
 public abstract class MinecraftForgeMixin_Forge {
@@ -38,7 +39,7 @@ public abstract class MinecraftForgeMixin_Forge {
     @Redirect(method = "<clinit>", at = @At(value = "INVOKE",
             target = "Lnet/minecraftforge/eventbus/api/BusBuilder;build()Lnet/minecraftforge/eventbus/api/IEventBus;", remap = false))
     private static IEventBus forge$substituteForgeEventBus(final BusBuilder builder) {
-        return new ForgeEventManager(builder.build());
+        return new ForgeEventManager(new SpongeEventBus(builder));
     }
 
 }

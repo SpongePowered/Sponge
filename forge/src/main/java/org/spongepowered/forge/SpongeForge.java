@@ -117,7 +117,7 @@ public final class SpongeForge {
     }
 
     @SubscribeEvent
-    public void onGameStopped(final FMLServerStoppedEvent event) {
+    public void onServerStoppedEvent(final FMLServerStoppedEvent event) {
         final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.callStoppingEngineEvent((Server) event.getServer());
     }

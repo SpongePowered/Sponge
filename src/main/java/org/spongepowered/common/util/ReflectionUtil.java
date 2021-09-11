@@ -135,21 +135,6 @@ public final class ReflectionUtil {
             SpongeCommon.logger().fatal(ReflectionUtil.REFLECTION_SCANNING, "Failed to load class in {} while scanning desired method {} under environment method name {}", targetClass, methodName, targetMethodForEnvironment);
             return true;
         }
-
-    }
-
-    public static <T> T createUnsafeInstance(final Class<T> objectClass, Object... args)
-            throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        if (args == null) {
-            args = new Object[] {null};
-        }
-        final Constructor<T>tConstructor = ReflectionUtil.findConstructor(objectClass, args);
-        try {
-            return tConstructor.newInstance(args);
-        } catch (final Exception e) {
-            final Object[] deconstructedArgs = ReflectionUtil.deconstructArray(args).toArray();
-            return tConstructor.newInstance(deconstructedArgs);
-        }
     }
 
     public static <T> T createInstance(final Class<T> objectClass, Object... args) {
