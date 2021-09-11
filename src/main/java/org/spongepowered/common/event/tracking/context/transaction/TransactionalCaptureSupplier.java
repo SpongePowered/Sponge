@@ -97,7 +97,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
     public EffectTransactor pushEffect(final ResultingTransactionBySideEffect effect) {
         final GameTransaction<@NonNull ?> parentTransaction = Optional.ofNullable(this.effect)
             .map(child -> (GameTransaction) child.tail)
-            .orElse(Objects.requireNonNull(this.tail));
+            .orElse(Objects.requireNonNull(this.tail, "Somehow pushing a new effect without an owning Transaction"));
         final EffectTransactor effectTransactor = new EffectTransactor(effect, parentTransaction, this.effect, this);
         this.effect = effect;
         parentTransaction.addLast(effect);

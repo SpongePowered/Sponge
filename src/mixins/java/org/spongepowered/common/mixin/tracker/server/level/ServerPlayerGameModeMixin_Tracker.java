@@ -31,7 +31,6 @@ import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -53,17 +52,13 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
-import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
-import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
@@ -186,18 +181,5 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
             }
         }
     }
-
-    @Redirect(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;mineBlock(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;)V"))
-    public void impl$onMineBlock(final ItemStack itemStack, final Level param0, final BlockState param1, final BlockPos param2, final Player param3) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-        final TransactionalCaptureSupplier transactor = context.getTransactor();
-        itemStack.mineBlock(param0, param1, param2, param3);
-        // Needs to get logged as a sideeffect under the BlockChange
-        try (EffectTransactor ignored = context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {
-            transactor.logPlayerInventoryChange(this.player, PlayerInventoryTransaction.EventCreator.STANDARD);
-            this.player.inventoryMenu.broadcastChanges();
-        }
-    }
-
 
 }
