@@ -24,15 +24,17 @@
  */
 package org.spongepowered.common.scheduler;
 
-import co.aikar.timings.Timing;
-import co.aikar.timings.sponge.TimingsManager;
 import com.google.common.collect.Sets;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -170,14 +172,12 @@ public abstract class SpongeScheduler implements Scheduler {
      */
     final void runTick() {
         this.preTick();
-        TimingsManager.PLUGIN_SCHEDULER_HANDLER.startTimingIfSync();
         try {
             this.taskMap.values().forEach(this::processTask);
             this.postTick();
         } finally {
             this.finallyPostTick();
         }
-        TimingsManager.PLUGIN_SCHEDULER_HANDLER.stopTimingIfSync();
     }
 
     /**
@@ -258,9 +258,7 @@ public abstract class SpongeScheduler implements Scheduler {
     private void startTask(final SpongeScheduledTask task) {
         this.executeTaskRunnable(task, () -> {
             task.setState(SpongeScheduledTask.ScheduledTaskState.EXECUTING);
-            try (final @Nullable PhaseContext<?> context = this.createContext(task, task.owner());
-                    final Timing timings = task.task.getTimingsHandler()) {
-                timings.startTimingIfSync();
+            try (final @Nullable PhaseContext<@NonNull ?> context = this.createContext(task, task.owner())) {
                 if (context != null) {
                     context.buildAndSwitch();
                 }
@@ -279,8 +277,10 @@ public abstract class SpongeScheduler implements Scheduler {
         });
     }
 
-    protected @Nullable PhaseContext<?> createContext(final SpongeScheduledTask task, final PluginContainer container) {
-        return null;
+    protected @Nullable PhaseContext<?> createContext(final SpongeScheduledTask task, final PluginContainer plugin) {
+        return PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.getInstance())
+                .source(task)
+                .container(plugin);
     }
 
     /**
@@ -296,7 +296,17 @@ public abstract class SpongeScheduler implements Scheduler {
      *
      * @param runnable The runnable to run
      */
-    protected abstract void executeTaskRunnable(SpongeScheduledTask task, Runnable runnable);
+    private void executeTaskRunnable(final SpongeScheduledTask task, final Runnable runnable) {
+        try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.SERVER)
+                .source(task)) {
+            context.buildAndSwitch();
+            this.executeRunnable(runnable);
+        }
+    }
+
+    protected void executeRunnable(final Runnable runnable) {
+        runnable.run();
+    }
 
     public <V> Future<V> execute(final Callable<V> callable) {
         final FutureTask<V> runnable = new FutureTask<>(callable);

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.manager;
 
-import co.aikar.timings.Timing;
-import co.aikar.timings.sponge.TimingsManager;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
@@ -34,7 +32,6 @@ import io.leangen.geantyref.GenericTypeReflector;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Engine;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
@@ -55,7 +52,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.util.EngineUtil;
 import org.spongepowered.common.util.TypeTokenUtil;
 import org.spongepowered.configurate.util.Types;
 import org.spongepowered.plugin.PluginContainer;
@@ -359,33 +355,13 @@ public abstract class SpongeEventManager implements EventManager {
         return this.handlersCache.get(eventType);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     protected final boolean post(final Event event, final List<RegisteredListener<?>> handlers) {
-        final Engine engine = EngineUtil.determineEngine();
-
-        // If this event is being posted asynchronously then we don't want
-        // to do any timing or cause stack changes
-        if (engine == null) {
-            for (final RegisteredListener handler : handlers) {
-                try {
-                    if (event instanceof AbstractEvent) {
-                        ((AbstractEvent) event).currentOrder = handler.getOrder();
-                    }
-                    handler.handle(event);
-                } catch (final Throwable e) {
-                    SpongeCommon.logger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
-                }
-            }
-            if (event instanceof AbstractEvent) {
-                ((AbstractEvent) event).currentOrder = null;
-            }
-            return event instanceof Cancellable && ((Cancellable) event).isCancelled();
-        }
-        TimingsManager.PLUGIN_EVENT_HANDLER.startTimingIfSync();
-        for (@SuppressWarnings("rawtypes") final RegisteredListener handler : handlers) {
-            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
-                    final PhaseContext<@NonNull ?> context = SpongeEventManager.createPluginContext(handler.getPlugin());
-                    final Timing timings = handler.getTimingsHandler()) {
+        for (final RegisteredListener handler : handlers) {
+            try (
+                    final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
+                    final PhaseContext<@NonNull ?> context = SpongeEventManager.createListenerContext(handler.getPlugin())
+            ) {
                 frame.pushCause(handler.getPlugin());
                 if (context != null) {
                     context.buildAndSwitch();
@@ -393,7 +369,6 @@ public abstract class SpongeEventManager implements EventManager {
                 if (event instanceof AbstractEvent) {
                     ((AbstractEvent) event).currentOrder = handler.getOrder();
                 }
-                timings.startTimingIfSync();
                 handler.handle(event);
             } catch (final Throwable e) {
                 SpongeCommon.logger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin().metadata().id(), e);
@@ -405,11 +380,16 @@ public abstract class SpongeEventManager implements EventManager {
         return event instanceof Cancellable && ((Cancellable) event).isCancelled();
     }
 
-    public static @Nullable EventListenerPhaseContext createPluginContext(final PluginContainer plugin) {
+    public static @Nullable EventListenerPhaseContext createListenerContext(@Nullable final PluginContainer plugin) {
         if (PhaseTracker.getInstance().getPhaseContext().allowsEventListener()) {
-            return PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext(PhaseTracker.getInstance())
-                    .source(plugin);
+            final EventListenerPhaseContext context = PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext(PhaseTracker.getInstance());
+            if (plugin != null) {
+                context.source(plugin);
+            }
+
+            return context;
         }
+
         return null;
     }
 

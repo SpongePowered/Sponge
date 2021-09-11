@@ -33,6 +33,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryReadOps;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
@@ -62,7 +63,7 @@ import java.nio.file.Path;
 import javax.annotation.Nullable;
 
 @Mixin(Minecraft.class)
-public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
+public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnable> implements MinecraftBridge, SpongeClient {
 
     // @formatter:off
     @Shadow private Thread gameThread;
@@ -70,6 +71,10 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     // @formatter:on
 
     private IntegratedServer impl$temporaryIntegratedServer;
+
+    public MinecraftMixin(String param0) {
+        super(param0);
+    }
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$setClientOnGame(final GameConfig gameConfig, final CallbackInfo ci) {
@@ -96,9 +101,10 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         lifecycle.callLoadedGameEvent();
     }
 
-    @Inject(method = "runTick", at = @At("TAIL"))
-    private void impl$tickClientScheduler(final boolean renderWorldIn, final CallbackInfo ci) {
+    @Redirect(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;runAllTasks()V"))
+    private void impl$tickClientScheduler(final Minecraft minecraft) {
         this.scheduler().tick();
+        this.runAllTasks();
     }
 
     @Override

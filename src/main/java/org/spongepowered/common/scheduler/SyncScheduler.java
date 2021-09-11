@@ -50,9 +50,4 @@ public abstract class SyncScheduler extends SpongeScheduler {
         }
         return super.timestamp(false);
     }
-
-    @Override
-    protected void executeTaskRunnable(final SpongeScheduledTask task, final Runnable runnable) {
-        runnable.run();
-    }
 }
