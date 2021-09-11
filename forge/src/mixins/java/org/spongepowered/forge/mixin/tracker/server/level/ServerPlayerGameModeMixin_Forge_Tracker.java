@@ -45,9 +45,11 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.Invent
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 
 @Mixin(ServerPlayerGameMode.class)
-public class ServerPlayerGameModeMixin_Forge_Tracker {
+public abstract class ServerPlayerGameModeMixin_Forge_Tracker {
 
+    // @formatter:off
     @Shadow public ServerPlayer player;
+    // @formatter:on
 
     @Redirect(
         method = "destroyBlock",
