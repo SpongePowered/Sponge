@@ -29,6 +29,7 @@ import net.minecraftforge.eventbus.api.BusBuilder;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBusInvokeDispatcher;
+import net.minecraftforge.eventbus.api.IEventExceptionHandler;
 import net.minecraftforge.eventbus.api.IEventListener;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.CauseStackManager;
@@ -44,11 +45,13 @@ public final class SpongeEventBus extends EventBus {
     // I hope ya'll like reflection...
     private static Field checkTypesOnDispatchField;
     private static Field busIDField;
+    private static Field exceptionHandler;
 
     static {
         try {
             SpongeEventBus.checkTypesOnDispatchField = EventBus.class.getDeclaredField("checkTypesOnDispatch");
             SpongeEventBus.busIDField = EventBus.class.getDeclaredField("busID");
+            SpongeEventBus.exceptionHandler = EventBus.class.getDeclaredField("exceptionHandler");
         } catch (final Exception ex) {
             // Burn this to the ground
             throw new RuntimeException(ex);
@@ -60,6 +63,7 @@ public final class SpongeEventBus extends EventBus {
     // reflected fields that are stored again to prevent multiple reflection calls
     private final boolean rcheckTypesOnDispatch;
     private final int rbusID;
+    private final IEventExceptionHandler rexceptionHandler;
     private boolean rshutdown;
 
     public SpongeEventBus(final BusBuilder busBuilder) {
@@ -71,12 +75,15 @@ public final class SpongeEventBus extends EventBus {
         try {
             SpongeEventBus.checkTypesOnDispatchField.setAccessible(true);
             SpongeEventBus.busIDField.setAccessible(true);
+            SpongeEventBus.exceptionHandler.setAccessible(true);
 
             this.rcheckTypesOnDispatch = SpongeEventBus.checkTypesOnDispatchField.getBoolean(null);
             this.rbusID = SpongeEventBus.busIDField.getInt(this);
+            this.rexceptionHandler = (IEventExceptionHandler) SpongeEventBus.exceptionHandler.get(this);
 
             SpongeEventBus.checkTypesOnDispatchField.setAccessible(false);
             SpongeEventBus.busIDField.setAccessible(false);
+            SpongeEventBus.exceptionHandler.setAccessible(false);
         } catch (final Exception ex) {
             // Burn this to the ground again
             throw new RuntimeException(ex);
@@ -112,7 +119,7 @@ public final class SpongeEventBus extends EventBus {
 
                 wrapper.invoke(listener, event);
             } catch (final Throwable t) {
-                this.builder.getExceptionHandler().handleException(this, event, listeners, index, t);
+                this.rexceptionHandler.handleException(this, event, listeners, index, t);
             }
         }
         return event.isCancelable() && event.isCanceled();
