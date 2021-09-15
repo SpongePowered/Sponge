@@ -33,6 +33,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.animal.MushroomCow;
@@ -206,6 +207,7 @@ final class VanillaRegistryLoader {
         this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), b -> ((BannerPatternAccessor) (Object) b).accessor$filename());
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());
         this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
+        this.knownName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values(), MobCategory::getName);
     }
 
     private static RegistryLoader<Criterion> criterion() {
