@@ -24,41 +24,17 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.util.ContainerUtil;
-import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public class BasicInventoryPacketState extends PacketState<InventoryPacketContext> {
 
@@ -100,9 +76,21 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         this.stateMask = stateMask;
     }
 
-    public @Nullable ClickContainerEvent createInventoryEvent(final net.minecraft.server.level.ServerPlayer playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
-                                                              final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, final @Nullable Slot slot) {
-        return null;
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, InventoryPacketContext> getFrameModifier() {
+        return super.getFrameModifier().andThen((frame, context) -> {
+            final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
+            final net.minecraft.world.inventory.AbstractContainerMenu openContainer = player.containerMenu;
+            frame.pushCause(openContainer);
+            frame.pushCause(player);
+        });
+    }
+
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final InventoryPacketContext context, final net.minecraft.world.entity.Entity entityToSpawn
+    ) {
+        return SpawnTypes.DROPPED_ITEM;
     }
 
     // Checks the proper ShouldFire flag for the event to be fired.
@@ -120,7 +108,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
     @Override
     public void populateContext(final net.minecraft.server.level.ServerPlayer playerMP, final Packet<?> packet, final InventoryPacketContext context) {
-        ((TrackedInventoryBridge) playerMP.containerMenu).bridge$setCaptureInventory(true);
+
     }
 
     @Override
@@ -128,142 +116,4 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         return new InventoryPacketContext(this, tracker);
     }
 
-
-    private static Set<Class<?>> containersFailedCapture = new ReferenceOpenHashSet<>();
-
-    @Override
-    public void unwind(final InventoryPacketContext context) {
-        final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
-
-        // The server will disable the player's crafting after receiving a client packet
-        // that did not pass validation (server click item != packet click item)
-        // The server then sends a SPacketConfirmTransaction and waits for a
-        // CPacketConfirmTransaction to re-enable crafting confirming that the
-        // client acknowledged the denied transaction.
-        // To detect when this happens, we turn off capturing so we can avoid
-        // firing invalid events.
-        // See NetHandlerPlayServerMixin processClickWindow redirect for rest of fix.
-        // --bloodmc
-        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.containerMenu;
-        if (!trackedInventory.bridge$capturingInventory() && !context.hasCaptures()) {
-            trackedInventory.bridge$getCapturedSlotTransactions().clear();
-            return;
-        }
-
-        final ServerboundContainerClickPacket packetIn = context.getPacket();
-        final Transaction<ItemStackSnapshot> cursorTransaction = this.getCursorTransaction(context, player);
-
-        final net.minecraft.world.inventory.AbstractContainerMenu openContainer = player.containerMenu;
-        final List<SlotTransaction> slotTransactions = trackedInventory.bridge$getCapturedSlotTransactions();
-
-        final int usedButton = packetIn.getButtonNum();
-        final List<Entity> capturedItems = new ArrayList<>();
-        // MAKE SURE THAT THIS IS KEPT IN SYNC WITH THE REST OF THE METHOD
-        // If you add any logic that does something even if no event listenres
-        // are registered, add it here.
-
-        // If there aren't any registered listeners,
-        // we can skip an enormous amount of logic (creating transactions,
-        // firing an event, checking for cancelled transaction, etc.)
-        if (!this.shouldFire()) {
-            if (ShouldFire.SPAWN_ENTITY_EVENT && !capturedItems.isEmpty()) {
-                for (final Entity entiy: capturedItems) {
-                    if (entiy instanceof CreatorTrackedBridge) {
-                        ((CreatorTrackedBridge) entiy).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((ServerPlayer) player).uniqueId());
-                    } else {
-                        entiy.offer(Keys.CREATOR, player.getUUID());
-                    }
-                }
-                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    PhaseTracker.getCauseStackManager().pushCause(openContainer);
-                    PhaseTracker.getCauseStackManager().pushCause(player);
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-                    SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
-                }
-            }
-            slotTransactions.clear();
-            trackedInventory.bridge$setCaptureInventory(false);
-            return;
-        }
-
-        Slot slot = null;
-        if (packetIn.getButtonNum() >= 0) {
-            slot = ((InventoryAdapter) trackedInventory).inventoryAdapter$getSlot(packetIn.getSlotNum()).orElse(null);
-        }
-        // else TODO slot for ClickContainerEvent.Drag
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            PhaseTracker.getCauseStackManager().pushCause(openContainer);
-            PhaseTracker.getCauseStackManager().pushCause(player);
-            final ClickContainerEvent inventoryEvent;
-
-            // We can only proceed with normal if and only if there are no entities spawned,
-            // slot transactions exist, and or the slot id being touched is greater than
-            // 0, avoiding idiotic negative slot id's.
-            if (slotTransactions.isEmpty() && packetIn.getSlotNum() >= 0 && capturedItems.isEmpty()) {
-                if (player.containerMenu.containerId != packetIn.getContainerId()) {
-                    return; // Container mismatch - ignore this.
-                }
-                if (!((TrackedContainerBridge) trackedInventory).bridge$capturePossible()) {
-                    // TODO When this happens a mod probably overrides Container#detectAndSendChanges
-                    // We are currently unable to detect changes in this case.
-                    if (BasicInventoryPacketState.containersFailedCapture.add(trackedInventory.getClass())) {
-                        SpongeCommon.logger().warn("Changes in modded Container were not captured. Inventory events will not fire for this. Container: " + openContainer.getClass());
-                    }
-                    return;
-                }
-                // No SlotTransaction was captured. So we add the clicked slot as a transaction
-                if (slot != null) {
-                    final ItemStackSnapshot item = slot.peek().createSnapshot();
-                    slotTransactions.add(new SlotTransaction(slot, item, item));
-                }
-            }
-
-            inventoryEvent = this.createInventoryEvent(player, ContainerUtil.fromNative(openContainer), cursorTransaction,
-                        new ArrayList<>(slotTransactions), capturedItems, usedButton, slot);
-
-            if (inventoryEvent != null) {
-
-                // The client sends several packets all at once for drag events
-                // we only care about the last one.
-                // Therefore, we never add any 'fake' transactions, as the final
-                // packet has everything we want.
-                if (!(inventoryEvent instanceof ClickContainerEvent.Drag)) {
-                    PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotNum(), openContainer, inventoryEvent.transactions());
-                }
-
-                SpongeCommon.post(inventoryEvent);
-
-                // Handle cursor
-                if (inventoryEvent.isCancelled() || !inventoryEvent.cursorTransaction().isValid()) {
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.cursorTransaction().original());
-                } else if (inventoryEvent.cursorTransaction().custom().isPresent()){
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.cursorTransaction().finalReplacement());
-                }
-
-                // Handle slots
-                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.transactions(), inventoryEvent.isCancelled());
-
-                if (!inventoryEvent.isCancelled()) {
-                    if (inventoryEvent instanceof SpawnEntityEvent) {
-                        PacketState.processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
-                    } else if (!capturedItems.isEmpty()) {
-                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-                        SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
-                    }
-                } else if (inventoryEvent instanceof ClickContainerEvent.Drop) {
-                    capturedItems.clear();
-                }
-
-            }
-        } finally { // cleanup
-            slotTransactions.clear();
-            trackedInventory.bridge$setCaptureInventory(false);
-        }
-    }
-
-    public Transaction<ItemStackSnapshot> getCursorTransaction(final InventoryPacketContext context, final net.minecraft.server.level.ServerPlayer player) {
-        final ItemStackSnapshot lastCursor = context.getCursor();
-        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.containerMenu.getCarried());
-        return new Transaction<>(lastCursor, newCursor);
-    }
 }

@@ -51,7 +51,7 @@ public final class PluginMetadataConfigurable implements IConfigurable {
             return Optional.of((T) this.metadata.id());
         }
         if ("version".equals(query)) {
-            return Optional.of((T) this.metadata.version());
+            return Optional.of((T) this.metadata.version().toString());
         }
         if ("displayName".equals(query)) {
             return (Optional<T>) this.metadata.name();

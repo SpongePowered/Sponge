@@ -37,15 +37,14 @@ import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerI
 @Mixin(targets = "net/minecraft/server/network/ServerLoginPacketListenerImpl$1")
 public abstract class ServerLoginPacketListenerImpl_1Mixin extends Thread {
 
-    @Shadow(aliases = {"this$0"}, remap = false)
-    @Final
-    private ServerLoginPacketListenerImpl handler;
+    @Shadow @Final
+    private ServerLoginPacketListenerImpl this$0;
 
     @SuppressWarnings("UnresolvedMixinReference")
     @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
             remap = false, cancellable = true)
     private void impl$fireAuthEvent(final CallbackInfo ci) {
-        if (((ServerLoginPacketListenerImplBridge) this.handler).bridge$fireAuthEvent()) {
+        if (((ServerLoginPacketListenerImplBridge) this.this$0).bridge$fireAuthEvent()) {
             ci.cancel();
         }
     }

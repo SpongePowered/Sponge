@@ -24,34 +24,11 @@
  */
 package org.spongepowered.common.bridge.world.inventory.container;
 
-import org.spongepowered.api.event.item.inventory.CraftItemEvent;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-
-import java.util.List;
-
 public interface TrackedContainerBridge {
-
-    void bridge$setShiftCrafting(boolean flag);
-
-    boolean bridge$isShiftCrafting();
-
-    void bridge$setLastCraft(CraftItemEvent.Craft event);
-
-    CraftItemEvent.Craft bridge$getLastCraft();
-
-    void bridge$setPreviousCursor(net.minecraft.world.item.ItemStack stack);
-
-    net.minecraft.world.item.ItemStack bridge$getPreviousCursor();
-
-    void bridge$setFirePreview(boolean firePreview);
-
-    boolean bridge$firePreview();
-
-    List<SlotTransaction> bridge$getPreviewTransactions();
 
     boolean bridge$capturePossible();
 
-    void bridge$setCapturePossible();
+    void bridge$detectAndSendChanges(boolean captureOnly);
 
     void bridge$trackViewable(Object inventory);
 }

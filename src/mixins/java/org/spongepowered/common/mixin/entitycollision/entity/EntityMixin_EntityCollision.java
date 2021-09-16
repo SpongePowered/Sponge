@@ -61,11 +61,10 @@ public abstract class EntityMixin_EntityCollision implements CollisionCapability
                 final ItemEntity item = (ItemEntity) (Object) this;
                 final ItemStack itemstack = item.getItem();
                 if (!itemstack.isEmpty()) {
-                    this.entityCollision$key =
-                            Sponge.game().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(((org.spongepowered.api.item.inventory.ItemStack) (Object) itemstack).type());
+                    this.entityCollision$key = Sponge.game().registry(RegistryTypes.ITEM_TYPE).valueKey(((org.spongepowered.api.item.inventory.ItemStack) (Object) itemstack).type());
                 }
             } else {
-                this.entityCollision$key = Sponge.game().registries().registry(RegistryTypes.ENTITY_TYPE).valueKey(((Entity) this).type());
+                this.entityCollision$key = Sponge.game().registry(RegistryTypes.ENTITY_TYPE).valueKey(((Entity) this).type());
             }
             if (!this.shadow$getCommandSenderWorld().isClientSide()) {
                 this.collision$initializeCollisionState(this.shadow$getCommandSenderWorld());

@@ -30,7 +30,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Ticks;
-import co.aikar.timings.sponge.SpongeTimings;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.time.Duration;
@@ -99,13 +98,6 @@ public final class SpongeTask implements Task {
                 .add("interval", this.interval)
                 .add("owner", this.owner.metadata().id())
                 .toString();
-    }
-
-    Timing getTimingsHandler() {
-        if (this.taskTimer == null) {
-            this.taskTimer = SpongeTimings.pluginSchedulerTimings(this.owner);
-        }
-        return this.taskTimer;
     }
 
     public static final class Builder implements Task.Builder {
@@ -249,8 +241,8 @@ public final class SpongeTask implements Task {
 
         @Override
         public Task build() {
-            Objects.requireNonNull(this.consumer);
-            Objects.requireNonNull(this.plugin);
+            Objects.requireNonNull(this.consumer, "consumer");
+            Objects.requireNonNull(this.plugin, "plugin");
 
             final String name;
             if (this.name == null) {

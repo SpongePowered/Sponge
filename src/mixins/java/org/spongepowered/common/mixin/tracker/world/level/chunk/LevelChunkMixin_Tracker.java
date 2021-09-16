@@ -62,7 +62,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
+import org.spongepowered.common.event.tracking.context.transaction.block.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.event.tracking.phase.generation.ChunkLoadContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;

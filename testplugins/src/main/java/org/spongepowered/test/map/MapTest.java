@@ -73,7 +73,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector2i;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 import javax.imageio.ImageIO;
@@ -227,7 +227,7 @@ public class MapTest implements LoadableModule {
 
     private CommandResult testMapShades(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final Collection<RegistryEntry<MapShade>> mapShades = Sponge.game().registries()
+        final Collection<RegistryEntry<MapShade>> mapShades = Sponge.game()
                 .registry(RegistryTypes.MAP_SHADE)
                 .streamEntries()
                 .collect(Collectors.toList());
@@ -349,7 +349,7 @@ public class MapTest implements LoadableModule {
         int y = Byte.MIN_VALUE;
 
         final List<MapDecorationType> types = RegistryTypes.MAP_DECORATION_TYPE.get().stream().collect(Collectors.toList());
-        final Collection<MapDecorationOrientation> orientations = Sponge.game().registries().registry(RegistryTypes.MAP_DECORATION_ORIENTATION).stream().collect(Collectors.toList());
+        final Collection<MapDecorationOrientation> orientations = Sponge.game().registry(RegistryTypes.MAP_DECORATION_ORIENTATION).stream().collect(Collectors.toList());
         player.sendMessage(Component.text("Number of orientations: " + orientations.size()));
         player.sendMessage(Component.text("EAST: " + MapDecorationOrientations.EAST.get().key(RegistryTypes.MAP_DECORATION_ORIENTATION).toString()));
         for (final MapDecorationOrientation dir : orientations) {
@@ -428,7 +428,7 @@ public class MapTest implements LoadableModule {
             final MapCanvas.Builder builder = MapCanvas.builder();
 
             final List<MapColor[]> mapColors = new ArrayList<>();
-            for (final MapColorType mapColorType : Sponge.game().registries().registry(RegistryTypes.MAP_COLOR_TYPE).stream().collect(Collectors.toList())) {
+            for (final MapColorType mapColorType : Sponge.game().registry(RegistryTypes.MAP_COLOR_TYPE).stream().collect(Collectors.toList())) {
                 final MapColor[] colors = new MapColor[] {
                         MapColor.of(mapColorType),
                         MapColor.builder().baseColor(mapColorType).darkest().build(),

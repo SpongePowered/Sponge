@@ -28,10 +28,12 @@ import com.google.common.base.CaseFormat;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.FrameType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.animal.MushroomCow;
@@ -67,7 +69,6 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.block.state.properties.StairsShape;
 import net.minecraft.world.level.block.state.properties.StructureMode;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.spongepowered.api.ResourceKey;
@@ -76,7 +77,6 @@ import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.advancement.criteria.trigger.Triggers;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
-import org.spongepowered.api.map.decoration.MapDecorationTypes;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryKey;
@@ -206,6 +206,7 @@ final class VanillaRegistryLoader {
         this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), b -> ((BannerPatternAccessor) (Object) b).accessor$filename());
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());
         this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
+        this.knownName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values(), MobCategory::getName);
     }
 
     private static RegistryLoader<Criterion> criterion() {
@@ -279,10 +280,10 @@ final class VanillaRegistryLoader {
             l.add(Triggers.USED_TOTEM, k -> (Trigger) CriteriaTriggers.USED_TOTEM);
             l.add(Triggers.VILLAGER_TRADE, k -> (Trigger) CriteriaTriggers.TRADE);
             final DefaultedRegistryReference<Trigger<?>> dummyKey =
-                    RegistryKey.of(RegistryTypes.TRIGGER, ResourceKey.sponge("dummy")).asDefaultedReference(() -> Sponge.game().registries());
+                    RegistryKey.of(RegistryTypes.TRIGGER, ResourceKey.sponge("dummy")).asDefaultedReference(Sponge::game);
             l.add(dummyKey, k -> (Trigger) (Object) SpongeDummyTrigger.DUMMY_TRIGGER);
             final DefaultedRegistryReference<Trigger<?>> scoreKey =
-                    RegistryKey.of(RegistryTypes.TRIGGER, ResourceKey.sponge("score")).asDefaultedReference(() -> Sponge.game().registries());
+                    RegistryKey.of(RegistryTypes.TRIGGER, ResourceKey.sponge("score")).asDefaultedReference(Sponge::game);
             l.add(scoreKey, k -> (Trigger) (Object) SpongeScoreTrigger.SCORE_TRIGGER);
         });
     }
@@ -344,7 +345,14 @@ final class VanillaRegistryLoader {
         return this.holder.createRegistry(type, () -> {
             final Map<ResourceKey, A> map = new HashMap<>();
             for (final Map.Entry<I, String> value : byName.entrySet()) {
-                map.put(ResourceKey.sponge(value.getValue()), (A) value.getKey());
+                final String rawId = value.getValue();
+                // To address Vanilla shortcomings, some mods will manually prefix their modid onto values they put into Vanilla registry-like
+                // registrars. We need to account for that possibility
+                if (rawId.contains(":")) {
+                    map.put((ResourceKey) (Object) new ResourceLocation(rawId), (A) value.getKey());
+                } else {
+                    map.put(ResourceKey.sponge(rawId), (A) value.getKey());
+                }
             }
             return map;
         }, false);

@@ -26,20 +26,19 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.util.PrettyPrinter;
 
+import java.util.Objects;
 import java.util.Optional;
 
-import net.minecraft.server.level.ServerPlayer;
-
 public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends PluginPhaseContext<L> {
-
 
     Object object;
     private CapturePlayer capturePlayer;
@@ -66,10 +65,6 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
         checkState(this.capturePlayer == null, "Already capturing a player object!");
         this.capturePlayer = new CapturePlayer();
         return (L) this;
-    }
-
-    public Object getEvent() {
-        return this.object;
     }
 
     public CapturePlayer getCapturedPlayerSupplier() throws IllegalStateException {
@@ -130,7 +125,7 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
 
         @Override
         public int hashCode() {
-            return com.google.common.base.Objects.hashCode(this.player);
+            return Objects.hashCode(this.player);
         }
 
         @Override

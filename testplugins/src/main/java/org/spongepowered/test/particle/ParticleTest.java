@@ -45,7 +45,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 @Plugin("particletest")
 public final class ParticleTest {
@@ -61,7 +61,7 @@ public final class ParticleTest {
     private void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ParticleType> particleType =
                 Parameter.registryElement(TypeToken.get(ParticleType.class),
-                        (ctx) -> Sponge.game().registries(),
+                        (ctx) -> Sponge.game(),
                         RegistryTypes.PARTICLE_TYPE,
                         "minecraft",
                         "sponge")

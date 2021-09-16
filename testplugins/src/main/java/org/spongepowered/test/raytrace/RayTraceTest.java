@@ -37,7 +37,7 @@ import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 @Plugin("raytracetest")
 public final class RayTraceTest {
@@ -80,7 +80,7 @@ public final class RayTraceTest {
                         .executor(context -> {
                             final Entity entity = context.requireOne(entityParameter);
                             context.sendMessage(Identity.nil(), Component.text("Location: " + entity.location().toString()));
-                            context.sendMessage(Identity.nil(), Component.text("Entity Type: " + RegistryTypes.ENTITY_TYPE.keyFor(entity.world().registries(), entity.type()).asString()));
+                            context.sendMessage(Identity.nil(), Component.text("Entity Type: " + RegistryTypes.ENTITY_TYPE.keyFor(entity.world(), entity.type()).asString()));
                             return CommandResult.success();
                         })
                         .build(),

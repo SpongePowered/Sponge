@@ -31,11 +31,18 @@ import net.minecraftforge.common.util.ITeleporter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.world.portal.PortalLogic;
+import org.spongepowered.forge.mixin.core.world.entity.LivingEntityMixin_Forge;
 
 @Mixin(ServerPlayer.class)
-public abstract class ServerPlayerMixin_Forge {
+public abstract class ServerPlayerMixin_Forge extends LivingEntityMixin_Forge {
 
     /**
      * @author dualspiral - 18th December 2020 - 1.16.4
@@ -52,6 +59,17 @@ public abstract class ServerPlayerMixin_Forge {
     @Nullable // should be javax.annotations.Nullable
     public Entity changeDimension(final ServerLevel serverLevel, final ITeleporter teleporter) {
         return ((EntityBridge) this).bridge$changeDimension(serverLevel, (PortalLogic) teleporter);
+    }
+
+    // override from LivingEntityMixin_Forge
+    @Override
+    protected void forge$onElytraUse(final CallbackInfo ci) {
+        final PhaseContext<?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;
+        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, PlayerInventoryTransaction.EventCreator.STANDARD)) {
+            player.inventoryMenu.broadcastChanges(); // capture
+        }
     }
 
 }

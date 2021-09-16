@@ -28,7 +28,6 @@ import co.aikar.timings.sponge.WorldTimingsHandler;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.bossevents.CustomBossEvents;
@@ -53,12 +52,12 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.world.ChangeWeatherEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
-import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -81,6 +80,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
@@ -92,7 +92,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
-import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -120,7 +119,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     private LevelStorageSource.LevelStorageAccess impl$levelSave;
     private CustomBossEvents impl$bossBarManager;
-    private SpongeRegistryHolder impl$registerHolder;
     private ChunkProgressListener impl$chunkStatusListener;
     private Map<Entity, Vector3d> impl$rotationUpdates;
     private Weather impl$prevWeather;
@@ -135,7 +133,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         this.impl$levelSave = p_i241885_3_;
         this.impl$chunkStatusListener = p_i241885_7_;
         this.impl$rotationUpdates = new Object2ObjectOpenHashMap<>();
-        this.impl$registerHolder = new SpongeRegistryHolder(((RegistryAccess.RegistryHolder) p_i241885_1_.registryAccess()));
         this.impl$prevWeather = ((ServerWorld) this).weather();
     }
 
@@ -249,11 +246,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Override
     public void bridge$setManualSave(final boolean state) {
         this.impl$isManualSave = state;
-    }
-
-    @Override
-    public RegistryHolder bridge$registries() {
-        return this.impl$registerHolder;
     }
 
     @Override
@@ -438,6 +430,11 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     private void impl$setWorldOnBorder() {
         ((WorldBorderBridge) this.shadow$getWorldBorder()).bridge$setAssociatedWorld(this.bridge$getKey());
+    }
+
+    @Redirect(method = "updateSleepingPlayerList", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isSpectator()Z"))
+    private boolean impl$handleSleepingIgnored(final net.minecraft.server.level.ServerPlayer serverPlayer) {
+        return serverPlayer.isSpectator() || ((ServerPlayerBridge) serverPlayer).bridge$sleepingIgnored();
     }
 
     @Override

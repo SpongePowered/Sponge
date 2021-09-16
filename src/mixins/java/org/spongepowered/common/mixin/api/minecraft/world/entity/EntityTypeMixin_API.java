@@ -25,7 +25,9 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.entity.MobCategory;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityCategory;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.tag.Tag;
@@ -47,6 +49,7 @@ public abstract class EntityTypeMixin_API<T extends Entity> implements EntityTyp
     @Shadow public abstract boolean shadow$canSerialize();
     @Shadow public abstract boolean shadow$fireImmune();
     @Shadow public abstract boolean shadow$canSummon();
+    @Shadow public abstract MobCategory shadow$getCategory();
     // @formatter:on
 
     @Override
@@ -82,5 +85,11 @@ public abstract class EntityTypeMixin_API<T extends Entity> implements EntityTyp
     @Override
     public Collection<Tag<EntityType<?>>> tags() {
         return TagUtil.getAssociatedTags(this, RegistryTypes.ENTITY_TYPE_TAGS);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public EntityCategory category() {
+        return (EntityCategory) (Object) this.shadow$getCategory();
     }
 }

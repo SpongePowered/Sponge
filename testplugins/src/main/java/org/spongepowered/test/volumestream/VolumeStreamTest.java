@@ -72,7 +72,7 @@ import org.spongepowered.api.world.volume.stream.VolumeCollectors;
 import org.spongepowered.api.world.volume.stream.VolumePositionTranslators;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 import java.io.IOException;

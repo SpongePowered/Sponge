@@ -24,33 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.event.item.inventory.CraftItemEvent;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.query.QueryTypes;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.event.inventory.InventoryEventFactory;
-import org.spongepowered.common.item.util.ItemStackUtil;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-
-import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -63,6 +36,26 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+
+import javax.annotation.Nullable;
 
 @Mixin(ResultSlot.class)
 public abstract class ResultSlotMixin_Inventory extends Slot {
@@ -76,7 +69,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         super(inventoryIn, index, xPosition, yPosition);
     }
 
-    @Nullable private CraftingRecipe impl$lastRecipe;
+    @Nullable private CraftingRecipe impl$onTakeRecipe;
     @Nullable private ItemStack impl$craftedStack;
     private int impl$craftedStackQuantity;
 
@@ -89,23 +82,16 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
     }
 
     @Inject(method = "checkTakeAchievements", at = @At("HEAD"))
-    private void onCraftingHead(final ItemStack itemStack, final CallbackInfo ci) {
+    private void impl$beforeCrafting(final ItemStack itemStack, final CallbackInfo ci) {
         this.impl$craftedStackQuantity = this.removeCount; // Remember for shift-crafting
     }
 
     @Inject(method = "onTake", at = @At("HEAD"))
-    private void beforeTake(final Player thePlayer, final ItemStack stack, final CallbackInfo ci) {
-        if (this.impl$lastRecipe == null || !((Recipe) this.impl$lastRecipe).matches(this.craftSlots, thePlayer.level)) {
-            this.impl$lastRecipe = ((CraftingRecipe) thePlayer.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots,
+    private void impl$beforeTake(final Player thePlayer, final ItemStack stack, final CallbackInfo ci) {
+        if (this.impl$onTakeRecipe == null || !((Recipe) this.impl$onTakeRecipe).matches(this.craftSlots, thePlayer.level)) {
+            this.impl$onTakeRecipe = ((CraftingRecipe) thePlayer.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots,
                     thePlayer.level).orElse(null));
         }
-        if (((TrackedContainerBridge) thePlayer.containerMenu).bridge$isShiftCrafting()) {
-            thePlayer.containerMenu.suppressRemoteUpdates();
-            thePlayer.containerMenu.broadcastChanges();
-            thePlayer.containerMenu.resumeRemoteUpdates();
-            ((TrackedContainerBridge) thePlayer.containerMenu).bridge$setShiftCrafting(false);
-        }
-        ((TrackedContainerBridge) thePlayer.containerMenu).bridge$setFirePreview(false);
 
         // When shift-crafting the crafted item was reduced to quantity 0
         // Grow the stack to copy it
@@ -121,23 +107,18 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
     }
 
     @Redirect(method = "onTake", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeManager;getRemainingItemsFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/Container;Lnet/minecraft/world/level/Level;)Lnet/minecraft/core/NonNullList;"))
-    private <C extends Container, T extends Recipe<C>> NonNullList<ItemStack> onGetRemainingItems(final RecipeManager recipeManager, final RecipeType<T> recipeTypeIn, final C inventoryIn, final net.minecraft.world.level.Level worldIn) {
-        if (this.impl$lastRecipe == null) {
+    private <C extends Container, T extends Recipe<C>> NonNullList<ItemStack> impl$onGetRemainingItems(final RecipeManager recipeManager, final RecipeType<T> recipeTypeIn, final C inventoryIn, final net.minecraft.world.level.Level worldIn) {
+        if (this.impl$onTakeRecipe == null) {
             return NonNullList.withSize(inventoryIn.getContainerSize(), ItemStack.EMPTY);
         }
         return worldIn.getRecipeManager().getRemainingItemsFor(recipeTypeIn, inventoryIn, worldIn);
     }
 
     @Inject(method = "onTake", cancellable = true, at = @At("RETURN"))
-    private void afterTake(final Player thePlayer, final ItemStack stack, final CallbackInfo ci) {
+    private void impl$afterTake(final Player thePlayer, final ItemStack stack, final CallbackInfo cir) {
         if (((LevelBridge) thePlayer.level).bridge$isFake()) {
             return;
         }
-
-        thePlayer.containerMenu.suppressRemoteUpdates();
-        thePlayer.containerMenu.broadcastChanges();
-        thePlayer.containerMenu.resumeRemoteUpdates();
-        ((TrackedInventoryBridge) thePlayer.containerMenu).bridge$setCaptureInventory(false);
 
         final AbstractContainerMenu container = thePlayer.containerMenu;
         final Inventory craftInv = ((Inventory) container).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
@@ -146,55 +127,11 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
             return;
         }
 
-        // retain only last slot-transactions on output slot
-        SlotTransaction first = null;
-        final List<SlotTransaction> capturedTransactions = ((TrackedInventoryBridge) container).bridge$getCapturedSlotTransactions();
-        for (final Iterator<SlotTransaction> iterator = capturedTransactions.iterator(); iterator.hasNext(); ) {
-            final SlotTransaction trans = iterator.next();
-            Optional<Integer> slotIndex = trans.slot().get(Keys.SLOT_INDEX);
-            if (slotIndex.isPresent() && slotIndex.get() == 0) {
-                iterator.remove();
-                if (first == null) {
-                    first = trans;
-                }
-            }
-        }
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
 
-        final ItemStackSnapshot craftedItem;
-        // if we got a transaction on the crafting-slot use this
-        if (first != null) {
-            capturedTransactions.add(first);
-            craftedItem = first.original().copy();
-        } else {
-            craftedItem = ItemStackUtil.snapshotOf(this.impl$craftedStack);
-        }
+        transactor.logCrafting(thePlayer, this.impl$craftedStack, (CraftingInventory) craftInv, this.impl$onTakeRecipe);
 
-        final CraftingInventory craftingInventory = (CraftingInventory) craftInv;
-        final CraftItemEvent.Craft event = InventoryEventFactory.callCraftEventPost(thePlayer, craftingInventory,
-                craftedItem, this.impl$lastRecipe, container, capturedTransactions);
-
-        ((TrackedContainerBridge) container).bridge$setLastCraft(event);
-        ((TrackedContainerBridge) container).bridge$setFirePreview(true);
         this.impl$craftedStack = null;
-        ((TrackedInventoryBridge) thePlayer.containerMenu).bridge$setCaptureInventory(true);
-
-        final List<SlotTransaction> previewTransactions = ((TrackedContainerBridge) container).bridge$getPreviewTransactions();
-        if (this.craftSlots.isEmpty()) {
-            return; // CraftMatrix is empty and/or no transaction present. Do not fire Preview.
-        }
-
-        final SlotTransaction last;
-        if (previewTransactions.isEmpty()) {
-            last = new SlotTransaction(craftingInventory.result(), ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(this.getItem()));
-            previewTransactions.add(last);
-        } else {
-            last = previewTransactions.get(0);
-        }
-
-        Optional<net.minecraft.world.item.crafting.CraftingRecipe> newRecipe = thePlayer.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots, thePlayer.level);
-
-        InventoryEventFactory.callCraftEventPre(thePlayer, craftingInventory, last, (CraftingRecipe) newRecipe.orElse(null), container, previewTransactions);
-        previewTransactions.clear();
-
     }
 }

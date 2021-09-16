@@ -175,8 +175,5 @@ public final class ForgeEventManager extends SpongeEventManager implements IEven
             // and now we do our standard event listener stuff.
             return this.post(spongeEvent, listeners.afterModifications());
         }
-
     }
-
-
 }

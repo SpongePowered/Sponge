@@ -24,7 +24,15 @@
  */
 package org.spongepowered.vanilla.launch.plugin;
 
-import org.spongepowered.plugin.jvm.JVMPluginLanguageService;
+import org.spongepowered.plugin.Environment;
+import org.spongepowered.plugin.builtin.jvm.JVMPluginLanguageService;
+import org.spongepowered.plugin.metadata.Container;
+import org.spongepowered.plugin.metadata.builtin.MetadataParser;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 public final class JavaPluginLanguageService extends JVMPluginLanguageService {
 
@@ -39,4 +47,11 @@ public final class JavaPluginLanguageService extends JVMPluginLanguageService {
     public String pluginLoader() {
         return "org.spongepowered.vanilla.launch.plugin.JavaPluginLoader";
     }
+
+    @Override
+    public Container loadMetadataContainer(final Environment environment, final InputStream stream) throws Exception {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
+        return MetadataParser.read(reader, MetadataParser.gsonBuilder().create());
+    }
+
 }

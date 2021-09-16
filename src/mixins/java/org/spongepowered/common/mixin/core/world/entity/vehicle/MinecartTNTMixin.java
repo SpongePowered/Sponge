@@ -24,13 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.vehicle.MinecartTNT;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -47,12 +50,10 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.vehicle.MinecartTNT;
 import java.util.ArrayList;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(MinecartTNT.class)
 public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements FusedExplosiveBridge, ExplosiveBridge {
@@ -72,8 +73,7 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
     }
 
     @Override
-    public void bridge$setExplosionRadius(final @Nullable
-        Integer radius) {
+    public void bridge$setExplosionRadius(final @Nullable Integer radius) {
         this.impl$explosionRadius = radius;
     }
 
@@ -98,14 +98,12 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
     }
 
 
-    @Inject(method = "hurt",
-        at = @At("INVOKE"))
+    @Inject(method = "hurt", at = @At("HEAD"))
     private void impl$onAttackSetPrimeCause(final DamageSource damageSource, final float amount, final CallbackInfoReturnable<Boolean> ci) {
         this.impl$primeCause = damageSource;
     }
 
-    @Inject(method = "activateMinecart(IIIZ)V",
-        at = @At("INVOKE"))
+    @Inject(method = "activateMinecart(IIIZ)V", at = @At("HEAD"))
     private void impl$onActivateSetPrimeCauseNotifier(final int x, final int y, final int z, final boolean receivingPower, final CallbackInfo ci) {
         if (((LevelBridge) this.level).bridge$isFake()) {
             return;
@@ -115,9 +113,7 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
         }
     }
 
-    @Inject(method = "primeFuse",
-        at = @At("INVOKE"),
-        cancellable = true)
+    @Inject(method = "primeFuse", at = @At("HEAD"), cancellable = true)
     private void impl$preIgnite(final CallbackInfo ci) {
         if (!this.bridge$shouldPrime()) {
             this.bridge$setFuseTicksRemaining(-1);
@@ -125,9 +121,8 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
         }
     }
 
-    @Inject(method = "primeFuse",
-        at = @At("RETURN"))
-    private void impl$postSpongeIgnite(final CallbackInfo ci) {
+    @Inject(method = "primeFuse", at = @At("RETURN"))
+    private void impl$postIgnite(final CallbackInfo ci) {
         this.bridge$setFuseTicksRemaining(this.impl$fuseDuration);
         if (this.impl$primeCause != null) {
             PhaseTracker.getCauseStackManager().pushCause(this.impl$primeCause);
@@ -161,8 +156,7 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
                 );
     }
 
-    @Inject(method = "explode",
-        at = @At("RETURN"))
+    @Inject(method = "explode", at = @At("RETURN"))
     private void impL$postExplode(final CallbackInfo ci) {
         if (this.impl$detonationCancelled) {
             this.impl$detonationCancelled = false;
@@ -170,9 +164,7 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
         }
     }
 
-    @Inject(method = "hurt",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/vehicle/MinecartTNT;explode(D)V"), cancellable = true)
+    @Inject(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/MinecartTNT;explode(D)V"), cancellable = true)
     private void impl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);

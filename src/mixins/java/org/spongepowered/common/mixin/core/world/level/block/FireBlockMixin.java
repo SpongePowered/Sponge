@@ -65,36 +65,4 @@ public abstract class FireBlockMixin extends BaseFireBlockMixin {
         return world.setBlock(pos, newState, flags);
     }
 
-    @Inject(method = "checkBurnOut",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"),
-        require = 0,
-        expect = 0,
-        cancellable = true)
-    private void impl$onCatchFirePreCheck(
-        final Level world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
-        if (!world.isClientSide) {
-            if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) world, pos).isCancelled()) {
-                callbackInfo.cancel();
-            }
-        }
-    }
-
-    @Inject(method = "checkBurnOut",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"),
-        require = 0,
-        expect = 0,
-        cancellable = true)
-    private void impl$onCatchFirePreCheckOther(
-        final Level world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
-        if (!world.isClientSide) {
-            if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) world, pos).isCancelled()) {
-                callbackInfo.cancel();
-            }
-        }
-    }
-
 }

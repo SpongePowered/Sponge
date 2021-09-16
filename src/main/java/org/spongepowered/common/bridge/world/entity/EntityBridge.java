@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.bridge.world.entity;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.cause.entity.DismountType;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
@@ -41,6 +44,8 @@ public interface EntityBridge {
     boolean bridge$isConstructing();
 
     void bridge$fireConstructors();
+
+    boolean bridge$isPlayerTouchDeclared();
 
     boolean bridge$removePassengers(DismountType type);
 

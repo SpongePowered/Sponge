@@ -157,7 +157,8 @@ minecraft {
                 // "-Dmixin.debug.strict=true"
             )
             allJvmArgumentProviders += CommandLineArgumentProvider {
-                // Resolve the Mixin artifact for use as a reload agent
+                // todo: Mixin agent does not currently work in 0.8.4
+                /*// Resolve the Mixin artifact for use as a reload agent
                 val mixinJar = vanillaAppLaunchConfig.get().resolvedConfiguration
                         .getFiles { it.name == "mixin" && it.group == "org.spongepowered" }
                         .firstOrNull()
@@ -167,10 +168,10 @@ minecraft {
                     listOf("-javaagent:$mixinJar")
                 } else {
                     emptyList()
-                }
+                }*/
 
                 // Then add necessary module cracks
-                base + listOf(
+                listOf(
                     "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
                     "--add-opens=java.base/java.util.jar=ALL-UNNAMED" // ModLauncher
                 )
@@ -204,6 +205,7 @@ minecraft {
 dependencies {
     val apiAdventureVersion: String by project
     val apiConfigurateVersion: String by project
+    val apiPluginSpiVersion: String by project
     val asmVersion: String by project
     val forgeFlowerVersion: String by project
     val guavaVersion: String by project
@@ -212,7 +214,6 @@ dependencies {
     val log4jVersion: String by project
     val mixinVersion: String by project
     val modlauncherVersion: String by project
-    val pluginSpiVersion: String by project
     val timingsVersion: String by project
     val tinyLogVersion: String by project
 
@@ -257,7 +258,7 @@ dependencies {
     appLaunch("org.ow2.asm:asm-util:$asmVersion")
     appLaunch("org.ow2.asm:asm-tree:$asmVersion")
     appLaunch("com.google.guava:guava:$guavaVersion")
-    appLaunch("org.spongepowered:plugin-spi:$pluginSpiVersion")
+    appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
     appLaunch("javax.inject:javax.inject:1")
     appLaunch("org.apache.logging.log4j:log4j-api:$log4jVersion")
     appLaunch("org.apache.logging.log4j:log4j-core:$log4jVersion")

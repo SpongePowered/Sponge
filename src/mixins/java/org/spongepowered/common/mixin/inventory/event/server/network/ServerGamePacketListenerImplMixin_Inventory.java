@@ -24,60 +24,142 @@
  */
 package org.spongepowered.common.mixin.inventory.event.server.network;
 
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
-import org.spongepowered.common.event.inventory.InventoryEventFactory;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(ServerGamePacketListenerImpl.class)
 public class ServerGamePacketListenerImplMixin_Inventory {
 
     @Shadow public ServerPlayer player;
 
-    // before if(flag1 && flag2)
-    @Inject(method = "handleSetCreativeModeSlot", cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundSetCreativeModeSlotPacket;getSlotNum()I", ordinal = 1))
-    private void onProcessCreativeInventoryAction(ServerboundSetCreativeModeSlotPacket packetIn, CallbackInfo ci) {
+    @Redirect(method = "handleSetCreativeModeSlot",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/InventoryMenu;broadcastChanges()V"))
+    private void impl$onBroadcastCreativeActionResult(final InventoryMenu inventoryMenu, final ServerboundSetCreativeModeSlotPacket packetIn) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
         final ItemStack itemstack = packetIn.getItem();
-        boolean flag2 = itemstack.isEmpty() || itemstack.getDamageValue() >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
-        if (flag2) {
-            // TODO handle vanilla sending a bunch of creative events (previously ignoring events within 100ms)
-            final ClickContainerEvent.Creative clickEvent = InventoryEventFactory.callCreativeClickContainerEvent(this.player, packetIn);
-            if (clickEvent.isCancelled()) {
-                // Reset slot on client
-                if (packetIn.getSlotNum() >= 0 && packetIn.getSlotNum() < this.player.containerMenu.slots.size()) {
-                    this.player.connection.send(
-                            new ClientboundContainerSetSlotPacket(this.player.containerMenu.containerId, this.player.containerMenu.getStateId(), packetIn.getSlotNum(),
-                                    this.player.containerMenu.getSlot(packetIn.getSlotNum()).getItem()));
-                    this.player.connection.send(new ClientboundContainerSetSlotPacket(-1, -1, -1, ItemStack.EMPTY));
-                }
-                ci.cancel();
-            } else {
-                if (PacketPhaseUtil.handleSlotRestore(this.player, this.player.containerMenu, clickEvent.transactions(), false)) {
-                    ci.cancel();
-                }
-                final Transaction<ItemStackSnapshot> cursorTransaction = clickEvent.cursorTransaction();
-                if (!cursorTransaction.isValid()) {
-                    // TODO original cursor is currently always empty
-                    PacketPhaseUtil.handleCustomCursor(this.player, cursorTransaction.original());
-                }
-                else if (cursorTransaction.custom().isPresent()) {
-                    PacketPhaseUtil.handleCustomCursor(this.player, cursorTransaction.finalReplacement());
-                }
-            }
+
+        // TODO handle vanilla sending a bunch of creative events (previously ignoring events within 100ms)
+        try (final EffectTransactor ignored = transactor.logCreativeClickContainer(packetIn.getSlotNum(), ItemStackUtil.snapshotOf(itemstack), this.player)) {
+        }
+        inventoryMenu.broadcastChanges();
+    }
+
+    @Redirect(method = "handleSetCreativeModeSlot",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;drop(Lnet/minecraft/world/item/ItemStack;Z)Lnet/minecraft/world/entity/item/ItemEntity;"))
+    private ItemEntity impl$onBroadcastCreativeActionResult(final ServerPlayer serverPlayer, final ItemStack stack, final boolean param1) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        try (final EffectTransactor ignored = transactor.logCreativeClickContainer(-1, ItemStackUtil.snapshotOf(stack), this.player)) {
+            return serverPlayer.drop(stack, param1);
+        }
+    }
+
+    // Before setting this.player.inventory.selected
+    @Inject(method = "handleSetCarriedItem",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundSetCarriedItemPacket;getSlot()I"),
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;stopUsingItem()V"))
+    )
+    private void impl$onHandleSetCarriedItem(final ServerboundSetCarriedItemPacket packet, final CallbackInfo ci) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        final int slotIdx = packet.getSlot();
+        transactor.logPlayerCarriedItem(this.player, slotIdx);
+        // TrackingUtil.processBlockCaptures called by SwitchHotbarScrollState
+    }
+
+    @Redirect(method = "handleUseItem",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayerGameMode;useItem(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
+    private InteractionResult impl$onHandleUseItem(final ServerPlayerGameMode serverPlayerGameMode, final ServerPlayer param0,
+            final Level param1, final ItemStack param2, final InteractionHand param3) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        final InteractionResult result = serverPlayerGameMode.useItem(param0, param1, param2, param3);
+        try (EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(this.player, PlayerInventoryTransaction.EventCreator.STANDARD)) {
+            this.player.inventoryMenu.broadcastChanges(); // capture
+        }
+        return result;
+        // TrackingUtil.processBlockCaptures called by UseItemPacketState
+    }
+
+    @Redirect(method = "handlePlayerCommand",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/horse/AbstractHorse;openInventory(Lnet/minecraft/world/entity/player/Player;)V"))
+    private void impl$onHandlePlayerCommandOpenInventory(final AbstractHorse abstractHorse, final Player player) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        try (final EffectTransactor ignored = context.getTransactor().logOpenInventory(player)) {
+            abstractHorse.openInventory(player);
+            context.getTransactor().logContainerSet(player);
+        }
+    }
+
+    @Redirect(method = "handleContainerClose",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;doCloseContainer()V"))
+    private void impl$onHandleContainerClose(final ServerPlayer player) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        try (final EffectTransactor ignored = transactor.logCloseInventory(player, true)) {
+            this.player.containerMenu.removed(player);
+            this.player.containerMenu.broadcastChanges();
+        }
+    }
+
+    @Redirect(method = "handleInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;interactAt(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
+    private InteractionResult impl$onInteractAt(final Entity entity, final Player param0, final Vec3 param1, final InteractionHand param2) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        final InteractionResult result = entity.interactAt(param0, param1, param2);
+        return result;
+    }
+
+    @Redirect(method = "handleInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;interactOn(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
+    private InteractionResult impl$onInteractOn(final ServerPlayer player, final Entity param0, final InteractionHand param1) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        final InteractionResult result = player.interactOn(param0, param1);
+        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, PlayerInventoryTransaction.EventCreator.STANDARD)) {
+            player.inventoryMenu.broadcastChanges();
+        }
+        return result;
+    }
+
+    @Inject(method = "handleSelectTrade", at = @At("RETURN"))
+    private void impl$onHandleSelectTrade(final ServerboundSelectTradePacket param0, final CallbackInfo ci) {
+        if (this.player.containerMenu instanceof MerchantMenu) {
+            final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+            final TransactionalCaptureSupplier transactor = context.getTransactor();
+            transactor.logSelectTrade(this.player, param0.getItem());
+            this.player.containerMenu.broadcastChanges(); // capture
         }
     }
 

@@ -43,15 +43,6 @@ public interface LensCollection {
     List<Lens> children();
 
     /**
-     * Get all the properties for the specified target slot.
-     * 
-     * @param index the lens index to fetch
-     * @return collection of properties for the specified slot when viewed
-     *      through this lens
-     */
-    Map<Key<?>, Object> getDataAt(int index);
-    
-    /**
      * Get all the properties for the specified lens (if contained in this
      * collection).
      * 

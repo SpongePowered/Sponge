@@ -69,8 +69,8 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     @Override
     public Biome biome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        return this.palette.get(this.biomes[this.getIndex(x, y, z)], Sponge.server().registries())
-            .orElseGet(Sponge.server().registries()
+        return this.palette.get(this.biomes[this.getIndex(x, y, z)], Sponge.server())
+            .orElseGet(Sponge.server()
                 .registry(RegistryTypes.BIOME)
                 .value(Biomes.OCEAN)
             );
@@ -124,8 +124,8 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
                 .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
                     .mapToObj(y -> VolumeElement.<Immutable, Biome>of(this, () -> {
                         final byte biomeId = this.biomes[this.getIndex(x, y, z)];
-                        return this.palette.get(biomeId & 255, Sponge.server().registries())
-                            .orElseGet(Sponge.server().registries()
+                        return this.palette.get(biomeId & 255, Sponge.server())
+                            .orElseGet(Sponge.server()
                                 .registry(RegistryTypes.BIOME)
                                 .value(Biomes.OCEAN)
                             );

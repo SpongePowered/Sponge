@@ -36,16 +36,20 @@ import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.DelegatingLens;
 import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 
 public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Builder.BuildingStep, Inventory.Builder.EndStep {
 
-    private List<Lens> lenses = new ArrayList<>();
-    private List<Inventory> inventories = new ArrayList<>();
+    private final List<Lens> lenses = new ArrayList<>();
+    private final List<Inventory> inventories = new ArrayList<>();
+
+    private PluginContainer plugin;
     private int size = 0;
 
     private Lens finalLens; // always set before build
@@ -93,6 +97,12 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
         return this;
     }
 
+    @Override
+    public EndStep plugin(final PluginContainer plugin) {
+        this.plugin = Objects.requireNonNull(plugin, "plugin");
+        return this;
+    }
+
     public EndStep identity(UUID uuid) {
         this.identity = uuid;
         return this;
@@ -104,14 +114,19 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
     }
 
     public Inventory build() {
-        return ((Inventory) new CustomInventory(this.size, this.finalLens, this.finalProvider, this.inventories, this.identity, this.carrier));
+        if (this.plugin == null) {
+            throw new IllegalStateException("Plugin has not been set in this builder!");
+        }
+        return ((Inventory) new CustomInventory(this.plugin, this.size, this.finalLens, this.finalProvider,
+                this.inventories, this.identity, this.carrier));
     }
 
     @Override
     public Inventory.Builder reset() {
+        this.plugin = null;
 
-        this.lenses = new ArrayList<>();
-        this.inventories = new ArrayList<>();
+        this.lenses.clear();
+        this.inventories.clear();
         this.size = 0;
 
         this.finalLens = null;

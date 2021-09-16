@@ -60,7 +60,7 @@ public class StubRegistryHolder implements RegistryHolder {
     }
 
     @Override
-    public Stream<Registry<?>> stream(final ResourceKey root) {
+    public Stream<Registry<?>> streamRegistries(final ResourceKey root) {
         return Stream.of();
     }
 }

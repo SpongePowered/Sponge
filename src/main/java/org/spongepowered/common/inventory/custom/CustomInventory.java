@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.inventory.custom;
 
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.CarriedBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.Lens;
@@ -39,10 +41,6 @@ import org.spongepowered.plugin.PluginContainer;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import net.minecraft.world.Container;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 
 public class CustomInventory implements Container, CarriedBridge {
 
@@ -57,14 +55,15 @@ public class CustomInventory implements Container, CarriedBridge {
     private int size;
     private Carrier carrier;
 
-    public CustomInventory(int size, Lens lens, SlotLensProvider provider, List<Inventory> inventories, @Nullable UUID identity, @Nullable Carrier carrier) {
+    public CustomInventory(final PluginContainer plugin, int size, Lens lens, SlotLensProvider provider, List<Inventory> inventories,
+            @Nullable UUID identity, @Nullable Carrier carrier) {
+        this.plugin = plugin;
         this.size = size;
         this.identity = identity;
         this.carrier = carrier;
         this.lens = lens;
         this.slotLensProvider = provider;
         this.inventories = inventories;
-        this.plugin = SpongeCommon.activePlugin();
     }
 
     public Carrier getCarrier() {

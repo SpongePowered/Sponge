@@ -41,8 +41,10 @@ import org.spongepowered.common.bridge.world.inventory.container.TrackedInventor
 import org.spongepowered.common.entity.player.SpongeUserData;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
 import org.spongepowered.common.inventory.custom.CustomInventory;
+import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -120,6 +122,9 @@ public final class InventoryUtil {
         if (inventory instanceof InventoryAdapter) {
             return ((InventoryAdapter) inventory);
         }
+        if (inventory instanceof Fabric) {
+            return new BasicInventoryAdapter((Fabric) inventory, null, null);
+        }
         return PlatformHooks.INSTANCE.getInventoryHooks().findInventoryAdapter(inventory);
     }
 
@@ -148,7 +153,7 @@ public final class InventoryUtil {
         final Object base = inventory;
 
         if (base instanceof BlockEntity) {
-            final ResourceKey key = Sponge.game().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(((BlockEntity) base).type());
+            final ResourceKey key = Sponge.game().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(((BlockEntity) base).type());
             final String pluginId = key.namespace();
             container = Sponge.pluginManager().plugin(pluginId)
                     .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + key.namespace() + ":" + key.value()));

@@ -24,14 +24,18 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> {
 
@@ -76,10 +80,18 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         final PhaseContext<@NonNull ?> unwindingContext = context.getUnwindingContext();
         try {
             // TODO - figure out what goes here.
-//            TrackingUtil.processBlockCaptures(unwindingContext);
+            if (!unwindingContext.getTransactor().isEmpty()) {
+                PhasePrinter.printUnprocessedPhaseContextObjects(context.createdTracker.stack, this, context);
+            }
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, context);
         }
+    }
+
+    @Override
+    public Supplier<ResourceKey> attemptWorldKey(UnwindingPhaseContext context) {
+        final Optional<Supplier<ResourceKey>> o = context.getSource(Entity.class).map(s -> () -> (ResourceKey) (Object) s.level.dimension().location());
+        return o.orElseThrow(() -> new IllegalStateException("Expected to be ticking an entity!"));
     }
 
     private final String desc = TrackingUtil.phaseStateToString("General", this);

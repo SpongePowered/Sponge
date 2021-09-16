@@ -24,6 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.SpawnEggItem;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.data.type.HandType;
@@ -34,27 +39,17 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.SpawnEggItem;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -117,28 +112,6 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     ) {
         final ItemStack itemStack = context.getItemUsed();
         return itemStack.type() instanceof SpawnEggItem ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT;
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public void unwind(final BasicPacketContext context) {
-        final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
-        final ItemStack itemStack = context.getItemUsed();
-        final ItemStackSnapshot snapshot = context.getItemUsedSnapshot();
-        // We can rely on TrackingUtil.processBlockCaptures because it checks for empty contexts.
-        // Swap the items used, the item used is what we want to "restore" it to the player
-        final InteractionHand hand = (InteractionHand) (Object) context.getHandUsed();
-        final net.minecraft.world.item.ItemStack replaced = player.getItemInHand(hand);
-        player.setItemInHand(hand, ItemStackUtil.toNative(itemStack.copy()));
-        if (!TrackingUtil.processBlockCaptures(context) && !snapshot.isEmpty()) {
-            PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), hand);
-        } else {
-            player.setItemInHand(hand, replaced);
-        }
-
-        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.containerMenu;
-        trackedInventory.bridge$setCaptureInventory(false);
-        trackedInventory.bridge$getCapturedSlotTransactions().clear();
     }
 
 }

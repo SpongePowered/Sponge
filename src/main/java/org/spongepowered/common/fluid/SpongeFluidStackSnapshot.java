@@ -86,7 +86,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
 
     @Override
     public @NonNull DataContainer toContainer() {
-        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.FLUID_TYPE).valueKey(this.fluidType);
+        final ResourceKey resourceKey = Sponge.game().registry(RegistryTypes.FLUID_TYPE).valueKey(this.fluidType);
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.contentVersion())
             .set(Constants.Fluids.FLUID_TYPE, resourceKey)

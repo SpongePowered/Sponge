@@ -36,7 +36,7 @@ import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 @Plugin("interacttest")
@@ -61,7 +61,7 @@ public final class InteractTest implements LoadableModule {
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(),
                     Component.text().append(Component.text("/* Hand: "))
-                            .append(Component.text(event.context().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.game().registries(), h).formatted()).orElse("UNKNOWN")))
+                            .append(Component.text(event.context().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.game(), h).formatted()).orElse("UNKNOWN")))
                             .build()
             );
             Sponge.game().systemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Cause: ")).append(Component.text(event.cause().all().toString())).build());
@@ -73,7 +73,7 @@ public final class InteractTest implements LoadableModule {
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(),
                     Component.text().append(Component.text("/* Hand: "))
-                            .append(Component.text(event.context().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.game().registries(), h).formatted()).orElse("UNKNOWN")))
+                            .append(Component.text(event.context().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.game(), h).formatted()).orElse("UNKNOWN")))
                             .build()
             );
             Sponge.game().systemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Cause: ")).append(Component.text(event.cause().all().toString())).build());
@@ -85,7 +85,7 @@ public final class InteractTest implements LoadableModule {
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(),
                     Component.text().append(Component.text("/* Hand: "))
-                            .append(Component.text(event.context().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.game().registries(), h).formatted()).orElse("UNKNOWN")))
+                            .append(Component.text(event.context().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.game(), h).formatted()).orElse("UNKNOWN")))
                             .build()
             );
             Sponge.game().systemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Cause: ")).append(Component.text(event.cause().all().toString())).build());

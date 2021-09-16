@@ -35,15 +35,15 @@ import net.minecraftforge.forgespi.locating.IModLocator;
 import net.minecraftforge.forgespi.locating.ModFileFactory;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.forge.applaunch.loading.metadata.PluginFileConfigurable;
-import org.spongepowered.plugin.metadata.PluginMetadata;
-import org.spongepowered.plugin.metadata.PluginMetadataContainer;
-import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
+import org.spongepowered.plugin.metadata.builtin.MetadataContainer;
+import org.spongepowered.plugin.metadata.builtin.MetadataParser;
 
+import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 
 public final class ModFileParsers {
 
@@ -59,10 +59,10 @@ public final class ModFileParsers {
         }
     }
 
-    public static IModFileInfo dummySpongeModParser(final String fileName, final IModFile iModFile) {
-        final ModFile modFile = (ModFile)iModFile;
+    public static IModFileInfo dummySpongeModParser(final IModFile realModFile, final String fileName, final IModFile iModFile) {
+        final ModFile modFile = (ModFile) iModFile;
         AppLaunch.logger().debug("Considering sponge platform candidate {}", modFile.getFilePath());
-        final Path modsjson = modFile.getLocator().findPath(modFile, fileName + ".toml");
+        final Path modsjson = modFile.getLocator().findPath(realModFile, fileName + ".toml");
         if (!Files.exists(modsjson)) {
             AppLaunch.logger().warn("Sponge platform file '{}' is missing the '{}' file", modFile, fileName + ".toml");
             return null;
@@ -84,12 +84,14 @@ public final class ModFileParsers {
         AppLaunch.logger().debug("Considering plugin file candidate {}", modFile.getFilePath());
         final Path metadataFile = modFile.getLocator().findPath(modFile, "META-INF/" + fileName + ".json");
         if (Files.notExists(metadataFile)) {
-            AppLaunch.logger().debug("Plugin file '{}' is missing a 'plugins.json' metadata file in META-INF", modFile);
+            AppLaunch.logger().debug("Plugin file '{}' is missing a 'sponge_plugins.json' metadata file in META-INF", modFile);
             return null;
         }
         try {
-            final Collection<PluginMetadata> metadata = PluginMetadataHelper.builder().build().read(metadataFile);
-            final PluginMetadataContainer container = new PluginMetadataContainer(metadata);
+            final MetadataContainer container;
+            try (final Reader reader = Files.newBufferedReader(metadataFile, StandardCharsets.UTF_8)) {
+                container = MetadataParser.read(reader);
+            }
             final PluginFileConfigurable configurable = new PluginFileConfigurable(container);
 
             return ModFileParsers.generateModFileMetadata(modFile, configurable);

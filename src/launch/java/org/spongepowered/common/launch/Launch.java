@@ -33,6 +33,7 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
+import org.spongepowered.common.launch.mapping.SpongeMappingManager;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -90,6 +91,8 @@ public abstract class Launch {
         }
         this.lifecycle = lifecycle;
     }
+
+    public abstract SpongeMappingManager mappingManager();
 
     public final Logger logger() {
         return this.logger;

@@ -45,23 +45,23 @@ public final class HorseData {
                 .asMutable(Horse.class)
                     .create(Keys.HORSE_COLOR)
                         .get(h -> {
-                            final MappedRegistry<HorseColor> registry = (MappedRegistry<HorseColor>) (Object) Sponge.game().registries().registry(RegistryTypes.HORSE_COLOR);
+                            final MappedRegistry<HorseColor> registry = (MappedRegistry<HorseColor>) (Object) Sponge.game().registry(RegistryTypes.HORSE_COLOR);
                             return registry.byId(HorseData.getHorseColor(h));
                         })
                         .set((h, v) -> {
                             final int style = HorseData.getHorseStyle(h);
-                            final MappedRegistry<HorseColor> registry = (MappedRegistry<HorseColor>) (Object) Sponge.game().registries().registry(RegistryTypes.HORSE_COLOR);
+                            final MappedRegistry<HorseColor> registry = (MappedRegistry<HorseColor>) (Object) Sponge.game().registry(RegistryTypes.HORSE_COLOR);
                             final int metadata = registry.getId(v);
                             ((HorseAccessor) h).invoker$setTypeVariant(metadata | style);
                         })
                     .create(Keys.HORSE_STYLE)
                         .get(h -> {
-                            final MappedRegistry<HorseStyle> registry = (MappedRegistry<HorseStyle>) (Object) Sponge.game().registries().registry(RegistryTypes.HORSE_STYLE);
+                            final MappedRegistry<HorseStyle> registry = (MappedRegistry<HorseStyle>) (Object) Sponge.game().registry(RegistryTypes.HORSE_STYLE);
                             return registry.byId(HorseData.getHorseStyle(h));
                         })
                         .set((h, v) -> {
                             final int color = HorseData.getHorseColor(h);
-                            final MappedRegistry<HorseStyle> registry = (MappedRegistry<HorseStyle>) (Object) Sponge.game().registries().registry(RegistryTypes.HORSE_STYLE);
+                            final MappedRegistry<HorseStyle> registry = (MappedRegistry<HorseStyle>) (Object) Sponge.game().registry(RegistryTypes.HORSE_STYLE);
                             final int metadata = registry.getId(v);
                             ((HorseAccessor) h).invoker$setTypeVariant((color | (metadata << 8)));
                         });

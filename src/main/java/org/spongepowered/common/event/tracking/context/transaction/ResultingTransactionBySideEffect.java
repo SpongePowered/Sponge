@@ -24,26 +24,55 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 
-@SuppressWarnings("rawtypes")
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Optional;
+
 public class ResultingTransactionBySideEffect {
     public final ProcessingSideEffect effect;
-    @Nullable GameTransaction head;
-    @Nullable GameTransaction tail;
+    @Nullable GameTransaction<@NonNull ?> head;
+    @Nullable GameTransaction<@NonNull ?> tail;
 
     public ResultingTransactionBySideEffect(final ProcessingSideEffect effect) {
         this.effect = effect;
     }
 
-    public void addChild(final GameTransaction child) {
+    public void addChild(
+        final PhaseContext<@NonNull ?> context,
+        final GameTransaction<@NonNull ?> child
+    ) {
+        // Basically attempt to climb up the chain to see if any of the existing
+        // transactions will accept the child. This can get expensive at times
+        // if the transaction tree reaches hundreds x hundreds of transactions.
+        final Optional<TransactionFlow.AbsorbingFlowStep> absorbingFlowStep = child.parentAbsorber();
+        if (absorbingFlowStep.isPresent()) {
+            final TransactionFlow.AbsorbingFlowStep absorber = absorbingFlowStep.get();
+            for (final Iterator<GameTransaction<@NonNull ?>> iterator = this.reverseDeepIterator();
+                 iterator.hasNext(); ) {
+                if (absorber.absorb(context, iterator.next())) {
+                    return;
+                }
+            }
+        }
         if (this.tail != null) {
-            this.tail.next = child;
-            child.previous = this.tail;
+            this.tail.append(child);
         } else {
             this.head = child;
         }
         this.tail = child;
     }
+
+    public Iterator<GameTransaction<@NonNull ?>> deepIterator() {
+        return this.head != null ? new DeepIterator(this.head) : Collections.emptyIterator();
+    }
+
+    public Iterator<GameTransaction<@NonNull ?>> reverseDeepIterator() {
+        return this.tail != null ? new ReverseDeepIterator(this.tail) : Collections.emptyIterator();
+    }
+
 }

@@ -24,22 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.server.level.ServerPlayer;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 
 public final class UnknownPacketState extends BasicPacketState {
 
-    @Override
-    public void unwind(BasicPacketContext context) {
-        final ServerPlayer player = context.getPacketPlayer();
-
-        try (CauseStackManager.StackFrame frame1 = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame1.pushCause(player);
-            TrackingUtil.processBlockCaptures(context);
-        }
-    }
 }

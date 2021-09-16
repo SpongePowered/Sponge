@@ -47,20 +47,20 @@ import java.net.Proxy;
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Forge_API implements ForgeServer {
 
-    private ForgeWorldManager forge$worldManager;
+    private ForgeWorldManager forgeAPI$worldManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void forge$setupSpongeFields(Thread p_i232576_1_, RegistryAccess.RegistryHolder p_i232576_2_,
+    private void forgeAPI$setupSpongeFields(Thread p_i232576_1_, RegistryAccess.RegistryHolder p_i232576_2_,
             LevelStorageSource.LevelStorageAccess p_i232576_3_,
             WorldData p_i232576_4_, PackRepository p_i232576_5_, Proxy p_i232576_6_, DataFixer p_i232576_7_,
             ServerResources p_i232576_8_, MinecraftSessionService p_i232576_9_, GameProfileRepository p_i232576_10_,
             GameProfileCache p_i232576_11_, ChunkProgressListenerFactory p_i232576_12_, CallbackInfo ci) {
 
-        this.forge$worldManager = new ForgeWorldManager((MinecraftServer) (Object) this);
+        this.forgeAPI$worldManager = new ForgeWorldManager((MinecraftServer) (Object) this);
     }
 
     @Override
     public ForgeWorldManager worldManager() {
-        return this.forge$worldManager;
+        return this.forgeAPI$worldManager;
     }
 }

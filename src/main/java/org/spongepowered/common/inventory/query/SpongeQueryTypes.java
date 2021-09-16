@@ -59,14 +59,14 @@ public final class SpongeQueryTypes {
     }
 
     private static DefaultedRegistryReference<QueryType.NoParam> noParamKey(final ResourceKey location) {
-        return RegistryKey.of(RegistryTypes.QUERY_TYPE, location).asDefaultedReference(() -> Sponge.game().registries());
+        return RegistryKey.of(RegistryTypes.QUERY_TYPE, location).asDefaultedReference(() -> Sponge.game());
     }
 
     private static <T1> DefaultedRegistryReference<QueryType.OneParam<T1>> oneParamKey(final ResourceKey location) {
-        return RegistryKey.of(RegistryTypes.QUERY_TYPE, location).asDefaultedReference(() -> Sponge.game().registries());
+        return RegistryKey.of(RegistryTypes.QUERY_TYPE, location).asDefaultedReference(() -> Sponge.game());
     }
 
     private static <T1, T2> DefaultedRegistryReference<QueryType.TwoParam<T1, T2>> twoParamKey(final ResourceKey location) {
-        return RegistryKey.of(RegistryTypes.QUERY_TYPE, location).asDefaultedReference(() -> Sponge.game().registries());
+        return RegistryKey.of(RegistryTypes.QUERY_TYPE, location).asDefaultedReference(() -> Sponge.game());
     }
 }

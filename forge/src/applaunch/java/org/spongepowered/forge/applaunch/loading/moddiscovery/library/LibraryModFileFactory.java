@@ -36,6 +36,6 @@ public final class LibraryModFileFactory implements ModFileFactory {
 
     @Override
     public IModFile build(final Path path, final IModLocator locator, final ModFileInfoParser parser) {
-        return new LibraryModFile(path, locator, parser);
+        return new SelectableTypeModFile(path, locator, parser, IModFile.Type.LIBRARY);
     }
 }

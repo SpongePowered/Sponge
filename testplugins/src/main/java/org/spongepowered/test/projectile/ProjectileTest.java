@@ -55,7 +55,7 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 import java.util.Collection;
@@ -80,7 +80,7 @@ public class ProjectileTest implements LoadableModule {
         final Parameter.Value<EntityType<@NonNull ?>> entityTypeParameter =
                 Parameter.registryElement(
                         new TypeToken<EntityType<?>>() {},
-                        (ctx) -> Sponge.game().registries(),
+                        (ctx) -> Sponge.game(),
                         RegistryTypes.ENTITY_TYPE,
                         "minecraft",
                         "sponge")
@@ -103,7 +103,7 @@ public class ProjectileTest implements LoadableModule {
                         final Entity target = nearbyEntities.iterator().next();
                         launched = player.launchProjectileTo((EntityType<Projectile>) entityType, target);
                         if (launched.isPresent()) {
-                            player.sendMessage(Identity.nil(), Component.text("Launched projectile to " + RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), target.type()).asString()));
+                            player.sendMessage(Identity.nil(), Component.text("Launched projectile to " + RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game(), target.type()).asString()));
                             return CommandResult.success();
                         }
                     } else {
@@ -137,16 +137,16 @@ public class ProjectileTest implements LoadableModule {
                     if (launched.isPresent()) {
                         final EntityType<?> launchedType = launched.get().type();
                         player.sendMessage(Identity.nil(), Component.text()
-                                .append(Component.text("You made a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), type).asString()))
-                                .append(Component.text(" shoot a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), launchedType).asString()))
+                                .append(Component.text("You made a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game(), type).asString()))
+                                .append(Component.text(" shoot a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game(), launchedType).asString()))
                                 .append(Component.text(" at you")).build()
                         );
                         return CommandResult.success();
                     }
 
                     throw new CommandException(Component.text()
-                            .append(Component.text("Could not launch a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), type).asString()))
-                            .append(Component.text(" from a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), entityType).asString()))
+                            .append(Component.text("Could not launch a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game(), type).asString()))
+                            .append(Component.text(" from a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game(), entityType).asString()))
                             .append(Component.text(" at you")).build());
                 })
                 .build();
@@ -169,14 +169,14 @@ public class ProjectileTest implements LoadableModule {
                     if (launched.isPresent()) {
                         launched.get().offer(Keys.SHOOTER, player);
                         player.sendMessage(Identity.nil(), Component.text()
-                                .append(Component.text("The dispenser launched a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), launched.get().type()).asString()))
+                                .append(Component.text("The dispenser launched a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game(), launched.get().type()).asString()))
                                 .build()
                         );
                         return CommandResult.success();
                     }
 
                     return CommandResult.error(Component.text()
-                            .append(Component.text("Could not make the dispenser launch a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), entityType).asString()))
+                            .append(Component.text("Could not make the dispenser launch a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game(), entityType).asString()))
                             .build());
                 })
                 .build();
@@ -220,7 +220,7 @@ public class ProjectileTest implements LoadableModule {
                 player.launchProjectile(nextType);
             }
             event.setCancelled(true);
-            player.sendMessage(Identity.nil(), Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), nextType).toString()));
+            player.sendMessage(Identity.nil(), Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game(), nextType).toString()));
         }
 
     }

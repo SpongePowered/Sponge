@@ -46,7 +46,7 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 import java.util.List;
@@ -157,7 +157,7 @@ public class TradeTest implements LoadableModule {
                 .filter(entity1 -> entity1.type().equals(EntityTypes.VILLAGER.get()) && Math.random() > 0.7)
                 .forEach(villager -> {
                     final DataManipulator.Mutable container = DataManipulator.mutableOf()
-                        .set(Keys.PROFESSION_TYPE, ProfessionTypes.CLERIC.get(villager.world().registries()))
+                        .set(Keys.PROFESSION_TYPE, ProfessionTypes.CLERIC.get(villager.world()))
                         .set(Keys.CUSTOM_NAME, TradeTest.FLARDIAN)
                         .set(Keys.INVULNERABILITY_TICKS, Ticks.of(10000))
                         // We have to specify the experience and level because otherwise the villager's brains reset

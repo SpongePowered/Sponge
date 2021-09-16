@@ -171,7 +171,7 @@ public final class AsyncScheduler extends SpongeScheduler {
     }
 
     @Override
-    protected void executeTaskRunnable(final SpongeScheduledTask task, final Runnable runnable) {
+    protected void executeRunnable(final Runnable runnable) {
         this.executor.submit(runnable);
     }
 

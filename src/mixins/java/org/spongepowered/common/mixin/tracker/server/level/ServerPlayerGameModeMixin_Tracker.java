@@ -38,6 +38,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -56,7 +57,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
@@ -113,7 +117,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                     frame.pushCause(playerIn);
                     frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld)(worldIn)).createSnapshot(pos));
                     ((ContainerBridge) playerIn.containerMenu).bridge$setOpenLocation(location);
-                    if (!InventoryEventFactory.callInteractContainerOpenEvent(((ServerPlayer) playerIn))) {
+                    if (!InventoryEventFactory.callInteractContainerOpenEvent(playerIn)) {
                         return InteractionResult.SUCCESS;
                     }
                 }
@@ -160,6 +164,12 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                     stackIn.setCount(i);
                 } else {
                     result = stackIn.useOn(itemusecontext);
+                    // Sponge start - log change in hand
+                    final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+                    final TransactionalCaptureSupplier transactor = context.getTransactor();
+                    transactor.logPlayerInventoryChange(this.player, PlayerInventoryTransaction.EventCreator.STANDARD);
+                    this.player.inventoryMenu.broadcastChanges();
+                    // Sponge end
                 }
 
                 if (result.consumesAction()) {
@@ -172,6 +182,5 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
             }
         }
     }
-
 
 }

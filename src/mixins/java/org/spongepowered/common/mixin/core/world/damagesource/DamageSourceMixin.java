@@ -122,7 +122,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
         if (!this.msgId.contains(":")) {
             this.impl$damageType = MemoizedSupplier.memoize(() -> DamageSourceToTypeProvider.INSTANCE.getOrCustom(this.msgId).get());
         } else {
-            this.impl$damageType = MemoizedSupplier.memoize(() -> Sponge.game().registries().registry(RegistryTypes.DAMAGE_TYPE).findValue(ResourceKey.resolve(this.msgId)).orElseGet(DamageTypes.CUSTOM));
+            this.impl$damageType = MemoizedSupplier.memoize(() -> Sponge.game().registry(RegistryTypes.DAMAGE_TYPE).findValue(ResourceKey.resolve(this.msgId)).orElseGet(DamageTypes.CUSTOM));
         }
     }
 
@@ -168,7 +168,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
 
     @Override
     public String toString() {
-        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.impl$damageType.get());
+        final ResourceKey resourceKey = Sponge.game().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.impl$damageType.get());
         return MoreObjects.toStringHelper("DamageSource")
                 .add("Name", this.msgId)
                 .add("Key", resourceKey)

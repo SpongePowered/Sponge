@@ -48,19 +48,20 @@ import java.net.Proxy;
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla_API implements VanillaServer {
 
-    private SpongeWorldManager vanilla$worldManager;
+    private SpongeWorldManager vanillaAPI$worldManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void vanilla$setupSpongeFields(Thread p_i232576_1_, RegistryAccess.RegistryHolder p_i232576_2_, LevelStorageSource.LevelStorageAccess p_i232576_3_,
+    private void vanillaAPI$setupSpongeFields(Thread p_i232576_1_, RegistryAccess.RegistryHolder p_i232576_2_,
+            LevelStorageSource.LevelStorageAccess p_i232576_3_,
             WorldData p_i232576_4_, PackRepository p_i232576_5_, Proxy p_i232576_6_, DataFixer p_i232576_7_,
             ServerResources p_i232576_8_, MinecraftSessionService p_i232576_9_, GameProfileRepository p_i232576_10_,
             GameProfileCache p_i232576_11_, ChunkProgressListenerFactory p_i232576_12_, CallbackInfo ci) {
 
-        this.vanilla$worldManager = new VanillaWorldManager((MinecraftServer) (Object) this);
+        this.vanillaAPI$worldManager = new VanillaWorldManager((MinecraftServer) (Object) this);
     }
 
     @Override
     public SpongeWorldManager worldManager() {
-        return this.vanilla$worldManager;
+        return this.vanillaAPI$worldManager;
     }
 }

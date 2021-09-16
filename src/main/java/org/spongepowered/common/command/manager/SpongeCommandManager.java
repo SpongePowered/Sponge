@@ -47,6 +47,7 @@ import net.kyori.adventure.util.ComponentMessageThrowable;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -86,7 +87,9 @@ import org.spongepowered.common.command.registrar.tree.builder.RootCommandTreeNo
 import org.spongepowered.common.command.result.SpongeCommandResult;
 import org.spongepowered.common.command.sponge.SpongeCommand;
 import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.launch.Launch;
@@ -336,8 +339,6 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
         final Object source = cause.cause().root();
 
         final CommandResult result;
-//         final TrackedInventoryBridge inventory = source instanceof EntityPlayer ?
-//                ((TrackedInventoryBridge) ((EntityPlayer) source).inventory) : null;
         try (final CommandPhaseContext context = GeneralPhase.State.COMMAND
             .createPhaseContext(PhaseTracker.getInstance())
             .source(source)
@@ -348,11 +349,6 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
                 context.creator(serverPlayer.uniqueId());
                 context.notifier(serverPlayer.uniqueId());
             }
-            //if (inventory != null) {
-            //    // Enable player inventory capture
-            //    context.inventory(inventory);
-            //    inventory.bridge$setCaptureInventory(true);
-            //}
             context.buildAndSwitch();
             try {
                 result = this.processCommand(cause, mapping, arguments, command, args);
@@ -551,7 +547,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     public void init() {
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final Set<TypeToken<?>> usedTokens = new HashSet<>();
-        Sponge.game().registries().registry(RegistryTypes.COMMAND_REGISTRAR_TYPE).streamEntries().forEach(entry -> {
+        Sponge.game().registry(RegistryTypes.COMMAND_REGISTRAR_TYPE).streamEntries().forEach(entry -> {
             final CommandRegistrarType<?> type = entry.value();
             // someone's gonna do it, let's not let them take us down.
             final TypeToken<?> handledType = type.handledType();

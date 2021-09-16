@@ -261,13 +261,16 @@ public abstract class SpongeWorldManager implements WorldManager {
             pluginDirectories
                     .filter(Files::isDirectory)
                     .forEach(pluginDirectory -> {
-                                try (final Stream<Path> pluginTemplates = Files.walk(pluginDirectory.resolve("dimension"), 1)) {
-                                    pluginTemplates
-                                            .filter(template -> template.endsWith(".json"))
-                                            .forEach(template -> templateKeys.add((ResourceKey) (Object) new ResourceLocation(pluginDirectory.toString(),
-                                                    FilenameUtils.removeExtension(template.getFileName().toString()))));
-                                } catch (final IOException e) {
-                                    throw new RuntimeException(e);
+                                final Path dimensionPath = pluginDirectory.resolve("dimension");
+                                if (Files.isDirectory(dimensionPath)) {
+                                    try (final Stream<Path> pluginTemplates = Files.walk(dimensionPath, 1)) {
+                                        pluginTemplates
+                                                .filter(template -> template.toString().endsWith(".json"))
+                                                .forEach(template -> templateKeys.add((ResourceKey) (Object) new ResourceLocation(pluginDirectory.getFileName().toString(),
+                                                        FilenameUtils.removeExtension(template.getFileName().toString()))));
+                                    } catch (final IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 }
                             }
                     );
@@ -396,9 +399,9 @@ public abstract class SpongeWorldManager implements WorldManager {
                 levelSettings = MinecraftServer.DEMO_SETTINGS;
                 generationSettings = WorldGenSettings.demoSettings(BootstrapProperties.registries);
             } else {
-                levelSettings = new LevelSettings(directoryName, (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.game().registries()),
+                levelSettings = new LevelSettings(directoryName, (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.game()),
                         templateBridge.bridge$hardcore().orElse(BootstrapProperties.hardcore), (Difficulty) (Object) BootstrapProperties.difficulty
-                        .get(Sponge.game().registries()), templateBridge.bridge$commands().orElse(BootstrapProperties.commands), new GameRules(),
+                        .get(Sponge.game()), templateBridge.bridge$commands().orElse(BootstrapProperties.commands), new GameRules(),
                     defaultLevelData.getDataPackConfig());
                 generationSettings = generatorSettings;
             }
@@ -959,9 +962,9 @@ public abstract class SpongeWorldManager implements WorldManager {
                         generationSettings = WorldGenSettings.demoSettings(BootstrapProperties.registries);
                     } else {
                         levelSettings = new LevelSettings(directoryName,
-                                (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.game().registries()),
+                                (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.game()),
                                 templateBridge.bridge$hardcore().orElse(BootstrapProperties.hardcore),
-                                (Difficulty) (Object) BootstrapProperties.difficulty.get(Sponge.game().registries()),
+                                (Difficulty) (Object) BootstrapProperties.difficulty.get(Sponge.game()),
                                 templateBridge.bridge$commands().orElse(BootstrapProperties.commands), new GameRules(), defaultLevelData.getDataPackConfig());
                         generationSettings = ((WorldGenSettingsBridge) defaultLevelData.worldGenSettings()).bridge$copy();
                     }

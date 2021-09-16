@@ -30,6 +30,7 @@ import org.spongepowered.common.event.manager.AnnotatedEventListener;
 import org.spongepowered.common.event.manager.ClassEventListenerFactory;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.vanilla.launch.plugin.VanillaJavaPluginContainer;
 
 import java.lang.invoke.MethodHandles;
 
@@ -39,8 +40,8 @@ public final class VanillaEventManager extends SpongeEventManager {
     @Override
     protected AnnotatedEventListener.Factory computeFactory(final PluginContainer key) {
         final MethodHandles.Lookup lookup;
-        if (key instanceof ModuleAwareJVMPluginContainer modular) {
-            lookup = modular.lookup();
+        if (key instanceof VanillaJavaPluginContainer vanilla) {
+            lookup = vanilla.lookup();
         } else {
             lookup = SpongeEventManager.OWN_LOOKUP; // won't provide appropriate module access, but that doesn't matter in a non-modular context
         }

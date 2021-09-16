@@ -106,7 +106,10 @@ public final class ServerPlayerData {
                     .create(Keys.VIEW_DISTANCE)
                         .get(ServerPlayerBridge::bridge$getViewDistance)
                     .create(Keys.SKIN_PARTS)
-                        .get(ServerPlayerBridge::bridge$getSkinParts);
+                        .get(ServerPlayerBridge::bridge$getSkinParts)
+                    .create(Keys.IS_SLEEPING_IGNORED)
+                        .get(ServerPlayerBridge::bridge$sleepingIgnored)
+                        .set(ServerPlayerBridge::bridge$setSleepingIgnored);
 
         registrator.spongeDataStore(Keys.HEALTH_SCALE.key(), ServerPlayerEntityHealthScaleBridge.class, Keys.HEALTH_SCALE);
         SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Player.HEALTH_SCALE, Keys.HEALTH_SCALE.key(), Keys.HEALTH_SCALE);

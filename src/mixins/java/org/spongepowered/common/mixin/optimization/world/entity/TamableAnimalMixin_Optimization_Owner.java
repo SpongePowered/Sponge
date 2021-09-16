@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.optimization.world.entity;
 
-import com.google.common.base.Optional;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -33,6 +32,8 @@ import org.spongepowered.common.mixin.core.world.entity.AgableMobMixin;
 import javax.annotation.Nullable;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.TamableAnimal;
+
+import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(TamableAnimal.class)
@@ -51,7 +52,7 @@ public abstract class TamableAnimalMixin_Optimization_Owner extends AgableMobMix
     @Overwrite
     public UUID getOwnerUUID() {
         if (this.cachedOwner$OwnerId == null) {
-            this.cachedOwner$OwnerId = this.entityData.get(TamableAnimalMixin_Optimization_Owner.DATA_OWNERUUID_ID).orNull();
+            this.cachedOwner$OwnerId = this.entityData.get(TamableAnimalMixin_Optimization_Owner.DATA_OWNERUUID_ID).orElse(null);
         }
         return this.cachedOwner$OwnerId;
     }
@@ -65,7 +66,7 @@ public abstract class TamableAnimalMixin_Optimization_Owner extends AgableMobMix
     @Overwrite
     public void setOwnerUUID(@Nullable final UUID ownerUuid) {
         this.cachedOwner$OwnerId = ownerUuid;
-        this.entityData.set(TamableAnimalMixin_Optimization_Owner.DATA_OWNERUUID_ID, Optional.fromNullable(ownerUuid));
+        this.entityData.set(TamableAnimalMixin_Optimization_Owner.DATA_OWNERUUID_ID, Optional.ofNullable(ownerUuid));
     }
 
 }

@@ -96,9 +96,9 @@ public abstract class HopperBlockEntityMixin_Inventory {
         if (!ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
             return HopperBlockEntityAccessor.invoker$tryMoveInItem(source, destination, stack, index, direction);
         }
-        TrackedInventoryBridge captureIn = HopperBlockEntityMixin_Inventory.impl$forCapture(source);
+        TrackedInventoryBridge captureIn = InventoryUtil.forCapture(source);
         if (captureIn == null) {
-            captureIn = HopperBlockEntityMixin_Inventory.impl$forCapture(destination);
+            captureIn = InventoryUtil.forCapture(destination);
         }
         return InventoryEventFactory.captureTransaction(captureIn, InventoryUtil.toInventory(destination), index,
                 () -> HopperBlockEntityAccessor.invoker$tryMoveInItem(source, destination, stack, index, direction));
@@ -117,8 +117,8 @@ public abstract class HopperBlockEntityMixin_Inventory {
         // after putStackInInventoryAllSlots if the transfer worked
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack1.isEmpty()) {
             // Capture Insert in Origin
-            final TrackedInventoryBridge capture = HopperBlockEntityMixin_Inventory.impl$forCapture(iInventory);
-            final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) iInventory, i, itemStack);
+            final TrackedInventoryBridge capture = InventoryUtil.forCapture(this);
+            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) this, i, itemStack);
             // Call event
             InventoryEventFactory.callTransferPost(capture, (Inventory) iInventory, InventoryUtil.toInventory(iInventory), itemStack, sourceSlotTransaction);
         }
@@ -135,8 +135,8 @@ public abstract class HopperBlockEntityMixin_Inventory {
         // after putStackInInventoryAllSlots if the transfer worked
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack2.isEmpty()) {
             // Capture Insert in Origin
-            final TrackedInventoryBridge capture = HopperBlockEntityMixin_Inventory.impl$forCapture(hopper);
-            final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);
+            final TrackedInventoryBridge capture = InventoryUtil.forCapture(hopper);
+            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);
             // Call event
             InventoryEventFactory.callTransferPost(capture, InventoryUtil.toInventory(iInventory), InventoryUtil.toInventory(hopper), itemStack1, sourceSlotTransaction);
         }
@@ -147,13 +147,5 @@ public abstract class HopperBlockEntityMixin_Inventory {
                     target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/Container;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/Direction;)Lnet/minecraft/world/item/ItemStack;"))
     private static ItemStack impl$onPutStackInInventoryAllSlots(final Container source, final Container destination, final ItemStack stack, final Direction direction, final Container d2, final ItemEntity entity) {
         return InventoryEventFactory.callInventoryPickupEvent(destination, entity, stack);
-    }
-
-    @Nullable
-    private static TrackedInventoryBridge impl$forCapture(final Object toCapture) {
-        if (toCapture instanceof TrackedInventoryBridge) {
-            return ((TrackedInventoryBridge) toCapture);
-        }
-        return null;
     }
 }

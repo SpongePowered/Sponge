@@ -67,7 +67,7 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -241,7 +241,7 @@ public final class CommandTest {
                         .addParameter(
                                 Parameter.registryElement(
                                         typeToken,
-                                        commandContext -> Sponge.game().registries(),
+                                        commandContext -> Sponge.game(),
                                         RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER,
                                         "sponge"
                                 ).key(commandParameterKey).build())

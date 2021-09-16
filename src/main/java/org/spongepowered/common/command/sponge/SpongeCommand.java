@@ -70,8 +70,8 @@ import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.metadata.PluginContributor;
 import org.spongepowered.plugin.metadata.PluginMetadata;
+import org.spongepowered.plugin.metadata.model.PluginContributor;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -634,7 +634,7 @@ public class SpongeCommand {
                         SpongeCommand.INDENT_COMPONENT,
                         Component.text(metadata.name().orElseGet(metadata::id), NamedTextColor.GRAY),
                         colon,
-                        Component.text(container.metadata().version())
+                        Component.text(container.metadata().version().toString())
                 );
             }
 
@@ -790,7 +790,7 @@ public class SpongeCommand {
             }
         }
 
-        this.appendPluginMeta(builder, "Main class", pluginMetadata.mainClass());
+        this.appendPluginMeta(builder, "Entrypoint", pluginMetadata.entrypoint());
         return builder.build();
     }
 

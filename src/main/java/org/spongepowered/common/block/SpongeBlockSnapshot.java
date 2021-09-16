@@ -184,11 +184,11 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
                 return false;
             }
 
-            // Prevent Shulker Boxes from dropping when restoring BlockSnapshot
-//            if (current.getBlock().getClass() == BlockShulkerBox.class) {
-//                world.bridge$removeTileEntity(pos);
-//            }
-            world.removeBlockEntity(pos);
+            // Pre-emptively remove 'unsimilar' block entities to avoid drops
+            // being created during block change removals
+            if (!current.is(((net.minecraft.world.level.block.state.BlockState) this.blockState).getBlock())) {
+                world.removeBlockEntity(pos);
+            }
             world.setBlock(pos, replaced, BlockChangeFlagManager.andNotifyClients(flag).getRawFlag());
             if (this.compound != null) {
                 @Nullable BlockEntity te = world.getBlockEntity(pos);

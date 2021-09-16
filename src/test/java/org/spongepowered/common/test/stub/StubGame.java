@@ -35,7 +35,6 @@ import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.network.channel.ChannelManager;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
@@ -49,10 +48,9 @@ import java.nio.file.Path;
 import java.util.Locale;
 
 @Singleton
-public class StubGame implements Game {
+public class StubGame extends StubRegistryHolder implements Game {
 
     private final SpongeFactoryProvider provider = new SpongeFactoryProvider();
-    private final StubRegistryHolder holder = new StubRegistryHolder();
     private final SpongeBuilderProvider builder = new SpongeBuilderProvider();
 
     @Override
@@ -145,13 +143,4 @@ public class StubGame implements Game {
         return null;
     }
 
-    @Override
-    public RegistryScope registryScope() {
-        return RegistryScope.GAME;
-    }
-
-    @Override
-    public StubRegistryHolder registries() {
-        return this.holder;
-    }
 }

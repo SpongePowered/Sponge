@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.api.minecraft.server.level;
 
 import com.google.common.collect.ImmutableList;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.pointer.Pointers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
@@ -44,6 +46,8 @@ import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.ServerLevelData;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -96,7 +100,8 @@ import java.util.stream.StreamSupport;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerLevel.class)
-public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowered.api.world.server.ServerWorld, ServerLocation> implements org.spongepowered.api.world.server.ServerWorld, SpongeLocationBaseDataHolder {
+public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowered.api.world.server.ServerWorld, ServerLocation> implements
+    org.spongepowered.api.world.server.ServerWorld, SpongeLocationBaseDataHolder {
 
     // @formatter:off
     @Shadow @Final private ServerTickList<Block> blockTicks;
@@ -116,6 +121,8 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Shadow public abstract long shadow$getSeed();
     // @formatter:on
 
+    private volatile @MonotonicNonNull Pointers api$pointers;
+
     @Override
     public long seed() {
         return this.shadow$getSeed();
@@ -126,6 +133,20 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Override
     public boolean isLoaded() {
         return ((ServerLevelBridge) this).bridge$isLoaded();
+    }
+
+    // Pointered (via Audience)
+
+    @Override
+    public @NotNull Pointers pointers() {
+        if (this.api$pointers == null) {
+            return this.api$pointers = Pointers.builder()
+                .withDynamic(Identity.UUID, this::uniqueId)
+                .withDynamic(Identity.NAME, () -> this.key().formatted())
+                .withDynamic(Identity.DISPLAY_NAME, () -> this.properties().displayName().orElse(null))
+                .build();
+        }
+        return this.api$pointers;
     }
 
     // LocationCreator
@@ -283,16 +304,6 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Override
     public void setWeather(final WeatherType type, final Ticks ticks) {
         ((ServerWorldProperties) this.shadow$getLevelData()).setWeather(Objects.requireNonNull(type, "type"), Objects.requireNonNull(ticks, "ticks"));
-    }
-
-    @Override
-    public RegistryScope registryScope() {
-        return RegistryScope.WORLD;
-    }
-
-    @Override
-    public RegistryHolder registries() {
-        return ((ServerLevelBridge) this).bridge$registries();
     }
 
     @Override

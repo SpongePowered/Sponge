@@ -29,6 +29,7 @@ import cpw.mods.modlauncher.api.IEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 
@@ -42,11 +43,29 @@ import java.util.List;
 
 public final class ForgePluginPlatform implements PluginPlatform {
 
+    private static volatile boolean bootstrapped;
+
     private final Environment environment;
     private final Logger logger;
     private final List<Path> pluginDirectories;
 
-    public ForgePluginPlatform(final Environment environment) {
+    /**
+     * Bootstrap
+     * @param environment
+     * @return
+     */
+    public static synchronized boolean bootstrap(final Environment environment) {
+        if (ForgePluginPlatform.bootstrapped) {
+            return false;
+        }
+        ForgePluginPlatform.bootstrapped = true;
+        final ForgePluginPlatform platform = new ForgePluginPlatform(environment);
+        AppLaunch.setPluginPlatform(platform);
+        platform.init();
+        return true;
+    }
+
+    private ForgePluginPlatform(final Environment environment) {
         this.environment = environment;
         this.logger = LogManager.getLogger("plugin");
         this.pluginDirectories = new ArrayList<>();
@@ -86,6 +105,17 @@ public final class ForgePluginPlatform implements PluginPlatform {
 
     @Override
     public void setPluginDirectories(final List<Path> pluginDirectories) {
+        // NOOP
+    }
+
+    // TODO: Zidane, how will this work with SF?
+    @Override
+    public String metadataFilePath() {
+        return null;
+    }
+
+    @Override
+    public void setMetadataFilePath(final String metadataFilePath) {
         // NOOP
     }
 

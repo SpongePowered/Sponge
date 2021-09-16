@@ -5,15 +5,14 @@ pluginManagement {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
-        maven("https://maven.architectury.dev/")
     }
 
     plugins {
         // Default plugin versions
         id("org.spongepowered.gradle.vanilla") version "0.2"
-        id("org.cadixdev.licenser") version "0.6.0"
+        id("org.cadixdev.licenser") version "0.6.1"
         id("com.github.johnrengelman.shadow") version "7.0.0"
-        id("org.spongepowered.gradle.sponge.dev") version "1.0.3"
+        id("org.spongepowered.gradle.sponge.dev") version "1.1.1"
         id("implementation-structure")
         id("org.jetbrains.gradle.plugin.idea-ext") version "1.0"
         id("com.github.ben-manes.versions") version "0.39.0"
@@ -74,9 +73,10 @@ if (testPluginsEnabledInCi.toBoolean()) {
     include(":testplugins")
 }
 
+// XX: SpongeForge temporarily disabled in 1.17
 val spongeForge = file("spongeforge.settings.gradle.kts")
 if (spongeForge.exists()) {
-    apply(from = spongeForge)
+    // apply(from = spongeForge)
 } else {
     spongeForge.writeText("// Uncomment to enable SpongeForge module.\n" +
             "// By default only Sponge and SpongeVanilla are made available\n" +
@@ -84,9 +84,16 @@ if (spongeForge.exists()) {
             "//project(\":SpongeForge\").projectDir = file(\"forge\")\n")
 }
 val spongeForgeEnabledInCi: String = startParameter.projectProperties.getOrDefault("enableSpongeForge", "false")
-if (spongeForgeEnabledInCi.toBoolean()) {
+if (false && spongeForgeEnabledInCi.toBoolean()) {
     include(":SpongeForge")
     project(":SpongeForge").projectDir = file("forge")
+}
+
+// Bring in a newer architectury t-r
+sourceControl {
+    gitRepository(uri("https://github.com/zml2008/tiny-remapper.git")) {
+        producesModule("dev.architectury:tiny-remapper")
+    }
 }
 
 // Include properties from API project (with api prefix)

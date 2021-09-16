@@ -62,13 +62,13 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
 
     public ArrayMutableBlockBuffer(final Vector3i start, final Vector3i size) {
         this(
-                new MutableBimapPalette<>(
-                        PaletteTypes.BLOCK_STATE_PALETTE.get(),
-                        Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE)
-                ),
-                BlockTypes.AIR,
-                start,
-                size
+            new MutableBimapPalette<>(
+                PaletteTypes.BLOCK_STATE_PALETTE.get(),
+                Sponge.game().registry(RegistryTypes.BLOCK_TYPE)
+            ),
+            BlockTypes.AIR,
+            start,
+            size
         );
     }
 
@@ -76,7 +76,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
             final Vector3i start, final Vector3i size
     ) {
         super(start, size);
-        final Palette.Mutable<BlockState, BlockType> mutablePalette = palette.asMutable(Sponge.game().registries());
+        final Palette.Mutable<BlockState, BlockType> mutablePalette = palette.asMutable(Sponge.game());
         this.palette = mutablePalette;
         final int airId = mutablePalette.orAssign(ArrayMutableBlockBuffer.AIR);
 
@@ -90,15 +90,15 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
                 this.data.set(i, airId);
             }
         }
-        this.registries = Sponge.game().registries();
+        this.registries = Sponge.game();
     }
 
     public ArrayMutableBlockBuffer(final Palette<BlockState, BlockType> palette, final Vector3i start, final Vector3i size, final char[] blocks) {
         super(start, size);
-        this.palette = palette.asMutable(Sponge.game().registries());
+        this.palette = palette.asMutable(Sponge.game());
         this.data = new BlockBackingData.CharBackingData(blocks);
         this.defaultState = BlockTypes.AIR;
-        this.registries = Sponge.game().registries();
+        this.registries = Sponge.game();
     }
 
     /**
@@ -111,10 +111,10 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
      */
     ArrayMutableBlockBuffer(final Palette<BlockState, BlockType> palette, final BlockBackingData blocks, final Vector3i start, final Vector3i size) {
         super(start, size);
-        this.palette = palette.asMutable(Sponge.game().registries());
+        this.palette = palette.asMutable(Sponge.game());
         this.data = blocks;
         this.defaultState = BlockTypes.AIR;
-        this.registries = Sponge.game().registries();
+        this.registries = Sponge.game();
     }
 
     @Override

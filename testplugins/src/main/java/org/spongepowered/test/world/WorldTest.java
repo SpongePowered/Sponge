@@ -65,7 +65,7 @@ import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.util.List;
 import java.util.Map;
@@ -330,7 +330,7 @@ public final class WorldTest {
         final String owner = player.name();
         final Random random = player.world().random();
 
-        final List<RegistryReference<Biome>> allBiomes = Sponge.server().registries().registry(RegistryTypes.BIOME)
+        final List<RegistryReference<Biome>> allBiomes = Sponge.server().registry(RegistryTypes.BIOME)
                 .streamEntries()
                 .map(RegistryEntry::asReference)
                 .collect(Collectors.toList());

@@ -42,7 +42,7 @@ public abstract class EntityDamageSourceMixin extends DamageSourceMixin {
 
     @Override
     public String toString() {
-        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.impl$damageType.get());
+        final ResourceKey resourceKey = Sponge.game().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.impl$damageType.get());
 
         return MoreObjects.toStringHelper("EntityDamageSource")
             .add("Name", this.msgId)

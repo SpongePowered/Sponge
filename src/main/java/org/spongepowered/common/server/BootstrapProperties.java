@@ -54,8 +54,8 @@ public final class BootstrapProperties {
     public static void init(final WorldGenSettings worldGenSettings, final GameType gameType, final net.minecraft.world.Difficulty difficulty,
             final boolean pvp, final boolean hardcore, final boolean commands, final int viewDistance, final RegistryAccess registries) {
         BootstrapProperties.worldGenSettings = worldGenSettings;
-        BootstrapProperties.gameMode = RegistryKey.of(RegistryTypes.GAME_MODE, ResourceKey.sponge(gameType.getName())).asDefaultedReference(() -> Sponge.game().registries());
-        BootstrapProperties.difficulty = RegistryKey.of(RegistryTypes.DIFFICULTY, ResourceKey.sponge(difficulty.getKey())).asDefaultedReference(() -> Sponge.game().registries());
+        BootstrapProperties.gameMode = RegistryKey.of(RegistryTypes.GAME_MODE, ResourceKey.sponge(gameType.getName())).asDefaultedReference(Sponge::game);
+        BootstrapProperties.difficulty = RegistryKey.of(RegistryTypes.DIFFICULTY, ResourceKey.sponge(difficulty.getKey())).asDefaultedReference(Sponge::game);
         BootstrapProperties.pvp = pvp;
         BootstrapProperties.hardcore = hardcore;
         BootstrapProperties.commands = commands;

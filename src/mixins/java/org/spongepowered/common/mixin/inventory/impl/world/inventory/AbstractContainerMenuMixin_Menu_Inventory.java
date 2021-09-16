@@ -117,7 +117,7 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
     }
 
     /**
-     * ordinal=4 is handled in {@link org.spongepowered.common.mixin.inventory.event.world.inventory.AbstractContainerMenuMixin_Inventory#onCanTakeStack}
+     * ordinal=4 is handled in {@link org.spongepowered.common.mixin.inventory.event.world.inventory.AbstractContainerMenuMixin_Inventory#impl$captureLastSlotForPickup}
      */
     @Redirect(method = "doClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z"),
             slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z", ordinal = 3))

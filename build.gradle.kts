@@ -20,11 +20,11 @@ val recommendedVersion: String by project
 
 val apiAdventureVersion: String by project
 val apiConfigurateVersion: String by project
+val apiPluginSpiVersion: String by project
 val asmVersion: String by project
 val log4jVersion: String by project
 val modlauncherVersion: String by project
 val mixinVersion: String by project
-val pluginSpiVersion: String by project
 val guavaVersion: String by project
 val junitVersion: String by project
 val mockitoVersion: String by project
@@ -167,7 +167,7 @@ dependencies {
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig("org.spongepowered:spongeapi:$apiVersion")
-    launchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
+    launchConfig("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
     launchConfig("org.spongepowered:mixin:$mixinVersion")
     launchConfig("org.checkerframework:checker-qual:3.13.0")
     launchConfig("com.google.guava:guava:$guavaVersion") {

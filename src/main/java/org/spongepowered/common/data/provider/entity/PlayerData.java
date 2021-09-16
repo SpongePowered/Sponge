@@ -123,8 +123,6 @@ public final class PlayerData {
                         })
                     .create(Keys.IS_SLEEPING)
                         .get(Player::isSleeping)
-                    .create(Keys.IS_SLEEPING_IGNORED)
-                        .get(Player::isSleeping)
                     .create(Keys.MAX_EXHAUSTION)
                         .get(h -> PlayerData.EXHAUSTION_MAX)
                     .create(Keys.MAX_FOOD_LEVEL)

@@ -56,7 +56,7 @@ public abstract class MinecraftBlockDamageSourceMixin_API extends DamageSourceMi
 
     @Override
     public String toString() {
-        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.type());
+        final ResourceKey resourceKey = Sponge.game().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.type());
         return MoreObjects.toStringHelper("BlockDamageSource")
             .add("Name", this.shadow$getMsgId())
             .add("Key", resourceKey)

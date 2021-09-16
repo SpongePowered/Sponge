@@ -81,7 +81,7 @@ public abstract class AbstractRegisterRegistryValueEvent extends AbstractLifecyc
 
         @Override
         protected RegistryHolder getHolder() {
-            return this.game.registries();
+            return this.game;
         }
     }
 
@@ -103,7 +103,7 @@ public abstract class AbstractRegisterRegistryValueEvent extends AbstractLifecyc
 
         @Override
         protected RegistryHolder getHolder() {
-            return this.engine.registries();
+            return this.engine;
         }
     }
 
@@ -123,7 +123,7 @@ public abstract class AbstractRegisterRegistryValueEvent extends AbstractLifecyc
 
         @Override
         protected RegistryHolder getHolder() {
-            return Sponge.server().worldManager().world(this.worldKey).orElse(null).registries();
+            return Sponge.server().worldManager().world(this.worldKey).orElse(null);
         }
     }
 }

@@ -86,7 +86,7 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Bl
     @Override
     public BlockState block(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        return this.palette.get(this.data.get(this.getIndex(x, y, z)), Sponge.game().registries()).orElse(ArrayImmutableBlockBuffer.AIR);
+        return this.palette.get(this.data.get(this.getIndex(x, y, z)), Sponge.game()).orElse(ArrayImmutableBlockBuffer.AIR);
     }
 
     @Override

@@ -69,7 +69,7 @@ public final class FireworkUtil {
         }
         if (compound.contains(Constants.Item.Fireworks.SHAPE_TYPE)) {
             final byte type = compound.getByte(Constants.Item.Fireworks.SHAPE_TYPE);
-            final MappedRegistry<FireworkShape> registry = (MappedRegistry<FireworkShape>) (Object) Sponge.game().registries().registry(RegistryTypes.FIREWORK_SHAPE);
+            final MappedRegistry<FireworkShape> registry = (MappedRegistry<FireworkShape>) (Object) Sponge.game().registry(RegistryTypes.FIREWORK_SHAPE);
             final @Nullable FireworkShape shape = registry.byId(type);
             if (shape != null) {
                 builder.shape(shape);
@@ -96,7 +96,7 @@ public final class FireworkUtil {
     }
 
     public static CompoundTag toCompound(final FireworkEffect effect) {
-        final MappedRegistry<FireworkShape> registry = (MappedRegistry<FireworkShape>) (Object) Sponge.game().registries().registry(RegistryTypes.FIREWORK_SHAPE);
+        final MappedRegistry<FireworkShape> registry = (MappedRegistry<FireworkShape>) (Object) Sponge.game().registry(RegistryTypes.FIREWORK_SHAPE);
 
         final CompoundTag tag = new CompoundTag();
         tag.putBoolean(Constants.Item.Fireworks.FLICKER, effect.flickers());

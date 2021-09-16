@@ -95,7 +95,7 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
         // Details
         this.categories.add(new Category("Details")
             .addEntry(new Entry("ID", metadata.id())).addEntry(new Entry("Name", metadata.name().orElse(null)))
-            .addEntry(new Entry("Version", metadata.version())).addEntry(new Entry("Entry", metadata.mainClass()))
+            .addEntry(new Entry("Version", metadata.version().toString())).addEntry(new Entry("Entry", metadata.entrypoint()))
             .addEntry(new Entry("Description", metadata.description().orElse(null))));
 
         // Contributors
@@ -106,7 +106,7 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
         this.categories.add(new Category("Dependencies", metadata.dependencies().stream()
             .map(d -> Lists.newArrayList(
                 new Entry(d.id(), ""),
-                new Entry("Version", d.version(), 1),
+                new Entry("Version", d.version().toString(), 1),
                 new Entry("Optional", String.valueOf(d.optional()), 1),
                 new Entry("Load Order", d.loadOrder().name(), 1)))
             .flatMap(List::stream)
@@ -121,7 +121,7 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
 
         // Other
         this.categories.add(new Category("Other",
-            metadata.extraMetadata().entrySet().stream().map(e -> new Entry(e.getKey(), e.getValue().toString())).collect(Collectors.toList())));
+            metadata.properties().entrySet().stream().map(e -> new Entry(e.getKey(), e.getValue().toString())).collect(Collectors.toList())));
 
         this.categories.stream().flatMap(c -> c.getEntries().stream()).forEach(e -> {
             final int width = e.key == null ? 0 : this.minecraft.font.width(e.key);

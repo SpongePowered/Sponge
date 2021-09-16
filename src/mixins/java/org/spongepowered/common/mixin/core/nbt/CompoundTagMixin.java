@@ -30,7 +30,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 
 import java.util.Map;
@@ -38,6 +37,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import org.spongepowered.common.util.PrettyPrinter;
 
 /**
  * @author Zidane - Minecraft 1.14.4
@@ -71,13 +71,13 @@ public abstract class CompoundTagMixin {
             printer.add();
             try {
                 printer.addWrapped(80, "%s : %s", "This compound", this);
-            } catch (Throwable error) {
+            } catch (final Throwable error) {
                 printer.addWrapped(80, "Unable to get the string of this compound. Printing out some of the entries to better assist");
 
                 for (final Map.Entry<String, Tag> entry : this.tags.entrySet()) {
                     try {
                         printer.addWrapped(80, "%s : %s", entry.getKey(), entry.getValue());
-                    } catch (Throwable throwable) {
+                    } catch (final Throwable throwable) {
                         printer.add();
                         printer.addWrapped(80, "The offending key entry is belonging to " + entry.getKey());
                         break;

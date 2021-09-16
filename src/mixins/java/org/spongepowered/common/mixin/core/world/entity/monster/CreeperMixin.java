@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.monster;
 
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Explosion.BlockInteraction;
 import org.spongepowered.api.entity.living.monster.Creeper;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,19 +38,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Explosion.BlockInteraction;
 import java.util.Optional;
 import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.entity.monster.Creeper.class)
 public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiveBridge, ExplosiveBridge {
@@ -58,7 +59,6 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
 
     @Shadow public abstract void shadow$ignite();
     @Shadow public abstract int shadow$getSwellDir();
-    @Shadow public abstract void shadow$setSwellDir(int state);
     // @formatter:on
 
     private int impl$fuseDuration = Constants.Entity.Creeper.FUSE_DURATION;
@@ -103,12 +103,12 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
         this.maxSwell = fuseTicks;
     }
 
-    @Inject(method = "setSwellDir", at = @At("INVOKE"), cancellable = true)
-    private void onStateChange(final int state, final CallbackInfo ci) {
-        this.bridge$setFuseDuration(this.impl$fuseDuration);
+    @Inject(method = "setSwellDir", at = @At("HEAD"), cancellable = true)
+    private void impl$preStateChange(final int state, final CallbackInfo ci) {
         if (this.level.isClientSide) {
             return;
         }
+        this.bridge$setFuseDuration(this.impl$fuseDuration);
 
         final boolean isPrimed = this.shadow$getSwellDir() == Constants.Entity.Creeper.STATE_PRIMED;
 
@@ -122,7 +122,7 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
     }
 
     @Inject(method = "setSwellDir", at = @At("RETURN"))
-    private void postStateChange(final int state, final CallbackInfo ci) {
+    private void impl$postStateChange(final int state, final CallbackInfo ci) {
         if (this.level.isClientSide) {
             return;
         }
@@ -154,7 +154,7 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
     }
 
     @Inject(method = "explodeCreeper", at = @At("RETURN"))
-    private void postExplode(final CallbackInfo ci) {
+    private void impl$postExplode(final CallbackInfo ci) {
         if (this.impl$detonationCancelled) {
             this.impl$detonationCancelled = this.dead = false;
         }

@@ -34,24 +34,34 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.TextFilter;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.inventory.RecipeBookMenu;
+import net.minecraft.world.item.crafting.Recipe;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.message.PlayerChatEvent;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.vanilla.chat.ChatFormatter;
 
@@ -66,7 +76,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
     @Shadow @Final private MinecraftServer server;
 
     @Inject(method = "handleCustomPayload", at = @At(value = "HEAD"))
-    private void onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
+    private void vanilla$onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
         // For some reason, "ServerboundCustomPayloadPacket" is released in the processPacket
         // method of its class, only applicable to this packet, so just retain here.
         packet.getData().retain();
@@ -113,5 +123,25 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
                     target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Ljava/util/function/Function;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V") )
     private void vanilla$cancelSendChatMsgImpl(final PlayerList playerList, final net.minecraft.network.chat.Component p_232641_1_, final Function<ServerPlayer, Component> messageProvider, final ChatType p_232641_2_, final UUID p_232641_3_) {
         // Do nothing
+    }
+
+    @SuppressWarnings({"UnresolvedMixinReference", "unchecked", "rawtypes"})
+    @Redirect(method = "lambda$handlePlaceRecipe$10",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
+    private void vanilla$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final net.minecraft.server.level.ServerPlayer player) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+
+        final Inventory craftInv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
+        if (!(craftInv instanceof CraftingInventory)) {
+            recipeBookMenu.handlePlacement(shift, recipe, player);
+            SpongeCommon.logger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
+            return;
+        }
+
+        try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, recipe, player, (CraftingInventory) craftInv)) {
+            recipeBookMenu.handlePlacement(shift, recipe, player);
+            player.containerMenu.broadcastChanges();
+        }
     }
 }

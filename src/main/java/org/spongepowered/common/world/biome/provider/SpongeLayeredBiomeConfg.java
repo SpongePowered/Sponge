@@ -29,6 +29,7 @@ import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;
 import org.spongepowered.common.server.BootstrapProperties;
+import org.spongepowered.common.util.SeedUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -65,6 +66,12 @@ public final class SpongeLayeredBiomeConfg extends AbstractBiomeProviderConfig i
         @Override
         public Builder seed(final long seed) {
             this.seed = seed;
+            return this;
+        }
+
+        @Override
+        public Builder seed(final String seed) {
+            this.seed = SeedUtil.compute(seed);
             return this;
         }
 

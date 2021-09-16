@@ -108,11 +108,6 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
     }
 
     @Override
-    public Map<Key<?>, Object> getDataAt(int index) {
-        return Collections.emptyMap();
-    }
-
-    @Override
     public boolean has(Lens lens) {
         return false;
     }

@@ -1,0 +1,218 @@
+{
+    "loader": {
+        "name": "java_plain",
+        "version": "1.0"
+    },
+    "license": "MIT",
+    "global": {
+        "version": "8.0.0",
+        "links": {
+            "homepage": "https://www.spongepowered.org",
+            "source": "https://www.spongepowered.org/source",
+            "issues": "https://www.spongepowered.org/issues"
+        },
+        "contributors": [
+            {
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }
+        ],
+        "dependencies": [
+            {
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }
+        ]
+    },
+    "plugins": [
+        {
+            "id": "test",
+            "name": "Test Plugin",
+            "entrypoint": "org.spongepowered.test.TestPlugin",
+            "description": "Manages the test plugins"
+        },
+        {
+            "id": "channeltest",
+            "name": "Channel Test",
+            "entrypoint": "org.spongepowered.test.channel.ChannelTest",
+            "description": "Testing Channels"
+        },
+        {
+            "id": "changeblocktest",
+            "name": "Change Block Test",
+            "entrypoint": "org.spongepowered.test.changeblock.ChangeBlockTest",
+            "description": "Testing ChangeBlock rollbacks"
+        },
+        {
+            "id": "worldtest",
+            "name": "World Test",
+            "entrypoint": "org.spongepowered.test.world.WorldTest",
+            "description": "Testing world changes"
+        },
+        {
+            "id": "commandtest",
+            "name": "Command Test",
+            "entrypoint": "org.spongepowered.test.command.CommandTest",
+            "description": "Testing commands"
+        },
+        {
+            "id": "inventorytest",
+            "name": "Inventory Test",
+            "entrypoint": "org.spongepowered.test.inventory.InventoryTest",
+            "description": "Testing inventory changes"
+        },
+        {
+            "id": "customdatatest",
+            "name": "Custom Data Test",
+            "entrypoint": "org.spongepowered.test.customdata.CustomDataTest",
+            "description": "Testing custom data"
+        },
+        {
+            "id": "projectiletest",
+            "name": "Projectile Test",
+            "entrypoint": "org.spongepowered.test.projectile.ProjectileTest",
+            "description": "Testing projectile"
+        },
+        {
+            "id": "datatest",
+            "name": "Data Test",
+            "entrypoint": "org.spongepowered.test.data.DataTest",
+            "description": "Testing data"
+        },
+        {
+            "id": "humantest",
+            "name": "Human Test",
+            "entrypoint": "org.spongepowered.test.human.HumanTest",
+            "description": "Testing human"
+        },
+        {
+            "id": "interacttest",
+            "name": "Interact Test",
+            "entrypoint": "org.spongepowered.test.interact.InteractTest",
+            "description": "Testing InteractEvents"
+        },
+        {
+            "id": "recipetest",
+            "name": "Recipe Test",
+            "entrypoint": "org.spongepowered.test.recipe.RecipeTest",
+            "description": "Testing recipes"
+        },
+        {
+            "id": "particletest",
+            "name": "Particle Test",
+            "entrypoint": "org.spongepowered.test.particle.ParticleTest",
+            "description": "Testing particles"
+        },
+        {
+            "id": "portaltest",
+            "name": "Portal Test",
+            "entrypoint": "org.spongepowered.test.portal.PortalTest",
+            "description": "Now you're thinking with portals"
+        },
+        {
+            "id": "advancementtest",
+            "name": "Advancement Test",
+            "entrypoint": "org.spongepowered.test.advancement.AdvancementTest",
+            "description": "Testing advancements"
+        },
+        {
+            "id": "configtest",
+            "name": "Config Test",
+            "entrypoint": "org.spongepowered.test.config.ConfigTest",
+            "description": "Testing configurations"
+        },
+        {
+            "id": "archetypetest",
+            "name": "Archetype Test",
+            "entrypoint": "org.spongepowered.test.archetype.ArchetypeTest",
+            "description": "Testing archetypes and Snapshots"
+        },
+        {
+            "id": "volumestreamtest",
+            "name": "Volume Stream Test",
+            "entrypoint": "org.spongepowered.test.volumestream.VolumeStreamTest",
+            "description": "Testing VolumeStreams"
+        },
+        {
+            "id": "raytracetest",
+            "name": "Ray Trace Test",
+            "entrypoint": "org.spongepowered.test.raytrace.RayTraceTest",
+            "description": "Testing ray traces"
+        },
+        {
+            "id": "movementtest",
+            "name": "Movement Entity Test",
+            "entrypoint": "org.spongepowered.test.movement.MovementTest",
+            "description": "Testing move entity events"
+        },
+        {
+            "id": "chattest",
+            "name": "Chat Test",
+            "entrypoint": "org.spongepowered.test.chat.ChatTest",
+            "description": "Testing Chat and Adventure functionality"
+        },
+        {
+            "id": "tradetest",
+            "name": "Trade Test",
+            "entrypoint": "org.spongepowered.test.trades.TradeTest",
+            "description": "Testing Villager Trade functionality"
+        },
+        {
+            "id": "scaledhealthtest",
+            "name": "Scaled Health Test",
+            "entrypoint": "org.spongepowered.test.scaledhealth.ScaledHealthTest",
+            "description": "Testing scaled health"
+        },
+        {
+            "id": "chunkeventtest",
+            "name": "Chunk Event Test",
+            "entrypoint": "org.spongepowered.test.chunk.ChunkEventTest",
+            "description": "Testing Chunk Events"
+        },
+        {
+            "id": "notifyneighbor",
+            "name": "Notify Neighbor Event Test",
+            "entrypoint": "org.spongepowered.test.notifyneighbor.NotifyNeighborTest",
+            "description": "Testing Notify Neighbor Event"
+        },
+        {
+            "id": "maptest",
+            "name": "MapTest",
+            "version": "1.0.0",
+            "entrypoint": "org.spongepowered.test.map.MapTest",
+            "description": "Tests map api"
+        },
+        {
+            "id": "collidetest",
+            "name": "CollideTest",
+            "version": "1.0.0",
+            "entrypoint": "org.spongepowered.test.collide.CollideTest",
+            "description": "Tests collide events"
+        },
+        {
+            "id": "worldbordertest",
+            "name": "World Border Test",
+            "entrypoint": "org.spongepowered.test.worldborder.WorldBorderTest",
+            "description": "World Border testing"
+        },
+        {
+            "id": "chunkmanagertest",
+            "name": "Chunk Manager Test",
+            "version": "1.0.0",
+            "entrypoint": "org.spongepowered.test.chunkmanager.ChunkManagerTest",
+            "description": "Tests the Chunk Manager"
+        },
+        {
+            "id": "tagtest",
+            "name": "Tag Test",
+            "entrypoint": "org.spongepowered.test.tag.TagTest",
+            "description": "Tag Testing"
+        },
+        {
+            "id": "lifecycletest",
+            "name": "Lifecycle Test",
+            "entrypoint": "org.spongepowered.test.lifecycle.LifecycleTest",
+            "description": "Lifecycle Testing"
+        }
+    ]
+}

@@ -26,10 +26,15 @@ package org.spongepowered.vanilla.launch.plugin;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.jvm.JVMPluginContainer;
-import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
+import org.spongepowered.plugin.builtin.jvm.JVMPluginContainer;
+import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResource;
+
+import java.lang.invoke.MethodHandles;
+import java.util.Objects;
 
 public final class VanillaJavaPluginContainer extends JVMPluginContainer {
+
+    private MethodHandles.Lookup lookup;
 
     public VanillaJavaPluginContainer(final PluginCandidate<JVMPluginResource> candidate) {
         super(candidate);
@@ -40,5 +45,20 @@ public final class VanillaJavaPluginContainer extends JVMPluginContainer {
         super.initializeInstance(instance);
 
         Sponge.eventManager().registerListeners(this, instance);
+    }
+
+    /**
+     * {@return A lookup with access to internals of the module containing this plugin}
+     */
+    public MethodHandles.Lookup lookup() {
+        return this.lookup;
+    }
+
+    public void initializeLookup(final MethodHandles.Lookup lookup) {
+        if (this.lookup != null) {
+            throw new RuntimeException(String.format("Attempt made to set the lookup for plugin container '%s' twice!",
+                this.metadata().id()));
+        }
+        this.lookup = Objects.requireNonNull(lookup);
     }
 }

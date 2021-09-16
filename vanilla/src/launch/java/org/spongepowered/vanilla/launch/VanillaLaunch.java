@@ -32,21 +32,27 @@ import com.google.inject.Stage;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.mapping.SpongeMappingManager;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.locator.JVMPluginResourceLocatorService;
+import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResourceLocatorService;
 import org.spongepowered.plugin.metadata.PluginMetadata;
-import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
+import org.spongepowered.plugin.metadata.builtin.MetadataContainer;
+import org.spongepowered.plugin.metadata.builtin.MetadataParser;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.launch.inject.SpongeVanillaModule;
+import org.spongepowered.vanilla.launch.mapping.VanillaMappingManager;
 import org.spongepowered.vanilla.launch.plugin.VanillaDummyPluginContainer;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -54,12 +60,14 @@ public abstract class VanillaLaunch extends Launch {
 
     private final Stage injectionStage;
     private final VanillaPluginManager pluginManager;
+    private final VanillaMappingManager mappingManager;
     private PluginContainer vanillaPlugin;
 
     protected VanillaLaunch(final VanillaPluginPlatform pluginPlatform, final Stage injectionStage) {
         super(pluginPlatform);
         this.injectionStage = injectionStage;
         this.pluginManager = new VanillaPluginManager();
+        this.mappingManager = new VanillaMappingManager();
     }
 
     @Override
@@ -91,6 +99,11 @@ public abstract class VanillaLaunch extends Launch {
     }
 
     @Override
+    public SpongeMappingManager mappingManager() {
+        return this.mappingManager;
+    }
+    
+    @Override
     public Injector createInjector() {
         final List<Module> modules = Lists.newArrayList(
             new SpongeModule(),
@@ -109,13 +122,12 @@ public abstract class VanillaLaunch extends Launch {
     protected abstract void performBootstrap(final String[] args);
 
     protected final void createPlatformPlugins() {
-        final Path gameDirectory = this.pluginPlatform.baseDirectory();
-
+        final String metadataFileLocation = this.pluginPlatform.metadataFilePath();
         try {
             // This is a bit nasty, but allows Sponge to detect builtin platform plugins when it's not the first entry on the classpath.
             final URL classUrl = VanillaLaunch.class.getResource("/" + VanillaLaunch.class.getName().replace('.', '/') + ".class");
 
-            Collection<PluginMetadata> read = null;
+            MetadataContainer read = null;
 
             // In production, let's try to ensure we can find our descriptor even if we're not first on the classpath
             if (classUrl.getProtocol().equals("jar")) {
@@ -125,7 +137,7 @@ public abstract class VanillaLaunch extends Launch {
 
                 // Then go through every possible resource
                 final Enumeration<URL> manifests =
-                        VanillaLaunch.class.getClassLoader().getResources("/META-INF/" + JVMPluginResourceLocatorService.DEFAULT_METADATA_FILENAME);
+                        VanillaLaunch.class.getClassLoader().getResources("/" + metadataFileLocation);
                 while (manifests.hasMoreElements()) {
                     final URL next = manifests.nextElement();
                     if (!next.getProtocol().equals("jar")) {
@@ -135,8 +147,11 @@ public abstract class VanillaLaunch extends Launch {
                     // And stop when the normalized jar in that resource matches the URL of the jar that loaded VanillaLaunch?
                     final String[] pathSplit = next.getPath().split("!");
                     if (pathSplit.length == 2) {
-                        if (Paths.get(new URL(pathSplit[0]).toURI()).equals(expectedFile)) {
-                            read = PluginMetadataHelper.builder().build().read(next.openStream());
+                        final Path vanillaPath = Paths.get(new URL(pathSplit[0]).toURI());
+                        if (vanillaPath.equals(expectedFile)) {
+                            try (final Reader reader = new InputStreamReader(next.openStream(), StandardCharsets.UTF_8)) {
+                                read = MetadataParser.read(reader);
+                            }
                             break;
                         }
                     }
@@ -144,14 +159,17 @@ public abstract class VanillaLaunch extends Launch {
             }
 
             if (read == null) { // other measures failed, fall back to directly querying the classpath
-                read = PluginMetadataHelper.builder().build().read(VanillaLaunch.class.getResourceAsStream(
-                        "/META-INF/" + JVMPluginResourceLocatorService.DEFAULT_METADATA_FILENAME));
+                final Path vanillaPath =
+                        Paths.get(VanillaLaunch.class.getResource("/" + metadataFileLocation).toURI());
+                try (final Reader reader = Files.newBufferedReader(vanillaPath, StandardCharsets.UTF_8)) {
+                    read = MetadataParser.read(reader);
+                }
             }
             if (read == null) {
                 throw new RuntimeException("Could not determine location for implementation metadata!");
             }
 
-            for (final PluginMetadata metadata : read) {
+            for (final PluginMetadata metadata : read.metadata()) {
                 this.pluginManager().addPlugin(new VanillaDummyPluginContainer(metadata, this.logger(), this));
             }
         } catch (final IOException | URISyntaxException e) {

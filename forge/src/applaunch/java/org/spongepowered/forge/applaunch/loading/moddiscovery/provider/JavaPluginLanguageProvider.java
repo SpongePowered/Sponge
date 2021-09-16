@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 
 public final class JavaPluginLanguageProvider extends FMLJavaModLanguageProvider {
 
-    private static final Type PLUGIN_ANNOTATION = Type.getType("Lorg/spongepowered/plugin/jvm/Plugin;");
+    private static final Type PLUGIN_ANNOTATION = Type.getType("Lorg/spongepowered/plugin/builtin/jvm/Plugin;");
 
     private final Logger logger;
 
@@ -57,7 +57,7 @@ public final class JavaPluginLanguageProvider extends FMLJavaModLanguageProvider
 
     @Override
     public String name() {
-        return "sponge_java_plain";
+        return "java_plain";
     }
 
     @Override

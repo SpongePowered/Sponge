@@ -87,7 +87,6 @@ public abstract class PlayerMixin_Tracker extends LivingEntityMixin_Tracker {
         }
         // Sponge Start - redirect to our handling to capture and throw events.
         if (!((LevelBridge) this.level).bridge$isFake()) {
-            ((PlayerBridge) this).bridge$shouldRestoreInventory(false);
             final Player player = (Player) (PlayerBridge) this;
 
             final double posX1 = player.getX();

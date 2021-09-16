@@ -31,7 +31,7 @@ import java.util.Deque;
 
 public class EffectTransactor implements AutoCloseable {
     final @Nullable ResultingTransactionBySideEffect previousEffect;
-    final @Nullable GameTransaction<@NonNull ?> parent;
+    public final @Nullable GameTransaction<@NonNull ?> parent;
     private final TransactionalCaptureSupplier supplier;
     private final ResultingTransactionBySideEffect effect;
 

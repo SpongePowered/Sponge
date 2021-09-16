@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
@@ -52,14 +53,16 @@ import java.util.concurrent.TimeUnit;
 
 public final class LibraryManager {
 
-    private final Installer installer;
+    private final boolean checkLibraryHashes;
     private final Path rootDirectory;
+    private final URL librariesUrl;
     private final Map<String, Library> libraries;
     private final ExecutorService preparationWorker;
 
-    public LibraryManager(final Installer installer, final Path rootDirectory) {
-        this.installer = installer;
+    public LibraryManager(final boolean checkLibraryHashes, final Path rootDirectory, final URL librariesUrl) {
+        this.checkLibraryHashes = checkLibraryHashes;
         this.rootDirectory = rootDirectory;
+        this.librariesUrl = librariesUrl;
 
         this.libraries = new LinkedHashMap<>();
         final int availableCpus = Runtime.getRuntime().availableProcessors();
@@ -91,7 +94,7 @@ public final class LibraryManager {
         final Gson gson = new Gson();
 
         final Libraries dependencies;
-        try (final JsonReader reader = new JsonReader(new InputStreamReader(this.getClass().getResourceAsStream("/libraries.json")))) {
+        try (final JsonReader reader = new JsonReader(new InputStreamReader(this.librariesUrl.openStream(), StandardCharsets.UTF_8))) {
             dependencies = gson.fromJson(reader, Libraries.class);
         }
 
@@ -108,7 +111,7 @@ public final class LibraryManager {
                 final Path depFile = depDirectory.resolve(dependency.module + "-" + dependency.version + ".jar");
                 final MessageDigest md5 = MessageDigest.getInstance("MD5");
 
-                final boolean checkHashes = this.installer.getLauncherConfig().checkLibraryHashes;
+                final boolean checkHashes = this.checkLibraryHashes;
 
                 if (Files.exists(depFile)) {
                     if (!checkHashes) {

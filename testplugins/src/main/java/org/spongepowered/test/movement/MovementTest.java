@@ -47,7 +47,7 @@ import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 @Plugin("movementtest")

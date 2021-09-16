@@ -104,7 +104,7 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<@NonNull FluidS
         this.reset();
         final String rawFluid = container.getString(Constants.Fluids.FLUID_TYPE).get();
 
-        final Optional<FluidType> fluidType = Sponge.game().registries().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
+        final Optional<FluidType> fluidType = Sponge.game().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
         if (!fluidType.isPresent()) {
             throw new InvalidDataException("Invalid fluid id found: " + rawFluid);
         }

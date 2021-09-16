@@ -118,7 +118,7 @@ import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -1354,11 +1354,10 @@ public final class DataTest  {
     }
 
     private <V extends Value<?>> boolean checkResult(final DataHolder.Mutable holder, final Key<V> key, final Object value, final DataTransactionResult result) {
-        if (!result.isSuccessful()) {
-            this.plugin.logger().error("Failed offer on {} for {} with {}.", DataTest.getHolderName(holder), key.key()
-                    .asString(), value);
+        if (result.isSuccessful()) {
             return true;
         }
+        this.plugin.logger().error("Failed offer on {} for {} with {}.", DataTest.getHolderName(holder), key.key().asString(), value);
         return false;
     }
 
@@ -1406,9 +1405,9 @@ public final class DataTest  {
     private static String getHolderName(final DataHolder holder) {
         String value = "";
         if (holder instanceof BlockState) {
-            value = RegistryTypes.BLOCK_TYPE.keyFor(Sponge.game().registries(), ((BlockState) holder).type()).value();
+            value = RegistryTypes.BLOCK_TYPE.keyFor(Sponge.game(), ((BlockState) holder).type()).value();
         } else if (holder instanceof ItemStack) {
-            value = RegistryTypes.ITEM_TYPE.keyFor(Sponge.game().registries(), ((ItemStack) holder).type()).value();
+            value = RegistryTypes.ITEM_TYPE.keyFor(Sponge.game(), ((ItemStack) holder).type()).value();
         }
         return String.format("%s[%s]", holder.getClass().getSimpleName(), value);
     }

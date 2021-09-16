@@ -53,40 +53,43 @@ public class OptimizationPlugin extends AbstractMixinConfigPlugin {
 
     // So that any additional optimizations can be added in succession.
     private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<OptimizationCategory, Boolean>> builder()
-            .put("org.spongepowered.common.mixin.optimization.SpongeImplHooksMixin_Item_Pre_Merge",
-                    optimizationCategory -> optimizationCategory.dropsPreMerge)
-            .put("org.spongepowered.common.mixin.optimization.mcp.block.BlockRedstoneWireMixin_Eigen", optimizationCategory -> optimizationCategory.eigenRedstone.enabled)
-            .put("org.spongepowered.common.accessor.block.BlockRedstoneWireAccessor_Eigen", optimizationCategory -> optimizationCategory.eigenRedstone.enabled)
-            .put("org.spongepowered.common.mixin.optimization.mcp.entity.passive.TameableEntity_Optimization_Owner",
-                    optimizationCategory -> optimizationCategory.cacheTameableOwners)
-            .put("org.spongepowered.common.mixin.optimization.mcp.entity.item.ItemFrameEntityMixin_Optimization_Map",
-                    optimizationCategory -> optimizationCategory.optimizeMaps)
-            .put("org.spongepowered.common.mixin.invalid.optimization.entity.EntityTrackerEntryMixin_MapOptimization",
-                    optimizationCategory -> optimizationCategory.optimizeMaps)
-            .put("org.spongepowered.common.mixin.optimization.mcp.item.ItemMapMixin_MapOptimization",
-                    optimizationCategory -> optimizationCategory.optimizeMaps)
-            .put("org.spongepowered.common.mixin.optimization.mcp.world.storage.MapDataMixin_MapOptimization",
-                    optimizationCategory -> optimizationCategory.optimizeMaps)
-            .put("org.spongepowered.common.mixin.optimization.mcp.world.storage.MapInfoMixin_MapOptimization",
-                    optimizationCategory -> optimizationCategory.optimizeMaps)
-            .put("org.spongepowered.common.mixin.optimization.mcp.server.MinecraftServerMixin_MapOptimization",
-                    optimizationCategory -> optimizationCategory.optimizeMaps)
-            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.TileEntityMixin_Optimization_Hopper",
-                    optimizationCategory -> optimizationCategory.optimizeHoppers)
-            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.HopperTileEntityMixin_Optimization_Hopper",
-                    optimizationCategory -> optimizationCategory.optimizeHoppers)
-            .put("org.spongepowered.common.mixin.optimization.mcp.entity.EntityMixin_UseActiveChunkForCollisions",
-                    optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
-            .put("org.spongepowered.common.mixin.optimization.mcp.world.WorldMixin_UseActiveChunkForCollisions",
-                    optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
-            .put("org.spongepowered.common.mixin.optimization.mcp.world.WorldServerMixin_UseActiveChunkForCollisions",
-                    optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
-            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.ChestTileEntityMixin_Optimization_TileEntity",
-                    optimizationCategory -> optimizationCategory.optimizeBlockEntityTicking)
-            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.EnderChestTileEntityMixin_Optimization_TileEntity",
-                    optimizationCategory -> optimizationCategory.optimizeBlockEntityTicking)
-            .put("org.spongepowered.common.mixin.optimization.mcp.block.LeavesBlockMixin_DisablePersistentScheduledUpdate",
-                    optimizationCategory -> optimizationCategory.disableScheduledUpdatesForPersistentLeafBlocks)
+            .put("org.spongepowered.common.mixin.optimization.entity.EntityMixin_Optimization_Collision", optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
+            .put("org.spongepowered.common.mixin.optimization.world.entity.TamableAnimalMixin_Optimization_Owner", optimizationCategory -> optimizationCategory.cacheTameableOwners)
+// TODO investigate what is still relevant and add them back
+//            .put("org.spongepowered.common.mixin.optimization.SpongeImplHooksMixin_Item_Pre_Merge",
+//                    optimizationCategory -> optimizationCategory.dropsPreMerge)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.block.BlockRedstoneWireMixin_Eigen", optimizationCategory -> optimizationCategory.eigenRedstone.enabled)
+//            .put("org.spongepowered.common.accessor.block.BlockRedstoneWireAccessor_Eigen", optimizationCategory -> optimizationCategory.eigenRedstone.enabled)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.entity.passive.TameableEntity_Optimization_Owner",
+//                    optimizationCategory -> optimizationCategory.cacheTameableOwners)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.entity.item.ItemFrameEntityMixin_Optimization_Map",
+//                    optimizationCategory -> optimizationCategory.optimizeMaps)
+//            .put("org.spongepowered.common.mixin.invalid.optimization.entity.EntityTrackerEntryMixin_MapOptimization",
+//                    optimizationCategory -> optimizationCategory.optimizeMaps)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.item.ItemMapMixin_MapOptimization",
+//                    optimizationCategory -> optimizationCategory.optimizeMaps)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.world.storage.MapDataMixin_MapOptimization",
+//                    optimizationCategory -> optimizationCategory.optimizeMaps)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.world.storage.MapInfoMixin_MapOptimization",
+//                    optimizationCategory -> optimizationCategory.optimizeMaps)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.server.MinecraftServerMixin_MapOptimization",
+//                    optimizationCategory -> optimizationCategory.optimizeMaps)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.TileEntityMixin_Optimization_Hopper",
+//                    optimizationCategory -> optimizationCategory.optimizeHoppers)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.HopperTileEntityMixin_Optimization_Hopper",
+//                    optimizationCategory -> optimizationCategory.optimizeHoppers)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.entity.EntityMixin_UseActiveChunkForCollisions",
+//                    optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.world.WorldMixin_UseActiveChunkForCollisions",
+//                    optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.world.WorldServerMixin_UseActiveChunkForCollisions",
+//                    optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.ChestTileEntityMixin_Optimization_TileEntity",
+//                    optimizationCategory -> optimizationCategory.optimizeBlockEntityTicking)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.EnderChestTileEntityMixin_Optimization_TileEntity",
+//                    optimizationCategory -> optimizationCategory.optimizeBlockEntityTicking)
+//            .put("org.spongepowered.common.mixin.optimization.mcp.block.LeavesBlockMixin_DisablePersistentScheduledUpdate",
+//                    optimizationCategory -> optimizationCategory.disableScheduledUpdatesForPersistentLeafBlocks)
             .build();
 
 }

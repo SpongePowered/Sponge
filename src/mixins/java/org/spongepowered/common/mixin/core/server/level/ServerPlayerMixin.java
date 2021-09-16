@@ -55,7 +55,6 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Unit;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -169,11 +168,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     private Scoreboard impl$scoreboard = Sponge.game().server().serverScoreboard().get();
     @Nullable private Boolean impl$keepInventory = null;
     // Used to restore original item received in a packet after canceling an event
-    private ItemStack impl$packetItem = ItemStack.EMPTY;
     private int impl$viewDistance;
     private int impl$skinPartMask;
     private Set<SkinPart> impl$skinParts = ImmutableSet.of();
     private final PlayerOwnBorderListener impl$borderListener = new PlayerOwnBorderListener((net.minecraft.server.level.ServerPlayer) (Object) this);
+    private boolean impl$sleepingIgnored;
 
     @Override
     public net.minecraft.network.chat.@Nullable Component bridge$getConnectionMessageToSend() {
@@ -201,11 +200,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public Tristate bridge$permDefault(final String permission) {
         return Tristate.FALSE;
-    }
-
-    @Override
-    public void bridge$setPacketItem(final ItemStack itemstack) {
-        this.impl$packetItem = itemstack;
     }
 
     @Override
@@ -337,7 +331,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     public Set<SkinPart> bridge$getSkinParts() {
         final int mask = this.shadow$getEntityData().get(DATA_PLAYER_MODE_CUSTOMISATION);
         if (this.impl$skinPartMask != mask) {
-            this.impl$skinParts = Sponge.game().registries().registry(RegistryTypes.SKIN_PART).stream()
+            this.impl$skinParts = Sponge.game().registry(RegistryTypes.SKIN_PART).stream()
                     .map(part -> (SpongeSkinPart) part)
                     .filter(part -> part.test(mask))
                     .collect(ImmutableSet.toImmutableSet());
@@ -359,7 +353,17 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         this.impl$skinPartMask = mask;
     }
 
-        /*
+    @Override
+    public boolean bridge$sleepingIgnored() {
+        return this.impl$sleepingIgnored;
+    }
+
+    @Override
+    public void bridge$setSleepingIgnored(final boolean sleepingIgnored) {
+        this.impl$sleepingIgnored = sleepingIgnored;
+    }
+
+    /*
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
     private void impl$onPlayerActive(final CallbackInfo ci) {
         ((ServerPlayNetHandlerBridge) this.connection).bridge$resendLatestResourcePackRequest();
@@ -384,7 +388,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             if (!hasMovementContext) {
-                frame.pushCause(SpongeCommon.activePlugin());
                 frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
             }
 
@@ -715,7 +718,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         final Locale newLocale = LocaleCache.getLocale(packet.getLanguage());
 
-        final ImmutableSet<SkinPart> skinParts = Sponge.game().registries().registry(RegistryTypes.SKIN_PART).stream()
+        final ImmutableSet<SkinPart> skinParts = Sponge.game().registry(RegistryTypes.SKIN_PART).stream()
                 .map(part -> (SpongeSkinPart) part)
                 .filter(part -> part.test(packet.getModelCustomisation()))
                 .collect(ImmutableSet.toImmutableSet());
@@ -746,13 +749,18 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         this.impl$language = newLocale;
     }
 
-    @Override
-    public void bridge$restorePacketItem(final InteractionHand hand) {
-        if (this.impl$packetItem.isEmpty()) {
-            return;
+    /**
+     * Send SlotCrafting updates to client for custom recipes.
+     *
+     * @author Faithcaio - 31.12.2016
+     * @reason Vanilla is not updating the Client when Slot is SlotCrafting - this is an issue when plugins register new recipes
+     */
+    @Inject(method = "slotChanged", at = @At("HEAD"))
+    private void sendSlotContents(
+            final net.minecraft.world.inventory.AbstractContainerMenu containerToSend, final int slotIn, final ItemStack stack, final CallbackInfo ci) {
+        if (containerToSend.getSlot(slotIn) instanceof ResultSlot) {
+            this.connection.send(new ClientboundContainerSetSlotPacket(containerToSend.containerId, slotIn, stack));
         }
-        this.shadow$setItemInHand(hand, this.impl$packetItem);
-        this.containerMenu.broadcastChanges();
     }
 
     @Override
