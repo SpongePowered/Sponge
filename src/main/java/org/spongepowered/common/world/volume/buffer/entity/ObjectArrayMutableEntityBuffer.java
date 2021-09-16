@@ -48,6 +48,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -187,7 +188,7 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
 
     @Override
     public Collection<? extends Entity> entities() {
-        return ImmutableList.copyOf(this.entities);
+        return Collections.unmodifiableCollection(this.entities);
     }
 
     @Override

@@ -80,6 +80,7 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -373,7 +374,7 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
 
     @Override
     public Collection<? extends Entity> entities() {
-        return (Collection<? extends Entity>) (Object) Arrays.stream(this.entitySections).flatMap(Collection::stream).collect(Collectors.toList());
+        return (Collection<? extends Entity>) (Object) Collections.unmodifiableCollection(Arrays.stream(this.entitySections).flatMap(Collection::stream).collect(Collectors.toList()));
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
