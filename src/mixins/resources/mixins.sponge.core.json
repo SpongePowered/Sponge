@@ -85,6 +85,7 @@
         "server.players.GameProfileCacheMixin",
         "server.players.IpBanListEntryMixin",
         "server.players.PlayerListMixin",
+        "server.players.SleepStatusMixin",
         "server.players.StoredUserEntryMixin",
         "server.players.StoredUserListMixin",
         "server.rcon.RconConsoleSourceMixin",

@@ -432,11 +432,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         ((WorldBorderBridge) this.shadow$getWorldBorder()).bridge$setAssociatedWorld(this.bridge$getKey());
     }
 
-    @Redirect(method = "updateSleepingPlayerList", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isSpectator()Z"))
-    private boolean impl$handleSleepingIgnored(final net.minecraft.server.level.ServerPlayer serverPlayer) {
-        return serverPlayer.isSpectator() || ((ServerPlayerBridge) serverPlayer).bridge$sleepingIgnored();
-    }
-
     @Override
     public String toString() {
         return new StringJoiner(",", ServerLevel.class.getSimpleName() + "[", "]")
