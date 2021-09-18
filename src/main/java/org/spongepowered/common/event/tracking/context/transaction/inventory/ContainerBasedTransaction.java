@@ -248,7 +248,7 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
         PacketPhaseUtil.handleCursorRestore(player, event.cursorTransaction());
         if (event.isCancelled() && event instanceof SpawnEntityEvent) {
             ((SpawnEntityEvent) event).entities().forEach(e ->
-                    ((ServerLevel) e.world()).despawn((net.minecraft.world.entity.Entity) e));
+                    ((net.minecraft.world.entity.Entity) e).discard());
         }
 
         // If this is not a crafting event try to call crafting events

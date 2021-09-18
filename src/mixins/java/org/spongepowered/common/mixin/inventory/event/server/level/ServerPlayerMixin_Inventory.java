@@ -217,7 +217,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
         final EquipmentSlot equipmentSlot
     ) {
         final EquipmentType equipmentType = (EquipmentType) (Object) equipmentSlot;
-        final PlayerInventoryBridge inventory = (PlayerInventoryBridge) ((net.minecraft.server.level.ServerPlayer) (Object) this).inventory;
+        final PlayerInventoryBridge inventory = (PlayerInventoryBridge) ((net.minecraft.server.level.ServerPlayer) (Object) this).getInventory();
         final Lens lens = ((InventoryAdapter) inventory).inventoryAdapter$getRootLens();
         final Fabric fabric = ((InventoryAdapter) inventory).inventoryAdapter$getFabric();
         if (lens instanceof PlayerInventoryLens) {

@@ -39,6 +39,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
@@ -60,6 +61,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
@@ -759,7 +761,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     private void sendSlotContents(
             final net.minecraft.world.inventory.AbstractContainerMenu containerToSend, final int slotIn, final ItemStack stack, final CallbackInfo ci) {
         if (containerToSend.getSlot(slotIn) instanceof ResultSlot) {
-            this.connection.send(new ClientboundContainerSetSlotPacket(containerToSend.containerId, slotIn, stack));
+            this.connection.send(new ClientboundContainerSetSlotPacket(containerToSend.containerId, containerToSend.getStateId(), slotIn, stack));
         }
     }
 

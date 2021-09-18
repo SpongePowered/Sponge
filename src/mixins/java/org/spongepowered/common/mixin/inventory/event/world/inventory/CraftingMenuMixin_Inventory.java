@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.ResultContainer;
@@ -55,7 +56,7 @@ public abstract class CraftingMenuMixin_Inventory {
     @Redirect(method = "slotChangedCraftingGrid",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/ResultContainer;setItem(ILnet/minecraft/world/item/ItemStack;)V"))
     private static void beforeSlotChangedCraftingGrid(final ResultContainer resultContainer, final int slotId, final ItemStack itemStack,
-            final int param0, final Level param1, final Player player, final CraftingContainer craftingContainer, final ResultContainer resultcontainer) {
+            final AbstractContainerMenu param0, final Level param1, final Player player, final CraftingContainer craftingContainer, final ResultContainer resultcontainer) {
         resultContainer.setItem(slotId, itemStack);
 
         final Inventory inv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));

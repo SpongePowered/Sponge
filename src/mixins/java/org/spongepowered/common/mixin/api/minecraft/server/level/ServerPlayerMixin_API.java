@@ -41,7 +41,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
@@ -503,12 +502,12 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         }
         Objects.requireNonNull(value, "value");
         if (part == TitlePart.TITLE) {
-            this.connection.send(new ClientboundSetTitlesPacket(ClientboundSetTitlesPacket.Type.TITLE, SpongeAdventure.asVanilla((Component) value)));
+            this.connection.send(new ClientboundSetTitleTextPacket(SpongeAdventure.asVanilla((Component) value)));
         } else if (part == TitlePart.SUBTITLE) {
-            this.connection.send(new ClientboundSetTitlesPacket(ClientboundSetTitlesPacket.Type.SUBTITLE, SpongeAdventure.asVanilla((Component) value)));
+            this.connection.send(new ClientboundSetSubtitleTextPacket(SpongeAdventure.asVanilla((Component) value)));
         } else if (part == TitlePart.TIMES) {
             final Title.Times times = (Title.Times) value;
-            this.connection.send(new ClientboundSetTitlesPacket(this.api$durationToTicks(times.fadeIn()), this.api$durationToTicks(times.stay()), this.api$durationToTicks(times.fadeOut())));
+            this.connection.send(new ClientboundSetTitlesAnimationPacket(this.api$durationToTicks(times.fadeIn()), this.api$durationToTicks(times.stay()), this.api$durationToTicks(times.fadeOut())));
         } else {
             throw new IllegalArgumentException("Unknown TitlePart '" + part + "'");
         }

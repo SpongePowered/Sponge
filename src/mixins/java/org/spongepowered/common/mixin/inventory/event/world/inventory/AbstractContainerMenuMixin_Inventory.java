@@ -83,11 +83,12 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
     //@formatter:off
     @Final @Shadow private NonNullList<ItemStack> lastSlots;
-    @Final @Shadow public List<Slot> slots;
+    @Final @Shadow public NonNullList<Slot> slots;
     @Final @Shadow private List<ContainerListener> containerListeners;
+    @Shadow private boolean suppressRemoteUpdates;
     @Final @Shadow private List<DataSlot> dataSlots;
 
-    @Shadow protected abstract ItemStack shadow$doClick(int param0, int param1, ClickType param2, Player param3);
+    @Shadow protected abstract void shadow$doClick(int param0, int param1, ClickType param2, Player param3);
     //@formatter:on
 
     private boolean impl$isClicking; // Menu Callbacks are only called when clicking in a container
@@ -187,20 +188,20 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Redirect(
             method = "clicked",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;doClick(IILnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/item/ItemStack;"))
-    private ItemStack inventory$wrapDoClickWithTransaction(
+                    target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;doClick(IILnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;)V"))
+    private void inventory$wrapDoClickWithTransaction(
             final AbstractContainerMenu menu, final int slotId, final int dragType,
             final ClickType clickType,
             final Player player
     ) {
         if (((LevelBridge) player.level).bridge$isFake()) {
-            return this.shadow$doClick(slotId, dragType, clickType, player);
+            this.shadow$doClick(slotId, dragType, clickType, player);
         }
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (final EffectTransactor ignored = transactor.logClickContainer(menu, slotId, dragType, clickType, player)) {
             this.impl$isClicking = true;
-            return this.shadow$doClick(slotId, dragType, clickType, player);
+            this.shadow$doClick(slotId, dragType, clickType, player);
         } finally {
             this.impl$isClicking = false;
         }
@@ -276,12 +277,12 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         for (final ContainerListener listener : this.containerListeners) {
             boolean isChangingQuantityOnly = true;
             if (listener instanceof ServerPlayer) {
-                isChangingQuantityOnly = ((ServerPlayer) listener).ignoreSlotUpdateHack;
-                ((ServerPlayer) listener).ignoreSlotUpdateHack = false;
+                isChangingQuantityOnly = this.suppressRemoteUpdates;
+                this.suppressRemoteUpdates = false;
             }
             listener.slotChanged(((AbstractContainerMenu) (Object) this), i, oldStack);
             if (listener instanceof ServerPlayer) {
-                ((ServerPlayer) listener).ignoreSlotUpdateHack = isChangingQuantityOnly;
+                this.suppressRemoteUpdates = isChangingQuantityOnly;
             }
         }
     }
@@ -291,7 +292,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             final DataSlot intreferenceholder = this.dataSlots.get(j);
             if (intreferenceholder.checkAndClearUpdateFlag()) {
                 for(final ContainerListener icontainerlistener1 : this.containerListeners) {
-                    icontainerlistener1.setContainerData((AbstractContainerMenu) (Object) this, j, intreferenceholder.get());
+                    icontainerlistener1.dataChanged((AbstractContainerMenu) (Object) this, j, intreferenceholder.get());
                 }
             }
         }

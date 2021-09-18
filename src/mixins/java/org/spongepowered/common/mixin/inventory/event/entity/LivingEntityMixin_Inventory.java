@@ -99,7 +99,7 @@ public abstract class LivingEntityMixin_Inventory extends Entity {
         });
     }
 
-    @Redirect(method = "updatingUsingItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;completeUsingItem()V"))
+    @Redirect(method = "updateUsingItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;completeUsingItem()V"))
     protected void inventory$onUpdateUsingItem(final LivingEntity thisEntity) {
         this.shadow$completeUsingItem();
     }

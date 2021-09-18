@@ -150,7 +150,7 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
         PacketPhaseUtil.handleSlotRestore(player, null, event.transactions(), event.isCancelled());
         if (event.isCancelled() && event instanceof SpawnEntityEvent) {
             ((SpawnEntityEvent) event).entities().forEach(e ->
-                    ((ServerLevel) e.world()).despawn((net.minecraft.world.entity.Entity) e));
+                    ((net.minecraft.world.entity.Entity) e).discard());
         }
     }
 

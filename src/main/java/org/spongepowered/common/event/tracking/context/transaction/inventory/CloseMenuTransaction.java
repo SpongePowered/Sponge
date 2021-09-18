@@ -173,7 +173,7 @@ public class CloseMenuTransaction extends MenuBasedTransaction<InteractContainer
             player.connection.send(new ClientboundOpenScreenPacket(container.containerId, container.getType(), title));
             // resync data to client
             container.broadcastFullState();
-            player.refreshContainer(container);
+            container.sendAllDataToRemote();
         } else {
             // TODO: Maybe print a warning or throw an exception here?
             // The player gui cannot be opened from the

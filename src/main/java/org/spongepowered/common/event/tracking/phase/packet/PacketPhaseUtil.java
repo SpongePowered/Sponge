@@ -106,7 +106,7 @@ public final class PacketPhaseUtil {
                 if (containerMenu != null) {
                     containerMenu.broadcastChanges();
                     if (player.containerMenu == containerMenu) {
-                        ((net.minecraft.server.level.ServerPlayer) player).refreshContainer(containerMenu);
+                        containerMenu.sendAllDataToRemote();
                     }
                 } else {
                     player.inventoryMenu.broadcastChanges();
