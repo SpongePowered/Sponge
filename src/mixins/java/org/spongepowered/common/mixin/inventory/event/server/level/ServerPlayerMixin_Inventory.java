@@ -184,7 +184,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
             .logContainerSet((ServerPlayer) (Object) this);
     }
 
-    @Inject(method = "openHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;addSlotListener(Lnet/minecraft/world/inventory/ContainerListener;)V"))
+    @Inject(method = "openHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V"))
     private void impl$onOpenHorseInventory(final AbstractHorse horse, final Container inventoryIn, final CallbackInfo ci) {
         ((TrackedContainerBridge) this.containerMenu).bridge$trackViewable(inventoryIn);
     }
