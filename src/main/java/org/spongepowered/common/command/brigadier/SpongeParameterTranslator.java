@@ -112,6 +112,9 @@ public final class SpongeParameterTranslator {
             // big problem generally comes in when you have two nodes with the same name
             // and a redirect (or not) - the client tries to be clever and de-duplicates
             // them but it doesn't account for the redirect...
+            //
+            // See https://github.com/Mojang/brigadier/pull/89 for details. If that is
+            // merged, the above can be substituted in here.
             for (final CommandNode<CommandSourceStack> child : children) {
                 redirectedNode.then(child);
             }
@@ -219,7 +222,7 @@ public final class SpongeParameterTranslator {
                 final Collection<CommandNode<CommandSourceStack>> parametersToAttachTo;
                 if (parameter instanceof SpongeMultiParameter) {
                     isOptional = parameter.isOptional();
-                    isTerminal = hasNext || parameter.isTerminal();
+                    isTerminal = !hasNext || parameter.isTerminal();
                     // In these cases, we delegate to the parameter, which may return here.
                     if (parameter instanceof SpongeFirstOfParameter) {
                         // take each parameter in turn and evaluate it, returns the terminal nodes of each block
@@ -239,7 +242,7 @@ public final class SpongeParameterTranslator {
                                 nodesToAttachTo,
                                 ((SpongeMultiParameter) parameter).childParameters(),
                                 executorWrapper,
-                                !hasNext || parameter.isTerminal(),
+                                isTerminal,
                                 allowSubcommands));
                     }
                 } else {
