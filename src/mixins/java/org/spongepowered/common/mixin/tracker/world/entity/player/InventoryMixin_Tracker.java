@@ -24,58 +24,34 @@
  */
 package org.spongepowered.common.mixin.tracker.world.entity.player;
 
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.entity.PlayerInventory;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(net.minecraft.world.entity.player.Inventory.class)
-public abstract class InventoryMixin_Tracker implements TrackedInventoryBridge {
+public abstract class InventoryMixin_Tracker {
 
-    @Shadow public abstract ItemStack shadow$getItem(int index);
     @Shadow protected abstract int shadow$addResource(int p_191973_1_, ItemStack p_191973_2_);
-
-
-    private Slot impl$getSpongeSlotByIndex(int index) {
-        final int hotbarSize = net.minecraft.world.entity.player.Inventory.getSelectionSize();
-        if (index < hotbarSize) {
-            return ((PlayerInventory) this).primary().hotbar().slot(index).get();
-        }
-        index -= hotbarSize;
-        return ((PlayerInventory) this).primary().storage().slot(index).get();
-    }
+    @Shadow @Final public Player player;
 
     @Inject(method = "add(ILnet/minecraft/world/item/ItemStack;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;", ordinal = 0))
     private void impl$ifCaptureDoTransactions(final int index, final ItemStack stack, final CallbackInfoReturnable<Boolean> cir) {
-        if (this.bridge$capturingInventory()) {
-            // Capture "damaged" items picked up
-            final Slot slot = this.impl$getSpongeSlotByIndex(index);
-            this.bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(stack)));
-        }
+        // Capture "damaged" items picked up
+        this.player.inventoryMenu.broadcastChanges(); // capture
     }
 
     @Redirect(method = "addResource(Lnet/minecraft/world/item/ItemStack;)I", at = @At(value = "INVOKE", target =
             "Lnet/minecraft/world/entity/player/Inventory;addResource(ILnet/minecraft/world/item/ItemStack;)I"))
     private int impl$ifCaptureDoTransactions(final net.minecraft.world.entity.player.Inventory inv, final int index, final ItemStack stack) {
-        if (this.bridge$capturingInventory()) {
-            // Capture items getting picked up
-            final Slot slot = index == 40 ? ((PlayerInventory) this).offhand() : this.impl$getSpongeSlotByIndex(index);
-            final ItemStackSnapshot original = ItemStackUtil.snapshotOf(this.shadow$getItem(index));
-            final int result = this.shadow$addResource(index, stack);
-            final ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(this.shadow$getItem(index));
-            this.bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot, original, replacement));
-            return result;
-        }
-        return this.shadow$addResource(index, stack);
-
+        // Capture items getting picked up
+        final int result = this.shadow$addResource(index, stack);
+        this.player.inventoryMenu.broadcastChanges(); // capture
+        return result;
     }
 }

@@ -29,18 +29,13 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 
 final class EventListenerPhaseState extends ListenerPhaseState<EventListenerPhaseContext> {
 
-    private boolean hasPrintedEntities = false;
-
-
     @Override
     public EventListenerPhaseContext createNewContext(final PhaseTracker tracker) {
-        return new EventListenerPhaseContext(this, tracker)
-            .player();
+        return new EventListenerPhaseContext(this, tracker).player();
     }
 
     @Override
     public void unwind(final EventListenerPhaseContext phaseContext) {
         TrackingUtil.processBlockCaptures(phaseContext);
     }
-
 }

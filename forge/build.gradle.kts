@@ -1,8 +1,8 @@
-import java.io.StringWriter
 import net.fabricmc.loom.LoomGradleExtension
 import net.fabricmc.loom.task.RemapJarTask
 import net.fabricmc.loom.task.RunGameTask
 import org.zeroturnaround.zip.transform.ZipEntryTransformer
+import java.io.StringWriter
 
 buildscript {
     repositories {
@@ -21,7 +21,7 @@ buildscript {
                 attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.SHADOWED))
             }
             version {
-                branch = "next"
+                branch = "fix/mappings-refresh"
             }
         }
     }
@@ -174,19 +174,25 @@ dependencies {
 
     val apiAdventureVersion: String by project
     val apiConfigurateVersion: String by project
-    val pluginSpiVersion: String by project
+    val apiPluginSpiVersion: String by project
     val timingsVersion: String by project
     val log4jVersion: String by project
 
-    api(project(":", configuration = "launch"))
-    implementation(project(":", configuration = "accessors"))
-    implementation(project(commonProject.path))
+    api(project(":", configuration = "launch")) {
+        exclude(group = "org.spongepowered", module = "mixin")
+    }
+    implementation(project(":", configuration = "accessors")) {
+        exclude(group = "org.spongepowered", module = "mixin")
+    }
+    implementation(project(commonProject.path)) {
+        exclude(group = "org.spongepowered", module = "mixin")
+    }
 
     forgeMixinsImplementation(project(commonProject.path))
 
     val appLaunch = forgeBootstrapLibrariesConfig.name
     appLaunch("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
-    appLaunch("org.spongepowered:plugin-spi:$pluginSpiVersion")
+    appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
     appLaunch(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
     appLaunch("org.spongepowered:configurate-core") {
         exclude(group = "org.checkerframework", module = "checker-qual")
@@ -299,6 +305,7 @@ tasks {
                 json = gson.fromJson(it, com.google.gson.JsonObject::class.java)
             }
             json.remove("refmap")
+            zipEntry.compressedSize = -1
             dest.putNextEntry(zipEntry)
             dest.bufferedWriter(Charsets.UTF_8).also {
                 gson.toJson(json, it)
@@ -314,6 +321,7 @@ tasks {
             val output = StringWriter().also {
                 net.fabricmc.accesswidener.AccessWidenerWriter(srg).write(it)
             }.toString()
+            zipEntry.compressedSize = -1
             dest.putNextEntry(zipEntry)
             dest.writer(Charsets.UTF_8).also {
                 it.write(output)

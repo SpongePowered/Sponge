@@ -24,16 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 
 public final class MovementPacketState extends BasicPacketState {
-
-    @Override
-    public void unwind(BasicPacketContext context) {
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(context);
-    }
 }

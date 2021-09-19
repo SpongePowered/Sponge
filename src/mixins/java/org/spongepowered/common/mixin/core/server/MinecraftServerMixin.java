@@ -85,7 +85,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
@@ -154,10 +153,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Inject(method = "tickServer", at = @At(value = "HEAD"))
     private void impl$onServerTickStart(final CallbackInfo ci) {
         TimingsManager.FULL_SERVER_TICK.startTiming();
-    }
-
-    @Inject(method = "tickServer", at = @At("TAIL"))
-    private void impl$tickServerScheduler(final BooleanSupplier hasTimeLeft, final CallbackInfo ci) {
         this.scheduler().tick();
     }
 

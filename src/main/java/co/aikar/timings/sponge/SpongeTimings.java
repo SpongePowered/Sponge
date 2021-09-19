@@ -31,37 +31,10 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.scheduler.ScheduledTask;
-import org.spongepowered.common.scheduler.AsyncScheduler;
-import org.spongepowered.common.scheduler.SpongeScheduledTask;
-import org.spongepowered.plugin.PluginContainer;
 
 public final class SpongeTimings {
 
     private SpongeTimings() {
-    }
-
-    /**
-     * Gets a timer associated with a plugins tasks.
-     *
-     * @param task
-     * @param period
-     * @return
-     */
-    public static Timing pluginTaskTimings(ScheduledTask task, long period) {
-        if (((SpongeScheduledTask) task).getScheduler() instanceof AsyncScheduler) {
-            return null;
-        }
-        PluginContainer plugin = task.owner();
-
-        String name = "Task: " + task.name();
-        if (period > 0) {
-            name += " (interval:" + period + ")";
-        } else {
-            name += " (Single)";
-        }
-
-        return SpongeTimingsFactory.ofSafe(plugin, name);
     }
 
     public static Timing entityTiming(final EntityType<?> type) {
@@ -70,14 +43,6 @@ public final class SpongeTimings {
 
     public static Timing blockEntityTiming(final BlockEntityType<?> type) {
         return SpongeTimingsFactory.ofSafe("Minecraft", "## blockEntity - " + BlockEntityType.getKey(type));
-    }
-
-    public static Timing pluginTimings(final PluginContainer plugin, final String context) {
-        return SpongeTimingsFactory.ofSafe(plugin.metadata().id(), context, TimingsManager.PLUGIN_EVENT_HANDLER);
-    }
-
-    public static Timing pluginSchedulerTimings(final PluginContainer plugin) {
-        return SpongeTimingsFactory.ofSafe(plugin.metadata().name().orElse(plugin.metadata().id()), TimingsManager.PLUGIN_SCHEDULER_HANDLER);
     }
 
     public static Timing blockTiming(final BlockType block) {

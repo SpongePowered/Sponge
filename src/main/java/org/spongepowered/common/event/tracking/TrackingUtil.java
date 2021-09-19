@@ -31,6 +31,7 @@ import co.aikar.timings.Timing;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RedstoneLampBlock;
@@ -47,6 +48,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -80,6 +82,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -462,6 +465,16 @@ public final class TrackingUtil {
             final PlayerTracker.Type trackerType = blockChange == BlockChange.PLACE ? PlayerTracker.Type.CREATOR : PlayerTracker.Type.NOTIFIER;
             spongeChunk.bridge$addTrackedBlockPosition(block, pos, uuid, trackerType);
         });
+    }
+
+    public static void setCreatorReference(List<Entity> entities, ServerPlayer player) {
+        for (final Entity currentEntity : entities) {
+            if (currentEntity instanceof CreatorTrackedBridge) {
+                ((CreatorTrackedBridge) currentEntity).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((org.spongepowered.api.entity.living.player.server.ServerPlayer) player).uniqueId());
+            } else {
+                currentEntity.offer(Keys.CREATOR, player.getUUID());
+            }
+        }
     }
 
     public static void addTileEntityToBuilder(final net.minecraft.world.level.block.entity.BlockEntity existing,

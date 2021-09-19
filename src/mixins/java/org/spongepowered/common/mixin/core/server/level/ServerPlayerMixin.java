@@ -56,7 +56,6 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Unit;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -114,11 +113,11 @@ import org.spongepowered.common.accessor.network.ConnectionAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundClientInformationPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.type.SpongeSkinPart;
 import org.spongepowered.common.entity.EntityUtil;
@@ -173,11 +172,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     private Scoreboard impl$scoreboard = Sponge.game().server().serverScoreboard().get();
     @Nullable private Boolean impl$keepInventory = null;
     // Used to restore original item received in a packet after canceling an event
-    private ItemStack impl$packetItem = ItemStack.EMPTY;
     private int impl$viewDistance;
     private int impl$skinPartMask;
     private Set<SkinPart> impl$skinParts = ImmutableSet.of();
     private final PlayerOwnBorderListener impl$borderListener = new PlayerOwnBorderListener((net.minecraft.server.level.ServerPlayer) (Object) this);
+    private boolean impl$sleepingIgnored;
 
     @Override
     public net.minecraft.network.chat.@Nullable Component bridge$getConnectionMessageToSend() {
@@ -205,11 +204,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public Tristate bridge$permDefault(final String permission) {
         return Tristate.FALSE;
-    }
-
-    @Override
-    public void bridge$setPacketItem(final ItemStack itemstack) {
-        this.impl$packetItem = itemstack;
     }
 
     @Override
@@ -360,7 +354,17 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         this.impl$skinPartMask = mask;
     }
 
-        /*
+    @Override
+    public boolean bridge$sleepingIgnored() {
+        return this.impl$sleepingIgnored;
+    }
+
+    @Override
+    public void bridge$setSleepingIgnored(final boolean sleepingIgnored) {
+        this.impl$sleepingIgnored = sleepingIgnored;
+    }
+
+    /*
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
     private void impl$onPlayerActive(final CallbackInfo ci) {
         ((ServerPlayNetHandlerBridge) this.connection).bridge$resendLatestResourcePackRequest();
@@ -385,7 +389,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             if (!hasMovementContext) {
-                frame.pushCause(SpongeCommon.activePlugin());
                 frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
             }
 
@@ -754,15 +757,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         this.impl$viewDistance = viewDistance;
         this.bridge$setLanguage(newLocale);
         this.impl$language = newLocale;
-    }
-
-    @Override
-    public void bridge$restorePacketItem(final InteractionHand hand) {
-        if (this.impl$packetItem.isEmpty()) {
-            return;
-        }
-        this.shadow$setItemInHand(hand, this.impl$packetItem);
-        this.containerMenu.broadcastChanges();
     }
 
     /**

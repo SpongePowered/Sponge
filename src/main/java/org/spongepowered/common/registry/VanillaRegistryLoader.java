@@ -28,10 +28,12 @@ import com.google.common.base.CaseFormat;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.FrameType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.animal.MushroomCow;
@@ -205,6 +207,7 @@ final class VanillaRegistryLoader {
         this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), b -> ((BannerPatternAccessor) (Object) b).accessor$filename());
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());
         this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
+        this.knownName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values(), MobCategory::getName);
     }
 
     private static RegistryLoader<Criterion> criterion() {
@@ -343,7 +346,14 @@ final class VanillaRegistryLoader {
         return this.holder.createRegistry(type, () -> {
             final Map<ResourceKey, A> map = new HashMap<>();
             for (final Map.Entry<I, String> value : byName.entrySet()) {
-                map.put(ResourceKey.sponge(value.getValue()), (A) value.getKey());
+                final String rawId = value.getValue();
+                // To address Vanilla shortcomings, some mods will manually prefix their modid onto values they put into Vanilla registry-like
+                // registrars. We need to account for that possibility
+                if (rawId.contains(":")) {
+                    map.put((ResourceKey) (Object) new ResourceLocation(rawId), (A) value.getKey());
+                } else {
+                    map.put(ResourceKey.sponge(rawId), (A) value.getKey());
+                }
             }
             return map;
         }, false);

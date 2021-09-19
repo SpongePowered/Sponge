@@ -41,8 +41,10 @@ import org.spongepowered.common.bridge.world.inventory.container.TrackedInventor
 import org.spongepowered.common.entity.player.SpongeUserData;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
 import org.spongepowered.common.inventory.custom.CustomInventory;
+import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -119,6 +121,9 @@ public final class InventoryUtil {
     public static InventoryAdapter findAdapter(final Object inventory) {
         if (inventory instanceof InventoryAdapter) {
             return ((InventoryAdapter) inventory);
+        }
+        if (inventory instanceof Fabric) {
+            return new BasicInventoryAdapter((Fabric) inventory, null, null);
         }
         return PlatformHooks.INSTANCE.getInventoryHooks().findInventoryAdapter(inventory);
     }

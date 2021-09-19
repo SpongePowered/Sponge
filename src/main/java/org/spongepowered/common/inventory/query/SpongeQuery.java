@@ -35,6 +35,8 @@ import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.DelegatingLens;
 import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.QueryLens;
+import org.spongepowered.common.inventory.lens.impl.slot.DelegatingSlotLens;
+import org.spongepowered.common.inventory.lens.impl.slot.QueriedSlotLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.Collections;
@@ -92,9 +94,8 @@ public abstract class SpongeQuery implements Query {
             if (data.isEmpty()) { // add back slot-lenses
                 matches.put(entry.getKey(), toRemove.getOrDefault(entry.getKey(), 0));
             } else { // with data if found
-                final SlotLens key = entry.getKey();
-//                System.out.println(data); // TODO wrap lens to include data? or put the data on the querylens
-                matches.put(key, toRemove.getOrDefault(entry.getKey(), 0));
+                final QueriedSlotLens delegatingSlotLens = new QueriedSlotLens(entry.getKey(), data);
+                matches.put(delegatingSlotLens, toRemove.getOrDefault(entry.getKey(), 0));
             }
         }
 

@@ -36,6 +36,7 @@ import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.biome.provider.multinoise.MultiNoiseConfig;
 import org.spongepowered.common.accessor.world.level.biome.MultiNoiseBiomeSourceAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
+import org.spongepowered.common.util.SeedUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -98,6 +99,12 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
         @Override
         public Builder seed(final long seed) {
             this.seed = seed;
+            return this;
+        }
+
+        @Override
+        public Builder seed(final String seed) {
+            this.seed = SeedUtil.compute(seed);
             return this;
         }
 

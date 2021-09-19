@@ -37,7 +37,6 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -53,7 +52,6 @@ public final class SpongeCommon {
     );
 
     @Inject private @Nullable static SpongeGame game;
-    private @Nullable static PluginContainer activePlugin;
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -113,18 +111,6 @@ public final class SpongeCommon {
 
     public static Path spongeConfigDirectory() {
         return SpongeCommon.gameDirectory().resolve("config");
-    }
-
-    public static PluginContainer activePlugin() {
-        if (SpongeCommon.activePlugin == null) {
-            return Launch.instance().minecraftPlugin();
-        }
-
-        return SpongeCommon.activePlugin;
-    }
-
-    public static void setActivePlugin(final @Nullable PluginContainer plugin) {
-        SpongeCommon.activePlugin = plugin;
     }
 
     public static boolean post(final Event event) {

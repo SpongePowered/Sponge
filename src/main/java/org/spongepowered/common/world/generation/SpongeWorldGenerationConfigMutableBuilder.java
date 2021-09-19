@@ -31,6 +31,7 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
+import org.spongepowered.common.util.SeedUtil;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -44,6 +45,11 @@ public final class SpongeWorldGenerationConfigMutableBuilder implements WorldGen
     public WorldGenerationConfig.Mutable.Builder seed(final long seed) {
         this.seed = seed;
         return this;
+    }
+
+    @Override
+    public void seed(final String seed) {
+        this.seed = SeedUtil.compute(seed);
     }
 
     @Override

@@ -26,12 +26,9 @@ package org.spongepowered.common.event.manager;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import co.aikar.timings.Timing;
-
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.Order;
-import co.aikar.timings.sponge.SpongeTimings;
 import org.spongepowered.common.event.SpongeEventListener;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -51,7 +48,6 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
     private final EventListener<? super T> listener;
 
     private final boolean beforeModifications;
-    private Timing listenerTimer;
 
     RegisteredListener(
             final PluginContainer plugin, final EventType<T> eventType, final Order order, final EventListener<? super T> listener, final boolean beforeModifications) {
@@ -76,13 +72,6 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
 
     public boolean isBeforeModifications() {
         return this.beforeModifications;
-    }
-
-    public Timing getTimingsHandler() {
-        if (this.listenerTimer == null) {
-            this.listenerTimer = SpongeTimings.pluginTimings(this.plugin, this.getHandle().getClass().getSimpleName());
-        }
-        return this.listenerTimer;
     }
 
     @Override

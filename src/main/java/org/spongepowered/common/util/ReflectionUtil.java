@@ -29,6 +29,7 @@ import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -56,7 +57,7 @@ import java.util.List;
  */
 public final class ReflectionUtil {
 
-    public static final Marker STUPID_REFLECTION = MarkerManager.getMarker("REFLECTION_SCANNING");
+    public static final Marker REFLECTION_SCANNING = MarkerManager.getMarker("REFLECTION_SCANNING");
     private static final Class<?>[] NEIGHBOR_CHANGED_METHOD_ARGS = {
         BlockState.class,
         Level.class,
@@ -75,6 +76,9 @@ public final class ReflectionUtil {
         Level.class,
         BlockPos.class,
         Entity.class
+    };
+    private static final Class<?>[] PLAYER_TOUCH_METHOD_ARGS= {
+        Player.class
     };
 
     public static boolean isNeighborChangedDeclared(final Class<?> targetClass) {
@@ -104,6 +108,15 @@ public final class ReflectionUtil {
         );
     }
 
+    public static boolean isPlayerTouchDeclared(final Class<?> targetClass) {
+        return ReflectionUtil.doesMethodExist(
+            targetClass,
+            Entity.class,
+            "playerTouch",
+            ReflectionUtil.PLAYER_TOUCH_METHOD_ARGS
+        );
+    }
+
     public static boolean doesMethodExist(
         final Class<?> targetClass,
         final Class<?> ignoredClass,
@@ -115,26 +128,12 @@ public final class ReflectionUtil {
             final Class<?> declaringClass = targetClass.getMethod(targetMethodForEnvironment, methodParameters).getDeclaringClass();
             return !ignoredClass.equals(declaringClass);
         } catch (final NoSuchMethodException e) {
-            SpongeCommon.logger().fatal(ReflectionUtil.STUPID_REFLECTION, "Could not find desired method {} under environment method name {}", methodName, targetMethodForEnvironment);
+            SpongeCommon.logger().fatal(ReflectionUtil.REFLECTION_SCANNING, "Could not find desired method {} in class {} under environment method "
+                + "name {}", methodName, targetClass.getSimpleName(), targetMethodForEnvironment);
             return true;
         } catch (final NoClassDefFoundError e) {
-            SpongeCommon.logger().fatal(ReflectionUtil.STUPID_REFLECTION, "Failed to load class in {} while scanning desired method {} under environment method name {}", targetClass, methodName, targetMethodForEnvironment);
+            SpongeCommon.logger().fatal(ReflectionUtil.REFLECTION_SCANNING, "Failed to load class in {} while scanning desired method {} under environment method name {}", targetClass, methodName, targetMethodForEnvironment);
             return true;
-        }
-
-    }
-
-    public static <T> T createUnsafeInstance(final Class<T> objectClass, Object... args)
-            throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        if (args == null) {
-            args = new Object[] {null};
-        }
-        final Constructor<T>tConstructor = ReflectionUtil.findConstructor(objectClass, args);
-        try {
-            return tConstructor.newInstance(args);
-        } catch (final Exception e) {
-            final Object[] deconstructedArgs = ReflectionUtil.deconstructArray(args).toArray();
-            return tConstructor.newInstance(deconstructedArgs);
         }
     }
 

@@ -25,22 +25,23 @@
 package org.spongepowered.forge.applaunch.loading.metadata;
 
 import net.minecraftforge.forgespi.language.IConfigurable;
-import org.spongepowered.plugin.metadata.PluginDependency;
 import org.spongepowered.plugin.metadata.PluginMetadata;
-import org.spongepowered.plugin.metadata.PluginMetadataContainer;
+import org.spongepowered.plugin.metadata.builtin.MetadataContainer;
+import org.spongepowered.plugin.metadata.model.PluginDependency;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 // ModFileInfo
 public final class PluginFileConfigurable implements IConfigurable {
 
-    private final PluginMetadataContainer container;
+    private final MetadataContainer container;
 
-    public PluginFileConfigurable(final PluginMetadataContainer container) {
+    public PluginFileConfigurable(final MetadataContainer container) {
         this.container = container;
     }
 
@@ -57,18 +58,15 @@ public final class PluginFileConfigurable implements IConfigurable {
         }
 
         if ("modLoader".equals(query)) {
-            // TODO PluginMetadata will require moving this to per-file metadata and not per-plugin
-            return (Optional<T>) Optional.of("sponge_java_plain");
+            return (Optional<T>) Optional.of(this.container.loader().name());
         }
 
         if ("loaderVersion".equals(query)) {
-            // TODO Need to have loaders "versioned" in plugin-spi or just always do 1.0...may be no point in this?
-            return (Optional<T>) Optional.of("1.0");
+            return (Optional<T>) Optional.of(this.container.loader().version().toString());
         }
 
         if ("license".equals(query)) {
-            // TODO PluginMetadata will require a "license" field
-            return (Optional<T>) Optional.of("MIT");
+            return (Optional<T>) Optional.of(this.container.license());
         }
 
         if (key.length == 2) {
@@ -79,7 +77,7 @@ public final class PluginFileConfigurable implements IConfigurable {
             }
 
             if ("modproperties".equals(query)) {
-                return (Optional<T>) Optional.of(metadata.extraMetadata());
+                return (Optional<T>) Optional.of(metadata.properties());
             }
         }
 
@@ -98,13 +96,13 @@ public final class PluginFileConfigurable implements IConfigurable {
         }
 
         if ("mods".equals(query)) {
-            final Map<String, PluginMetadata> metadataById = this.container.allMetadata();
+            final Set<PluginMetadata> metadataById = this.container.metadata();
             if (metadataById.isEmpty()) {
                 return Collections.emptyList();
             }
 
             final List<IConfigurable> metadataConfigurables = new ArrayList<>();
-            metadataById.forEach((id, metadata) -> metadataConfigurables.add(new PluginMetadataConfigurable(metadata)));
+            metadataById.forEach((metadata) -> metadataConfigurables.add(new PluginMetadataConfigurable(metadata)));
             return metadataConfigurables;
         }
 
@@ -121,7 +119,7 @@ public final class PluginFileConfigurable implements IConfigurable {
         if ("dependencies".equals(query)) {
 
             // TODO Should we inject a dependency on SpongeForge?
-            final List<PluginDependency> dependencies = metadata.dependencies();
+            final Set<PluginDependency> dependencies = metadata.dependencies();
             if (dependencies.isEmpty()) {
                 return Collections.emptyList();
             }

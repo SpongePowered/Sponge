@@ -27,11 +27,9 @@ package org.spongepowered.common.scheduler;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.bridge.world.entity.player.PlayerInventoryBridge;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
-import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 
 public final class ServerScheduler extends SyncScheduler {
 
@@ -45,25 +43,12 @@ public final class ServerScheduler extends SyncScheduler {
 
         for (final Player player : Sponge.server().onlinePlayers()) {
             if (player instanceof net.minecraft.world.entity.player.Player) {
-                // Detect Changes on PlayerInventories marked as dirty.
-                ((PlayerInventoryBridge) ((net.minecraft.world.entity.player.Player) player).inventory).bridge$cleanupDirty();
+                try (EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(player)) {
+                    tickContext.buildAndSwitch();
+                    // Detect Changes on PlayerInventories marked as dirty.
+                    ((PlayerInventoryBridge) ((net.minecraft.world.entity.player.Player) player).inventory).bridge$cleanupDirty();
+                }
             }
         }
-    }
-
-    @Override
-    protected void executeTaskRunnable(final SpongeScheduledTask task, final Runnable runnable) {
-        try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.SERVER)
-                .source(task)) {
-            context.buildAndSwitch();
-            super.executeTaskRunnable(task, runnable);
-        }
-    }
-
-    @Override
-    protected PhaseContext<?> createContext(final SpongeScheduledTask task, final PluginContainer container) {
-        return PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.SERVER)
-                .source(task)
-                .container(container);
     }
 }

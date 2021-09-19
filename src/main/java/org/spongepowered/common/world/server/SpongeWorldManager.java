@@ -261,13 +261,16 @@ public abstract class SpongeWorldManager implements WorldManager {
             pluginDirectories
                     .filter(Files::isDirectory)
                     .forEach(pluginDirectory -> {
-                                try (final Stream<Path> pluginTemplates = Files.walk(pluginDirectory.resolve("dimension"), 1)) {
-                                    pluginTemplates
-                                            .filter(template -> template.endsWith(".json"))
-                                            .forEach(template -> templateKeys.add((ResourceKey) (Object) new ResourceLocation(pluginDirectory.toString(),
-                                                    FilenameUtils.removeExtension(template.getFileName().toString()))));
-                                } catch (final IOException e) {
-                                    throw new RuntimeException(e);
+                                final Path dimensionPath = pluginDirectory.resolve("dimension");
+                                if (Files.isDirectory(dimensionPath)) {
+                                    try (final Stream<Path> pluginTemplates = Files.walk(dimensionPath, 1)) {
+                                        pluginTemplates
+                                                .filter(template -> template.toString().endsWith(".json"))
+                                                .forEach(template -> templateKeys.add((ResourceKey) (Object) new ResourceLocation(pluginDirectory.getFileName().toString(),
+                                                        FilenameUtils.removeExtension(template.getFileName().toString()))));
+                                    } catch (final IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 }
                             }
                     );

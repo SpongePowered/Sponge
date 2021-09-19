@@ -37,7 +37,8 @@ final class ForgeMappingManager implements SpongeMappingManager {
     private static final Map<String, String> METHOD_MAPPINGS = ImmutableMap.of(
         "neighborChanged", "func_220069_a",
         "entityInside", "func_196262_a",
-        "stepOn", "func_176199_a"
+        "stepOn", "func_176199_a",
+        "playerTouch", "func_70100_b_"
     );
 
     private static final Map<String, String> FIELD_MAPPINGS = ImmutableMap.of(

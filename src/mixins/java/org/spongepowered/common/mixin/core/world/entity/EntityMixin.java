@@ -109,6 +109,7 @@ import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.util.MinecraftBlockDamageSource;
+import org.spongepowered.common.util.ReflectionUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.NetherPortalType;
 import org.spongepowered.common.world.portal.PortalLogic;
@@ -219,6 +220,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     protected boolean impl$dontCreateExitPortal = false;
     protected short impl$fireImmuneTicks = 0;
     private BlockPos impl$lastCollidedBlockPos;
+    private Boolean impl$playerTouchDeclared;
 
     // When changing custom data it is serialized on to this.
     // On writeInternal the SpongeData tag is added to the new CompoundNBT accordingly
@@ -234,6 +236,14 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Override
     public void bridge$fireConstructors() {
         this.impl$isConstructing = false;
+    }
+
+    @Override
+    public boolean bridge$isPlayerTouchDeclared() {
+        if (this.impl$playerTouchDeclared == null) {
+            this.impl$playerTouchDeclared = ReflectionUtil.isPlayerTouchDeclared(this.getClass());
+        }
+        return this.impl$playerTouchDeclared;
     }
 
     @Override
@@ -260,7 +270,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(SpongeCommon.activePlugin());
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
 
             final net.minecraft.server.level.ServerLevel originalWorld = (ServerLevel) this.shadow$getCommandSenderWorld();
@@ -833,7 +842,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             final PhaseTracker phaseTracker, final Vector3d originalDestinationPosition) {
         final boolean hasMovementContext = phaseTracker.currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE);
         if (!hasMovementContext) {
-            phaseTracker.pushCause(SpongeCommon.activePlugin());
             phaseTracker.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
         }
 
@@ -1144,7 +1152,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return EntityUtil.entityOnDropItem((Entity) (Object) this, stack, offsetY, ((Entity) (Object) this).posX, ((Entity) (Object) this).posZ);
     }
 */
-    @Nullable
+    @org.checkerframework.checker.nullness.qual.Nullable
     @Override
     public BlockPos bridge$getLastCollidedBlockPos() {
         return this.impl$lastCollidedBlockPos;

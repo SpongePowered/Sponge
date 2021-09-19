@@ -24,26 +24,20 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.util.Constants;
 
-import net.minecraft.network.protocol.Packet;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,36 +48,27 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
     }
 
     @Override
-    public void populateContext(final net.minecraft.server.level.ServerPlayer playerMP, final Packet<?> packet,
-        final InventoryPacketContext context) {
-        super.populateContext(playerMP, packet, context);
+    public ClickContainerEvent createContainerEvent(
+            final InventoryPacketContext ctx, final Cause cause, final ServerPlayer serverPlayer,
+            final Container openContainer,
+            final Transaction<ItemStackSnapshot> transaction,
+            final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
+            final @Nullable Slot slot) {
+
+        TrackingUtil.setCreatorReference(capturedEntities, serverPlayer);
+
+        if (usedButton == Constants.Networking.PACKET_BUTTON_PRIMARY_ID) {
+            return SpongeEventFactory.createClickContainerEventDropOutsidePrimary(cause,
+                    openContainer, transaction, capturedEntities, Optional.ofNullable(slot), slotTransactions);
+        }
+        return SpongeEventFactory.createClickContainerEventDropOutsideSecondary(cause,
+                openContainer, transaction, capturedEntities, Optional.ofNullable(slot), slotTransactions);
     }
 
     @Override
-    public ClickContainerEvent createInventoryEvent(final net.minecraft.server.level.ServerPlayer playerMP, final Container openContainer,
-        final Transaction<ItemStackSnapshot> transaction,
-        final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
-        final @Nullable Slot slot) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-
-            for (final Entity currentEntity : capturedEntities) {
-                if (currentEntity instanceof CreatorTrackedBridge) {
-                    ((CreatorTrackedBridge) currentEntity).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((ServerPlayer) playerMP).uniqueId());
-                } else {
-                    currentEntity.offer(Keys.CREATOR, playerMP.getUUID());
-                }
-            }
-            if (usedButton == Constants.Networking.PACKET_BUTTON_PRIMARY_ID) {
-                return SpongeEventFactory.createClickContainerEventDropOutsidePrimary(frame.currentCause(),
-                    openContainer, transaction, capturedEntities,
-                    Optional.ofNullable(slot), slotTransactions);
-            } else {
-                return SpongeEventFactory.createClickContainerEventDropOutsideSecondary(frame.currentCause(),
-                    openContainer, transaction, capturedEntities,
-                    Optional.ofNullable(slot), slotTransactions);
-            }
-        }
+    public boolean doesContainerCaptureEntitySpawn(
+        final InventoryPacketContext context, final net.minecraft.world.entity.Entity entityIn
+    ) {
+        return true;
     }
-
 }

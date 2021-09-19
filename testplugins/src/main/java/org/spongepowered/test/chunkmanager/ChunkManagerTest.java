@@ -46,7 +46,7 @@ import org.spongepowered.api.world.server.Ticket;
 import org.spongepowered.api.world.server.TicketTypes;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 import java.util.Optional;

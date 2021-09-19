@@ -26,11 +26,9 @@ package co.aikar.timings.sponge;
 
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
-import com.google.common.collect.EvictingQueue;
-import org.spongepowered.api.command.manager.CommandMapping;
-import org.spongepowered.common.SpongeCommon;
 import co.aikar.timings.util.LoadingMap;
-import org.spongepowered.plugin.PluginContainer;
+import com.google.common.collect.EvictingQueue;
+import org.spongepowered.common.SpongeCommon;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -38,7 +36,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public final class TimingsManager {
 
@@ -46,9 +43,6 @@ public final class TimingsManager {
             LoadingMap.newHashMap((id) -> (id.protect ? new UnsafeTimingHandler(id) : new TimingHandler(id)), 256, .5F));
     public static final FullServerTickHandler FULL_SERVER_TICK = new FullServerTickHandler();
     public static final TimingHandler TIMINGS_TICK = SpongeTimingsFactory.ofSafe("Timings Tick", TimingsManager.FULL_SERVER_TICK);
-    public static final Timing MOD_EVENT_HANDLER = SpongeTimingsFactory.ofSafe("Mod Events");
-    public static final Timing PLUGIN_SCHEDULER_HANDLER = SpongeTimingsFactory.ofSafe("Plugin Scheduler");
-    public static final Timing PLUGIN_EVENT_HANDLER = SpongeTimingsFactory.ofSafe("Plugin Events");
     public static List<String> hiddenConfigs = new ArrayList<>();
     public static boolean privacy = false;
 

@@ -26,6 +26,8 @@ package org.spongepowered.common.mixin.api.minecraft.server.level;
 
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.pointer.Pointers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
@@ -45,6 +47,8 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.ServerLevelData;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -116,6 +120,8 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Shadow public abstract long shadow$getSeed();
     // @formatter:on
 
+    private volatile @MonotonicNonNull Pointers api$pointers;
+
     @Override
     public long seed() {
         return this.shadow$getSeed();
@@ -126,6 +132,20 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Override
     public boolean isLoaded() {
         return ((ServerLevelBridge) this).bridge$isLoaded();
+    }
+
+    // Pointered (via Audience)
+
+    @Override
+    public @NotNull Pointers pointers() {
+        if (this.api$pointers == null) {
+            return this.api$pointers = Pointers.builder()
+                .withDynamic(Identity.UUID, this::uniqueId)
+                .withDynamic(Identity.NAME, () -> this.key().formatted())
+                .withDynamic(Identity.DISPLAY_NAME, () -> this.properties().displayName().orElse(null))
+                .build();
+        }
+        return this.api$pointers;
     }
 
     // LocationCreator

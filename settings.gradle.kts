@@ -88,7 +88,7 @@ if (spongeForgeEnabledInCi.toBoolean()) {
 
 // Bring in a newer architectury t-r
 sourceControl {
-    gitRepository(uri("https://github.com/architectury/tiny-remapper.git")) {
+    gitRepository(uri("https://github.com/zml2008/tiny-remapper.git")) {
         producesModule("dev.architectury:tiny-remapper")
     }
 }

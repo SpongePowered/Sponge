@@ -29,11 +29,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,7 +40,6 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
-import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Locale;
 import java.util.Set;
@@ -73,10 +68,6 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
     void bridge$removeScoreboardOnRespawn();
 
     void bridge$setScoreboardOnRespawn(Scoreboard scoreboard);
-
-    void bridge$restorePacketItem(InteractionHand hand);
-
-    void bridge$setPacketItem(ItemStack itemstack);
 
     void bridge$refreshExp();
 
@@ -109,5 +100,9 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
     }
 
     boolean bridge$kick(final Component message);
+
+    boolean bridge$sleepingIgnored();
+
+    void bridge$setSleepingIgnored(final boolean sleepingIgnored);
 
 }

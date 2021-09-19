@@ -26,8 +26,8 @@ package org.spongepowered.forge.applaunch.loading.metadata;
 
 import net.minecraftforge.forgespi.language.IConfigurable;
 import net.minecraftforge.forgespi.language.IModInfo;
-import org.spongepowered.plugin.metadata.PluginDependency;
 import org.spongepowered.plugin.metadata.PluginMetadata;
+import org.spongepowered.plugin.metadata.model.PluginDependency;
 
 import java.util.Collections;
 import java.util.List;
@@ -59,7 +59,7 @@ public final class PluginDependencyConfigurable implements IConfigurable {
             return (Optional<T>) Optional.of(!this.dependency.optional());
         }
         if ("versionRange".equals(query)) {
-            return (Optional<T>) Optional.of(this.dependency.version());
+            return (Optional<T>) Optional.of(this.dependency.version().toString());
         }
         if ("ordering".equals(query)) {
             return (Optional<T>) Optional.of(this.loadToOrdering(this.dependency.loadOrder()).toString());

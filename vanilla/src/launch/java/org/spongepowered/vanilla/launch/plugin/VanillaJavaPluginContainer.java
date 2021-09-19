@@ -26,8 +26,8 @@ package org.spongepowered.vanilla.launch.plugin;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.jvm.JVMPluginContainer;
-import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
+import org.spongepowered.plugin.builtin.jvm.JVMPluginContainer;
+import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResource;
 
 public final class VanillaJavaPluginContainer extends JVMPluginContainer {
 

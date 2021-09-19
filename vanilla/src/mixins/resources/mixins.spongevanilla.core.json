@@ -27,6 +27,7 @@
         "server.network.ServerLoginPacketListenerImpl_1Mixin_Vanilla",
         "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
         "world.entity.EntityMixin_Vanilla",
+        "world.entity.LivingEntityMixin_Vanilla",
         "world.entity.ai.attributes.DefaultAttributesMixin",
         "world.entity.item.ItemEntityMixin_Vanilla",
         "world.entity.projectile.ThrownEnderpearlMixin_Vanilla",

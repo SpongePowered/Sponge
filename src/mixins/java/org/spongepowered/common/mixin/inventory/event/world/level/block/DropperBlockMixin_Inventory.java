@@ -47,6 +47,7 @@ import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.DropperBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import org.spongepowered.common.inventory.util.InventoryUtil;
 
 @Mixin(DropperBlock.class)
 public abstract class DropperBlockMixin_Inventory {
@@ -63,7 +64,7 @@ public abstract class DropperBlockMixin_Inventory {
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
             // Transfer worked if remainder is one less than the original stack
             if (itemstack1.getCount() == itemstack.getCount() - 1) {
-                final TrackedInventoryBridge capture = DropperBlockMixin_Inventory.impl$forCapture(dispensertileentity);
+                final TrackedInventoryBridge capture = InventoryUtil.forCapture(dispensertileentity);
                 final Inventory sourceInv = ((Inventory) dispensertileentity);
                 SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
                 InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
@@ -84,7 +85,7 @@ public abstract class DropperBlockMixin_Inventory {
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST) {
             // Transfer worked if remainder is one less than the original stack
             if (itemstack1.getCount() == itemstack.getCount() - 1) {
-                final TrackedInventoryBridge capture = DropperBlockMixin_Inventory.impl$forCapture(dispensertileentity);
+                final TrackedInventoryBridge capture = InventoryUtil.forCapture(dispensertileentity);
                 final Inventory sourceInv = ((Inventory) dispensertileentity);
                 SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
                 final Direction enumfacing = worldIn.getBlockState(pos).getValue(DispenserBlock.FACING);
@@ -108,13 +109,5 @@ public abstract class DropperBlockMixin_Inventory {
         if (InventoryEventFactory.callTransferPre(((Inventory) dispensertileentity), ((Inventory) iinventory)).isCancelled()) {
             ci.cancel();
         }
-    }
-
-    @Nullable
-    private static TrackedInventoryBridge impl$forCapture(final Object toCapture) {
-        if (toCapture instanceof TrackedInventoryBridge) {
-            return ((TrackedInventoryBridge) toCapture);
-        }
-        return null;
     }
 }

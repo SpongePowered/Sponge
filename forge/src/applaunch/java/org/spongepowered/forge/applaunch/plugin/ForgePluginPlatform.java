@@ -108,6 +108,17 @@ public final class ForgePluginPlatform implements PluginPlatform {
         // NOOP
     }
 
+    // TODO: Zidane, how will this work with SF?
+    @Override
+    public String metadataFilePath() {
+        return null;
+    }
+
+    @Override
+    public void setMetadataFilePath(final String metadataFilePath) {
+        // NOOP
+    }
+
     public void init() {
         final Path alternativePluginsDirectory = Paths.get(SpongeConfigs.getCommon().get().general.pluginsDir.getParsed());
         try {
