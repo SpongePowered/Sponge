@@ -256,7 +256,7 @@ public abstract class SpongeScheduler implements Scheduler {
      * @param task The task to start
      */
     private void startTask(final SpongeScheduledTask task) {
-        this.executeTaskRunnable(task, () -> {
+        this.executeRunnable(() -> {
             task.setState(SpongeScheduledTask.ScheduledTaskState.EXECUTING);
             try (final @Nullable PhaseContext<@NonNull ?> context = this.createContext(task, task.owner())) {
                 if (context != null) {
@@ -289,19 +289,6 @@ public abstract class SpongeScheduler implements Scheduler {
      */
     protected void onTaskCompletion(final SpongeScheduledTask task) {
         // no-op for sync methods.
-    }
-
-    /**
-     * Actually run the runnable that will begin the task
-     *
-     * @param runnable The runnable to run
-     */
-    private void executeTaskRunnable(final SpongeScheduledTask task, final Runnable runnable) {
-        try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.SERVER)
-                .source(task)) {
-            context.buildAndSwitch();
-            this.executeRunnable(runnable);
-        }
     }
 
     protected void executeRunnable(final Runnable runnable) {
