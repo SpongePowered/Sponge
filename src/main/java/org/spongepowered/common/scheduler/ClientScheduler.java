@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.scheduler;
 
-public class ClientScheduler extends SyncScheduler {
+public final class ClientScheduler extends SyncScheduler {
 
     public ClientScheduler() {
         super("C");
     }
-
-    // TODO: 1.14 - Track tasks on ClientScheduler?
 }

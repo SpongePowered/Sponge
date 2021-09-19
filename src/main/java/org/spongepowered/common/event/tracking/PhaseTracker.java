@@ -27,6 +27,24 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Queues;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.chunk.LevelChunk;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.DefaultQualifier;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
@@ -44,23 +62,6 @@ import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.ThreadUtil;
-
-import com.google.common.collect.MapMaker;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Queues;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.chunk.LevelChunk;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -238,29 +239,29 @@ public final class PhaseTracker implements CauseStackManager {
             return;
         }
         this.hasRun = true;
-        Task.builder()
-            .name("Sponge Async To Sync Entity Spawn Task")
-            .interval(Ticks.single())
-            .execute(() -> {
-                if (PhaseTracker.ASYNC_CAPTURED_ENTITIES.isEmpty()) {
-                    return;
-                }
-
-                final List<net.minecraft.world.entity.Entity> entities = new ArrayList<>(PhaseTracker.ASYNC_CAPTURED_ENTITIES);
-                PhaseTracker.ASYNC_CAPTURED_ENTITIES.removeAll(entities);
-                try (final CauseStackManager.StackFrame frame = this.pushCauseFrame()) {
-                    // We are forcing the spawn, as we can't throw the proper event at the proper time, so
-                    // we'll just mark it as "forced".
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpongeSpawnTypes.FORCED);
-                    for (final net.minecraft.world.entity.Entity entity : entities) {
-                        // At this point, we don't care what the causes are...
-                        entity.getCommandSenderWorld().addFreshEntity(entity);
+        final Task task = Task.builder()
+                .interval(Ticks.single())
+                .execute(() -> {
+                    if (PhaseTracker.ASYNC_CAPTURED_ENTITIES.isEmpty()) {
+                        return;
                     }
-                }
 
-            })
-            .plugin(Launch.instance().commonPlugin())
-            .build();
+                    final List<Entity> entities = new ArrayList<>(PhaseTracker.ASYNC_CAPTURED_ENTITIES);
+                    PhaseTracker.ASYNC_CAPTURED_ENTITIES.removeAll(entities);
+                    try (final StackFrame frame = this.pushCauseFrame()) {
+                        // We are forcing the spawn, as we can't throw the proper event at the proper time, so
+                        // we'll just mark it as "forced".
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpongeSpawnTypes.FORCED);
+                        for (final Entity entity : entities) {
+                            // At this point, we don't care what the causes are...
+                            entity.getCommandSenderWorld().addFreshEntity(entity);
+                        }
+                    }
+
+                })
+                .plugin(Launch.instance().commonPlugin())
+                .build();
+        Sponge.server().scheduler().submit(task, "Sponge Async To Sync Entity Spawn Task");
     }
 
     public void setThread(final @Nullable Thread thread) throws IllegalAccessException {

@@ -26,6 +26,7 @@ package org.spongepowered.common.scheduler;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.scheduler.ScheduledTask;
+import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 
 import java.util.UUID;
@@ -35,31 +36,27 @@ import java.util.UUID;
  */
 public final class SpongeScheduledTask implements ScheduledTask {
 
-    final SpongeTask task;
     private final SpongeScheduler scheduler;
-    private final UUID id;
+    final SpongeTask task;
+    private final UUID uniqueId;
     private final String name;
+
     private long timestamp;
     private ScheduledTaskState state;
     private boolean isCancelled = false;
 
-    SpongeScheduledTask(SpongeScheduler scheduler, SpongeTask task, String taskName) {
+    SpongeScheduledTask(final SpongeScheduler scheduler, final SpongeTask task, final String name) {
         this.scheduler = scheduler;
-        this.id = UUID.randomUUID();
-        this.name = taskName;
         this.task = task;
+        this.name = name;
+        this.uniqueId = UUID.randomUUID();
         // All tasks begin waiting.
         this.state = ScheduledTaskState.WAITING;
     }
 
     @Override
-    public UUID uniqueId() {
-        return this.id;
-    }
-
-    @Override
-    public String name() {
-        return this.name;
+    public Scheduler scheduler() {
+        return this.scheduler;
     }
 
     @Override
@@ -68,12 +65,19 @@ public final class SpongeScheduledTask implements ScheduledTask {
     }
 
     @Override
+    public UUID uniqueId() {
+        return this.uniqueId;
+    }
+
+    @Override
+    public String name() {
+        return this.name;
+    }
+
+    @Override
     public boolean cancel() {
-        boolean success = false;
-        if (this.state() == ScheduledTaskState.RUNNING
-                || this.state() == ScheduledTaskState.EXECUTING) {
-            success = true;
-        }
+        final boolean success = this.state() == ScheduledTaskState.RUNNING
+                || this.state() == ScheduledTaskState.EXECUTING;
         this.state = ScheduledTaskState.CANCELED;
         this.isCancelled = true;
         return success;
@@ -84,15 +88,11 @@ public final class SpongeScheduledTask implements ScheduledTask {
         return this.isCancelled;
     }
 
-    public SpongeScheduler getScheduler() {
-        return this.scheduler;
-    }
-
     long timestamp() {
         return this.timestamp;
     }
 
-    void setTimestamp(long timestamp) {
+    void setTimestamp(final long timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -121,8 +121,6 @@ public final class SpongeScheduledTask implements ScheduledTask {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("name", this.name)
-                .add("id", this.id)
                 .add("task", this.task)
                 .toString();
     }
