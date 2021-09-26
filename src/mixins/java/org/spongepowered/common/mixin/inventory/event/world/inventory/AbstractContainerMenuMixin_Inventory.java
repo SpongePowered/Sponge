@@ -143,7 +143,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Redirect(method = "doClick",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z",
+            target = "Lnet/minecraft/world/inventory/Slot;safeTake(IILnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/item/ItemStack;",
             ordinal = 0
         ),
         slice = @Slice(
@@ -155,15 +155,14 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             )
         )
     )
-    private boolean impl$verifyReadOnlyMenu(final Slot slot, final Player playerIn) {
-        if (((LevelBridge) playerIn.level).bridge$isFake()) {
-            slot.mayPickup(playerIn);
+    private ItemStack impl$verifyReadOnlyMenu(final Slot slot, final int param0, final int param1, final Player param2) {
+        if (!((LevelBridge) param2.level).bridge$isFake()) {
+            if (((MenuBridge) this).bridge$isReadonlyMenu(slot)) {
+                ((MenuBridge) this).bridge$refreshListeners();
+                return ItemStack.EMPTY;
+            }
         }
-        if (((MenuBridge) this).bridge$isReadonlyMenu(slot)) {
-            ((MenuBridge) this).bridge$refreshListeners();
-            return false;
-        }
-        return slot.mayPickup(playerIn);
+        return slot.safeTake(param0, param1, param2);
     }
 
     // ClickType.QUICK_MOVE (for Crafting) -------------------------
