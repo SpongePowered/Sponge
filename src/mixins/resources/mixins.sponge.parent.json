@@ -1,5 +1,4 @@
 {
-    "package": "forge.please.get.mixin.0.8.3",
     "minVersion": "0.8",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_11",

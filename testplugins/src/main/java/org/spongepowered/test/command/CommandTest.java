@@ -601,6 +601,25 @@ public final class CommandTest {
                         .build(),
                 "textcolor"
         );
+
+        final Parameter.Value<Integer> rangedInt1 = Parameter.rangedInteger(1, Integer.MAX_VALUE).key("quantity").build();
+
+        event.register(this.plugin,
+                Command.builder()
+                    .addParameter(Parameter.firstOf(playerKey, Parameter.user().key(userKey).build()))
+                    .addParameter(choicesKey)
+                    .addParameter(rangedInt1)
+                    .executor(ctx -> {
+                        if (ctx.hasAny(playerKey)) {
+                            ctx.sendMessage(Identity.nil(), Component.text(ctx.requireOne(playerKey).name()));
+                        } else {
+                            ctx.sendMessage(Identity.nil(), Component.text(ctx.requireOne(userKey).toString()));
+                        }
+                        ctx.sendMessage(Identity.nil(), Component.text(ctx.requireOne(choicesKey)));
+                        ctx.sendMessage(Identity.nil(), Component.text(ctx.requireOne(rangedInt1)));
+                        return CommandResult.success();
+                    })
+                    .build(), "firstoftest");
     }
 
     @Listener

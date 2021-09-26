@@ -15,7 +15,7 @@ description = "${description}"
 [[dependencies.spongeforge]]
 modId = "forge"
 mandatory = true
-versionRange = "[36,)"
+versionRange = "[36.2.5,37)"
 ordering = "AFTER"
 side = "BOTH"
 
