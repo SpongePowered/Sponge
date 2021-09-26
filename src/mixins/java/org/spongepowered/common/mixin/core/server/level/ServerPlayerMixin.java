@@ -751,20 +751,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         this.impl$language = newLocale;
     }
 
-    /**
-     * Send SlotCrafting updates to client for custom recipes.
-     *
-     * @author Faithcaio - 31.12.2016
-     * @reason Vanilla is not updating the Client when Slot is SlotCrafting - this is an issue when plugins register new recipes
-     */
-    @Inject(method = "slotChanged", at = @At("HEAD"))
-    private void sendSlotContents(
-            final net.minecraft.world.inventory.AbstractContainerMenu containerToSend, final int slotIn, final ItemStack stack, final CallbackInfo ci) {
-        if (containerToSend.getSlot(slotIn) instanceof ResultSlot) {
-            this.connection.send(new ClientboundContainerSetSlotPacket(containerToSend.containerId, containerToSend.getStateId(), slotIn, stack));
-        }
-    }
-
     @Override
     public PlayerOwnBorderListener bridge$getWorldBorderListener() {
         return this.impl$borderListener;
