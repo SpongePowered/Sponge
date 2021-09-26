@@ -145,16 +145,7 @@ public final class SpawnEntityTransaction extends WorldBasedTransaction<SpawnEnt
 
     @Override
     public void restore(final PhaseContext<@NonNull ?> context, final SpawnEntityEvent event) {
-        final ServerLevel serverWorld = this.worldSupplier.get();
-        if (((ServerLevelAccessor) serverWorld).accessor$tickingEntities()) {
-            // More than likely we could also be needing to remove the entity from both the entities to add
-            // and the chunk.
-            ((ServerLevelAccessor) serverWorld).accessor$toAddAfterTick().remove(this.entityToSpawn);
-            ((ServerLevelAccessor) serverWorld).invoker$removeFromChunk(this.entityToSpawn);
-        } else {
-            ((ServerLevelAccessor) serverWorld).accessor$getEntityManager().tick();
-            serverWorld.despawn(this.entityToSpawn);
-        }
+        this.entityToSpawn.remove(Entity.RemovalReason.DISCARDED);
     }
 
     @Override

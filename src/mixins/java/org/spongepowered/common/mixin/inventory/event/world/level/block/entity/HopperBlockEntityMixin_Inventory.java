@@ -117,8 +117,8 @@ public abstract class HopperBlockEntityMixin_Inventory {
         // after putStackInInventoryAllSlots if the transfer worked
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack1.isEmpty()) {
             // Capture Insert in Origin
-            final TrackedInventoryBridge capture = InventoryUtil.forCapture(this);
-            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) this, i, itemStack);
+            final TrackedInventoryBridge capture = InventoryUtil.forCapture(var3);
+            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) var3, i, itemStack);
             // Call event
             InventoryEventFactory.callTransferPost(capture, (Inventory) iInventory, InventoryUtil.toInventory(iInventory), itemStack, sourceSlotTransaction);
         }
