@@ -116,24 +116,8 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
         return slot.mayPlace(stack);
     }
 
-    /**
-     * ordinal=4 is handled in {@link org.spongepowered.common.mixin.inventory.event.world.inventory.AbstractContainerMenuMixin_Inventory#impl$captureLastSlotForPickup}
-     */
-    @Redirect(method = "doClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z"),
-            slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z", ordinal = 3))
-    )
-    public boolean impl$onMayPickupBefore4(final Slot slot, final Player player) {
-        return this.impl$onMayPickup(slot, player);
-    }
-
-    @Redirect(method = "doClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z"),
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z", ordinal = 5))
-    )
-    public boolean impl$onMayPickupAfter4(final Slot slot, final Player player) {
-        return this.impl$onMayPickup(slot, player);
-    }
-
-    private boolean impl$onMayPickup(final Slot slot, final Player player) {
+    @Redirect(method = "doClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z"))
+    public boolean impl$verifyReadOnlyMenu(final Slot slot, final Player player) {
         if (this.bridge$isReadonlyMenu(slot)) {
             this.bridge$refreshListeners();
             return false;
