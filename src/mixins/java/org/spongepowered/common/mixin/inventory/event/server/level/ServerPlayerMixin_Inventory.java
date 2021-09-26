@@ -97,14 +97,16 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
         }
     }
 
-    @Override
+    @Inject(method = "drop(Z)Z",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;removeFromSelected(Z)Lnet/minecraft/world/item/ItemStack;"))
     protected void impl$beforeRemoveItem(final boolean param0, final CallbackInfoReturnable<Boolean> cir) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         this.inventory$effectTransactor = transactor.logDropFromPlayerInventory((ServerPlayer) (Object) this, param0);
     }
 
-    @Override
+    @Inject(method = "drop(Z)Z",
+            at = @At(value = "RETURN"))
     protected void impl$onPlayerDrop(boolean param0, CallbackInfoReturnable<Boolean> cir) {
         try (final EffectTransactor ignored = this.inventory$effectTransactor) {
             this.containerMenu.broadcastChanges(); // for capture
