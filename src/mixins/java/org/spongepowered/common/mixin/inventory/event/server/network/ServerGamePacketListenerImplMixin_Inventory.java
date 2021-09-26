@@ -134,25 +134,6 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         }
     }
 
-    @Redirect(method = "handleInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;interactAt(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
-    private InteractionResult impl$onInteractAt(final Entity entity, final Player param0, final Vec3 param1, final InteractionHand param2) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-        final TransactionalCaptureSupplier transactor = context.getTransactor();
-        final InteractionResult result = entity.interactAt(param0, param1, param2);
-        return result;
-    }
-
-    @Redirect(method = "handleInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;interactOn(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
-    private InteractionResult impl$onInteractOn(final ServerPlayer player, final Entity param0, final InteractionHand param1) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-        final TransactionalCaptureSupplier transactor = context.getTransactor();
-        final InteractionResult result = player.interactOn(param0, param1);
-        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, PlayerInventoryTransaction.EventCreator.STANDARD)) {
-            player.inventoryMenu.broadcastChanges();
-        }
-        return result;
-    }
-
     @Inject(method = "handleSelectTrade", at = @At("RETURN"))
     private void impl$onHandleSelectTrade(final ServerboundSelectTradePacket param0, final CallbackInfo ci) {
         if (this.player.containerMenu instanceof MerchantMenu) {
