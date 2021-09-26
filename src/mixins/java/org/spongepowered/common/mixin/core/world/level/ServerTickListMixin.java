@@ -70,8 +70,8 @@ public abstract class ServerTickListMixin<T> {
         ),
         locals = LocalCapture.CAPTURE_FAILEXCEPTION
     )
-    private void impl$markDataAsCompleted(CallbackInfo ci, int var0, TickNextTickData var4) {
-        ((TickNextTickDataBridge<T>) var4).bridge$setState(ScheduledUpdate.State.FINISHED);
+    private void impl$markDataAsCompleted(CallbackInfo ci, int var0, Iterator var1, TickNextTickData var3) {
+        ((TickNextTickDataBridge<T>) var3).bridge$setState(ScheduledUpdate.State.FINISHED);
     }
 
     /**

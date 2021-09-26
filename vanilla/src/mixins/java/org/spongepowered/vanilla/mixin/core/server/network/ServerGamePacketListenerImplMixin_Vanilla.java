@@ -126,7 +126,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
     }
 
     @SuppressWarnings({"UnresolvedMixinReference", "unchecked", "rawtypes"})
-    @Redirect(method = "lambda$handlePlaceRecipe$10",
+    @Redirect(method = "lambda$handlePlaceRecipe$11",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
     private void vanilla$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final net.minecraft.server.level.ServerPlayer player) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
