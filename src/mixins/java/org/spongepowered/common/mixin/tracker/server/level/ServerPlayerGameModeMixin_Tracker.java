@@ -187,17 +187,5 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
         }
     }
 
-    @Redirect(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;mineBlock(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;)V"))
-    public void impl$onMineBlock(final ItemStack itemStack, final Level param0, final BlockState param1, final BlockPos param2, final Player param3) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-        final TransactionalCaptureSupplier transactor = context.getTransactor();
-        itemStack.mineBlock(param0, param1, param2, param3);
-        // Needs to get logged as a sideeffect under the BlockChange
-        try (EffectTransactor ignored = context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {
-            transactor.logPlayerInventoryChange(this.player, PlayerInventoryTransaction.EventCreator.STANDARD);
-            this.player.inventoryMenu.broadcastChanges();
-        }
-    }
-
 
 }
