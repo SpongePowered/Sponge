@@ -235,14 +235,9 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
 
     @Override
     public EndStep completeStructure() {
-        if (this.slotDefinitions.isEmpty()) {
-            if (this.info.size != 0) {
-                Inventory inventory = Inventory.builder().slots(this.info.size).completeStructure().build();
-                this.finalInventories = Arrays.asList(inventory);
-            }
-        } else {
+        if (!this.slotDefinitions.isEmpty()) {
             this.fillDummy();
-            this.finalInventories = this.slotDefinitions.values().stream().map(Inventory::parent).distinct().collect(Collectors.toList());
+//            this.finalInventories = this.slotDefinitions.values().stream().map(Inventory::parent).distinct().collect(Collectors.toList());
 // TODO custom slot provider with reduces inventories
 //            CustomSlotProvider slotProvider = new CustomSlotProvider();
 //            for (Map.Entry<Integer, Slot> entry : this.slotDefinitions.entrySet()) {
@@ -268,6 +263,11 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
     public ViewableInventory build() {
         if (this.plugin == null) {
             throw new IllegalStateException("Plugin has not been set on this builder!");
+        }
+
+        if (this.slotDefinitions.isEmpty() && this.info.size != 0) {
+            Inventory inventory = Inventory.builder().slots(this.info.size).completeStructure().plugin(this.plugin).build();
+            this.finalInventories = Arrays.asList(inventory);
         }
 
         final ViewableCustomInventory inventory = new ViewableCustomInventory(this.plugin, this.type, SpongeViewableInventoryBuilder.containerTypeInfo

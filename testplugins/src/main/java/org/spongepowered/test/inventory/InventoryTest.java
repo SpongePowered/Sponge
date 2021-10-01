@@ -62,6 +62,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.math.vector.Vector2i;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -125,7 +126,7 @@ public final class InventoryTest implements LoadableModule {
             final Optional<Component> component = event.container().get(Keys.DISPLAY_NAME);
             final String title = component.map(c -> PlainTextComponentSerializer.plainText().serialize(c)).orElse("No Title");
             if (title.equals("Foobar")) {
-                InventoryTest.doFancyStuff(event.cause().first(Player.class).get());
+                InventoryTest.doFancyStuff(this.plugin, event.cause().first(Player.class).get());
             }
         }
 
@@ -222,16 +223,17 @@ public final class InventoryTest implements LoadableModule {
         Sponge.eventManager().registerListeners(this.plugin, new InventoryTestListener(this.plugin));
     }
 
-    private static void doFancyStuff(final Player player) {
+    private static void doFancyStuff(final PluginContainer plugin, final Player player) {
 
         final GridInventory inv27Grid = player.inventory().query(PrimaryPlayerInventory.class).get().storage();
-        final Inventory inv27Slots = Inventory.builder().slots(27).completeStructure().build();
-        final Inventory inv27Slots2 = Inventory.builder().slots(27).completeStructure().build();
+        final Inventory inv27Slots = Inventory.builder().slots(27).completeStructure().plugin(plugin).build();
+        final Inventory inv27Slots2 = Inventory.builder().slots(27).completeStructure().plugin(plugin).build();
         final ViewableInventory doubleMyInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6.get())
                 .grid(inv27Slots.slots(), Vector2i.from(9, 3), Vector2i.from(0, 0))
                 .grid(inv27Slots2.slots(), Vector2i.from(9, 3), Vector2i.from(0, 3))
                 .completeStructure()
                 .carrier(player)
+                .plugin(plugin)
                 .build();
         final InventoryMenu menu = doubleMyInventory.asMenu();
         menu.setReadOnly(true);
@@ -239,17 +241,21 @@ public final class InventoryTest implements LoadableModule {
         doubleMyInventory.set(8, ItemStack.of(ItemTypes.GOLD_INGOT));
         doubleMyInventory.set(45, ItemStack.of(ItemTypes.EMERALD));
         doubleMyInventory.set(53, ItemStack.of(ItemTypes.DIAMOND));
-        menu.registerSlotClick(new MySlotClickHandler(menu, doubleMyInventory));
-        final Optional<Container> open = menu.open((ServerPlayer) player);
+        menu.registerSlotClick(new MySlotClickHandler(plugin, menu, doubleMyInventory));
+        Sponge.server().scheduler().submit(Task.builder().plugin(plugin).execute(() -> {
+            menu.open((ServerPlayer) player);
+        }).build());
     }
 
     private static class MySlotClickHandler implements SlotClickHandler {
 
         private final InventoryMenu menu;
+        private PluginContainer plugin;
         private final ViewableInventory primary;
         private ViewableInventory last;
 
-        public MySlotClickHandler(final InventoryMenu menu, final ViewableInventory primary) {
+        public MySlotClickHandler(PluginContainer plugin, final InventoryMenu menu, final ViewableInventory primary) {
+            this.plugin = plugin;
             this.primary = primary;
             this.menu = menu;
         }
@@ -265,15 +271,15 @@ public final class InventoryTest implements LoadableModule {
                     case 53:
                         this.last = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6.get())
                                 .fillDummy().item(slot.peek().createSnapshot())
-                                .completeStructure().build();
-                        this.menu.setCurrentInventory(this.last);
+                                .completeStructure().plugin(this.plugin).build();
+                        Sponge.server().scheduler().submit(Task.builder().execute(() -> this.menu.setCurrentInventory(this.last)).plugin(this.plugin).build());
                         break;
                     default:
                         slot.set(ItemStack.of(ItemTypes.BEDROCK));
                 }
                 return false;
             } else if (slot.viewedSlot().parent() == this.last) {
-                this.menu.setCurrentInventory(this.primary);
+                Sponge.server().scheduler().submit(Task.builder().execute(() -> this.menu.setCurrentInventory(this.primary)).plugin(this.plugin).build());
                 return false;
             }
             return true;
