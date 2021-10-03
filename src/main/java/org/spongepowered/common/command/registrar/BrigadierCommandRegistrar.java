@@ -35,6 +35,7 @@ import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
@@ -88,12 +89,10 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar<
         return this.dispatcher;
     }
 
-    // For mods and others that use this. We get the plugin container from the CauseStack
-    // TODO: Make sure this is valid. For Forge, I suspect we'll have done this in a context of some sort.
+    // For mods and others that use this. We get the plugin container from the CauseStack, if we can.
     public LiteralCommandNode<CommandSourceStack> register(final LiteralArgumentBuilder<CommandSourceStack> command) {
-        // Get the plugin container
-        final PluginContainer container = PhaseTracker.getCauseStackManager().currentCause().first(PluginContainer.class)
-                .orElseThrow(() -> new IllegalStateException("Cannot register command without knowing its origin."));
+        // Get the plugin container - though we might not have it.
+        final @Nullable PluginContainer container = PhaseTracker.getCauseStackManager().currentCause().first(PluginContainer.class).orElse(null);
 
         return this.registerInternal(this,
                 container,
@@ -136,7 +135,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar<
 
     private Tuple<CommandMapping, LiteralCommandNode<CommandSourceStack>> registerInternal(
             final CommandRegistrar<?> registrar,
-            final PluginContainer container,
+            final @Nullable PluginContainer container,
             final LiteralCommandNode<CommandSourceStack> namespacedCommand,
             final String[] secondaryAliases,
             final boolean allowDuplicates) { // Brig technically allows them...

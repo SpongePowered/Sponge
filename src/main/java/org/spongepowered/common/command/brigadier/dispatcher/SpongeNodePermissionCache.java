@@ -97,8 +97,9 @@ public final class SpongeNodePermissionCache {
                 final String original = path.iterator().next();
                 pluginId = dispatcher.getCommandManager()
                         .commandMapping(original)
-                        .map(x -> x.plugin().metadata().id()).orElseGet(() -> {
-                            SpongeCommon.logger().error("Root command /{} does not have an associated plugin!", original);
+                        .flatMap(x -> x.plugin().map(y -> y.metadata().id())).orElseGet(() -> {
+                            SpongeCommon.logger().error("Root command /{} does not have an associated plugin! Using \"unknown\" in place of plugin "
+                                    + "ID for the permission.", original);
                             return "unknown";
                         });
                 permString = path.stream().map(x -> {
