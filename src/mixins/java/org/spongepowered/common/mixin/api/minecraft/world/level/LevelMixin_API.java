@@ -161,13 +161,19 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             return Optional.empty();
         }
         final ChunkSource chunkProvider = ((LevelAccessor) this).getChunkSource();
+
         // If we aren't generating, return the chunk
-        if (!shouldGenerate) {
-            // TODO correct ChunkStatus?
-            return Optional.ofNullable((WorldChunk) chunkProvider.getChunk(cx, cz, ChunkStatus.EMPTY, true));
+        final ChunkStatus status = shouldGenerate ? ChunkStatus.EMPTY : ChunkStatus.FULL;
+        final @Nullable ChunkAccess chunkAccess = chunkProvider.getChunk(cx, cz, status, true);
+        if (chunkAccess == null) {
+            return Optional.empty();
         }
-        // TODO correct ChunkStatus?
-        return Optional.ofNullable((WorldChunk) chunkProvider.getChunk(cx, cz, ChunkStatus.FULL, true));
+
+        if (chunkAccess instanceof ImposterProtoChunk) {
+            return Optional.of((WorldChunk) ((ImposterProtoChunk) chunkAccess).getWrapped());
+        }
+
+        return Optional.of((WorldChunk) chunkAccess);
     }
 
     @Override
