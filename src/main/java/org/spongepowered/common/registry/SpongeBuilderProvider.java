@@ -201,7 +201,7 @@ import org.spongepowered.common.map.decoration.SpongeMapDecorationBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderComponentBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderContextBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
-import org.spongepowered.common.scheduler.SpongeTaskBuilder;
+import org.spongepowered.common.scheduler.SpongeTask;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
@@ -294,7 +294,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(RangedAttackAgainstAgentGoal.Builder.class, SpongeRangedAttackAgainstAgentGoalBuilder::new)
                 .register(LookRandomlyGoal.Builder.class, SpongeLookRandomlyGoalBuilder::new)
                 .register(BannerPatternLayer.Builder.class, SpongePatternLayerBuilder::new)
-                .register(Task.Builder.class, SpongeTaskBuilder::new)
+                .register(Task.Builder.class, SpongeTask.BuilderImpl::new)
                 .register(Ban.Builder.class, SpongeBanBuilder::new)
                 .register(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
                 .register(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)

@@ -141,7 +141,7 @@ public final class CustomDataTest {
                                 final Scheduler scheduler = Sponge.server().scheduler();
                                 scheduler.submit(Task.builder().delay(Ticks.single()).execute(() -> this.customUserData(player.uniqueId(), number).join()).plugin(this.plugin).build());
                                 scheduler.submit(Task.builder().delay(Ticks.of(2)).execute(() -> this.customUserData(player.uniqueId(), number).join()).plugin(this.plugin).build());
-                            }, Sponge.server().scheduler().createExecutor(this.plugin));
+                            }, Sponge.server().scheduler().executor(this.plugin));
                             break;
                         case BLOCK:
                             // try out custom data-stores
@@ -219,6 +219,6 @@ public final class CustomDataTest {
                         this.plugin.logger().info("Custom data on user {}: {}", user.get().name(), integer);
                         user.get().offer(this.myDataKey, number);
                     }
-                }, Sponge.server().scheduler().createExecutor(this.plugin));
+                }, Sponge.server().scheduler().executor(this.plugin));
     }
 }

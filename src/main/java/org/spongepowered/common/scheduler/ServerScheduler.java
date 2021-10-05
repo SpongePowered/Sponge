@@ -42,12 +42,10 @@ public final class ServerScheduler extends SyncScheduler {
         super.tick();
 
         for (final Player player : Sponge.server().onlinePlayers()) {
-            if (player instanceof net.minecraft.world.entity.player.Player) {
-                try (EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(player)) {
-                    tickContext.buildAndSwitch();
-                    // Detect Changes on PlayerInventories marked as dirty.
-                    ((PlayerInventoryBridge) ((net.minecraft.world.entity.player.Player) player).getInventory()).bridge$cleanupDirty();
-                }
+            try (final EntityTickContext context = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(player)) {
+                context.buildAndSwitch();
+                // Detect Changes on PlayerInventories marked as dirty.
+                ((PlayerInventoryBridge) ((net.minecraft.world.entity.player.Player) player).getInventory()).bridge$cleanupDirty();
             }
         }
     }

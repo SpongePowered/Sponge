@@ -294,7 +294,7 @@ public final class CommandTest {
                     .executor(context -> {
                         Sponge.server().userManager().load(context.requireOne(userKey))
                                 .thenAcceptAsync(x -> context.sendMessage(Identity.nil(), Component.text(x.map(User::name).orElse("unknown"))),
-                                    Sponge.server().scheduler().createExecutor(this.plugin));
+                                    Sponge.server().scheduler().executor(this.plugin));
                         return CommandResult.success();
                     })
                     .build(),
