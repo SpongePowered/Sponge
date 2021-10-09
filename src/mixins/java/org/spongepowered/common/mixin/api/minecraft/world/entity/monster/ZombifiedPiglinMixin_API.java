@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.zombie.ZombifiedPiglin;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +38,8 @@ public abstract class ZombifiedPiglinMixin_API extends ZombieMixin_API implement
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.angerLevel().asImmutable());
+        values.add(this.requireValue(Keys.ANGER_LEVEL).asImmutable());
+        values.add(this.requireValue(Keys.IS_ANGRY).asImmutable());
 
         return values;
     }

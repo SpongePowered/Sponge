@@ -86,6 +86,10 @@ public final class SpongeObjective implements Objective {
         this.updateDisplayName();
     }
 
+    public void storeDisplayName(final Component displayName) {
+        this.displayName = displayName;
+    }
+
     @Override
     public Criterion criterion() {
         return this.criterion;
@@ -100,7 +104,10 @@ public final class SpongeObjective implements Objective {
     public void setDisplayMode(final ObjectiveDisplayMode displayMode) {
         this.displayMode = displayMode;
         this.updateDisplayMode();
+    }
 
+    public void storeDisplayMode(final ObjectiveDisplayMode displayMode) {
+        this.displayMode = displayMode;
     }
 
     @Override

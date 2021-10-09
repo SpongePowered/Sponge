@@ -154,13 +154,13 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    public Set<CommandMapping> knownMappings() {
+    public @NonNull Set<CommandMapping> knownMappings() {
         return Collections.unmodifiableSet(new HashSet<>(this.inverseCommandMappings.keySet()));
     }
 
     public @NonNull CommandMapping registerNamespacedAlias(
             final @NonNull CommandRegistrar<?> registrar,
-            final @NonNull PluginContainer container,
+            final @Nullable PluginContainer container,
             final @NonNull LiteralCommandNode<CommandSourceStack> rootArgument,
             final @NonNull String @NonNull... secondaryAliases)
             throws CommandFailedRegistrationException {
@@ -198,7 +198,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
 
     public @NonNull CommandMapping registerAliasWithNamespacing(
             final @NonNull CommandRegistrar<?> registrar,
-            final @NonNull PluginContainer container,
+            final @Nullable PluginContainer container,
             final @NonNull String namespacedAlias,
             final @NonNull Collection<String> otherAliases,
             final CommandTreeNode.@Nullable Root parameterTree)
@@ -208,9 +208,10 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
                 throw new CommandFailedRegistrationException("Aliases may not contain spaces or colons.");
         }
 
+        final String pluginId = container == null ? "unknown" : container.metadata().id();
         if (!this.knownRegistrars.containsKey(GenericTypeReflector.erase(registrar.type().handledType().getType()))) {
             throw new IllegalArgumentException(String.format("Plugin '%s' is trying to register command %s with unknown registrar %s",
-                    container.metadata().id(),
+                    pluginId,
                     namespacedAlias,
                     registrar
             ));
@@ -240,7 +241,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
                 .aliases
                 .entrySet()
                 .stream()
-                .filter(x -> !x.getValue().equalsIgnoreCase(container.metadata().id()))
+                .filter(x -> !x.getValue().equalsIgnoreCase(pluginId))
                 .filter(x -> aliases.contains(x.getKey()))
                 .forEach(x -> aliases.remove(x.getKey()));
 
@@ -257,7 +258,9 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
                 registrar
         );
 
-        this.pluginToCommandMap.put(container, mapping);
+        if (container != null) {
+            this.pluginToCommandMap.put(container, mapping);
+        }
         aliases.forEach(key -> {
             this.commandMappings.put(key, mapping);
             this.inverseCommandMappings.put(mapping, key);
@@ -477,7 +480,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
                 .hr()
                 .add()
                 .add("Command: %s", commandString)
-                .add("Owning Plugin: %s", mapping.plugin().metadata().id())
+                .add("Owning Plugin: %s", mapping.plugin().map(x -> x.metadata().id()).orElse("unknown"))
                 .add("Owning Registrar: %s", mapping.registrar().getClass().getName())
                 .add()
                 .add("Exception Details: ");
@@ -493,7 +496,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    public List<CommandCompletion> complete(final @NonNull String arguments) {
+    public @NonNull List<CommandCompletion> complete(final @NonNull String arguments) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.COMMAND, arguments);
             final String[] splitArg = arguments.split(" ", 2);
@@ -522,7 +525,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    public <T extends Subject & Audience> List<CommandCompletion> complete(
+    public <T extends Subject & Audience> @NonNull List<CommandCompletion> complete(
             final @NonNull T subjectReceiver,
             final @NonNull String arguments) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -533,7 +536,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    public List<CommandCompletion> complete(
+    public @NonNull List<CommandCompletion> complete(
             final @NonNull Subject subject,
             final @NonNull Audience receiver,
             final @NonNull String arguments) {

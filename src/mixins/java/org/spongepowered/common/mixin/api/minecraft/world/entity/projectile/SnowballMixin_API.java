@@ -24,24 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.Snowball;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
-
 @Mixin(net.minecraft.world.entity.projectile.Snowball.class)
-public abstract class SnowballMixin_API extends ThrowableProjectileMixin_API implements Snowball {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        // DamagingProjectile
-        values.add(this.attackDamage().asImmutable());
-        values.add(this.customAttackDamage().asImmutable());
-
-        return values;
-    }
+public abstract class SnowballMixin_API extends ThrowableItemProjectileMixin_API implements Snowball {
 
 }

@@ -24,10 +24,24 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.decoration;
 
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.hanging.ItemFrame;
 import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.decoration.ItemFrame.class)
 public abstract class ItemFrameMixin_API extends HangingEntityMixin_API implements ItemFrame {
 
+    @Override
+    protected Set<Value.Immutable<?>> api$getVanillaValues() {
+        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
+
+        values.add(this.requireValue(Keys.ITEM_STACK_SNAPSHOT).asImmutable());
+
+        this.getValue(Keys.ORIENTATION).map(Value::asImmutable).ifPresent(values::add);
+
+        return values;
+    }
 }

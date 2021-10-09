@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
 import net.minecraft.world.entity.AgeableMob;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,8 +39,11 @@ public abstract class AgableMobMixin_API extends PathfinderMobMixin_API implemen
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.babyTicks().asImmutable());
-        values.add(this.adult().asImmutable());
+        values.add(this.requireValue(Keys.CAN_BREED).asImmutable());
+        values.add(this.requireValue(Keys.IS_ADULT).asImmutable());
+
+        this.getValue(Keys.BABY_TICKS).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.BREEDING_COOLDOWN).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

@@ -28,6 +28,6 @@ import org.spongepowered.api.entity.living.animal.Bee;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(net.minecraft.world.entity.animal.Bee.class)
-public abstract class BeeMixin_API implements Bee {
+public abstract class BeeMixin_API extends AnimalMixin_API implements Bee {
 
 }

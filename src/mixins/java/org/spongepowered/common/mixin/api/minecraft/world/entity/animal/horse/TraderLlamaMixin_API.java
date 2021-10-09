@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.horse;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.horse.llama.TraderLlama;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,9 +38,7 @@ public abstract class TraderLlamaMixin_API extends LlamaMixin_API implements Tra
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.despawnDelay().asImmutable());
-
-        this.tamer().map(Value::asImmutable).ifPresent(values::add);
+        values.add(this.requireValue(Keys.DESPAWN_DELAY).asImmutable());
 
         return values;
     }

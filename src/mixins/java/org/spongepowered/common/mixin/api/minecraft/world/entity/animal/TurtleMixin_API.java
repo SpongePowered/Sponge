@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Turtle;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,12 +38,12 @@ public abstract class TurtleMixin_API extends AnimalMixin_API implements Turtle 
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.homePosition().asImmutable());
-        values.add(this.hasEgg().asImmutable());
-        values.add(this.layingEgg().asImmutable());
-        values.add(this.travelingPosition().asImmutable());
-        values.add(this.goingHome().asImmutable());
-        values.add(this.traveling().asImmutable());
+        values.add(this.requireValue(Keys.HAS_EGG).asImmutable());
+        values.add(this.requireValue(Keys.HOME_POSITION).asImmutable());
+        values.add(this.requireValue(Keys.IS_GOING_HOME).asImmutable());
+        values.add(this.requireValue(Keys.IS_LAYING_EGG).asImmutable());
+        values.add(this.requireValue(Keys.IS_TRAVELING).asImmutable());
+        values.add(this.requireValue(Keys.TARGET_POSITION).asImmutable());
 
         return values;
     }

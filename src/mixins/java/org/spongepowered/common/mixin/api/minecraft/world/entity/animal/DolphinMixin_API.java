@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.aquatic.Dolphin;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,8 +38,8 @@ public abstract class DolphinMixin_API extends WaterAnimalMixin_API implements D
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.skinMoisture().asImmutable());
-        values.add(this.gotFish().asImmutable());
+        values.add(this.requireValue(Keys.HAS_FISH).asImmutable());
+        values.add(this.requireValue(Keys.SKIN_MOISTURE).asImmutable());
 
         return values;
     }

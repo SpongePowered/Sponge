@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.raid;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.raider.Raider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.monster.PatrollingMonsterMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.raid.Raider.class)
@@ -37,10 +39,11 @@ public abstract class RaiderMixin_API extends PatrollingMonsterMixin_API impleme
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.canJoinRaid().asImmutable());
-        values.add(this.celebrating().asImmutable());
+        values.add(this.requireValue(Keys.CAN_JOIN_RAID).asImmutable());
+        values.add(this.requireValue(Keys.IS_CELEBRATING).asImmutable());
+        values.add(this.requireValue(Keys.IS_LEADER).asImmutable());
 
-        this.raidWave().map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.RAID_WAVE).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

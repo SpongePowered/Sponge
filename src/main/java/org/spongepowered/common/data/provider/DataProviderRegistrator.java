@@ -338,6 +338,9 @@ public class DataProviderRegistrator {
 
                 @Override
                 protected Optional<E> getFrom(final H dataHolder) {
+                    if (registration.get == null) {
+                        return Optional.empty();
+                    }
                     if (this.isBooleanKey) {
                         return (Optional<E>) OptBool.of((Boolean) registration.get.apply(dataHolder));
                     }
@@ -487,6 +490,9 @@ public class DataProviderRegistrator {
 
                 @Override
                 protected Optional<E> getFrom(final H dataHolder) {
+                    if (registration.get == null) {
+                        return Optional.empty();
+                    }
                     if (this.isBooleanKey) {
                         return (Optional<E>) OptBool.of((Boolean) registration.get.apply(dataHolder));
                     }
@@ -495,6 +501,9 @@ public class DataProviderRegistrator {
 
                 @Override
                 protected Optional<H> set(final H dataHolder, final E value) {
+                    if (registration.set == null) {
+                        return Optional.empty();
+                    }
                     return Optional.ofNullable(registration.set.apply(dataHolder, value));
                 }
 

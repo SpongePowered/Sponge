@@ -24,23 +24,21 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Parrot;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.TamableAnimalMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.animal.Parrot.class)
-public abstract class ParrotMixin_API extends TamableAnimalMixin_API implements Parrot {
+public abstract class ParrotMixin_API extends ShoulderRidingEntityMixin_API implements Parrot {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // Sittable
-        values.add(this.sitting().asImmutable());
-
-        values.add(this.parrotType().asImmutable());
+        values.add(this.requireValue(Keys.PARROT_TYPE).asImmutable());
 
         return values;
     }

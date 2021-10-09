@@ -28,6 +28,7 @@ import co.aikar.timings.Timings;
 import co.aikar.timings.sponge.SpongeTimingsFactory;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -670,11 +671,11 @@ public class SpongeCommand {
         final CommandMapping mapping = context.requireOne(this.commandMappingKey);
         context.sendMessage(Identity.nil(), Component.text().append(
                 this.title("Aliases: "),
-                Component.join(Component.text(", "),
+                Component.join(JoinConfiguration.separator(Component.text(", ")),
                     mapping.allAliases().stream().map(x -> Component.text(x, NamedTextColor.YELLOW)).collect(Collectors.toList())),
                 Component.newline(),
                 this.title("Owned by: "),
-                this.hl(mapping.plugin().metadata().name().orElseGet(() -> mapping.plugin().metadata().id())))
+                this.hl(mapping.plugin().map(x -> x.metadata().name().orElseGet(() -> x.metadata().id())).orElse("unknown")))
                 .build());
         return CommandResult.success();
     }

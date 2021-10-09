@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Wolf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.TamableAnimalMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.animal.Wolf.class)
@@ -37,12 +39,10 @@ public abstract class WolfMixin_API extends TamableAnimalMixin_API implements Wo
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // Sittable
-        values.add(this.sitting().asImmutable());
-
-        values.add(this.angry().asImmutable());
-        values.add(this.collarColor().asImmutable());
-        values.add(this.beggingForFood().asImmutable());
+        values.add(this.requireValue(Keys.DYE_COLOR).asImmutable());
+        values.add(this.requireValue(Keys.IS_ANGRY).asImmutable());
+        values.add(this.requireValue(Keys.IS_BEGGING_FOR_FOOD).asImmutable());
+        values.add(this.requireValue(Keys.IS_WET).asImmutable());
 
         return values;
     }

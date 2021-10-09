@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.aquatic.fish.school.TropicalFish;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,9 +38,9 @@ public abstract class TropicalFishMixin_API extends AbstractSchoolingFishMixin_A
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.baseColor().asImmutable());
-        values.add(this.patternColor().asImmutable());
-        values.add(this.shape().asImmutable());
+        values.add(this.requireValue(Keys.DYE_COLOR).asImmutable());
+        values.add(this.requireValue(Keys.PATTERN_COLOR).asImmutable());
+        values.add(this.requireValue(Keys.TROPICAL_FISH_SHAPE).asImmutable());
 
         return values;
     }

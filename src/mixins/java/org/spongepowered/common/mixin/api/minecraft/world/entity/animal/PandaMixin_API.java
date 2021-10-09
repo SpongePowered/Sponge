@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Panda;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,20 +38,17 @@ public abstract class PandaMixin_API extends AnimalMixin_API implements Panda {
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // Sittable
-        values.add(this.sitting().asImmutable());
-
-        values.add(this.knownGene().asImmutable());
-        values.add(this.hiddenGene().asImmutable());
-        values.add(this.sneezing().asImmutable());
-        values.add(this.lyingOnBack().asImmutable());
-        values.add(this.rollingAround().asImmutable());
-        values.add(this.unhappyTime().asImmutable());
-        values.add(this.eatingTime().asImmutable());
-        values.add(this.sneezingTime().asImmutable());
-        values.add(this.frightened().asImmutable());
-        values.add(this.unhappy().asImmutable());
-        values.add(this.eating().asImmutable());
+        values.add(this.requireValue(Keys.EATING_TIME).asImmutable());
+        values.add(this.requireValue(Keys.HIDDEN_GENE).asImmutable());
+        values.add(this.requireValue(Keys.IS_EATING).asImmutable());
+        values.add(this.requireValue(Keys.IS_FRIGHTENED).asImmutable());
+        values.add(this.requireValue(Keys.IS_LYING_ON_BACK).asImmutable());
+        values.add(this.requireValue(Keys.IS_ROLLING_AROUND).asImmutable());
+        values.add(this.requireValue(Keys.IS_SNEEZING).asImmutable());
+        values.add(this.requireValue(Keys.IS_UNHAPPY).asImmutable());
+        values.add(this.requireValue(Keys.KNOWN_GENE).asImmutable());
+        values.add(this.requireValue(Keys.SNEEZING_TIME).asImmutable());
+        values.add(this.requireValue(Keys.UNHAPPY_TIME).asImmutable());
 
         return values;
     }

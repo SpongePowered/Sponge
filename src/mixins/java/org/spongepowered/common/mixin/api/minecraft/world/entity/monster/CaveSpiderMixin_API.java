@@ -24,23 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.spider.CaveSpider;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
-
 @Mixin(net.minecraft.world.entity.monster.CaveSpider.class)
-public abstract class CaveSpiderMixin_API extends MonsterMixin_API implements CaveSpider {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        // Spider
-        values.add(this.climbing().asImmutable());
-
-        return values;
-    }
+public abstract class CaveSpiderMixin_API extends SpiderMixin_API implements CaveSpider {
 
 }

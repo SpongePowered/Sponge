@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.npc;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.trader.Villager;
 import org.spongepowered.asm.mixin.Mixin;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.npc.Villager.class)
@@ -36,9 +38,12 @@ public abstract class VillagerMixin_API extends AbstractVillagerMixin_API implem
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.villagerType().asImmutable());
-        values.add(this.profession().asImmutable());
-        values.add(this.professionLevel().asImmutable());
+        values.add(this.requireValue(Keys.EXPERIENCE).asImmutable());
+        values.add(this.requireValue(Keys.EXPERIENCE_LEVEL).asImmutable());
+        values.add(this.requireValue(Keys.PROFESSION_LEVEL).asImmutable());
+        values.add(this.requireValue(Keys.PROFESSION_TYPE).asImmutable());
+        values.add(this.requireValue(Keys.TRADE_OFFERS).asImmutable());
+        values.add(this.requireValue(Keys.VILLAGER_TYPE).asImmutable());
 
         return values;
     }

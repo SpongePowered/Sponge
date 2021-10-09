@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.item;
 
+import net.minecraft.world.entity.item.PrimedTnt;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
+
 import java.util.Set;
-import net.minecraft.world.entity.item.PrimedTnt;
 
 @Mixin(PrimedTnt.class)
 public abstract class PrimedTntMixin_API extends EntityMixin_API implements PrimedTNT {
@@ -49,11 +51,12 @@ public abstract class PrimedTntMixin_API extends EntityMixin_API implements Prim
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // FusedExplosive
-        values.add(this.primed().asImmutable());
-        values.add(this.fuseDuration().asImmutable());
+        values.add(this.requireValue(Keys.FUSE_DURATION).asImmutable());
+        values.add(this.requireValue(Keys.IS_PRIMED).asImmutable());
+        values.add(this.requireValue(Keys.TICKS_REMAINING).asImmutable());
 
-        this.detonator().map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.DETONATOR).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.EXPLOSION_RADIUS).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

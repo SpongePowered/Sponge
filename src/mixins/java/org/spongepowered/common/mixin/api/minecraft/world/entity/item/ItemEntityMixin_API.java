@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.item;
 
+import net.minecraft.world.entity.item.ItemEntity;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
+
 import java.util.Set;
-import net.minecraft.world.entity.item.ItemEntity;
 
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin_API extends EntityMixin_API implements Item {
@@ -38,7 +40,11 @@ public abstract class ItemEntityMixin_API extends EntityMixin_API implements Ite
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.item().asImmutable());
+        values.add(this.requireValue(Keys.DESPAWN_DELAY).asImmutable());
+        values.add(this.requireValue(Keys.INFINITE_DESPAWN_DELAY).asImmutable());
+        values.add(this.requireValue(Keys.INFINITE_PICKUP_DELAY).asImmutable());
+        values.add(this.requireValue(Keys.ITEM_STACK_SNAPSHOT).asImmutable());
+        values.add(this.requireValue(Keys.PICKUP_DELAY).asImmutable());
 
         return values;
     }
