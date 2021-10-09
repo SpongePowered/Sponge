@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import java.util.Set;
 
 @Mixin(AgeableMob.class)
-public abstract class AgableMobMixin_API extends PathfinderMobMixin_API implements Ageable {
+public abstract class AgeableMobMixin_API extends PathfinderMobMixin_API implements Ageable {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

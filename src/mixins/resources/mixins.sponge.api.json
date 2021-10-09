@@ -74,7 +74,7 @@
         "minecraft.world.IWorldGenerationReaderMixin_API",
         "minecraft.world.effect.MobEffectInstanceMixin_API",
         "minecraft.world.effect.MobEffectMixin_API",
-        "minecraft.world.entity.AgableMobMixin_API",
+        "minecraft.world.entity.AgeableMobMixin_API",
         "minecraft.world.entity.AreaEffectCloudMixin_API",
         "minecraft.world.entity.EntityMixin_API",
         "minecraft.world.entity.EntityTypeMixin_API",

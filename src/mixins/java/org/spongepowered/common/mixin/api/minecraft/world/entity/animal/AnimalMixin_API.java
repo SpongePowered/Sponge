@@ -31,12 +31,12 @@ import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.AgableMobMixin_API;
+import org.spongepowered.common.mixin.api.minecraft.world.entity.AgeableMobMixin_API;
 
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.animal.Animal.class)
-public abstract class AnimalMixin_API extends AgableMobMixin_API implements Animal {
+public abstract class AnimalMixin_API extends AgeableMobMixin_API implements Animal {
 
     // @formatter: off
     @Shadow public abstract boolean shadow$isFood(net.minecraft.world.item.ItemStack var1);
