@@ -71,7 +71,7 @@ public abstract class ClientLevelMixin_API implements org.spongepowered.api.worl
 
     @Override
     public Collection<Entity> entities() {
-        return (Collection< org.spongepowered.api.entity.Entity>) (Object) Collections.unmodifiableCollection(this.entitiesById.values());
+        return (Collection<org.spongepowered.api.entity.Entity>) (Object) ImmutableList.copyOf(this.entitiesById.values());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

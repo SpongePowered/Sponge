@@ -188,7 +188,7 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
 
     @Override
     public Collection<? extends Entity> entities() {
-        return Collections.unmodifiableCollection(this.entities);
+        return ImmutableList.copyOf(this.entities);
     }
 
     @Override

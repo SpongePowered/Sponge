@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.world.level.EntityGetter;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -86,7 +87,7 @@ public interface EntityGetterMixin_API extends EntityVolume {
 
     @Override
     default Collection<? extends Entity> entities() {
-        return (Collection<? extends Entity>) (Object) Collections.unmodifiableCollection(this.shadow$getEntities(null, VecHelper.toMinecraftAABB(AABB.of(this.min(), this.max()))));
+        return (Collection<? extends Entity>) (Object) ImmutableList.copyOf(this.shadow$getEntities(null, VecHelper.toMinecraftAABB(AABB.of(this.min(), this.max()))));
     }
 
     @SuppressWarnings(value = {"unchecked", "rawtypes"})

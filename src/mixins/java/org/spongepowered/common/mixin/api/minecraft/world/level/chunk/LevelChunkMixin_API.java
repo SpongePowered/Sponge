@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
@@ -374,7 +375,7 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
 
     @Override
     public Collection<? extends Entity> entities() {
-        return (Collection<? extends Entity>) (Object) Collections.unmodifiableCollection(Arrays.stream(this.entitySections).flatMap(Collection::stream).collect(Collectors.toList()));
+        return (Collection<? extends Entity>) (Object) Arrays.stream(this.entitySections).flatMap(Collection::stream).collect(ImmutableList.toImmutableList());
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
