@@ -245,9 +245,10 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar<
             // nope
             throw new IllegalArgumentException("The literal must not contain a colon or a space.");
         }
-
+        // Handle null plugin container for sponge-unaware mods (forge)
+        final String modid = (pluginContainer != null) ? pluginContainer.metadata().id() : "unknown";
         final LiteralArgumentBuilder<CommandSourceStack> replacementBuilder =
-                LiteralArgumentBuilder.<CommandSourceStack>literal(pluginContainer.metadata().id() + ":" + builder.getLiteral())
+                LiteralArgumentBuilder.<CommandSourceStack>literal(modid + ":" + builder.getLiteral())
                         .forward(builder.getRedirect(), builder.getRedirectModifier(), builder.isFork())
                         .executes(builder.getCommand())
                         .requires(builder.getRequirement());
