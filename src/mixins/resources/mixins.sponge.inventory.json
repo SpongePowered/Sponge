@@ -71,6 +71,7 @@
         "impl.world.inventory.AbstractContainerMenuMixin_Fabric_Inventory",
         "impl.world.inventory.AbstractContainerMenuMixin_Menu_Inventory",
         "impl.world.inventory.InventoryMenuMixin_Bridge_Inventory",
+        "impl.world.inventory.PlayerEnderChestContainerMixin_MenuProvider_Inventory",
         "impl.world.inventory.SlotMixin_Fabric_Inventory",
         "impl.world.inventory.SlotMixin_Lens_Inventory",
         "impl.world.level.block.entity.CampfireBlockEntityMixin_Fabric_Inventory"

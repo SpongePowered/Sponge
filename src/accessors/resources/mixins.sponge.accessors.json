@@ -171,6 +171,7 @@
         "world.level.block.BaseFireBlockAccessor",
         "world.level.block.BedBlockAccessor",
         "world.level.block.DispenserBlockAccessor",
+        "world.level.block.EnderChestBlockAccessor",
         "world.level.block.JukeboxBlockAccessor",
         "world.level.block.entity.AbstractFurnaceBlockEntityAccessor",
         "world.level.block.entity.BannerPatternAccessor",
