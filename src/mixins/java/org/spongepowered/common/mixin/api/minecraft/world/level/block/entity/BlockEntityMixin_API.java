@@ -63,7 +63,7 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     @Shadow protected boolean remove;
 
     @Shadow public abstract BlockPos shadow$getBlockPos();
-    @Shadow public abstract CompoundTag shadow$save(CompoundTag compound);
+    @Shadow public abstract CompoundTag shadow$saveWithFullMetadata();
     //@formatter:on
 
     @Shadow @Final protected BlockPos worldPosition;
@@ -113,8 +113,7 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
             .set(Queries.POSITION_Y, this.shadow$getBlockPos().getY())
             .set(Queries.POSITION_Z, this.shadow$getBlockPos().getZ())
             .set(Constants.TileEntity.TILE_TYPE, key);
-        final CompoundTag compound = new CompoundTag();
-        this.shadow$save(compound);
+        final CompoundTag compound = this.shadow$saveWithFullMetadata();
         Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         container.set(Constants.Sponge.UNSAFE_NBT, NBTTranslator.INSTANCE.translateFrom(compound));
 //        final Collection<Mutable<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();

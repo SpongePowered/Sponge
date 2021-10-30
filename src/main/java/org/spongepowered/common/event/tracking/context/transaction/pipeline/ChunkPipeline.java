@@ -77,7 +77,7 @@ public final class ChunkPipeline implements BlockPipeline {
         this.chunkEffects = builder.effects;
         this.serverWorld = builder.serverWorld;
         this.sectionSupplier = builder.sectionSupplier;
-        this.wasEmpty = Objects.requireNonNull(builder.sectionSupplier).get().isEmpty();
+        this.wasEmpty = Objects.requireNonNull(builder.sectionSupplier).get().hasOnlyAir();
         this.transaction = builder.transaction;
     }
 
@@ -187,7 +187,7 @@ public final class ChunkPipeline implements BlockPipeline {
                 }
                 return chunkRef;
             };
-            this.wasSectionEmpty = section.isEmpty();
+            this.wasSectionEmpty = section.hasOnlyAir();
             return this;
         }
 

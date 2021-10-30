@@ -414,7 +414,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(worldTypeKey, worldKey);
         ((PrimaryLevelDataBridge) levelData).bridge$configAdapter(configAdapter);
 
-        levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().isPresent());
+        levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().shouldReportAsModified());
         final boolean isDebugGeneration = levelData.worldGenSettings().isDebug();
         final long seed = BiomeManager.obfuscateSeed(levelData.worldGenSettings().seed());
 
@@ -985,7 +985,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(worldTypeKey, worldKey);
             ((PrimaryLevelDataBridge) levelData).bridge$configAdapter(configAdapter);
 
-            levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().isPresent());
+            levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().shouldReportAsModified());
             final long seed = BiomeManager.obfuscateSeed(levelData.worldGenSettings().seed());
 
             final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(worldKey);

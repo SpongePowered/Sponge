@@ -642,10 +642,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
         }
 
         public BuilderImpl tileEntity(final BlockEntity added) {
-            this.compound = null;
-            final CompoundTag tag = new CompoundTag();
-            added.save(tag);
-            this.compound = tag;
+            this.compound = added.saveWithFullMetadata();
             return this;
         }
     }

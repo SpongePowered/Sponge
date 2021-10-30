@@ -453,9 +453,8 @@ public final class TrackingUtil {
     public static void addTileEntityToBuilder(final net.minecraft.world.level.block.entity.BlockEntity existing,
         final SpongeBlockSnapshot.BuilderImpl builder) {
         // TODO - gather custom data.
-        final CompoundTag compound = new CompoundTag();
         try {
-            existing.save(compound);
+            final CompoundTag compound = existing.saveWithFullMetadata();
             builder.addUnsafeCompound(compound);
         }
         catch (final Throwable t) {

@@ -49,7 +49,7 @@ public final class UpdateChunkLightManagerEffect implements ProcessingSideEffect
     ) {
         final LevelChunkSection chunkSection = pipeline.getAffectedSection();
         final boolean wasEmpty = pipeline.wasEmpty();
-        final boolean isStillEmpty = chunkSection.isEmpty();
+        final boolean isStillEmpty = chunkSection.hasOnlyAir();
         if (wasEmpty != isStillEmpty) {
             pipeline.getServerWorld().getChunkSource().getLightEngine().updateSectionStatus(oldState.pos, isStillEmpty);
         }

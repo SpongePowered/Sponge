@@ -127,8 +127,7 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
         if (!(Objects.requireNonNull(blockEntity, "BlockEntity cannot be null!") instanceof net.minecraft.world.level.block.entity.BlockEntity)) {
             throw new IllegalArgumentException("BlockEntity is not compatible with this implementation!");
         }
-        final CompoundTag compound = new CompoundTag();
-        ((net.minecraft.world.level.block.entity.BlockEntity) blockEntity).save(compound);
+        final CompoundTag compound = ((net.minecraft.world.level.block.entity.BlockEntity) blockEntity).saveWithFullMetadata();
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X);
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Y);
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Z);
