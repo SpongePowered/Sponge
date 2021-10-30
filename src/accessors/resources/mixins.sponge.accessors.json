@@ -58,7 +58,6 @@
         "tags.FluidTagsAccessor",
         "tags.ItemTagsAccessor",
         "tags.StaticTagHelperAccessor",
-        "util.WeighedRandom_WeighedRandomItemAccessor",
         "util.datafix.schemas.V100Accessor",
         "world.CompoundContainerAccessor",
         "world.LockCodeAccessor",

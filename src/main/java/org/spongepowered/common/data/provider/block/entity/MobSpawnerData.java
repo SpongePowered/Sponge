@@ -28,6 +28,9 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.random.SimpleWeightedRandomList;
+import net.minecraft.util.random.Weight;
+import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.SpawnData;
@@ -41,7 +44,6 @@ import org.spongepowered.api.util.weighted.TableEntry;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.common.accessor.util.WeighedRandom_WeighedRandomItemAccessor;
 import org.spongepowered.common.accessor.world.level.BaseSpawnerAccessor;
 import org.spongepowered.common.accessor.world.level.block.entity.SpawnerBlockEntityAccessor;
 import org.spongepowered.common.data.persistence.NBTTranslator;
@@ -49,6 +51,8 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
+
+import java.util.Optional;
 
 public final class MobSpawnerData {
 
@@ -94,13 +98,14 @@ public final class MobSpawnerData {
     // @formatter:on
 
     private static WeightedSerializableObject<EntityArchetype> getNextEntity(final BaseSpawnerAccessor logic) {
-        final int weight = ((WeighedRandom_WeighedRandomItemAccessor) logic.accessor$nextSpawnData()).accessor$weight();
+        //TODO next entity doesn't have a weight but the api key needs to be changed
+        final int weight = 1; //((WeighedRandom_WeighedRandomItemAccessor) logic.accessor$nextSpawnData()).accessor$weight();
 
-        final String resourceLocation = logic.accessor$nextSpawnData().getTag().getString(Constants.Entity.ENTITY_TYPE_ID);
+        final String resourceLocation = logic.accessor$nextSpawnData().entityToSpawn().getString(Constants.Entity.ENTITY_TYPE_ID);
         final EntityType<?> type =
                 Registry.ENTITY_TYPE.getOptional(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
-        final CompoundTag data = logic.accessor$nextSpawnData().getTag();
+        final CompoundTag data = logic.accessor$nextSpawnData().entityToSpawn();
 
         final EntityArchetype archetype = SpongeEntityArchetypeBuilder.pooled()
                 .type(type)
@@ -118,14 +123,14 @@ public final class MobSpawnerData {
             compound.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
         }
 
-        entity.getSpawner().setNextSpawnData(entity.getLevel(), entity.getBlockPos(), new SpawnData((int) value.weight(), compound));
+        entity.getSpawner().setNextSpawnData(entity.getLevel(), entity.getBlockPos(), new SpawnData(compound, Optional.empty()));
     }
 
     private static WeightedTable<EntityArchetype> getEntities(final BaseSpawner logic) {
         final WeightedTable<EntityArchetype> possibleEntities = new WeightedTable<>();
-        for (final SpawnData weightedEntity : ((BaseSpawnerAccessor) logic).accessor$spawnPotentials().unwrap()) {
+        for (final WeightedEntry.Wrapper<SpawnData> weightedEntity : ((BaseSpawnerAccessor) logic).accessor$spawnPotentials().unwrap()) {
 
-            final CompoundTag nbt = weightedEntity.getTag();
+            final CompoundTag nbt = weightedEntity.getData().entityToSpawn();
 
             final String resourceLocation = nbt.getString(Constants.Entity.ENTITY_TYPE_ID);
             final EntityType<?> type =
@@ -136,15 +141,14 @@ public final class MobSpawnerData {
                     .entityData(NBTTranslator.INSTANCE.translateFrom(nbt))
                     .build();
 
-            possibleEntities
-                    .add(new WeightedSerializableObject<>(archetype, ((WeighedRandom_WeighedRandomItemAccessor) weightedEntity).accessor$weight()));
+            possibleEntities.add(new WeightedSerializableObject<>(archetype, weightedEntity.getWeight().asInt()));
         }
 
         return possibleEntities;
     }
 
     private static void setEntities(final BaseSpawnerAccessor logic, final WeightedTable<EntityArchetype> table) {
-        final ImmutableList.Builder<SpawnData> builder = ImmutableList.builder();
+        final SimpleWeightedRandomList.Builder<SpawnData> builder = SimpleWeightedRandomList.builder();
         for (final TableEntry<EntityArchetype> entry : table) {
             if (!(entry instanceof WeightedObject)) {
                 continue;
@@ -158,9 +162,8 @@ public final class MobSpawnerData {
                 compound.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
             }
 
-
-            builder.add(new SpawnData((int) entry.weight(), compound));
+            builder.add(new SpawnData(compound, Optional.empty()), (int) entry.weight());
         }
-        logic.accessor$spawnPotentials(WeightedRandomList.create(builder.build()));
+        logic.accessor$spawnPotentials(builder.build());
     }
 }
