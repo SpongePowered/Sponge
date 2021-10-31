@@ -26,8 +26,8 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.ticks.ScheduledTick;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -54,7 +54,7 @@ abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState
 
     @Override
     public void associateScheduledTickUpdate(
-        final C asContext, final ServerLevel level, final TickNextTickData<?> entry
+        final C asContext, final ServerLevel level, final ScheduledTick<?> entry
     ) {
         asContext.getTransactor().logScheduledUpdate(level, entry);
     }

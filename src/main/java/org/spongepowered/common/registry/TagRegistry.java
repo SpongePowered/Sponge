@@ -124,13 +124,18 @@ public final class TagRegistry<T> extends net.minecraft.core.Registry<Tag<T>> {
     }
 
     @Override
-    protected Lifecycle lifecycle(final Tag<T> var1) {
+    public Lifecycle lifecycle(final Tag<T> var1) {
         return this.lifecycle;
     }
 
     @Override
     public Lifecycle elementsLifecycle() {
         return this.lifecycle;
+    }
+
+    @Override
+    public int size() {
+        return this.staticTagHelper.getAllTags().getAllTags().size();
     }
 
     @Override

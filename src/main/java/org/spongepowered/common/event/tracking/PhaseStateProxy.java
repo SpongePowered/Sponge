@@ -29,11 +29,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.ticks.ScheduledTick;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -306,7 +306,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         this.getState().foldContextForThread(this.asContext(), returnValue);
     }
 
-    default void associateScheduledTickUpdate(final ServerLevel level, final TickNextTickData<?> entry) {
+    default void associateScheduledTickUpdate(final ServerLevel level, final ScheduledTick<?> entry) {
         this.getState().associateScheduledTickUpdate(this.asContext(), level, entry);
     }
 

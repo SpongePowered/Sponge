@@ -262,7 +262,7 @@ public final class VolumeStreamUtils {
         final boolean shouldCarbonCopy, final ObjectArrayMutableBlockEntityBuffer backingVolume, final @Nullable Level level
     ) {
         return shouldCarbonCopy ? (pos, tile) -> {
-            final CompoundTag nbt = tile.save(new CompoundTag());
+            final CompoundTag nbt = tile.saveWithFullMetadata();
             final BlockState state = tile.getBlockState();
             final net.minecraft.world.level.block.entity.@Nullable BlockEntity cloned = tile.getType().create(pos, state);
             Objects.requireNonNull(

@@ -36,11 +36,11 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.ticks.ScheduledTick;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.cause.entity.SpawnType;
@@ -176,14 +176,14 @@ interface TransactionSink {
     }
 
     @SuppressWarnings("ConstantConditions")
-    default void logScheduledUpdate(final ServerLevel serverWorld, final TickNextTickData<?> data) {
+    default void logScheduledUpdate(final ServerLevel serverWorld, final ScheduledTick<?> data) {
         final WeakReference<ServerLevel> worldRef = new WeakReference<>(serverWorld);
         final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
-        final @Nullable BlockEntity tileEntity = serverWorld.getBlockEntity(data.pos);
-        final BlockState existing = serverWorld.getBlockState(data.pos);
+        final @Nullable BlockEntity tileEntity = serverWorld.getBlockEntity(data.pos());
+        final BlockState existing = serverWorld.getBlockState(data.pos());
         final SpongeBlockSnapshot original = TrackingUtil.createPooledSnapshot(
             existing,
-            data.pos,
+            data.pos(),
             BlockChangeFlags.NONE,
             Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
             tileEntity,

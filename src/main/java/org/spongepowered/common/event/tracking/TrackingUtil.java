@@ -348,7 +348,7 @@ public final class TrackingUtil {
         final @Nullable Object source = blockEvent.bridge$getTileEntity() != null ? blockEvent.bridge$getTileEntity() : blockEvent.bridge$getTickingLocatable();
         if (source == null) {
             // No source present which means we are ignoring the phase state
-            return currentState.triggerEvent(worldIn, event.getPos(), event.getParamA(), event.getParamB());
+            return currentState.triggerEvent(worldIn, event.pos(), event.paramA(), event.paramB());
         }
         final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext(PhaseTracker.SERVER);
         phaseContext.source(source);
@@ -362,7 +362,7 @@ public final class TrackingUtil {
         boolean result = true;
         try (final BlockEventTickContext o = phaseContext) {
             o.buildAndSwitch();
-            phaseContext.setEventSucceeded(currentState.triggerEvent(worldIn, event.getPos(), event.getParamA(), event.getParamB()));
+            phaseContext.setEventSucceeded(currentState.triggerEvent(worldIn, event.pos(), event.paramA(), event.paramB()));
             // We need to grab the result here as the phase context close will trigger a reset
             result = phaseContext.wasNotCancelled();
         } // We can't return onBlockEventReceived because the phase state may have cancelled all transactions

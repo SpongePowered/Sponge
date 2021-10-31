@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.block;
 
-import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.ticks.ScheduledTick;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -42,11 +42,11 @@ import java.util.function.BiConsumer;
 
 public class ScheduleUpdateTransaction extends BlockEventBasedTransaction {
 
-    private final TickNextTickData<?> data;
+    private final ScheduledTick<?> data;
     private final SpongeBlockSnapshot original;
 
 
-    public ScheduleUpdateTransaction(final SpongeBlockSnapshot original, final TickNextTickData<?> data) {
+    public ScheduleUpdateTransaction(final SpongeBlockSnapshot original, final ScheduledTick<?> data) {
         super(original.getBlockPos(), (BlockState) original.state(), original.world());
         this.data = data;
         this.original = original;

@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.ticks.ScheduledTick;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -56,7 +56,7 @@ final class DeferredScheduledUpdatePhaseState extends GeneralGenerationPhaseStat
 
     @Override
     public void associateScheduledTickUpdate(
-        final Context asContext, ServerLevel level, final TickNextTickData<?> entry
+        final Context asContext, ServerLevel level, final ScheduledTick<?> entry
     ) {
     }
 

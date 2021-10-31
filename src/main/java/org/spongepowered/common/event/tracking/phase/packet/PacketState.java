@@ -28,9 +28,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.ticks.ScheduledTick;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
@@ -91,7 +91,7 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
 
     @Override
     public void associateScheduledTickUpdate(
-        final P asContext, final ServerLevel level, final TickNextTickData<?> entry
+        final P asContext, final ServerLevel level, final ScheduledTick<?> entry
     ) {
         asContext.getTransactor().logScheduledUpdate(level, entry);
     }

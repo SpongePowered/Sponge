@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
-import net.minecraft.world.level.TickPriority;
+import net.minecraft.world.ticks.TickPriority;
 import org.spongepowered.api.scheduler.TaskPriority;
 import org.spongepowered.asm.mixin.Mixin;
 
