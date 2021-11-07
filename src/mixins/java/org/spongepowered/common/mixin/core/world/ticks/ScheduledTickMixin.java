@@ -22,13 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level;
+package org.spongepowered.common.mixin.core.world.ticks;
 
 import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.util.Ticks;
-import net.minecraft.world.level.ServerTickList;
-import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.ticks.LevelTicks;
+import net.minecraft.world.ticks.ScheduledTick;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -37,31 +37,27 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.level.ServerTickListAccessor;
-import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
+import org.spongepowered.common.bridge.world.ticks.TickNextTickDataBridge;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 import java.time.Duration;
-import java.util.Iterator;
-import java.util.Queue;
-import java.util.Set;
 
-@Mixin(net.minecraft.world.level.TickNextTickData.class)
-public abstract class TickNextTickDataMixin<T> implements TickNextTickDataBridge<T> {
+@Mixin(ScheduledTick.class)
+public abstract class ScheduledTickMixin<T> implements TickNextTickDataBridge<T> {
 
-    @Shadow @Final public BlockPos pos;
+    @Shadow @Final private BlockPos pos;
+    @Shadow @Final private long triggerTick;
 
-    @Shadow @Final private T type;
-    @Shadow @Final public long triggerTick;
     @MonotonicNonNull private ServerLocation impl$location;
-    @MonotonicNonNull private ServerTickList<T> impl$parentTickList;
+    @MonotonicNonNull private LevelTicks<T> impl$parentTickList;
     private long impl$scheduledTime;
     private ScheduledUpdate.State impl$state = ScheduledUpdate.State.WAITING;
 
     @SuppressWarnings("unchecked")
     @Override
-    public void bridge$createdByList(final ServerTickList<T> tickList) {
+    public void bridge$createdByList(final LevelTicks<T> tickList) {
         this.impl$parentTickList = tickList;
         this.impl$scheduledTime = ((ServerTickListAccessor<T>) tickList).accessor$level().getGameTime();
     }

@@ -22,10 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level;
+package org.spongepowered.common.mixin.api.minecraft.world.ticks;
 
-import net.minecraft.world.level.TickNextTickData;
-import net.minecraft.world.level.TickPriority;
+import net.minecraft.world.ticks.ScheduledTick;
+import net.minecraft.world.ticks.TickPriority;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.scheduler.TaskPriority;
 import org.spongepowered.api.world.Location;
@@ -33,14 +33,14 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
+import org.spongepowered.common.bridge.world.ticks.TickNextTickDataBridge;
 
 import java.time.Duration;
 
-@Mixin(TickNextTickData.class)
-public class TickNextTickDataMixin_API<T> implements ScheduledUpdate<T> {
+@Mixin(ScheduledTick.class)
+public class ScheduledTickMixin_API<T> implements ScheduledUpdate<T> {
     @Shadow @Final private T type;
-    @Shadow @Final public TickPriority priority;
+    @Shadow @Final private TickPriority priority;
 
     @Override
     public T target() {

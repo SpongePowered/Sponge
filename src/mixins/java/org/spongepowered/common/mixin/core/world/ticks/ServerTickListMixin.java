@@ -22,19 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level;
+package org.spongepowered.common.mixin.core.world.ticks;
 
 import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.TickNextTickData;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
+import org.spongepowered.common.bridge.world.ticks.TickNextTickDataBridge;
 
 import java.util.Iterator;
 import java.util.Queue;

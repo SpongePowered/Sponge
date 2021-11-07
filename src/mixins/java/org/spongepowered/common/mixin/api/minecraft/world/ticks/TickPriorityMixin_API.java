@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level;
+package org.spongepowered.common.mixin.api.minecraft.world.ticks;
 
 import net.minecraft.world.ticks.TickPriority;
 import org.spongepowered.api.scheduler.TaskPriority;

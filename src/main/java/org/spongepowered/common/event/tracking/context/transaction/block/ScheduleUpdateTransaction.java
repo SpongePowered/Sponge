@@ -31,7 +31,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
+import org.spongepowered.common.bridge.world.ticks.TickNextTickDataBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.util.PrettyPrinter;

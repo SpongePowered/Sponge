@@ -22,13 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level;
+package org.spongepowered.common.mixin.api.minecraft.world.ticks;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ServerTickList;
-import net.minecraft.world.level.TickNextTickData;
-import net.minecraft.world.level.TickPriority;
+import net.minecraft.world.ticks.LevelTicks;
+import net.minecraft.world.ticks.ScheduledTick;
+import net.minecraft.world.ticks.TickPriority;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
@@ -37,7 +36,7 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
+import org.spongepowered.common.bridge.world.ticks.TickNextTickDataBridge;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -48,16 +47,15 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@Mixin(ServerTickList.class)
+@Mixin(LevelTicks.class)
 public abstract class ServerTickListMixin_API<T> implements ScheduledUpdateList<T> {
 
-    @Shadow @Final protected Predicate<T> ignore;
-    @Shadow @Final private ServerLevel level;
-    @Shadow @Final private Queue<TickNextTickData<T>> currentlyTicking;
-    @Shadow @Final private Set<TickNextTickData<T>> tickNextTickSet;
+    @Shadow @Final private Predicate<T> tickCheck;
+    @Shadow @Final private Queue<ScheduledTick<T>> toRunThisTick;
+    @Shadow @Final private Set<ScheduledTick<T>> toRunThisTickSet;
 
     @Shadow public abstract boolean shadow$hasScheduledTick(BlockPos param0, T param1);
-    @Shadow protected abstract void shadow$addTickData(TickNextTickData<T> data);
+    @Shadow protected abstract void shadow$addTickData(ScheduledTick<T> data);
 
     @Override
     public ScheduledUpdate<T> schedule(
@@ -71,9 +69,9 @@ public abstract class ServerTickListMixin_API<T> implements ScheduledUpdateList<
     public ScheduledUpdate<T> schedule(
             final int x, final int y, final int z, final T target, final Ticks tickDelay, final TaskPriority priority
     ) {
-        final TickNextTickData<T> scheduledUpdate = new TickNextTickData<>(new BlockPos(x, y, z), target, tickDelay.ticks() + this.level.getGameTime(), (TickPriority) (Object) priority);
-        if (!this.ignore.test(target)) {
-            ((TickNextTickDataBridge<T>) scheduledUpdate).bridge$createdByList((ServerTickList<T>) (Object) this);
+        final ScheduledTick<T> scheduledUpdate = new ScheduledTick<>(new BlockPos(x, y, z), target, tickDelay.ticks() + this.level.getGameTime(), (TickPriority) (Object) priority);
+        if (!this.tickCheck.test(target)) {
+            ((TickNextTickDataBridge<T>) scheduledUpdate).bridge$createdByList((LevelTicks<T>) (Object) this);
             this.shadow$addTickData(scheduledUpdate);
         }
         return (ScheduledUpdate<T>) scheduledUpdate;
@@ -91,7 +89,7 @@ public abstract class ServerTickListMixin_API<T> implements ScheduledUpdateList<
             return Collections.emptySet();
         }
         return Collections.unmodifiableCollection(this.tickNextTickSet.stream()
-            .filter(data -> data.pos.getX() == x && data.pos.getZ() == z && data.pos.getY() == y)
+            .filter(data -> data.pos().getX() == x && data.pos().getZ() == z && data.pos().getY() == y)
             .map(data -> (ScheduledUpdate<T>) data)
             .collect(Collectors.toList()));
     }

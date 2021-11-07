@@ -22,10 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level;
+package org.spongepowered.common.bridge.world.ticks;
 
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerTickList;
+import net.minecraft.world.ticks.LevelTicks;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.world.server.ServerLocation;
 
@@ -33,7 +34,7 @@ import java.time.Duration;
 
 public interface TickNextTickDataBridge<T> {
 
-    void bridge$createdByList(ServerTickList<T> tickList);
+    void bridge$createdByList(LevelTicks<T> tickList);
 
     void bridge$setWorld(Level world);
 
