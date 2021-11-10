@@ -22,6 +22,10 @@ java {
     if (JavaVersion.current() < JavaVersion.VERSION_16) {
         toolchain { languageVersion.set(JavaLanguageVersion.of(16)) }
     }
+
+    // Make eclipse aware of what version we're using
+    sourceCompatibility = JavaVersion.VERSION_16
+    targetCompatibility = JavaVersion.VERSION_16
 }
 
 tasks.withType(JavaCompile::class) {
