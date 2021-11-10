@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public final class Main {
@@ -46,15 +48,21 @@ public final class Main {
     }
 
     private final VanillaPluginPlatform pluginPlatform;
+    private final Path[] extraPaths;
 
-    public Main() {
+    public Main(final Path[] extraPaths) {
         this.pluginPlatform = AppLaunch.setPluginPlatform(new VanillaPluginPlatform(new StandardEnvironment()));
+        this.extraPaths = extraPaths;
     }
 
     public static void main(final String[] args) throws Exception {
+        Main.main(args, new Path[0]);
+    }
+
+    public static void main(final String[] args, final Path[] extraPaths) throws Exception {
         Java8SpaceDetection.check();
         AppCommandLine.configure(args);
-        new Main().run();
+        new Main(extraPaths).run();
     }
 
     public void run() throws IOException {
@@ -75,6 +83,12 @@ public final class Main {
         }
         this.pluginPlatform.setPluginDirectories(pluginDirectories);
         this.pluginPlatform.setMetadataFilePath(PluginPlatformConstants.METADATA_FILE_LOCATION);
+
+        // Extra paths that are on the TCL but not the system loader
+        this.pluginPlatform.getStandardEnvironment().blackboard().getOrCreate(
+            VanillaPluginPlatform.EXTRA_TRANSFORMABLE_PATHS,
+            () -> Collections.unmodifiableList(Arrays.asList(this.extraPaths))
+        );
 
         AppLaunch.logger().info("Transitioning to ModLauncher, please wait...");
         final ArgumentList lst = ArgumentList.from(AppCommandLine.RAW_ARGS);

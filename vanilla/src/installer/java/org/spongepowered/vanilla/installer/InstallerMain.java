@@ -57,6 +57,8 @@ import java.util.concurrent.ExecutorService;
 
 public final class InstallerMain {
 
+    private static final String COLLECTION_BOOTSTRAP = "bootstrap"; // goes on app
+    private static final String COLLECTION_MAIN = "main"; // goes on TCL
     private static final int MAX_TRIES = 2;
 
     private final Installer installer;
@@ -111,17 +113,23 @@ public final class InstallerMain {
         }
         assert remappedMinecraftJar != null; // always assigned or thrown
 
-        this.installer.getLibraryManager().addLibrary(new LibraryManager.Library("minecraft", remappedMinecraftJar));
+        // We need MC at the bootstrap level, since the server jar has some of its dependencies bundled
+        // Changes in 1.18 will allow us to easily isolate the server itself from its dependencies.
+        this.installer.getLibraryManager().addLibrary(InstallerMain.COLLECTION_BOOTSTRAP, new LibraryManager.Library("minecraft", remappedMinecraftJar));
         this.installer.getLibraryManager().finishedProcessing();
 
         Logger.info("Environment has been verified.");
 
-        this.installer.getLibraryManager().getAll().values().stream()
+        this.installer.getLibraryManager().getAll(InstallerMain.COLLECTION_BOOTSTRAP).stream()
             .map(LibraryManager.Library::getFile)
             .forEach(path -> {
                 Logger.debug("Adding jar {} to classpath", path);
                 Agent.addJarToClasspath(path);
             });
+
+        final Path[] transformableLibs = this.installer.getLibraryManager().getAll(COLLECTION_MAIN).stream()
+            .map(LibraryManager.Library::getFile)
+            .toArray(Path[]::new);
 
         final List<String> gameArgs = new ArrayList<>(LauncherCommandLine.remainingArgs);
         Collections.addAll(gameArgs, this.installer.getLauncherConfig().args.split(" "));
@@ -130,7 +138,7 @@ public final class InstallerMain {
         Agent.crackModules();
 
         final String className = "org.spongepowered.vanilla.applaunch.Main";
-        InstallerMain.invokeMain(className, gameArgs.toArray(new String[0]));
+        InstallerMain.invokeMain(className, gameArgs.toArray(new String[0]), transformableLibs);
     }
 
     private <T extends Throwable> Path recoverFromMinecraftDownloadError(final T ex) throws T {
@@ -143,11 +151,11 @@ public final class InstallerMain {
         }
     }
 
-    private static void invokeMain(final String className, final String[] args) {
+    private static void invokeMain(final String className, final String[] args, final Path[] extraCpEntries) {
         try {
             Class.forName(className)
-                .getMethod("main", String[].class)
-                .invoke(null, (Object) args);
+                .getMethod("main", String[].class, Path[].class)
+                .invoke(null, args, extraCpEntries);
         } catch (final InvocationTargetException ex) {
             Logger.error(ex.getCause(), "Failed to invoke main class {} due to an error", className);
             System.exit(1);

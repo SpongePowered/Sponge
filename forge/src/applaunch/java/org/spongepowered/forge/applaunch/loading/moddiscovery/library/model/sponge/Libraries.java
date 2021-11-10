@@ -25,11 +25,12 @@
 package org.spongepowered.forge.applaunch.loading.moddiscovery.library.model.sponge;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public final class Libraries {
 
-    public List<Dependency> dependencies;
+    public Map<String, List<Dependency>> dependencies;
 
     public static final class Dependency {
 
