@@ -42,6 +42,7 @@ import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -87,7 +88,7 @@ public final class LibraryManager {
     }
 
     protected void addLibrary(final String set, final Library library) {
-        this.libraries.computeIfAbsent(set, $ -> ConcurrentHashMap.newKeySet()).add(library);
+        this.libraries.computeIfAbsent(set, $ -> Collections.synchronizedSet(new LinkedHashSet<>())).add(library);
     }
 
     public void validate() throws Exception {
@@ -132,7 +133,7 @@ public final class LibraryManager {
         final Map<String, CompletableFuture<Path>> operations,
         final Set<String> failures
     ) {
-        final Set<Library> downloadedDeps = ConcurrentHashMap.newKeySet(dependencies.size());
+        final Set<Library> downloadedDeps = Collections.synchronizedSet(new LinkedHashSet<>(dependencies.size()));
         for (final Libraries.Dependency dependency : dependencies) {
             operations.computeIfAbsent(asId(dependency), $ -> AsyncUtils.asyncFailableFuture(() -> {
                 final String groupPath = dependency.group.replace(".", "/");
