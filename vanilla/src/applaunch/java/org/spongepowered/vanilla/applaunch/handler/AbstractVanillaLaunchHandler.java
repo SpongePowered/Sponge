@@ -110,6 +110,10 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             "org.apache.maven.artifact."
     };
 
+    private static final String[] EXCLUSION_EXCEPTIONS = {
+            "org.spongepowered.configurate.objectmapping.guice."
+    };
+
     @Override
     public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
         // Specifically requested to be available on the launch loader
@@ -171,8 +175,13 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
         this.logger.info("Transitioning to Sponge launch, please wait...");
 
         launchClassLoader.addTargetPackageFilter(klass -> {
-            for (final String pkg : AbstractVanillaLaunchHandler.EXCLUDED_PACKAGES) {
+            outer: for (final String pkg : AbstractVanillaLaunchHandler.EXCLUDED_PACKAGES) {
                 if (klass.startsWith(pkg)) {
+                    for (final String exception : AbstractVanillaLaunchHandler.EXCLUSION_EXCEPTIONS) {
+                        if (klass.startsWith(exception)) {
+                            break outer;
+                        }
+                    }
                     return false;
                 }
             }
