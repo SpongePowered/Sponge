@@ -28,6 +28,8 @@ import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.data.Keys;
@@ -44,6 +46,7 @@ import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
 import org.spongepowered.api.event.item.inventory.TransferInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
+import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ContainerTypes;
@@ -79,6 +82,22 @@ public final class InventoryTest implements LoadableModule {
     @Inject
     public InventoryTest(final PluginContainer plugin) {
         this.plugin = plugin;
+    }
+
+    @Listener
+    public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+        final Command.Builder builder = Command.builder();
+        builder.addChild(Command.builder().executor(this::enderchest).build(), "ender");
+        event.register(this.plugin, builder.build(), "inventorytest");
+    }
+
+    private CommandResult enderchest(CommandContext commandContext) {
+        final ServerPlayer player = commandContext.cause().first(ServerPlayer.class).orElse(null);
+        if (player == null) {
+            return CommandResult.error(Component.text("Must be run ingame by a player"));
+        }
+        player.openInventory(player.enderChestInventory());
+        return CommandResult.success();
     }
 
     public static class InventoryTestListener {

@@ -29,14 +29,18 @@ import com.google.gson.GsonBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.NamedDomainObjectProvider;
+import org.gradle.api.artifacts.ArtifactCollection;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;
 import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.provider.MapProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
@@ -53,8 +57,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 public abstract class OutputDependenciesToJson extends DefaultTask {
@@ -134,9 +140,9 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
      */
     static final class DependencyManifest {
 
-        final List<DependencyDescriptor> dependencies;
+        final Map<String, List<DependencyDescriptor>> dependencies;
 
-        DependencyManifest(final List<DependencyDescriptor> dependencies) {
+        DependencyManifest(final Map<String, List<DependencyDescriptor>> dependencies) {
             this.dependencies = dependencies;
         }
     }
@@ -144,11 +150,11 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
     /**
      * Configuration to gather dependency artifacts from.
      */
-    @Input
-    public abstract Property<Configuration> getDependencies();
+    @Nested
+    public abstract MapProperty<String, ConfigurationHolder> getDependencies();
 
-    public final void dependencies(final NamedDomainObjectProvider<Configuration> config) {
-        this.getDependencies().set(config);
+    public final void dependencies(final String key, final NamedDomainObjectProvider<Configuration> config) {
+        this.getDependencies().put(key, config.map(ConfigurationHolder::new));
     }
 
     /**
@@ -187,7 +193,27 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
             }
         }
 
-        final List<DependencyDescriptor> descriptors = this.getDependencies().get().getIncoming().getArtifacts().getArtifacts().stream()
+        final Map<String, ConfigurationHolder> inputConfigs = this.getDependencies().get();
+        final Map<String, List<DependencyDescriptor>> dependenciesMap = new TreeMap<>();
+
+        for (final Map.Entry<String, ConfigurationHolder> entry : inputConfigs.entrySet()) {
+            dependenciesMap.put(entry.getKey(), this.configToDescriptor(entry.getValue().getConfiguration().getIncoming().getArtifacts(), excludedDeps));
+        }
+        final DependencyManifest manifest = new DependencyManifest(dependenciesMap);
+
+        this.getLogger().info("Writing to {}", this.getOutputFile().get().getAsFile());
+        try (
+            final BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(this.getOutputFile().get().getAsFile()), StandardCharsets.UTF_8))
+        ) {
+            OutputDependenciesToJson.GSON.toJson(manifest, writer);
+        } catch (final IOException ex) {
+            throw new GradleException("Failed to write dependencies manifest", ex);
+        }
+    }
+
+    private List<DependencyDescriptor> configToDescriptor(final ArtifactCollection conf, final Set<ModuleComponentIdentifier> excludedDeps) {
+        return conf.getArtifacts().stream()
             .filter(dep -> {
                 final ComponentIdentifier ident = dep.getId().getComponentIdentifier();
                 return ident instanceof ModuleComponentIdentifier && !excludedDeps.contains(ident);
@@ -221,18 +247,6 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
             })
             .sorted(Comparator.naturalOrder()) // sort dependencies for stable output
             .collect(Collectors.toList());
-
-        final DependencyManifest manifest = new DependencyManifest(descriptors);
-
-        this.getLogger().info("Writing to {}", this.getOutputFile().get().getAsFile());
-        try (
-            final BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(this.getOutputFile().get().getAsFile()), StandardCharsets.UTF_8))
-        ) {
-            OutputDependenciesToJson.GSON.toJson(manifest, writer);
-        } catch (final IOException ex) {
-            throw new GradleException("Failed to write dependencies manifest", ex);
-        }
     }
 
     public static String toHexString(final byte[] bytes) {
@@ -243,6 +257,19 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
             hexChars[j * 2 + 1] = OutputDependenciesToJson.hexArray[v & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    public static class ConfigurationHolder {
+        private final Configuration configuration;
+
+        public ConfigurationHolder(final Configuration configuration) {
+            this.configuration = configuration;
+        }
+
+        @InputFiles
+        public Configuration getConfiguration() {
+            return this.configuration;
+        }
     }
 
 }

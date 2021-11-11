@@ -25,27 +25,18 @@
 package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerListener;
-import net.minecraft.world.inventory.CraftingMenu;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.inventory.ResultSlot;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import org.spongepowered.api.event.item.inventory.CraftItemEvent;
+import net.minecraft.world.inventory.ContainerSynchronizer;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
@@ -57,10 +48,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
-import org.spongepowered.common.bridge.world.inventory.InventoryMenuBridge;
 import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
@@ -74,9 +62,10 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 @Mixin(AbstractContainerMenu.class)
 public abstract class AbstractContainerMenuMixin_Inventory implements TrackedContainerBridge, InventoryAdapter {
@@ -87,6 +76,8 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Final @Shadow private List<ContainerListener> containerListeners;
     @Shadow private boolean suppressRemoteUpdates;
     @Final @Shadow private List<DataSlot> dataSlots;
+    @Shadow @Final private NonNullList<ItemStack> remoteSlots;
+    @Shadow @Nullable private ContainerSynchronizer synchronizer;
 
     @Shadow protected abstract void shadow$doClick(int param0, int param1, ClickType param2, Player param3);
     //@formatter:on
@@ -266,6 +257,13 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 // TODO forge checks !itemstack1.equals(itemstack, true) before doing this
                 for (final ContainerListener listener : this.containerListeners) {
                     listener.slotChanged(((AbstractContainerMenu) (Object) this), i, oldStack);
+                }
+                final ItemStack remoteStack = this.remoteSlots.get(i);
+                if (!ItemStack.matches(remoteStack, newStack)) {
+                    this.remoteSlots.set(i, newStack.copy());
+                    if (this.synchronizer != null) {
+                        this.synchronizer.sendSlotChange(((AbstractContainerMenu) (Object) this), i, newStack);
+                    }
                 }
             }
         }

@@ -40,6 +40,7 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.ClientSideMerchant;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.PlayerEnderChestContainer;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
 
@@ -57,6 +58,7 @@ import net.minecraft.world.level.block.entity.LecternBlockEntity;
         ClientSideMerchant.class,
         // ChestBlock - DoubleSidedInventory
         CompoundContainer.class,
+        PlayerEnderChestContainer.class
 })
 public abstract class TraitMixin_ViewableBridge_Inventory implements ViewableInventoryBridge {
 

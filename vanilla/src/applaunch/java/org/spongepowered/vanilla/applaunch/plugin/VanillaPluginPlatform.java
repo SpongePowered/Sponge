@@ -30,12 +30,12 @@ import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginLanguageService;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.PluginResourceLocatorService;
+import org.spongepowered.plugin.blackboard.Key;
 import org.spongepowered.plugin.blackboard.Keys;
 import org.spongepowered.plugin.builtin.StandardEnvironment;
 import org.spongepowered.plugin.builtin.jvm.JVMKeys;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -48,6 +48,8 @@ import java.util.ServiceLoader;
 import java.util.Set;
 
 public final class VanillaPluginPlatform implements PluginPlatform {
+
+    public static final Key<List<Path>> EXTRA_TRANSFORMABLE_PATHS = Key.of("spongevanilla:transformable_paths", List.class);
 
     private final StandardEnvironment standardEnvironment;
     private final Map<String, PluginResourceLocatorService<PluginResource>> locatorServices;

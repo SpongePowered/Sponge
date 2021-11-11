@@ -22,36 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.installer.model.sponge;
+package org.spongepowered.common.accessor.world.level.block;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.EnderChestBlock;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
-public final class Libraries {
+@Mixin(EnderChestBlock.class)
+public interface EnderChestBlockAccessor {
 
-    public Map<String, List<Dependency>> dependencies;
-
-    public static final class Dependency {
-
-        public String group, module, version, md5;
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(this.group, this.module);
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || this.getClass() != o.getClass()) {
-                return false;
-            }
-            final Dependency that = (Dependency) o;
-            return this.group.equals(that.group) &&
-                this.module.equals(that.module);
-        }
+    @Accessor("CONTAINER_TITLE") static Component accessor$CONTAINER_TITLE() {
+        throw new UntransformedAccessorError();
     }
 }

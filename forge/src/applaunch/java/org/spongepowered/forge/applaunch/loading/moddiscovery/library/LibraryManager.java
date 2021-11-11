@@ -108,7 +108,7 @@ public final class LibraryManager {
         final List<CompletableFuture<?>> operations = new ArrayList<>(dependencies.dependencies.size());
         final Set<String> failures = ConcurrentHashMap.newKeySet();
 
-        for (final Libraries.Dependency dependency : dependencies.dependencies) {
+        for (final Libraries.Dependency dependency : dependencies.dependencies.get("main")) { // todo: evaluate dep sections for forge
             operations.add(AsyncUtils.asyncFailableFuture(() -> {
                 final String groupPath = dependency.group.replace(".", "/");
                 final Path depDirectory =
