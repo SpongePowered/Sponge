@@ -26,12 +26,11 @@ package org.spongepowered.common.world.volume;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
@@ -41,13 +40,13 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.entity.EntitySection;
+import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.entity.EntitySection;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -65,7 +64,6 @@ import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.accessor.world.level.block.entity.BlockEntityAccessor;
 import org.spongepowered.common.accessor.world.level.entity.PersistentEntitySectionManagerAccessor;
 import org.spongepowered.common.accessor.world.level.entity.TransientEntitySectionManagerAccessor;
-import org.spongepowered.common.accessor.world.level.chunk.ChunkBiomeContainerAccessor;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.volume.buffer.biome.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
@@ -115,7 +113,7 @@ public final class VolumeStreamUtils {
 
     @SuppressWarnings({"RedundantCast", "unchecked", "rawtypes"})
     public static <MC, T> org.spongepowered.api.registry.Registry<T> nativeToSpongeRegistry(final Registry<MC> registry) {
-        return (org.spongepowered.api.registry.Registry<T>) (org.spongepowered.api.registry.Registry) registry;
+        return (org.spongepowered.api.registry.Registry) registry;
     }
 
     public static Predicate<org.spongepowered.api.util.Tuple<Vector3d, EntityArchetype>> entityArchetypePositionFilter(final Vector3i min, final Vector3i max) {
@@ -151,7 +149,7 @@ public final class VolumeStreamUtils {
             if (ichunk instanceof ImposterProtoChunk) {
                 return ((ImposterProtoChunk) ichunk).getWrapped();
             }
-            return (ChunkAccess) ichunk;
+            return ichunk;
         };
     }
 
@@ -169,20 +167,17 @@ public final class VolumeStreamUtils {
     }
 
     public static boolean setBiomeOnNativeChunk(final int x, final int y, final int z, final
-        org.spongepowered.api.world.biome.Biome biome, final Supplier<@Nullable ChunkBiomeContainerAccessor> accessor,
+        org.spongepowered.api.world.biome.Biome biome, final Supplier<@Nullable LevelChunkSection> accessor,
         final Runnable finalizer
         ) {
-        @Nullable final ChunkBiomeContainerAccessor chunkBiomeContainerAccessor = accessor.get();
-        if (chunkBiomeContainerAccessor == null) {
+        @Nullable final LevelChunkSection section = accessor.get();
+        if (section == null) {
             return false;
         }
-        final int maskedX = x & ChunkBiomeContainerAccessor.accessor$HORIZONTAL_MASK();
-        final int maskedY = Math.max(y, 0);
-        final int maskedZ = z & ChunkBiomeContainerAccessor.accessor$HORIZONTAL_MASK();
-        final int WIDTH_BITS = ChunkBiomeContainerAccessor.accessor$WIDTH_BITS();
-        final int posKey = maskedY << WIDTH_BITS + WIDTH_BITS | maskedZ << WIDTH_BITS | maskedX;
-        final Biome[] biomes = chunkBiomeContainerAccessor.accessor$biomes();
-        biomes[posKey] = (net.minecraft.world.level.biome.Biome) (Object) biome;
+        final int maskedX = x & 3;
+        final int maskedY = y & 3;
+        final int maskedZ = z & 3;
+        section.getBiomes().set(maskedX, maskedY, maskedZ, (Biome) (Object) biome);
 
         finalizer.run();
         return true;
@@ -301,7 +296,7 @@ public final class VolumeStreamUtils {
     }
 
     public static Predicate<net.minecraft.world.entity.Entity> apiToImplPredicate(final Predicate<? super Entity> filter) {
-        return entity -> entity instanceof Entity && filter.test((Entity) entity);
+        return entity -> entity instanceof Entity && filter.test(entity);
     }
 
     /**
@@ -320,28 +315,25 @@ public final class VolumeStreamUtils {
     public static boolean setBiome(final ChunkAccess chunk, final int x, final int y, final int z,
         final org.spongepowered.api.world.biome.Biome biome
     ) {
-        final boolean result = VolumeStreamUtils.setBiome(chunk.getBiomes(), x, y, z, biome);
+        final boolean result = VolumeStreamUtils.setBiome(chunk.getSection(chunk.getSectionIndex(y)), x, y, z, biome);
         if (result) {
             chunk.setUnsaved(true);
         }
         return result;
     }
 
-    public static boolean setBiome(@Nullable ChunkBiomeContainer biomeContainer,
+    public static boolean setBiome(@Nullable final LevelChunkSection section,
         final int x, final int y, final int z, final org.spongepowered.api.world.biome.Biome biome
     ) {
-        if (biomeContainer == null) {
+        if (section == null) {
             return false;
         }
-        final Biome[] biomes = ((ChunkBiomeContainerAccessor) biomeContainer).accessor$biomes();
+        final PalettedContainer<Biome> biomes = section.getBiomes();
 
-        final int maskedX = x & ChunkBiomeContainerAccessor.accessor$HORIZONTAL_MASK();
-        final int maskedY = Math.max(y, 0);
-        final int maskedZ = z & ChunkBiomeContainerAccessor.accessor$HORIZONTAL_MASK();
-
-        final int WIDTH_BITS = ChunkBiomeContainerAccessor.accessor$WIDTH_BITS();
-        final int posKey = maskedY << WIDTH_BITS + WIDTH_BITS | maskedZ << WIDTH_BITS | maskedX;
-        biomes[posKey] = (Biome) (Object) biome;
+        final int maskedX = x & 3;
+        final int maskedY = y & 3;
+        final int maskedZ = z & 3;
+        biomes.set(maskedX, maskedY, maskedZ, (Biome) (Object) biome);
 
         return true;
     }
@@ -362,7 +354,7 @@ public final class VolumeStreamUtils {
 
     private static QuadFunction<ChunkAccess, LevelChunkSection, BlockPos, LevelReader, Biome> chunkSectionBiomeGetter() {
         return ((chunk, chunkSection, pos, world) -> {
-            if (chunk.getBiomes() == null) {
+            if (chunk.getSection(chunk.getSectionIndex(pos.getY())) == null) {
                 if (chunk instanceof LevelChunk) {
                     return ((LevelChunk) chunk).getLevel().getNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
                 } else {
@@ -370,7 +362,7 @@ public final class VolumeStreamUtils {
                     return world.getUncachedNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
                 }
             }
-            return chunk.getBiomes().getNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
+            return chunk.getNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
         }
         );
     }

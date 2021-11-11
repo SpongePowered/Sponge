@@ -24,30 +24,26 @@
  */
 package org.spongepowered.common.accessor.world.level.biome;
 
-import com.mojang.datafixers.util.Pair;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedAccessorError;
 import org.spongepowered.common.UntransformedInvokerError;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
-import net.minecraft.core.Registry;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 
 @Mixin(MultiNoiseBiomeSource.class)
 public interface MultiNoiseBiomeSourceAccessor {
 
-    @Accessor("DEFAULT_NOISE_PARAMETERS") static MultiNoiseBiomeSource.NoiseParameters accessor$DEFAULT_NOISE_PARAMETERS() {
+    /*@Accessor("DEFAULT_NOISE_PARAMETERS") static MultiNoiseBiomeSource.NoiseParameters accessor$DEFAULT_NOISE_PARAMETERS() {
         throw new UntransformedAccessorError();
-    }
+    }*/
 
-    @Invoker("<init>") static MultiNoiseBiomeSource invoker$new(final long seed, final List<Pair<Biome.ClimateParameters, Supplier<Biome>>> attributedBiomes,
-            final MultiNoiseBiomeSource.NoiseParameters temperatureConfig, final MultiNoiseBiomeSource.NoiseParameters humidityConfig, final MultiNoiseBiomeSource.NoiseParameters altitudeConfig,
-            final MultiNoiseBiomeSource.NoiseParameters weirdnessConfig, final Optional<Pair<Registry<Biome>, MultiNoiseBiomeSource.Preset>> empty) {
+    @Invoker("<init>") static MultiNoiseBiomeSource invoker$new(
+        final Climate.ParameterList<Supplier<Biome>> parameters,
+        final MultiNoiseBiomeSource.Preset preset
+    ) {
         throw new UntransformedInvokerError();
     }
 }
