@@ -40,6 +40,7 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.ClientSideMerchant;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+import net.minecraft.world.inventory.PlayerEnderChestContainer;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
 
@@ -57,6 +58,7 @@ import net.minecraft.world.level.block.entity.LecternBlockEntity;
         ClientSideMerchant.class,
         // ChestBlock - DoubleSidedInventory
         CompoundContainer.class,
+        PlayerEnderChestContainer.class
 }, priority = 999)
 public abstract class TraitMixin_Viewable_Inventory_API implements ViewableInventory {
 

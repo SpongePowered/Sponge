@@ -39,16 +39,19 @@ import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
@@ -102,15 +105,25 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             "org.jline.",
             "org.fusesource.",
             "net.minecrell.terminalconsole.",
-            // Guice (for easier opening to reflection)
-            "com.google.inject.",
             "org.slf4j.",
             // Maven artifacts -- specifically for versioning
             "org.apache.maven.artifact."
     };
 
+    private static final String[] EXCLUSION_EXCEPTIONS = {
+            "org.spongepowered.configurate.objectmapping.guice."
+    };
+
     @Override
     public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
+        // Specifically requested to be available on the launch loader
+        final VanillaPluginPlatform platform = AppLaunch.pluginPlatform();
+        for (final Path path : platform.getStandardEnvironment().blackboard().getOrCreate(VanillaPluginPlatform.EXTRA_TRANSFORMABLE_PATHS, () -> Collections.emptyList())) {
+            builder.addTransformationPath(path);
+        }
+
+        // Plus everything else on the system loader
+        // todo: we might be able to eliminate this at some point, but that causes complications
         for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
             try {
                 final URI uri = url.toURI();
@@ -162,18 +175,35 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
         this.logger.info("Transitioning to Sponge launch, please wait...");
 
         launchClassLoader.addTargetPackageFilter(klass -> {
-            for (final String pkg : AbstractVanillaLaunchHandler.EXCLUDED_PACKAGES) {
+            outer: for (final String pkg : AbstractVanillaLaunchHandler.EXCLUDED_PACKAGES) {
                 if (klass.startsWith(pkg)) {
+                    for (final String exception : AbstractVanillaLaunchHandler.EXCLUSION_EXCEPTIONS) {
+                        if (klass.startsWith(exception)) {
+                            break outer;
+                        }
+                    }
                     return false;
                 }
             }
             return true;
         });
+        AbstractVanillaLaunchHandler.fixPackageExclusions(launchClassLoader);
 
         return () -> {
             this.launchService0(arguments, launchClassLoader);
             return null;
         };
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void fixPackageExclusions(final ITransformingClassLoader tcl) {
+        try {
+            final Field prefixField = tcl.getClass().getDeclaredField("SKIP_PACKAGE_PREFIXES");
+            prefixField.setAccessible(true);
+            ((List) prefixField.get(null)).set(1, "__javax__noplswhy.");
+        } catch (NoSuchFieldException | IllegalAccessException ex) {
+            throw new RuntimeException("Failed to fix strange transformer exclusions", ex);
+        }
     }
 
     protected Function<String, Enumeration<URL>> getResourceLocator() {

@@ -26,6 +26,15 @@ package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.CraftingMenu;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.StonecutterMenu;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -47,15 +56,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.inventory.CraftingMenu;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.inventory.StonecutterMenu;
-import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 
 @Mixin(net.minecraft.world.item.crafting.RecipeManager.class)
 public abstract class RecipeManagerMixin_API implements RecipeManager {
@@ -70,7 +70,7 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
     // @formatter:on
 
     @Override
-    public Optional<Recipe> byKey(ResourceKey key) {
+    public Optional<Recipe> byKey(final ResourceKey key) {
         Preconditions.checkNotNull(key);
         return this.shadow$byKey((ResourceLocation) (Object) key).map(Recipe.class::cast);
     }
@@ -83,13 +83,13 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public <T extends Recipe> Collection<T> allOfType(RecipeType<T> type) {
+    public <T extends Recipe> Collection<T> allOfType(final RecipeType<T> type) {
         Preconditions.checkNotNull(type);
         return this.shadow$byType((net.minecraft.world.item.crafting.RecipeType)type).values();
     }
 
     @Override
-    public <T extends Recipe> Collection<T> findByResult(RecipeType<T> type, ItemStackSnapshot result) {
+    public <T extends Recipe> Collection<T> findByResult(final RecipeType<T> type, final ItemStackSnapshot result) {
         Preconditions.checkNotNull(type);
         Preconditions.checkNotNull(result);
         return this.allOfType(type).stream()
@@ -98,12 +98,13 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
     }
 
     @Override
-    public Optional<Recipe> findMatchingRecipe(Inventory inventory, ServerWorld world) {
+    @SuppressWarnings("unchecked")
+    public Optional<Recipe> findMatchingRecipe(final Inventory inventory, final ServerWorld world) {
         Preconditions.checkNotNull(inventory);
         Preconditions.checkNotNull(world);
         if (inventory instanceof AbstractFurnaceBlockEntity) {
             final net.minecraft.world.item.crafting.RecipeType<? extends AbstractCookingRecipe> type = ((AbstractFurnaceBlockEntityAccessor) inventory).accessor$recipeType();
-            return this.shadow$getRecipeFor(type, (Container) inventory, (net.minecraft.world.level.Level) world).map(Recipe.class::cast);
+            return this.<Container, AbstractCookingRecipe>shadow$getRecipeFor((net.minecraft.world.item.crafting.RecipeType<AbstractCookingRecipe>) type, (Container) inventory, (net.minecraft.world.level.Level) world).map(Recipe.class::cast);
         }
         if (inventory instanceof CampfireBlockEntity) {
             return this.shadow$getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CAMPFIRE_COOKING, (Container) inventory, (net.minecraft.world.level.Level) world).map(Recipe.class::cast);
@@ -126,7 +127,7 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public <T extends Recipe> Optional<T> findMatchingRecipe(RecipeType<T> type, Inventory inventory, ServerWorld world) {
+    public <T extends Recipe> Optional<T> findMatchingRecipe(final RecipeType<T> type, final Inventory inventory, final ServerWorld world) {
         Preconditions.checkNotNull(type);
         Preconditions.checkNotNull(inventory);
         Preconditions.checkNotNull(world);
@@ -138,7 +139,7 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public <T extends CookingRecipe> Optional<T> findCookingRecipe(RecipeType<T> type, ItemStackSnapshot ingredient) {
+    public <T extends CookingRecipe> Optional<T> findCookingRecipe(final RecipeType<T> type, final ItemStackSnapshot ingredient) {
         Preconditions.checkNotNull(type);
         Preconditions.checkNotNull(ingredient);
         final net.minecraft.world.SimpleContainer fakeFurnace = new net.minecraft.world.SimpleContainer(1);
@@ -147,7 +148,7 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
     }
 
     @Redirect(method = "apply", at = @At(value = "INVOKE", remap = false, target = "Ljava/util/Map;size()I"))
-    public int impl$getActualRecipeCount(Map<net.minecraft.world.item.crafting.RecipeType<?>, ImmutableMap.Builder<ResourceLocation, net.minecraft.world.item.crafting.Recipe<?>>>  map) {
+    public int impl$getActualRecipeCount(final Map<net.minecraft.world.item.crafting.RecipeType<?>, ImmutableMap.Builder<ResourceLocation, net.minecraft.world.item.crafting.Recipe<?>>>  map) {
         return this.recipes.values().stream().mapToInt(Map::size).sum();
     }
 }

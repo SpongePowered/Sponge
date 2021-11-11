@@ -304,7 +304,7 @@ interface TransactionSink {
             }
             if (phaseContext instanceof EntityTickContext || phaseContext instanceof UnwindingPhaseContext) {
                 // TODO remove warning when we got all cases covered
-                SpongeCommon.logger().warn("Ignoring slot transaction on InventoryMenu during {}. {}", phaseContext.getClass().getSimpleName(), newTransaction);
+                SpongeCommon.logger().warn("Ignoring slot transaction on InventoryMenu during {}. {}\nNo Event will be fired for this", phaseContext.getClass().getSimpleName(), newTransaction);
                 return;
             }
         }

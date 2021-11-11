@@ -64,7 +64,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 @Mixin(Minecraft.class)
-public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Runnable> implements SpongeClient, SpongeRegistryHolder {
+public abstract class MinecraftMixin_API implements SpongeClient, SpongeRegistryHolder {
 
     // @formatter:off
     @Shadow public net.minecraft.client.multiplayer.ClientLevel level;
@@ -76,10 +76,6 @@ public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Run
 
     private final ClientScheduler api$scheduler = new ClientScheduler();
     private final RegistryHolderLogic api$registryHolder = new RegistryHolderLogic();
-
-    public MinecraftMixin_API(String name) {
-        super(name);
-    }
 
     @Override
     public Optional<LocalPlayer> player() {
@@ -128,7 +124,7 @@ public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Run
 
     @Override
     public boolean onMainThread() {
-        return this.isSameThread();
+        return ((Minecraft) (Object) this).isSameThread();
     }
 
     @Override

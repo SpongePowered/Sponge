@@ -17,7 +17,6 @@ minecraft {
             }
 }
 
-
 dependencies {
     val forgeFlowerVersion: String by project
     val tinyLogVersion: String by project

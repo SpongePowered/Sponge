@@ -356,7 +356,7 @@ tasks {
     val emitDependencies by registering(org.spongepowered.gradle.impl.OutputDependenciesToJson::class) {
         group = "sponge"
         // everything in applaunch
-        this.dependencies(forgeLibrariesConfig)
+        this.dependencies("main", forgeLibrariesConfig)
         // except what we're providing through the installer
         this.excludedDependencies(forgeAppLaunchConfig)
 

@@ -57,7 +57,7 @@ public interface SpongeDataHolder extends DataHolder {
      * @param <E> The element type
      * @return The data provider
      */
-    default <V extends Value<E>, E> DataProvider<V, E> impl$getProviderFor(Key<V> key, DataHolder dataHolder) {
+    default <V extends Value<E>, E> DataProvider<V, E> impl$getProviderFor(final Key<V> key, final DataHolder dataHolder) {
         requireNonNull(key, "key");
         return SpongeDataManager.getProviderRegistry().getProvider(key, dataHolder.getClass());
     }
@@ -71,12 +71,12 @@ public interface SpongeDataHolder extends DataHolder {
         return Collections.singletonList(this);
     }
 
-    default Collection<DataProvider<?, ?>> impl$getAllProviders(DataHolder dataHolder) {
+    default Collection<DataProvider<?, ?>> impl$getAllProviders(final DataHolder dataHolder) {
         return SpongeDataManager.getProviderRegistry().getAllProviders(dataHolder.getClass());
     }
 
-    default <T, E, V extends Value<E>> T impl$apply(Key<V> key, BiFunction<DataProvider, DataHolder, T> function, Supplier<T> defaultResult) {
-        for (DataHolder dataHolder : this.impl$delegateDataHolder()) {
+    default <T, E, V extends Value<E>> T impl$apply(final Key<V> key, final BiFunction<DataProvider, DataHolder, T> function, final Supplier<T> defaultResult) {
+        for (final DataHolder dataHolder : this.impl$delegateDataHolder()) {
             final DataProvider<V, E> dataProvider = this.impl$getProviderFor(key, dataHolder);
             if (dataProvider.isSupported(dataHolder)) {
                 return function.apply(dataProvider, dataHolder);
@@ -87,17 +87,18 @@ public interface SpongeDataHolder extends DataHolder {
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    default boolean supports(Key<?> key) {
-        return this.impl$apply((Key) key, (p, d) -> true, () -> false);
+    default boolean supports(final Key<?> key) {
+    	// XX: JDT cannot infer this cast
+        return (boolean) this.impl$apply((Key) key, (p, d) -> true, () -> false);
     }
 
     @Override
-    default <E> Optional<E> get(Key<? extends Value<E>> key) {
+    default <E> Optional<E> get(final Key<? extends Value<E>> key) {
         return this.impl$apply(key, DataProvider::get, Optional::empty);
     }
 
     @Override
-    default <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
+    default <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
         return this.impl$apply(key, DataProvider::value, Optional::empty);
     }
 

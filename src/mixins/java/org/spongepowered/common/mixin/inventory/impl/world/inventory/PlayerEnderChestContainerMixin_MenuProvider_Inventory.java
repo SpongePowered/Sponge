@@ -22,36 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.installer.model.sponge;
+package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.PlayerEnderChestContainer;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.accessor.world.level.block.EnderChestBlockAccessor;
 
-public final class Libraries {
+@Mixin(PlayerEnderChestContainer.class)
+public abstract class PlayerEnderChestContainerMixin_MenuProvider_Inventory implements MenuProvider {
 
-    public Map<String, List<Dependency>> dependencies;
+    @Override
+    public Component getDisplayName() {
+        return EnderChestBlockAccessor.accessor$CONTAINER_TITLE();
+    }
 
-    public static final class Dependency {
-
-        public String group, module, version, md5;
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(this.group, this.module);
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || this.getClass() != o.getClass()) {
-                return false;
-            }
-            final Dependency that = (Dependency) o;
-            return this.group.equals(that.group) &&
-                this.module.equals(that.module);
-        }
+    @Nullable @Override
+    public AbstractContainerMenu createMenu(final int var1, final Inventory var2, final Player var3) {
+        return ChestMenu.threeRows(var1, var3.getInventory(), (Container) this);
     }
 }
