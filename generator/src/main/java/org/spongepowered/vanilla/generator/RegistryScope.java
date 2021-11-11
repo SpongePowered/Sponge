@@ -41,7 +41,7 @@ enum RegistryScope {
     GAME {
         @Override
         protected CodeBlock registryKeyToReference() {
-            return CodeBlock.of("asDefaultedReference(() -> $T.game().registries())", Types.SPONGE);
+            return CodeBlock.of("asDefaultedReference($T::game)", Types.SPONGE);
         }
 
         @Override
@@ -57,7 +57,7 @@ enum RegistryScope {
     SERVER {
         @Override
         protected CodeBlock registryKeyToReference() {
-            return CodeBlock.of("asDefaultedReference(() -> $T.server().registries())", Types.SPONGE);
+            return CodeBlock.of("asDefaultedReference($T::server)", Types.SPONGE);
         }
 
         @Override
