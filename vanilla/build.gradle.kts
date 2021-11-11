@@ -261,6 +261,10 @@ dependencies {
     libraries("net.kyori:adventure-serializer-configurate4")
     libraries("org.spongepowered:timings:$timingsVersion")
     libraries("javax.inject:javax.inject:1")
+    libraries("org.spongepowered:configurate-jackson") {
+        exclude(group = "org.spongepowered", module = "configurate-core")
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
     
     // Databases
     libraries("com.zaxxer:HikariCP:2.6.3")
@@ -282,10 +286,6 @@ dependencies {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
     bootstrapLibraries("org.spongepowered:configurate-hocon") {
-        exclude(group = "org.spongepowered", module = "configurate-core")
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
-    bootstrapLibraries("org.spongepowered:configurate-jackson") {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
