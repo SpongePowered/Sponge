@@ -130,9 +130,11 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         // Make sure to call any broadcast changes to capture any inventory transactions
         // for events
         final TransactionalCaptureSupplier transactor = this.getTransactor();
-        transactor.logPlayerInventoryChange(this.packetPlayer, PlayerInventoryTransaction.EventCreator.STANDARD);
-        try (EffectTransactor ignored = BroadcastInventoryChangesEffect.transact(transactor)) {
-            this.packetPlayer.containerMenu.broadcastChanges();
+        if (this.packetPlayer != null) {
+            transactor.logPlayerInventoryChange(this.packetPlayer, PlayerInventoryTransaction.EventCreator.STANDARD);
+            try (EffectTransactor ignored = BroadcastInventoryChangesEffect.transact(transactor)) {
+                this.packetPlayer.containerMenu.broadcastChanges();
+            }
         }
         super.close();
     }
