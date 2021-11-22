@@ -26,6 +26,9 @@ plugins {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_PROJECT) // needed for forge-loom, unfortunately
     repositories {
+        mavenLocal {
+            content { includeGroup("net.minecraftforge") }
+        }
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }

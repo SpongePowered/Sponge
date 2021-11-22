@@ -236,13 +236,12 @@ dependencies {
             .onEach {
                 installer("org.ow2.asm:$it:$asmVersion")
             }.toSet()
-    installer("org.cadixdev:atlas:0.2.1") {
+    installer("net.minecraftforge:ForgeAutoRenamingTool:0.1.19-sponge") {
         asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
     }
-    installer("org.cadixdev:lorenz-asm:0.5.6") {
+    installer("net.minecraftforge:srgutils:0.4.3") {
         asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
     }
-    installer("org.cadixdev:lorenz-io-proguard:0.5.6")
 
     // Add the API as a runtime dependency, just so it gets shaded into the jar
     add(vanillaInstaller.runtimeOnlyConfigurationName, "org.spongepowered:spongeapi:$apiVersion") {

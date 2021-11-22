@@ -26,23 +26,20 @@ package org.spongepowered.vanilla.installer;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import org.cadixdev.atlas.Atlas;
-import org.cadixdev.bombe.asm.jar.JarEntryRemappingTransformer;
-import org.cadixdev.bombe.jar.JarClassEntry;
-import org.cadixdev.lorenz.MappingSet;
-import org.cadixdev.lorenz.asm.LorenzRemapper;
-import org.cadixdev.lorenz.io.proguard.ProGuardReader;
+import net.minecraftforge.fart.api.RecordFixFlag;
+import net.minecraftforge.fart.api.Renamer;
+import net.minecraftforge.fart.api.SourceFixerConfig;
+import net.minecraftforge.fart.api.Transformer;
+import net.minecraftforge.srgutils.IMappingFile;
 import org.spongepowered.vanilla.installer.model.mojang.Version;
 import org.spongepowered.vanilla.installer.model.mojang.VersionManifest;
 import org.tinylog.Logger;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -301,13 +298,9 @@ public final class InstallerMain {
         }
 
         Logger.info("Remapping Minecraft. This may take a while...");
-        final MappingSet mappings = MappingSet.create();
-        try (final BufferedReader reader = Files.newBufferedReader(serverMappings, StandardCharsets.UTF_8)) {
-            new ProGuardReader(reader).read().reverse(mappings);
-        }
-
-        try (final Atlas atlas = new Atlas(service)) {
-            atlas.install(ctx -> new JarEntryRemappingTransformer(new LorenzRemapper(mappings, ctx.inheritanceProvider())) {
+        final IMappingFile mappings = IMappingFile.load(serverMappings.toFile()).reverse();
+        // todo
+            /*atlas.install(ctx -> new JarEntryRemappingTransformer(new LorenzRemapper(mappings, ctx.inheritanceProvider())) {
                 @Override
                 public JarClassEntry transform(final JarClassEntry entry) {
                     // Skip shaded classes that we know are non-obf
@@ -322,10 +315,18 @@ public final class InstallerMain {
 
                     return super.transform(entry);
                 }
-            });
-            // Write to a temporary file so we don't have corrupt partial output
-            atlas.run(inputJar, tempOutput);
-        }
+            });*/
+
+        Renamer.builder()
+            .input(inputJar.toFile())
+            .output(tempOutput.toFile())
+            .add(Transformer.parameterAnnotationFixerFactory())
+            .add(Transformer.renamerFactory(mappings))
+            .add(Transformer.recordFixerFactory(RecordFixFlag.all()))
+            .add(Transformer.sourceFixerFactory(SourceFixerConfig.JAVA))
+            .logger(s -> {}) // silent
+            .build()
+            .run();
 
         // Restore file
         try {
