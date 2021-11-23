@@ -26,7 +26,6 @@ package org.spongepowered.vanilla.installer;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import net.minecraftforge.fart.api.RecordFixFlag;
 import net.minecraftforge.fart.api.Renamer;
 import net.minecraftforge.fart.api.SourceFixerConfig;
 import net.minecraftforge.fart.api.Transformer;
@@ -46,6 +45,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -299,11 +299,17 @@ public final class InstallerMain {
 
         Logger.info("Remapping Minecraft. This may take a while...");
         final IMappingFile mappings = IMappingFile.load(serverMappings.toFile()).reverse();
-        // todo
-            /*atlas.install(ctx -> new JarEntryRemappingTransformer(new LorenzRemapper(mappings, ctx.inheritanceProvider())) {
+
+        Renamer.builder()
+            .input(inputJar.toFile())
+            .output(tempOutput.toFile())
+            .add(Transformer.parameterAnnotationFixerFactory())
+            .add(ctx -> {
+              final Transformer backing = Transformer.renamerFactory(mappings).create(ctx);
+              return new Transformer() {
+
                 @Override
-                public JarClassEntry transform(final JarClassEntry entry) {
-                    // Skip shaded classes that we know are non-obf
+                public ClassEntry process(final ClassEntry entry) {
                     final String name = entry.getName();
                     if (name.startsWith("it/unimi")
                         || name.startsWith("com/google")
@@ -312,17 +318,26 @@ public final class InstallerMain {
                         || name.startsWith("org/apache")) {
                         return entry;
                     }
-
-                    return super.transform(entry);
+                    return backing.process(entry);
                 }
-            });*/
 
-        Renamer.builder()
-            .input(inputJar.toFile())
-            .output(tempOutput.toFile())
-            .add(Transformer.parameterAnnotationFixerFactory())
-            .add(Transformer.renamerFactory(mappings))
-            .add(Transformer.recordFixerFactory(RecordFixFlag.all()))
+                @Override
+                public ManifestEntry process(final ManifestEntry entry) {
+                    return backing.process(entry);
+                }
+
+                @Override
+                public ResourceEntry process(final ResourceEntry entry) {
+                    return backing.process(entry);
+                }
+
+                @Override
+                public Collection<? extends Entry> getExtras() {
+                    return backing.getExtras();
+                }
+
+              };
+            })
             .add(Transformer.sourceFixerFactory(SourceFixerConfig.JAVA))
             .logger(s -> {}) // silent
             .build()
