@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
 import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
 import net.minecraft.world.level.levelgen.NoiseSettings;
+import net.minecraft.world.level.levelgen.NoiseSlider;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
 import org.spongepowered.api.world.generation.config.noise.SlideConfig;
@@ -43,8 +44,8 @@ public abstract class NoiseSettingsMixin_API implements NoiseConfig {
     // @formatter:off
     @Shadow public abstract int shadow$height();
     @Shadow public abstract NoiseSamplingSettings shadow$noiseSamplingSettings();
-    @Shadow public abstract net.minecraft.world.level.levelgen.NoiseSlideSettings shadow$topSlideSettings();
-    @Shadow public abstract net.minecraft.world.level.levelgen.NoiseSlideSettings shadow$bottomSlideSettings();
+    @Shadow public abstract NoiseSlider shadow$topSlideSettings();
+    @Shadow public abstract NoiseSlider shadow$bottomSlideSettings();
     @Shadow public abstract int shadow$noiseSizeHorizontal();
     @Shadow public abstract int shadow$noiseSizeVertical();
     @Shadow public abstract double shadow$densityFactor();

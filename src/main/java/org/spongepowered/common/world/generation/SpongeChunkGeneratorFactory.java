@@ -51,16 +51,19 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
 
     @Override
     public <T extends NoiseGeneratorConfig> ConfigurableChunkGenerator<T> noise(final BiomeProvider provider, final T config) {
-        return (ConfigurableChunkGenerator<T>) (Object) new NoiseBasedChunkGenerator((net.minecraft.world.level.biome.BiomeSource) Objects
-                .requireNonNull(provider, "provider"), BootstrapProperties.worldGenSettings.seed(), () ->
-                (NoiseGeneratorSettings) (Object) Objects.requireNonNull(config, "config"));
+        return (ConfigurableChunkGenerator<T>) (Object) new NoiseBasedChunkGenerator(BootstrapProperties.registries.registryOrThrow(Registry.NOISE_REGISTRY),
+            (net.minecraft.world.level.biome.BiomeSource) Objects.requireNonNull(provider, "provider"),
+            BootstrapProperties.worldGenSettings.seed(), () -> (NoiseGeneratorSettings) (Object) Objects.requireNonNull(config, "config"));
     }
 
     @Override
     public <T extends NoiseGeneratorConfig> ConfigurableChunkGenerator<T> noise(final BiomeProvider provider, final long seed, final T config) {
-        return (ConfigurableChunkGenerator<T>) (Object) new NoiseBasedChunkGenerator((net.minecraft.world.level.biome.BiomeSource)
-                Objects.requireNonNull(provider, "provider"), seed, () -> (NoiseGeneratorSettings) (Object) Objects.requireNonNull(config,
-            "config"));
+        return (ConfigurableChunkGenerator<T>) (Object) new NoiseBasedChunkGenerator(
+            BootstrapProperties.registries.registryOrThrow(Registry.NOISE_REGISTRY),
+            (net.minecraft.world.level.biome.BiomeSource) Objects.requireNonNull(provider, "provider"),
+            seed,
+            () -> (NoiseGeneratorSettings) (Object) Objects.requireNonNull(config, "config")
+        );
     }
 
     @Override
@@ -70,8 +73,7 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
 
     @Override
     public ConfigurableChunkGenerator<NoiseGeneratorConfig> overworld() {
-        return (ConfigurableChunkGenerator<NoiseGeneratorConfig>) (Object) WorldGenSettings.makeDefaultOverworld(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY),
-            BootstrapProperties.registries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY),
+        return (ConfigurableChunkGenerator<NoiseGeneratorConfig>) (Object) WorldGenSettings.makeDefaultOverworld(BootstrapProperties.registries,
             BootstrapProperties.worldGenSettings.seed());
     }
 

@@ -61,7 +61,7 @@ public final class NetherPortalType extends VanillaPortalType {
         final ServerLevel serverWorld = (ServerLevel) location.world();
         final BlockPos position = VecHelper.toBlockPos(location.blockPosition());
         return serverWorld.getPortalForcer()
-                .findPortalAround(position, serverWorld.dimension() == Level.NETHER);
+                .findPortalAround(position, serverWorld.dimension() == Level.NETHER, serverWorld.getWorldBorder());
     }
 
     public static Portal portalObjectFromRectangle(final ServerWorld world, final BlockUtil.FoundRectangle x) {

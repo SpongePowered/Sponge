@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.world.ticks;
 
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.ticks.LevelTicks;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.world.server.ServerLocation;

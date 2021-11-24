@@ -141,6 +141,7 @@ public final class ChunkPipeline implements BlockPipeline {
         return new Builder();
     }
 
+    @Override
     public boolean wasEmpty() {
         return this.wasEmpty;
     }

@@ -31,6 +31,6 @@ public final class SpongeBiomeAttributesFactory implements BiomeAttributes.Facto
 
     @Override
     public BiomeAttributes of(final float temperature, final float humidity, final float altitude, final float weirdness, final float offset) {
-        return (BiomeAttributes) new Biome.ClimateParameters(temperature, humidity, altitude, weirdness, offset);
+        return (BiomeAttributes) new Biome.ClimateSettings(temperature, humidity, altitude, weirdness, offset);
     }
 }

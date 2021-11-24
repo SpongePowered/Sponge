@@ -280,11 +280,11 @@ allprojects {
     }
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_16
-        targetCompatibility = JavaVersion.VERSION_16
-        if (JavaVersion.current() < JavaVersion.VERSION_16) {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        if (JavaVersion.current() < JavaVersion.VERSION_17) {
             toolchain {
-                languageVersion.set(JavaLanguageVersion.of(16))
+                languageVersion.set(JavaLanguageVersion.of(17))
             }
         }
     }
@@ -300,7 +300,7 @@ allprojects {
         withType(JavaCompile::class).configureEach {
             options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
             options.encoding = "UTF-8"
-            options.release.set(16)
+            options.release.set(17)
             if (project.name != "testplugins" && System.getProperty("idea.sync.active") != null) {
                 options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
             }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.spongepowered.api.event.CauseStackManager;
@@ -37,7 +38,7 @@ final class DeferredScheduledUpdatePhaseState extends GeneralGenerationPhaseStat
 
     private final BiConsumer<CauseStackManager.StackFrame, Context> CHUNK_LOAD_MODIFIER =
         super.getFrameModifier().andThen((frame, context) -> {
-            frame.pushCause(context.getEntry());
+            frame.pushCause(context.location()); // todo: type?
         });
 
     public DeferredScheduledUpdatePhaseState() {
@@ -62,19 +63,25 @@ final class DeferredScheduledUpdatePhaseState extends GeneralGenerationPhaseStat
 
     public static final class Context extends GenerationContext<Context> {
 
-        private TickNextTickData<?> entry;
+        private BlockPos location;
+        private Object type;
 
         Context(final PhaseTracker tracker) {
             super(GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE, tracker);
         }
 
-        public Context scheduledUpdate(final TickNextTickData<?> entry) {
-            this.entry = entry;
+        public Context scheduledUpdate(final BlockPos location, final Object type) {
+            this.location = location;
+            this.type = type;
             return this;
         }
 
-        public TickNextTickData<?> getEntry() {
-            return Objects.requireNonNull(this.entry, "NextTickListEntry was not initialized");
+        public BlockPos location() {
+            return Objects.requireNonNull(this.location, "NextTickListEntry was not initialized");
+        }
+
+        public Object type() {
+            return Objects.requireNonNull(this.type, "NextTickListEntry was not initialized");
         }
     }
 }

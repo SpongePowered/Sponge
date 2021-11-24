@@ -344,7 +344,7 @@ public final class TrackingUtil {
     public static boolean fireMinecraftBlockEvent(final ServerLevel worldIn, final BlockEventData event,
         final net.minecraft.world.level.block.state.BlockState currentState
     ) {
-        final TrackableBlockEventDataBridge blockEvent = (TrackableBlockEventDataBridge) event;
+        final TrackableBlockEventDataBridge blockEvent = (TrackableBlockEventDataBridge) (Object) event;
         final @Nullable Object source = blockEvent.bridge$getTileEntity() != null ? blockEvent.bridge$getTileEntity() : blockEvent.bridge$getTickingLocatable();
         if (source == null) {
             // No source present which means we are ignoring the phase state
@@ -353,7 +353,7 @@ public final class TrackingUtil {
         final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext(PhaseTracker.SERVER);
         phaseContext.source(source);
 
-        final UUID user = ((TrackableBlockEventDataBridge) event).bridge$getSourceUserUUID();
+        final UUID user = ((TrackableBlockEventDataBridge) (Object) event).bridge$getSourceUserUUID();
         if (user != null) {
             phaseContext.creator = user;
             phaseContext.notifier = user;

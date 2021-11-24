@@ -57,6 +57,6 @@ public final class ChunkLoadPhaseState extends GeneralGenerationPhaseState<Chunk
     public void associateScheduledTickUpdate(
         final ChunkLoadContext asContext, ServerLevel level, final ScheduledTick<?> entry
     ) {
-        ((TickNextTickDataBridge) entry).bridge$setIsPartOfWorldGeneration(true);
+        ((TickNextTickDataBridge) (Object) entry).bridge$setIsPartOfWorldGeneration(true);
     }
 }

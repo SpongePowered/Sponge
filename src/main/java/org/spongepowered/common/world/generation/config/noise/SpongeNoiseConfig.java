@@ -163,7 +163,7 @@ public final class SpongeNoiseConfig {
             Objects.requireNonNull(this.bottom, "bottom");
 
             return (NoiseConfig) net.minecraft.world.level.levelgen.NoiseSettings.create(this.minY, this.height, (NoiseSamplingSettings) this.sampling,
-                    (net.minecraft.world.level.levelgen.NoiseSlideSettings) this.top, (net.minecraft.world.level.levelgen.NoiseSlideSettings) this.bottom,
+                    (net.minecraft.world.level.levelgen.NoiseSlider) this.top, (net.minecraft.world.level.levelgen.NoiseSlider) this.bottom,
                     this.horizontalSize, this.verticalSize, this.densityFactor, this.densityOffset, this.simplexForSurface,
                     this.randomizeDensityOffset, false, this.amplified);
         }
@@ -174,16 +174,16 @@ public final class SpongeNoiseConfig {
         private static final class Holder {
             private static final NoiseConfig OVERWORLD = (NoiseConfig) net.minecraft.world.level.levelgen.NoiseSettings.create(DimensionType.MIN_Y, 256,
                     new NoiseSamplingSettings(0.9999999814507745D, 0.9999999814507745D, 80.0D, 160.0D),
-                    new net.minecraft.world.level.levelgen.NoiseSlideSettings(-10, 3, 0), new net.minecraft.world.level.levelgen.NoiseSlideSettings(-30, 0, 0), 1, 2, 1.0D,
+                    new net.minecraft.world.level.levelgen.NoiseSlider(-10, 3, 0), new net.minecraft.world.level.levelgen.NoiseSlider(-30, 0, 0), 1, 2, 1.0D,
                     -0.46875D, true, true, false, false);
 
             private static final NoiseConfig NETHER = (NoiseConfig) net.minecraft.world.level.levelgen.NoiseSettings.create(DimensionType.MIN_Y, 128,
-                    new NoiseSamplingSettings(1.0D, 3.0D, 80.0D, 60.0D), new net.minecraft.world.level.levelgen.NoiseSlideSettings(120, 3, 0), new net.minecraft.world.level.levelgen.NoiseSlideSettings(320,
+                    new NoiseSamplingSettings(1.0D, 3.0D, 80.0D, 60.0D), new net.minecraft.world.level.levelgen.NoiseSlider(120, 3, 0), new net.minecraft.world.level.levelgen.NoiseSlider(320,
                     4, -1), 1, 2, 0.0D, 0.019921875D, false,
                     false, false, false);
 
             private static final NoiseConfig END = (NoiseConfig) net.minecraft.world.level.levelgen.NoiseSettings.create(DimensionType.MIN_Y, 128,
-                    new NoiseSamplingSettings(2.0D, 1.0D, 80.0D, 160.0D), new net.minecraft.world.level.levelgen.NoiseSlideSettings(-3000, 64, -46), new net.minecraft.world.level.levelgen.NoiseSlideSettings(
+                    new NoiseSamplingSettings(2.0D, 1.0D, 80.0D, 160.0D), new net.minecraft.world.level.levelgen.NoiseSlider(-3000, 64, -46), new net.minecraft.world.level.levelgen.NoiseSlider(
                     -30, 7, 1), 2, 1, 0.0D, 0.0D,
                     true, false, false, false);
         }

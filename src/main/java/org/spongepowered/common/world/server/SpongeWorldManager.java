@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.DynamicOps;
@@ -40,10 +39,10 @@ import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.data.worldgen.Features;
+import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.resources.RegistryResourceAccess;
 import net.minecraft.resources.RegistryWriteOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -194,7 +193,7 @@ public abstract class SpongeWorldManager implements WorldManager {
     public Optional<Path> worldDirectory(final ResourceKey key) {
         Objects.requireNonNull(key, "key");
         
-        Path directory;
+        final Path directory;
         if (Level.OVERWORLD.location().equals(key)) {
             directory = this.defaultWorldDirectory;
         } else if (Level.NETHER.location().equals(key)) {
@@ -1052,7 +1051,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                         ((PrimaryLevelData) world.getLevelData()).setSpawn(ServerLevel.END_SPAWN_POINT, 0);
                     }
                 } else {
-                    Features.BONUS_CHEST.place(world, world.getChunkSource().getGenerator(), world.random, new BlockPos(levelData.getXSpawn(),
+                    MiscOverworldFeatures.BONUS_CHEST.place(world, world.getChunkSource().getGenerator(), world.random, new BlockPos(levelData.getXSpawn(),
                             levelData.getYSpawn(),levelData.getZSpawn()));
                 }
                 levelData.setInitialized(true);
@@ -1073,7 +1072,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         // Initialize PlayerData in PlayerList, add WorldBorder listener. We change the method in PlayerList to handle per-world border
-        this.server.getPlayerList().setLevel(world);
+        this.server.getPlayerList().addWorldborderListener(world);
 
         if (levelData.getCustomBossEvents() != null) {
             ((ServerLevelBridge) world).bridge$getBossBarManager().load(levelData.getCustomBossEvents());
@@ -1187,7 +1186,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             final JsonParser parser = new JsonParser();
             final JsonElement element = parser.parse(reader);
             final SingleTemplateAccess singleTemplateAccess = new SingleTemplateAccess(registryKey, element);
-            final RegistryReadOps<JsonElement> settingsAdapter = RegistryReadOps.create(JsonOps.INSTANCE, singleTemplateAccess, (RegistryAccess.RegistryHolder) BootstrapProperties.registries);
+            final RegistryReadOps<JsonElement> settingsAdapter = RegistryReadOps.create(JsonOps.INSTANCE, singleTemplateAccess, BootstrapProperties.registries);
             final MappedRegistry<LevelStem> registry = new MappedRegistry<>(net.minecraft.core.Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
             settingsAdapter.decodeElements(registry, net.minecraft.core.Registry.LEVEL_STEM_REGISTRY, LevelStem.CODEC);
             final LevelStem template = registry.stream().findAny().orElse(null);
@@ -1234,7 +1233,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         return this.getDimensionDataPackDirectory().resolve(key.namespace()).resolve("dimension").resolve(key.value() + ".json");
     }
 
-    private static final class SingleTemplateAccess implements RegistryReadOps.ResourceAccess {
+    private static final class SingleTemplateAccess implements RegistryResourceAccess {
 
         private final net.minecraft.resources.ResourceKey<?> key;
         private final JsonElement element;
@@ -1245,19 +1244,19 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         @Override
-        public Collection<ResourceLocation> listResources(final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<?>> registryKey) {
+        public <E> Collection<net.minecraft.resources.ResourceKey<E>> listResources(final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<E>> registryKey) {
             if (this.key.isFor(registryKey)) {
-                return Collections.singletonList(new ResourceLocation(this.key.location().getNamespace(),
-                        registryKey.location().getPath() + "/" + this.key.location().getPath() + ".json"));
+                return Collections.singletonList(net.minecraft.resources.ResourceKey.create(registryKey, new ResourceLocation(this.key.location().getNamespace(),
+                        registryKey.location().getPath() + "/" + this.key.location().getPath() + ".json")));
             }
             return Collections.emptyList();
         }
 
         @Override
-        public <E> Optional<DataResult<Pair<E, OptionalInt>>> parseElement(final DynamicOps<JsonElement> ops,
+        public <E> Optional<DataResult<RegistryResourceAccess.ParsedEntry<E>>> parseElement(final DynamicOps<JsonElement> ops,
                 final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<E>> registryKey, final net.minecraft.resources.ResourceKey<E> elementKey, final Decoder<E> decoder) {
             final DataResult<E> result = decoder.parse(ops, this.element);
-            return Optional.of(result.map(t -> Pair.of(t, OptionalInt.empty())));
+            return Optional.of(result.map(t -> new ParsedEntry<>(t, OptionalInt.empty())));
         }
     }
 }

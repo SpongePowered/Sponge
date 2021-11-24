@@ -79,7 +79,7 @@ public class ScheduleUpdateTransaction extends BlockEventBasedTransaction {
 
     @Override
     public void restore(PhaseContext<?> context, ChangeBlockEvent.All event) {
-        ((TickNextTickDataBridge<?>) this.data).bridge$cancelForcibly();
+        ((TickNextTickDataBridge<?>) (Object) this.data).bridge$cancelForcibly();
     }
 
     @Override

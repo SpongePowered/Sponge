@@ -164,7 +164,7 @@ public final class SpongeNoiseGeneratorConfig {
         @Override
         public NoiseGeneratorConfig build() {
             final NoiseGeneratorSettings settings = NoiseGeneratorSettingsAccessor.invoker$new((StructureSettings) this.structureConfig,
-                    (net.minecraft.world.level.levelgen.NoiseSettings) this.noiseConfig, (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
+                    (net.minecraft.world.level.levelgen.NoiseSettings) (Object) this.noiseConfig, (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
                     (net.minecraft.world.level.block.state.BlockState) this.defaultFluid, this.bedrockRoofY, this.bedrockFloorY, this.seaLevel, this.minSurfaceLevel, false,
                     this.aquifers, this.noiseCaves, this.deepslate, this.oreVeins, this.noodleCaves
                 );

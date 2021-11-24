@@ -279,8 +279,8 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     @Override
-    protected SoundEvent getFallDamageSound(final int height) {
-        return height > 4 ? SoundEvents.PLAYER_BIG_FALL : SoundEvents.PLAYER_SMALL_FALL;
+    public Fallsounds getFallSounds() {
+        return new Fallsounds(SoundEvents.PLAYER_SMALL_FALL, SoundEvents.PLAYER_BIG_FALL);
     }
 
     @Override
