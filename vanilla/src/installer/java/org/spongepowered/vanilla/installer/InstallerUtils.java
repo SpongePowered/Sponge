@@ -82,6 +82,30 @@ public final class InstallerUtils {
         return expectedHash.equals(InstallerUtils.toHexString(digest.digest()));
     }
 
+    public static boolean validateSha256(final String expectedHash, final Path path) throws IOException {
+        try (final InputStream is = Files.newInputStream(path)) {
+            return InstallerUtils.validateSha256(expectedHash, is);
+        }
+    }
+
+    public static boolean validateSha256(final String expectedHash, final InputStream stream) throws IOException {
+        final MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (final NoSuchAlgorithmException ex) {
+            throw new AssertionError(ex); // Guaranteed present by MessageDigest spec
+        }
+
+        final byte[] buf = new byte[4096];
+        int read;
+
+        while ((read = stream.read(buf)) != -1) {
+            digest.update(buf,0, read);
+        }
+
+        return expectedHash.equals(InstallerUtils.toHexString(digest.digest()));
+    }
+
     /**
      * Downloads a file.
      *
@@ -125,43 +149,50 @@ public final class InstallerUtils {
      * @param expected The SHA-1 expected digest
      * @throws IOException If there is a problem while downloading the file
      */
-    public static void downloadCheckHash(final URL url, final Path path, final MessageDigest digest, final String expected,
-        boolean requiresRequest) throws IOException {
-        Files.createDirectories(path.getParent());
-
+    public static void downloadCheckHash(final URL url, final Path path, final MessageDigest digest, final String expected) throws IOException {
         final String name = path.getFileName().toString();
 
         Logger.info("Downloading {}. This may take a while...", name);
         Logger.debug("URL -> <{}>", url);
 
-        if (!requiresRequest) {
-            // Pipe the download stream into the file and compute the hash
-            try (final DigestInputStream stream = new DigestInputStream(url.openStream(), digest); final ReadableByteChannel in = Channels
-                .newChannel(stream); final FileChannel out = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
-                out.transferFrom(in, 0, Long.MAX_VALUE);
-            }
-        } else {
-            final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Content-Type", "application/json");
-            connection.setRequestProperty("User-Agent", "Sponge-Downloader");
+        final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("User-Agent", "Sponge-Downloader");
 
-            connection.connect();
+        connection.connect();
 
-            // Pipe the download stream into the file and compute the hash
-            try (final DigestInputStream stream = new DigestInputStream(connection.getInputStream(), digest); final ReadableByteChannel in = Channels
-                .newChannel(stream); final FileChannel out = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
-                out.transferFrom(in, 0, Long.MAX_VALUE);
-            }
+        try (final InputStream is = connection.getInputStream()) {
+            InstallerUtils.transferCheckHash(is, path, digest, expected);
+        }
+    }
+
+    /**
+     * Transfer a file and verify its digest.
+     *
+     * @param source the stream
+     * @param path The local path
+     * @param expected The SHA-1 expected digest
+     * @throws IOException If there is a problem while downloading the file
+     */
+    public static void transferCheckHash(final InputStream source, final Path path, final MessageDigest digest, final String expected) throws IOException {
+        Files.createDirectories(path.getParent());
+
+        final String name = path.getFileName().toString();
+        // Pipe the download stream into the file and compute the hash
+        try (final DigestInputStream stream = new DigestInputStream(source, digest);
+             final ReadableByteChannel in = Channels.newChannel(stream);
+             final FileChannel out = FileChannel.open(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+            out.transferFrom(in, 0, Long.MAX_VALUE);
         }
 
         final String fileSha1 = InstallerUtils.toHexString(digest.digest());
 
         if (expected.equalsIgnoreCase(fileSha1)) {
-            Logger.info("Successfully downloaded {} and verified checksum!", name);
+            Logger.info("Successfully processed {} and verified checksum!", name);
         } else {
             Files.delete(path);
-            throw new IOException(String.format("Checksum verification failed: Expected '%s', got '%s'.", expected, fileSha1));
+            throw new IOException(String.format("Checksum verification for %s failed: Expected '%s', got '%s'.", name, expected, fileSha1));
         }
     }
 }
