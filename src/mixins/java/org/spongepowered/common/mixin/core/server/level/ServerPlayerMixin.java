@@ -65,6 +65,7 @@ import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.portal.PortalInfo;
@@ -77,15 +78,20 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.SkinPart;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
@@ -165,6 +171,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow protected abstract void shadow$tellNeutralMobsThatIDied();
     @Shadow protected abstract void shadow$createEndPlatform(ServerLevel p_241206_1_, BlockPos blockPos);
     @Shadow protected abstract void shadow$triggerDimensionChangeTriggers(ServerLevel serverworld);
+    @Shadow public abstract void shadow$onUpdateAbilities();
     // @formatter:on
 
     private net.minecraft.network.chat.@Nullable Component impl$connectionMessage;
@@ -824,6 +831,45 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                     break;
             }
         }
+    }
+
+    /**
+     * @author doot - November 23rd, 2021
+     * @reason Throw ChangeDataHolderEvent.ValueChange event for gamemode changes.
+     */
+    @Overwrite
+    public void setGameMode(GameType param0) {
+        // -- Sponge Start
+        final DataTransactionResult transaction = DataTransactionResult.builder()
+                .replace(Value.immutableOf(Keys.GAME_MODE, (GameMode) (Object) this.gameMode.getGameModeForPlayer()))
+                .success(Value.immutableOf(Keys.GAME_MODE, (GameMode) (Object) param0))
+                .result(DataTransactionResult.Type.SUCCESS)
+                .build();
+        final ChangeDataHolderEvent.ValueChange valueChange = SpongeEventFactory.createChangeDataHolderEventValueChange(
+                PhaseTracker.SERVER.currentCause(),
+                transaction,
+                (ServerPlayer) this);
+        Sponge.eventManager().post(valueChange);
+        if (valueChange.isCancelled()) {
+            // Don't set gamemode if someone doesn't want us to.
+            return;
+        }
+        param0 = (GameType) (Object) valueChange.endResult().successfulValue(Keys.GAME_MODE)
+                .map(Value::get)
+                .orElse((GameMode) (Object) param0);
+        // -- Sponge End
+
+        this.gameMode.setGameModeForPlayer(param0);
+        this.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.CHANGE_GAME_MODE, (float) param0.getId()));
+        if (param0 == GameType.SPECTATOR) {
+            this.shadow$removeEntitiesOnShoulder();
+            this.stopRiding();
+        } else {
+            this.shadow$setCamera((net.minecraft.world.entity.Entity) (Object) this);
+        }
+
+        this.shadow$onUpdateAbilities();
+        this.shadow$updateEffectVisibility();
     }
 }
 
