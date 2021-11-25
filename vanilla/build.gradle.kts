@@ -208,6 +208,7 @@ dependencies {
     val apiConfigurateVersion: String by project
     val apiPluginSpiVersion: String by project
     val asmVersion: String by project
+    val forgeAutoRenamingToolVersion: String by project
     val guavaVersion: String by project
     val jlineVersion: String by project
     val jansiVersion: String by project
@@ -236,7 +237,7 @@ dependencies {
             .onEach {
                 installer("org.ow2.asm:$it:$asmVersion")
             }.toSet()
-    installer("net.minecraftforge:ForgeAutoRenamingTool:0.1.19-sponge") {
+    installer("net.minecraftforge:ForgeAutoRenamingTool:$forgeAutoRenamingToolVersion") {
         asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
     }
     installer("net.minecraftforge:srgutils:0.4.3") {

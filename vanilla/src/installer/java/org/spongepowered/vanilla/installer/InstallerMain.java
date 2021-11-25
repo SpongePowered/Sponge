@@ -27,6 +27,7 @@ package org.spongepowered.vanilla.installer;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import net.minecraftforge.fart.api.Renamer;
+import net.minecraftforge.fart.api.SignatureStripperConfig;
 import net.minecraftforge.fart.api.SourceFixerConfig;
 import net.minecraftforge.fart.api.Transformer;
 import net.minecraftforge.srgutils.IMappingFile;
@@ -338,8 +339,11 @@ public final class InstallerMain {
 
               };
             })
+            .add(Transformer.recordFixerFactory())
+            .add(Transformer.parameterAnnotationFixerFactory())
             .add(Transformer.sourceFixerFactory(SourceFixerConfig.JAVA))
-            .logger(s -> {}) // silent
+            .add(Transformer.signatureStripperFactory(SignatureStripperConfig.ALL))
+            .logger(Logger::debug) // quiet
             .build()
             .run();
 
