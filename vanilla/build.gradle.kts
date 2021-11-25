@@ -333,6 +333,9 @@ val vanillaManifest = the<JavaPluginConvention>().manifest {
         "Implementation-Version" to spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVersion, recommendedVersion),
         "Implementation-Vendor" to "SpongePowered"
     )
+    // These two are included by most CI's
+    System.getenv()["GIT_COMMIT"]?.apply { attributes("Git-Commit" to this) }
+    System.getenv()["GIT_BRANCH"]?.apply { attributes("Git-Branch" to this) }
 }
 
 tasks {
