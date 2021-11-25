@@ -24,6 +24,22 @@
  */
 package org.spongepowered.common.entity;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.storage.LevelData;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -42,28 +58,10 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.math.vector.Vector3d;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
-import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
-import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.PlayerList;
-import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.storage.LevelData;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -88,6 +86,20 @@ public final class EntityUtil {
             .findFirst();
 
     private EntityUtil() {
+    }
+
+    public static void despawnFilteredEntities(final Iterable<? extends Entity> originalEntities, final SpawnEntityEvent event) {
+        if (event.isCancelled()) {
+            for (Entity e : originalEntities) {
+                ((ServerLevel) e.level).despawn(e);
+            }
+        } else {
+            for (Entity e : originalEntities) {
+                if (!event.entities().contains(e)) {
+                    ((ServerLevel) e.level).despawn(e);
+                }
+            }
+        }
     }
 
     public static void performPostChangePlayerWorldLogic(final ServerPlayer player, final ServerLevel fromWorld,
