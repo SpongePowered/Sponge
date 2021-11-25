@@ -238,9 +238,7 @@ dependencies {
                 installer("org.ow2.asm:$it:$asmVersion")
             }.toSet()
     installer("net.minecraftforge:ForgeAutoRenamingTool:$forgeAutoRenamingToolVersion") {
-        asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
-    }
-    installer("net.minecraftforge:srgutils:0.4.3") {
+        exclude(group = "net.sf.jopt-simple")
         asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
     }
 
