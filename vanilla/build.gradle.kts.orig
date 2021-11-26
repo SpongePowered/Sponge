@@ -212,8 +212,11 @@ dependencies {
     val apiConfigurateVersion: String by project
     val apiPluginSpiVersion: String by project
     val asmVersion: String by project
+<<<<<<< HEAD
     val forgeFlowerVersion: String by project
+=======
     val forgeAutoRenamingToolVersion: String by project
+>>>>>>> api-8
     val guavaVersion: String by project
     val jlineVersion: String by project
     val jansiVersion: String by project
