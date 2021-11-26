@@ -26,29 +26,27 @@ package org.spongepowered.vanilla.installer;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import org.cadixdev.atlas.Atlas;
-import org.cadixdev.bombe.asm.jar.JarEntryRemappingTransformer;
-import org.cadixdev.bombe.jar.JarClassEntry;
-import org.cadixdev.lorenz.MappingSet;
-import org.cadixdev.lorenz.asm.LorenzRemapper;
-import org.cadixdev.lorenz.io.proguard.ProGuardReader;
+import net.minecraftforge.fart.api.Renamer;
+import net.minecraftforge.fart.api.SignatureStripperConfig;
+import net.minecraftforge.fart.api.SourceFixerConfig;
+import net.minecraftforge.fart.api.Transformer;
+import net.minecraftforge.srgutils.IMappingFile;
 import org.spongepowered.vanilla.installer.model.mojang.Version;
 import org.spongepowered.vanilla.installer.model.mojang.VersionManifest;
 import org.tinylog.Logger;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -301,16 +299,18 @@ public final class InstallerMain {
         }
 
         Logger.info("Remapping Minecraft. This may take a while...");
-        final MappingSet mappings = MappingSet.create();
-        try (final BufferedReader reader = Files.newBufferedReader(serverMappings, StandardCharsets.UTF_8)) {
-            new ProGuardReader(reader).read().reverse(mappings);
-        }
+        final IMappingFile mappings = IMappingFile.load(serverMappings.toFile()).reverse();
 
-        try (final Atlas atlas = new Atlas(service)) {
-            atlas.install(ctx -> new JarEntryRemappingTransformer(new LorenzRemapper(mappings, ctx.inheritanceProvider())) {
+        Renamer.builder()
+            .input(inputJar.toFile())
+            .output(tempOutput.toFile())
+            .add(Transformer.parameterAnnotationFixerFactory())
+            .add(ctx -> {
+              final Transformer backing = Transformer.renamerFactory(mappings).create(ctx);
+              return new Transformer() {
+
                 @Override
-                public JarClassEntry transform(final JarClassEntry entry) {
-                    // Skip shaded classes that we know are non-obf
+                public ClassEntry process(final ClassEntry entry) {
                     final String name = entry.getName();
                     if (name.startsWith("it/unimi")
                         || name.startsWith("com/google")
@@ -319,13 +319,33 @@ public final class InstallerMain {
                         || name.startsWith("org/apache")) {
                         return entry;
                     }
-
-                    return super.transform(entry);
+                    return backing.process(entry);
                 }
-            });
-            // Write to a temporary file so we don't have corrupt partial output
-            atlas.run(inputJar, tempOutput);
-        }
+
+                @Override
+                public ManifestEntry process(final ManifestEntry entry) {
+                    return backing.process(entry);
+                }
+
+                @Override
+                public ResourceEntry process(final ResourceEntry entry) {
+                    return backing.process(entry);
+                }
+
+                @Override
+                public Collection<? extends Entry> getExtras() {
+                    return backing.getExtras();
+                }
+
+              };
+            })
+            .add(Transformer.recordFixerFactory())
+            .add(Transformer.parameterAnnotationFixerFactory())
+            .add(Transformer.sourceFixerFactory(SourceFixerConfig.JAVA))
+            .add(Transformer.signatureStripperFactory(SignatureStripperConfig.ALL))
+            .logger(Logger::debug) // quiet
+            .build()
+            .run();
 
         // Restore file
         try {
