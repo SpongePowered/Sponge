@@ -158,9 +158,17 @@ public final class SpawnEntityTransaction extends WorldBasedTransaction<SpawnEnt
 
     @Override
     public boolean markCancelledTransactions(final SpawnEntityEvent event,
-        final ImmutableList<? extends GameTransaction<SpawnEntityEvent>> gameTransactions
-    ) {
-        return false;
+        final ImmutableList<? extends GameTransaction<SpawnEntityEvent>> gameTransactions) {
+        boolean cancelledAny = false;
+
+        for (final GameTransaction<SpawnEntityEvent> gameTransaction : gameTransactions) {
+            if (!event.entities().contains(((SpawnEntityTransaction) gameTransaction).entityToSpawn)) {
+                gameTransaction.markCancelled();
+                cancelledAny = true;
+            }
+        }
+
+        return cancelledAny;
     }
 
     @Override

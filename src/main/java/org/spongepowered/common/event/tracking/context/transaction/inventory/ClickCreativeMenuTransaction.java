@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -66,7 +65,7 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
 
     @Override
     Optional<ClickContainerEvent> createInventoryEvent(
-        final List<SlotTransaction> slotTransactions, final ImmutableList<Entity> entities,
+        final List<SlotTransaction> slotTransactions, final List<Entity> entities,
         final PhaseContext<@NonNull ?> context,
         final Cause cause
     ) {

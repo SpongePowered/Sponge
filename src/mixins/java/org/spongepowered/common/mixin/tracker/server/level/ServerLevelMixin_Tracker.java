@@ -126,7 +126,7 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -819,20 +819,18 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         }
 
         final Cause currentCause = tracker.currentCause();
+        final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>();
+        entities.add((org.spongepowered.api.entity.Entity) entityIn);
 
-        final SpawnEntityEvent.Pre pre = SpongeEventFactory.createSpawnEntityEventPre(
-            currentCause,
-            Collections.singletonList((org.spongepowered.api.entity.Entity) entityIn)
-        );
+        final SpawnEntityEvent.Pre pre = SpongeEventFactory.createSpawnEntityEventPre(currentCause, entities);
         Sponge.eventManager().post(pre);
-        if (pre.isCancelled()) {
+
+        if (pre.isCancelled() || entities.isEmpty()) {
             cir.setReturnValue(false);
         }
-
 
         if (current.allowsBulkEntityCaptures()) {
             current.getTransactor().logEntitySpawn(current, this, entityIn);
         }
-
     }
 }

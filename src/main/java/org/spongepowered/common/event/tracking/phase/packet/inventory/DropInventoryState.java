@@ -40,6 +40,7 @@ import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEn
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 public final class DropInventoryState extends BasicInventoryPacketState {
 
@@ -62,7 +63,7 @@ public final class DropInventoryState extends BasicInventoryPacketState {
     ) {
         return SpongeEventFactory.createDropItemEventDispense(currentCause, collect.stream()
             .map(Tuple::first).map(entity -> (Entity) entity)
-            .collect(ImmutableList.toImmutableList())
+            .collect(Collectors.toList())
         );
     }
 
