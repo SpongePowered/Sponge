@@ -827,6 +827,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
         if (pre.isCancelled() || entities.isEmpty()) {
             cir.setReturnValue(false);
+            return;
         }
 
         if (current.allowsBulkEntityCaptures()) {
