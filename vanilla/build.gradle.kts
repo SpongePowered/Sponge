@@ -268,7 +268,7 @@ dependencies {
     libraries("com.zaxxer:HikariCP:2.6.3")
     
     // Libraries needed during applaunch phase and runtime
-    bootstrapLibraries("net.minecrell:terminalconsoleappender:1.3.0-SNAPSHOT")
+    bootstrapLibraries("net.minecrell:terminalconsoleappender:1.3.0")
     bootstrapLibraries("org.jline:jline-terminal:$jlineVersion")
     bootstrapLibraries("org.jline:jline-reader:$jlineVersion")
     bootstrapLibraries("org.jline:jline-terminal-jansi:$jlineVersion") {
