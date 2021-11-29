@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.world.generation.config.noise;
 
+import net.minecraft.data.worldgen.TerrainProvider;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.NoiseSettings;
+import net.minecraft.world.level.levelgen.NoiseSlider;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
@@ -172,20 +175,17 @@ public final class SpongeNoiseConfig {
     public static final class FactoryImpl implements NoiseConfig.Factory {
 
         private static final class Holder {
-            private static final NoiseConfig OVERWORLD = (NoiseConfig) net.minecraft.world.level.levelgen.NoiseSettings.create(DimensionType.MIN_Y, 256,
-                    new NoiseSamplingSettings(0.9999999814507745D, 0.9999999814507745D, 80.0D, 160.0D),
-                    new net.minecraft.world.level.levelgen.NoiseSlider(-10, 3, 0), new net.minecraft.world.level.levelgen.NoiseSlider(-30, 0, 0), 1, 2, 1.0D,
-                    -0.46875D, true, true, false, false);
+            private static final NoiseConfig OVERWORLD = (NoiseConfig) (Object) net.minecraft.world.level.levelgen.NoiseSettings.create(-64, 384,
+                    new NoiseSamplingSettings(1.0D, 1.0D, 80.0D, 160.0D), new NoiseSlider(-0.078125D, 2, 8),
+                    new NoiseSlider(0.1171875D, 3, 0), 1, 2, false, false, false, TerrainProvider.overworld(false));
 
-            private static final NoiseConfig NETHER = (NoiseConfig) net.minecraft.world.level.levelgen.NoiseSettings.create(DimensionType.MIN_Y, 128,
-                    new NoiseSamplingSettings(1.0D, 3.0D, 80.0D, 60.0D), new net.minecraft.world.level.levelgen.NoiseSlider(120, 3, 0), new net.minecraft.world.level.levelgen.NoiseSlider(320,
-                    4, -1), 1, 2, 0.0D, 0.019921875D, false,
-                    false, false, false);
+            private static final NoiseConfig NETHER = (NoiseConfig) (Object) net.minecraft.world.level.levelgen.NoiseSettings.create(0, 128,
+                    new NoiseSamplingSettings(1.0D, 3.0D, 80.0D, 60.0D), new NoiseSlider(0.9375D, 3, 0),
+                    new NoiseSlider(2.5D, 4, -1), 1, 2, false, false, false, TerrainProvider.nether());
 
-            private static final NoiseConfig END = (NoiseConfig) net.minecraft.world.level.levelgen.NoiseSettings.create(DimensionType.MIN_Y, 128,
-                    new NoiseSamplingSettings(2.0D, 1.0D, 80.0D, 160.0D), new net.minecraft.world.level.levelgen.NoiseSlider(-3000, 64, -46), new net.minecraft.world.level.levelgen.NoiseSlider(
-                    -30, 7, 1), 2, 1, 0.0D, 0.0D,
-                    true, false, false, false);
+            private static final NoiseConfig END = (NoiseConfig) (Object) NoiseSettings.create(0, 128,
+                    new NoiseSamplingSettings(2.0D, 1.0D, 80.0D, 160.0D), new NoiseSlider(-23.4375D, 64, -46),
+                    new NoiseSlider(-0.234375D, 7, 1), 2, 1, true, false, false, TerrainProvider.end());
         }
 
         @Override

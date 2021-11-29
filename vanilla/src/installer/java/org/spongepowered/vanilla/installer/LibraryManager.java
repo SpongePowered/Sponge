@@ -173,7 +173,7 @@ public final class LibraryManager {
                         final SonatypeResponse.Item item = response.items.get(0);
                         final URL url = item.downloadUrl;
 
-                        InstallerUtils.downloadCheckHash(url, depFile, md5, item.checksum.md5, true);
+                        InstallerUtils.downloadCheckHash(url, depFile, md5, item.checksum.md5);
                     }
                 } else {
                     final SonatypeResponse response = this.getResponseFor(this.gson, dependency);
@@ -189,7 +189,7 @@ public final class LibraryManager {
                     final URL url = item.downloadUrl;
 
                     if (checkHashes) {
-                        InstallerUtils.downloadCheckHash(url, depFile, md5, item.checksum.md5, true);
+                        InstallerUtils.downloadCheckHash(url, depFile, md5, item.checksum.md5);
                     } else {
                         InstallerUtils.download(url, depFile, true);
                     }
