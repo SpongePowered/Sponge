@@ -103,17 +103,17 @@ public final class LivingData {
                     .create(Keys.CHEST_ROTATION)
                         .get(h -> new Vector3d(h.xRot, h.yRot, 0))
                         .set((h, v) -> {
-                            final float headYaw = (float) v.y();
+                            final float yaw = (float) v.y();
                             final float pitch = (float) v.x();
-                            h.setYHeadRot(headYaw);
+                            h.yRot = yaw;
                             h.xRot = pitch;
                         })
                     .create(Keys.HEAD_ROTATION)
                         .get(h -> new Vector3d(h.xRot, h.getYHeadRot(), 0))
                         .set((h, v) -> {
-                            final float yaw = (float) v.y();
+                            final float headYaw = (float) v.y();
                             final float pitch = (float) v.x();
-                            h.yRot = yaw;
+                            h.yHeadRot = headYaw;
                             h.xRot = pitch;
                         })
                     .create(Keys.HEALTH)
