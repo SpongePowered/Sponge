@@ -36,7 +36,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.world.level.biome.BiomeSourceAccessor;
-import org.spongepowered.common.bridge.world.level.biome.OverworldBiomeSourceBridge;
 import org.spongepowered.common.world.biome.provider.OverworldBiomeSourceHelper;
 
 import java.util.ArrayList;

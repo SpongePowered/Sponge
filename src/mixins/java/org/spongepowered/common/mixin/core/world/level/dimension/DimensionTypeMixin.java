@@ -40,7 +40,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
-import org.spongepowered.common.registry.provider.BiomeSamplerProvider;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
 import java.io.File;

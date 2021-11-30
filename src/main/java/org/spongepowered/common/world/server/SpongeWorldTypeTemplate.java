@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.world.server;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -37,15 +34,11 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.util.MinecraftDayTime;
-import org.spongepowered.api.world.biome.BiomeSampler;
-import org.spongepowered.api.world.biome.BiomeSamplers;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeEffects;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
-import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
-import org.spongepowered.common.data.fixer.SpongeDataCodec;
 import org.spongepowered.common.registry.provider.DimensionEffectProvider;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.MissingImplementationException;
@@ -58,7 +51,6 @@ import java.util.OptionalLong;
 public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed implements WorldTypeTemplate {
 
     public final WorldTypeEffect effect;
-    public final BiomeSampler biomeSampler;
     @Nullable public final MinecraftDayTime fixedTime;
     public final ResourceKey infiniburn;
 
@@ -67,24 +59,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     public final int minY, logicalHeight, maximumHeight;
     public final double coordinateScale;
 
-    private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
-        .create(r -> r
-            .group(
-                ResourceLocation.CODEC.optionalFieldOf("biome_sampler", new ResourceLocation("sponge", "column_fuzzed")).forGetter(v -> v.biomeSampler),
-                Codec.BOOL.optionalFieldOf("create_dragon_fight", Boolean.FALSE).forGetter(v -> v.createDragonFight)
-            )
-            .apply(r, r.stable(SpongeDataSection::new))
-        );
-
-    public static Codec<DimensionType> DIRECT_CODEC;
-
-    public static void internalCodec(final Codec<DimensionType> internalCodec) {
-        SpongeWorldTypeTemplate.DIRECT_CODEC = new MapCodec.MapCodecCodec<>(new SpongeDataCodec<>(internalCodec,
-            SpongeWorldTypeTemplate.SPONGE_CODEC, (type, data) -> ((DimensionTypeBridge) type).bridge$decorateData(data), type -> ((DimensionTypeBridge)
-            type).bridge$createData()));
-    }
-
-    protected SpongeWorldTypeTemplate(final BuilderImpl builder) {
+    SpongeWorldTypeTemplate(final BuilderImpl builder) {
         super(builder.key);
 
         this.effect = builder.effect;
@@ -103,9 +78,6 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         this.logicalHeight = builder.logicalHeight;
         this.maximumHeight = builder.maximumHeight;
         this.coordinateScale = builder.coordinateMultiplier;
-
-        // Sponge
-        this.biomeSampler = builder.biomeSampler;
         this.createDragonFight = builder.createDragonFight;
     }
 
@@ -126,7 +98,6 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         this.minY = dimensionType.minY();
         this.logicalHeight = dimensionType.logicalHeight();
         this.maximumHeight = dimensionType.height();
-        this.biomeSampler = (BiomeSampler) dimensionType.getBiomeZoomer();
         this.infiniburn = (ResourceKey) (Object) ((DimensionTypeAccessor)dimensionType).accessor$infiniburn();
         this.effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) ((DimensionTypeAccessor) dimensionType).accessor$effectsLocation());
         this.ambientLight = ((DimensionTypeAccessor) dimensionType).accessor$ambientLight();
@@ -151,11 +122,6 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     @Override
     public WorldTypeEffect effect() {
         return this.effect;
-    }
-
-    @Override
-    public BiomeSampler biomeSampler() {
-        return this.biomeSampler;
     }
 
     @Override
@@ -247,7 +213,6 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
         @Nullable protected WorldTypeEffect effect;
         @Nullable protected MinecraftDayTime fixedTime;
-        @Nullable protected BiomeSampler biomeSampler;
         @Nullable protected ResourceKey infiniburn;
 
         protected boolean scorching, natural, skylight, ceiling, piglinSafe, bedsUsable, respawnAnchorsUsable, hasRaids, createDragonFight;
@@ -258,12 +223,6 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         @Override
         public WorldTypeTemplate.Builder effect(final WorldTypeEffect effect) {
             this.effect = Objects.requireNonNull(effect, "effect");
-            return this;
-        }
-
-        @Override
-        public Builder biomeSampler(final BiomeSampler biomeSampler) {
-            this.biomeSampler = Objects.requireNonNull(biomeSampler, "biomeFinder");
             return this;
         }
 
@@ -362,7 +321,6 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             super.reset();
             this.effect = WorldTypeEffects.OVERWORLD;
             this.fixedTime = null;
-            this.biomeSampler = BiomeSamplers.COLUMN_FUZZED;
             this.infiniburn = (ResourceKey) (Object) BlockTags.INFINIBURN_OVERWORLD.getName();
             this.scorching = false;
             this.natural = true;
@@ -386,7 +344,6 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             Objects.requireNonNull(value, "value");
 
             this.effect = value.effect();
-            this.biomeSampler = value.biomeSampler();
             this.fixedTime = value.fixedTime().orElse(null);
             this.infiniburn = (ResourceKey) (Object) BlockTags.INFINIBURN_OVERWORLD.getName();
             this.scorching = value.scorching();
