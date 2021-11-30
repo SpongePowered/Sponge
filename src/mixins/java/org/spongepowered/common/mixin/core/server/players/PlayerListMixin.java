@@ -130,7 +130,6 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final private static SimpleDateFormat BAN_DATE_FORMAT;
     @Shadow @Final private MinecraftServer server;
-    @Shadow private int viewDistance;
     @Shadow @Final @Mutable private UserBanList bans;
     @Shadow @Final @Mutable private IpBanList ipBans;
     @Shadow @Final @Mutable private UserWhiteList whitelist;
@@ -374,16 +373,13 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundLoginPacket"))
-    private ClientboundLoginPacket impl$usePerWorldViewDistance(final int p_i242082_1_, final GameType p_i242082_2_, final GameType p_i242082_3_,
-            final long p_i242082_4_, final boolean p_i242082_6_, final Set<ResourceKey<Level>> p_i242082_7_,
-            final RegistryAccess.RegistryHolder p_i242082_8_, final DimensionType p_i242082_9_, final ResourceKey<Level> p_i242082_10_,
-            final int p_i242082_11_, final int p_i242082_12_, final boolean p_i242082_13_, final boolean p_i242082_14_,
-            final boolean p_i242082_15_, final boolean p_i242082_16_, final Connection p_72355_1_,
-            final net.minecraft.server.level.ServerPlayer player) {
+    private ClientboundLoginPacket impl$usePerWorldViewDistance(int $$0, boolean $$1, GameType $$2, GameType $$3, Set $$4,
+        RegistryAccess.RegistryHolder $$5, DimensionType $$6, ResourceKey $$7, long $$8, int $$9, int $$10, int $$11, boolean $$12, boolean $$13,
+        boolean $$14, boolean $$15, net.minecraft.server.level.ServerPlayer player) {
 
-        return new ClientboundLoginPacket(p_i242082_1_, p_i242082_2_, p_i242082_3_, p_i242082_4_, p_i242082_6_, p_i242082_7_, p_i242082_8_, p_i242082_9_,
-                p_i242082_10_, p_i242082_11_, ((PrimaryLevelDataBridge) player.getLevel().getLevelData()).bridge$viewDistance().orElse(this.viewDistance),
-                p_i242082_13_, p_i242082_14_, p_i242082_15_, p_i242082_16_);
+        return new ClientboundLoginPacket($$0, $$1, $$2, $$3, $$4, $$5, $$6, $$7,
+            $$8, $$9, ((PrimaryLevelDataBridge) player.getLevel().getLevelData()).bridge$viewDistance().orElse($$10),
+                $$11, $$12, $$13, $$14, $$15);
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))
@@ -433,7 +429,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((ServerScoreboardBridge) ((ServerPlayer) player).scoreboard()).bridge$removePlayer(player, false);
     }
 
-    @Redirect(method = "setLevel",
+    @Redirect(method = "addWorldborderListener",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/level/border/WorldBorder;addListener(Lnet/minecraft/world/level/border/BorderChangeListener;)V"

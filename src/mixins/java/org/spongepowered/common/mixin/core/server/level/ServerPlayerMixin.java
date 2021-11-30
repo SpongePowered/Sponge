@@ -571,7 +571,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Redirect(method = "getExitPortal",
             slice = @Slice(
-                    from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getExitPortal(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Z)Ljava/util/Optional;"),
+                    from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getExitPortal(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;ZLnet/minecraft/world/level/border/WorldBorder;)Ljava/util/Optional;"),
                     to = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/server/level/ServerPlayer;level:Lnet/minecraft/world/level/Level;")
             ),
             at = @At(value = "INVOKE", remap = false, target = "Ljava/util/Optional;isPresent()Z"))
@@ -718,24 +718,24 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             return;
         }
 
-        final Locale newLocale = LocaleCache.getLocale(packet.getLanguage());
+        final Locale newLocale = LocaleCache.getLocale(packet.language());
 
         final ImmutableSet<SkinPart> skinParts = Sponge.game().registry(RegistryTypes.SKIN_PART).stream()
                 .map(part -> (SpongeSkinPart) part)
-                .filter(part -> part.test(packet.getModelCustomisation()))
+                .filter(part -> part.test(packet.modelCustomisation()))
                 .collect(ImmutableSet.toImmutableSet());
-        final int viewDistance = packet.getViewDistance();
+        final int viewDistance = packet.viewDistance();
 
         // Post before the player values are updated
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final ChatVisibility visibility = (ChatVisibility) (Object) packet.getChatVisibility();
+            final ChatVisibility visibility = (ChatVisibility) (Object) packet.chatVisibility();
             final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(
                     frame.currentCause(),
                     visibility,
                     skinParts,
                     newLocale,
                     (ServerPlayer) this,
-                    packet.getChatColors(),
+                    packet.chatColors(),
                     viewDistance);
             SpongeCommon.post(event);
         }
@@ -743,10 +743,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Inject(method = "updateOptions", at = @At("TAIL"))
     private void impl$updateTrackedClientSettings(final ServerboundClientInformationPacket packet, final CallbackInfo ci) {
-        final Locale newLocale = LocaleCache.getLocale(packet.getLanguage());
+        final Locale newLocale = LocaleCache.getLocale(packet.language());
 
         // Update the fields we track ourselves
-        this.impl$viewDistance = packet.getViewDistance();
+        this.impl$viewDistance = packet.viewDistance();
         this.bridge$setLanguage(newLocale);
         this.impl$language = newLocale;
     }
