@@ -39,13 +39,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
 import net.minecraft.world.level.CollisionGetter;
-import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.ServerLevelData;
+import net.minecraft.world.ticks.LevelTicks;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
@@ -104,8 +104,8 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     org.spongepowered.api.world.server.ServerWorld, SpongeLocationBaseDataHolder {
 
     // @formatter:off
-    @Shadow @Final private ServerTickList<Block> blockTicks;
-    @Shadow @Final private ServerTickList<Fluid> liquidTicks;
+    @Shadow @Final private LevelTicks<Block> blockTicks;
+    @Shadow @Final private LevelTicks<Fluid> fluidTicks;
     @Shadow @Final private PersistentEntitySectionManager<Entity> entityManager;
     @Shadow @Final private ServerLevelData serverLevelData;
 
@@ -279,7 +279,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public ScheduledUpdateList<FluidType> scheduledFluidUpdates() {
-        return (ScheduledUpdateList<FluidType>) this.liquidTicks;
+        return (ScheduledUpdateList<FluidType>) this.fluidTicks;
     }
 
     // LocationBaseDataHolder

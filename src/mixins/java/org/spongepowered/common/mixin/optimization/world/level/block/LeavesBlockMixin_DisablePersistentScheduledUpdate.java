@@ -73,7 +73,7 @@ public abstract class LeavesBlockMixin_DisablePersistentScheduledUpdate {
                 return facingState.setValue(LeavesBlockMixin_DisablePersistentScheduledUpdate.DISTANCE, i);
             }
             // Sponge End
-            worldIn.getBlockTicks().scheduleTick(currentPos, (LeavesBlock) (Object) this, 1);
+            worldIn.scheduleTick(currentPos, (LeavesBlock) (Object) this, 1);
         }
 
         return stateIn;

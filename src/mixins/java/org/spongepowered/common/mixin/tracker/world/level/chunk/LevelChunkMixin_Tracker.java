@@ -25,15 +25,14 @@
 package org.spongepowered.common.mixin.tracker.world.level.chunk;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.chunk.ProtoTickList;
 import net.minecraft.world.phys.AABB;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -66,6 +65,7 @@ import org.spongepowered.common.event.tracking.context.transaction.block.ChangeB
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.event.tracking.phase.generation.ChunkLoadContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -140,7 +140,7 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
                 return ChunkPipeline.nullReturn((LevelChunk) (Object) this, (ServerLevel) this.level);
             }
 
-            chunksection = new LevelChunkSection(SectionPos.blockToSectionCoord(yPos));
+            chunksection = new LevelChunkSection(SectionPos.blockToSectionCoord(yPos), BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY));
             this.sections[sectionIndex] = chunksection;
         }
 

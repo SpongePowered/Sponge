@@ -186,7 +186,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         } else {
             postProcessor = param5;
         }
-        return status.generate(param0, param1, param2, param3, param4, postProcessor, param6);
+        return status.generate(param0, param1, param2, param3, param4, postProcessor, param6, false);
     }
 
     @Inject(method = "save", at = @At(value = "RETURN"))

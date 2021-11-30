@@ -70,8 +70,8 @@ public abstract class ChunkMapMixin_Tracker {
     }
 
     @Redirect(method = "*",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;unpackTicks()V"))
-    private static void tracker$wrapUnpackTicks(final LevelChunk chunk) {
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;startTickingChunk(Lnet/minecraft/world/level/chunk/LevelChunk;)V"))
+    private static void tracker$wrapUnpackTicks(final LevelChunk chunk, final long l) {
         if (!PhaseTracker.SERVER.onSidedThread()) {
             new PrettyPrinter(60).add("Illegal Async Chunk Unpacking").centre().hr()
                 .addWrapped("Someone is attempting to unpack chunk scheduled updates while off the main thread, this is" +
@@ -93,7 +93,7 @@ public abstract class ChunkMapMixin_Tracker {
             .world((ServerLevel) chunk.getLevel())
             .chunk(chunk)) {
             ctx.buildAndSwitch();
-            chunk.unpackTicks();
+            chunk.unpackTicks(l);
         }
 
     }

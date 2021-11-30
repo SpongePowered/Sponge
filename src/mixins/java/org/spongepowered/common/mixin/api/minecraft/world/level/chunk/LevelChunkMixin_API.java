@@ -34,7 +34,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -64,7 +63,6 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.level.LevelAccessor;
-import org.spongepowered.common.accessor.world.level.chunk.ChunkBiomeContainerAccessor;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -96,7 +94,6 @@ import java.util.stream.Stream;
 public abstract class LevelChunkMixin_API implements WorldChunk {
 
     //@formatter:off
-    @Shadow private ChunkBiomeContainer biomes;
     @Shadow private long inhabitedTime;
     @Shadow @Final private ChunkPos chunkPos;
     @Shadow @Final Level level;
@@ -112,7 +109,9 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.biomes, () -> this.shadow$setUnsaved(true));
+        // TODO ChunkBiomeContainerAccessor is dead
+        //return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.biomes, () -> this.shadow$setUnsaved(true));
+        return false;
     }
 
     @Intrinsic

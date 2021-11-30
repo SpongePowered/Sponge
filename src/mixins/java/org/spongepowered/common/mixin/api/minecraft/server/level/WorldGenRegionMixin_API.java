@@ -95,7 +95,7 @@ public abstract class WorldGenRegionMixin_API implements GenerationRegion {
             throw new IllegalArgumentException(String.format("Chunk coordinates (%d, %d, %d) is out of bounds.", cx, cy, cz));
         } else if (chunk instanceof LevelChunk) {
             // If this strange circumstance occurs, we just use Mojang's imposter and be on our way.
-            return (GenerationChunk) new ImposterProtoChunk((LevelChunk) chunk);
+            return (GenerationChunk) new ImposterProtoChunk((LevelChunk) chunk, false);
         }
         return (GenerationChunk) chunk;
     }
