@@ -31,15 +31,15 @@ import net.minecraft.util.ClassInstanceMultiMap;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
+import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.ticks.LevelChunkTicks;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -95,12 +95,12 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
     private Map<Integer, PlayerTracker> impl$trackedIntBlockPositions = new HashMap<>();
     private Map<Short, PlayerTracker> impl$trackedShortBlockPositions = new HashMap<>();
 
-    @Inject(method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/chunk/ChunkBiomeContainer;Lnet/minecraft/world/level/chunk/UpgradeData;Lnet/minecraft/world/level/TickList;Lnet/minecraft/world/level/TickList;J[Lnet/minecraft/world/level/chunk/LevelChunkSection;Ljava/util/function/Consumer;)V",
+    @Inject(method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/chunk/UpgradeData;Lnet/minecraft/world/ticks/LevelChunkTicks;Lnet/minecraft/world/ticks/LevelChunkTicks;J[Lnet/minecraft/world/level/chunk/LevelChunkSection;Lnet/minecraft/world/level/chunk/LevelChunk$PostLoadProcessor;Lnet/minecraft/world/level/levelgen/blending/BlendingData;)V",
             at = @At("RETURN"))
-    private void impl$onConstruct(Level p_i225781_1_, ChunkPos p_i225781_2_, ChunkBiomeContainer p_i225781_3_, UpgradeData p_i225781_4_,
-            TickList<Block> p_i225781_5_, TickList<Fluid> p_i225781_6_, long p_i225781_7_, LevelChunkSection[] p_i225781_9_,
-            Consumer<LevelChunk> p_i225781_10_, CallbackInfo ci) {
-        this.impl$cacheKey = ChunkPos.asLong(p_i225781_2_.x, p_i225781_2_.z);
+    private void impl$onConstruct(Level $$0, ChunkPos $$1, UpgradeData $$2, LevelChunkTicks $$3, LevelChunkTicks $$4,
+                                  long $$5, LevelChunkSection[] $$6, LevelChunk.PostLoadProcessor $$7, BlendingData $$8,
+                                  CallbackInfo ci) {
+        this.impl$cacheKey = ChunkPos.asLong($$1.x, $$1.z);
     }
 
     @Override

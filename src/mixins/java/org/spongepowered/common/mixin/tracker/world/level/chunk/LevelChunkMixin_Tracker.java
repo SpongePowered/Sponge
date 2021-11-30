@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.ticks.LevelChunkTicks;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -233,15 +234,15 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    @Redirect(method = "unpackTicks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/ProtoTickList;copyOut(Lnet/minecraft/world/level/TickList;Ljava/util/function/Function;)V"))
-    private void tracker$wrapRescheduledTicks(final ProtoTickList chunkPrimerTickList, final TickList<?> tickList, final Function<BlockPos, ?> func) {
+    @Redirect(method = "unpackTicks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/ticks/LevelChunkTicks;unpack(J)V"))
+    private void tracker$wrapRescheduledTicks(final LevelChunkTicks instance, final long $$0) {
         if (!PhaseTracker.SERVER.onSidedThread()) {
             return;
         }
         try (final ChunkLoadContext context = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.SERVER)) {
             context.chunk((LevelChunk) (Object) this);
             context.buildAndSwitch();
-            chunkPrimerTickList.copyOut(tickList, func);
+            instance.unpack($$0);
         }
     }
 }
