@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world.level.levelgen;
 
+import static net.minecraft.world.level.levelgen.WorldGenSettings.makeDefaultOverworld;
+
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -56,10 +59,6 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
 
     @Shadow public static MappedRegistry<LevelStem> withOverworld(Registry<DimensionType> p_242749_0_,
             MappedRegistry<LevelStem> p_242749_1_, ChunkGenerator p_242749_2_) {
-        return null;
-    }
-    @Shadow public static NoiseBasedChunkGenerator makeDefaultOverworld(
-            Registry<Biome> p_242750_0_, Registry<NoiseGeneratorSettings> p_242750_1_, long p_242750_2_) {
         return null;
     }
     // @formatter:on
@@ -96,16 +95,18 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
     }
 
     /**
-     * @author zidane - January 3rd, 2021 - Minecraft 1.16.4
+     * @author zidane
      * @reason Cache the default generator settings as early as possible if a defaulted one
      */
     @Overwrite
-    public static WorldGenSettings makeDefault(Registry<DimensionType> p_242751_0_, Registry<Biome> p_242751_1_, Registry<NoiseGeneratorSettings> p_242751_2_) {
-        long i = (new Random()).nextLong();
-        final WorldGenSettings dimensionGeneratorSettings =
-                new WorldGenSettings(i, true, false, withOverworld(p_242751_0_, DimensionType.defaultDimensions(p_242751_0_, p_242751_1_,
-                        p_242751_2_, i), makeDefaultOverworld(p_242751_1_, p_242751_2_, i)));
-        BootstrapProperties.worldGenSettings = dimensionGeneratorSettings;
-        return dimensionGeneratorSettings;
+    public static WorldGenSettings makeDefault(RegistryAccess $$0) {
+        long $$1 = (new Random()).nextLong();
+        // Sponge Start - Cache the world gen settings as early as possible
+        final WorldGenSettings worldGenSettings =
+            new WorldGenSettings($$1, true, false, withOverworld($$0.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY),
+                DimensionType.defaultDimensions($$0, $$1), makeDefaultOverworld($$0, $$1)));
+        BootstrapProperties.worldGenSettings = worldGenSettings;
+        // Sponge End
+        return worldGenSettings;
     }
 }

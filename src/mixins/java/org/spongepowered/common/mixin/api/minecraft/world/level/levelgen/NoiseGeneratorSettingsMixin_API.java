@@ -44,17 +44,14 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     // @formatter:off
     @Shadow public abstract StructureSettings shadow$structureSettings();
     @Shadow public abstract net.minecraft.world.level.levelgen.NoiseSettings shadow$noiseSettings();
-    @Shadow public abstract int shadow$getBedrockRoofPosition();
-    @Shadow public abstract int shadow$getBedrockFloorPosition();
     @Shadow public abstract int shadow$seaLevel();
-    @Shadow public abstract int shadow$getMinSurfaceLevel();
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$getDefaultBlock();
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$getDefaultFluid();
-    @Shadow protected abstract boolean shadow$isAquifersEnabled();
-    @Shadow protected abstract boolean shadow$isNoiseCavesEnabled();
-    @Shadow protected abstract boolean shadow$isDeepslateEnabled();
+    @Shadow public abstract boolean shadow$isAquifersEnabled();
+    @Shadow public abstract boolean shadow$isNoiseCavesEnabled();
+    @Shadow public abstract boolean shadow$isOreVeinsEnabled();
+    @Shadow public abstract boolean shadow$isNoodleCavesEnabled();
     // @formatter:on
-
 
     @Override
     public StructureGenerationConfig structureConfig() {
@@ -63,7 +60,7 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
 
     @Override
     public NoiseConfig noiseConfig() {
-        return (NoiseConfig) this.shadow$noiseSettings();
+        return (NoiseConfig) (Object) this.shadow$noiseSettings();
     }
 
     @Override
@@ -76,24 +73,9 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
         return (BlockState) this.shadow$getDefaultFluid();
     }
 
-    @Override
-    public int bedrockRoofY() {
-        return this.shadow$getBedrockRoofPosition();
-    }
-
-    @Override
-    public int bedrockFloorY() {
-        return this.shadow$getBedrockFloorPosition();
-    }
-
     @Intrinsic
     public int noiseGeneratorConfig$seaLevel() {
         return this.shadow$seaLevel();
-    }
-
-    @Intrinsic
-    public int noiseGeneratorConfig$minSurfaceLevel() {
-        return this.shadow$getMinSurfaceLevel();
     }
 
     @Override
@@ -107,8 +89,12 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     }
 
     @Override
-    public boolean deepslate() {
-        return this.shadow$isDeepslateEnabled();
+    public boolean oreVeins() {
+        return this.shadow$isOreVeinsEnabled();
     }
 
+    @Override
+    public boolean noodleCaves() {
+        return this.shadow$isNoodleCavesEnabled();
+    }
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
+import net.minecraft.world.level.biome.Climate;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,13 +33,14 @@ import java.util.List;
 import java.util.Set;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import org.spongepowered.common.bridge.world.level.biome.BiomeSourceBridge;
 
 @Mixin(BiomeSource.class)
 public abstract class BiomeSourceMixin_API implements org.spongepowered.api.world.biome.provider.BiomeProvider, BiomeManager.NoiseBiomeSource {
 
     // @formatter:off
-    @Shadow public abstract List<net.minecraft.world.level.biome.Biome> shadow$possibleBiomes();
-    @Shadow public abstract Set<net.minecraft.world.level.biome.Biome> shadow$getBiomesWithin(int p_225530_1_, int p_225530_2_, int p_225530_3_, int p_225530_4_);
+    @Shadow public abstract Set<net.minecraft.world.level.biome.Biome> shadow$possibleBiomes();
+    @Shadow public abstract Set<net.minecraft.world.level.biome.Biome> shadow$getBiomesWithin(int x, int y, int z, int size, Climate.Sampler sampler);
     // @formatter:on
 
     @Override
@@ -53,6 +55,7 @@ public abstract class BiomeSourceMixin_API implements org.spongepowered.api.worl
 
     @Override
     public Set<Biome> within(final int x, final int y, final int z, final int size) {
-        return (Set<Biome>) (Object) this.shadow$getBiomesWithin(x, y, z, size);
+        final Climate.Sampler sampler = ((BiomeSourceBridge) (Object) this).bridge$chunkGenerator().climateSampler();
+        return (Set<Biome>) (Object) this.shadow$getBiomesWithin(x, y, z, size, sampler);
     }
 }

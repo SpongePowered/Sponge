@@ -49,7 +49,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.biome.BiomeZoomer;
 import net.minecraft.world.level.dimension.DimensionType;
 
 @Mixin(DimensionType.class)
@@ -61,7 +60,6 @@ public abstract class DimensionTypeMixin_API implements WorldType {
     @Shadow @Final private float ambientLight;
     @Shadow @Final private OptionalLong fixedTime;
 
-    @Shadow public abstract BiomeZoomer shadow$getBiomeZoomer();
     @Shadow public abstract boolean shadow$ultraWarm();
     @Shadow public abstract boolean shadow$natural();
     @Shadow public abstract double shadow$coordinateScale();
@@ -96,11 +94,6 @@ public abstract class DimensionTypeMixin_API implements WorldType {
             throw new IllegalStateException(String.format("The effect '%s' has not been registered!", this.effectsLocation));
         }
         return effect;
-    }
-
-    @Override
-    public BiomeSampler biomeSampler() {
-        return (BiomeSampler) this.shadow$getBiomeZoomer();
     }
 
     @Override

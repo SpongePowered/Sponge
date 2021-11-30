@@ -22,18 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
+package org.spongepowered.common.mixin.core.world.level.chunk;
 
-import net.minecraft.world.level.biome.TheEndBiomeSource;
-import org.spongepowered.api.world.biome.provider.ConfigurableBiomeProvider;
-import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.StructureSettings;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.world.level.biome.BiomeSourceBridge;
 
-@Mixin(TheEndBiomeSource.class)
-public abstract class TheEndBiomeSourceMixin_API extends BiomeSourceMixin_API implements ConfigurableBiomeProvider<EndStyleBiomeConfig> {
+@Mixin(ChunkGenerator.class)
+public abstract class ChunkGeneratorMixin {
 
-    @Override
-    public EndStyleBiomeConfig config() {
-        return null;
+    @Inject(method = "<init>(Lnet/minecraft/world/level/biome/BiomeSource;Lnet/minecraft/world/level/biome/BiomeSource;Lnet/minecraft/world/level/levelgen/StructureSettings;J)V", at = @At("RETURN"))
+    private void impl$assignGeneratorRefToSource(final BiomeSource $$0, final BiomeSource $$1, final StructureSettings $$2, final long $$3,
+        final CallbackInfo ci) {
+
+        ((BiomeSourceBridge) $$0).bridge$setChunkGenerator((ChunkGenerator) (Object) this);
+        ((BiomeSourceBridge) $$1).bridge$setChunkGenerator((ChunkGenerator) (Object) this);
     }
 }

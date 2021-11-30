@@ -235,7 +235,9 @@
         "world.scores.ObjectiveMixin",
         "world.scores.PlayerTeamMixin",
         "world.scores.ScoreboardMixin",
-        "world.scores.ScoreMixin"
+        "world.scores.ScoreMixin",
+        "world.level.biome.BiomeSourceMixin",
+        "world.level.chunk.ChunkGeneratorMixin"
     ],
     "client": [
         "client.MinecraftMixin",

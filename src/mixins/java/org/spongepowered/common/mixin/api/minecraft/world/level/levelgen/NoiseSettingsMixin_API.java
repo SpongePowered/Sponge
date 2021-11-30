@@ -48,10 +48,6 @@ public abstract class NoiseSettingsMixin_API implements NoiseConfig {
     @Shadow public abstract NoiseSlider shadow$bottomSlideSettings();
     @Shadow public abstract int shadow$noiseSizeHorizontal();
     @Shadow public abstract int shadow$noiseSizeVertical();
-    @Shadow public abstract double shadow$densityFactor();
-    @Shadow public abstract double shadow$densityOffset();
-    @Shadow @Deprecated public abstract boolean shadow$useSimplexSurfaceNoise();
-    @Shadow @Deprecated public abstract boolean shadow$randomDensityOffset();
     @Shadow @Deprecated public abstract boolean shadow$isAmplified();
     // @formatter:on
 
@@ -83,26 +79,6 @@ public abstract class NoiseSettingsMixin_API implements NoiseConfig {
     @Override
     public int verticalSize() {
         return this.shadow$noiseSizeVertical();
-    }
-
-    @Intrinsic
-    public double noiseConfig$densityFactor() {
-        return this.shadow$densityFactor();
-    }
-
-    @Intrinsic
-    public double noiseConfig$densityOffset() {
-        return this.shadow$densityOffset();
-    }
-
-    @Override
-    public boolean simplexForSurface() {
-        return this.shadow$useSimplexSurfaceNoise();
-    }
-
-    @Override
-    public boolean randomizeDensityOffset() {
-        return this.shadow$randomDensityOffset();
     }
 
     @Override

@@ -22,18 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
+package org.spongepowered.common.mixin.core.world.level.biome;
 
-import net.minecraft.world.level.biome.OverworldBiomeSource;
-import org.spongepowered.api.world.biome.provider.ConfigurableBiomeProvider;
-import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.world.level.biome.BiomeSourceBridge;
 
-@Mixin(OverworldBiomeSource.class)
-public abstract class OverworldBiomeSourceMixin_API extends BiomeSourceMixin_API implements ConfigurableBiomeProvider<LayeredBiomeConfig> {
+@Mixin(BiomeSource.class)
+public abstract class BiomeSourceMixin implements BiomeSourceBridge {
+
+    private ChunkGenerator impl$chunkGenerator;
 
     @Override
-    public LayeredBiomeConfig config() {
-        return null;
+    public ChunkGenerator bridge$chunkGenerator() {
+        return this.impl$chunkGenerator;
+    }
+
+    @Override
+    public void bridge$setChunkGenerator(final ChunkGenerator generator) {
+        this.impl$chunkGenerator = generator;
     }
 }

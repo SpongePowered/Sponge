@@ -66,7 +66,7 @@ public final class ChunkPipeline implements BlockPipeline {
         this.chunkSupplier = () -> chunkWeakReference.get();
         final WeakReference<ServerLevel> serverWorldWeakReference = new WeakReference<>(world);
         this.serverWorld = () -> serverWorldWeakReference.get();
-        this.sectionSupplier = () -> LevelChunk.EMPTY_SECTION;
+        this.sectionSupplier = () -> null;
         this.wasEmpty = true;
         this.chunkEffects = Collections.emptyList();
         this.transaction = null;
