@@ -91,8 +91,6 @@ public interface EntityAccessor {
 
     @Accessor("portalEntrancePos") void accessor$portalEntrancePos(final BlockPos portalEntrancePos);
 
-    @Accessor("passengers") List<Entity> accessor$passengers();
-
     @Invoker("setRot") void invoker$setRot(final float yRot, final float xRot);
 
     @Invoker("getEncodeId") @Nullable String invoker$getEncodeId();
