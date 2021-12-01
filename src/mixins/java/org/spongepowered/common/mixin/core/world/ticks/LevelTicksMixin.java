@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.ticks;
 
-import net.minecraft.world.level.ServerTickList;
-import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.ticks.LevelTicks;
+import net.minecraft.world.ticks.ScheduledTick;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,44 +34,47 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
 import org.spongepowered.common.bridge.world.ticks.TickNextTickDataBridge;
 
-import java.util.Iterator;
+import java.util.Objects;
 import java.util.Queue;
+import java.util.function.BiConsumer;
+import java.util.function.LongSupplier;
 
-@Mixin(ServerTickList.class)
-public abstract class ServerTickListMixin<T> {
+@Mixin(LevelTicks.class)
+public abstract class LevelTicksMixin<T> implements LevelTicksBridge<T> {
+
+    // @formatter:off
+    private LongSupplier impl$gameTimeSupplier = () -> 0;
+    // @formatter:on
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     @Inject(
-        method = "addTickData",
+        method = "schedule",
         at = @At(
             value = "INVOKE",
-            target = "Ljava/util/Set;add(Ljava/lang/Object;)Z",
+            target = "Lnet/minecraft/world/ticks/LevelChunkTicks;schedule(Lnet/minecraft/world/ticks/ScheduledTick;)V",
             remap = false
         )
     )
-    private void impl$associateScheduledTickData(TickNextTickData<T> param0, CallbackInfo ci) {
-        ((TickNextTickDataBridge<T>) param0).bridge$createdByList((ServerTickList<T>) (Object) this);
+    private void impl$associateScheduledTickData(ScheduledTick<T> param0, CallbackInfo ci) {
+        ((TickNextTickDataBridge<T>) (Object) param0).bridge$createdByList((LevelTicks<T>) (Object) this);
     }
 
-
-    /*
-    DO NOT REORDER THIS INJECT AFTER THE REDIRECT ON QUEUE;ADD DUE TO MIXIN BUG
-    https://github.com/SpongePowered/Mixin/issues/493
-     */
+    @SuppressWarnings("unchecked")
     @Inject(
-        method = "tick",
+        method = "runCollectedTicks",
         at = @At(
             value = "INVOKE",
-            target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V",
+            target = "Ljava/util/function/BiConsumer;accept(Ljava/lang/Object;Ljava/lang/Object;)V",
             remap = false,
             shift = At.Shift.AFTER
         ),
         locals = LocalCapture.CAPTURE_FAILEXCEPTION
     )
-    private void impl$markDataAsCompleted(CallbackInfo ci, int var0, Iterator var1, TickNextTickData var3) {
-        ((TickNextTickDataBridge<T>) var3).bridge$setState(ScheduledUpdate.State.FINISHED);
+    private void impl$markDataAsCompleted(BiConsumer<BlockPos, T> $$0, CallbackInfo ci, ScheduledTick<T> scheduledTick) {
+        ((TickNextTickDataBridge<T>) (Object) scheduledTick).bridge$setState(ScheduledUpdate.State.FINISHED);
     }
 
     /**
@@ -84,21 +88,31 @@ public abstract class ServerTickListMixin<T> {
      * @param data The next tick data to tick
      * @return False if the data was marked as cancelled
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
     @Redirect(
-        method = "tick",
+        method = "scheduleForThisTick",
         at = @At(
             value = "INVOKE",
             target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z",
             remap = false
         )
     )
-    private boolean impl$validateHasNextUncancelled(Queue<TickNextTickData<T>> queue, Object data) {
+    private boolean impl$validateHasNextUncancelled(Queue<ScheduledTick<T>> queue, Object data) {
         final ScheduledUpdate.State state = ((TickNextTickDataBridge<T>) data).bridge$internalState();
         if (state == ScheduledUpdate.State.CANCELLED) {
             return false;
         }
-        return queue.add((TickNextTickData<T>) data);
+        return queue.add((ScheduledTick<T>) data);
+    }
+
+    @Override
+    public LongSupplier bridge$getGameTime() {
+        return this.impl$gameTimeSupplier;
+    }
+
+    @Override
+    public void bridge$setGameTimeSupplier(LongSupplier supplier) {
+        this.impl$gameTimeSupplier = Objects.requireNonNull(supplier, "gametime supplier cannot be null");
     }
 
     //endregion

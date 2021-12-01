@@ -48,6 +48,8 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
+import net.minecraft.world.level.storage.WritableLevelData;
+import net.minecraft.world.ticks.LevelTicks;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -86,6 +88,7 @@ import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -100,6 +103,8 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
+import java.util.function.LongPredicate;
+import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -124,6 +129,21 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     private Weather impl$prevWeather;
     private boolean impl$isManualSave = false;
     private long impl$preTickTime = 0L;
+
+    @SuppressWarnings("unchecked")
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "NEW",
+            target = "Lnet/minecraft/world/ticks/LevelTicks;<init>(Ljava/util/function/LongPredicate;Ljava/util/function/Supplier;)V"
+        )
+    )
+    private <T> LevelTicks<T> impl$createLevelTicks(LongPredicate predicate, Supplier<ProfilerFiller> supplier) {
+        final var levelTicks = new LevelTicks<T>(predicate, supplier);
+        final var levelData = this.levelData;
+        ((LevelTicksBridge<T>) levelTicks).bridge$setGameTimeSupplier(levelData::getGameTime);
+        return levelTicks;
+    }
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$cacheLevelSave(final MinecraftServer p_i241885_1_, final Executor p_i241885_2_, final LevelStorageSource.LevelStorageAccess p_i241885_3_,

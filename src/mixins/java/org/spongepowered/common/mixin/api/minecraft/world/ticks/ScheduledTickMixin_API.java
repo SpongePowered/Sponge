@@ -47,9 +47,10 @@ public class ScheduledTickMixin_API<T> implements ScheduledUpdate<T> {
         return this.type;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Duration delay() {
-        return ((TickNextTickDataBridge) this).bridge$getScheduledDelayWhenCreated();
+        return ((TickNextTickDataBridge<T>) this).bridge$getScheduledDelayWhenCreated();
     }
 
     @Override
@@ -57,23 +58,27 @@ public class ScheduledTickMixin_API<T> implements ScheduledUpdate<T> {
         return (TaskPriority) (Object) this.priority;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public State state() {
-        return ((TickNextTickDataBridge) this).bridge$internalState();
+        return ((TickNextTickDataBridge<T>) this).bridge$internalState();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean cancel() {
-        return ((TickNextTickDataBridge) this).bridge$cancelForcibly();
+        return ((TickNextTickDataBridge<T>) this).bridge$cancelForcibly();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public World<?, ?> world() {
-        return ((TickNextTickDataBridge) this).bridge$getLocation().world();
+        return ((TickNextTickDataBridge<T>) this).bridge$getLocation().world();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Location<?, ?> location() {
-        return ((TickNextTickDataBridge) this).bridge$getLocation();
+        return ((TickNextTickDataBridge<T>) this).bridge$getLocation();
     }
 }

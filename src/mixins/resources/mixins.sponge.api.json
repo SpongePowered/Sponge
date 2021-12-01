@@ -384,7 +384,7 @@
         "minecraft.world.scores.Team_VisibilityMixin_API",
         "minecraft.world.scores.criteria.ObjectiveCriteria_RenderTypeMixin_API",
         "minecraft.world.scores.criteria.ObjectiveCriteriaMixin_API",
-        "minecraft.world.ticks.ServerTickListMixin_API",
+        "minecraft.world.ticks.LevelTicksMixin_API",
         "minecraft.world.ticks.ScheduledTickMixin_API",
         "minecraft.world.ticks.TickPriorityMixin_API",
         "service.permission.SubjectMixin_API",

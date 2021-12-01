@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.ticks;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.ticks.LevelChunkTicks;
 import net.minecraft.world.ticks.LevelTicks;
 import net.minecraft.world.ticks.ScheduledTick;
 import net.minecraft.world.ticks.TickPriority;
@@ -36,45 +39,52 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
 import org.spongepowered.common.bridge.world.ticks.TickNextTickDataBridge;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Queue;
-import java.util.Set;
+import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Mixin(LevelTicks.class)
-public abstract class ServerTickListMixin_API<T> implements ScheduledUpdateList<T> {
+public abstract class LevelTicksMixin_API<T> implements ScheduledUpdateList<T> {
 
+    // @formatter:off
     @Shadow @Final private Predicate<T> tickCheck;
-    @Shadow @Final private Queue<ScheduledTick<T>> toRunThisTick;
-    @Shadow @Final private Set<ScheduledTick<T>> toRunThisTickSet;
+    @Shadow @Final private Long2ObjectMap<LevelChunkTicks<T>> allContainers;
+    @Shadow @Final private List<ScheduledTick<T>> alreadyRunThisTick;
 
     @Shadow public abstract boolean shadow$hasScheduledTick(BlockPos param0, T param1);
-    @Shadow protected abstract void shadow$addTickData(ScheduledTick<T> data);
+    @Shadow public abstract void shadow$schedule(ScheduledTick<T> data);
+    // @formatter:on
+
 
     @Override
     public ScheduledUpdate<T> schedule(
-            final int x, final int y, final int z, final T target, final Duration delay, final TaskPriority priority
+        final int x, final int y, final int z, final T target, final Duration delay, final TaskPriority priority
     ) {
-        return this.schedule(x, y, z, target, Ticks.ofWallClockTime(Sponge.server(), delay.toMillis(), ChronoUnit.MILLIS));
+        return this.schedule(
+            x, y, z, target, Ticks.ofWallClockTime(Sponge.server(), delay.toMillis(), ChronoUnit.MILLIS));
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     @Override
     public ScheduledUpdate<T> schedule(
-            final int x, final int y, final int z, final T target, final Ticks tickDelay, final TaskPriority priority
+        final int x, final int y, final int z, final T target, final Ticks tickDelay, final TaskPriority priority
     ) {
-        final ScheduledTick<T> scheduledUpdate = new ScheduledTick<>(new BlockPos(x, y, z), target, tickDelay.ticks() + this.level.getGameTime(), (TickPriority) (Object) priority);
+        final var blockPos = new BlockPos(x, y, z);
+        final var gameTime = ((LevelTicksBridge<T>) this).bridge$getGameTime().getAsLong();
+        final var subCount = ((LevelTicksBridge<T>) this).bridge$getNextSubTickCountSupplier().getAsLong();
+        final var scheduledUpdate = new ScheduledTick<>(
+            target, blockPos, tickDelay.ticks() + gameTime, (TickPriority) (Object) priority, subCount);
         if (!this.tickCheck.test(target)) {
-            ((TickNextTickDataBridge<T>) scheduledUpdate).bridge$createdByList((LevelTicks<T>) (Object) this);
-            this.shadow$addTickData(scheduledUpdate);
+            ((TickNextTickDataBridge<T>) (Object) scheduledUpdate).bridge$createdByList((LevelTicks<T>) (Object) this);
+            this.shadow$schedule(scheduledUpdate);
         }
-        return (ScheduledUpdate<T>) scheduledUpdate;
+        return (ScheduledUpdate<T>) (Object) scheduledUpdate;
     }
 
     @Override
@@ -85,12 +95,15 @@ public abstract class ServerTickListMixin_API<T> implements ScheduledUpdateList<
     @SuppressWarnings("unchecked")
     @Override
     public Collection<? extends ScheduledUpdate<T>> scheduledAt(final int x, final int y, final int z) {
-        if (!this.currentlyTicking.isEmpty()) {
+        if (!this.alreadyRunThisTick.isEmpty()) {
             return Collections.emptySet();
         }
-        return Collections.unmodifiableCollection(this.tickNextTickSet.stream()
+        final long longPos = ChunkPos.asLong(new BlockPos(x, y, z));
+        LevelChunkTicks<T> $$2 = this.allContainers.get(longPos);
+
+        return $$2.getAll()
             .filter(data -> data.pos().getX() == x && data.pos().getZ() == z && data.pos().getY() == y)
-            .map(data -> (ScheduledUpdate<T>) data)
-            .collect(Collectors.toList()));
+            .map(data -> (ScheduledUpdate<T>) (Object) data)
+            .toList();
     }
 }
