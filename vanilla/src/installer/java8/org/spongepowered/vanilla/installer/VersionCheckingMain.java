@@ -27,7 +27,7 @@ package org.spongepowered.vanilla.installer;
 public class VersionCheckingMain {
 
     public static void main(final String[] args) throws Exception {
-        JavaVersionCheckUtils.ensureJava16();
+        JavaVersionCheckUtils.ensureJava17();
         VersionCheckingMain.runInstaller(args);
     }
 

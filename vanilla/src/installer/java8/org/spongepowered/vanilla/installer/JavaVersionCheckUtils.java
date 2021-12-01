@@ -31,13 +31,13 @@ import javax.swing.JOptionPane;
 public class JavaVersionCheckUtils {
 
     private static final int INVALID_VERSION = -1;
-    private static final String REQUIRED_VERSION = "16";
+    private static final String REQUIRED_VERSION = "17";
 
     private static final String ERROR_MESSAGE = "We have detected that you are running Java version %s, which is not supported!!\n"
         + "In order to run Sponge (and Minecraft 1.17+), you **must** be running a Java runtime version %s or above.\n"
-        + "This can be downloaded from AdoptOpenJDK: https://adoptopenjdk.net/?variant=openjdk16&jvmVariant=hotspot";
+        + "This can be downloaded from AdoptOpenJDK: https://adoptopenjdk.net/?variant=openjdk17&jvmVariant=hotspot";
 
-    public static void ensureJava16() {
+    public static void ensureJava17() {
         final String version = JavaVersionCheckUtils.getCurrentVersion();
         if (JavaVersionCheckUtils.getMajorVersion(version) < JavaVersionCheckUtils.getMajorVersion(JavaVersionCheckUtils.REQUIRED_VERSION)) {
             final String error = String.format(JavaVersionCheckUtils.ERROR_MESSAGE, version, JavaVersionCheckUtils.REQUIRED_VERSION);
