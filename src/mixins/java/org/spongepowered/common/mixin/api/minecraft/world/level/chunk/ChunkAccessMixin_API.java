@@ -37,31 +37,30 @@ import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import javax.annotation.Nullable;
 
 @Mixin(ChunkAccess.class)
-public interface ChunkAccessMixin_API<P extends Chunk<P>> extends Chunk<P> {
+public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<P> {
 
     // @formatter:on
-    @Shadow ChunkStatus shadow$getStatus();
-    @Shadow void shadow$addEntity(net.minecraft.world.entity.Entity entity);
-    @Shadow void shadow$setUnsaved(boolean var1);
+    @Shadow abstract ChunkStatus shadow$getStatus();
+    @Shadow abstract void shadow$addEntity(net.minecraft.world.entity.Entity entity);
     // @formatter:off
 
     @Override
-    default void addEntity(final Entity entity) {
+    public void addEntity(final Entity entity) {
         this.shadow$addEntity((net.minecraft.world.entity.Entity) entity);
     }
 
     @Override
-    default ChunkState state() {
+    public ChunkState state() {
         return (ChunkState) this.shadow$getStatus();
     }
 
     @Override
-    default boolean isEmpty() {
+    public boolean isEmpty() {
         return this.shadow$getStatus() == ChunkStatus.EMPTY;
     }
 
     @Override
-    default boolean setBiome(final int x, final int y, final int z, final Biome biome) {
+    public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
         // TODO ChunkBiomeContainerAccessor is dead
         //return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.shadow$getBiomes(), () -> this.shadow$setUnsaved(true));
         return false;

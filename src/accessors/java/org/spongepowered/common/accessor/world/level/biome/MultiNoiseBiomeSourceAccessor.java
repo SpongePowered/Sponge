@@ -40,10 +40,10 @@ public interface MultiNoiseBiomeSourceAccessor {
         throw new UntransformedAccessorError();
     }*/
 
-    @Invoker("<init>") static MultiNoiseBiomeSource invoker$new(
+    /*@Invoker("<init>") static MultiNoiseBiomeSource invoker$new(
         final Climate.ParameterList<Supplier<Biome>> parameters,
         final MultiNoiseBiomeSource.Preset preset
     ) {
         throw new UntransformedInvokerError();
-    }
+    }*/
 }

@@ -382,12 +382,12 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         this.impl$isManualSave = false;
     }
 
-    @Inject(method = "tick",
+    @Inject(method = "advanceWeatherCycle",
             locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "FIELD", target = "Lnet/minecraft/server/level/ServerLevel;oRainLevel:F", shift = At.Shift.BEFORE, ordinal = 1))
-    public void impl$onSetWeatherParameters(final BooleanSupplier param0, final CallbackInfo ci, final ProfilerFiller var0, final boolean wasRaining) {
+    public void impl$onSetWeatherParameters(final CallbackInfo ci, final boolean $$0) {
         final boolean isRaining = this.shadow$isRaining();
-        if (this.oRainLevel != this.rainLevel || this.oThunderLevel != this.thunderLevel || wasRaining != isRaining) {
+        if (this.oRainLevel != this.rainLevel || this.oThunderLevel != this.thunderLevel || $$0 != isRaining) {
             Weather newWeather = ((ServerWorld) this).properties().weather();
             final Cause currentCause = Sponge.server().causeStackManager().currentCause();
             final Transaction<Weather> weatherTransaction = new Transaction<>(this.impl$prevWeather, newWeather);

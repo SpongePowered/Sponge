@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraft.world.level.levelgen.StructureSettings;
+import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
@@ -40,10 +41,9 @@ public interface NoiseGeneratorSettingsAccessor {
         final NoiseSettings noiseSettings,
         final BlockState defaultBlock,
         final BlockState defaultFluid,
-        final int bedrockRoofPosition,
-        final int bedrockFloorPosition,
-        final int seaLevel, final int minSurfaceLevel, final boolean disableMobGeneration, final boolean aquifersEnabled,
-        final boolean noiseCavesEnabled, final boolean deepslateEnabled, final boolean oreVeinsEnabled, final boolean noodleCavesEnabled
+        final SurfaceRules.RuleSource surfaceRule,
+        final int seaLevel, final boolean disableMobGeneration, final boolean aquifersEnabled,
+        final boolean noiseCavesEnabled, final boolean oreVeinsEnabled, final boolean noodleCavesEnabled, final boolean randomSource
     ) {
         throw new UntransformedInvokerError();
     }

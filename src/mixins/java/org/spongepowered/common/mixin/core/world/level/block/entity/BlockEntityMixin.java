@@ -79,9 +79,9 @@ public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoun
     }
 
     @Inject(method = "saveMetadata", at = @At("RETURN"))
-    private void impl$writeSpongeData(final CompoundTag compound, final CallbackInfoReturnable<CompoundTag> ci) {
+    private void impl$writeSpongeData(final CompoundTag $$0, final CallbackInfo ci) {
         if (DataUtil.syncDataToTag(this)) {
-            compound.merge(this.data$getCompound());
+            $$0.merge(this.data$getCompound());
         }
     }
 
