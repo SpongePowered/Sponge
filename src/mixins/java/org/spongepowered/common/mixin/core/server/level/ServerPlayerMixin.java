@@ -45,6 +45,7 @@ import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
+import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.server.MinecraftServer;
@@ -90,9 +91,9 @@ import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
+import org.spongepowered.api.event.entity.SteerVehicleEvent;
 import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
 import org.spongepowered.api.event.entity.living.player.PlayerChangeClientSettingsEvent;
-import org.spongepowered.api.event.entity.living.player.SteerVehicleEvent;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -827,26 +828,48 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
     }
 
-    @Inject(method = "setPlayerInput", at = @At("HEAD"), cancellable = true)
-    public void onSetPlayerInput(final float sway, final float surge, final boolean jumping, final boolean dismount, final CallbackInfo ci) {
-        if(isPassenger()) {
-            if(sway == this.xxa && surge == this.zza && jumping == this.jumping) {
-                return;
+    @Redirect(method = "setPlayerInput", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isPassenger()Z"))
+    private boolean impl$onSetPlayerInput(final net.minecraft.server.level.ServerPlayer self, final float sway, final float surge, final boolean jumping, final boolean dismount) {
+        if (!this.shadow$isPassenger()) {
+            return false;
+        }
+
+        if (!ShouldFire.STEER_VEHICLE_EVENT) {
+            return true;
+        }
+
+        final Vector3d input = new Vector3d(sway, jumping ? 1 : 0, surge);
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this);
+
+            final SteerVehicleEvent event;
+            if (dismount) {
+                event = SpongeEventFactory.createSteerVehicleEventDismount(
+                    frame.currentCause(),
+                    input,
+                    (org.spongepowered.api.entity.Entity) this.shadow$getVehicle()
+                );
+            } else {
+                event = SpongeEventFactory.createSteerVehicleEvent(
+                    frame.currentCause(),
+                    input,
+                    (org.spongepowered.api.entity.Entity) this.shadow$getVehicle()
+                );
             }
-
-            final SteerVehicleEvent event = SpongeEventFactory.createSteerVehicleEvent(
-                    PhaseTracker.getCauseStackManager().currentCause(),
-                    (org.spongepowered.api.entity.living.player.server.ServerPlayer) this,
-                    jumping,
-                    surge,
-                    sway
-            );
-
+            
             Sponge.eventManager().post(event);
-
-            if(event.isCancelled()) {
-                ci.cancel();
+                
+            if (!event.isCancelled()) {
+                return true;
             }
+                
+            if (dismount) {
+                //TODO: MC-202202, regression from 1.15, fixed on 1.17
+                this.connection.send(new ClientboundSetPassengersPacket(this.shadow$getVehicle()));
+            }
+
+            return false;
         }
     }
 

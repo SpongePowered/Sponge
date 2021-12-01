@@ -30,6 +30,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -206,8 +207,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow @Nullable protected abstract PortalInfo shadow$findDimensionEntryPoint(ServerLevel param0);
     // @formatter:on
 
-    @Shadow public abstract boolean isPassenger();
-
     private boolean impl$isConstructing = true;
     private boolean impl$vanishPreventsTargeting = false;
     private boolean impl$isVanished = false;
@@ -341,6 +340,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
                 if (SpongeCommon.post(SpongeEventFactory.
                         createRideEntityEventDismount(frame.currentCause(), (org.spongepowered.api.entity.Entity) this.shadow$getVehicle()))) {
+                    
+                    //TODO: MC-202202, regression from 1.15, fixed on 1.17
+                    if ((Object) this instanceof ServerPlayer) {
+                        ((ServerPlayer) (Object) this).connection.send(new ClientboundSetPassengersPacket(this.shadow$getVehicle()));
+                    }
+
                     return false;
                 }
             }

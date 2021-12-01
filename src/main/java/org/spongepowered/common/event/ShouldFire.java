@@ -127,4 +127,5 @@ public final class ShouldFire {
 
     public static boolean CHANGE_DATA_HOLDER_EVENT_VALUE_CHANGE = false;
 
+    public static boolean STEER_VEHICLE_EVENT = false;
 }
