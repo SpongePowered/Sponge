@@ -25,15 +25,11 @@
 package org.spongepowered.common.mixin.tracker.world.level.chunk;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.ticks.LevelChunkTicks;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -43,7 +39,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -56,8 +51,6 @@ import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBrid
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.chunk.TrackedLevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -66,25 +59,20 @@ import org.spongepowered.common.event.tracking.context.transaction.block.ChangeB
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.event.tracking.phase.generation.ChunkLoadContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.server.BootstrapProperties;
+import org.spongepowered.common.mixin.tracker.world.level.LevelHeightAccessorMixin_Tracker;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 
 @Mixin(LevelChunk.class)
-public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge {
+public abstract class LevelChunkMixin_Tracker extends ChunkAccessMixin_Tracker implements TrackedLevelChunkBridge, LevelHeightAccessorMixin_Tracker {
     // @formatter:off
-    @Shadow @Final public static LevelChunkSection EMPTY_SECTION;
-    @Shadow @Final private LevelChunkSection[] sections;
-    @Shadow @Final private net.minecraft.world.level.Level level;
+    @Shadow @Final net.minecraft.world.level.Level level;
 
     @Shadow public abstract @Nullable BlockEntity shadow$getBlockEntity(BlockPos pos, LevelChunk.EntityCreationType creationMode);
     @Shadow public abstract BlockState getBlockState(BlockPos pos);
@@ -135,14 +123,10 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
         final int zPos = pos.getZ() & 15;
         final int sectionIndex = ((LevelChunk) (Object) this).getSectionIndex(yPos);
         // Sponge - get the moving flag from our flag construct
-        LevelChunkSection chunksection = this.sections[sectionIndex];
-        if (chunksection == LevelChunkMixin_Tracker.EMPTY_SECTION) {
-            if (newState.isAir()) {
-                return ChunkPipeline.nullReturn((LevelChunk) (Object) this, (ServerLevel) this.level);
-            }
-
-            chunksection = new LevelChunkSection(SectionPos.blockToSectionCoord(yPos), BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY));
-            this.sections[sectionIndex] = chunksection;
+        final LevelChunkSection chunksection = this.shadow$getSection(this.shadow$getSectionIndex(yPos));
+        final var isEmpty = chunksection.hasOnlyAir();
+        if (isEmpty && newState.isAir()) {
+            return ChunkPipeline.nullReturn((LevelChunk) (Object) this, (ServerLevel) this.level);
         }
 
         // Sponge Start - Build out the BlockTransaction
