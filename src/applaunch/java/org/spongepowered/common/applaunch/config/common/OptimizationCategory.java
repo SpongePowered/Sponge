@@ -113,6 +113,18 @@ public final class OptimizationCategory {
         "are `persistent`. Does not drastically improve performance.")
     public boolean disableScheduledUpdatesForPersistentLeafBlocks = true;
 
+    @Setting("enable-lazydfu")
+    @Comment("By default, Vanilla 'warms-up' all migration rules for\n"
+            + "every Minecraft version when the game starts. This often\n"
+            + "causes a period of extremely high CPU usage when the game\n"
+            + "starts, often for no benefit since the typical pattern is\n"
+            + "that most chunks do not have to be migrated, or only have\n"
+            + "to be migrated from just a few versions. This option disables\n"
+            + "migration rules from being 'warmed-up' and instead forces them\n"
+            + "to be generated on demand. This is a very safe optimization and\n"
+            + "should usually remain enabled.")
+    public boolean enableLazyDFU = true;
+
     public OptimizationCategory() {
         // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
         // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game

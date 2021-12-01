@@ -53,6 +53,7 @@ public class OptimizationPlugin extends AbstractMixinConfigPlugin {
 
     // So that any additional optimizations can be added in succession.
     private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<OptimizationCategory, Boolean>> builder()
+            .put("org.spongepowered.common.mixin.optimization.general.DataFixersMixin_Optimization_LazyDFU", optimizationCategory -> optimizationCategory.enableLazyDFU)
             .put("org.spongepowered.common.mixin.optimization.entity.EntityMixin_Optimization_Collision", optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
             .put("org.spongepowered.common.mixin.optimization.world.entity.TamableAnimalMixin_Optimization_Owner", optimizationCategory -> optimizationCategory.cacheTameableOwners)
 // TODO investigate what is still relevant and add them back
