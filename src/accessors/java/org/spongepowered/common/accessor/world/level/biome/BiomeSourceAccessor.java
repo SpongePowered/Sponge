@@ -29,14 +29,16 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
+import java.util.Set;
+
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 
 @Mixin(BiomeSource.class)
 public interface BiomeSourceAccessor {
 
-    @Accessor("possibleBiomes") List<Biome> accessor$possibleBiomes();
+    @Accessor("possibleBiomes") Set<Biome> accessor$possibleBiomes();
 
-    @Accessor("possibleBiomes") @Mutable void accessor$possibleBiomes(List<Biome> possibleBiomes);
+    @Accessor("possibleBiomes") @Mutable void accessor$possibleBiomes(Set<Biome> possibleBiomes);
 
 }

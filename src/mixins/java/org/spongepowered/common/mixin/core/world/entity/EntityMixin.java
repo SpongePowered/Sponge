@@ -51,6 +51,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LavaCauldronBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.AABB;
@@ -199,7 +200,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract void shadow$setDeltaMovement(net.minecraft.world.phys.Vec3 motion);
     @Shadow public abstract void shadow$unRide();
     @Shadow protected abstract Optional<BlockUtil.FoundRectangle> shadow$getExitPortal(
-            net.minecraft.server.level.ServerLevel targetWorld, BlockPos targetPosition, boolean isNether);
+            net.minecraft.server.level.ServerLevel targetWorld, BlockPos targetPosition, boolean isNether, WorldBorder $$3);
     @Shadow protected abstract net.minecraft.world.phys.Vec3 shadow$getRelativePortalPosition(Direction.Axis direction$axis,
             BlockUtil.FoundRectangle teleportationrepositioner$result);
     @Shadow protected abstract void shadow$removeAfterChangingDimensions();
@@ -453,14 +454,15 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Redirect(method = "findDimensionEntryPoint", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;getExitPortal(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Z)Ljava/util/Optional;"))
+            target = "Lnet/minecraft/world/entity/Entity;getExitPortal(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;ZLnet/minecraft/world/level/border/WorldBorder;)Ljava/util/Optional;"))
     private Optional<BlockUtil.FoundRectangle> impl$redirectGetExitPortal(
             final Entity thisEntity,
             final net.minecraft.server.level.ServerLevel targetWorld,
             final BlockPos targetPosition,
-            final boolean targetIsNether) {
+            final boolean targetIsNether,
+            final WorldBorder $$3) {
         try {
-            return this.shadow$getExitPortal(targetWorld, targetPosition, targetIsNether);
+            return this.shadow$getExitPortal(targetWorld, targetPosition, targetIsNether, $$3);
         } finally {
             // Reset for the next attempt.
             this.impl$dontCreateExitPortal = false;
@@ -746,6 +748,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private void impl$fireRepositionEventWhenFindingAPortal(final net.minecraft.server.level.ServerLevel targetWorld,
             final BlockPos targetPosition,
             final boolean targetIsNether,
+            final WorldBorder $$3,
             final CallbackInfoReturnable<Optional<BlockUtil.FoundRectangle>> cir) {
         if (this.impl$shouldFireRepositionEvent) {
             // This exists as we're injecting at return
@@ -768,7 +771,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 // Something changed so we want to re-rerun this loop.
                 // TODO: There is an open question here about whether we want to force the creation of a portal in this
                 //  scenario, or whether we're happy if the repositioning will put someone in a nearby portal.
-                cir.setReturnValue(this.shadow$getExitPortal(targetWorld, VecHelper.toBlockPos(reposition.destinationPosition()), targetIsNether));
+                cir.setReturnValue(this.shadow$getExitPortal(targetWorld, VecHelper.toBlockPos(reposition.destinationPosition()), targetIsNether, $$3));
                 this.impl$dontCreateExitPortal = true;
             }
         }

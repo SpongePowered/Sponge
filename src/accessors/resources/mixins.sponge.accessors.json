@@ -189,8 +189,6 @@
         "world.level.block.state.BlockBehaviourAccessor",
         "world.level.block.state.StateHolderAccessor",
         "world.level.border.WorldBorderAccessor",
-        "world.level.chunk.LevelChunk$BoundTickingBlockEntityAccessor",
-        "world.level.chunk.LevelChunk$RebindableTickingBlockEntityWrapperAccessor",
         "world.level.chunk.LevelChunkAccessor",
         "world.level.dimension.DimensionTypeAccessor",
         "world.level.entity.EntityTickListAccessor",

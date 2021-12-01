@@ -71,8 +71,4 @@ public interface MerchantMixin_API extends Merchant {
     default void imerchant$notifyTradeUpdated(final ItemStack stack) {
 
     }
-
-    default Level imerchant$getLevel() {
-        return ((Level) this.location().world());
-    }
 }
