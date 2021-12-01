@@ -22,24 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.world.level;
+package org.spongepowered.common.bridge.world.ticks;
 
-import net.minecraft.world.level.TickNextTickData;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
+public interface ScheduledTickBridge {
 
-@Mixin(TickNextTickData.class)
-public abstract class TickNextTickDataMixin_Tracker implements TickNextTickDataBridge {
+    boolean bridge$isPartOfWorldGeneration();
 
-    private boolean tracker$isWorldGen = false;
-
-    @Override
-    public boolean bridge$isPartOfWorldGeneration() {
-        return this.tracker$isWorldGen;
-    }
-
-    @Override
-    public void bridge$setIsPartOfWorldGeneration(final boolean isLoading) {
-        this.tracker$isWorldGen = isLoading;
-    }
+    void bridge$setIsPartOfWorldGeneration(boolean isLoading);
 }

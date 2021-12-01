@@ -28,7 +28,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.Objects;

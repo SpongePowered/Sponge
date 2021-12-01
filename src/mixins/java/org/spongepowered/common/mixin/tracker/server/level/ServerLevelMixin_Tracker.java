@@ -38,7 +38,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
@@ -47,6 +46,8 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.ticks.ScheduledTick;
+import net.minecraft.world.ticks.TickPriority;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -71,7 +72,6 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
@@ -107,7 +107,6 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Chun
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.TileEntityPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.tracker.world.level.LevelMixin_Tracker;
 import org.spongepowered.common.util.Constants;
@@ -133,7 +132,6 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     @Shadow @Final List<ServerPlayer> players;
     // @formatting:on
 
-    @SuppressWarnings("UnresolvedMixinReference")
     @Redirect(
             // This normally would target this.entityTickList.forEach((var2x) ->
             // but we don't have lambda syntax support yet.
@@ -148,7 +146,6 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     ) {
         final Timing entityTickTiming = ((TimingBridge) entity.getType()).bridge$timings();
         entityTickTiming.startTiming();
-        final PhaseContext<@NonNull ?> currentState = PhaseTracker.SERVER.getPhaseContext();
         TrackingUtil.tickEntity(entityUpdateConsumer, entity);
         entityTickTiming.stopTiming();
     }
@@ -171,38 +168,56 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
      * @param randomIn The world random
      * @author gabizou - January 11th, 2020 - Minecraft 1.14.3
      */
-    @Redirect(method = "tickBlock(Lnet/minecraft/world/level/TickNextTickData;)V",
+    @Redirect(method = "tickBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;)V",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/state/BlockState;tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Ljava/util/Random;)V"))
-    private void tracker$wrapBlockTick(final BlockState blockState, final ServerLevel worldIn, final BlockPos posIn, final Random randomIn, final TickNextTickData<Block> entry) {
-        if (((TickNextTickDataBridge) entry).bridge$isPartOfWorldGeneration()) {
-            try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE.createPhaseContext(PhaseTracker.SERVER)
-                .source(this)
-                .scheduledUpdate(entry)
-            ) {
-                context.buildAndSwitch();
-                blockState.tick(worldIn, posIn, randomIn);
-            }
-            return;
-        }
+    private void tracker$wrapBlockTick(BlockState blockState, ServerLevel worldIn, BlockPos posIn, Random randomIn) {
         TrackingUtil.updateTickBlock(this, blockState, posIn, randomIn);
     }
 
-    @Redirect(method = "tickLiquid(Lnet/minecraft/world/level/TickNextTickData;)V",
+    @Redirect(method = "tickFluid(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/material/Fluid;)V",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/material/FluidState;tick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"))
-    private void tracker$wrapFluidTick(final FluidState fluidState, final net.minecraft.world.level.Level worldIn, final BlockPos pos, final TickNextTickData<Fluid> entry) {
-        if (((TickNextTickDataBridge) entry).bridge$isPartOfWorldGeneration()) {
-            try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE.createPhaseContext(PhaseTracker.SERVER)
-                .source(this)
-                .scheduledUpdate(entry)
-            ) {
-                context.buildAndSwitch();
-                fluidState.tick(worldIn, pos);
-            }
-            return;
-        }
+    private void tracker$wrapFluidTick(FluidState fluidState, net.minecraft.world.level.Level level, BlockPos pos) {
         TrackingUtil.updateTickFluid(this, fluidState, pos);
+    }
+
+    private <T> ScheduledTick<T> tracker$createTick(BlockPos pos, T type, int triggerTick, TickPriority priority) {
+        return new ScheduledTick<>(type, pos, this.shadow$getLevelData().getGameTime() + (long)triggerTick, priority, this.shadow$nextSubTickCount());
+    }
+
+    private <T> ScheduledTick<T> tracker$createTick(BlockPos pos, T type, int triggerTick) {
+        return new ScheduledTick<>(type, pos, this.shadow$getLevelData().getGameTime() + (long)triggerTick, this.shadow$nextSubTickCount());
+    }
+
+    @Override
+    public void shadow$scheduleTick(BlockPos pos, Block block, int triggerTick, TickPriority priority) {
+        final var scheduledTick = this.tracker$createTick(pos, block, triggerTick, priority);
+        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate((ServerLevel) (Object) this, scheduledTick);
+        this.shadow$getBlockTicks().schedule(scheduledTick);
+    }
+
+    @Override
+    public void shadow$scheduleTick(BlockPos pos, Block block, int triggerTick) {
+        final var scheduledTick = this.tracker$createTick(pos, block, triggerTick);
+        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate((ServerLevel) (Object) this, scheduledTick);
+        this.shadow$getBlockTicks().schedule(scheduledTick);
+    }
+
+    @Override
+    public void shadow$scheduleTick(
+        BlockPos pos, Fluid fluid, int triggerTick, TickPriority priority
+    ) {
+        final var scheduledTick = this.tracker$createTick(pos, fluid, triggerTick, priority);
+        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate((ServerLevel) (Object) this, scheduledTick);
+        this.shadow$getFluidTicks().schedule(scheduledTick);
+    }
+
+    @Override
+    public void shadow$scheduleTick(BlockPos pos, Fluid fluid, int triggerTick) {
+        final var scheduledTick = this.tracker$createTick(pos, fluid, triggerTick);
+        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate((ServerLevel) (Object) this, scheduledTick);
+        this.shadow$getFluidTicks().schedule(scheduledTick);
     }
 
     /**
@@ -281,7 +296,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     ) {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
         final BlockEventData blockEventData = (BlockEventData) data;
-        final TrackableBlockEventDataBridge blockEvent = (TrackableBlockEventDataBridge) blockEventData;
+        final TrackableBlockEventDataBridge blockEvent = (TrackableBlockEventDataBridge) (Object) blockEventData;
         // Short circuit phase states who do not track during block events
         if (currentContext.ignoresBlockEvent()) {
             return list.add(blockEventData);
@@ -568,7 +583,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 final CompoundTag nbt = new CompoundTag();
                 // Some mods like OpenComputers assert if attempting to save robot while moving
                 try {
-                    tileEntity.save(nbt);
+                    tileEntity.saveWithFullMetadata();
                     builder.addUnsafeCompound(nbt);
                 } catch (final Throwable t) {
                     // ignore

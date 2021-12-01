@@ -66,7 +66,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @Mixin(Level.class)
-public abstract class LevelMixin_Tracker implements LevelBridge {
+public abstract class LevelMixin_Tracker implements LevelBridge, LevelAccessorMixin_Tracker {
 
     // @formatter:off
     @Shadow @Final public Random random;

@@ -24,26 +24,30 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ServerTickList;
-import net.minecraft.world.level.TickNextTickData;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.ticks.LevelTickAccess;
+import net.minecraft.world.ticks.TickPriority;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 
-@Mixin(ServerTickList.class)
-public abstract class ServerTickListMixin_Tracker<T> {
+@Mixin(LevelAccessor.class)
+public interface LevelAccessorMixin_Tracker {
 
-    @Shadow protected abstract void shadow$addTickData(TickNextTickData<T> p_219504_1_);
+    // @formatter:off
+    @Shadow LevelData shadow$getLevelData();
+    @Shadow long shadow$nextSubTickCount();
+    @Shadow LevelTickAccess<Block> shadow$getBlockTicks();
+    @Shadow LevelTickAccess<Fluid> shadow$getFluidTicks();
 
-    @Shadow @Final private ServerLevel level;
+    // Shadow methods to be overridden in ServerLevelMixin_Tracker
+    @Shadow void shadow$scheduleTick(BlockPos pos, Block block, int $$2, TickPriority priority);
+    @Shadow void shadow$scheduleTick(BlockPos pos, Block block, int $$2);
+    @Shadow void shadow$scheduleTick(BlockPos pos, Fluid fluid, int $$2, TickPriority priority);
+    @Shadow void shadow$scheduleTick(BlockPos pos, Fluid fluid, int $$2);
+    // @formatter:on
 
-    @Redirect(method = "scheduleTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/ServerTickList;addTickData(Lnet/minecraft/world/level/TickNextTickData;)V"))
-    private void tracker$associatePhaseContextWithTickEntry(final ServerTickList<T> thisList, final TickNextTickData<T> entry) {
-        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate(this.level, entry);
-        this.shadow$addTickData(entry);
-    }
 }
