@@ -25,17 +25,17 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.player;
 
 import com.mojang.authlib.GameProfile;
+import net.kyori.adventure.identity.Identified;
+import net.kyori.adventure.identity.Identity;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.player.Abilities;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemCooldowns;
-import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
@@ -44,6 +44,7 @@ import org.spongepowered.common.mixin.api.minecraft.world.entity.LivingEntityMix
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.player.Player.class)
+@Implements(@Interface(iface=Identified.class, prefix = "identified$", remap = Remap.NONE))
 public abstract class PlayerMixin_API extends LivingEntityMixin_API implements Player {
 
     // @formatter:off
@@ -88,5 +89,9 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API implements P
         this.getValue(Keys.LAST_DATE_PLAYED).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
+    }
+
+    public Identity identified$identity() {
+        return this.profile();
     }
 }
