@@ -101,6 +101,10 @@ val vanillaAppLaunch by sourceSets.register("applaunch") {
     spongeImpl.applyNamedDependencyOnOutput(commonProject, main.get(), this, project, this.runtimeOnlyConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.runtimeOnlyConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, vanillaMain, this, project, this.runtimeOnlyConfigurationName)
+    
+    configurations.named(runtimeClasspathConfigurationName) {
+        extendsFrom(vanillaLibrariesConfig.get())
+    }
 }
 val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementationConfigurationName) {
     extendsFrom(vanillaAppLaunchConfig.get())

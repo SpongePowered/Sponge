@@ -111,7 +111,11 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
     };
 
     private static final String[] EXCLUSION_EXCEPTIONS = {
-            "org.spongepowered.configurate.objectmapping.guice."
+            "org.spongepowered.configurate.objectmapping.guice.",
+            "org.spongepowered.configurate.yaml.",
+            "org.spongepowered.configurate.gson.",
+            "org.spongepowered.configurate.jackson.",
+            "org.spongepowered.configurate.xml.",
     };
 
     @Override
