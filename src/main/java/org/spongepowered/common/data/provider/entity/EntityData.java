@@ -169,8 +169,8 @@ public final class EntityData {
                     .create(Keys.PASSENGERS)
                         .get(h -> h.getPassengers().stream().map(org.spongepowered.api.entity.Entity.class::cast).collect(Collectors.toList()))
                         .set((h, v) -> {
-                            ((EntityAccessor) h).accessor$passengers().clear();
-                            v.forEach(v1 -> ((EntityAccessor) h).accessor$passengers().add((Entity) v1));
+                            h.ejectPassengers();
+                            v.forEach(v1 -> ((Entity) v1).startRiding(h, true));
                         })
                     .create(Keys.REMAINING_AIR)
                         .get(h -> Math.max(0, h.getAirSupply()))

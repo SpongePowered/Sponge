@@ -25,6 +25,10 @@
 package org.spongepowered.common.data.provider.entity;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -32,19 +36,14 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
-import org.spongepowered.common.bridge.world.entity.LivingEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
-import org.spongepowered.common.util.PotionEffectUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.PotionEffectUtil;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Collection;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public final class LivingData {
 
@@ -103,17 +102,17 @@ public final class LivingData {
                     .create(Keys.CHEST_ROTATION)
                         .get(h -> new Vector3d(h.getXRot(), h.getYRot(), 0))
                         .set((h, v) -> {
-                            final float headYaw = (float) v.y();
+                            final float yaw = (float) v.y();
                             final float pitch = (float) v.x();
-                            h.setYHeadRot(headYaw);
+                            h.setYRot(yaw);
                             h.setXRot(pitch);
                         })
                     .create(Keys.HEAD_ROTATION)
                         .get(h -> new Vector3d(h.getXRot(), h.getYHeadRot(), 0))
                         .set((h, v) -> {
-                            final float yaw = (float) v.y();
+                            final float headYaw = (float) v.y();
                             final float pitch = (float) v.x();
-                            h.setYRot(yaw);
+                            h.setYHeadRot(headYaw);
                             h.setXRot(pitch);
                         })
                     .create(Keys.HEALTH)
