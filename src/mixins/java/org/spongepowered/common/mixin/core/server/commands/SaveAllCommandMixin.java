@@ -37,7 +37,7 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 @Mixin(SaveAllCommand.class)
 public abstract class SaveAllCommandMixin {
 
-    @Inject(method = "saveAll", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;saveAllChunks(ZZZ)Z"))
+    @Inject(method = "saveAll", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;saveEverything(ZZZ)Z"))
     private static void impl$markManualSave(final CommandSourceStack source, final boolean flush, final CallbackInfoReturnable<Integer> cir) {
         for (final ServerLevel world : SpongeCommon.server().getAllLevels()) {
             ((ServerLevelBridge) world).bridge$setManualSave(true);

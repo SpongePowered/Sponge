@@ -83,7 +83,7 @@ public abstract class ChunkSerializerMixin_Tracker {
 
     @Redirect(method = "read",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/ChunkAccess;setLightCorrect(Z)V"))
-    private static void impl$readSpongeLevelData(final ChunkAccess chunkAccess, final boolean var1, final ServerLevel param0, final StructureManager param1, final PoiManager param2, final ChunkPos param3, final CompoundTag param4) {
+    private static void impl$readSpongeLevelData(final ChunkAccess chunkAccess, final boolean var1, final ServerLevel param0, final PoiManager param2, final ChunkPos param3, final CompoundTag param4) {
         if (!(chunkAccess instanceof LevelChunk)) {
             return;
         }
