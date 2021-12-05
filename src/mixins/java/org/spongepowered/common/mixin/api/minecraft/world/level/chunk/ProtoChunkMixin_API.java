@@ -24,23 +24,35 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.chunk.UpgradeData;
+import net.minecraft.world.level.levelgen.blending.BlendingData;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.generation.GenerationChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.SpongeTicks;
-import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
 @Mixin(ProtoChunk.class)
-public abstract class ProtoChunkMixin_API implements GenerationChunk {
+public abstract class ProtoChunkMixin_API extends ChunkAccess implements GenerationChunk {
 
     // @formatter:off
-    @Shadow private long inhabitedTime;
     @Shadow private volatile ChunkStatus status;
     // @formatter:on
+
+    public ProtoChunkMixin_API(
+        final ChunkPos $$0, final UpgradeData $$1, final LevelHeightAccessor $$2, final Registry<net.minecraft.world.level.biome.Biome> $$3, final long $$4,
+        final LevelChunkSection[] $$5, final BlendingData $$6
+    ) {
+        super($$0, $$1, $$2, $$3, $$4, $$5, $$6);
+    }
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
@@ -51,12 +63,12 @@ public abstract class ProtoChunkMixin_API implements GenerationChunk {
 
     @Override
     public Ticks inhabitedTime() {
-        return new SpongeTicks(this.inhabitedTime);
+        return new SpongeTicks(this.getInhabitedTime());
     }
 
     @Override
     public void setInhabitedTime(final Ticks newInhabitedTime) {
-        this.inhabitedTime = newInhabitedTime.ticks();
+        this.setInhabitedTime(newInhabitedTime.ticks());
     }
 
     @Override

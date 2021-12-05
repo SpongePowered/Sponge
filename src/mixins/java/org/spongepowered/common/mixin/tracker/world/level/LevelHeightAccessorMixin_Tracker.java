@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level;
 
-import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

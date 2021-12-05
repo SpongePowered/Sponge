@@ -28,6 +28,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,5 +41,5 @@ public interface NaturalSpawner_SpawnStateAccessor {
 
     @Invoker("afterSpawn") void invoker$afterSpawn(Mob p_234970_1_, ChunkAccess p_234970_2_);
 
-    @Invoker("canSpawnForCategory") boolean invoker$canSpawnForCategory(MobCategory category);
+    @Invoker("canSpawnForCategory") boolean invoker$canSpawnForCategory(MobCategory category, final ChunkPos pos);
 }

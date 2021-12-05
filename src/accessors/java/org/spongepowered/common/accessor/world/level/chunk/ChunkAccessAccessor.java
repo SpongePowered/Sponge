@@ -22,20 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level;
+package org.spongepowered.common.accessor.world.level.chunk;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.ticks.LevelTicks;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Map;
 
-@Mixin(LevelTicks.class)
-public interface ServerTickListAccessor<T> {
+@Mixin(ChunkAccess.class)
+public interface ChunkAccessAccessor {
 
-    @Accessor("level") ServerLevel accessor$level();
+    @Accessor("heightmaps") Map<Heightmap.Types, Heightmap> accessor$heightmaps();
+
 }

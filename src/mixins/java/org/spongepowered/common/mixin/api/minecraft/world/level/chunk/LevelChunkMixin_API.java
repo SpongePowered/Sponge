@@ -27,16 +27,18 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.util.ClassInstanceMultiMap;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.blending.BlendingData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -77,8 +79,6 @@ import org.spongepowered.common.world.volume.buffer.entity.ObjectArrayMutableEnt
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -91,42 +91,43 @@ import java.util.stream.Stream;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
 @Implements(@Interface(iface = WorldChunk.class, prefix = "worldChunk$", remap = Remap.NONE))
-public abstract class LevelChunkMixin_API implements WorldChunk {
-
+public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldChunk {
     //@formatter:off
-    @Shadow private long inhabitedTime;
-    @Shadow @Final private ChunkPos chunkPos;
     @Shadow @Final Level level;
 
-    @Shadow public abstract void shadow$setInhabitedTime(long p_177415_1_);
     @Shadow public abstract boolean shadow$isEmpty();
-    @Shadow public abstract int shadow$getHeight(Heightmap.Types param0, int param1, int param2);
-    @Shadow public abstract void shadow$setUnsaved(boolean unsaved);
     //@formatter:on
 
     private @Nullable Vector3i api$blockMin;
     private @Nullable Vector3i api$blockMax;
 
+    public LevelChunkMixin_API(
+        final ChunkPos $$0, final UpgradeData $$1, final LevelHeightAccessor $$2, final Registry<net.minecraft.world.level.biome.Biome> $$3, final long $$4,
+        final LevelChunkSection[] $$5, final BlendingData $$6
+    ) {
+        super($$0, $$1, $$2, $$3, $$4, $$5, $$6);
+    }
+
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
         // TODO ChunkBiomeContainerAccessor is dead
-        //return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.biomes, () -> this.shadow$setUnsaved(true));
+        //return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.biomes, () -> this.setUnsaved(true));
         return false;
     }
 
     @Intrinsic
     public long impl$getInhabitedTime() {
-        return this.inhabitedTime;
+        return this.getInhabitedTime();
     }
 
     @Override
     public Ticks inhabitedTime() {
-        return new SpongeTicks(this.inhabitedTime);
+        return new SpongeTicks(this.getInhabitedTime());
     }
 
     @Override
     public void setInhabitedTime(final Ticks newInhabitedTime) {
-        this.inhabitedTime = newInhabitedTime.ticks();
+        this.setInhabitedTime(newInhabitedTime.ticks());
     }
 
     @Override
@@ -322,7 +323,7 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
 
     @Override
     public int highestYAt(final int x, final int z) {
-        return this.shadow$getHeight((Heightmap.Types) (Object) HeightTypes.WORLD_SURFACE.get(), x, z);
+        return this.getOrCreateHeightmapUnprimed((Heightmap.Types) (Object) HeightTypes.WORLD_SURFACE.get()).getHighestTaken(x, z);
     }
 
     @Override

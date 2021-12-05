@@ -42,8 +42,8 @@ public abstract class NaturalSpawnerMixin {
 
     // @formatter:off
     @Shadow @Final private static MobCategory[] SPAWNING_CATEGORIES;
-    @Shadow static public void spawnCategoryForChunk(MobCategory p_234967_0_, ServerLevel p_234967_1_, LevelChunk p_234967_2_,
-            NaturalSpawner.SpawnPredicate p_234967_3_, NaturalSpawner.AfterSpawnCallback p_234967_4_) {
+    @Shadow static public void spawnCategoryForChunk(final MobCategory p_234967_0_, final ServerLevel p_234967_1_, final LevelChunk p_234967_2_,
+            final NaturalSpawner.SpawnPredicate p_234967_3_, final NaturalSpawner.AfterSpawnCallback p_234967_4_) {
     }
     // @formatter:on
 
@@ -52,11 +52,11 @@ public abstract class NaturalSpawnerMixin {
      * @reason Use world configured spawn limits
      */
     @Overwrite
-    public static void spawnForChunk(ServerLevel world, LevelChunk chunk, NaturalSpawner.SpawnState manager, boolean spawnFriendlies, boolean spawnEnemies, boolean doMobSpawning) {
+    public static void spawnForChunk(final ServerLevel world, final LevelChunk chunk, final NaturalSpawner.SpawnState manager, final boolean spawnFriendlies, final boolean spawnEnemies, final boolean doMobSpawning) {
         world.getProfiler().push("spawner");
 
         for (final MobCategory entityclassification : SPAWNING_CATEGORIES) {
-            if ((spawnFriendlies || !entityclassification.isFriendly()) && (spawnEnemies || entityclassification.isFriendly()) && (doMobSpawning || !entityclassification.isPersistent()) && NaturalSpawnerMixin.impl$canSpawnInLevel(manager, entityclassification, world)) {
+            if ((spawnFriendlies || !entityclassification.isFriendly()) && (spawnEnemies || entityclassification.isFriendly()) && (doMobSpawning || !entityclassification.isPersistent()) && NaturalSpawnerMixin.impl$canSpawnInLevel(manager, entityclassification, world, chunk)) {
                 //                 spawnCategoryForChunk(var0, param0, param1, (param1x, param2x, param3x) -> param2.canSpawn(param1x, param2x,
                 //                 param3x), (param1x, param2x) -> param2.afterSpawn(param1x, param2x));
                 NaturalSpawnerMixin.spawnCategoryForChunk(entityclassification, world, chunk,
@@ -69,11 +69,11 @@ public abstract class NaturalSpawnerMixin {
         world.getProfiler().pop();
     }
 
-    private static boolean impl$canSpawnInLevel(final NaturalSpawner.SpawnState manager, final MobCategory classification, final ServerLevel level) {
+    private static boolean impl$canSpawnInLevel(final NaturalSpawner.SpawnState manager, final MobCategory classification, final ServerLevel level, final LevelChunk chunk) {
         final int tick = NaturalSpawnerMixin.impl$getSpawningTickRate(classification, level);
         // Unknown category/use default
         if (tick == -1) {
-            return ((NaturalSpawner_SpawnStateAccessor) manager).invoker$canSpawnForCategory(classification);
+            return ((NaturalSpawner_SpawnStateAccessor) manager).invoker$canSpawnForCategory(classification, chunk.getPos());
         }
         // Turn off spawns
         if (tick == 0) {

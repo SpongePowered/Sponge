@@ -78,6 +78,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
     @Shadow @Final ServerLevel level;
     // @formatter:on
 
+    @Override
     public DistanceManagerBridge bridge$distanceManager() {
         // The ticket manager on this object is a package-private class and isn't accessible from here
         // - @Shadow doesn't work because it seems to need the exact type.
@@ -159,7 +160,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
                             + "Lnet/minecraft/server/level/ServerLevel;"
                             + "Lnet/minecraft/world/level/chunk/ChunkGenerator;"
                             + "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureManager;"
-                            + "Lnet/minecraft/server/level/ThreadedLevelLightEngine;Ljava/util/function/Function;Ljava/util/List;)"
+                            + "Lnet/minecraft/server/level/ThreadedLevelLightEngine;Ljava/util/function/Function;Ljava/util/List;Z)"
                             + "Ljava/util/concurrent/CompletableFuture;")
     )
     private CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> impl$attachEventToCompletedGeneration(final ChunkStatus status,
@@ -169,7 +170,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
             final StructureManager param3,
             final ThreadedLevelLightEngine param4,
             final Function<ChunkAccess, CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> param5,
-            final List<ChunkAccess> param6) {
+            final List<ChunkAccess> param6, final boolean param7) {
         final Function<ChunkAccess, CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> postProcessor;
         if (ShouldFire.CHUNK_EVENT_GENERATED) {
             postProcessor = chunkAccess -> {
@@ -186,7 +187,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         } else {
             postProcessor = param5;
         }
-        return status.generate(param0, param1, param2, param3, param4, postProcessor, param6, false);
+        return status.generate(param0, param1, param2, param3, param4, postProcessor, param6, param7);
     }
 
     @Inject(method = "save", at = @At(value = "RETURN"))

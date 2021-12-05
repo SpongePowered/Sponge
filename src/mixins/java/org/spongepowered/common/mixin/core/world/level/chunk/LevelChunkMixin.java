@@ -26,19 +26,20 @@ package org.spongepowered.common.mixin.core.world.level.chunk;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerChunkCache;
-import net.minecraft.util.ClassInstanceMultiMap;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.ticks.LevelChunkTicks;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Final;
@@ -59,7 +60,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DirectionUtil;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -69,18 +69,16 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
-public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridge {
+public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkBridge, CacheKeyBridge {
 
     // @formatter:off
     @Shadow @Final private Level level;
-    @Shadow @Final private ChunkPos chunkPos;
     @Shadow private boolean loaded;
-    @Shadow private boolean unsaved;
-    @Shadow @Final private Map<BlockPos, BlockEntity> blockEntities;
 
     @Shadow @Nullable public abstract BlockEntity shadow$getBlockEntity(BlockPos pos, net.minecraft.world.level.chunk.LevelChunk.EntityCreationType p_177424_2_);
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos pos);
@@ -95,11 +93,23 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
     private Map<Integer, PlayerTracker> impl$trackedIntBlockPositions = new HashMap<>();
     private Map<Short, PlayerTracker> impl$trackedShortBlockPositions = new HashMap<>();
 
+    public LevelChunkMixin(
+        final ChunkPos $$0,
+        final UpgradeData $$1,
+        final LevelHeightAccessor $$2,
+        final Registry<Biome> $$3,
+        final long $$4,
+        final LevelChunkSection[] $$5,
+        final BlendingData $$6
+    ) {
+        super($$0, $$1, $$2, $$3, $$4, $$5, $$6);
+    }
+
     @Inject(method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/chunk/UpgradeData;Lnet/minecraft/world/ticks/LevelChunkTicks;Lnet/minecraft/world/ticks/LevelChunkTicks;J[Lnet/minecraft/world/level/chunk/LevelChunkSection;Lnet/minecraft/world/level/chunk/LevelChunk$PostLoadProcessor;Lnet/minecraft/world/level/levelgen/blending/BlendingData;)V",
             at = @At("RETURN"))
-    private void impl$onConstruct(Level $$0, ChunkPos $$1, UpgradeData $$2, LevelChunkTicks $$3, LevelChunkTicks $$4,
-                                  long $$5, LevelChunkSection[] $$6, LevelChunk.PostLoadProcessor $$7, BlendingData $$8,
-                                  CallbackInfo ci) {
+    private void impl$onConstruct(final Level $$0, final ChunkPos $$1, final UpgradeData $$2, final LevelChunkTicks $$3, final LevelChunkTicks $$4,
+                                  final long $$5, final LevelChunkSection[] $$6, final LevelChunk.PostLoadProcessor $$7, final BlendingData $$8,
+                                  final CallbackInfo ci) {
         this.impl$cacheKey = ChunkPos.asLong($$1.x, $$1.z);
     }
 

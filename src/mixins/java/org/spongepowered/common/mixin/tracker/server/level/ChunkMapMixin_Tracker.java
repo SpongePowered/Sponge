@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.tracker.server.level;
 
-import com.mojang.datafixers.util.Either;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
@@ -33,7 +32,6 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
-
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,7 +49,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.List;
 
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin_Tracker {
@@ -71,7 +69,7 @@ public abstract class ChunkMapMixin_Tracker {
 
     @Redirect(method = "*",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;startTickingChunk(Lnet/minecraft/world/level/chunk/LevelChunk;)V"))
-    private static void tracker$wrapUnpackTicks(final LevelChunk chunk, final long l) {
+    private void tracker$wrapUnpackTicks(final ServerLevel level, final LevelChunk chunk, final List<ChunkAccess> chunks) {
         if (!PhaseTracker.SERVER.onSidedThread()) {
             new PrettyPrinter(60).add("Illegal Async Chunk Unpacking").centre().hr()
                 .addWrapped("Someone is attempting to unpack chunk scheduled updates while off the main thread, this is" +
@@ -90,10 +88,10 @@ public abstract class ChunkMapMixin_Tracker {
         }
         try (final PhaseContext<@NonNull ?> ctx = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.getInstance())
             .source(chunk)
-            .world((ServerLevel) chunk.getLevel())
+            .world(level)
             .chunk(chunk)) {
             ctx.buildAndSwitch();
-            chunk.unpackTicks(l);
+            chunk.unpackTicks(level.getLevelData().getGameTime());
         }
 
     }

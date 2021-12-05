@@ -87,10 +87,10 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.client.server.IntegratedPlayerListBridge;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
-import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.entity.player.LoginPermissions;
 import org.spongepowered.common.entity.player.SpongeUserView;
@@ -248,9 +248,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         }
         return compound;
     }
-    
+
     @Redirect(method = "placeNewPlayer",
-        at = @At(value = "INVOKE", 
+        at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/MinecraftServer;getLevel(Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/server/level/ServerLevel;"
         )
     )
@@ -373,9 +373,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundLoginPacket"))
-    private ClientboundLoginPacket impl$usePerWorldViewDistance(int $$0, boolean $$1, GameType $$2, GameType $$3, Set $$4,
-        RegistryAccess.RegistryHolder $$5, DimensionType $$6, ResourceKey $$7, long $$8, int $$9, int $$10, int $$11, boolean $$12, boolean $$13,
-        boolean $$14, boolean $$15, net.minecraft.server.level.ServerPlayer player) {
+    private ClientboundLoginPacket impl$usePerWorldViewDistance(final int $$0, final boolean $$1, final GameType $$2, final GameType $$3, final Set<ResourceKey<Level>> $$4,
+        final RegistryAccess.RegistryHolder $$5, final DimensionType $$6, final ResourceKey<Level> $$7, final long $$8, final int $$9, final int $$10, final int $$11, final boolean $$12, final boolean $$13,
+        final boolean $$14, final boolean $$15, final Connection conn, final net.minecraft.server.level.ServerPlayer player) {
 
         return new ClientboundLoginPacket($$0, $$1, $$2, $$3, $$4, $$5, $$6, $$7,
             $$8, $$9, ((PrimaryLevelDataBridge) player.getLevel().getLevelData()).bridge$viewDistance().orElse($$10),

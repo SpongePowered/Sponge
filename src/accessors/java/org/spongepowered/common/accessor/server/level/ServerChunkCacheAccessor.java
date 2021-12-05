@@ -26,15 +26,13 @@ package org.spongepowered.common.accessor.server.level;
 
 import net.minecraft.server.level.DistanceManager;
 import net.minecraft.server.level.ServerChunkCache;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ServerChunkCache.class)
 public interface ServerChunkCacheAccessor {
 
-    @Accessor("generator") @Mutable void accessor$generator(final ChunkGenerator generator);
+    // @Accessor("generator") @Mutable void accessor$generator(final ChunkGenerator generator);
 
     @Accessor("distanceManager") DistanceManager accessor$distanceManager();
 

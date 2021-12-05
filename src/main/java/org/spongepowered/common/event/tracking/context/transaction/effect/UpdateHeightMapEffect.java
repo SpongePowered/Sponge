@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import org.spongepowered.common.accessor.world.level.chunk.LevelChunkAccessor;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
+import org.spongepowered.common.accessor.world.level.chunk.ChunkAccessAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Map;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.Heightmap;
 
 public final class UpdateHeightMapEffect implements ProcessingSideEffect {
 
@@ -49,7 +49,7 @@ public final class UpdateHeightMapEffect implements ProcessingSideEffect {
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag, final int limit
     ) {
-        final Map<Heightmap.Types, Heightmap> heightMap = ((LevelChunkAccessor) pipeline.getAffectedChunk()).accessor$heightmaps();
+        final Map<Heightmap.Types, Heightmap> heightMap = ((ChunkAccessAccessor) pipeline.getAffectedChunk()).accessor$heightmaps();
         if (heightMap == null) {
             throw new IllegalStateException("Heightmap dereferenced!");
         }

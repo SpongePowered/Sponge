@@ -48,13 +48,11 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
-import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.ticks.LevelTicks;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
@@ -82,7 +80,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
@@ -135,10 +132,10 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         method = "<init>",
         at = @At(
             value = "NEW",
-            target = "Lnet/minecraft/world/ticks/LevelTicks;<init>(Ljava/util/function/LongPredicate;Ljava/util/function/Supplier;)V"
+            target = "(Ljava/util/function/LongPredicate;Ljava/util/function/Supplier;)Lnet/minecraft/world/ticks/LevelTicks;"
         )
     )
-    private <T> LevelTicks<T> impl$createLevelTicks(LongPredicate predicate, Supplier<ProfilerFiller> supplier) {
+    private <T> LevelTicks<T> impl$createLevelTicks(final LongPredicate predicate, final Supplier<ProfilerFiller> supplier) {
         final var levelTicks = new LevelTicks<T>(predicate, supplier);
         final var levelData = this.levelData;
         ((LevelTicksBridge<T>) levelTicks).bridge$setGameTimeSupplier(levelData::getGameTime);

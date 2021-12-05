@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.tracker.world.level.chunk;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -59,7 +60,6 @@ import org.spongepowered.common.event.tracking.context.transaction.block.ChangeB
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.event.tracking.phase.generation.ChunkLoadContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.mixin.tracker.world.level.LevelHeightAccessorMixin_Tracker;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -70,7 +70,7 @@ import java.util.Optional;
 
 
 @Mixin(LevelChunk.class)
-public abstract class LevelChunkMixin_Tracker extends ChunkAccessMixin_Tracker implements TrackedLevelChunkBridge, LevelHeightAccessorMixin_Tracker {
+public abstract class LevelChunkMixin_Tracker extends ChunkAccessMixin_Tracker implements TrackedLevelChunkBridge, LevelHeightAccessor {
     // @formatter:off
     @Shadow @Final net.minecraft.world.level.Level level;
 
@@ -123,7 +123,7 @@ public abstract class LevelChunkMixin_Tracker extends ChunkAccessMixin_Tracker i
         final int zPos = pos.getZ() & 15;
         final int sectionIndex = ((LevelChunk) (Object) this).getSectionIndex(yPos);
         // Sponge - get the moving flag from our flag construct
-        final LevelChunkSection chunksection = this.shadow$getSection(this.shadow$getSectionIndex(yPos));
+        final LevelChunkSection chunksection = this.shadow$getSection(this.getSectionIndex(yPos));
         final var isEmpty = chunksection.hasOnlyAir();
         if (isEmpty && newState.isAir()) {
             return ChunkPipeline.nullReturn((LevelChunk) (Object) this, (ServerLevel) this.level);

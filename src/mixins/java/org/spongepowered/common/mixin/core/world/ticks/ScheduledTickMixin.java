@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.core.world.ticks;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.util.Ticks;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.ticks.LevelTicks;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -36,11 +38,8 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.world.level.ServerTickListAccessor;
+import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
 import org.spongepowered.common.bridge.world.ticks.TickNextTickDataBridge;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
 
 import java.time.Duration;
 
@@ -59,11 +58,11 @@ public abstract class ScheduledTickMixin<T> implements TickNextTickDataBridge<T>
     @Override
     public void bridge$createdByList(final LevelTicks<T> tickList) {
         this.impl$parentTickList = tickList;
-        this.impl$scheduledTime = ((ServerTickListAccessor<T>) tickList).accessor$level().getGameTime();
+        this.impl$scheduledTime = ((LevelTicksBridge<T>) tickList).bridge$getGameTime().getAsLong();
     }
 
     @Override
-    public void bridge$setWorld(Level world) {
+    public void bridge$setWorld(final Level world) {
         checkState(this.impl$location == null, "World already known");
         final BlockPos position = this.pos;
         this.impl$location = ServerLocation.of((ServerWorld) world, position.getX(), position.getY(), position.getZ());
@@ -84,7 +83,7 @@ public abstract class ScheduledTickMixin<T> implements TickNextTickDataBridge<T>
     }
 
     @Override
-    public void bridge$setState(ScheduledUpdate.State state) {
+    public void bridge$setState(final ScheduledUpdate.State state) {
         this.impl$state = state;
     }
 

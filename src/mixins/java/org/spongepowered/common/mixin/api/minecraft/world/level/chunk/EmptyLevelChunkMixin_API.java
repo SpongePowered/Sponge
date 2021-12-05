@@ -24,12 +24,25 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.UpgradeData;
+import net.minecraft.world.level.levelgen.blending.BlendingData;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(EmptyLevelChunk.class)
 public abstract class EmptyLevelChunkMixin_API extends LevelChunkMixin_API {
+
+    public EmptyLevelChunkMixin_API(
+        final ChunkPos $$0, final UpgradeData $$1, final LevelHeightAccessor $$2, final Registry<net.minecraft.world.level.biome.Biome> $$3, final long $$4,
+        final LevelChunkSection[] $$5, final BlendingData $$6
+    ) {
+        super($$0, $$1, $$2, $$3, $$4, $$5, $$6);
+    }
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {

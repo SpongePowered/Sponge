@@ -47,13 +47,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.function.LongPredicate;
 
 @Mixin(LevelTicks.class)
 public abstract class LevelTicksMixin_API<T> implements ScheduledUpdateList<T> {
 
     // @formatter:off
-    @Shadow @Final private Predicate<T> tickCheck;
+    @Shadow @Final private LongPredicate tickCheck;
     @Shadow @Final private Long2ObjectMap<LevelChunkTicks<T>> allContainers;
     @Shadow @Final private List<ScheduledTick<T>> alreadyRunThisTick;
 
@@ -80,7 +80,7 @@ public abstract class LevelTicksMixin_API<T> implements ScheduledUpdateList<T> {
         final var subCount = ((LevelTicksBridge<T>) this).bridge$getNextSubTickCountSupplier().getAsLong();
         final var scheduledUpdate = new ScheduledTick<>(
             target, blockPos, tickDelay.ticks() + gameTime, (TickPriority) (Object) priority, subCount);
-        if (!this.tickCheck.test(target)) {
+        if (!this.tickCheck.test(ChunkPos.asLong(blockPos))) {
             ((TickNextTickDataBridge<T>) (Object) scheduledUpdate).bridge$createdByList((LevelTicks<T>) (Object) this);
             this.shadow$schedule(scheduledUpdate);
         }
@@ -99,7 +99,7 @@ public abstract class LevelTicksMixin_API<T> implements ScheduledUpdateList<T> {
             return Collections.emptySet();
         }
         final long longPos = ChunkPos.asLong(new BlockPos(x, y, z));
-        LevelChunkTicks<T> $$2 = this.allContainers.get(longPos);
+        final LevelChunkTicks<T> $$2 = this.allContainers.get(longPos);
 
         return $$2.getAll()
             .filter(data -> data.pos().getX() == x && data.pos().getZ() == z && data.pos().getY() == y)

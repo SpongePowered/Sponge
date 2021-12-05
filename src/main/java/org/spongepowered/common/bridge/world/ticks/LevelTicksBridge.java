@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.world.ticks;
 
 import java.util.function.LongSupplier;
-import java.util.function.Supplier;
 
 public interface LevelTicksBridge<T> {
 
