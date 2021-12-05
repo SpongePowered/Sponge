@@ -1,0 +1,26 @@
+dependencies {
+    implementation "org.ow2.asm:asm:$asmVersion"
+}
+
+// Make sure jar is present for other projects
+eclipse {
+    synchronizationTasks 'jar'
+}
+
+tasks.named('jar') {
+    manifest.attributes "Premain-Class": "org.spongepowered.mlpatcher.AsmFixerAgent",
+        "Agent-Class": "org.spongepowered.mlpatcher.AsmFixerAgent"
+    
+}
+
+license {
+    properties {
+        name = "Sponge"
+        organization = project.ext.organization
+        url = project.ext.projectUrl
+    }
+    header = rootProject.file("HEADER.txt")
+
+    include "**/*.java"
+    newLine false
+}

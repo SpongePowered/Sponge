@@ -28,7 +28,10 @@ val vanillaAppLaunchConfig = configurations.register("applaunch") {
     extendsFrom(vanillaBootstrapLibrariesConfig.get())
     extendsFrom(configurations.minecraft.get())
 }
-val vanillaInstallerConfig = configurations.register("installer")
+val mlpatcherConfig = configurations.register("mlpatcher")
+val vanillaInstallerConfig = configurations.register("installer") {
+    extendsFrom(mlpatcherConfig.get())
+}
 
 // Common source sets and configurations
 val launchConfig = commonProject.configurations.named("launch")
@@ -59,11 +62,18 @@ val vanillaInstallerJava9 by sourceSets.register("installerJava9") {
     tasks.named(compileJavaTaskName, JavaCompile::class) {
         options.release.set(9)
     }
+    
+    configurations.configureEach {
+        attributes {
+            attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
+        }
+    }
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(vanillaInstallerConfig.get())
     }
 }
+
 
 dependencies.add(vanillaInstaller.implementationConfigurationName, vanillaInstallerJava9.output)
 
@@ -115,6 +125,7 @@ val vanillaAppLaunch by sourceSets.register("applaunch") {
     
     configurations.named(runtimeClasspathConfigurationName) {
         extendsFrom(vanillaLibrariesConfig.get())
+        extendsFrom(mlpatcherConfig.get())
     }
 }
 val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementationConfigurationName) {
@@ -182,7 +193,8 @@ minecraft {
                 // Then add necessary module cracks
                 listOf(
                     "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
-                    "--add-opens=java.base/java.util.jar=ALL-UNNAMED" // ModLauncher
+                    "--add-opens=java.base/java.util.jar=ALL-UNNAMED", // ModLauncher
+                    "-javaagent:${mlpatcherConfig.get().resolvedConfiguration.files.firstOrNull()}"
                 )
             }
             allArgumentProviders += CommandLineArgumentProvider {
@@ -231,6 +243,7 @@ dependencies {
     implementation(project(":", configuration = "accessors"))
     implementation(project(commonProject.path))
 
+    mlpatcherConfig.name(project(":modlauncher-patcher"))
     vanillaMixinsImplementation(project(commonProject.path))
 
     val installer = vanillaInstallerConfig.name
