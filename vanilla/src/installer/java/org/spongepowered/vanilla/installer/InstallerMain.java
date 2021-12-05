@@ -39,14 +39,12 @@ import org.spongepowered.vanilla.installer.model.mojang.Version;
 import org.spongepowered.vanilla.installer.model.mojang.VersionManifest;
 import org.tinylog.Logger;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -294,9 +292,9 @@ public final class InstallerMain {
                 }
             }
             if (serverExtractionNeeded) {
-                final ZipEntry serverEntry = bundle.getEntry("META-INF/versions/" + server.path());
+                final ZipEntry serverEntry = bundle.getEntry(server.path());
                 try (final InputStream is = bundle.getInputStream(serverEntry)) {
-                    InstallerUtils.transferCheckHash(is, serverDestination, MessageDigest.getInstance("SHA-265"), server.sha256());
+                    InstallerUtils.transferCheckHash(is, serverDestination, MessageDigest.getInstance("SHA-256"), server.sha256());
                 }
             }
 
@@ -314,9 +312,9 @@ public final class InstallerMain {
                     }
                 }
 
-                final ZipEntry entry = bundle.getEntry("META-INF/libraries/" + library.path());
+                final ZipEntry entry = bundle.getEntry(library.path());
                 try (final InputStream is = bundle.getInputStream(entry)) {
-                    InstallerUtils.transferCheckHash(is, destination, MessageDigest.getInstance("SHA-265"), library.sha256());
+                    InstallerUtils.transferCheckHash(is, destination, MessageDigest.getInstance("SHA-256"), library.sha256());
                     libs.put(gav, destination);
                 }
             }
