@@ -24,22 +24,13 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level;
 
-import net.minecraft.world.level.block.entity.TickingBlockEntity;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
-
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
@@ -52,21 +43,21 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-
-import javax.annotation.Nullable;
 
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 @Mixin(Level.class)
-public abstract class LevelMixin_Tracker implements LevelBridge, LevelAccessorMixin_Tracker {
+public abstract class LevelMixin_Tracker implements LevelBridge, LevelAccessor {
 
     // @formatter:off
     @Shadow @Final public Random random;
@@ -74,6 +65,7 @@ public abstract class LevelMixin_Tracker implements LevelBridge, LevelAccessorMi
 
     @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos pos);
     @Shadow public abstract void shadow$guardEntityTick(Consumer<Entity> p_217390_1_, Entity p_217390_2_);
+    @Override
     @Shadow public boolean setBlock(final BlockPos pos, final BlockState state, final int flags, final int limit) { throw new IllegalStateException("Untransformed shadow!"); }
     @Shadow public void shadow$removeBlockEntity(final BlockPos pos) { } // shadowed
     @Shadow @Nullable public abstract BlockEntity shadow$getBlockEntity(BlockPos pos);
@@ -81,6 +73,7 @@ public abstract class LevelMixin_Tracker implements LevelBridge, LevelAccessorMi
     @Shadow public void shadow$neighborChanged(final BlockPos pos, final Block blockIn, final BlockPos fromPos) { } // Shadowed
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos pos);
     @Shadow public abstract boolean shadow$isDebug();
+    @Override
     @Shadow public boolean destroyBlock(final BlockPos p_241212_1_, final boolean p_241212_2_, @Nullable final Entity p_241212_3_, final int p_241212_4_) { throw new IllegalStateException("Untransformed shadow!"); }
     @Shadow public abstract FluidState shadow$getFluidState(BlockPos p_204610_1_);
     // @formatter:on
