@@ -33,7 +33,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -57,7 +56,7 @@ public abstract class ChunkSerializerMixin_Tracker {
         }
         final LevelChunkBridge chunk = (LevelChunkBridge) param1;
         if (!chunk.bridge$getTrackedShortPlayerPositions().isEmpty() || !chunk.bridge$getTrackedIntPlayerPositions().isEmpty()) {
-            final CompoundTag level = (CompoundTag) cir.getReturnValue().get("Level");
+            final CompoundTag level = cir.getReturnValue();
             final CompoundTag trackedNbt = new CompoundTag();
             final ListTag positions = new ListTag();
             trackedNbt.put(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, positions);
@@ -68,7 +67,7 @@ public abstract class ChunkSerializerMixin_Tracker {
         }
     }
 
-    private static <T> void impl$writeMap(ListTag positions, Map<T, PlayerTracker> map, BiConsumer<CompoundTag, T> consumer) {
+    private static <T> void impl$writeMap(final ListTag positions, final Map<T, PlayerTracker> map, final BiConsumer<CompoundTag, T> consumer) {
         for (final Map.Entry<T, PlayerTracker> mapEntry : map.entrySet()) {
             final T pos = mapEntry.getKey();
             final int ownerUniqueIdIndex = mapEntry.getValue().creatorindex;
@@ -87,8 +86,7 @@ public abstract class ChunkSerializerMixin_Tracker {
         if (!(chunkAccess instanceof LevelChunk)) {
             return;
         }
-        final CompoundTag level = (CompoundTag) param4.get("Level");
-        final CompoundTag spongeData = level.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA);
+        final CompoundTag spongeData = param4.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA);
         if (spongeData.isEmpty()) {
             return;
         }
@@ -97,7 +95,7 @@ public abstract class ChunkSerializerMixin_Tracker {
 
         final ListTag list = spongeData.getList(Constants.Sponge.SPONGE_BLOCK_POS_TABLE, 10);
         final LevelChunkBridge chunk = (LevelChunkBridge) chunkAccess;
-        for (Tag tag : list) {
+        for (final Tag tag : list) {
             final PlayerTracker tracker = new PlayerTracker();
             final CompoundTag data = (CompoundTag) tag;
             final boolean isShortPos = data.contains("pos");

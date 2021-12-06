@@ -184,8 +184,9 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             final ClickType clickType,
             final Player player
     ) {
-        if (((LevelBridge) player.level).bridge$isFake()) {
+        if (((LevelBridge) player.level).bridge$isFake() || player.level.isClientSide()) {
             this.shadow$doClick(slotId, dragType, clickType, player);
+            return;
         }
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();

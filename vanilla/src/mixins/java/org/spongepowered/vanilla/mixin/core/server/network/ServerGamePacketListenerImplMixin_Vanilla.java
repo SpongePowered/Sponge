@@ -51,7 +51,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Group;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -107,7 +106,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
             } else {
                 event.chatFormatter().ifPresent(formatter ->
                     event.audience().map(SpongeAdventure::unpackAudiences).ifPresent(targets -> {
-                        for (Audience target : targets) {
+                        for (final Audience target : targets) {
                             formatter.format(player, target, event.message(), event.originalMessage()).ifPresent(formattedMessage ->
                                 target.sendMessage(player, formattedMessage));
                         }
@@ -126,7 +125,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
     }
 
     @SuppressWarnings({"UnresolvedMixinReference", "unchecked", "rawtypes"})
-    @Redirect(method = "lambda$handlePlaceRecipe$11",
+    @Redirect(method = "lambda$handlePlaceRecipe$9",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
     private void vanilla$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final net.minecraft.server.level.ServerPlayer player) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
