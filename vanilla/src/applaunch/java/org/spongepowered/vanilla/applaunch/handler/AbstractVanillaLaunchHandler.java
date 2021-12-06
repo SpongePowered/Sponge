@@ -118,6 +118,10 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             "org.spongepowered.configurate.xml.",
     };
 
+    protected boolean isDev() {
+        return false;
+    }
+
     @Override
     public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
         // Specifically requested to be available on the launch loader
@@ -128,18 +132,20 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
 
         // Plus everything else on the system loader
         // todo: we might be able to eliminate this at some point, but that causes complications
-        for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
-            try {
-                final URI uri = url.toURI();
-                if (!this.isTransformable(uri)) {
-                    this.logger.debug("Non-transformable system classpath entry: {}", uri);
-                    continue;
-                }
+        if (this.isDev()) {
+            for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
+                try {
+                    final URI uri = url.toURI();
+                    if (!this.isTransformable(uri)) {
+                        this.logger.debug("Non-transformable system classpath entry: {}", uri);
+                        continue;
+                    }
 
-                builder.addTransformationPath(Paths.get(uri));
-                this.logger.debug("Transformable system classpath entry: {}", uri);
-            } catch (final URISyntaxException | IOException ex) {
-                this.logger.error("Failed to add {} to transformation path", url, ex);
+                    builder.addTransformationPath(Paths.get(uri));
+                    this.logger.debug("Transformable system classpath entry: {}", uri);
+                } catch (final URISyntaxException | IOException ex) {
+                    this.logger.error("Failed to add {} to transformation path", url, ex);
+                }
             }
         }
 

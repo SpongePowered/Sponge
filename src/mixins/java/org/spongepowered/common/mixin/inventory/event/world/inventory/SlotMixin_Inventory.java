@@ -44,4 +44,5 @@ public class SlotMixin_Inventory {
             ctx.getTransactor().logShiftCraftingResult((Slot) (Object) this, stackTaken);
         }
     }
+
 }

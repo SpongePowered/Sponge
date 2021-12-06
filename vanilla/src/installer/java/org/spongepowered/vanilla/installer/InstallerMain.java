@@ -55,8 +55,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -137,7 +139,9 @@ public final class InstallerMain {
 
         Logger.info("Environment has been verified.");
 
+        final Set<String> seenLibs = new HashSet<>();
         this.installer.getLibraryManager().getAll(InstallerMain.COLLECTION_BOOTSTRAP).stream()
+            .peek(lib -> seenLibs.add(lib.getName()))
             .map(LibraryManager.Library::getFile)
             .forEach(path -> {
                 Logger.debug("Adding jar {} to bootstrap classpath", path);
@@ -145,6 +149,7 @@ public final class InstallerMain {
             });
 
         final Path[] transformableLibs = this.installer.getLibraryManager().getAll(InstallerMain.COLLECTION_MAIN).stream()
+            .filter(lib -> !seenLibs.contains(lib.getName()))
             .map(LibraryManager.Library::getFile)
             .toArray(Path[]::new);
 

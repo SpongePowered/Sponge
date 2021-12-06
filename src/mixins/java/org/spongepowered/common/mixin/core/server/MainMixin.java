@@ -54,16 +54,16 @@ public abstract class MainMixin {
     private static DedicatedServerSettings impl$cacheBootstrapProperties(final Path p_i242100_2_) {
         final DedicatedServerSettings provider = new DedicatedServerSettings(p_i242100_2_);
         final DedicatedServerProperties properties = provider.getProperties();
-        RegistryAccess.RegistryHolder p_i242100_1_ = RegistryAccess.builtin();
+        final RegistryAccess.RegistryHolder p_i242100_1_ = RegistryAccess.builtin();
         BootstrapProperties.init(properties.getWorldGenSettings(p_i242100_1_), properties.gamemode, properties.difficulty, properties.pvp, properties.hardcore,
                 true, properties.viewDistance, p_i242100_1_);
         return provider;
     }
 
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/resources/RegistryReadOps;"))
-    private static <T> RegistryReadOps<T> impl$cacheWorldSettingsAdapter(DynamicOps<T> ops, ResourceManager resourceAccess,
-            RegistryAccess registryAccess) {
-        final RegistryReadOps<T> worldSettingsAdapter = RegistryReadOps.create(ops, resourceAccess, registryAccess);
+    private static <T> RegistryReadOps<T> impl$cacheWorldSettingsAdapter(final DynamicOps<T> ops, final ResourceManager resourceAccess,
+            final RegistryAccess registryAccess) {
+        final RegistryReadOps<T> worldSettingsAdapter = RegistryReadOps.createAndLoad(ops, resourceAccess, registryAccess);
         BootstrapProperties.worldSettingsAdapter(worldSettingsAdapter);
         SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
         return worldSettingsAdapter;
