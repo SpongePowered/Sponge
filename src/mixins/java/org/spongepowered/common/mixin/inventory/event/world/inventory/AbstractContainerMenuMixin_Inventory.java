@@ -165,7 +165,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     private ItemStack impl$transferStackInSlot(final AbstractContainerMenu thisContainer, final Player player, final int slotId) {
         final ItemStack result = thisContainer.quickMoveStack(player, slotId);
         // Crafting on Serverside?
-        if (((LevelBridge) player.level).bridge$isFake() || !(thisContainer.getSlot(slotId) instanceof ResultSlot)) {
+        if (((LevelBridge) player.level).bridge$isFake() || player.level.isClientSide || !(thisContainer.getSlot(slotId) instanceof ResultSlot)) {
             return result;
         }
         this.bridge$detectAndSendChanges(true);

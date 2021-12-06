@@ -39,7 +39,9 @@ public class SlotMixin_Inventory {
 
     @Inject(method = "onQuickCraft(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)V", at = @At("HEAD"))
     private void inventory$onQuickCraft(final ItemStack slotStack, final ItemStack stackTaken, final CallbackInfo ci) {
-        final PhaseContext<@NonNull ?> ctx = PhaseTracker.SERVER.getPhaseContext();
-        ctx.getTransactor().logShiftCraftingResult((Slot) (Object) this, stackTaken);
+        if (PhaseTracker.SERVER.onSidedThread()) {
+            final PhaseContext<@NonNull ?> ctx = PhaseTracker.SERVER.getPhaseContext();
+            ctx.getTransactor().logShiftCraftingResult((Slot) (Object) this, stackTaken);
+        }
     }
 }
