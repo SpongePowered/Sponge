@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.text.chat;
 
+import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -39,6 +42,7 @@ import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.text.SpongeTexts;
 
+import java.util.Locale;
 import java.util.Optional;
 
 public final class ChatUtil {
@@ -46,7 +50,20 @@ public final class ChatUtil {
     private ChatUtil() {
     }
 
+    public static final String JNDI_EXPLOIT_FRAGMENT = "${jndi";
+
+    public static boolean isExploitable(final String message) {
+        return message.toLowerCase(Locale.ROOT).contains(ChatUtil.JNDI_EXPLOIT_FRAGMENT);
+    }
+
     public static void sendMessage(ITextComponent component, MessageChannel channel, CommandSource source, boolean isChat) {
+        if (ChatUtil.isExploitable(component.getUnformattedText())) {
+            // block it
+            TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("chat.cannotSend", new Object[0]);
+            textcomponenttranslation.getStyle().setColor(TextFormatting.RED);
+            source.sendMessage(SpongeTexts.toText(textcomponenttranslation));
+            return;
+        }
         Text raw = SpongeTexts.toText(component);
         MessageFormatter formatter = new MessageEvent.MessageFormatter(raw);
         final boolean isMainThread = Sponge.isServerAvailable() && Sponge.getServer().isMainThread();
