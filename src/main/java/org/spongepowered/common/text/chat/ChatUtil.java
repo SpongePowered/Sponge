@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.text.chat;
 
-import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -51,6 +50,19 @@ public final class ChatUtil {
     }
 
     public static final String JNDI_EXPLOIT_FRAGMENT = "${jndi";
+
+    public static boolean isExploitable(final Object message) {
+        if (message instanceof String) {
+            return ChatUtil.isExploitable((String) message);
+        } else if (message instanceof ITextComponent) {
+            return ChatUtil.isExploitable((ITextComponent) message);
+        }
+        return false;
+    }
+
+    public static boolean isExploitable(final ITextComponent message) {
+        return ChatUtil.isExploitable(message.getUnformattedText());
+    }
 
     public static boolean isExploitable(final String message) {
         return message.toLowerCase(Locale.ROOT).contains(ChatUtil.JNDI_EXPLOIT_FRAGMENT);
