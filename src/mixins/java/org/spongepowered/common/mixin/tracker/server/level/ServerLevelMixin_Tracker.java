@@ -54,7 +54,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
@@ -818,16 +819,18 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             return;
         }
 
-        final Cause currentCause = tracker.currentCause();
-        final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>();
-        entities.add((org.spongepowered.api.entity.Entity) entityIn);
+        try (final CauseStackManager.StackFrame frame = tracker.pushCauseFrame()) {
+            final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>();
+            entities.add((org.spongepowered.api.entity.Entity) entityIn);
 
-        final SpawnEntityEvent.Pre pre = SpongeEventFactory.createSpawnEntityEventPre(currentCause, entities);
-        Sponge.eventManager().post(pre);
+            frame.addContext(EventContextKeys.SPAWN_TYPE, current.getSpawnTypeForTransaction(entityIn));
+            final SpawnEntityEvent.Pre pre = SpongeEventFactory.createSpawnEntityEventPre(frame.currentCause(), entities);
+            Sponge.eventManager().post(pre);
 
-        if (pre.isCancelled() || entities.isEmpty()) {
-            cir.setReturnValue(false);
-            return;
+            if (pre.isCancelled() || entities.isEmpty()) {
+                cir.setReturnValue(false);
+                return;
+            }
         }
 
         if (current.allowsBulkEntityCaptures()) {
