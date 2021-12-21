@@ -32,7 +32,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -81,7 +84,14 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
             return Optional.of(SpongeEventFactory.createClickContainerEventCreativeSet(cause, (Container) this.menu,
                         cursorTransaction, Optional.ofNullable(this.slot), slotTransactions));
         }
-        return Optional.of(SpongeEventFactory.createClickContainerEventCreativeDrop(cause, (Container) this.menu,
+
+        final Cause causeWithSpawnType = Cause.builder().from(cause).build(
+                EventContext.builder().from(cause.context()).add(
+                        EventContextKeys.SPAWN_TYPE,
+                        SpawnTypes.DROPPED_ITEM.get()
+                ).build());
+
+        return Optional.of(SpongeEventFactory.createClickContainerEventCreativeDrop(causeWithSpawnType, (Container) this.menu,
                 cursorTransaction, this.creativeStack, entities, Optional.ofNullable(this.slot), slotTransactions));
     }
 
