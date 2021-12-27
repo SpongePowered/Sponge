@@ -32,6 +32,7 @@ val mlpatcherConfig = configurations.register("mlpatcher")
 val vanillaInstallerConfig = configurations.register("installer") {
     extendsFrom(mlpatcherConfig.get())
 }
+val localBundled = configurations.register("localBundled")
 
 // Common source sets and configurations
 val launchConfig = commonProject.configurations.named("launch")
@@ -265,7 +266,7 @@ dependencies {
     }
 
     // Add the API as a runtime dependency, just so it gets shaded into the jar
-    add(vanillaInstaller.runtimeOnlyConfigurationName, "org.spongepowered:spongeapi:$apiVersion") {
+    add(localBundled.name, "org.spongepowered:spongeapi:$apiVersion") {
         isTransitive = false
     }
 
@@ -461,23 +462,15 @@ tasks {
     named(vanillaInstaller.processResourcesTaskName).configure {
         dependsOn(emitDependencies)
     }
-
-    shadowJar {
-        mergeServiceFiles()
-
-        configurations = listOf(project.configurations.getByName(vanillaInstaller.runtimeClasspathConfigurationName))
-
-        archiveClassifier.set("universal")
+    
+    val combinedJar by registering(Jar::class) {
+        archiveClassifier.set("combined")
+        
         manifest {
             attributes(mapOf(
-                    "Access-Widener" to "common.accesswidener",
-                    "MixinConfigs" to mixinConfigs.joinToString(","),
-                    "Main-Class" to "org.spongepowered.vanilla.installer.VersionCheckingMain",
-                    "Launch-Target" to "sponge_server_prod",
-                    "Multi-Release" to true,
-                    "Premain-Class" to "org.spongepowered.vanilla.installer.Agent",
-                    "Agent-Class" to "org.spongepowered.vanilla.installer.Agent",
-                    "Launcher-Agent-Class" to "org.spongepowered.vanilla.installer.Agent"
+                "Access-Widener" to "common.accesswidener",
+                "MixinConfigs" to mixinConfigs.joinToString(","),
+                "Launch-Target" to "sponge_server_prod",
             ))
             from(vanillaManifest)
         }
@@ -487,16 +480,45 @@ tasks {
         from(commonProject.sourceSets.named("launch").map {it.output })
         from(commonProject.sourceSets.named("applaunch").map {it.output })
         from(sourceSets.main.map {it.output })
-        from(vanillaInstaller.output)
-        from(vanillaInstallerJava8.output)
-        from(vanillaInstallerJava9.output)
         from(vanillaAppLaunch.output)
         from(vanillaLaunch.output)
         from(vanillaMixins.output)
-        /*dependencies {
-            // include(project(":"))
-            include("org.spongepowered:spongeapi:$apiVersion")
-        } */
+    }
+    project.dependencies.add(localBundled.name, project.files(combinedJar.map { it.outputs }))
+    
+    val indexFile = project.layout.buildDirectory.file("generated/index/sponge.index")
+    val generateIndex = register("generateIndex", org.spongepowered.gradle.impl.GenerateIndex::class) {
+        group = "sponge"
+        bundledArtifacts.from(localBundled)
+        index.set(indexFile)
+    }
+
+    shadowJar {
+        mergeServiceFiles()
+
+        configurations = listOf(project.configurations.getByName(vanillaInstaller.runtimeClasspathConfigurationName))
+
+        archiveClassifier.set("universal")
+        manifest {
+            attributes(mapOf(
+                    "Main-Class" to "org.spongepowered.vanilla.installer.VersionCheckingMain",
+                    "Multi-Release" to true,
+                    "Premain-Class" to "org.spongepowered.vanilla.installer.Agent",
+                    "Agent-Class" to "org.spongepowered.vanilla.installer.Agent",
+                    "Launcher-Agent-Class" to "org.spongepowered.vanilla.installer.Agent"
+            ))
+            from(vanillaManifest)
+        }
+        into("META-INF/sponge") {
+            from(localBundled.map { it.incoming.files })
+            rename { it -> it.replace(".jar", "") }
+        }
+        into("META-INF") {
+            from(generateIndex.map { it.outputs })
+        }
+        from(vanillaInstaller.output)
+        from(vanillaInstallerJava8.output)
+        from(vanillaInstallerJava9.output)
 
         // We cannot have modules in a shaded jar
         exclude("META-INF/versions/*/module-info.class")

@@ -42,7 +42,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.accessor.client.gui.components.AbstractSelectionListAccessor;
 import org.spongepowered.vanilla.util.Bounds;
 
@@ -298,7 +297,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
     }
 
     @Override
-    public void updateNarration(final @NonNull NarrationElementOutput narrationConsumer) {
+    public void updateNarration(final NarrationElementOutput narrationConsumer) {
         final @org.checkerframework.checker.nullness.qual.Nullable E hovered = this.getCurrentHoveredEntry();
         if (hovered != null) {
             this.narrateListElementPosition(narrationConsumer, hovered);

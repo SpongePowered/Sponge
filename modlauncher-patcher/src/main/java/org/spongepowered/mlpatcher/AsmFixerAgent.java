@@ -61,17 +61,29 @@ public class AsmFixerAgent {
 
     private static class MLFixer implements ClassFileTransformer {
 
-        record PatchInfo(Set<String> methodsToPatch) {
+        interface PatchAction {
+            ClassVisitor createVisitor(final ClassVisitor parent);
+        }
+
+        record PatchInfo(Set<String> methodsToPatch) implements PatchAction {
 
             public PatchInfo(final String... methods) {
                 this(Set.of(methods));
             }
+
+            @Override
+            public ClassVisitor createVisitor(final ClassVisitor parent) {
+                return new PatchAsmApiVersion(parent, this);
+            }
+
         }
 
-        private final Map<String, PatchInfo> patch = Map.of(
+        private final Map<String, PatchAction> patch = Map.<String, PatchAction>of(
             "cpw/mods/modlauncher/TransformerClassWriter$SuperCollectingVisitor", new PatchInfo("<init>"),
             "cpw/mods/modlauncher/ClassTransformer", new PatchInfo("transform"),
-            "cpw/mods/modlauncher/PredicateVisitor", new PatchInfo("<init>")
+            "cpw/mods/modlauncher/PredicateVisitor", new PatchInfo("<init>"),
+            "cpw/mods/modlauncher/ValidateLibraries", RemovePointlessRestrictions::new,
+            "cpw/mods/modlauncher/TransformationServicesHandler", FixTransformerClassLoaderParent::new
         );
 
         @Override
@@ -90,14 +102,14 @@ public class AsmFixerAgent {
             final ClassReader reader = new ClassReader(classfileBuffer);
             final ClassWriter writer = new ClassWriter(reader, 0);
 
-            reader.accept(new Cls(writer, this.patch.get(className)), 0);
+            reader.accept(this.patch.get(className).createVisitor(writer), 0);
 
             return writer.toByteArray();
         }
 
-        private static class Cls extends ClassVisitor {
+        private static class PatchAsmApiVersion extends ClassVisitor {
             private final PatchInfo data;
-            public Cls(final ClassVisitor parent, final PatchInfo data) {
+            public PatchAsmApiVersion(final ClassVisitor parent, final PatchInfo data) {
                 super(AsmFixerAgent.ASM_VERSION, parent);
                 this.data = data;
             }
@@ -140,6 +152,56 @@ public class AsmFixerAgent {
                 } else {
                     super.visitLdcInsn(value);
                 }
+            }
+        }
+
+        private static class RemovePointlessRestrictions extends ClassVisitor {
+
+            public RemovePointlessRestrictions(final ClassVisitor parent) {
+                super(AsmFixerAgent.ASM_VERSION, parent);
+            }
+
+            @Override
+            public MethodVisitor visitMethod(
+                final int access,
+                final String name,
+                final String descriptor,
+                final String signature,
+                final String[] exceptions
+            ) {
+                if (name.equals("validate") && descriptor.equals("()V")) {
+                    // some dumb check for OpenJ9, and insisting various libs are on the system classpath
+                    // just strip out the entire method, it's useless
+                    final MethodVisitor mv = this.cv.visitMethod(access, name, descriptor, signature, exceptions);
+                    mv.visitCode();
+                    mv.visitInsn(Opcodes.RETURN);
+                    mv.visitEnd();
+                    return null;
+                }
+
+                return super.visitMethod(
+                    access,
+                    name,
+                    descriptor,
+                    signature,
+                    exceptions
+                );
+            }
+
+        }
+
+        private static class FixTransformerClassLoaderParent extends ClassVisitor {
+            public FixTransformerClassLoaderParent(final ClassVisitor parent) {
+                super(AsmFixerAgent.ASM_VERSION, parent);
+            }
+
+            // original: ServiceLoaderStreamUtils.errorHandlingServiceLoader(ITransformationService.class, cl, serviceConfigurationError -> LOGGER.fatal(MODLAUNCHER, "Encountered serious error loading transformation service, expect problems", serviceConfigurationError));
+            // actual: ServiceLoaderStreamUtils.errorHandlingServiceLoader(ITransformationService.class, null, ...)
+        }
+
+        private static class FixDefaultServiceLoader extends ClassVisitor {
+            public FixDefaultServiceLoader(final ClassVisitor parent) {
+                super(AsmFixerAgent.ASM_VERSION, parent);
             }
         }
 

@@ -28,6 +28,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -126,16 +127,20 @@ public record BundlerMetadata(
         return Optional.of(new BundlerMetadata(parsed, libraries, serverJar, mainClass));
     }
 
-    private static Stream<BundleElement> readIndex(final JarFile jar, final String index) throws IOException {
+    static Stream<BundleElement> readIndex(final JarFile jar, final String index) throws IOException {
         final @Nullable JarEntry entry = jar.getJarEntry("META-INF/" + index + ".list");
         if (entry == null) {
             return Stream.empty();
         }
 
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(jar.getInputStream(entry), StandardCharsets.UTF_8));
+        return BundlerMetadata.readIndex(index, jar.getInputStream(entry));
+    }
+
+    public static Stream<BundleElement> readIndex(final String indexName, final InputStream in) throws IOException {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
         return reader.lines()
             .map(x -> x.split("\t"))
-            .map(line -> new BundleElement(line[0], line[1], "META-INF/" + index + "/" + line[2]))
+            .map(line -> new BundleElement(line[0], line[1], "META-INF/" + indexName + "/" + line[2]))
             .onClose(() -> {
                 try {
                     reader.close();
@@ -143,6 +148,7 @@ public record BundlerMetadata(
                     throw new RuntimeException(ex);
                 }
             });
+
     }
 
 }

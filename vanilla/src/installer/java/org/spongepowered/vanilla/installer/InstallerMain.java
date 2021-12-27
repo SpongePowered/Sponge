@@ -43,7 +43,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
@@ -60,14 +62,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.jar.JarFile;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 
 public final class InstallerMain {
 
-    private static final String COLLECTION_BOOTSTRAP = "bootstrap"; // goes on app
+    private static final String COLLECTION_BOOTSTRAP = "bootstrap"; // goes on bootstrap loader
     private static final String COLLECTION_MAIN = "main"; // goes on TCL
     private static final int MAX_TRIES = 2;
 
@@ -103,6 +107,7 @@ public final class InstallerMain {
             this.installer.getLibraryManager().validate();
         }
 
+        final CompletableFuture<Set<Path>> includedElementsFuture = this.extractJarInJar(LauncherCommandLine.librariesDirectory);
         final var libraryManager = this.installer.getLibraryManager();
         try {
             if (mcVersion != null) {
@@ -135,32 +140,77 @@ public final class InstallerMain {
                 libraryManager.addLibrary(InstallerMain.COLLECTION_BOOTSTRAP, new LibraryManager.Library(library.getKey().toString(), library.getValue()));
             }
         }
+
         this.installer.getLibraryManager().finishedProcessing();
 
         Logger.info("Environment has been verified.");
 
+        // todo: once unified with json, properly split sponge classes into their appropriate layers
+        final Set<Path> includedElements = includedElementsFuture.get();
         final Set<String> seenLibs = new HashSet<>();
-        this.installer.getLibraryManager().getAll(InstallerMain.COLLECTION_BOOTSTRAP).stream()
-            .peek(lib -> seenLibs.add(lib.getName()))
-            .map(LibraryManager.Library::getFile)
-            .forEach(path -> {
-                Logger.debug("Adding jar {} to bootstrap classpath", path);
-                Agent.addJarToClasspath(path);
-            });
+        final URL[] urls = Stream.concat(
+            includedElements.stream(),
+            this.installer.getLibraryManager().getAll(InstallerMain.COLLECTION_BOOTSTRAP).stream()
+                .peek(lib -> seenLibs.add(lib.getName()))
+                .map(LibraryManager.Library::getFile)
+            )
+            .peek(path -> Logger.debug("Adding jar {} to bootstrap classpath", path))
+            .map(p -> {
+                try {
+                    return p.toUri().toURL();
+                } catch (final MalformedURLException ex) {
+                    throw new RuntimeException(ex);
+                }
+            })
+            .toArray(URL[]::new);
+        final ClassLoader bootstrapLoader = new URLClassLoader(urls);
 
-        final Path[] transformableLibs = this.installer.getLibraryManager().getAll(InstallerMain.COLLECTION_MAIN).stream()
-            .filter(lib -> !seenLibs.contains(lib.getName()))
-            .map(LibraryManager.Library::getFile)
+        final Path[] transformableLibs = Stream.concat(
+            includedElements.stream(),
+            this.installer.getLibraryManager().getAll(InstallerMain.COLLECTION_MAIN).stream()
+                .filter(lib -> !seenLibs.contains(lib.getName()))
+                .map(LibraryManager.Library::getFile)
+            )
+            .peek(path -> Logger.debug("Selecting jar {} for transformation path"))
             .toArray(Path[]::new);
 
         final List<String> gameArgs = new ArrayList<>(LauncherCommandLine.remainingArgs);
         Collections.addAll(gameArgs, this.installer.getLauncherConfig().args.split(" "));
 
         // Suppress illegal reflection warnings on newer java
-        Agent.crackModules();
+        Agent.crackModules(bootstrapLoader);
 
         final String className = "org.spongepowered.vanilla.applaunch.Main";
-        InstallerMain.invokeMain(className, gameArgs.toArray(new String[0]), transformableLibs);
+        InstallerMain.invokeMain(bootstrapLoader, className, gameArgs.toArray(new String[0]), transformableLibs);
+    }
+
+    private CompletableFuture<Set<Path>> extractJarInJar(final Path librariesDirectory) {
+        return CompletableFuture.supplyAsync(() -> {
+            try (final InputStream is = InstallerMain.class.getResourceAsStream("/META-INF/sponge.index")) {
+                final Stream<BundleElement> entries = BundlerMetadata.readIndex("sponge", is);
+                final Set<Path> outputs = new HashSet<>();
+
+                for (final BundleElement library : (Iterable<BundleElement>) entries::iterator) {
+                    final Path destination = librariesDirectory.resolve("org/spongepowered/bundled").resolve(library.id());
+
+                    if (Files.exists(destination)) {
+                        if (InstallerUtils.validateSha256(library.sha256(), destination)) {
+                           // library is valid
+                            outputs.add(destination);
+                           continue;
+                        }
+                    }
+
+                    try (final InputStream lib = InstallerMain.class.getResourceAsStream("/" + library.path())) {
+                        InstallerUtils.transferCheckHash(lib, destination, MessageDigest.getInstance("SHA-256"), library.sha256());
+                        outputs.add(destination);
+                    }
+                }
+                return outputs;
+            } catch (final IOException | NoSuchAlgorithmException ex) {
+                throw new CompletionException(ex);
+            }
+        }, this.installer.getLibraryManager().preparationWorker());
     }
 
     private <T extends Throwable> ServerAndLibraries recoverFromMinecraftDownloadError(final T ex) throws T {
@@ -169,15 +219,16 @@ public final class InstallerMain {
         // Re-read bundler metadata (needs original bundled location)
         if (Files.exists(expectedRemapped)) {
             Logger.warn(ex, "Failed to download and remap Minecraft. An existing jar exists, so we will attempt to use that instead.");
-            return this.extractBundle(this.expectedBundleLocation(expectedUnpacked), LauncherCommandLine.librariesDirectory);
+            return this.extractBundle(this.expectedBundleLocation(expectedUnpacked), LauncherCommandLine.librariesDirectory)
+                .server(expectedRemapped);
         } else {
             throw ex;
         }
     }
 
-    private static void invokeMain(final String className, final String[] args, final Path[] extraCpEntries) {
+    private static void invokeMain(final ClassLoader loader, final String className, final String[] args, final Path[] extraCpEntries) {
         try {
-            Class.forName(className)
+            Class.forName(className, true, loader)
                 .getMethod("main", String[].class, Path[].class)
                 .invoke(null, args, extraCpEntries);
         } catch (final InvocationTargetException ex) {
