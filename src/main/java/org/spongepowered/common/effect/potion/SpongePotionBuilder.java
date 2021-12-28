@@ -28,6 +28,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -36,15 +39,18 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.world.effect.MobEffect;
 
+@DefaultQualifier(NonNull.class)
 public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> implements PotionEffect.Builder {
 
-    private PotionEffectType potionType;
-    private int duration;
+    private @Nullable PotionEffectType potionType;
+    private Ticks duration = Ticks.zero();
     private int amplifier;
     private boolean isAmbient;
     private boolean showParticles;
@@ -56,7 +62,7 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
     }
 
     @Override
-    public PotionEffect.Builder from(PotionEffect holder) {
+    public PotionEffect.Builder from(final PotionEffect holder) {
         this.potionType = checkNotNull(holder).type();
         this.duration = holder.duration();
         this.amplifier = holder.amplifier();
@@ -67,23 +73,23 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
     }
 
     @Override
-    protected Optional<PotionEffect> buildContent(DataView container) throws InvalidDataException {
+    protected Optional<PotionEffect> buildContent(final DataView container) throws InvalidDataException {
         checkNotNull(container);
         if (!container.contains(Constants.Item.Potions.POTION_TYPE) || !container.contains(Constants.Item.Potions.POTION_DURATION)
             || !container.contains(Constants.Item.Potions.POTION_AMPLIFIER) || !container.contains(Constants.Item.Potions.POTION_AMBIANCE)
             || !container.contains(Constants.Item.Potions.POTION_SHOWS_PARTICLES)) {
             return Optional.empty();
         }
-        String effectName = container.getString(Constants.Item.Potions.POTION_TYPE).get();
-        Optional<PotionEffectType> optional = Sponge.game().registry(RegistryTypes.POTION_EFFECT_TYPE).findValue(ResourceKey.resolve(effectName));
+        final String effectName = container.getString(Constants.Item.Potions.POTION_TYPE).get();
+        final Optional<PotionEffectType> optional = Sponge.game().registry(RegistryTypes.POTION_EFFECT_TYPE).findValue(ResourceKey.resolve(effectName));
         if (!optional.isPresent()) {
             throw new InvalidDataException("The container has an invalid potion type name: " + effectName);
         }
-        int duration = container.getInt(Constants.Item.Potions.POTION_DURATION).get();
-        int amplifier = container.getInt(Constants.Item.Potions.POTION_AMPLIFIER).get();
-        boolean ambience = container.getBoolean(Constants.Item.Potions.POTION_AMBIANCE).get();
-        boolean particles = container.getBoolean(Constants.Item.Potions.POTION_SHOWS_PARTICLES).get();
-        PotionEffect.Builder builder = new SpongePotionBuilder();
+        final Ticks duration = Ticks.of(container.getInt(Constants.Item.Potions.POTION_DURATION).get());
+        final int amplifier = container.getInt(Constants.Item.Potions.POTION_AMPLIFIER).get();
+        final boolean ambience = container.getBoolean(Constants.Item.Potions.POTION_AMBIANCE).get();
+        final boolean particles = container.getBoolean(Constants.Item.Potions.POTION_SHOWS_PARTICLES).get();
+        final PotionEffect.Builder builder = new SpongePotionBuilder();
 
         return Optional.of(builder.potionType(optional.get())
                 .showParticles(particles)
@@ -94,40 +100,44 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
     }
 
     @Override
-    public PotionEffect.Builder potionType(PotionEffectType potionEffectType) {
-        checkNotNull(potionEffectType, "Potion effect type cannot be null");
+    public PotionEffect.@NonNull Builder potionType(final @NonNull PotionEffectType potionEffectType) {
+        Objects.requireNonNull(potionEffectType, "Potion effect type cannot be null");
         this.potionType = potionEffectType;
         return this;
     }
 
     @Override
-    public PotionEffect.Builder duration(int duration) {
-        checkArgument(duration > 0, "Duration must be greater than 0");
+    public PotionEffect.Builder duration(final @NonNull Ticks duration) {
+        if (duration.ticks() <= 0) {
+            throw new IllegalArgumentException("Duration must be positive");
+        }
         this.duration = duration;
         return this;
     }
 
     @Override
-    public PotionEffect.Builder amplifier(int amplifier) throws IllegalArgumentException {
-        checkArgument(amplifier >= 0, "Amplifier must not be negative");
+    public PotionEffect.Builder amplifier(final int amplifier) throws IllegalArgumentException {
+        if (amplifier < 0) {
+            throw new IllegalArgumentException("Amplifier must not be negative");
+        }
         this.amplifier = amplifier;
         return this;
     }
 
     @Override
-    public PotionEffect.Builder ambient(boolean ambience) {
+    public PotionEffect.Builder ambient(final boolean ambience) {
         this.isAmbient = ambience;
         return this;
     }
 
     @Override
-    public PotionEffect.Builder showParticles(boolean showParticles) {
+    public PotionEffect.Builder showParticles(final boolean showParticles) {
         this.showParticles = showParticles;
         return this;
     }
 
     @Override
-    public PotionEffect.Builder showIcon(boolean showIcon) {
+    public PotionEffect.Builder showIcon(final boolean showIcon) {
         this.showIcon = showIcon;
         return this;
     }
@@ -135,8 +145,11 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
     @Override
     public PotionEffect build() throws IllegalStateException {
         checkState(this.potionType != null, "Potion type has not been set");
-        checkState(this.duration > 0, "Duration has not been set");
-        return (PotionEffect) new net.minecraft.world.effect.MobEffectInstance((MobEffect) this.potionType, this.duration,
+        if (this.duration.ticks() <= 0) {
+            throw new IllegalStateException("Duration has not been set");
+        }
+        return (PotionEffect) new net.minecraft.world.effect.MobEffectInstance((MobEffect) this.potionType,
+                (int) this.duration.ticks(),
                 this.amplifier,
                 this.isAmbient,
                 this.showParticles,
@@ -147,7 +160,7 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
     public PotionEffect.Builder reset() {
         this.potionType = null;
         this.amplifier = 0;
-        this.duration = 0;
+        this.duration = Ticks.zero();
         this.isAmbient = true;
         this.showParticles = true;
         this.showIcon = true;

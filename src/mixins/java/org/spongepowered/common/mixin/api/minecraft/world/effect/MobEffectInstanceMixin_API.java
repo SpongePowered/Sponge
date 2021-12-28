@@ -31,6 +31,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,8 +54,8 @@ public abstract class MobEffectInstanceMixin_API implements PotionEffect {
     }
 
     @Override
-    public int duration() {
-        return this.duration;
+    public Ticks duration() {
+        return Ticks.of(this.duration);
     }
 
     @Override

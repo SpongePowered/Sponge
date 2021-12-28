@@ -40,6 +40,7 @@ import org.spongepowered.api.entity.vehicle.minecart.Minecart;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
@@ -78,7 +79,7 @@ public class CollideTest implements LoadableModule {
         public void onFallOnBlock(final CollideBlockEvent.Fall event, @First final ServerPlayer player) {
             if (event.targetBlock().type().isAnyOf(BlockTypes.DIAMOND_BLOCK)) {
                 player.transform(Keys.POTION_EFFECTS, e -> {
-                    e.add(PotionEffect.of(PotionEffectTypes.JUMP_BOOST, 4, 20));
+                    e.add(PotionEffect.of(PotionEffectTypes.JUMP_BOOST, 4, Ticks.of(20)));
                     player.sendActionBar(Component.text("JUMP!"));
                     return e;
                 });
@@ -92,7 +93,7 @@ public class CollideTest implements LoadableModule {
         public void onStepOnBlock(final CollideBlockEvent.StepOn event, @First final ServerPlayer player) {
             if (event.targetBlock().type().isAnyOf(BlockTypes.REDSTONE_BLOCK)) {
                 player.transform(Keys.POTION_EFFECTS, e -> {
-                    e.add(PotionEffect.of(PotionEffectTypes.SPEED, 4, 20));
+                    e.add(PotionEffect.of(PotionEffectTypes.SPEED, 4, Ticks.of(20)));
                     player.sendActionBar(Component.text("RUN!"));
                     return e;
                 });
@@ -108,7 +109,7 @@ public class CollideTest implements LoadableModule {
             if (event.targetBlock().type().isAnyOf(BlockTypes.TALL_GRASS)) {
                 player.transform(Keys.POTION_EFFECTS, e -> {
                     player.sendActionBar(Component.text("Invisibility!"));
-                    e.add(PotionEffect.of(PotionEffectTypes.INVISIBILITY, 1, 20));
+                    e.add(PotionEffect.of(PotionEffectTypes.INVISIBILITY, 1, Ticks.of(20)));
                     return e;
                 });
             } else if (event.targetBlock().type().isAnyOf(BlockTypes.FIRE)) {
