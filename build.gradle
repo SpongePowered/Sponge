@@ -57,7 +57,7 @@ dependencies {
     }
 
     // log4j2 slf4j implementation
-    runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.8.1'
+    runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.15.0'
 
     // Database connectors
     compile 'com.zaxxer:HikariCP:2.6.3'
@@ -91,4 +91,8 @@ test {
     // If we try to generate HTML reports, we end up trying to generate a report
     // for all of the catalog method subs-tests, which takes an incredibly long amount of time
     reports.html.enabled = false
+}
+
+repositories {
+    mavenCentral()
 }
