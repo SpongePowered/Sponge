@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.client.multiplayer;
 
+import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -39,9 +40,11 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelMixin_API implements org.spongepowered.api.world.client.ClientWorld {
@@ -66,6 +69,11 @@ public abstract class ClientLevelMixin_API implements org.spongepowered.api.worl
     @Override
     public Optional<Entity> entity(final UUID uuid) {
         return (Optional) Optional.ofNullable(this.shadow$getEntities().get(uuid));
+    }
+
+    @Override
+    public Collection<Entity> entities() {
+        return (Collection<org.spongepowered.api.entity.Entity>) (Object) ImmutableList.copyOf(this.shadow$getEntities().getAll());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

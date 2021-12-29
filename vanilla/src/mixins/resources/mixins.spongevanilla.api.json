@@ -4,7 +4,8 @@
     "package": "org.spongepowered.vanilla.mixin.api",
     "priority": 1300,
     "mixins": [
-        "minecraft.server.MinecraftServerMixin_Vanilla_API"
+        "minecraft.server.MinecraftServerMixin_Vanilla_API",
+        "minecraft.server.packs.repository.PackRepositoryMixin_Vanilla_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_Vanilla_API"

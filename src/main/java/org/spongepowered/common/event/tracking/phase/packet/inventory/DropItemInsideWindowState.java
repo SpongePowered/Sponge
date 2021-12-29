@@ -28,7 +28,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -39,11 +42,19 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 public final class DropItemInsideWindowState extends BasicInventoryPacketState {
 
     public DropItemInsideWindowState() {
         super(Constants.Networking.MODE_DROP | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_INSIDE_WINDOW);
+    }
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, InventoryPacketContext> getFrameModifier() {
+        return super.getFrameModifier().andThen((frame, context) -> {
+            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
+        });
     }
 
     @Override

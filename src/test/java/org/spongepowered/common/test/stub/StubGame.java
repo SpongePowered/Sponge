@@ -29,7 +29,6 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.SystemSubject;
-import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.event.EventManager;
@@ -110,11 +109,6 @@ public class StubGame extends StubRegistryHolder implements Game {
 
     @Override
     public EventManager eventManager() {
-        return null;
-    }
-
-    @Override
-    public AssetManager assetManager() {
         return null;
     }
 

@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -39,6 +38,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
@@ -96,10 +96,10 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
             transaction.used = true;
         }
 
-        final ImmutableList<Entity> entities = containerBasedTransactions.stream()
+        final List<Entity> entities = containerBasedTransactions.stream()
                 .map(InventoryBasedTransaction::getEntitiesSpawned)
                 .flatMap(List::stream)
-                .collect(ImmutableList.toImmutableList());
+                .collect(Collectors.toList());
 
         // TODO on pickup grouping does not work?
         final Map<Slot, List<SlotTransaction>> collected = slotTransactions.stream().collect(Collectors.groupingBy(SlotTransaction::slot));
@@ -148,9 +148,8 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
 
     protected void handleEventResults(final Player player, final ChangeInventoryEvent event) {
         PacketPhaseUtil.handleSlotRestore(player, null, event.transactions(), event.isCancelled());
-        if (event.isCancelled() && event instanceof SpawnEntityEvent) {
-            ((SpawnEntityEvent) event).entities().forEach(e ->
-                    ((net.minecraft.world.entity.Entity) e).discard());
+        if (this.entities != null && event instanceof SpawnEntityEvent) {
+            EntityUtil.despawnFilteredEntities(this.entities, (SpawnEntityEvent) event);
         }
     }
 

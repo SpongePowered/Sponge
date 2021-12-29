@@ -29,7 +29,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
@@ -60,10 +63,19 @@ public class DropFromPlayerInventoryTransaction extends InventoryBasedTransactio
             final List<Entity> entities, final PhaseContext<@NonNull ?> context,
             final Cause currentCause) {
         TrackingUtil.setCreatorReference(entities, this.player);
+
+        final Cause causeWithSpawnType = Cause.builder().from(currentCause).build(
+                EventContext.builder().from(currentCause.context()).add(
+                        EventContextKeys.SPAWN_TYPE,
+                        SpawnTypes.DROPPED_ITEM.get()
+                ).build());
+
         if (this.dropAll) {
-            return Optional.of(SpongeEventFactory.createChangeInventoryEventDropFull(currentCause, entities, this.inventory, this.slot, slotTransactions));
+            return Optional.of(SpongeEventFactory.createChangeInventoryEventDropFull(causeWithSpawnType,
+                    entities, this.inventory, this.slot, slotTransactions));
         }
-        return Optional.of(SpongeEventFactory.createChangeInventoryEventDropSingle(currentCause, entities, this.inventory, this.slot, slotTransactions));
+        return Optional.of(SpongeEventFactory.createChangeInventoryEventDropSingle(causeWithSpawnType,
+                entities, this.inventory, this.slot, slotTransactions));
     }
 
     @Override

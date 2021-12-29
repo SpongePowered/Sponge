@@ -80,6 +80,12 @@
             "description": "Testing data"
         },
         {
+            "id": "entitytest",
+            "name": "Entity Test",
+            "entrypoint": "org.spongepowered.test.entity.EntityTest",
+            "description": "Testing entities"
+        },
+        {
             "id": "humantest",
             "name": "Human Test",
             "entrypoint": "org.spongepowered.test.human.HumanTest",
@@ -213,6 +219,18 @@
             "name": "Lifecycle Test",
             "entrypoint": "org.spongepowered.test.lifecycle.LifecycleTest",
             "description": "Lifecycle Testing"
+        },
+        {
+            "id": "entityvolumetest",
+            "name": "Entity Volume test",
+            "entrypoint": "org.spongepowered.test.entity.EntityVolumeTest",
+            "description": "Entity Volume Testing"
+        },
+        {
+            "id": "packtest",
+            "name": "Pack Test",
+            "entrypoint": "org.spongepowered.test.pack.PackTest",
+            "description": "Pack Testing"
         }
     ]
 }

@@ -9,22 +9,22 @@
       <PatternLayout>
         <!-- In production, filter stack trace elements from JDK internals -->
         <LoggerNamePatternSelector
-                defaultPattern="[%d{HH:mm:ss}] [%t/%highlight{%level}] [%c{1.3}%notEmpty{/%markerSimpleName}]: %highlightError{%msg%n%xEx{filters(${sponge.exceptionFiltered})}{ansi(${sponge.exceptionFormat})}}">
+                defaultPattern="[%d{HH:mm:ss}] [%t/%highlight{%level}] [%c{1.3}%notEmpty{/%markerSimpleName}]: %highlightError{%msg{nolookups}%n%xEx{filters(${sponge.exceptionFiltered})}{ansi(${sponge.exceptionFormat})}}">
           <!-- Use a simplified pattern for Vanilla log messages -->
           <PatternMatch key="net.minecraft.,com.mojang."
-                        pattern="[%d{HH:mm:ss}] [%t/%highlight{%level}]: %highlightError{%msg%n%xEx{filters(${sponge.exceptionFiltered})}{ansi(${sponge.exceptionFormat})}}"/>
+                        pattern="[%d{HH:mm:ss}] [%t/%highlight{%level}]: %highlightError{%msg{nolookups}%n%xEx{filters(${sponge.exceptionFiltered})}{ansi(${sponge.exceptionFormat})}}"/>
         </LoggerNamePatternSelector>
       </PatternLayout>
     </TerminalConsole>
     <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz" immediateFlush="false">
-      <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level]: %msg%n"/>
+      <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level]: %msg{nolookups}%n"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
         <OnStartupTriggeringPolicy/>
       </Policies>
     </RollingRandomAccessFile>
     <RollingRandomAccessFile name="DebugFile" fileName="logs/debug.log" filePattern="logs/debug-%i.log.gz" immediateFlush="false">
-      <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level] [%c{1.3}/%markerSimpleName]: %msg%n"/>
+      <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level] [%c{1.3}/%markerSimpleName]: %msg{nolookups}%n"/>
       <Policies>
         <OnStartupTriggeringPolicy/>
         <SizeBasedTriggeringPolicy size="200MB"/>

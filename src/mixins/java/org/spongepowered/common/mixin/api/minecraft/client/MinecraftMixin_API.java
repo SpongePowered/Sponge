@@ -28,6 +28,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.Connection;
+import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.spongepowered.api.Game;
@@ -38,9 +39,8 @@ import org.spongepowered.api.entity.living.player.client.LocalPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.api.registry.Registry;
-import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.resource.ResourceManager;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.world.client.ClientWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -71,7 +71,10 @@ public abstract class MinecraftMixin_API implements SpongeClient, SpongeRegistry
     @Shadow public net.minecraft.client.player.LocalPlayer player;
     @Shadow @Nullable private Connection pendingConnection;
     @Shadow @Final public Options options;
+
     @Shadow @Nullable public abstract IntegratedServer shadow$getSingleplayerServer();
+    @Shadow public abstract PackRepository shadow$getResourcePackRepository();
+    @Shadow public abstract net.minecraft.server.packs.resources.ResourceManager shadow$getResourceManager();
     // @formatter:on
 
     private final ClientScheduler api$scheduler = new ClientScheduler();
@@ -115,6 +118,16 @@ public abstract class MinecraftMixin_API implements SpongeClient, SpongeRegistry
     @Override
     public CauseStackManager causeStackManager() {
         return PhaseTracker.getCauseStackManager();
+    }
+
+    @Override
+    public org.spongepowered.api.resource.pack.PackRepository packRepository() {
+        return (org.spongepowered.api.resource.pack.PackRepository) this.shadow$getResourcePackRepository();
+    }
+
+    @Override
+    public ResourceManager resourceManager() {
+        return (ResourceManager) this.shadow$getResourceManager();
     }
 
     @Override
