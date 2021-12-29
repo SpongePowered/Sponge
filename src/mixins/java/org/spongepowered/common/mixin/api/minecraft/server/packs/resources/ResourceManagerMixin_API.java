@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.server.packs.resources;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceProvider;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.resource.Resource;
 import org.spongepowered.api.resource.ResourcePath;
@@ -46,14 +47,13 @@ import java.util.stream.Stream;
 public interface ResourceManagerMixin_API extends org.spongepowered.api.resource.ResourceManager {
 
     // @formatter:off
-    @Shadow net.minecraft.server.packs.resources.Resource getResource(ResourceLocation var1) throws IOException;
     @Shadow List<net.minecraft.server.packs.resources.Resource> getResources(ResourceLocation var1) throws IOException;
     @Shadow Collection<ResourceLocation> listResources(String var1, Predicate<String> var2);
     // @formatter:on
 
     @Override
     default Resource load(final ResourcePath path) throws IOException {
-        return new SpongeResource(this.getResource((ResourceLocation) (Object) Objects.requireNonNull(path, "path").key()));
+        return new SpongeResource(((ResourceProvider) this).getResource((ResourceLocation) (Object) Objects.requireNonNull(path, "path").key()));
     }
 
     @Override
