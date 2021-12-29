@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.context.transaction.inventory;
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -53,6 +52,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
@@ -127,10 +127,10 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
             //        }
         }
 
-        final ImmutableList<Entity> entities = containerBasedTransactions.stream()
+        final List<Entity> entities = containerBasedTransactions.stream()
             .map(ContainerBasedTransaction::getEntitiesSpawned)
             .flatMap(List::stream)
-            .collect(ImmutableList.toImmutableList());
+            .collect(Collectors.toList());
 
         final List<SlotTransaction> slotTransactions = containerBasedTransactions
             .stream()
@@ -198,7 +198,7 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
 
     Optional<ClickContainerEvent> createInventoryEvent(
         final List<SlotTransaction> slotTransactions,
-        final ImmutableList<Entity> entities,
+        final List<Entity> entities,
         final PhaseContext<@NonNull ?> context,
         final Cause currentCause
     ) {
@@ -246,9 +246,8 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
     protected void handleEventResults(final Player player, final ClickContainerEvent event) {
         PacketPhaseUtil.handleSlotRestore(player, this.menu, event.transactions(), event.isCancelled());
         PacketPhaseUtil.handleCursorRestore(player, event.cursorTransaction());
-        if (event.isCancelled() && event instanceof SpawnEntityEvent) {
-            ((SpawnEntityEvent) event).entities().forEach(e ->
-                    ((net.minecraft.world.entity.Entity) e).discard());
+        if (this.entities != null && event instanceof SpawnEntityEvent) {
+            EntityUtil.despawnFilteredEntities(this.entities, (SpawnEntityEvent) event);
         }
 
         // If this is not a crafting event try to call crafting events

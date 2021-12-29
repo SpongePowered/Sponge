@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.api.minecraft.world.item;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -60,7 +62,7 @@ import java.util.Collection;
 
 @Mixin(net.minecraft.world.item.ItemStack.class)
 @Implements(@Interface(iface = ItemStack.class, prefix = "itemStack$", remap = Remap.NONE)) // We need to soft implement this interface due to a synthetic bridge method
-public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutable {       // conflict from overriding ValueContainer#copy() from DataHolder
+public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutable, ComponentLike {       // conflict from overriding ValueContainer#copy() from DataHolder
 
     // @formatter:off
     @Shadow public abstract int shadow$getCount();
@@ -76,6 +78,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Shadow public abstract Item shadow$getItem();
     @Shadow public abstract Multimap<Attribute, net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getAttributeModifiers(EquipmentSlot equipmentSlot);
     @Shadow public abstract void shadow$addAttributeModifier(Attribute attribute, net.minecraft.world.entity.ai.attributes.AttributeModifier modifier, @Nullable EquipmentSlot equipmentSlot);
+    @Shadow public abstract String shadow$getDescriptionId();
     // @formatter:on
 
     public int itemStack$quantity() {
@@ -206,4 +209,8 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         return this.shadow$isEmpty();
     }
 
+    @Override
+    public Component asComponent() {
+        return Component.translatable(this.shadow$getDescriptionId());
+    }
 }

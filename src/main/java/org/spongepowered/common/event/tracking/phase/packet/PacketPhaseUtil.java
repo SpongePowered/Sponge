@@ -249,11 +249,10 @@ public final class PacketPhaseUtil {
                     final IPhaseState<? extends PacketContext<?>> packetState = PacketPhase.getInstance().getStateForPacket(packetIn);
                     // At the very least make an unknown packet state case.
                     final PacketContext<?> context = packetState.createPhaseContext(PhaseTracker.SERVER);
+                    context.source(packetPlayer)
+                           .packetPlayer(packetPlayer)
+                           .packet(packetIn);
                     if (!PacketPhase.getInstance().isPacketInvalid(packetIn, packetPlayer, packetState)) {
-                        context
-                            .source(packetPlayer)
-                            .packetPlayer(packetPlayer)
-                            .packet(packetIn);
 
                         PacketPhase.getInstance().populateContext(packetIn, packetPlayer, packetState, context);
                         context.creator(((ServerPlayer) packetPlayer).uniqueId());

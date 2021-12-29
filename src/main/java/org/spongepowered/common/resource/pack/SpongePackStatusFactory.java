@@ -22,29 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject.provider;
+package org.spongepowered.common.resource.pack;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import org.spongepowered.api.asset.Asset;
-import org.spongepowered.api.asset.AssetId;
-import org.spongepowered.api.asset.AssetManager;
-import org.spongepowered.common.inject.SpongeInjectionPoint;
-import org.spongepowered.plugin.PluginContainer;
+import net.minecraft.server.packs.repository.PackCompatibility;
+import org.spongepowered.api.resource.pack.PackStatus;
 
-import java.util.NoSuchElementException;
-
-public class PluginAssetProvider implements Provider<Asset> {
-
-    @Inject private PluginContainer container;
-    @Inject private AssetManager assetManager;
-    @Inject private SpongeInjectionPoint point;
+public final class SpongePackStatusFactory implements PackStatus.Factory {
 
     @Override
-    public Asset get() {
-        final String name = this.point.getAnnotation(AssetId.class).value();
-        return this.assetManager.asset(this.container, name)
-                .orElseThrow(() -> new NoSuchElementException("Cannot find asset " + name));
+    public PackStatus compatible() {
+        return (PackStatus) (Object) PackCompatibility.COMPATIBLE;
     }
 
+    @Override
+    public PackStatus newer() {
+        return (PackStatus) (Object) PackCompatibility.TOO_NEW;
+    }
+
+    @Override
+    public PackStatus older() {
+        return (PackStatus) (Object) PackCompatibility.TOO_OLD;
+    }
 }

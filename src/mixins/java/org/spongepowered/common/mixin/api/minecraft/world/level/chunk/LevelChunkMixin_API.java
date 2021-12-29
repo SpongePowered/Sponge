@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
@@ -82,6 +83,7 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -90,6 +92,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
 @Implements(@Interface(iface = WorldChunk.class, prefix = "worldChunk$", remap = Remap.NONE))
@@ -370,6 +373,14 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
     public Optional<Entity> entity(final UUID uuid) {
         return (Optional) Optional.ofNullable(((LevelAccessor) this.level).invoker$getEntities().get(uuid))
                 .filter(x -> x.chunkPosition().equals(this.chunkPos));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<? extends Entity> entities() {
+        return (Collection<? extends Entity>) (Object) StreamSupport.stream(
+                ((LevelAccessor) this.level).invoker$getEntities().getAll().spliterator(), false)
+                    .collect(Collectors.toList());
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

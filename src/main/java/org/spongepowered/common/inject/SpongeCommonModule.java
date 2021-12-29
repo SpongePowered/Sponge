@@ -27,9 +27,7 @@ package org.spongepowered.common.inject;
 import com.google.inject.AbstractModule;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.MinecraftVersion;
-import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.network.channel.ChannelManager;
@@ -41,8 +39,6 @@ import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeGame;
-import org.spongepowered.common.SpongePlatform;
-import org.spongepowered.common.asset.SpongeAssetManager;
 import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.launch.Launch;
@@ -60,7 +56,6 @@ public final class SpongeCommonModule extends AbstractModule {
     protected void configure() {
         this.bind(Game.class).to(SpongeGame.class);
         this.bind(MinecraftVersion.class).toInstance(SpongeCommon.minecraftVersion());
-        this.bind(AssetManager.class).to(SpongeAssetManager.class);
         this.bind(ChannelManager.class).toInstance(new SpongeChannelManager(ChannelBufferAllocator.POOLED));
         this.bind(PluginManager.class).toInstance(Launch.instance().pluginManager());
         this.bind(DataManager.class).to(SpongeDataManager.class);
