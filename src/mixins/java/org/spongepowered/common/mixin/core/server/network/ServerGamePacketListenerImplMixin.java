@@ -105,6 +105,7 @@ import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
+import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
@@ -132,7 +133,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerGamePacketListenerImplMixin implements ConnectionHolderBridge {
+public abstract class ServerGamePacketListenerImplMixin implements ServerGamePacketListenerImplBridge, ConnectionHolderBridge {
 
     // @formatter:off
     @Shadow @Final public Connection connection;
@@ -150,6 +151,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     @Shadow protected abstract boolean shadow$isSingleplayerOwner();
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch);
     @Shadow protected abstract void shadow$filterTextPacket(List<String> p_244537_1_, Consumer<List<String>> p_244537_2_);
+    @Shadow public abstract void shadow$resetPosition();
     // @formatter:on
 
     private int impl$ignorePackets;
@@ -565,6 +567,11 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         }
 
         return 0;
+    }
+
+    @Override
+    public void bridge$captureCurrentPlayerPosition() {
+        this.shadow$resetPosition();
     }
 
 }
