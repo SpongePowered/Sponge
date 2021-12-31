@@ -29,6 +29,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -47,7 +48,7 @@ public final class SignItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.SIGN_LINES)
                         .get(h -> {
-                            final CompoundTag tag = h.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
+                            final @Nullable CompoundTag tag = h.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
                             if (tag == null) {
                                 return null;
                             }
@@ -67,7 +68,7 @@ public final class SignItemStackData {
                             final CompoundTag tag = h.getOrCreateTagElement(Constants.Item.BLOCK_ENTITY_TAG);
                             tag.putString(Constants.Item.BLOCK_ENTITY_ID, Constants.TileEntity.SIGN);
                             for (int i = 0; i < 4; i++) {
-                                final Component line = v.size() > i ? v.get(i) : Component.empty();
+                                final @Nullable Component line = v.size() > i ? v.get(i) : Component.empty();
                                 if (line == null) {
                                     throw new IllegalArgumentException("A null line was given at index " + i);
                                 }

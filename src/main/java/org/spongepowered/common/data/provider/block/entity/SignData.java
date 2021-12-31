@@ -74,6 +74,9 @@ public final class SignData {
                             return false;
                         })
                         .supports(h -> h.getLevel() != null)
+                    .create(Keys.GLOWING_TEXT)
+                        .get(SignBlockEntity::hasGlowingText)
+                        .set(SignBlockEntity::setHasGlowingText)
                 .asMutable(ServerLocation.class)
                     .create(Keys.SIGN_LINES)
                         .get(SignData::getSignLines)

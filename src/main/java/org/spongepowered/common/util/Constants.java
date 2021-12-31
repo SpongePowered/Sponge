@@ -620,7 +620,6 @@ public final class Constants {
         public static final String X_POS = "x";
         public static final String Y_POS = "y";
         public static final String Z_POS = "z";
-        public static final DataQuery SIGN_LINES = of("SignLines");
         // TileEntities
         public static final DataQuery TILE_TYPE = of("TileType");
         public static final DataQuery LOCK_CODE = of("Lock");
@@ -700,6 +699,12 @@ public final class Constants {
             // UpdateAnvilEventCost
             public static final DataQuery MATERIALCOST = DataQuery.of("materialcost");
             public static final DataQuery LEVELCOST = DataQuery.of("levelcost");
+        }
+
+        public static final class Sign {
+
+            public static final DataQuery LINES = of("SignLines");
+            public static final DataQuery GLOWING_TEXT = of("GlowingText");
         }
     }
 

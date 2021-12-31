@@ -44,6 +44,7 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
         CactusData.register(this.registrator);
         CakeData.register(this.registrator);
         CampfireData.register(this.registrator);
+        CandleData.register(this.registrator);
         ChestData.register(this.registrator);
         CocoaData.register(this.registrator);
         ComparatorData.register(this.registrator);

@@ -45,15 +45,18 @@ public abstract class SignBlockEntityMixin_API extends BlockEntityMixin_API impl
     @Shadow @Final private Component[] messages;
     // @formatter:on
 
+    @Shadow private boolean hasGlowingText;
+
     @Override
     public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        List<String> lines = Lists.newArrayList();
-        for (Component line : this.messages) {
+        final DataContainer container = super.toContainer();
+        final List<String> lines = Lists.newArrayList();
+        for (final Component line : this.messages) {
             lines.add(Component.Serializer.toJson(line));
         }
 
-        container.set(Constants.TileEntity.SIGN_LINES, lines);
+        container.set(Constants.TileEntity.Sign.LINES, lines);
+        container.set(Constants.TileEntity.Sign.GLOWING_TEXT, this.hasGlowingText);
         return container;
     }
 
@@ -62,6 +65,7 @@ public abstract class SignBlockEntityMixin_API extends BlockEntityMixin_API impl
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         values.add(this.lines().asImmutable());
+        values.add(this.glowingText().asImmutable());
 
         return values;
     }
