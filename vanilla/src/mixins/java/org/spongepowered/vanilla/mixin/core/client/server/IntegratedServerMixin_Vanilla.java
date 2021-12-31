@@ -24,11 +24,14 @@
  */
 package org.spongepowered.vanilla.mixin.core.client.server;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.vanilla.mixin.core.server.MinecraftServerMixin_Vanilla;
@@ -36,8 +39,12 @@ import org.spongepowered.vanilla.mixin.core.server.MinecraftServerMixin_Vanilla;
 @Mixin(IntegratedServer.class)
 public abstract class IntegratedServerMixin_Vanilla extends MinecraftServerMixin_Vanilla  {
 
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "initServer", at = @At("HEAD"))
     private void vanilla$runEngineStartLifecycle(final CallbackInfoReturnable<Boolean> cir) {
+        if (!Sponge.isServerAvailable()) {
+            ((MinecraftBridge) Minecraft.getInstance()).bridge$setTemporaryIntegratedServer((IntegratedServer) (Object) this);
+        }
         final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.establishServerServices();
 
@@ -47,8 +54,12 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServerMixin
         lifecycle.callStartingEngineEvent(this);
     }
 
+    @SuppressWarnings({"RedundantCast", "ConstantConditions"})
     @Inject(method = "initServer", at = @At("RETURN"))
     private void vanilla$callStartedEngineAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
         Launch.instance().lifecycle().callStartedEngineEvent(this);
+        if (((MinecraftBridge) Minecraft.getInstance()).bridge$getTemporaryIntegratedServer() == (IntegratedServer) (Object) this) {
+            ((MinecraftBridge) Minecraft.getInstance()).bridge$setTemporaryIntegratedServer((IntegratedServer) (Object) this);
+        }
     }
 }
