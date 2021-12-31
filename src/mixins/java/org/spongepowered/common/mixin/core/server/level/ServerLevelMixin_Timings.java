@@ -75,14 +75,12 @@ public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implem
         TimingHistory.blockEntityTicks += this.blockEntityTickers.size();
     }
 
-    @SuppressWarnings("UnresolvedMixinReference")
-    @Inject(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;discard()V"))
+    @Inject(method = "lambda$tick$3", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;discard()V"))
     protected void impl$startEntityRemovalTimings(final CallbackInfo ci) {
         this.bridge$getTimingsHandler().entityRemoval.startTiming();
     }
 
-    @SuppressWarnings("UnresolvedMixinReference")
-    @Inject(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;discard()V", shift = At.Shift.AFTER))
+    @Inject(method = "lambda$tick$3", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;discard()V", shift = At.Shift.AFTER))
     protected void impl$stopEntityRemovalTimings(final CallbackInfo ci) {
         this.bridge$getTimingsHandler().entityRemoval.stopTiming();
     }

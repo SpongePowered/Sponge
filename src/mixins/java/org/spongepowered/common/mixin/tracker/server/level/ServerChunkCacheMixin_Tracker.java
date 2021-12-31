@@ -39,9 +39,8 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 @Mixin(ServerChunkCache.class)
 public abstract class ServerChunkCacheMixin_Tracker {
 
-    @SuppressWarnings("UnresolvedMixinReference")
     @Redirect(
-        method = "*",
+        method = "tickChunks",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/level/NaturalSpawner;spawnForChunk(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/chunk/LevelChunk;Lnet/minecraft/world/level/NaturalSpawner$SpawnState;ZZZ)V"

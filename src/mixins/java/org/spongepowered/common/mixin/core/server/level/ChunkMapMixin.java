@@ -153,9 +153,9 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         }
     }
 
-    @Redirect(method = "*",
+    @Redirect(method = "lambda$scheduleChunkGeneration$20",
             at = @At(value = "INVOKE",
-                    target = "net/minecraft/world/level/chunk/ChunkStatus.generate (Ljava/util/concurrent/Executor;"
+                    target = "net/minecraft/world/level/chunk/ChunkStatus.generate(Ljava/util/concurrent/Executor;"
                             + "Lnet/minecraft/server/level/ServerLevel;"
                             + "Lnet/minecraft/world/level/chunk/ChunkGenerator;"
                             + "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureManager;"

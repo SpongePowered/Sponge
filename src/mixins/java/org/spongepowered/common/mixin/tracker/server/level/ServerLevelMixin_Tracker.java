@@ -136,11 +136,10 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     @Redirect(
             // This normally would target this.entityTickList.forEach((var2x) ->
             // but we don't have lambda syntax support yet.
-            method = "*",
+            method = "lambda$tick$3",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/level/ServerLevel;guardEntityTick(Ljava/util/function/Consumer;"
-                            + "Lnet/minecraft/world/entity/Entity;)V")
+                    target = "Lnet/minecraft/server/level/ServerLevel;guardEntityTick(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V")
     )
     private void tracker$wrapNormalEntityTick(final ServerLevel level, final Consumer<Entity> entityUpdateConsumer,
         final Entity entity

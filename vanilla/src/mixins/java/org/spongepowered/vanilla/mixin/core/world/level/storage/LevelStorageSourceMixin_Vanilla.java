@@ -48,9 +48,9 @@ public abstract class LevelStorageSourceMixin_Vanilla {
 
     private static Dynamic<Tag> impl$spongeLevelData;
 
-    @SuppressWarnings("UnresolvedMixinReference")
+    @SuppressWarnings("deprecation")
     @Redirect(
-            method = "*",
+            method = "lambda$getLevelData$1",
             slice = @Slice(
                     from = @At(
                             value = "INVOKE",
@@ -72,9 +72,8 @@ public abstract class LevelStorageSourceMixin_Vanilla {
         return compoundNBT.getCompound(path);
     }
 
-    @SuppressWarnings("UnresolvedMixinReference")
     @Redirect(
-            method = "*",
+            method = "lambda$getLevelData$1",
             slice = @Slice(
                     from = @At(
                             value = "INVOKE",

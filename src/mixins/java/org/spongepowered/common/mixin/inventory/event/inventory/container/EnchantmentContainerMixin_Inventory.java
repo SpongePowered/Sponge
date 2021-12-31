@@ -64,8 +64,7 @@ public abstract class EnchantmentContainerMixin_Inventory {
     private ItemStackSnapshot prevLapis;
 
     // onCraftMatrixChanged lambda
-    @SuppressWarnings("UnresolvedMixinReference")
-    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getEnchantmentCost(Ljava/util/Random;IILnet/minecraft/world/item/ItemStack;)I"), require = 1)
+    @Redirect(method = "lambda$slotsChanged$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getEnchantmentCost(Ljava/util/Random;IILnet/minecraft/world/item/ItemStack;)I"), require = 1)
     private int impl$onCalcItemStackEnchantability(
         final Random random, final int option, final int power, final ItemStack itemStack) {
         int levelRequirement = EnchantmentHelper.getEnchantmentCost(random, option, power, itemStack);
@@ -85,16 +84,14 @@ public abstract class EnchantmentContainerMixin_Inventory {
     }
 
     // enchantItem lambda
-    @SuppressWarnings("UnresolvedMixinReference")
-    @Inject(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;onEnchantmentPerformed(Lnet/minecraft/world/item/ItemStack;I)V"), require = 1)
+    @Inject(method = "lambda$clickMenuButton$1", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;onEnchantmentPerformed(Lnet/minecraft/world/item/ItemStack;I)V"), require = 1)
     private void impl$beforeEnchantItem(final CallbackInfo ci) {
         this.prevItem = ItemStackUtil.snapshotOf(this.enchantSlots.getItem(0));
         this.prevLapis = ItemStackUtil.snapshotOf(this.enchantSlots.getItem(1));
     }
 
     // enchantItem lambda
-    @SuppressWarnings("UnresolvedMixinReference")
-    @Inject(method = "*", cancellable = true,
+    @Inject(method = "lambda$clickMenuButton$1", cancellable = true,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/ResourceLocation;)V"), require = 1)
     private void impl$afterEnchantItem(final ItemStack itemstack, final int id, final Player playerIn, final int i, final ItemStack itemstack1, final Level arg5, final BlockPos arg6, final CallbackInfo ci) {
         final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(this.enchantSlots.getItem(0));
