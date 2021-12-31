@@ -118,8 +118,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         chunkManager.write(pos, compound);
     }
 
-    @SuppressWarnings("UnresolvedMixinReference") // Lambda
-    @Redirect(method = "*",
+    @Redirect(method = "lambda$scheduleUnload$11",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;unload(Lnet/minecraft/world/level/chunk/LevelChunk;)V"),
             slice = @Slice(
                     from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ChunkMap;save(Lnet/minecraft/world/level/chunk/ChunkAccess;)Z")
@@ -216,8 +215,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         }
     }
 
-    @SuppressWarnings("UnresolvedMixinReference") // Lambda
-    @Redirect(method = "*",
+    @Redirect(method = "lambda$protoChunkToFullChunk$27",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V"),
             slice = @Slice(
                     from = @At(value = "INVOKE", remap = false, target = "Lit/unimi/dsi/fastutil/longs/LongSet;add(J)Z"),

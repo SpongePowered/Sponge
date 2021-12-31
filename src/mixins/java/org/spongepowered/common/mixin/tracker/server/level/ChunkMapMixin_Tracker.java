@@ -54,7 +54,7 @@ import java.util.List;
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin_Tracker {
 
-    @Shadow @Final private ServerLevel level;
+    @Shadow @Final ServerLevel level;
 
     @Redirect(method = "addEntity(Lnet/minecraft/world/entity/Entity;)V",
         at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
@@ -67,7 +67,7 @@ public abstract class ChunkMapMixin_Tracker {
         return exception;
     }
 
-    @Redirect(method = "*",
+    @Redirect(method = "lambda$prepareTickingChunk$31",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;startTickingChunk(Lnet/minecraft/world/level/chunk/LevelChunk;)V"))
     private void tracker$wrapUnpackTicks(final ServerLevel level, final LevelChunk chunk, final List<ChunkAccess> chunks) {
         if (!PhaseTracker.SERVER.onSidedThread()) {
@@ -96,7 +96,7 @@ public abstract class ChunkMapMixin_Tracker {
 
     }
 
-    @Redirect(method = "*",
+    @Redirect(method = "lambda$protoChunkToFullChunk$27",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V"),
         slice = @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setFullStatus(Ljava/util/function/Supplier;)V"),
@@ -132,13 +132,11 @@ public abstract class ChunkMapMixin_Tracker {
                 .buildAndSwitch();
     }
 
-    @SuppressWarnings("UnresolvedMixinReference")
-    @Inject(method = "*",
+    @Inject(method = "lambda$protoChunkToFullChunk$27",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V", shift = At.Shift.BY, by = 2),
         slice = @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V")
         ),
-        expect = 1,
         require = 1
     )
     private void tracker$endLoad(final ChunkHolder chunkHolder, final ChunkAccess chunk, final CallbackInfoReturnable<ChunkAccess> cir) {
