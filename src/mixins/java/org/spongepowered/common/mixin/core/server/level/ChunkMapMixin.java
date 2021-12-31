@@ -116,7 +116,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         chunkManager.write(pos, compound);
     }
 
-    @Redirect(method = "*",
+    @Redirect(method = "lambda$scheduleUnload$10",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;unload(Lnet/minecraft/world/level/chunk/LevelChunk;)V"),
             slice = @Slice(
                     from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ChunkMap;save(Lnet/minecraft/world/level/chunk/ChunkAccess;)Z")

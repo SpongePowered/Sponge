@@ -49,7 +49,7 @@ public abstract class LevelStorageSourceMixin_Vanilla {
     private static Dynamic<Tag> impl$spongeLevelData;
 
     @Redirect(
-            method = "*",
+            method = "lambda$getLevelData$4",
             slice = @Slice(
                     from = @At(
                             value = "INVOKE",
@@ -72,7 +72,7 @@ public abstract class LevelStorageSourceMixin_Vanilla {
     }
 
     @Redirect(
-            method = "*",
+            method = "lambda$getLevelData$4",
             slice = @Slice(
                     from = @At(
                             value = "INVOKE",
