@@ -31,7 +31,9 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
+import org.spongepowered.common.accessor.world.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 
 import java.lang.ref.WeakReference;
@@ -105,22 +107,54 @@ public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSo
     }
 
     @Override
-    public FallingBlockDamageSource.Builder fallTime(final int time) {
-        throw new UnsupportedOperationException("implement me");
+    public FallingBlockDamageSource.Builder fallTime(final Ticks time) {
+        if (this.reference == null) {
+            throw new IllegalArgumentException("Cannot set fall time without an entity");
+        }
+        if (time.ticks() < 0) {
+            throw new IllegalArgumentException("Cannot set fall time to a negative value");
+        }
+        final Entity entity = this.reference.get();
+        if (entity instanceof FallingBlockEntityAccessor) {
+            ((FallingBlockEntityAccessor) entity).accessor$time((int) time.ticks());
+        }
+        return this;
     }
 
     @Override
     public FallingBlockDamageSource.Builder hurtsEntities(final boolean hurts) {
-        throw new UnsupportedOperationException("implement me");
+        if (this.reference == null) {
+            throw new IllegalArgumentException("Cannot set hurt entities without an entity");
+        }
+        final Entity entity = this.reference.get();
+        if (entity instanceof FallingBlockEntityAccessor) {
+            ((FallingBlockEntityAccessor) entity).accessor$hurtEntities(hurts);
+        }
+        return this;
     }
 
     @Override
     public FallingBlockDamageSource.Builder maxDamage(final double damage) {
-        throw new UnsupportedOperationException("implement me");
+        if (this.reference == null) {
+            throw new IllegalArgumentException("Cannot set max damage without an entity");
+        }
+        final Entity entity = this.reference.get();
+
+        if (entity instanceof FallingBlockEntityAccessor) {
+            ((FallingBlockEntityAccessor) entity).accessor$fallDamageMax((int) damage);
+        }
+        return this;
     }
 
     @Override
     public FallingBlockDamageSource.Builder damagePerBlock(final double damagePer) {
-        throw new UnsupportedOperationException("implement me");
+        if (this.reference == null) {
+            throw new IllegalArgumentException("Cannot set max damage without an entity");
+        }
+        final Entity entity = this.reference.get();
+        if (entity instanceof FallingBlockEntityAccessor) {
+            ((FallingBlockEntityAccessor) entity).accessor$fallDamageAmount((float) damagePer);
+        }
+        return this;
     }
 }

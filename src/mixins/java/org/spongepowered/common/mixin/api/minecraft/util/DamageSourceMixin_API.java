@@ -46,6 +46,7 @@ public abstract class DamageSourceMixin_API implements DamageSource {
     @Shadow public abstract float shadow$getFoodExhaustion();
     @Shadow public abstract boolean shadow$scalesWithDifficulty();
     @Shadow public abstract boolean shadow$isExplosion();
+    @Shadow public abstract boolean shadow$isFire();
     @Shadow public abstract String shadow$getMsgId();
     // @formatter:on
 
@@ -57,6 +58,11 @@ public abstract class DamageSourceMixin_API implements DamageSource {
     @Intrinsic
     public boolean damageSource$isMagic() {
         return this.shadow$isMagic();
+    }
+
+    @Intrinsic
+    public boolean damageSource$isFire() {
+        return this.shadow$isFire();
     }
 
     @Override
