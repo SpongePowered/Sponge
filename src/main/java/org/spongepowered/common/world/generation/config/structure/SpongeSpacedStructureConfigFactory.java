@@ -22,29 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level.dimension;
+package org.spongepowered.common.world.generation.config.structure;
 
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
-import org.spongepowered.common.registry.provider.BiomeSamplerProvider;
-import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
+import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
+import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
 
-import java.nio.file.Path;
+public final class SpongeSpacedStructureConfigFactory implements SpacedStructureConfig.Factory {
 
-@Mixin(DimensionType.class)
-public abstract class DimensionTypeMixin implements DimensionTypeBridge {
-
-    /**
-     * @author zidane
-     * @reason Compensate for our per-world level save adapters
-     */
-    @Overwrite
-    public static Path getStorageFolder(ResourceKey<Level> worldKey, Path defaultLevelDirectory) {
-        // Sponge Start - The directory is already set to be at this location
-        return defaultLevelDirectory;
+    @Override
+    public SpacedStructureConfig of(final int distance, final int spread, final int count) {
+        return (SpacedStructureConfig) new StrongholdConfiguration(distance, spread, count);
     }
 }

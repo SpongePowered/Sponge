@@ -22,29 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level.dimension;
+package org.spongepowered.common.world.generation.config.flat;
 
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
-import org.spongepowered.common.registry.provider.BiomeSamplerProvider;
-import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.world.generation.config.flat.LayerConfig;
+import org.spongepowered.common.bridge.world.level.levelgen.flat.FlatLayerInfoBridge;
 
-import java.nio.file.Path;
+public final class SpongeLayerConfigFactory implements LayerConfig.Factory {
 
-@Mixin(DimensionType.class)
-public abstract class DimensionTypeMixin implements DimensionTypeBridge {
-
-    /**
-     * @author zidane
-     * @reason Compensate for our per-world level save adapters
-     */
-    @Overwrite
-    public static Path getStorageFolder(ResourceKey<Level> worldKey, Path defaultLevelDirectory) {
-        // Sponge Start - The directory is already set to be at this location
-        return defaultLevelDirectory;
+    @Override
+    public LayerConfig of(final int height, final BlockState block) {
+        final FlatLayerInfo layer = new FlatLayerInfo(height, (Block) block.type());
+        ((FlatLayerInfoBridge) layer).bridge$setBlockState((net.minecraft.world.level.block.state.BlockState) block);
+        return (LayerConfig) layer;
     }
 }

@@ -22,29 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level.dimension;
+package org.spongepowered.common.world.biome.provider;
 
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
-import org.spongepowered.common.registry.provider.BiomeSamplerProvider;
-import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
+import org.spongepowered.api.registry.RegistryReference;
+import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.api.world.biome.provider.BiomeProviderConfig;
 
-import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
 
-@Mixin(DimensionType.class)
-public abstract class DimensionTypeMixin implements DimensionTypeBridge {
+public abstract class AbstractBiomeProviderConfig implements BiomeProviderConfig {
 
-    /**
-     * @author zidane
-     * @reason Compensate for our per-world level save adapters
-     */
-    @Overwrite
-    public static Path getStorageFolder(ResourceKey<Level> worldKey, Path defaultLevelDirectory) {
-        // Sponge Start - The directory is already set to be at this location
-        return defaultLevelDirectory;
+    private final List<RegistryReference<Biome>> biomes;
+
+    protected AbstractBiomeProviderConfig(final List<RegistryReference<Biome>> biomes) {
+        this.biomes = biomes;
+    }
+
+    @Override
+    public List<RegistryReference<Biome>> biomes() {
+        return Collections.unmodifiableList(this.biomes);
     }
 }
