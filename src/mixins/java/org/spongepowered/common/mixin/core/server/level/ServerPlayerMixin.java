@@ -141,6 +141,7 @@ import java.util.Set;
 import java.util.UUID;
 
 // See also: SubjectMixin_API and SubjectMixin
+@SuppressWarnings("ConstantConditions")
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
 public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBridge, ServerPlayerBridge {
 
@@ -752,10 +753,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     private void impl$updateTrackedClientSettings(final ServerboundClientInformationPacket packet, final CallbackInfo ci) {
         final ServerboundClientInformationPacketAccessor $packet = (ServerboundClientInformationPacketAccessor) packet;
         final Locale newLocale = LocaleCache.getLocale($packet.accessor$language());
-        final int viewDistance = $packet.accessor$viewDistance();
 
         // Update the fields we track ourselves
-        this.impl$viewDistance = viewDistance;
+        this.impl$viewDistance = $packet.accessor$viewDistance();
         this.bridge$setLanguage(newLocale);
         this.impl$language = newLocale;
     }
@@ -834,6 +834,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         if (this.connection != null) {
             ((ServerGamePacketListenerImplBridge) this.connection).bridge$captureCurrentPlayerPosition();
         }
+    }
+
+    @Override
+    protected void impl$updateHealthForUseFinish(CallbackInfo ci) {
+        this.bridge$refreshScaledHealth();
     }
 }
 

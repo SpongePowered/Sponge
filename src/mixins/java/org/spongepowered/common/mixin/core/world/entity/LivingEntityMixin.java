@@ -26,7 +26,10 @@ package org.spongepowered.common.mixin.core.world.entity;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -240,9 +243,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             if ((damageSource instanceof FallingBlockDamageSource) || damageSource == DamageSource.ANVIL
                     || damageSource == DamageSource.FALLING_BLOCK && !helmet.isEmpty()) {
                 helmet.hurtAndBreak((int) (event.baseDamage() * 4.0F + this.random.nextFloat() * event.baseDamage() * 2.0F),
-                        (LivingEntity) (Object) this, (entity) -> {
-                            entity.broadcastBreakEvent(EquipmentSlot.HEAD);
-                        });
+                        (LivingEntity) (Object) this, (entity) -> entity.broadcastBreakEvent(EquipmentSlot.HEAD)
+                );
             }
 
             boolean hurtStack = false;
@@ -665,37 +667,62 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     /**
      * @author gabizou - January 4th, 2016
      * @reason This allows invisiblity to ignore entity collisions.
-     /*
-    @Overwrite
-    public boolean canBeCollidedWith() {
-        return !(this.bridge$isVanished() && this.bridge$isUncollideable()) && !this.removed;
+     */
+    @Inject(method = "isPickable", at = @At("HEAD"), cancellable = true)
+    private void impl$ifVanishedDoNotPick(CallbackInfoReturnable<Boolean> cir) {
+        if (this.bridge$isVanished() && this.bridge$isVanishIgnoresCollision()) {
+            cir.setReturnValue(false);
+        }
     }
 
-    @Redirect(method = "updateFallState",
+    @Redirect(
+        method = "eat(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"
+        )
+    )
+    private void impl$ignoreExperienceLevelSoundsWhileVanished(final net.minecraft.world.level.Level world,
+        final net.minecraft.world.entity.player.Player player, final double x, final double y, final double z,
+        final SoundEvent sound, final SoundSource category, final float volume, final float pitch
+    ) {
+        if (this.bridge$isVanished()) {
+            return;
+        }
+        world.playSound(player, x, y, z, sound, category, volume, pitch);
+    }
+
+    @Redirect(method = "checkFallDamage",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/server/ServerWorld;spawnParticle(Lnet/minecraft/particles/IParticleData;DDDIDDDD)I"))
-    private int impl$vanishSpawnParticleForFallState(
-        final ServerWorld serverWorld, final IParticleData particleTypes, final double xCoord, final double yCoord,
-        final double zCoord, final int numberOfParticles, final double xOffset, final double yOffset,
-        final double zOffset, final double particleSpeed) {
+            target = "Lnet/minecraft/server/level/ServerLevel;sendParticles(Lnet/minecraft/core/particles/ParticleOptions;DDDIDDDD)I"))
+    private <T extends ParticleOptions> int impl$vanishSpawnParticleForFallState(
+        ServerLevel serverLevel, T options, double xCoord, double yCoord, double zCoord, int numberOfParticles,
+        double xOffset,
+        double yOffset,
+        double zOffset,
+        double particleSpeed
+    ) {
         if (!this.bridge$isVanished()) {
-            return serverWorld.spawnParticle(particleTypes, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed);
+            return serverLevel.sendParticles(options, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed);
         }
         return 0;
     }
 
-
-    @Inject(method = "onItemUseFinish",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/LivingEntity;resetActiveHand()V"))
-    private void impl$updateHealthForUseFinish(final CallbackInfo ci) {
-        if (this instanceof ServerPlayerEntityBridge) {
-            ((ServerPlayerEntityBridge) this).bridge$refreshScaledHealth();
+    @Inject(method = "broadcastBreakEvent(Lnet/minecraft/world/entity/EquipmentSlot;)V", at = @At("HEAD"), cancellable = true)
+    private void impl$vanishDoesNotBroadcastBreakEvents(final EquipmentSlot slot, final CallbackInfo ci) {
+        if (this.bridge$isVanished()) {
+            ci.cancel();
         }
     }
 
+    @Inject(method = "updatingUsingItem",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/LivingEntity;stopUsingItem()V"))
+    protected void impl$updateHealthForUseFinish(final CallbackInfo ci) {
+    }
+
     // Data delegated methods
-     */
+
     // Start implementation of UseItemstackEvent
 
     @Inject(method = "startUsingItem",

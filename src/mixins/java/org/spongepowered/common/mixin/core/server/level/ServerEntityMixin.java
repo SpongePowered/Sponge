@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -34,6 +35,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
@@ -55,11 +57,11 @@ public abstract class ServerEntityMixin {
     @Shadow @Final private Entity entity;
     @Shadow @Final @Mutable private Consumer<Packet<?>> broadcast;
 
-    /*
+    /**
      * @author gabizou
      * @reason Because the packets for *most* all entity updates are handled
      * through this consumer tick, basically all the players tracking the
-     * {@link #trackedEntity} can be updated within the {@code net.minecraft.world.server.ChunkManager.EntityTracker}
+     * {@link #entity} can be updated within the {@code net.minecraft.world.server.ChunkManager.EntityTracker}
      * which maintains which players are being updated for all "tick" updates. The problem
      * with this is that we don't really care about which updates are sent, but rather
      * whether the update packets are sent at all (ideally so that hack clients thinking
@@ -69,23 +71,24 @@ public abstract class ServerEntityMixin {
      * then as a fail safe, the EntityTracker mixin. Meanwhile, all other states are updated
      * just fine.
      *
-     * @param world The world
-     * @param tracked The entity being tracked
-     * @param update The update frequency
-     * @param sendVelocity Whether velocity updates are sent
-     * @param consumer The consumer (a method handle for EntityTracker#sendToAllTracking)
+     * @param serverLevel The world
+     * @param entity The entity being tracked
+     * @param trackingRange The update frequency
+     * @param trackMovementDeltas Whether velocity updates are sent
+     * @param broadcaster The consumer (a method handle for EntityTracker#sendToAllTracking)
      * @param ci The callback info
      */
-//    @Inject(method = "<init>", at = @At("TAIL"))
-//    private void impl$wrapConsumer(ServerWorld world, Entity tracked, int update, boolean sendVelocity, Consumer<IPacket<?>> consumer, CallbackInfo ci) {
-//        this.packetConsumer = (packet)  -> {
-//            if (this.trackedEntity instanceof VanishableBridge) {
-//                if (!((VanishableBridge) this.trackedEntity).bridge$isVanished()) {
-//                    consumer.accept(packet);
-//                }
-//            }
-//        };
-//    }
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void impl$wrapConsumer(final ServerLevel serverLevel, final Entity entity, final int trackingRange,
+        final boolean trackMovementDeltas, final Consumer<Packet<?>> broadcaster, final CallbackInfo ci) {
+        this.broadcast = (packet)  -> {
+            if (this.entity instanceof VanishableBridge) {
+                if (!((VanishableBridge) this.entity).bridge$isVanished()) {
+                    broadcaster.accept(packet);
+                }
+            }
+        };
+    }
 
 
     /**
