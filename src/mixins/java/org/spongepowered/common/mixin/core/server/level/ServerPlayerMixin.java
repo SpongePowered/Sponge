@@ -116,6 +116,7 @@ import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.data.DataUtil;
@@ -823,6 +824,15 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                 case OTHER_PROBLEM: // ignore
                     break;
             }
+        }
+    }
+
+    @Override
+    protected void impl$capturePlayerPosition(
+        double x, double y, double z, CallbackInfo ci
+    ) {
+        if (this.connection != null) {
+            ((ServerGamePacketListenerImplBridge) this.connection).bridge$captureCurrentPlayerPosition();
         }
     }
 }

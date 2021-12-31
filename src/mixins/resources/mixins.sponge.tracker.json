@@ -15,10 +15,12 @@
         "server.level.ServerChunkCacheMixin_Tracker",
         "server.level.ServerLevelMixin_Tracker",
         "server.level.ServerPlayerGameModeMixin_Tracker",
+        "server.level.ServerPlayerMixin_Tracker",
         "server.network.ServerGamePacketListenerImplMixin_Tracker",
         "server.players.PlayerListMixin_Tracker",
         "util.thread.BlockableEventLoopMixin_Tracker",
         "world.entity.EntityMixin_Tracker",
+        "world.entity.EntityTypeMixin_Tracker",
         "world.entity.LivingEntityMixin_Tracker",
         "world.entity.animal.AnimalMixin_Tracker",
         "world.entity.item.FallingBlockEntityMixin_Tracker",
@@ -33,15 +35,14 @@
         "world.level.ServerTickListMixin_Tracker",
         "world.level.TickNextTickDataMixin_Tracker",
         "world.level.block.BlockMixin_Tracker",
+        "world.level.block.BlocksMixin_Tracker",
         "world.level.block.DispenserBlockMixin_Tracker",
         "world.level.block.LeavesBlockMixin_Tracker",
         "world.level.block.entity.BlockEntityMixin_Tracker",
+        "world.level.block.entity.BlockEntityTypeMixin_Tracker",
         "world.level.chunk.LevelChunkMixin_Tracker",
         "world.level.chunk.storage.ChunkSerializerMixin_Tracker",
-        "world.level.dimension.end.EndDragonFightMixin_Tracker",
-        "world.entity.EntityTypeMixin_Tracker",
-        "world.level.block.entity.BlockEntityTypeMixin_Tracker",
-        "world.level.block.BlocksMixin_Tracker"
+        "world.level.dimension.end.EndDragonFightMixin_Tracker"
     ],
     "injectors": {
         "maxShiftBy": 3
