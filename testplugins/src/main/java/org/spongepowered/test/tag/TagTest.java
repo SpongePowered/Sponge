@@ -356,7 +356,7 @@ public final class TagTest {
         return heldItem.type();
     }
 
-    private static <T extends Taggable<@NonNull T>> void sendTagMessage(final T taggable, final DefaultedRegistryType<T> registry, final Tag<T> tag, final ResourceKey tagKey, final Audience audience) {
+    private static <S extends T, T extends Taggable<@NonNull T>> void sendTagMessage(final S taggable, final DefaultedRegistryType<S> registry, final Tag<T> tag, final ResourceKey tagKey, final Audience audience) {
         final boolean contained = tag.contains(taggable);
         final Component message = contained ? Component.text(taggable.key(registry) + " has tag " + tagKey, NamedTextColor.GREEN)
                 : Component.text(taggable.key(registry) + " does not have tag " + tagKey, NamedTextColor.RED);

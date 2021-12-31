@@ -153,7 +153,7 @@ public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSo
         }
         final Entity entity = this.reference.get();
         if (entity instanceof FallingBlockEntityAccessor) {
-            ((FallingBlockEntityAccessor) entity).accessor$fallDamageAmount((float) damagePer);
+            ((FallingBlockEntityAccessor) entity).accessor$fallDamagePerDistance((float) damagePer);
         }
         return this;
     }
