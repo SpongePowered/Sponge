@@ -70,11 +70,13 @@ public abstract class LevelTicksMixin_Tracker {
             try (final var context = GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE.createPhaseContext(
                     PhaseTracker.SERVER)
                 .source(this)
-                .scheduledUpdate((BlockPos) blockPos, ticking);
+                .scheduledUpdate((BlockPos) blockPos, ticking)
             ) {
                 context.buildAndSwitch();
                 consumer.accept(blockPos, ticking);
             }
+        } else {
+            consumer.accept(blockPos, ticking);
         }
     }
 }
