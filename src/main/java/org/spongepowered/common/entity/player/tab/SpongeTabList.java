@@ -25,7 +25,6 @@
 package org.spongepowered.common.entity.player.tab;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
@@ -49,6 +48,7 @@ import org.spongepowered.common.profile.SpongeGameProfile;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -124,13 +124,13 @@ public final class SpongeTabList implements TabList {
 
     @Override
     public Optional<TabListEntry> entry(final UUID uniqueId) {
-        checkNotNull(uniqueId, "unique id");
+        Objects.requireNonNull(uniqueId, "unique id");
         return Optional.ofNullable(this.entries.get(uniqueId));
     }
 
     @Override
     public TabList addEntry(final TabListEntry entry) throws IllegalArgumentException {
-        checkNotNull(entry, "builder");
+        Objects.requireNonNull(entry, "builder");
         checkState(entry.list().equals(this), "the provided tab list entry was not created for this tab list");
 
         this.addEntry(entry, true);
@@ -155,23 +155,19 @@ public final class SpongeTabList implements TabList {
     private void addEntry(final TabListEntry entry, final boolean exceptionOnDuplicate) {
         final UUID uniqueId = entry.profile().uniqueId();
 
-        if (exceptionOnDuplicate) {
-            checkArgument(!this.entries.containsKey(uniqueId), "cannot add duplicate entry");
+        @Nullable final TabListEntry prev = this.entries.putIfAbsent(uniqueId, entry);
+        if (exceptionOnDuplicate && prev != null) {
+            throw new IllegalArgumentException("cannot add duplicate entry");
         }
 
-        if (!this.entries.containsKey(uniqueId)) {
-            this.entries.put(uniqueId, entry);
-
+        if (prev == null) {
             this.sendUpdate(entry, ClientboundPlayerInfoPacket.Action.ADD_PLAYER);
-            entry.displayName().ifPresent(text -> this.sendUpdate(entry, ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME));
-            this.sendUpdate(entry, ClientboundPlayerInfoPacket.Action.UPDATE_LATENCY);
-            this.sendUpdate(entry, ClientboundPlayerInfoPacket.Action.UPDATE_GAME_MODE);
         }
     }
 
     @Override
     public Optional<TabListEntry> removeEntry(final UUID uniqueId) {
-        checkNotNull(uniqueId, "unique id");
+        Objects.requireNonNull(uniqueId, "unique id");
 
         final TabListEntry entry = this.entries.remove(uniqueId);
         if (entry != null) {
