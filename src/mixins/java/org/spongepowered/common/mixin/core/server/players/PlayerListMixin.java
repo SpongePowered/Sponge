@@ -118,6 +118,7 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -138,6 +139,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow @Final @Mutable private UserWhiteList whitelist;
     @Shadow @Final private List<net.minecraft.server.level.ServerPlayer> players;
     @Shadow @Final protected int maxPlayers;
+    @Shadow @Final private Map<UUID, net.minecraft.server.level.ServerPlayer> playersByUUID;
 
     @Shadow public abstract MinecraftServer shadow$getServer();
     @Shadow @Nullable public abstract CompoundTag shadow$load(net.minecraft.server.level.ServerPlayer playerIn);
@@ -418,38 +420,6 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Redirect(
         method = "placeNewPlayer",
         at = @At(
-            value = "NEW",
-            target = "Lnet/minecraft/network/protocol/game/ClientboundPlayerInfoPacket;<init>(Lnet/minecraft/network/protocol/game/ClientboundPlayerInfoPacket$Action;[Lnet/minecraft/server/level/ServerPlayer;)V"
-        ),
-        slice = @Slice(
-            from = @At(
-                value = "INVOKE",
-                target = "Ljava/util/List;size()I",
-                remap = false
-            ),
-            to = @At(
-                value = "INVOKE",
-                target = "Lnet/minecraft/server/level/ServerLevel;addNewPlayer(Lnet/minecraft/server/level/ServerPlayer;)V"
-            )
-        )
-    )
-    private ClientboundPlayerInfoPacket impl$onlySendAddPlayerForUnvanishedPlayers(
-        ClientboundPlayerInfoPacket.Action addPlayer,
-        net.minecraft.server.level.ServerPlayer[] players
-    ) {
-        if (players.length == 0) {
-            return null;
-        }
-        // Effectively, don't notify new players of vanished players
-        if (((VanishableBridge) players[0]).bridge$isVanished()) {
-            return null;
-        }
-        return new ClientboundPlayerInfoPacket(addPlayer, players);
-    }
-
-    @Redirect(
-        method = "placeNewPlayer",
-        at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"
         ),
@@ -466,11 +436,16 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         )
     )
     private void impl$onlySendAddPlayerForUnvanishedPlayers(ServerGamePacketListenerImpl connection, Packet<?> packet) {
-        // Since the redirect above can technically make the packet null, we don't
-        // want to send a null packet and cause an NPE
-        if (packet == null) {
+        ClientboundPlayerInfoPacket pkt = (ClientboundPlayerInfoPacket) packet;
+
+        // size is always 1
+        VanishableBridge p = (VanishableBridge) this.playersByUUID.get(pkt.getEntries().get(0).getProfile().getId());
+
+        // Effectively, don't notify new players of vanished players
+        if (p.bridge$isVanished()) {
             return;
         }
+
         connection.send(packet);
     }
 
