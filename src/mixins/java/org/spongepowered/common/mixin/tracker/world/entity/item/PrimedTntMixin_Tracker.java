@@ -41,9 +41,10 @@ public abstract class PrimedTntMixin_Tracker extends EntityMixin_Tracker {
     @Shadow @Nullable private LivingEntity owner;
 
     @Override
-    public void tracker$populateFrameInTickContext(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
+    protected void tracker$populateDeathContextIfNeeded(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
         if (this.owner != null) {
             frame.addContext(EventContextKeys.IGNITER, (Living) this.owner);
         }
+        super.tracker$populateDeathContextIfNeeded(frame, context);
     }
 }

@@ -43,7 +43,7 @@ public abstract class ClassInstanceMultiMapMixin_ConcurrentCheck {
             .getGeneralHooks()
             .onServerThread()) {
             Thread.dumpStack();
-            SpongeCommon.logger().error("Detected attempt to add entity '" + entity + "' to ClassInheritanceMultiMap asynchronously.\n"
+            SpongeCommon.logger().error("Detected attempt to add entity '" + entity + "' to ClassInstanceMultiMap asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
                     + " Skipping...");
             cir.setReturnValue(false);
@@ -56,7 +56,7 @@ public abstract class ClassInstanceMultiMapMixin_ConcurrentCheck {
             .getGeneralHooks()
             .onServerThread()) {
             Thread.dumpStack();
-            SpongeCommon.logger().error("Detected attempt to remove entity '" + entity + "' from ClassInheritanceMultiMap asynchronously.\n"
+            SpongeCommon.logger().error("Detected attempt to remove entity '" + entity + "' from ClassInstanceMultiMap asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
                     + " Skipping...");
             cir.setReturnValue(false);

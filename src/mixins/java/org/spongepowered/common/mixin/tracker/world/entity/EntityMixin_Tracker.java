@@ -29,12 +29,10 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -52,8 +50,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.DelegatingConfigTrackableBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.entity.TrackableEntityBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -71,9 +69,6 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     // @formatter:off
     @Shadow @Final private EntityType<?> type;
     @Shadow public Level level;
-    @Shadow private Vec3 position;
-    @Shadow private float yRot;
-    @Shadow private float xRot;
     @Shadow @Final protected Random random;
 
     @Shadow @Nullable public abstract Team getTeam();
@@ -158,7 +153,7 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     }
 
     @Override
-    public void tracker$populateFrameInTickContext(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
+    public final void tracker$populateFrameInTickContext(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
         this.tracker$populateDeathContextIfNeeded(frame, context);
     }
 

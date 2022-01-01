@@ -231,6 +231,12 @@
             "name": "Pack Test",
             "entrypoint": "org.spongepowered.test.pack.PackTest",
             "description": "Pack Testing"
+        },
+        {
+            "id": "vanish-test",
+            "name": "Vanish Test",
+            "entrypoint": "org.spongepowered.test.vanish.VanishTest",
+            "description": "Vanish Testing"
         }
     ]
 }

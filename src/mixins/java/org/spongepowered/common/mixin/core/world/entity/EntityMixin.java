@@ -29,8 +29,12 @@ import net.minecraft.BlockUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -40,8 +44,10 @@ import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -74,6 +80,7 @@ import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalTypes;
@@ -89,6 +96,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
+import org.spongepowered.common.accessor.server.level.ChunkMap_TrackedEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
@@ -109,6 +118,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.util.MinecraftBlockDamageSource;
@@ -120,12 +130,12 @@ import org.spongepowered.common.world.portal.SpongePortalInfo;
 import org.spongepowered.common.world.portal.VanillaPortal;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-
-import javax.annotation.Nullable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, CommandSourceProviderBridge, DataCompoundHolder {
@@ -212,6 +222,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract void shadow$setXRot(final float param0);
     @Shadow protected abstract Vec3 shadow$collide(Vec3 param0);
     @Shadow protected abstract boolean shadow$fireImmune();
+    @Shadow public abstract boolean shadow$isPickable();
 
     @Shadow protected String stringUUID;
     @Shadow @Nullable protected abstract PortalInfo shadow$findDimensionEntryPoint(ServerLevel param0);
@@ -945,17 +956,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     }
 
-    /*
-    @SuppressWarnings("ConstantConditions")
-    @Inject(method = "setPosition",
-        at = @At("HEAD"))
-    private void impl$capturePlayerPosition(final double x, final double y, final double z, final CallbackInfo ci) {
-        if ((Entity) (Object) this instanceof ServerPlayerEntity) {
-            final ServerPlayerEntity player = (ServerPlayerEntity) (Object) this;
-            if (player.connection != null) {
-                ((ServerPlayNetHandlerBridge) player.connection).bridge$captureCurrentPlayerPosition();
-            }
-        }
+
+    @Inject(method = "setPos(DDD)V", at = @At("HEAD"))
+    protected void impl$capturePlayerPosition(final double x, final double y, final double z, final CallbackInfo ci) {
+        // Overridden in ServerPlayer
     }
 
 
@@ -963,29 +967,29 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Inject(method = "tick",
         at = @At("RETURN"))
     private void impl$updateVanishState(final CallbackInfo callbackInfo) {
-        if (this.impl$pendingVisibilityUpdate && !this.world.isClientSide) {
-            final EntityTrackerAccessor trackerAccessor = ((ChunkManagerAccessor) ((ServerWorld) this.world).getChunkProvider().chunkManager).accessor$getEntityTrackers().get(this.shadow$getEntityId());
+        if (this.impl$pendingVisibilityUpdate && !this.level.isClientSide) {
+            final ChunkMap_TrackedEntityAccessor trackerAccessor = ((ChunkMapAccessor) ((ServerWorld) this.level).chunkManager()).accessor$entityMap().get(this.shadow$getId());
             if (trackerAccessor != null && this.impl$visibilityTicks % 4 == 0) {
                 if (this.impl$isVanished) {
-                    for (final ServerPlayerEntity entityPlayerMP : trackerAccessor.accessor$getTrackingPlayers()) {
-                        entityPlayerMP.connection.sendPacket(new SDestroyEntitiesPacket(this.shadow$getEntityId()));
-                        if ((Entity) (Object) this instanceof ServerPlayerEntity) {
-                            entityPlayerMP.connection.sendPacket(
-                                new SPlayerListItemPacket(SPlayerListItemPacket.Action.REMOVE_PLAYER, (ServerPlayerEntity) (Object) this));
+                    for (final ServerPlayer entityPlayerMP : trackerAccessor.accessor$seenBy()) {
+                        entityPlayerMP.connection.send(new ClientboundRemoveEntitiesPacket(this.shadow$getId()));
+                        if ((Entity) (Object) this instanceof ServerPlayer) {
+                            entityPlayerMP.connection.send(
+                                new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, (ServerPlayer) (Object) this));
                         }
                     }
                 } else {
                     this.impl$visibilityTicks = 1;
                     this.impl$pendingVisibilityUpdate = false;
-                    for (final ServerPlayerEntity entityPlayerMP : SpongeCommon.getServer().getPlayerList().players()) {
+                    for (final ServerPlayer entityPlayerMP : SpongeCommon.server().getPlayerList().getPlayers()) {
                         if ((Entity) (Object) this == entityPlayerMP) {
                             continue;
                         }
-                        if ((Entity) (Object) this instanceof ServerPlayerEntity) {
-                            final IPacket<?> packet = new SPlayerListItemPacket(SPlayerListItemPacket.Action.ADD_PLAYER, (ServerPlayerEntity) (Object) this);
-                            entityPlayerMP.connection.sendPacket(packet);
+                        if ((Entity) (Object) this instanceof ServerPlayer) {
+                            final Packet<?> packet = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, (ServerPlayer) (Object) this);
+                            entityPlayerMP.connection.send(packet);
                         }
-                        trackerAccessor.accessor$getEntry().sendSpawnPackets(entityPlayerMP.connection::sendPacket);
+                        trackerAccessor.accessor$updatePlayer(entityPlayerMP);
                     }
                 }
             }
@@ -996,17 +1000,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             }
         }
     }
-
-    */
-
-/*
-    @Override
-    public void bridge$setImplVelocity(final Vector3d velocity) {
-        this.motion = VecHelper.toVec3d(velocity);
-        this.velocityChanged = true;
-    }
-
-    */
 
     @Redirect(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collide(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;"))
     private Vec3 impl$onMoveCollide(final Entity entity, final Vec3 originalMove) {
@@ -1090,45 +1083,47 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
          * @reason gabizou - January 27th, 2016 - Rewrite to a redirect
          *     <p>
          *     This prevents sounds from being sent to the server by entities that are vanished
-         *//*
+         */
 
     @Redirect(method = "playSound",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
+            target = "Lnet/minecraft/world/entity/Entity;isSilent()Z"))
     private boolean impl$checkIsSilentOrInvis(final Entity entity) {
         return entity.isSilent() || this.impl$isVanished;
     }
 
-    @Redirect(method = "applyEntityCollision",
+    @Redirect(method = "push(Lnet/minecraft/world/entity/Entity;)V",
         at = @At(value = "FIELD",
-            target = "Lnet/minecraft/entity/Entity;noClip:Z",
+            target = "Lnet/minecraft/world/entity/Entity;noPhysics:Z",
             opcode = Opcodes.GETFIELD))
     private boolean impl$applyEntityCollisionCheckVanish(final Entity entity) {
-        return entity.noClip || ((VanishableBridge) entity).bridge$isVanished();
+        return entity.noPhysics || ((VanishableBridge) entity).bridge$isVanished();
     }
 
     @Redirect(method = "doWaterSplashEffect",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;addParticle(Lnet/minecraft/particles/IParticleData;DDDDDD)V"))
-    private void impl$spawnParticle(final net.minecraft.world.World world, final IParticleData particleTypes,
-        final double xCoord, final double yCoord, final double zCoord,
-        final double xOffset, final double yOffset, final double zOffset) {
+            target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"))
+    private void impl$spawnParticle(
+        final Level instance, final ParticleOptions particleOptions, final double xCoord, final double yCoord,
+        final double zCoord, final double xOffset, final double yOffset, final double zOffset
+    ) {
         if (!this.impl$isVanished) {
-            this.world.addParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
+            this.level.addParticle(particleOptions, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
 
-    @Redirect(method = "createRunningParticles",
+    @Redirect(method = "spawnSprintParticle",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;addParticle(Lnet/minecraft/particles/IParticleData;DDDDDD)V"))
-    private void impl$runningSpawnParticle(final net.minecraft.world.World world, final IParticleData particleTypes,
-        final double xCoord, final double yCoord, final double zCoord,
-        final double xOffset, final double yOffset, final double zOffset) {
+            target = "Lnet/minecraft/world/level/Level;addParticle(Lnet/minecraft/core/particles/ParticleOptions;DDDDDD)V"))
+    private void impl$runningSpawnParticle(
+        final Level instance, final ParticleOptions particleOptions, final double xCoord, final double yCoord,
+        final double zCoord, final double xOffset, final double yOffset, final double zOffset
+    ) {
         if (!this.impl$isVanished) {
-            this.world.addParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
+            instance.addParticle(particleOptions, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
-    */
+
 
     /**
      * @return
@@ -1142,28 +1137,50 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
      *     2) If we are in a client environment, we should not perform any sort of processing whatsoever.
      *     3) This method is entirely managed from the standpoint where our events have final say, as per usual.
      */
-/*
-    @javax.annotation.Nullable
-    @Overwrite
-    @Nullable
-    public ItemEntity entityDropItem(final ItemStack stack, final float offsetY) {
-        // Sponge Start
-        // Gotta stick with the client side handling things
-        if (this.world.isClientSide) {
-            // Sponge End - resume normal client code. Server side we will handle it elsewhere
-            if (stack.isEmpty()) {
-                return null;
-            } else {
-                final ItemEntity entityitem = new ItemEntity(this.world, this.posX, this.posY + (double) offsetY, this.posZ, stack);
-                entityitem.setDefaultPickupDelay();
-                this.world.addEntity(entityitem);
-                return entityitem;
-            }
+
+    @Inject(
+        method = "spawnAtLocation(Lnet/minecraft/world/item/ItemStack;F)Lnet/minecraft/world/entity/item/ItemEntity;",
+        at = @At("HEAD"),
+        cancellable = true
+    )
+    public void impl$throwDropItemConstructEvent(
+        final ItemStack stack, final float offsetY, final CallbackInfoReturnable<ItemEntity> cir
+    ) {
+        if (stack.isEmpty()) {
+            cir.setReturnValue(null);
+            return;
         }
-        // Sponge - Redirect server sided code to handle through the PhaseTracker
-        return EntityUtil.entityOnDropItem((Entity) (Object) this, stack, offsetY, ((Entity) (Object) this).posX, ((Entity) (Object) this).posZ);
+        if (((LevelBridge) this.level).bridge$isFake()) {
+            return;
+        }
+        // Now the real fun begins.
+        final ItemStack item;
+        final double posX = this.shadow$position().x;
+        final double posY = this.shadow$position().y + offsetY;
+        final double posZ = this.shadow$position().z;
+
+        // FIRST we want to throw the DropItemEvent.PRE
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
+        final List<ItemStackSnapshot> original = new ArrayList<>();
+        original.add(snapshot);
+
+        // We want to frame ourselves here, because of the two events we have to throw, first for the drop item event, then the constructentityevent.
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            // Perform the event throws first, if they return false, return null
+            item = SpongeCommonEventFactory.throwDropItemAndConstructEvent(
+                (Entity) (Object) this, posX, posY, posZ, snapshot, original, frame);
+
+            if (item == null || item.isEmpty()) {
+                cir.setReturnValue(null);
+                return;
+            }
+            final ItemEntity entityitem = new ItemEntity(this.level, posX, posY, posZ, item);
+            entityitem.setDefaultPickUpDelay();
+            this.level.addFreshEntity(entityitem);
+            cir.setReturnValue(entityitem);
+        }
     }
-*/
+
     @org.checkerframework.checker.nullness.qual.Nullable
     @Override
     public BlockPos bridge$getLastCollidedBlockPos() {
@@ -1227,35 +1244,25 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return !this.impl$transient;
     }
 
-    /*
-    @Redirect(method = "onStruckByLightning",
+
+    @Redirect(method = "thunderHit",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+            target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
     private boolean impl$ThrowDamageEventWithLightingSource(
-        final Entity entity, final DamageSource source, final float damage, final LightningBoltEntity lightningBolt) {
-        if (!this.world.isClientSide) {
-            return entity.attackEntityFrom(source, damage);
+        final Entity entity, final DamageSource source, final float damage,
+        final ServerLevel level, final LightningBolt lightningBolt
+    ) {
+        if (!this.level.isClientSide) {
+            return entity.hurt(source, damage);
         }
         try {
             final EntityDamageSource lightning = new EntityDamageSource("lightningBolt", lightningBolt);
             ((DamageSourceBridge) lightning).bridge$setLightningSource();
-            return entity.attackEntityFrom(DamageSource.LIGHTNING_BOLT, damage);
+            return entity.hurt(DamageSource.LIGHTNING_BOLT, damage);
         } finally {
             ((DamageSourceBridge) source).bridge$setLightningSource();
         }
     }
-
-    @Inject(method = "remove()V",
-        at = @At(value = "RETURN"))
-    private void impl$createDestructionEventOnDeath(final CallbackInfo ci) {
-        if (ShouldFire.DESTRUCT_ENTITY_EVENT
-            && !((WorldBridge) this.world).bridge$isFake()
-            && !((Entity) (Object) this instanceof MobEntity)) {
-
-            this.impl$destructCause = PhaseTracker.getCauseStackManager().getCurrentCause();
-        }
-    }
-*/
 
     @Inject(method = "getFireImmuneTicks", at = @At(value = "HEAD"), cancellable = true)
     private void impl$getFireImmuneTicks(final CallbackInfoReturnable<Integer> ci) {

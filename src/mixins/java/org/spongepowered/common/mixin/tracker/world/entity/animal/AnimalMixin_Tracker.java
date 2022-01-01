@@ -44,13 +44,13 @@ public abstract class AnimalMixin_Tracker extends LivingEntityMixin_Tracker {
     //@formatter:on
 
     @Override
-    public void tracker$populateFrameInTickContext(
+    public void tracker$populateDeathContextIfNeeded(
         final CauseStackManager.StackFrame frame, final EntityTickContext context
     ) {
         final ServerPlayer serverPlayer = this.shadow$getLoveCause();
         if (serverPlayer != null) {
             frame.addContext(EventContextKeys.PLAYER, (Player) serverPlayer);
         }
-        super.tracker$populateFrameInTickContext(frame, context);
+        super.tracker$populateDeathContextIfNeeded(frame, context);
     }
 }

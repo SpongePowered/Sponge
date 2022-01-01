@@ -126,20 +126,18 @@ public abstract class ExplosionMixin_Tracker {
                     this.level.getProfiler().push("explosion_blocks");
 
                     // Sponge - All of this is forwarded to the effects
-                    // if (block.canDropFromExplosion(this) && this.world instanceof ServerWorld) {
-                    //     TileEntity tileentity = block.hasTileEntity() ? this.world.getTileEntity(blockpos) : null;
-                    //     LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerWorld)this.world)).withRandom(this.world.rand).withParameter(
-                    //         LootParameters.POSITION, blockpos).withParameter(LootParameters.TOOL, ItemStack.EMPTY).withNullableParameter(LootParameters.BLOCK_ENTITY, tileentity).withNullableParameter(LootParameters.THIS_ENTITY, this.exploder);
-                    //     if (this.mode == Explosion.Mode.DESTROY) {
-                    //         lootcontext$builder.withParameter(LootParameters.EXPLOSION_RADIUS, this.size);
+                    // if (block.canDropFromExplosion(this) && this.level instanceof ServerLevel) {
+                    //     BlockEntity var6 = block.isEntityBlock() ? this.level.getBlockEntity(blockpos) : null;
+                    //     LootContext.Builder lootcontext$builder = (new LootContext.Builder((ServerLevel)this.level)).withRandom(this.level.rand).withParameter(
+                    //         LootParameters.ORIGIN, Vec3.atCenterOf(blockpos)).withParameter(LootParameters.TOOL, ItemStack.EMPTY).withNullableParameter(LootParameters.BLOCK_ENTITY, var6).withNullableParameter(LootParameters.THIS_ENTITY, this.source);
+                    //     if (this.blockInteraction == Explosion.BlockInteraction.DESTROY) {
+                    //         lootcontext$builder.withParameter(LootParameters.EXPLOSION_RADIUS, this.radius);
                     //     }
 
-                    //     blockstate.getDrops(lootcontext$builder).forEach((p_229977_2_) -> {
-                    //         func_229976_a_(objectarraylist, p_229977_2_, blockpos1);
-                    //     });
+                    //     var3.getDrops(var7).forEach((param2) -> addBlockDrops(var1, param2, var5));
                     // }
 
-                    //this.world.setBlock(blockpos, Blocks.AIR.defaultState(), 3);
+                    //this.level.setBlock(blockpos, Blocks.AIR.defaultState(), 3);
                     //block.onExplosionDestroy(this.world, blockpos, this);
 
                     final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
@@ -161,8 +159,8 @@ public abstract class ExplosionMixin_Tracker {
                 }
             }
             // Sponge Start - This is built into the SpawnDestructBlocksEffect
-            // for(Pair<ItemStack, BlockPos> pair : objectarraylist) {
-            //    Block.spawnAsEntity(this.world, pair.second(), pair.first());
+            // for(Pair<ItemStack, BlockPos> var8 : objectarraylist) {
+            //    Block.popResource(this.level, var8.getSecond(), var8.getFirst());
             // }
             // Sponge End
         }

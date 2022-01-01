@@ -13,11 +13,11 @@ The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms
 
 ### Sponge
 
-**1.16.5**: ![Snapshots](https://img.shields.io/nexus/maven-snapshots/org.spongepowered/sponge?label=Sponge&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
+**1.16.5**: ![Snapshots](https://img.shields.io/nexus/maven-snapshots/org.spongepowered/sponge?label=Sponge&server=https%3A%2F%2Frepo.spongepowered.org%2F)
 
 ### SpongeVanilla
 
-**1.16.5**: ![Snapshots](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=SpongeVanilla&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
+**1.16.5**: ![Snapshots](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=SpongeVanilla&server=https%3A%2F%2Frepo.spongepowered.org%2F)
 
 
 ## Prerequisites
@@ -74,14 +74,14 @@ Are you a talented programmer looking to contribute some code? We'd love the hel
 * Open a pull request with your changes, following our [guidelines](.github/CONTRIBUTING.md).
 * Please follow the above guidelines for your pull request(s) to be accepted.
 
-[Eclipse]: https://eclipse.org/
-[Eclipse Marketplace]: http://marketplace.eclipse.org/content/buildship-gradle-integration
+[Eclipse]: https://www.eclipse.org/
+[Eclipse Marketplace]: https://marketplace.eclipse.org/content/buildship-gradle-integration
 [Gradle]: https://gradle.org/
 [Homepage]: https://spongepowered.org/
-[IntelliJ]: http://www.jetbrains.com/idea/
+[IntelliJ]: https://www.jetbrains.com/idea/
 [Issues]: https://github.com/SpongePowered/Sponge/issues
 [Documentation]: https://docs.spongepowered.org/
-[Java]: https://adoptopenjdk.net/?variant=openjdk8&jvmVariant=hotspot
+[Java]: https://adoptium.net/installation.html?variant=openjdk8&jvmVariant=hotspot
 [Source]: https://github.com/SpongePowered/Sponge/
-[MIT License]: http://www.tldrlegal.com/license/mit-license
+[MIT License]: https://www.tldrlegal.com/license/mit-license
 [Discord]: https://discord.gg/sponge

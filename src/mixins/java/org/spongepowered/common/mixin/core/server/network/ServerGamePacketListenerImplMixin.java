@@ -150,6 +150,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     @Shadow protected abstract boolean shadow$isSingleplayerOwner();
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch);
     @Shadow protected abstract void shadow$filterTextPacket(List<String> p_244537_1_, Consumer<List<String>> p_244537_2_);
+    @Shadow public abstract void shadow$resetPosition();
     // @formatter:on
 
     private int impl$ignorePackets;
@@ -536,6 +537,11 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         }
 
         return 0;
+    }
+
+    @Override
+    public void bridge$captureCurrentPlayerPosition() {
+        this.shadow$resetPosition();
     }
 
 }

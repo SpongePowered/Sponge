@@ -42,10 +42,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.storage.LevelData;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
@@ -56,7 +54,6 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.math.vector.Vector3d;
@@ -69,24 +66,10 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public final class EntityUtil {
-
-    public static final Function<PhaseContext<?>, Supplier<Optional<UUID>>> ENTITY_CREATOR_FUNCTION = (context) ->
-        () -> Stream.<Supplier<Optional<UUID>>>builder()
-            .add(() -> context.getSource(ServerPlayer.class).map(Entity::getUUID))
-            .add(() -> context.getSource(User.class).map(Identifiable::uniqueId))
-            .add(context::getNotifier)
-            .add(context::getCreator)
-            .build()
-            .map(Supplier::get)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .findFirst();
 
     private EntityUtil() {
     }
@@ -174,27 +157,6 @@ public final class EntityUtil {
                 )
         );
         // Sponge End
-    }
-
-    public static boolean isEntityDead(final net.minecraft.world.entity.Entity entity) {
-        if (entity instanceof LivingEntity) {
-            final LivingEntity base = (LivingEntity) entity;
-            return base.getHealth() <= 0 || base.deathTime > 0 || ((LivingEntityAccessor) entity).accessor$dead();
-        }
-        return entity.isRemoved();
-    }
-
-    public static boolean processEntitySpawnsFromEvent(final SpawnEntityEvent event, final Supplier<Optional<UUID>> entityCreatorSupplier) {
-        boolean spawnedAny = false;
-        for (final org.spongepowered.api.entity.Entity entity : event.entities()) {
-            // Here is where we need to handle the custom items potentially having custom entities
-            spawnedAny = EntityUtil.processEntitySpawn(entity, entityCreatorSupplier, e ->  e.level.addFreshEntity(e));
-        }
-        return spawnedAny;
-    }
-
-    public static boolean processEntitySpawnsFromEvent(final PhaseContext<?> context, final SpawnEntityEvent destruct) {
-        return EntityUtil.processEntitySpawnsFromEvent(destruct, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
     }
 
     public static boolean processEntitySpawn(final org.spongepowered.api.entity.Entity entity, final Supplier<Optional<UUID>> supplier, final Consumer<Entity> spawner) {

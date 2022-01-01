@@ -82,7 +82,7 @@ public abstract class ExplosionMixin_API implements Explosion {
 
     @Override
     public boolean shouldPlaySmoke() {
-        return this.blockInteraction != net.minecraft.world.level.Explosion.BlockInteraction.NONE;
+        return ((ExplosionBridge) this).bridge$getShouldPlaySmoke();
     }
 
     @Override

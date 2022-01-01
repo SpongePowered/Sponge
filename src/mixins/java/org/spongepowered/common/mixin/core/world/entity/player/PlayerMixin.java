@@ -28,6 +28,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -63,6 +64,7 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -117,6 +119,7 @@ import org.spongepowered.common.util.ExperienceHolderUtil;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -162,6 +165,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     @Shadow public Either<BedSleepingProblem, Unit> shadow$startSleepInBed(BlockPos param0) {
         return null; // Shadowed
     }
+    @Shadow protected abstract void shadow$playShoulderEntityAmbientSound(CompoundTag p_192028_1_);
     // @formatter: on
 
     private boolean impl$affectsSpawning = true;
@@ -193,15 +197,19 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
         this.experienceProgress = (float) experience / this.shadow$getXpNeededForNextLevel();
     }
 
-    /*
-    @Redirect(method = "livingTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;"))
-    private List<Entity> impl$ignoreOtherEntitiesWhenUncollideable(final World world, Entity entityIn, AxisAlignedBB bb) {
-        if (this.bridge$isUncollideable()) {
+    @Redirect(
+        method = "aiStep",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/level/Level;getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"
+        )
+    )
+    private List<Entity> impl$ignoreOtherEntitiesWhenUncollideable(final Level level, final Entity entity, final AABB aabb) {
+        if (this.bridge$isVanishIgnoresCollision()) {
             return Collections.emptyList();
         }
-        return world.getEntitiesWithinAABBExcludingEntity(entityIn, bb);
+        return level.getEntities(entity, aabb);
     }
-*/
 
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSleeping()Z"))
     private boolean impl$postSleepingEvent(final net.minecraft.world.entity.player.Player self) {
@@ -232,12 +240,39 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
         return playerEntity.getName();
     }
 
-    @Redirect(method = "playSound(Lnet/minecraft/sounds/SoundEvent;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"))
-    private void impl$playNoSoundToOthersIfVanished(final Level world, final net.minecraft.world.entity.player.Player player, final double x, final double y, final double z,
-            final SoundEvent sound, final SoundSource category, final float volume, final float pitch) {
-        if (!this.bridge$isVanished()) {
-            this.level.playSound(player, x, y, z, sound, category, volume, pitch);
+    @Redirect(
+        method = "aiStep",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/player/Player;playShoulderEntityAmbientSound(Lnet/minecraft/nbt/CompoundTag;)V"
+        )
+    )
+    private void impl$ignoreShoulderSoundsWhileVanished(final net.minecraft.world.entity.player.Player thisPlayer, final CompoundTag tag) {
+        if (this.bridge$isVanished()) {
+            return;
         }
+        this.shadow$playShoulderEntityAmbientSound(tag);
+    }
+
+    @Redirect(
+        method = {
+            "playSound(Lnet/minecraft/sounds/SoundEvent;FF)V",
+            "giveExperienceLevels(I)V",
+            "eat(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;"
+        },
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"
+        )
+    )
+    private void impl$ignoreExperienceLevelSoundsWhileVanished(final Level world,
+        final net.minecraft.world.entity.player.Player player, final double x, final double y, final double z,
+        final SoundEvent sound, final SoundSource category, final float volume, final float pitch
+    ) {
+        if (this.bridge$isVanished()) {
+            return;
+        }
+        this.level.playSound(player, x, y, z, sound, category, volume, pitch);
     }
 
     @Redirect(method = "canUseGameMasterBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getPermissionLevel()I"))
@@ -545,7 +580,12 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                                 }
                             }
 
-                            this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, this.shadow$getSoundSource(), 1.0F, 1.0F);
+                            if (!this.bridge$isVanished()) {
+                                this.level.playSound(
+                                    null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(),
+                                    SoundEvents.PLAYER_ATTACK_SWEEP, this.shadow$getSoundSource(), 1.0F, 1.0F
+                                );
+                            }
                             this.shadow$sweepAttack();
                         }
 
@@ -556,11 +596,13 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                         }
 
                         if (isCriticalAttack) {
-                            this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.shadow$getSoundSource(), 1.0F, 1.0F);
+                            if (!this.bridge$isVanished()) {
+                                this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.shadow$getSoundSource(), 1.0F, 1.0F);
+                            }
                             this.shadow$crit(targetEntity);
                         }
 
-                        if (!isCriticalAttack && !isSweapingAttack) {
+                        if (!isCriticalAttack && !isSweapingAttack && !this.bridge$isVanished()) {
                             if (isStrongAttack) {
                                 this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.shadow$getSoundSource(), 1.0F, 1.0F);
                             } else {
@@ -615,7 +657,9 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
 
                         this.shadow$causeFoodExhaustion(0.1F);
                     } else {
-                        this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.shadow$getSoundSource(), 1.0F, 1.0F);
+                        if (this.bridge$isVanished()) {
+                            this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.shadow$getSoundSource(), 1.0F, 1.0F);
+                        }
 
                         if (litEntityOnFire) {
                             targetEntity.clearFire();

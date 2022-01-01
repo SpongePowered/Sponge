@@ -35,12 +35,12 @@ import org.spongepowered.common.bridge.TrackableBridge;
 @Mixin(ServerLevel.EntityCallbacks.class)
 public abstract class ServerLevel$EntityCallbackMixin_Tracker {
 
-    @Inject(method = "onTrackingStart", at = @At("TAIL"))
+    @Inject(method = "onTrackingStart(Lnet/minecraft/world/entity/Entity;)V", at = @At("TAIL"))
     private void tracker$setEntityTracked(Entity var1, CallbackInfo ci) {
         ((TrackableBridge) var1).bridge$setWorldTracked(true);
     }
 
-    @Inject(method = "onTrackingEnd", at = @At("TAIL"))
+    @Inject(method = "onTrackingEnd(Lnet/minecraft/world/entity/Entity;)V", at = @At("TAIL"))
     private void tracker$setEntityUntracked(Entity var1, CallbackInfo ci) {
         ((TrackableBridge) var1).bridge$setWorldTracked(false);
     }

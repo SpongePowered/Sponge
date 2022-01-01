@@ -49,8 +49,6 @@ public interface EntityBridge {
 
     boolean bridge$removePassengers(DismountType type);
 
-    void bridge$setImplVelocity(Vector3d velocity);
-
     @Nullable BlockPos bridge$getLastCollidedBlockPos();
 
     void bridge$setFireImmuneTicks(int ticks);

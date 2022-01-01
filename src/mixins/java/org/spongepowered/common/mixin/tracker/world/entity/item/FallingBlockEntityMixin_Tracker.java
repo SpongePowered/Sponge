@@ -47,7 +47,7 @@ import org.spongepowered.common.mixin.tracker.world.entity.EntityMixin_Tracker;
 public abstract class FallingBlockEntityMixin_Tracker extends EntityMixin_Tracker {
 
     @Override
-    public void tracker$populateFrameInTickContext(
+    protected void tracker$populateDeathContextIfNeeded(
         final CauseStackManager.StackFrame frame, final EntityTickContext context
     ) {
         context.getCreator().ifPresent(frame::pushCause);

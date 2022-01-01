@@ -49,6 +49,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.Random;
+
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
 
@@ -71,6 +73,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
     @Shadow public abstract void shadow$swing(InteractionHand p_184609_1_);
     @Shadow protected abstract void shadow$pushEntities();
     @Shadow public abstract float shadow$getHealth();
+    @Shadow public abstract Random shadow$getRandom();
     @Shadow public int deathTime;
     // @formatter:on
 

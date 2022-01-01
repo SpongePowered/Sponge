@@ -104,13 +104,6 @@ public abstract class DispenserBlockMixin_Tracker {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/entity/DispenserBlockEntity;setItem(ILnet/minecraft/world/item/ItemStack;)V"))
     private void tracker$setInventoryContentsCallEvent(final DispenserBlockEntity dispenserTileEntity, final int index, final ItemStack stack) {
-        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
-        // If we captured nothing, simply set the slot contents and return
-        // TODO - figure out how to get captured item transactions
-//        if (context.getCapturedItemsOrEmptyList().isEmpty()) {
-//            dispenserTileEntity.setInventorySlotContents(index, stack);
-//            return;
-//        }
         final ItemStack dispensedItem = ItemStack.EMPTY;
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(dispensedItem);
         final List<ItemStackSnapshot> original = new ArrayList<>();

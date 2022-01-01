@@ -249,7 +249,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             // Sponge End
 
             mcExplosion.explode();
-            mcExplosion.finalizeExplosion(true);
+            mcExplosion.finalizeExplosion(explosion.shouldPlaySmoke());
 
             if (!shouldBreakBlocks) {
                 mcExplosion.clearToBlow();

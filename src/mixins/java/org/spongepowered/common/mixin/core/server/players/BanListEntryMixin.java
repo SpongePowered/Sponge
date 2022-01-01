@@ -35,9 +35,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.players.BanListEntryBridge;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(BanListEntry.class)
 public abstract class BanListEntryMixin<T> extends StoredUserEntryMixin<T> implements BanListEntryBridge {
