@@ -99,6 +99,7 @@ import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.player.PlayerPhase;
 import org.spongepowered.common.service.ban.SpongeIPBanList;
@@ -473,7 +474,6 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         // Spawn player into level
         final WorldServer level = this.server.getWorld(player.dimension);
-        // TODO direct this appropriately
         level.spawnEntity(player);
         this.preparePlayer(player, null);
 

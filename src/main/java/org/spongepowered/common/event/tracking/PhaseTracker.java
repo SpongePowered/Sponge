@@ -1046,7 +1046,7 @@ public final class PhaseTracker {
             final EntityPlayer entityplayer = (EntityPlayer) entity;
             world.playerEntities.add(entityplayer);
             world.updateAllPlayersSleepingFlag();
-            SpongeImplHooks.firePlayerJoinSpawnEvent((EntityPlayerMP) entityplayer);
+            SpongeImplHooks.firePlayerJoinSpawnEvent((EntityPlayerMP) entityplayer, context);
         } else {
             // Sponge start - check for vanilla owner
             if (entity instanceof IEntityOwnable) {
