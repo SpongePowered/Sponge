@@ -221,7 +221,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private boolean impl$isVanished = false;
     private boolean impl$pendingVisibilityUpdate = false;
     private int impl$visibilityTicks = 0;
-    private boolean impl$vanishIgnoresCollision = true;
+    private boolean impl$vanishIgnoresCollision = false;
     private boolean impl$transient = false;
     private boolean impl$shouldFireRepositionEvent = true;
     private WeakReference<ServerWorld> impl$originalDestinationWorld = null;
