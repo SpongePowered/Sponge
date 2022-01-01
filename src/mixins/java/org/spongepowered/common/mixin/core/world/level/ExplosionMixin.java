@@ -86,6 +86,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
     private boolean impl$shouldBreakBlocks;
     private boolean impl$shouldDamageEntities;
+    private boolean impl$shouldPlaySmoke;
     private int impl$resolution;
     private float impl$randomness;
     private double impl$knockback;
@@ -299,6 +300,16 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     @Override
     public int bridge$getResolution() {
         return this.impl$resolution;
+    }
+
+    @Override
+    public void bridge$setShouldPlaySmoke(final boolean shouldPlaySmoke) {
+        this.impl$shouldPlaySmoke = shouldPlaySmoke;
+    }
+
+    @Override
+    public boolean bridge$getShouldPlaySmoke() {
+        return this.impl$shouldPlaySmoke;
     }
 
     @Override

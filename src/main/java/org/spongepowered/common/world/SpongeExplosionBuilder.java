@@ -26,6 +26,7 @@ package org.spongepowered.common.world;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.world.entity.Entity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.World;
@@ -33,10 +34,12 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.bridge.world.level.ExplosionBridge;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.util.Objects;
+
 public class SpongeExplosionBuilder implements Explosion.Builder {
 
     private ServerLocation location;
-    private Explosive sourceExplosive;
+    @Nullable private Explosive sourceExplosive;
     private float radius;
     private boolean canCauseFire;
     private boolean shouldBreakBlocks = true;
@@ -51,7 +54,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     }
 
     @Override
-    public Explosion.Builder sourceExplosive(Explosive source) {
+    public Explosion.Builder sourceExplosive(@Nullable Explosive source) {
         this.sourceExplosive = source;
         return this;
     }
@@ -64,7 +67,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
 
     @Override
     public Explosion.Builder location(ServerLocation location) {
-        this.location = Preconditions.checkNotNull(location, "location");
+        this.location = Objects.requireNonNull(location, "location");
         return this;
     }
 
@@ -150,9 +153,10 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         final Vector3d origin = this.location.position();
         final net.minecraft.world.level.Explosion explosion = new net.minecraft.world.level.Explosion((net.minecraft.world.level.Level) world,
                 (Entity) this.sourceExplosive, null, null, origin.x(), origin.y(), origin.z(), this.radius,
-                this.canCauseFire, this.shouldSmoke ? net.minecraft.world.level.Explosion.BlockInteraction.DESTROY : net.minecraft.world.level.Explosion.BlockInteraction.NONE);
+                this.canCauseFire, this.shouldBreakBlocks ? net.minecraft.world.level.Explosion.BlockInteraction.DESTROY : net.minecraft.world.level.Explosion.BlockInteraction.NONE);
         ((ExplosionBridge) explosion).bridge$setShouldBreakBlocks(this.shouldBreakBlocks);
         ((ExplosionBridge) explosion).bridge$setShouldDamageEntities(this.shouldDamageEntities);
+        ((ExplosionBridge) explosion).bridge$setShouldPlaySmoke(this.shouldSmoke);
         ((ExplosionBridge) explosion).bridge$setResolution(this.resolution);
         ((ExplosionBridge) explosion).bridge$setRandomness(this.randomness);
         ((ExplosionBridge) explosion).bridge$setKnockback(this.knockback);
