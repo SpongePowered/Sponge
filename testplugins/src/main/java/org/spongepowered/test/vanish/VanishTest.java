@@ -48,6 +48,7 @@ public class VanishTest {
     @Listener
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<Entity> entityKey = Parameter.entity()
+            .key("entity")
             .usage(key -> "any entity")
             .optional()
             .build();
