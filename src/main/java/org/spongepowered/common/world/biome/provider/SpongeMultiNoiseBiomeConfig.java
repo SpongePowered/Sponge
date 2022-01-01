@@ -24,45 +24,35 @@
  */
 package org.spongepowered.common.world.biome.provider;
 
-import com.google.common.collect.Lists;
+import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryReference;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
-import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
-import org.spongepowered.api.world.biome.provider.multinoise.MultiNoiseConfig;
 import org.spongepowered.common.accessor.world.level.biome.MultiNoiseBiomeSourceAccessor;
-import org.spongepowered.common.server.BootstrapProperties;
-import org.spongepowered.common.util.SeedUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConfig implements MultiNoiseBiomeConfig {
 
-    private final long seed;
     private final List<AttributedBiome> biomes;
-    private final MultiNoiseConfig temperatureConfig, humidityConfig, altitudeConfig, weirdnessConfig;
 
-    protected SpongeMultiNoiseBiomeConfig(final BuilderImpl builder) {
-        super(builder.biomes.stream().map(b -> b.biome()).collect(Collectors.toList()));
-        this.seed = builder.seed;
+    private SpongeMultiNoiseBiomeConfig(final BuilderImpl builder) {
+        super(builder.biomes.stream().map(AttributedBiome::biome).collect(Collectors.toList()));
         this.biomes = builder.biomes;
-        this.temperatureConfig = builder.temperatureConfig;
-        this.humidityConfig = builder.humidityConfig;
-        this.altitudeConfig = builder.altitudeConfig;
-        this.weirdnessConfig = builder.weirdnessConfig;
-    }
-
-    @Override
-    public long seed() {
-        return this.seed;
     }
 
     @Override
@@ -70,43 +60,10 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
         return this.biomes;
     }
 
-    @Override
-    public MultiNoiseConfig temperatureConfig() {
-        return this.temperatureConfig;
-    }
-
-    @Override
-    public MultiNoiseConfig humidityConfig() {
-        return this.humidityConfig;
-    }
-
-    @Override
-    public MultiNoiseConfig altitudeConfig() {
-        return this.altitudeConfig;
-    }
-
-    @Override
-    public MultiNoiseConfig weirdnessConfig() {
-        return this.weirdnessConfig;
-    }
     
     public static final class BuilderImpl implements Builder {
 
-        public long seed;
         public final List<AttributedBiome> biomes = new ArrayList<>();
-        public MultiNoiseConfig temperatureConfig, humidityConfig, altitudeConfig, weirdnessConfig;
-
-        @Override
-        public Builder seed(final long seed) {
-            this.seed = seed;
-            return this;
-        }
-
-        @Override
-        public Builder seed(final String seed) {
-            this.seed = SeedUtil.compute(seed);
-            return this;
-        }
 
         @Override
         public Builder addBiome(final AttributedBiome biome) {
@@ -117,6 +74,14 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
         @Override
         public Builder addBiomes(final List<AttributedBiome> biomes) {
             this.biomes.addAll(Objects.requireNonNull(biomes, "biomes"));
+            return this;
+        }
+
+        public Builder addMcBiomes(final Climate.ParameterList<Supplier<net.minecraft.world.level.biome.Biome>> biomes) {
+            for (var pair : biomes.values()) {
+                var biome = RegistryTypes.BIOME.referenced(RegistryTypes.BIOME.keyFor(Sponge.server(), (Biome) (Object) pair.getSecond().get()));
+                this.biomes.add(AttributedBiome.of(biome, (BiomeAttributes) (Object) pair.getFirst()));
+            }
             return this;
         }
 
@@ -135,50 +100,15 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
         }
 
         @Override
-        public Builder temperatureConfig(final MultiNoiseConfig temperatureConfig) {
-            this.temperatureConfig = Objects.requireNonNull(temperatureConfig, "temperatureConfig");
-            return this;
-        }
-
-        @Override
-        public Builder humidityConfig(final MultiNoiseConfig humidityConfig) {
-            this.humidityConfig = Objects.requireNonNull(humidityConfig, "humidityConfig");
-            return this;
-        }
-
-        @Override
-        public Builder altitudeConfig(final MultiNoiseConfig altitudeConfig) {
-            this.altitudeConfig = Objects.requireNonNull(altitudeConfig, "altitudeConfig");
-            return this;
-        }
-
-        @Override
-        public Builder weirdnessConfig(final MultiNoiseConfig weirdnessConfig) {
-            this.weirdnessConfig = Objects.requireNonNull(weirdnessConfig, "weirdnessConfig");
-            return this;
-        }
-
-        @Override
         public Builder from(final MultiNoiseBiomeConfig value) {
             this.biomes.clear();
-            this.seed = Objects.requireNonNull(value, "value").seed();
             this.biomes.addAll(value.attributedBiomes());
-            this.temperatureConfig = value.temperatureConfig();
-            this.humidityConfig = value.humidityConfig();
-            this.altitudeConfig = value.altitudeConfig();
-            this.weirdnessConfig = value.weirdnessConfig();
             return this;
         }
 
         @Override
         public Builder reset() {
             this.biomes.clear();
-            this.seed = BootstrapProperties.worldGenSettings.seed();
-            final MultiNoiseBiomeSource.NoiseParameters defaultNoise = MultiNoiseBiomeSourceAccessor.accessor$DEFAULT_NOISE_PARAMETERS();
-            this.temperatureConfig = (MultiNoiseConfig) defaultNoise;
-            this.humidityConfig = (MultiNoiseConfig) defaultNoise;
-            this.altitudeConfig = (MultiNoiseConfig) defaultNoise;
-            this.weirdnessConfig = (MultiNoiseConfig) defaultNoise;
             return this;
         }
 
@@ -189,21 +119,22 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
             }
             return new SpongeMultiNoiseBiomeConfig(this);
         }
+
+
     }
 
     public static final class FactoryImpl implements Factory {
 
         @Override
         public MultiNoiseBiomeConfig nether() {
-            return new BuilderImpl()
-                    .addBiomes(Lists.newArrayList(
-                            AttributedBiome.of(Biomes.NETHER_WASTES, BiomeAttributes.of(0, 0, 0, 0, 0)),
-                            AttributedBiome.of(Biomes.SOUL_SAND_VALLEY, BiomeAttributes.of(0, -0.5F, 0, 0, 0)),
-                            AttributedBiome.of(Biomes.CRIMSON_FOREST, BiomeAttributes.of(0.4F, 0, 0, 0, 0)),
-                            AttributedBiome.of(Biomes.WARPED_FOREST, BiomeAttributes.of(0, 0.5F, 0, 0, 0.375F)),
-                            AttributedBiome.of(Biomes.BASALT_DELTAS, BiomeAttributes.of(-0.5F, 0, 0, 0, 0.175F))
-                    ))
-                    .build();
+            var biomeSource = (MultiNoiseBiomeSourceAccessor) MultiNoiseBiomeSource.Preset.NETHER.biomeSource((Registry) Sponge.server().registry(RegistryTypes.BIOME));
+            return new BuilderImpl().addMcBiomes(biomeSource.accessor$parameters()).build();
+        }
+
+        @Override
+        public MultiNoiseBiomeConfig overworld() {
+            var biomeSource = (MultiNoiseBiomeSourceAccessor) MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource((Registry) Sponge.server().registry(RegistryTypes.BIOME));
+            return new BuilderImpl().addMcBiomes(biomeSource.accessor$parameters()).build();
         }
     }
 }

@@ -80,16 +80,17 @@ import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
-import org.spongepowered.api.world.biome.BiomeSampler;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
+import org.spongepowered.api.world.biome.provider.FixedBiomeConfig;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
-import org.spongepowered.api.world.biome.provider.multinoise.MultiNoiseConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
+import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
+import org.spongepowered.api.world.generation.config.noise.Shaper;
 import org.spongepowered.api.world.generation.config.noise.SlideConfig;
 import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;
 import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
@@ -147,9 +148,8 @@ import org.spongepowered.common.world.SpongeWorldTypeEffect;
 import org.spongepowered.common.world.biome.SpongeAttributedBiome;
 import org.spongepowered.common.world.biome.SpongeBiomeAttributesFactory;
 import org.spongepowered.common.world.biome.SpongeBiomeProviderFactory;
-import org.spongepowered.common.world.biome.SpongeBiomeSamplerFactory;
+import org.spongepowered.common.world.biome.provider.SpongeFixedBiomeConfig;
 import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
-import org.spongepowered.common.world.biome.provider.multinoise.SpongeMultiNoiseConfigFactory;
 import org.spongepowered.common.world.generation.SpongeChunkGeneratorFactory;
 import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfig;
 import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
@@ -157,6 +157,8 @@ import org.spongepowered.common.world.generation.config.flat.SpongeLayerConfigFa
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
 import org.spongepowered.common.world.generation.config.noise.SpongeSamplingConfigFactory;
 import org.spongepowered.common.world.generation.config.noise.SpongeSlideConfigFactory;
+import org.spongepowered.common.world.generation.config.noise.SpongeSurfaceRulesFactory;
+import org.spongepowered.common.world.generation.config.noise.SpongeTerrainShaperFactory;
 import org.spongepowered.common.world.generation.config.structure.SpongeSeparatedStructureConfigFactory;
 import org.spongepowered.common.world.generation.config.structure.SpongeSpacedStructureConfigFactory;
 import org.spongepowered.common.world.generation.config.structure.SpongeStructureGenerationConfig;
@@ -246,12 +248,11 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(PaletteReference.Factory.class, new SpongePaletteReferenceFactory())
                 .registerFactory(EntityArchetypeEntry.Factory.class, new SpongeEntityArchetypeEntryFactory())
                 .registerFactory(ServerLocationCreator.Factory.class, new SpongeServerLocationCreatorFactory())
-                .registerFactory(MultiNoiseConfig.Factory.class, new SpongeMultiNoiseConfigFactory())
                 .registerFactory(AttributedBiome.Factory.class, new SpongeAttributedBiome.FactoryImpl())
                 .registerFactory(MultiNoiseBiomeConfig.Factory.class, new SpongeMultiNoiseBiomeConfig.FactoryImpl())
+                .registerFactory(FixedBiomeConfig.Factory.class, new SpongeFixedBiomeConfig.FactoryImpl())
                 .registerFactory(BiomeAttributes.Factory.class, new SpongeBiomeAttributesFactory())
                 .registerFactory(BiomeProvider.Factory.class, new SpongeBiomeProviderFactory())
-                .registerFactory(BiomeSampler.Factory.class, new SpongeBiomeSamplerFactory())
                 .registerFactory(WorldTypeEffect.Factory.class, new SpongeWorldTypeEffect.FactoryImpl())
                 .registerFactory(WorldTypeTemplate.Factory.class, new SpongeWorldTypeTemplate.FactoryImpl())
                 .registerFactory(WorldTemplate.Factory.class, new SpongeWorldTemplate.FactoryImpl())
@@ -259,6 +260,8 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(NoiseConfig.Factory.class, new SpongeNoiseConfig.FactoryImpl())
                 .registerFactory(SamplingConfig.Factory.class, new SpongeSamplingConfigFactory())
                 .registerFactory(SlideConfig.Factory.class, new SpongeSlideConfigFactory())
+                .registerFactory(Shaper.Factory.class, new SpongeTerrainShaperFactory())
+                .registerFactory(SurfaceRule.Factory.class, new SpongeSurfaceRulesFactory())
                 .registerFactory(SeparatedStructureConfig.Factory.class, new SpongeSeparatedStructureConfigFactory())
                 .registerFactory(SpacedStructureConfig.Factory.class, new SpongeSpacedStructureConfigFactory())
                 .registerFactory(NoiseGeneratorConfig.Factory.class, new SpongeNoiseGeneratorConfig.FactoryImpl())

@@ -390,7 +390,16 @@
         "minecraft.world.ticks.ScheduledTickMixin_API",
         "minecraft.world.ticks.TickPriorityMixin_API",
         "service.permission.SubjectMixin_API",
-        "world.LocatableBlockMixin_API"
+        "world.LocatableBlockMixin_API",
+        "minecraft.world.level.biome.Climate_ParameterPointMixin_API",
+        "minecraft.world.level.biome.Climate_ParameterMixin_API",
+        "minecraft.world.level.levelgen.NoiseSliderMixin_API",
+        "minecraft.world.level.biome.TerrainShaperMixin",
+        "minecraft.world.level.levelgen.SurfaceRules_RulesSourceMixin_API",
+        "minecraft.world.level.biome.MultiNoiseBiomeSourceMixin_API",
+        "minecraft.world.level.biome.CheckerboardColumnBiomeSourceMixin_API",
+        "minecraft.world.level.biome.TheEndBiomeSourceMixin_API",
+        "minecraft.world.level.biome.FixedBiomeSourceMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

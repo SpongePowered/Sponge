@@ -48,9 +48,14 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldTypes;
+import org.spongepowered.api.world.biome.AttributedBiome;
+import org.spongepowered.api.world.biome.BiomeAttributes;
+import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
+import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
+import org.spongepowered.api.world.generation.config.noise.Shaper;
 import org.spongepowered.api.world.generation.structure.Structure;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
@@ -318,13 +323,13 @@ public final class WorldTest {
                 , "wai", "whereami")
                 .register(this.plugin, Command
                         .builder()
-                        .executor(this::createRandomCheckerboardWorld)
+                        .executor(this::createWorld)
                         .build()
                 , "createrandomworld", "crw"
         );
     }
 
-    private CommandResult createRandomCheckerboardWorld(final CommandContext context) {
+    private CommandResult createWorld(final CommandContext context) {
         final WorldManager wm = Sponge.server().worldManager();
         final ServerPlayer player = (ServerPlayer) context.cause().root();
         final String owner = player.name();
@@ -337,6 +342,9 @@ public final class WorldTest {
         final List<RegistryReference<Biome>> biomes = IntStream.range(0, random.nextInt(allBiomes.size()))
                 .mapToObj(i -> allBiomes.get(random.nextInt(allBiomes.size())))
                 .collect(Collectors.toList());
+        if (biomes.isEmpty()) {
+            biomes.add(Biomes.PLAINS);
+        }
 
         final List<Structure> allStructures = RegistryTypes.STRUCTURE.get().stream().collect(Collectors.toList());
 
@@ -354,7 +362,10 @@ public final class WorldTest {
                 .addStructures(rareStructures)
                 .build();
 
-        final NoiseConfig noiseConfig = NoiseConfig.builder().height(256).build();
+        Shaper[] shapers = {Shaper.overworld(), Shaper.amplified(), Shaper.caves(), Shaper.floatingIslands(), Shaper.nether(), Shaper.end()};
+        final NoiseConfig noiseConfig = NoiseConfig.builder().minY(random.nextInt(128/16)*16-64).height(256)
+                .terrainShaper(shapers[random.nextInt(shapers.length)])
+                .build();
 
         final NoiseGeneratorConfig noiseGenConfig = NoiseGeneratorConfig.builder()
                 .structureConfig(structureConfig)
@@ -363,6 +374,19 @@ public final class WorldTest {
                 .build();
 
         final ResourceKey worldKey = ResourceKey.of(this.plugin, owner.toLowerCase());
+        final List<AttributedBiome> attributedBiomes = biomes.stream().map(biomeRef -> {
+                    Biome biome = biomeRef.get(Sponge.server());
+                    BiomeAttributes attr = BiomeAttributes.of((float) biome.temperature(),
+                            (float) biome.humidity(),
+                            random.nextFloat() * 4 - 2,
+                            random.nextFloat() * 4 - 2,
+                            random.nextFloat() * 4 - 2,
+                            random.nextFloat() / 5,
+                            0f);
+                    return AttributedBiome.of(biomeRef, attr);
+                }
+                ).collect(Collectors.toList());
+        final MultiNoiseBiomeConfig biomeCfg = MultiNoiseBiomeConfig.builder().addBiomes(attributedBiomes).build();
         final WorldTemplate customTemplate = WorldTemplate.builder()
                 .from(WorldTemplate.overworld())
                 .key(worldKey)
@@ -371,8 +395,7 @@ public final class WorldTest {
                 .loadOnStartup(false)
                 .performsSpawnLogic(true)
                 .displayName(Component.text("Custom world by " + owner))
-                .generator(ChunkGenerator.noise(BiomeProvider.checkerboard(CheckerboardBiomeConfig.builder().addBiomes(biomes).scale(random.nextInt(16 - 2) + 2).build()),
-                    noiseGenConfig))
+                .generator(ChunkGenerator.noise(BiomeProvider.multiNoise(biomeCfg), noiseGenConfig))
                 .build();
 
         if (player.world().key().equals(worldKey)) {

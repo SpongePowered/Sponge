@@ -22,14 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level.biome;
+package org.spongepowered.common.world.generation.config.noise;
 
-import net.minecraft.world.level.biome.OverworldBiomeSource;
-import org.spongepowered.common.world.biome.provider.OverworldBiomeSourceHelper;
+import net.minecraft.data.worldgen.TerrainProvider;
+import org.spongepowered.api.world.generation.config.noise.Shaper;
 
-public interface OverworldBiomeSourceBridge {
+public final class SpongeTerrainShaperFactory implements Shaper.Factory {
 
-    OverworldBiomeSource bridge$decorateData(OverworldBiomeSourceHelper.SpongeDataSection data);
+    @Override
+    public Shaper overworld(final boolean ampflied) {
+        return (Shaper) (Object) TerrainProvider.overworld(ampflied);
+    }
 
-    OverworldBiomeSourceHelper.SpongeDataSection bridge$createData();
+    @Override
+    public Shaper caves() {
+        return (Shaper) (Object) TerrainProvider.caves();
+    }
+
+    @Override
+    public Shaper floatingIslands() {
+        return (Shaper) (Object) TerrainProvider.floatingIslands();
+    }
+
+    @Override
+    public Shaper nether() {
+        return (Shaper) (Object) TerrainProvider.nether();
+    }
+
+    @Override
+    public Shaper end() {
+        return (Shaper) (Object) TerrainProvider.end();
+    }
 }

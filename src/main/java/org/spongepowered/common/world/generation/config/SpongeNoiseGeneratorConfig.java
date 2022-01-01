@@ -30,6 +30,7 @@ import net.minecraft.world.level.levelgen.StructureSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
+import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.common.accessor.world.level.levelgen.NoiseGeneratorSettingsAccessor;
@@ -43,8 +44,9 @@ public final class SpongeNoiseGeneratorConfig {
         public StructureGenerationConfig structureConfig;
         public NoiseConfig noiseConfig;
         public BlockState defaultBlock, defaultFluid;
-        public int bedrockRoofY, bedrockFloorY, seaLevel, minSurfaceLevel;
-        public boolean aquifers, noiseCaves, deepslate, oreVeins, noodleCaves;
+        public int seaLevel;
+        public boolean aquifers, noiseCaves, oreVeins, noodleCaves, legacyRandomSource, disableMobGeneration;
+        public SurfaceRule surfaceRule;
 
         public BuilderImpl() {
             this.reset();
@@ -75,16 +77,11 @@ public final class SpongeNoiseGeneratorConfig {
         }
 
         @Override
-        public NoiseGeneratorConfig.Builder bedrockRoofY(final int y) {
-            this.bedrockRoofY = y;
+        public NoiseGeneratorConfig.Builder surfaceRule(SurfaceRule rule) {
+            this.surfaceRule = rule;
             return this;
         }
 
-        @Override
-        public NoiseGeneratorConfig.Builder bedrockFloorY(final int y) {
-            this.bedrockFloorY = y;
-            return this;
-        }
 
         @Override
         public NoiseGeneratorConfig.Builder seaLevel(final int y) {
@@ -93,8 +90,8 @@ public final class SpongeNoiseGeneratorConfig {
         }
 
         @Override
-        public NoiseGeneratorConfig.Builder minSurfaceLevel(final int y) {
-            this.minSurfaceLevel = y;
+        public NoiseGeneratorConfig.Builder mobGeneration(boolean mobGeneration) {
+            this.disableMobGeneration = !mobGeneration;
             return this;
         }
 
@@ -111,12 +108,6 @@ public final class SpongeNoiseGeneratorConfig {
         }
 
         @Override
-        public NoiseGeneratorConfig.Builder deepslate(final boolean enableDeepslate) {
-            this.deepslate = enableDeepslate;
-            return this;
-        }
-
-        @Override
         public NoiseGeneratorConfig.Builder oreVeins(final boolean enableOreVeins) {
             this.oreVeins = enableOreVeins;
             return this;
@@ -129,19 +120,24 @@ public final class SpongeNoiseGeneratorConfig {
         }
 
         @Override
+        public NoiseGeneratorConfig.Builder randomSource(boolean useLegacyRandomSource) {
+            this.legacyRandomSource = useLegacyRandomSource;
+            return this;
+        }
+
+        @Override
         public NoiseGeneratorConfig.Builder reset() {
             this.structureConfig = (StructureGenerationConfig) new StructureSettings(true);
             this.noiseConfig = NoiseConfig.overworld();
             this.defaultBlock = BlockTypes.STONE.get().defaultState();
             this.defaultFluid = BlockTypes.WATER.get().defaultState();
-            this.bedrockRoofY = -10;
-            this.bedrockFloorY = 0;
+            this.surfaceRule = SurfaceRule.overworld();
             this.seaLevel = 63;
             this.aquifers = false;
             this.noiseCaves = false;
-            this.deepslate = false;
             this.oreVeins = false;
             this.noodleCaves = false;
+            this.legacyRandomSource = false;
             return this;
         }
 
@@ -151,22 +147,29 @@ public final class SpongeNoiseGeneratorConfig {
             this.noiseConfig = value.noiseConfig();
             this.defaultBlock = value.defaultBlock();
             this.defaultFluid = value.defaultFluid();
-            this.bedrockRoofY = value.bedrockRoofY();
-            this.bedrockFloorY = value.bedrockFloorY();
+            this.surfaceRule = value.surfaceRule();
             this.seaLevel = value.seaLevel();
             this.aquifers = value.aquifers();
             this.noiseCaves = value.noiseCaves();
-            this.deepslate = value.deepslate();
-            this.deepslate = value.oreVeins();
+            this.noodleCaves = value.noodleCaves();
+            this.legacyRandomSource = value.legacyRandomSource();
             return this;
         }
 
         @Override
         public NoiseGeneratorConfig build() {
             final NoiseGeneratorSettings settings = NoiseGeneratorSettingsAccessor.invoker$new((StructureSettings) this.structureConfig,
-                    (net.minecraft.world.level.levelgen.NoiseSettings) (Object) this.noiseConfig, (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
-                    (net.minecraft.world.level.block.state.BlockState) this.defaultFluid, this.bedrockRoofY, this.bedrockFloorY, this.seaLevel, this.minSurfaceLevel, false,
-                    this.aquifers, this.noiseCaves, this.deepslate, this.oreVeins, this.noodleCaves
+                    (net.minecraft.world.level.levelgen.NoiseSettings) (Object) this.noiseConfig,
+                    (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
+                    (net.minecraft.world.level.block.state.BlockState) this.defaultFluid,
+                    (net.minecraft.world.level.levelgen.SurfaceRules.RuleSource)this.surfaceRule,
+                    this.seaLevel,
+                    this.disableMobGeneration,
+                    this.aquifers,
+                    this.noiseCaves,
+                    this.oreVeins,
+                    this.noodleCaves,
+                    this.legacyRandomSource
                 );
             return (NoiseGeneratorConfig) (Object) settings;
         }
@@ -202,6 +205,11 @@ public final class SpongeNoiseGeneratorConfig {
         @Override
         public NoiseGeneratorConfig floatingIslands() {
             return (NoiseGeneratorConfig) (Object) BuiltinRegistries.NOISE_GENERATOR_SETTINGS.get(NoiseGeneratorSettings.FLOATING_ISLANDS);
+        }
+
+        @Override
+        public NoiseGeneratorConfig largeBiomes() {
+            return (NoiseGeneratorConfig) (Object) BuiltinRegistries.NOISE_GENERATOR_SETTINGS.get(NoiseGeneratorSettings.LARGE_BIOMES);
         }
     }
 }

@@ -24,13 +24,21 @@
  */
 package org.spongepowered.common.world.biome;
 
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
 import org.spongepowered.api.world.biome.BiomeAttributes;
 
 public final class SpongeBiomeAttributesFactory implements BiomeAttributes.Factory {
 
     @Override
-    public BiomeAttributes of(final float temperature, final float humidity, final float altitude, final float weirdness, final float offset) {
-        return (BiomeAttributes) new Biome.ClimateSettings(temperature, humidity, altitude, weirdness, offset);
+    public BiomeAttributes of(final float temperature, final float humidity, final float continentalness, final float erosion, final float depth, final float weirdness, final float offset) {
+        var mcTemperature = Climate.Parameter.point(temperature);
+        var mcHumidity = Climate.Parameter.point(humidity);
+        var mcContinentalness = Climate.Parameter.point(continentalness);
+        var mcErosion = Climate.Parameter.point(erosion);
+        var mcDepth = Climate.Parameter.point(depth);
+        var mcWeirdness = Climate.Parameter.point(weirdness);
+        var mcOffset = Climate.quantizeCoord(offset);
+
+        return (BiomeAttributes) (Object) new Climate.ParameterPoint(mcTemperature, mcHumidity, mcContinentalness, mcErosion, mcDepth, mcWeirdness, mcOffset);
     }
 }

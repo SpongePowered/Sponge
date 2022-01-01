@@ -50,14 +50,11 @@ import java.nio.file.Path;
 @Mixin(Main.class)
 public abstract class MainMixin {
 
-    @Redirect(method = "main", at = @At(value = "NEW", target = "net/minecraft/server/dedicated/DedicatedServerSettings"))
-    private static DedicatedServerSettings impl$cacheBootstrapProperties(final Path p_i242100_2_) {
-        final DedicatedServerSettings provider = new DedicatedServerSettings(p_i242100_2_);
-        final DedicatedServerProperties properties = provider.getProperties();
-        final RegistryAccess.RegistryHolder p_i242100_1_ = RegistryAccess.builtin();
-        BootstrapProperties.init(properties.getWorldGenSettings(p_i242100_1_), properties.gamemode, properties.difficulty, properties.pvp, properties.hardcore,
-                true, properties.viewDistance, p_i242100_1_);
-        return provider;
+    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/DedicatedServerProperties;getWorldGenSettings(Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/world/level/levelgen/WorldGenSettings;", ordinal = 0))
+    private static WorldGenSettings redirectInitSettings(DedicatedServerProperties instance, RegistryAccess $$02) {
+        var worldGenSettings = instance.getWorldGenSettings($$02);
+        BootstrapProperties.init(worldGenSettings, instance.gamemode, instance.difficulty, instance.pvp, instance.hardcore, true, instance.viewDistance, $$02);
+        return worldGenSettings;
     }
 
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/resources/RegistryReadOps;"))

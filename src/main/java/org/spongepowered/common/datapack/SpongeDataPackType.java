@@ -31,7 +31,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.RegistryWriteOps;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.biome.BiomeZoomer;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -115,7 +114,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                     final OptionalLong fixedTime = s.fixedTime().isEmpty() ? OptionalLong.empty() : OptionalLong.of(s.fixedTime().get().asTicks().ticks());
                     final DimensionType type = DimensionType.create(fixedTime, s.hasSkylight(), s.hasCeiling(), s.scorching(), s.natural(),
                         s.coordinateMultiplier(), s.createDragonFight(), s.piglinSafe(), s.bedsUsable(), s.respawnAnchorsUsable(), s.hasRaids(),
-                        s.minY(), s.logicalHeight(), s.maximumHeight(), (BiomeZoomer) s.biomeSampler(), (ResourceLocation) (Object)
+                        s.minY(), s.logicalHeight(), s.maximumHeight(), (ResourceLocation) (Object)
                             ((SpongeWorldTypeTemplate) s).infiniburn, (ResourceLocation) (Object) s.effect().key(), s.ambientLighting());
                     return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), type).getOrThrow(false, e -> {});
                 },

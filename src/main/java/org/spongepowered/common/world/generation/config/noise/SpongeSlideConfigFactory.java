@@ -29,7 +29,7 @@ import org.spongepowered.api.world.generation.config.noise.SlideConfig;
 public final class SpongeSlideConfigFactory implements SlideConfig.Factory {
 
     @Override
-    public SlideConfig of(final int target, final int size, final int offset) {
+    public SlideConfig of(final double target, final int size, final int offset) {
         return (SlideConfig) new net.minecraft.world.level.levelgen.NoiseSlider(target, size, offset);
     }
 }

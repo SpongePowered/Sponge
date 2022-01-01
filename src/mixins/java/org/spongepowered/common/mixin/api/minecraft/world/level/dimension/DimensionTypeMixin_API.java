@@ -31,7 +31,6 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeTemplate;
-import org.spongepowered.api.world.biome.BiomeSampler;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;

@@ -22,26 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.biome.provider.multinoise;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
-import org.spongepowered.api.world.biome.provider.multinoise.MultiNoiseConfig;
-import org.spongepowered.common.accessor.world.level.biome.MultiNoiseBiomeSourceAccessor;
-import java.util.List;
-import java.util.Objects;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.levelgen.SurfaceRules;
+import org.spongepowered.api.world.generation.config.SurfaceRule;
+import org.spongepowered.asm.mixin.Mixin;
 
-public final class SpongeMultiNoiseConfigFactory implements MultiNoiseConfig.Factory {
+@Mixin(SurfaceRules.RuleSource.class)
+public interface SurfaceRules_RulesSourceMixin_API extends SurfaceRule {
 
-    @Override
-    public MultiNoiseConfig nether() {
-        return (MultiNoiseConfig) MultiNoiseBiomeSourceAccessor.accessor$DEFAULT_NOISE_PARAMETERS();
-    }
-
-    @Override
-    public MultiNoiseConfig of(final int firstOctave, final List<Double> amplitudes) {
-        if (Objects.requireNonNull(amplitudes, "amplitudes").isEmpty()) {
-            throw new IllegalArgumentException("Amplitudes must have at least 1 value!");
-        }
-        return (MultiNoiseConfig) new MultiNoiseBiomeSource.NoiseParameters(firstOctave, amplitudes);
-    }
 }

@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.world.generation.config;
 
+import net.minecraft.world.level.biome.Biome;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryReference;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
@@ -134,8 +137,9 @@ public final class SpongeFlatGeneratorConfig {
             if (this.layers.isEmpty()) {
                 throw new IllegalStateException("Flat generation requires at least 1 Layer!");
             }
+            final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
             return (FlatGeneratorConfig) FlatLevelGeneratorSettingsAccessor.invoker$new(
-                    BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY),
+                    biomeRegistry,
                     (StructureSettings) this.structureConfig, (List<FlatLayerInfo>) (Object) this.layers, this.populateLakes,
                     this.performDecoration, Optional.of(() -> BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY)
                     .get((ResourceLocation) (Object) this.biome.location())));
@@ -146,7 +150,8 @@ public final class SpongeFlatGeneratorConfig {
 
         @Override
         public FlatGeneratorConfig standard() {
-            return (FlatGeneratorConfig) FlatLevelGeneratorSettings.getDefault(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY));
+            final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
+            return (FlatGeneratorConfig) FlatLevelGeneratorSettings.getDefault(biomeRegistry);
         }
     }
 }
