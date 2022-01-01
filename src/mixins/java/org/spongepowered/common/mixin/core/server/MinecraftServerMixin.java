@@ -37,6 +37,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.ProgressListener;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
@@ -241,69 +242,61 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
      */
     @Overwrite
     public boolean saveAllChunks(final boolean suppressLog, final boolean flush, final boolean isForced) {
+        boolean var0 = false;
+
         for (final ServerLevel world : this.shadow$getAllLevels()) {
             final SerializationBehavior serializationBehavior = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
-            boolean log = !suppressLog;
+            final InheritableConfigHandle<WorldConfig> adapter = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter();
 
-            // Not forced happens during ticks and when shutting down
-            if (!isForced) {
-                final InheritableConfigHandle<WorldConfig> adapter = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter();
+            // Sponge start - use our own config
+            boolean log = adapter.get().world.logAutoSave;
+
+            // If the server isn't running or we hit Vanilla's save interval or this was triggered
+            // by a command, save our configs
+            if (!this.shadow$isRunning() || this.tickCount % 6000 == 0 || isForced) {
+                ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter().save();
+            }
+
+            final boolean canSaveAtAll = serializationBehavior != SerializationBehavior.NONE;
+
+            // This world is set to not save of any time, no reason to check the auto-save/etc, skip it
+            if (!canSaveAtAll) {
+                continue;
+            }
+
+            // Only run auto-save skipping if the server is still running and the save is not forced
+            if (this.bridge$performAutosaveChecks() && !isForced) {
                 final int autoSaveInterval = adapter.get().world.autoSaveInterval;
-                if (log) {
-                    if (this.bridge$performAutosaveChecks()) {
-                        log = adapter.get().world.logAutoSave;
-                    }
-                }
 
-                // Not forced means this is an auto-save or a shut down, handle accordingly
-
-                // If the server isn't running or we hit Vanilla's save interval, save our configs
-                if (!this.shadow$isRunning() || this.tickCount % 6000 == 0) {
-                    ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter().save();
-                }
-
-                final boolean canSaveAtAll = serializationBehavior != SerializationBehavior.NONE;
-
-                // This world is set to not save of any time, no reason to check the auto-save/etc, skip it
-                if (!canSaveAtAll) {
+                // Do not process properties or chunks if the world is not set to do so unless the server is shutting down
+                if (autoSaveInterval <= 0 || serializationBehavior != SerializationBehavior.AUTOMATIC) {
                     continue;
                 }
 
-                // Only run auto-save skipping if the server is still running
-                if (this.bridge$performAutosaveChecks()) {
-
-                    // Do not process properties or chunks if the world is not set to do so unless the server is shutting down
-                    if (autoSaveInterval <= 0 || serializationBehavior != SerializationBehavior.AUTOMATIC) {
-                        continue;
-                    }
-
-                    // Now check the interval vs the tick counter and skip it
-                    if (this.tickCount % autoSaveInterval != 0) {
-                        continue;
-                    }
+                // Now check the interval vs the tick counter and skip it
+                if (this.tickCount % autoSaveInterval != 0) {
+                    continue;
                 }
-
-                world.save(null, false, world.noSave);
-
-                if (log) {
-                    if (this.bridge$performAutosaveChecks()) {
-                        MinecraftServerMixin.LOGGER.info("Auto-saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).key());
-                    } else {
-                        MinecraftServerMixin.LOGGER.info("Saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).key());
-                    }
-                }
-            // Forced happens during command
-            } else {
-                if (log) {
-                    MinecraftServerMixin.LOGGER.info("Manually saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).key());
-                }
-
-                ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter().save();
-
-                world.save(null, false, world.noSave);
             }
+            // Sponge end
+
+            if (log) {
+                LOGGER.info("Saving chunks for level '{}'/{}", world, world.dimension().location());
+            }
+
+            world.save((ProgressListener)null, flush, world.noSave && !isForced);
+            var0 = true;
         }
 
+        // Sponge start - We do per-world WorldInfo/WorldBorders/BossBars
+//        ServerLevel var2 = this.overworld();
+//        ServerLevelData var3 = this.worldData.overworldData();
+//        var3.setWorldBorder(var2.getWorldBorder().createSettings());
+//        this.worldData.setCustomBossEvents(this.getCustomBossEvents().save());
+//        this.storageSource.saveDataTag(this.registryHolder, this.worldData, this.shadow$getPlayerList().getSingleplayerData());
+        // Sponge end
+
+        // Sponge start
         // Save the usercache.json file every 10 minutes or if forced to
         if (isForced || this.tickCount % 6000 == 0) {
             // We want to save the username cache json, as we normally bypass it.
@@ -311,7 +304,9 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             this.profileCache.save();
             ((GameProfileCacheBridge) this.profileCache).bridge$setCanSave(false);
         }
-        return true;
+        // Sponge end
+
+        return var0;
     }
 
     /**
