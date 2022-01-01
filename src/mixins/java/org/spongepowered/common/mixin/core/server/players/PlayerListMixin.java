@@ -39,6 +39,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
@@ -86,6 +87,7 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundRespawnPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.client.server.IntegratedPlayerListBridge;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
@@ -395,6 +397,81 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;updateEntireScoreboard(Lnet/minecraft/server/ServerScoreboard;Lnet/minecraft/server/level/ServerPlayer;)V"))
     private void impl$sendScoreboard(final PlayerList playerList, final ServerScoreboard scoreboardIn, final net.minecraft.server.level.ServerPlayer playerIn) {
         ((ServerPlayerBridge)playerIn).bridge$initScoreboard();
+    }
+
+    @Redirect(
+        method = "placeNewPlayer",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/players/PlayerList;broadcastAll(Lnet/minecraft/network/protocol/Packet;)V"
+        )
+    )
+    private void impl$sendScoreboard(final PlayerList playerList, final Packet<?> addPlayer,
+        final Connection playerConnection, final net.minecraft.server.level.ServerPlayer serverPlayer
+    ) {
+        if (((VanishableBridge) serverPlayer).bridge$isVanished()) {
+            return;
+        }
+        playerList.broadcastAll(addPlayer);
+    }
+
+    @Redirect(
+        method = "placeNewPlayer",
+        at = @At(
+            value = "NEW",
+            target = "Lnet/minecraft/network/protocol/game/ClientboundPlayerInfoPacket;<init>(Lnet/minecraft/network/protocol/game/ClientboundPlayerInfoPacket$Action;[Lnet/minecraft/server/level/ServerPlayer;)V"
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Ljava/util/List;size()I",
+                remap = false
+            ),
+            to = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/server/level/ServerLevel;addNewPlayer(Lnet/minecraft/server/level/ServerPlayer;)V"
+            )
+        )
+    )
+    private ClientboundPlayerInfoPacket impl$onlySendAddPlayerForUnvanishedPlayers(
+        ClientboundPlayerInfoPacket.Action addPlayer,
+        net.minecraft.server.level.ServerPlayer[] players
+    ) {
+        if (players.length == 0) {
+            return null;
+        }
+        // Effectively, don't notify new players of vanished players
+        if (((VanishableBridge) players[0]).bridge$isVanished()) {
+            return null;
+        }
+        return new ClientboundPlayerInfoPacket(addPlayer, players);
+    }
+
+    @Redirect(
+        method = "placeNewPlayer",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"
+        ),
+        slice = @Slice(
+            from = @At(
+                value = "INVOKE",
+                target = "Ljava/util/List;size()I",
+                remap = false
+            ),
+            to = @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/server/level/ServerLevel;addNewPlayer(Lnet/minecraft/server/level/ServerPlayer;)V"
+            )
+        )
+    )
+    private void impl$onlySendAddPlayerForUnvanishedPlayers(ServerGamePacketListenerImpl connection, Packet<?> packet) {
+        // Since the redirect above can technically make the packet null, we don't
+        // want to send a null packet and cause an NPE
+        if (packet == null) {
+            return;
+        }
+        connection.send(packet);
     }
 
     @Inject(method = "placeNewPlayer", at = @At(value = "RETURN"))
