@@ -31,6 +31,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -56,7 +57,7 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
     private Function<Container, net.minecraft.world.item.ItemStack> resultFunction;
 
     private @Nullable Float experience;
-    private @Nullable Integer cookingTime;
+    private @Nullable Ticks cookingTime;
     private @Nullable String group;
 
     @Override
@@ -114,8 +115,8 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
     }
 
     @Override
-    public EndStep cookingTime(final int ticks) {
-        this.cookingTime = ticks;
+    public EndStep cookingTime(final Ticks ticks) {
+        this.cookingTime = Objects.requireNonNull(ticks);
         return this;
     }
 
@@ -146,22 +147,22 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
         final RecipeSerializer<?> serializer;
         if (this.type == net.minecraft.world.item.crafting.RecipeType.BLASTING) {
             if (this.cookingTime == null) {
-                this.cookingTime = 100;
+                this.cookingTime = Ticks.of(100);
             }
             serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.BLASTING_RECIPE, SpongeCookingRecipeSerializer.Blasting.SPONGE_BLASTING);
         } else if (this.type == net.minecraft.world.item.crafting.RecipeType.CAMPFIRE_COOKING) {
             if (this.cookingTime == null) {
-                this.cookingTime = 600;
+                this.cookingTime = Ticks.of(600);
             }
             serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.CAMPFIRE_COOKING_RECIPE, SpongeCookingRecipeSerializer.Campfire.SPONGE_CAMPFIRE_COOKING);
         } else if (this.type == net.minecraft.world.item.crafting.RecipeType.SMOKING) {
             if (this.cookingTime == null) {
-                this.cookingTime = 100;
+                this.cookingTime = Ticks.of(100);
             }
             serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.SMOKING_RECIPE, SpongeCookingRecipeSerializer.Smoking.SPONGE_SMOKING);
         } else if (this.type == net.minecraft.world.item.crafting.RecipeType.SMELTING) {
             if (this.cookingTime == null) {
-                this.cookingTime = 200;
+                this.cookingTime = Ticks.of(200);
             }
             serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.SMELTING_RECIPE, SpongeCookingRecipeSerializer.Smelting.SPONGE_SMELTING);
         } else {

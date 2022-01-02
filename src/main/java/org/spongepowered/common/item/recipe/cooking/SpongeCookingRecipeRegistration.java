@@ -25,6 +25,7 @@
 package org.spongepowered.common.item.recipe.cooking;
 
 import com.google.gson.JsonObject;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
@@ -44,14 +45,14 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration {
     private final Ingredient ingredient;
     private final Item result;
     private final float experience;
-    private final int cookingTime;
+    private final Ticks cookingTime;
 
     // Sponge Recipe
     private final ItemStack spongeResult;
     private final Function<Container, ItemStack> resultFunction;
 
     public SpongeCookingRecipeRegistration(final ResourceLocation key, final RecipeSerializer<?> serializer,
-                                           final String group, final Ingredient ingredient, final float experience, final int cookingTime,
+                                           final String group, final Ingredient ingredient, final float experience, final Ticks cookingTime,
                                            final ItemStack spongeResult, final Function<Container, ItemStack> resultFunction) {
         super(key, serializer, spongeResult.getItem(), group);
         this.ingredient = ingredient;
@@ -83,6 +84,6 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration {
     @Override
     public void serializeAdditional(final JsonObject json) {
         json.addProperty(Constants.Recipe.COOKING_EXP, this.experience);
-        json.addProperty(Constants.Recipe.COOKING_TIME, this.cookingTime);
+        json.addProperty(Constants.Recipe.COOKING_TIME, this.cookingTime.ticks());
     }
 }

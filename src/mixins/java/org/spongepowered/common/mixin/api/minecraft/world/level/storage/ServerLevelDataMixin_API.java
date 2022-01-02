@@ -102,13 +102,13 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default int wanderingTraderSpawnDelay() {
-        return this.shadow$getWanderingTraderSpawnDelay();
+    default Ticks wanderingTraderSpawnDelay() {
+        return Ticks.of(this.shadow$getWanderingTraderSpawnDelay());
     }
 
     @Override
-    default void setWanderingTraderSpawnDelay(final int delay) {
-        this.shadow$setWanderingTraderSpawnDelay(delay);
+    default void setWanderingTraderSpawnDelay(final Ticks delay) {
+        this.shadow$setWanderingTraderSpawnDelay((int) delay.ticks());
     }
 
     @Override

@@ -68,6 +68,7 @@ import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -173,6 +174,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow public abstract AttributeMap shadow$getAttributes();
     @Shadow public abstract void shadow$clearSleepingPos();
     // @formatter:on
+
+    @Shadow public abstract boolean causeFallDamage(float param0, float param1);
 
     @Nullable private ItemStack impl$activeItemStackCopy;
     @Nullable private Vector3d impl$preTeleportPosition;
@@ -349,7 +352,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
     @Inject(method = "die", at = @At("HEAD"), cancellable = true)
-    private void impl$throwDestructEntityDeath(DamageSource cause, CallbackInfo ci) {
+    private void impl$throwDestructEntityDeath(final DamageSource cause, final CallbackInfo ci) {
         final boolean throwEvent = !((LevelBridge) this.level).bridge$isFake() && Sponge.isServerAvailable() && Sponge.server().onMainThread();
         if (!this.dead) { // isDead should be set later on in this method so we aren't re-throwing the events.
             if (throwEvent && this.impl$deathEventsPosted <= Constants.Sponge.MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
@@ -367,7 +370,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V"),
             cancellable = true)
-    private void impl$doNotSendStateForHumans(DamageSource cause, CallbackInfo ci) {
+    private void impl$doNotSendStateForHumans(final DamageSource cause, final CallbackInfo ci) {
         if (((LivingEntity) (Object) this) instanceof HumanEntity) {
             ci.cancel();
         }
@@ -524,10 +527,10 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 // } else if (entity1 instanceof WolfEntity) {
                 //    WolfEntity wolfentity = (WolfEntity)entity1;
                 } else if (entity instanceof TamableAnimal) {
-                    TamableAnimal wolfentity = (TamableAnimal)entity;
+                    final TamableAnimal wolfentity = (TamableAnimal)entity;
                     if (wolfentity.isTame()) {
                         this.lastHurtByPlayerTime = 100;
-                        LivingEntity livingentity = wolfentity.getOwner();
+                        final LivingEntity livingentity = wolfentity.getOwner();
                         if (livingentity != null && livingentity.getType() == EntityType.PLAYER) {
                             this.lastHurtByPlayer = (Player)livingentity;
                         } else {
@@ -628,14 +631,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
     @Inject(method = "randomTeleport", at = @At("HEAD"))
-    private void impl$snapshotPositionBeforeVanillaTeleportLogic(double x, double y, double z, boolean changeState,
-            CallbackInfoReturnable<Boolean> cir) {
+    private void impl$snapshotPositionBeforeVanillaTeleportLogic(final double x, final double y, final double z, final boolean changeState,
+                                                                 final CallbackInfoReturnable<Boolean> cir) {
         this.impl$preTeleportPosition = new Vector3d(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
     }
 
     @Inject(method = "randomTeleport", at = @At(value = "RETURN", ordinal = 0, shift = At.Shift.BY, by = 2), cancellable = true)
-    private void impl$callMoveEntityEventForTeleport(double x, double y, double z, boolean changeState,
-            CallbackInfoReturnable<Boolean> cir) {
+    private void impl$callMoveEntityEventForTeleport(final double x, final double y, final double z, final boolean changeState,
+                                                     final CallbackInfoReturnable<Boolean> cir) {
         if (!ShouldFire.MOVE_ENTITY_EVENT) {
             return;
         }
@@ -670,7 +673,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
      * @reason This allows invisiblity to ignore entity collisions.
      */
     @Inject(method = "isPickable", at = @At("HEAD"), cancellable = true)
-    private void impl$ifVanishedDoNotPick(CallbackInfoReturnable<Boolean> cir) {
+    private void impl$ifVanishedDoNotPick(final CallbackInfoReturnable<Boolean> cir) {
         if (this.bridge$isVanished() && this.bridge$isVanishIgnoresCollision()) {
             cir.setReturnValue(false);
         }
@@ -697,11 +700,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/level/ServerLevel;sendParticles(Lnet/minecraft/core/particles/ParticleOptions;DDDIDDDD)I"))
     private <T extends ParticleOptions> int impl$vanishSpawnParticleForFallState(
-        ServerLevel serverLevel, T options, double xCoord, double yCoord, double zCoord, int numberOfParticles,
-        double xOffset,
-        double yOffset,
-        double zOffset,
-        double particleSpeed
+            final ServerLevel serverLevel, final T options, final double xCoord, final double yCoord, final double zCoord, final int numberOfParticles,
+            final double xOffset,
+            final double yOffset,
+            final double zOffset,
+            final double particleSpeed
     ) {
         if (!this.bridge$isVanished()) {
             return serverLevel.sendParticles(options, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed);
@@ -741,14 +744,15 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) hand;
             this.impl$addSelfToFrame(frame, snapshot, handType);
+            final Ticks useDuration = Ticks.of(stack.getUseDuration());
             event = SpongeEventFactory.createUseItemStackEventStart(PhaseTracker.getCauseStackManager().currentCause(),
-                stack.getUseDuration(), stack.getUseDuration(), snapshot);
+                useDuration, useDuration, snapshot);
         }
 
         if (SpongeCommon.post(event)) {
             ci.cancel();
         } else {
-            this.useItemRemaining = event.remainingDuration();
+            this.useItemRemaining = (int) event.remainingDuration().ticks();
         }
     }
 
@@ -794,12 +798,13 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.useItem);
             final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
+            final Ticks useItemRemainingTicks = Ticks.of(this.useItemRemaining);
             event = SpongeEventFactory.createUseItemStackEventTick(PhaseTracker.getCauseStackManager().currentCause(),
-                this.useItemRemaining, this.useItemRemaining, snapshot);
+                useItemRemainingTicks, useItemRemainingTicks, snapshot);
             SpongeCommon.post(event);
         }
         // Because the item usage will only finish if useItemRemaining == 0 and decrements it first, it should be >= 1
-        this.useItemRemaining = Math.max(event.remainingDuration(), 1);
+        this.useItemRemaining = Math.max((int) event.remainingDuration().ticks(), 1);
 
         if (event.isCancelled()) {
             // Get prepared for some cool hacks: We're within the condition for updateItemUse
@@ -827,12 +832,13 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.useItem);
             final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
+            final Ticks useItemRemainingTicks = Ticks.of(this.useItemRemaining);
             event = SpongeEventFactory.createUseItemStackEventFinish(PhaseTracker.getCauseStackManager().currentCause(),
-                this.useItemRemaining, this.useItemRemaining, snapshot);
+                    useItemRemainingTicks, useItemRemainingTicks, snapshot);
         }
         SpongeCommon.post(event);
-        if (event.remainingDuration() > 0) {
-            this.useItemRemaining = event.remainingDuration();
+        if (event.remainingDuration().ticks() > 0) {
+            this.useItemRemaining = (int) event.remainingDuration().ticks();
             ci.cancel();
         } else if (event.isCancelled()) {
             this.shadow$stopUsingItem();
@@ -866,8 +872,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack == null ? ItemStack.EMPTY : stack);
             final HandType handType = (HandType) (Object) hand;
             this.impl$addSelfToFrame(frame, activeItemStackSnapshot, handType);
+            final Ticks useItemRemainingTicks = Ticks.of(this.useItemRemaining);
             event = SpongeEventFactory.createUseItemStackEventReplace(PhaseTracker.getCauseStackManager().currentCause(),
-                this.useItemRemaining, this.useItemRemaining, activeItemStackSnapshot,
+                    useItemRemainingTicks, useItemRemainingTicks, activeItemStackSnapshot,
                 new Transaction<>(ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy), snapshot));
         }
 
@@ -898,8 +905,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
+            final Ticks ticksDuration = Ticks.of(duration);
             if (!SpongeCommon.post(SpongeEventFactory.createUseItemStackEventStop(PhaseTracker.getCauseStackManager().currentCause(),
-                duration, duration, snapshot))) {
+                ticksDuration, ticksDuration, snapshot))) {
                 stack.releaseUsing(world, self, duration);
                 if (self instanceof net.minecraft.server.level.ServerPlayer) {
                     // Log Change and capture SlotTransactions
@@ -923,8 +931,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             this.impl$addSelfToFrame(frame, snapshot);
+            final Ticks useItemRemainingTicks = Ticks.of(this.useItemRemaining);
             SpongeCommon.post(SpongeEventFactory.createUseItemStackEventReset(PhaseTracker.getCauseStackManager().currentCause(),
-                this.useItemRemaining, this.useItemRemaining, snapshot));
+                    useItemRemainingTicks, useItemRemainingTicks, snapshot));
         }
         this.impl$activeItemStackCopy = null;
     }
@@ -942,7 +951,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
     @Inject(method = "stopSleeping", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;clearSleepingPos()V"))
-    private void impl$callFinishSleepingEvent(CallbackInfo ci) {
+    private void impl$callFinishSleepingEvent(final CallbackInfo ci) {
         if (this.level.isClientSide) {
             return;
         }
@@ -951,10 +960,10 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         if (!sleepingPos.isPresent()) {
             return;
         }
-        BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(sleepingPos.get().getX(), sleepingPos.get().getY(), sleepingPos.get().getZ());
+        final BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(sleepingPos.get().getX(), sleepingPos.get().getY(), sleepingPos.get().getZ());
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
-        ServerLocation loc = ServerLocation.of((ServerWorld) this.level, VecHelper.toVector3d(this.shadow$position()));
-        Vector3d rot = ((Living) this).rotation();
+        final ServerLocation loc = ServerLocation.of((ServerWorld) this.level, VecHelper.toVector3d(this.shadow$position()));
+        final Vector3d rot = ((Living) this).rotation();
         final SleepingEvent.Finish event = SpongeEventFactory.createSleepingEventFinish(currentCause, loc, loc, rot, rot, snapshot, (Living) this);
         Sponge.eventManager().post(event);
         this.shadow$clearSleepingPos();

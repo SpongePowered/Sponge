@@ -55,6 +55,7 @@ import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.api.item.recipe.smithing.SmithingRecipe;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -78,21 +79,21 @@ public final class RecipeTest implements LoadableModule {
     }
 
     @Override
-    public void enable(CommandContext ctx) {
+    public void enable(final CommandContext ctx) {
         this.enabled = true;
         try {
             Sponge.server().commandManager().process("reload");
-        } catch (CommandException e) {
+        } catch (final CommandException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void disable(CommandContext ctx) {
+    public void disable(final CommandContext ctx) {
         this.enabled = false;
         try {
             Sponge.server().commandManager().process("reload");
-        } catch (CommandException e) {
+        } catch (final CommandException e) {
             e.printStackTrace();
         }
     }
@@ -185,7 +186,7 @@ public final class RecipeTest implements LoadableModule {
                 .ingredient(Ingredient.of(ItemTypes.PAPER, ItemTypes.STICK))
                 .result(ItemTypes.GUNPOWDER)
                 .experience(1)
-                .cookingTime(1)
+                .cookingTime(Ticks.of(1))
                 .key(ResourceKey.of(this.plugin, "burn_paper_and_sticks"))
                 .build();
 
@@ -205,7 +206,7 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration removeRedOnBedrock = CookingRecipe.builder().type(RecipeTypes.BLASTING)
                 .ingredient(Ingredient.of(redBedRock))
                 .result(redderBedrock)
-                .cookingTime(20)
+                .cookingTime(Ticks.of(20))
                 .experience(100)
                 .key(ResourceKey.of(this.plugin, "redder_bedrock"))
                 .build();
@@ -223,7 +224,7 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration sticksToTorches = CookingRecipe.builder().type(RecipeTypes.CAMPFIRE_COOKING)
                 .ingredient(Ingredient.of(ItemTypes.STICK))
                 .result(ItemTypes.TORCH)
-                .cookingTime(20)
+                .cookingTime(Ticks.of(20))
                 .key(ResourceKey.of(this.plugin, "stick_to_torch"))
                 .build();
 

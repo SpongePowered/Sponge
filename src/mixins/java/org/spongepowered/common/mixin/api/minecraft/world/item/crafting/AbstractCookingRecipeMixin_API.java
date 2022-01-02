@@ -28,6 +28,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.item.recipe.cooking.CookingResult;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -61,12 +62,12 @@ public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {
     }
 
     @Override
-    public boolean isValid(ItemStackSnapshot ingredient) {
+    public boolean isValid(final ItemStackSnapshot ingredient) {
         return this.ingredient.test(ItemStackUtil.fromSnapshotToNative(ingredient));
     }
 
     @Override
-    public Optional<CookingResult> result(ItemStackSnapshot ingredient) {
+    public Optional<CookingResult> result(final ItemStackSnapshot ingredient) {
         if (this.isValid(ingredient)) {
             return Optional.of(new CookingResult(this.exemplaryResult(), this.shadow$getExperience()));
         }
@@ -74,8 +75,8 @@ public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {
     }
 
     @Override
-    public int cookingTime() {
-        return this.shadow$getCookingTime();
+    public Ticks cookingTime() {
+        return Ticks.of(this.shadow$getCookingTime());
     }
 
     @Override
