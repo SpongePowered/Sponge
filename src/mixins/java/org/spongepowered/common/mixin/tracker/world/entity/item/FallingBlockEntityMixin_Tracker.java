@@ -50,7 +50,7 @@ public abstract class FallingBlockEntityMixin_Tracker extends EntityMixin_Tracke
         final CauseStackManager.StackFrame frame, final EntityTickContext context
     ) {
         context.getCreator().ifPresent(frame::pushCause);
-        super.tracker$populateFrameInTickContext(frame, context);
+        super.tracker$populateDeathContextIfNeeded(frame, context);
     }
 
     /**
