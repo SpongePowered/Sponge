@@ -175,8 +175,6 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow public abstract void shadow$clearSleepingPos();
     // @formatter:on
 
-    @Shadow public abstract boolean causeFallDamage(float param0, float param1);
-
     @Nullable private ItemStack impl$activeItemStackCopy;
     @Nullable private Vector3d impl$preTeleportPosition;
     private int impl$deathEventsPosted;
