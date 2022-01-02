@@ -27,14 +27,15 @@ package org.spongepowered.common.mixin.api.minecraft.world.item;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.item.ItemCooldowns_CooldownInstanceAccessor;
 import org.spongepowered.common.bridge.world.item.ItemCooldownsBridge;
-import java.util.Map;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
+
+import java.util.*;
+
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemCooldowns;
 
@@ -57,7 +58,7 @@ public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.en
     }
 
     @Override
-    public OptionalInt cooldown(final ItemType type) {
+    public Optional<Ticks> cooldown(final ItemType type) {
         checkNotNull(type, "Item type cannot be null!");
 
         final ItemCooldowns_CooldownInstanceAccessor cooldown = (ItemCooldowns_CooldownInstanceAccessor) this.cooldowns.get((Item) type);
@@ -65,28 +66,28 @@ public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.en
         if (cooldown != null) {
             final int remainingCooldown = cooldown.accessor$endTime() - this.tickCount;
             if (remainingCooldown > 0) {
-                return OptionalInt.of(remainingCooldown);
+                return Optional.of(Ticks.of(remainingCooldown));
             }
         }
-        return OptionalInt.empty();
+        return Optional.empty();
     }
 
     @Override
-    public boolean setCooldown(final ItemType type, final int ticks) {
+    public boolean setCooldown(final ItemType type, final Ticks ticks) {
         checkNotNull(type, "Item type cannot be null!");
-        this.shadow$addCooldown((Item) type, ticks);
+        this.shadow$addCooldown((Item) type, (int) ticks.ticks());
         return ((ItemCooldownsBridge) this).bridge$getSetCooldownResult();
     }
 
 
     @Override
     public boolean resetCooldown(final ItemType type) {
-        return this.setCooldown(type, 0);
+        return this.setCooldown(type, Ticks.zero());
     }
 
     @Override
     public OptionalDouble fractionRemaining(final ItemType type) {
-        checkNotNull(type, "Item type cannot be null!");
+        Objects.requireNonNull(type, "Item type cannot be null!");
         final float cooldown = this.shadow$getCooldownPercent((Item) type, 0);
 
         if (cooldown > 0.0F) {

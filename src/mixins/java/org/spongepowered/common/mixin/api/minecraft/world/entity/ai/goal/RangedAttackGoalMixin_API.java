@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity.ai.goal;
 
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.RangedAttackAgainstAgentGoal;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -53,13 +54,13 @@ public abstract class RangedAttackGoalMixin_API implements RangedAttackAgainstAg
     }
 
     @Override
-    public int delayBetweenAttacks() {
-        return this.attackIntervalMax;
+    public Ticks delayBetweenAttacks() {
+        return Ticks.of(this.attackIntervalMax);
     }
 
     @Override
-    public RangedAttackAgainstAgentGoal setDelayBetweenAttacks(final int delay) {
-        this.attackIntervalMax = delay;
+    public RangedAttackAgainstAgentGoal setDelayBetweenAttacks(final Ticks delay) {
+        this.attackIntervalMax = (int) delay.ticks();
         return this;
     }
 

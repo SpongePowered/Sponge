@@ -1189,7 +1189,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
                 frame.pushCause(((org.spongepowered.api.entity.Entity) this).location().world());
                 final IgniteEntityEvent event = SpongeEventFactory.
-                    createIgniteEntityEvent(frame.currentCause(), ticks, ticks, (org.spongepowered.api.entity.Entity) this);
+                    createIgniteEntityEvent(frame.currentCause(), Ticks.of(ticks), Ticks.of(ticks), (org.spongepowered.api.entity.Entity) this);
 
                 if (SpongeCommon.post(event)) {
                     // Don't do anything
@@ -1197,7 +1197,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 }
                 final DataTransactionResult transaction = DataTransactionResult.builder()
                     .replace(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, Ticks.of(Math.max(this.remainingFireTicks, 0))))
-                    .success(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, Ticks.of(event.fireTicks())))
+                    .success(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, event.fireTicks()))
                     .result(DataTransactionResult.Type.SUCCESS)
                     .build();
 

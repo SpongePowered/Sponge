@@ -30,11 +30,13 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.CooldownEvent;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
+import java.util.Optional;
 import java.util.OptionalInt;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ServerItemCooldowns;
@@ -42,24 +44,26 @@ import net.minecraft.world.item.ServerItemCooldowns;
 @Mixin(ServerItemCooldowns.class)
 public abstract class ServerItemCooldownsMixin extends ItemCooldownsMixin {
 
+    // @formmater:off
     @Shadow @Final private net.minecraft.server.level.ServerPlayer player;
 
-    @Shadow protected abstract void onCooldownStarted(Item itemIn, int ticksIn);
+    @Shadow protected abstract void shadow$onCooldownStarted(Item itemIn, int ticksIn);
+    // @formmater:on
 
     @Override
     protected int impl$throwSetCooldownEvent(final ItemType type, final int ticks) {
         if (ticks == 0) {
             return 0;
         }
-        final OptionalInt beforeCooldown = ((CooldownTracker) this).cooldown(type);
+        final Optional<Ticks> beforeCooldown = ((CooldownTracker) this).cooldown(type);
         final CooldownEvent.Set event = SpongeEventFactory.createCooldownEventSet(PhaseTracker.getCauseStackManager().currentCause(),
-                ticks, ticks, type, (ServerPlayer) this.player, beforeCooldown);
+                Ticks.of(ticks), Ticks.of(ticks), type, (ServerPlayer) this.player, beforeCooldown);
 
         if (Sponge.eventManager().post(event)) {
-            this.onCooldownStarted((Item) type, beforeCooldown.orElse(0));
+            this.shadow$onCooldownStarted((Item) type, beforeCooldown.map(x -> (int) x.ticks()).orElse(0));
             return -1;
         } else {
-            return event.newCooldown();
+            return (int) event.newCooldown().ticks();
         }
     }
 

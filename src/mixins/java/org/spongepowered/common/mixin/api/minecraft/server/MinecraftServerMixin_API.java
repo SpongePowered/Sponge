@@ -69,6 +69,7 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.tag.Tag;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.teleport.TeleportHelper;
@@ -317,8 +318,8 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public int runningTimeTicks() {
-        return this.shadow$getTickCount();
+    public @NonNull Ticks runningTimeTicks() {
+        return Ticks.of(this.shadow$getTickCount());
     }
 
     @Override
