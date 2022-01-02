@@ -25,9 +25,13 @@
 package org.spongepowered.test.vanish;
 
 import com.google.inject.Inject;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Listener;
@@ -52,26 +56,31 @@ public class VanishTest {
             .usage(key -> "any entity")
             .optional()
             .build();
-        final Parameter.Value<Boolean> collisions = Parameter.bool()
-            .key("collisions")
-            .optional()
+        final Flag collisionsFlag = Flag.builder()
+            .setParameter(entityKey)
+            .alias("c")
             .build();
-        final Parameter.Value<Boolean> targeting = Parameter.bool()
-            .key("targeting")
-            .optional()
+        final Flag targetingFlag = Flag.builder()
+            .setParameter(entityKey)
+            .alias("t")
             .build();
         event.register(
             this.plugin,
             Command.builder()
                 .addParameter(entityKey)
+                .addFlag(collisionsFlag)
+                .addFlag(targetingFlag)
                 .executor(ctx -> {
                     ctx.all(entityKey).forEach(entity -> {
                         entity.offer(Keys.VANISH, true);
-                        ctx.one(collisions)
-                            .ifPresent(collision -> entity.offer(Keys.VANISH_IGNORES_COLLISION, collision));
-                        ctx.one(targeting)
-                            .ifPresent(target -> entity.offer(Keys.VANISH_PREVENTS_TARGETING, target));
+                        if (ctx.flagInvocationCount(collisionsFlag) > 0) {
+                            entity.offer(Keys.VANISH_IGNORES_COLLISION, true);
+                        }
+                        if (ctx.flagInvocationCount(targetingFlag) > 0) {
+                            entity.offer(Keys.VANISH_PREVENTS_TARGETING, true);
+                        }
                     });
+                    ctx.sendMessage(Identity.nil(), Component.text("Vanished!", NamedTextColor.DARK_AQUA));
                     return CommandResult.success();
                 })
                 .build(),
@@ -82,7 +91,12 @@ public class VanishTest {
             Command.builder()
                 .addParameter(entityKey)
                 .executor(ctx -> {
-                    ctx.all(entityKey).forEach(entity -> entity.offer(Keys.VANISH, false));
+                    ctx.all(entityKey).forEach(entity -> {
+                        entity.offer(Keys.VANISH, false);
+                        entity.offer(Keys.VANISH_PREVENTS_TARGETING, false);
+                        entity.offer(Keys.VANISH_IGNORES_COLLISION, false);
+                    });
+                    ctx.sendMessage(Identity.nil(), Component.text("Vanished!", NamedTextColor.DARK_AQUA));
                     return CommandResult.success();
                 })
                 .build(),

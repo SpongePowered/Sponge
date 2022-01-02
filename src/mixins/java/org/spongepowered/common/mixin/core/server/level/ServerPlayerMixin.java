@@ -197,11 +197,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    public boolean bridge$isVanished() {
-        return false;
-    }
-
-    @Override
     public Tristate bridge$permDefault(final String permission) {
         return Tristate.FALSE;
     }
