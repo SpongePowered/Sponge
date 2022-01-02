@@ -170,7 +170,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
 
     @Override
     public boolean bridge$affectsSpawning() {
-        return this.impl$affectsSpawning && !this.shadow$isSpectator() && !this.bridge$isVanishPreventsTargeting();
+        return this.impl$affectsSpawning && !this.shadow$isSpectator() && !this.bridge$vanishState().untargetable();
     }
 
     @Override
@@ -202,7 +202,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
         )
     )
     private List<Entity> impl$ignoreOtherEntitiesWhenUncollideable(final Level level, final Entity entity, final AABB aabb) {
-        if (this.bridge$isVanishIgnoresCollision()) {
+        if (this.bridge$vanishState().ignoresCollisions()) {
             return Collections.emptyList();
         }
         return level.getEntities(entity, aabb);
@@ -245,7 +245,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
         )
     )
     private void impl$ignoreShoulderSoundsWhileVanished(final net.minecraft.world.entity.player.Player thisPlayer, final CompoundTag tag) {
-        if (this.bridge$isVanished()) {
+        if (!this.bridge$vanishState().createsSounds()) {
             return;
         }
         this.shadow$playShoulderEntityAmbientSound(tag);
@@ -266,7 +266,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
         final net.minecraft.world.entity.player.Player player, final double x, final double y, final double z,
         final SoundEvent sound, final SoundSource category, final float volume, final float pitch
     ) {
-        if (this.bridge$isVanished()) {
+        if (!this.bridge$vanishState().createsSounds()) {
             return;
         }
         this.level.playSound(player, x, y, z, sound, category, volume, pitch);
@@ -577,7 +577,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                                 }
                             }
 
-                            if (!this.bridge$isVanished()) {
+                            if (this.bridge$vanishState().createsSounds()) {
                                 this.level.playSound(
                                     null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(),
                                     SoundEvents.PLAYER_ATTACK_SWEEP, this.shadow$getSoundSource(), 1.0F, 1.0F
@@ -593,13 +593,13 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                         }
 
                         if (isCriticalAttack) {
-                            if (!this.bridge$isVanished()) {
+                            if (this.bridge$vanishState().createsSounds()) {
                                 this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.shadow$getSoundSource(), 1.0F, 1.0F);
                             }
                             this.shadow$crit(targetEntity);
                         }
 
-                        if (!isCriticalAttack && !isSweapingAttack && !this.bridge$isVanished()) {
+                        if (!isCriticalAttack && !isSweapingAttack && this.bridge$vanishState().createsSounds()) {
                             if (isStrongAttack) {
                                 this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.shadow$getSoundSource(), 1.0F, 1.0F);
                             } else {
@@ -654,7 +654,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
 
                         this.shadow$causeFoodExhaustion(0.1F);
                     } else {
-                        if (this.bridge$isVanished()) {
+                        if (this.bridge$vanishState().createsSounds()) {
                             this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.shadow$getSoundSource(), 1.0F, 1.0F);
                         }
 

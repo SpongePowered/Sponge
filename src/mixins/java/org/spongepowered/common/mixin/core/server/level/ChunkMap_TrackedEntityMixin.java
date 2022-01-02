@@ -75,7 +75,7 @@ public abstract class ChunkMap_TrackedEntityMixin {
     @Inject(method = "broadcast(Lnet/minecraft/network/protocol/Packet;)V", at = @At("HEAD"), cancellable = true)
     private void impl$ignoreVanished(final Packet<?> p_219391_1_, final CallbackInfo ci) {
         if (this.entity instanceof VanishableBridge) {
-            if (((VanishableBridge) this.entity).bridge$isVanished()) {
+            if (((VanishableBridge) this.entity).bridge$vanishState().invisible()) {
                 ci.cancel();
             }
         }
@@ -87,7 +87,7 @@ public abstract class ChunkMap_TrackedEntityMixin {
                     target = "Lnet/minecraft/world/entity/Entity;broadcastToPlayer(Lnet/minecraft/server/level/ServerPlayer;)Z"))
     private boolean impl$isSpectatedOrVanished(final Entity entity, final ServerPlayer player) {
         if (entity instanceof VanishableBridge) {
-            if (((VanishableBridge) entity).bridge$isVanished()) {
+            if (((VanishableBridge) entity).bridge$vanishState().invisible()) {
                 return false;
             }
         }

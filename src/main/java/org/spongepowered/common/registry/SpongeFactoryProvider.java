@@ -45,6 +45,7 @@ import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.effect.VanishState;
 import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -117,6 +118,7 @@ import org.spongepowered.common.data.manipulator.ImmutableDataManipulatorFactory
 import org.spongepowered.common.data.manipulator.MutableDataManipulatorFactory;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.datapack.SpongeDataPackType;
+import org.spongepowered.common.entity.effect.SpongeVanishState;
 import org.spongepowered.common.event.SpongeEventListenerRegistration;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.item.SpongeItemStack;
@@ -277,6 +279,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(PackType.Factory.class, new SpongePackTypeFactory())
                 .registerFactory(PackStatus.Factory.class, new SpongePackStatusFactory())
                 .registerFactory(ResourcePath.Factory.class, new SpongeResourcePath.FactoryImpl())
+                .registerFactory(VanishState.Factory.class, new SpongeVanishState.SpongeVanishStateFactory())
         ;
     }
 }

@@ -111,6 +111,7 @@
         "world.entity.ai.goal.GoalMixin",
         "world.entity.ai.goal.GoalSelectorMixin",
         "world.entity.ai.goal.RunAroundLikeCrazyGoalMixin",
+        "world.entity.ai.targeting.TargetingConditionsMixin",
         "world.entity.animal.AnimalMixin",
         "world.entity.animal.Cat_CatRelaxOnOwnerGoalMixin",
         "world.entity.animal.OcelotMixin",

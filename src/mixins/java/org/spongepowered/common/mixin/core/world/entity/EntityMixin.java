@@ -66,6 +66,7 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.effect.VanishState;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -217,11 +218,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     // @formatter:on
 
     private boolean impl$isConstructing = true;
-    private boolean impl$vanishPreventsTargeting = false;
-    private boolean impl$isVanished = false;
+    private VanishState impl$vanishState = VanishState.unvanished();
     private boolean impl$pendingVisibilityUpdate = false;
     private int impl$visibilityTicks = 0;
-    private boolean impl$vanishIgnoresCollision = false;
     private boolean impl$transient = false;
     private boolean impl$shouldFireRepositionEvent = true;
     private WeakReference<ServerWorld> impl$originalDestinationWorld = null;
@@ -387,52 +386,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Override
-    public boolean bridge$isVanished() {
-        return this.impl$isVanished;
+    public VanishState bridge$vanishState() {
+        return this.impl$vanishState;
     }
 
     @Override
-    public void bridge$setVanished(final boolean vanished) {
-        this.impl$isVanished = vanished;
-        this.impl$pendingVisibilityUpdate = true;
-        this.impl$visibilityTicks = 20;
-        if (vanished) {
-            ((SpongeDataHolderBridge) this).bridge$offer(Keys.VANISH, true);
-        } else {
-            ((SpongeDataHolderBridge) this).bridge$remove(Keys.VANISH);
-            ((SpongeDataHolderBridge) this).bridge$remove(Keys.VANISH_IGNORES_COLLISION);
-            ((SpongeDataHolderBridge) this).bridge$remove(Keys.VANISH_PREVENTS_TARGETING);
-        }
-    }
-
-    @Override
-    public boolean bridge$isVanishIgnoresCollision() {
-        return this.impl$vanishIgnoresCollision;
-    }
-
-    @Override
-    public void bridge$setVanishIgnoresCollision(final boolean vanishIgnoresCollision) {
-        this.impl$vanishIgnoresCollision = vanishIgnoresCollision;
-        if (vanishIgnoresCollision) {
-            ((SpongeDataHolderBridge) this).bridge$remove(Keys.VANISH_IGNORES_COLLISION);
-        } else {
-            ((SpongeDataHolderBridge) this).bridge$offer(Keys.VANISH_IGNORES_COLLISION, false);
-        }
-    }
-
-    @Override
-    public boolean bridge$isVanishPreventsTargeting() {
-        return this.impl$vanishPreventsTargeting;
-    }
-
-    @Override
-    public void bridge$setVanishPreventsTargeting(final boolean vanishPreventsTargeting) {
-        this.impl$vanishPreventsTargeting = vanishPreventsTargeting;
-        if (vanishPreventsTargeting) {
-            ((SpongeDataHolderBridge) this).bridge$offer(Keys.VANISH_PREVENTS_TARGETING, true);
-        } else {
-            ((SpongeDataHolderBridge) this).bridge$remove(Keys.VANISH_PREVENTS_TARGETING);
-        }
+    public void bridge$vanishState(VanishState state) {
+        this.impl$vanishState = state;
     }
 
     @Override
@@ -954,7 +914,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         if (this.impl$pendingVisibilityUpdate && !this.level.isClientSide) {
             final ChunkMap_TrackedEntityAccessor trackerAccessor = ((ChunkMapAccessor) ((ServerWorld) this.level).chunkManager()).accessor$entityMap().get(this.shadow$getId());
             if (trackerAccessor != null && this.impl$visibilityTicks % 4 == 0) {
-                if (this.impl$isVanished) {
+                if (this.bridge$vanishState().invisible()) {
                     for (final ServerPlayer entityPlayerMP : trackerAccessor.accessor$seenBy()) {
                         entityPlayerMP.connection.send(new ClientboundRemoveEntitiesPacket(this.shadow$getId()));
                         if ((Entity) (Object) this instanceof ServerPlayer) {
@@ -1076,7 +1036,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/Entity;isSilent()Z"))
     private boolean impl$checkIsSilentOrInvis(final Entity entity) {
-        return entity.isSilent() || this.impl$isVanished;
+        return entity.isSilent() || !this.bridge$vanishState().createsSounds();
     }
 
     @Redirect(method = "push(Lnet/minecraft/world/entity/Entity;)V",
@@ -1084,7 +1044,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             target = "Lnet/minecraft/world/entity/Entity;noPhysics:Z",
             opcode = Opcodes.GETFIELD))
     private boolean impl$applyEntityCollisionCheckVanish(final Entity entity) {
-        return entity.noPhysics || ((VanishableBridge) entity).bridge$isVanished();
+        return entity.noPhysics || ((VanishableBridge) entity).bridge$vanishState().ignoresCollisions();
     }
 
     @Redirect(method = "doWaterSplashEffect",
@@ -1094,7 +1054,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         final Level instance, final ParticleOptions particleOptions, final double xCoord, final double yCoord,
         final double zCoord, final double xOffset, final double yOffset, final double zOffset
     ) {
-        if (!this.impl$isVanished) {
+        if (this.bridge$vanishState().createsParticles()) {
             this.level.addParticle(particleOptions, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }
@@ -1106,7 +1066,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         final Level instance, final ParticleOptions particleOptions, final double xCoord, final double yCoord,
         final double zCoord, final double xOffset, final double yOffset, final double zOffset
     ) {
-        if (!this.impl$isVanished) {
+        if (this.bridge$vanishState().createsParticles()) {
             instance.addParticle(particleOptions, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset);
         }
     }

@@ -36,7 +36,6 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.util.datafix.DataFixers;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
@@ -51,25 +50,20 @@ import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.effect.VanishState;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.UserInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.service.permission.SubjectData;
-import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.util.RespawnLocation;
-import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
@@ -79,7 +73,6 @@ import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
-import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.world.entity.player.BedLocationHolderBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
@@ -98,16 +91,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -133,6 +121,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     private boolean invulnerable;
     private boolean isVanished;
     private boolean isInvisible;
+    private VanishState vanishState;
     private boolean vanishIgnoresCollision;
     private boolean vanishPreventsTargeting;
     private final GameProfile profile;
@@ -534,26 +523,21 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     }
 
     @Override
-    public void bridge$setVanished(final boolean vanished) {
-        final Optional<ServerPlayer> playerOpt = this.player();
-        if (playerOpt.isPresent()) {
-            ((VanishableBridge) playerOpt.get()).bridge$setVanished(vanished);
-            return;
-        }
-        this.isVanished = vanished;
-        this.markDirty();
-        if (vanished) {
-            ((SpongeDataHolderBridge) (Object) this).bridge$offer(Keys.VANISH, true);
-        } else {
-            ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.VANISH);
-            ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.VANISH_IGNORES_COLLISION);
-            ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.VANISH_PREVENTS_TARGETING);
-        }
+    public VanishState bridge$vanishState() {
+        return this.vanishState;
     }
 
     @Override
-    public boolean bridge$isVanished() {
-        return this.player().map(player -> ((VanishableBridge) player).bridge$isVanished()).orElseGet(() -> this.isVanished);
+    public void bridge$vanishState(VanishState state) {
+        final Optional<ServerPlayer> playerOpt = this.player();
+        if (playerOpt.isPresent()) {
+            ((VanishableBridge) playerOpt.get()).bridge$vanishState(state);
+            return;
+        }
+        this.vanishState = state;
+        this.markDirty();
+        ((SpongeDataHolderBridge) (Object) this).bridge$offer(Keys.VANISH_STATE, state);
+
     }
 
     @Override
@@ -573,46 +557,6 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
             ((SpongeDataHolderBridge) (Object) this).bridge$offer(Keys.IS_INVISIBLE, true);
         } else {
             ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.IS_INVISIBLE);
-        }
-    }
-
-    @Override
-    public boolean bridge$isVanishIgnoresCollision() {
-        return this.player().map(player -> ((VanishableBridge) player).bridge$isVanishIgnoresCollision()).orElseGet(() -> this.vanishIgnoresCollision);
-    }
-
-    @Override
-    public void bridge$setVanishIgnoresCollision(final boolean vanishIgnoresCollision) {
-        final Optional<ServerPlayer> player = this.player();
-        if (player.isPresent()) {
-            ((VanishableBridge) player.get()).bridge$setVanishIgnoresCollision(vanishIgnoresCollision);
-            return;
-        }
-        this.vanishIgnoresCollision = vanishIgnoresCollision;
-        if (vanishIgnoresCollision) {
-            ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.VANISH_IGNORES_COLLISION);
-        } else {
-            ((SpongeDataHolderBridge) (Object) this).bridge$offer(Keys.VANISH_IGNORES_COLLISION, false);
-        }
-    }
-
-    @Override
-    public boolean bridge$isVanishPreventsTargeting() {
-        return this.player().map(player -> ((VanishableBridge) player).bridge$isVanishPreventsTargeting()).orElseGet(() -> this.vanishPreventsTargeting);
-    }
-
-    @Override
-    public void bridge$setVanishPreventsTargeting(final boolean vanishPreventsTargeting) {
-        final Optional<ServerPlayer> player = this.player();
-        if (player.isPresent()) {
-            ((VanishableBridge) player.get()).bridge$setVanishPreventsTargeting(vanishPreventsTargeting);
-            return;
-        }
-        this.vanishPreventsTargeting = vanishPreventsTargeting;
-        if (vanishPreventsTargeting) {
-            ((SpongeDataHolderBridge) (Object) this).bridge$offer(Keys.VANISH_PREVENTS_TARGETING, true);
-        } else {
-            ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.VANISH_PREVENTS_TARGETING);
         }
     }
 

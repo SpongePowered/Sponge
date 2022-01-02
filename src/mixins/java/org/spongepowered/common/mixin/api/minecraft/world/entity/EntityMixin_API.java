@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
-import com.google.common.base.Preconditions;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -323,9 +322,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public boolean canSee(final org.spongepowered.api.entity.Entity entity) {
-        // note: this implementation will be changing with contextual data
-        final Optional<Boolean> optional = entity.get(Keys.VANISH);
-        return (!optional.isPresent() || !optional.get()) && !((VanishableBridge) entity).bridge$isVanished();
+        return !((VanishableBridge) entity).bridge$vanishState().invisible();
     }
 
     @Override
@@ -385,7 +382,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         values.add(this.requireValue(Keys.SCALE).asImmutable());
         values.add(this.requireValue(Keys.SCOREBOARD_TAGS).asImmutable());
         values.add(this.requireValue(Keys.TRANSIENT).asImmutable());
-        values.add(this.requireValue(Keys.VANISH).asImmutable());
+        values.add(this.requireValue(Keys.VANISH_STATE).asImmutable());
         values.add(this.requireValue(Keys.VANISH_IGNORES_COLLISION).asImmutable());
         values.add(this.requireValue(Keys.VANISH_PREVENTS_TARGETING).asImmutable());
         values.add(this.requireValue(Keys.VELOCITY).asImmutable());

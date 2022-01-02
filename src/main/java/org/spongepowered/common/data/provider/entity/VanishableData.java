@@ -27,17 +27,20 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.effect.VanishState;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
+@SuppressWarnings("deprecation")
 public final class VanishableData {
 
     private VanishableData() {
     }
 
     // @formatter:off
+    @SuppressWarnings("unchecked")
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(VanishableBridge.class)
@@ -45,43 +48,51 @@ public final class VanishableData {
                         .get(VanishableBridge::bridge$isInvisible)
                         .set(VanishableBridge::bridge$setInvisible)
                     .create(Keys.VANISH)
-                        .get(VanishableBridge::bridge$isVanished)
+                        .get(bridge -> bridge.bridge$vanishState().invisible())
                         .setAnd((h, v) -> {
                             if (h instanceof Entity && ((Entity) h).level.isClientSide) {
                                 return false;
                             }
-                            h.bridge$setVanished(v);
+                            h.bridge$vanishState(v ? VanishState.vanished() : VanishState.unvanished());
                             return true;
                         })
                     .create(Keys.VANISH_IGNORES_COLLISION)
-                        .get(VanishableBridge::bridge$isVanishIgnoresCollision)
+                        .get(b -> b.bridge$vanishState().ignoresCollisions())
                         .setAnd((h, v) -> {
                             if (h instanceof Entity && ((Entity) h).level.isClientSide) {
                                 return false;
                             }
-                            if (!h.bridge$isVanished()) {
+                            if (!h.bridge$vanishState().invisible()) {
                                 return false;
                             }
-                            h.bridge$setVanishIgnoresCollision(v);
+                            h.bridge$vanishState(h.bridge$vanishState().ignoreCollisions(v));
                             return true;
                         })
                     .create(Keys.VANISH_PREVENTS_TARGETING)
-                        .get(VanishableBridge::bridge$isVanishPreventsTargeting)
+                        .get(b -> b.bridge$vanishState().untargetable())
                         .setAnd((h, v) -> {
                             if (h instanceof Entity && ((Entity) h).level.isClientSide) {
                                 return false;
                             }
-                            if (!h.bridge$isVanished()) {
+                            if (!h.bridge$vanishState().invisible()) {
                                 return false;
                             }
-                            h.bridge$setVanishPreventsTargeting(v);
+                            h.bridge$vanishState(h.bridge$vanishState().untargetable(v));
+                            return true;
+                        })
+                    .create(Keys.VANISH_STATE)
+                        .get(VanishableBridge::bridge$vanishState)
+                        .setAnd((h, v) -> {
+                            if (h instanceof Entity && ((Entity) h).level.isClientSide) {
+                                return false;
+                            }
+                            h.bridge$vanishState(v);
                             return true;
                         });
         final ResourceKey dataStoreKey = ResourceKey.sponge("invisibility");
-        registrator.spongeDataStore(dataStoreKey, VanishableBridge.class,
-                Keys.IS_INVISIBLE, Keys.VANISH, Keys.VANISH_IGNORES_COLLISION, Keys.VANISH_PREVENTS_TARGETING);
+        registrator.spongeDataStore(dataStoreKey, VanishableBridge.class, Keys.IS_INVISIBLE, Keys.VANISH_STATE);
         SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.IS_INVISIBLE, dataStoreKey, Keys.IS_INVISIBLE);
-        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.IS_VANISHED, dataStoreKey, Keys.VANISH);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.IS_VANISHED, dataStoreKey, Keys.VANISH_STATE);
         SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, dataStoreKey, Keys.VANISH_IGNORES_COLLISION);
         SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.VANISH_UNTARGETABLE, dataStoreKey, Keys.VANISH_PREVENTS_TARGETING);
     }

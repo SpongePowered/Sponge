@@ -83,7 +83,7 @@ public abstract class ServerEntityMixin {
         final boolean trackMovementDeltas, final Consumer<Packet<?>> broadcaster, final CallbackInfo ci) {
         this.broadcast = (packet)  -> {
             if (this.entity instanceof VanishableBridge) {
-                if (!((VanishableBridge) this.entity).bridge$isVanished()) {
+                if (!((VanishableBridge) this.entity).bridge$vanishState().invisible()) {
                     broadcaster.accept(packet);
                 }
             }
