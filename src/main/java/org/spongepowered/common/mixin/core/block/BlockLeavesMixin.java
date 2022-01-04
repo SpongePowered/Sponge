@@ -206,8 +206,16 @@ public abstract class BlockLeavesMixin extends BlockMixin {
 
     @Override
     public List<ImmutableDataManipulator<?, ?>> bridge$getManipulators(final IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(impl$getTreeData(blockState), impl$getIsDecayableFor(blockState));
-
+        final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
+        if (blockState.getProperties().containsKey(BlockLeaves.DECAYABLE)) {
+            builder.add(impl$getIsDecayableFor(blockState));
+        }
+        if (blockState.getProperties().containsKey(BlockOldLeaf.VARIANT)) {
+            builder.add(impl$getTreeData(blockState));
+        } else if (blockState.getProperties().containsKey(BlockNewLeaf.VARIANT)) {
+            builder.add(impl$getTreeData(blockState));
+        }
+        return builder.build();
     }
 
 }
