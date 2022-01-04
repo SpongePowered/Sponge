@@ -38,6 +38,7 @@
         "world.level.block.BlocksMixin_Tracker",
         "world.level.block.DispenserBlockMixin_Tracker",
         "world.level.block.LeavesBlockMixin_Tracker",
+        "world.level.block.SaplingBlockMixin_Tracker",
         "world.level.block.entity.BlockEntityMixin_Tracker",
         "world.level.block.entity.BlockEntityTypeMixin_Tracker",
         "world.level.chunk.LevelChunkMixin_Tracker",
