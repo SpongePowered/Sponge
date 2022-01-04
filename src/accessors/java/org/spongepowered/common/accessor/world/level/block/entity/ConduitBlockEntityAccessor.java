@@ -22,28 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.block.entity;
+package org.spongepowered.common.accessor.world.level.block.entity;
 
-import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.entity.ConduitBlockEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public final class BlockEntityDataProviders extends DataProviderRegistratorBuilder {
+@Mixin(ConduitBlockEntity.class)
+public interface ConduitBlockEntityAccessor {
 
-    @Override
-    public void registerProviders() {
-        BannerData.register(this.registrator);
-        BeaconData.register(this.registrator);
-        BrewingStandData.register(this.registrator);
-        CommandBlockData.register(this.registrator);
-        ConduitData.register(this.registrator);
-        EndGatewayData.register(this.registrator);
-        AbstractFurnaceData.register(this.registrator);
-        HopperData.register(this.registrator);
-        JukeBoxData.register(this.registrator);
-        LecternData.register(this.registrator);
-        LockableData.register(this.registrator);
-        MobSpawnerData.register(this.registrator);
-        SignData.register(this.registrator);
-        SkullData.register(this.registrator);
-        StructureBlockData.register(this.registrator);
-    }
+    @Accessor("destroyTarget") @Nullable LivingEntity accessor$destroyTarget();
+
+    @Accessor("destroyTarget") void accessor$setDestroyTarget(@Nullable LivingEntity target);
+
 }

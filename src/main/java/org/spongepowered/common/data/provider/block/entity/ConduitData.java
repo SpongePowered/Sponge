@@ -24,26 +24,36 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
+import net.minecraft.world.entity.LivingEntity;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.common.accessor.world.level.block.entity.ConduitBlockEntityAccessor;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-public final class BlockEntityDataProviders extends DataProviderRegistratorBuilder {
+public final class ConduitData {
 
-    @Override
-    public void registerProviders() {
-        BannerData.register(this.registrator);
-        BeaconData.register(this.registrator);
-        BrewingStandData.register(this.registrator);
-        CommandBlockData.register(this.registrator);
-        ConduitData.register(this.registrator);
-        EndGatewayData.register(this.registrator);
-        AbstractFurnaceData.register(this.registrator);
-        HopperData.register(this.registrator);
-        JukeBoxData.register(this.registrator);
-        LecternData.register(this.registrator);
-        LockableData.register(this.registrator);
-        MobSpawnerData.register(this.registrator);
-        SignData.register(this.registrator);
-        SkullData.register(this.registrator);
-        StructureBlockData.register(this.registrator);
+    private ConduitData() {
+    }
+
+    public static void register(final DataProviderRegistrator registrator) {
+        //@formatter:off
+        registrator.asMutable(ConduitBlockEntityAccessor.class)
+            .create(Keys.TARGET_ENTITY)
+                .get(c -> (Entity) c.accessor$destroyTarget())
+                .deleteAnd(c -> {
+                    if (c.accessor$destroyTarget() == null) {
+                        return false;
+                    }
+                    c.accessor$setDestroyTarget(null);
+                    return true;
+                })
+                .setAnd((c, e) -> {
+                    if (!(e instanceof LivingEntity)) {
+                        return false;
+                    }
+                    c.accessor$setDestroyTarget((LivingEntity) e);
+                    return true;
+                });
+        //@formatter:on
     }
 }
