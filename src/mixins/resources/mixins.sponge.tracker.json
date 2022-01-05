@@ -5,6 +5,7 @@
     "mixinPriority": 1102,
     "mixins": [
         "CreatorTrackedMixin_Tracker",
+        "CreatorTrackedPlayerMixin_Tracker",
         "TrackableTypeMixin",
         "event.TraitMixin_Tracked_Inventory",
         "network.protocol.PacketUtilsMixin_Tracker",
