@@ -37,17 +37,17 @@ import java.util.UUID;
 public abstract class CreatorTrackedPlayerMixin_Tracker implements CreatorTrackedBridge {
 
     @Override
-    public Optional<UUID> tracked$getCreatorUUID() {
+    public Optional<UUID> tracker$getCreatorUUID() {
         return Optional.empty();
     }
 
     @Override
-    public Optional<UUID> tracked$getNotifierUUID() {
+    public Optional<UUID> tracker$getNotifierUUID() {
         return Optional.empty();
     }
 
     @Override
-    public void tracked$setTrackedUUID(PlayerTracker.Type type, @Nullable UUID uuid) {
+    public final void tracker$setTrackedUUID(PlayerTracker.Type type, @Nullable UUID uuid) {
         // noop
     }
 }

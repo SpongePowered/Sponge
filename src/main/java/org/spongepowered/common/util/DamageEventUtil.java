@@ -289,8 +289,8 @@ public final class DamageEventUtil {
             final net.minecraft.world.entity.Entity source = damageSource.getEntity();
             if (!(source instanceof Player) && source instanceof CreatorTrackedBridge) {
                 final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) source;
-                creatorBridge.tracked$getCreatorUUID().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
-                creatorBridge.tracked$getNotifierUUID().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
+                creatorBridge.tracker$getCreatorUUID().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
+                creatorBridge.tracker$getNotifierUUID().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
             }
         } else if (damageSource instanceof BlockDamageSource) {
             final ServerLocation location = ((BlockDamageSource) damageSource).location();

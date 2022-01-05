@@ -185,7 +185,7 @@ public final class EntityUtil {
                     supplier.get()
                         .ifPresent(spawned -> {
                             if (entityToSpawn instanceof CreatorTrackedBridge) {
-                                ((CreatorTrackedBridge) entityToSpawn).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, spawned);
+                                ((CreatorTrackedBridge) entityToSpawn).tracker$setTrackedUUID(PlayerTracker.Type.CREATOR, spawned);
                             }
                         });
                     if (entityToSpawn.removed) {

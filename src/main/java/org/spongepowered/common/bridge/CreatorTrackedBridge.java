@@ -43,16 +43,16 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  * {@code ChunkMixin_OwnershipTracked}, and {@code WorldMixin_CreatorTracked}.
  * Note that it is not guaranteed this interface is mixed onto
  * {@link Entity} and {@link BlockEntity} because of the option
- * for {@link ModuleCategory#useTracking()}. If the tracking is
+ * for {@link ModuleCategory#tracking}. If the tracking is
  * disabled, the {@link PhaseTracker} and it's hooks are still
  * used, but none of the owner/notifier information is persisted
  * or transferred to the target objects.
  */
 public interface CreatorTrackedBridge {
 
-    Optional<UUID> tracked$getCreatorUUID();
+    Optional<UUID> tracker$getCreatorUUID();
 
-    Optional<UUID> tracked$getNotifierUUID();
+    Optional<UUID> tracker$getNotifierUUID();
 
-    void tracked$setTrackedUUID(PlayerTracker.Type type, @Nullable UUID uuid);
+    void tracker$setTrackedUUID(PlayerTracker.Type type, @Nullable UUID uuid);
 }

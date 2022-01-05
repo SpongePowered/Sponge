@@ -181,7 +181,7 @@ public final class SpawnEntityTransaction extends WorldBasedTransaction<SpawnEnt
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findFirst()
-            .ifPresent(creator -> event.entities().forEach(entity -> ((CreatorTrackedBridge) entity).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, creator)));
+            .ifPresent(creator -> event.entities().forEach(entity -> ((CreatorTrackedBridge) entity).tracker$setTrackedUUID(PlayerTracker.Type.CREATOR, creator)));
     }
 
     @Override

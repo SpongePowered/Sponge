@@ -520,7 +520,7 @@ public final class SpongeCommonEventFactory {
             if (damageSource.getDirectEntity() instanceof CreatorTrackedBridge) {
                 final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) damageSource.getDirectEntity();
                 if (creatorBridge != null) {
-                    sourceCreator = creatorBridge.tracked$getCreatorUUID();
+                    sourceCreator = creatorBridge.tracker$getCreatorUUID();
                 }
             }
         }
@@ -559,7 +559,7 @@ public final class SpongeCommonEventFactory {
 
             if (entity instanceof CreatorTrackedBridge) {
                 final CreatorTrackedBridge spongeEntity = (CreatorTrackedBridge) entity;
-                spongeEntity.tracked$getCreatorUUID().ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
+                spongeEntity.tracker$getCreatorUUID().ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
             }
 
             // TODO: Add target side support

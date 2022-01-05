@@ -234,8 +234,8 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
         ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(this);
         // Make sure to set creator/notifier for TE if any chunk data exists
         // Failure to do this during chunk load will cause TE's to not have proper user tracking
-        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((LevelChunkBridge) this).bridge$getBlockCreatorUUID(pos).orElse(null));
-        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, null);
+        ((CreatorTrackedBridge) tileEntityIn).tracker$setTrackedUUID(PlayerTracker.Type.CREATOR, ((LevelChunkBridge) this).bridge$getBlockCreatorUUID(pos).orElse(null));
+        ((CreatorTrackedBridge) tileEntityIn).tracker$setTrackedUUID(PlayerTracker.Type.NOTIFIER, null);
     }
 
     @SuppressWarnings("InvalidInjectorMethodSignature")

@@ -28,7 +28,6 @@ import com.google.common.base.MoreObjects;
 import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -61,7 +60,7 @@ public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSource
         if (this.entity != null) { // sources can be null
             final Entity mcEntity = this.shadow$getEntity();
             this.impl$creatorUUID = mcEntity instanceof CreatorTrackedBridge
-                         ? ((CreatorTrackedBridge) mcEntity).tracked$getCreatorUUID().orElse(null)
+                         ? ((CreatorTrackedBridge) mcEntity).tracker$getCreatorUUID().orElse(null)
                          : null;
             if (this.owner == null && this.impl$creatorUUID != null) {
                 final ServerPlayer player = SpongeCommon.server().getPlayerList().getPlayer(this.impl$creatorUUID);

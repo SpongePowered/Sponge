@@ -41,11 +41,11 @@ public final class CreatorTrackedData {
 
         registrator.asMutable(CreatorTrackedBridge.class)
                 .create(Keys.NOTIFIER)
-                    .get(m -> m.tracked$getNotifierUUID().orElse(null))
-                    .set((b, n) -> b.tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, n))
+                    .get(m -> m.tracker$getNotifierUUID().orElse(null))
+                    .set((b, n) -> b.tracker$setTrackedUUID(PlayerTracker.Type.NOTIFIER, n))
                 .create(Keys.CREATOR)
-                    .get(m -> m.tracked$getCreatorUUID().orElse(null))
-                    .set((b, n) -> b.tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, n));
+                    .get(m -> m.tracker$getCreatorUUID().orElse(null))
+                    .set((b, n) -> b.tracker$setTrackedUUID(PlayerTracker.Type.CREATOR, n));
 
         final ResourceKey dataStoreKey = ResourceKey.sponge("creator_tracked");
         registrator.spongeDataStore(dataStoreKey, CreatorTrackedBridge.class, Keys.NOTIFIER, Keys.CREATOR);

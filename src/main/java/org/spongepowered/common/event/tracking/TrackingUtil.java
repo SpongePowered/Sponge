@@ -130,8 +130,8 @@ public final class TrackingUtil {
              final Timing entityTiming = ((TimingBridge) entity.getType()).bridge$timings()
         ) {
             if (entity instanceof CreatorTrackedBridge) {
-                ((CreatorTrackedBridge) entity).tracked$getNotifierUUID().ifPresent(context::notifier);
-                ((CreatorTrackedBridge) entity).tracked$getCreatorUUID().ifPresent(context::creator);
+                ((CreatorTrackedBridge) entity).tracker$getNotifierUUID().ifPresent(context::notifier);
+                ((CreatorTrackedBridge) entity).tracker$getCreatorUUID().ifPresent(context::creator);
             }
             context.buildAndSwitch();
             entityTiming.startTiming();
@@ -161,8 +161,8 @@ public final class TrackingUtil {
              ) {
             entityTiming.startTiming();
             if (entity instanceof CreatorTrackedBridge) {
-                ((CreatorTrackedBridge) entity).tracked$getNotifierUUID().ifPresent(context::notifier);
-                ((CreatorTrackedBridge) entity).tracked$getCreatorUUID().ifPresent(context::creator);
+                ((CreatorTrackedBridge) entity).tracker$getNotifierUUID().ifPresent(context::notifier);
+                ((CreatorTrackedBridge) entity).tracker$getCreatorUUID().ifPresent(context::creator);
             }
             context.buildAndSwitch();
             entity.rideTick();
@@ -197,11 +197,11 @@ public final class TrackingUtil {
 
             if (tile instanceof CreatorTrackedBridge) {
                 // Add notifier and owner so we don't have to perform lookups during the phases and other processing
-                ((CreatorTrackedBridge) tile).tracked$getNotifierUUID().ifPresent(phaseContext::notifier);
+                ((CreatorTrackedBridge) tile).tracker$getNotifierUUID().ifPresent(phaseContext::notifier);
                 // Allow the tile entity to validate the owner of itself. As long as the tile entity
                 // chunk is already loaded and activated, and the tile entity has already loaded
                 // the owner of itself.
-                ((CreatorTrackedBridge) tile).tracked$getCreatorUUID().ifPresent(phaseContext::creator);
+                ((CreatorTrackedBridge) tile).tracker$getCreatorUUID().ifPresent(phaseContext::creator);
             }
 
             // Finally, switch the context now that we have the owner and notifier
@@ -470,7 +470,7 @@ public final class TrackingUtil {
     public static void setCreatorReference(List<Entity> entities, ServerPlayer player) {
         for (final Entity currentEntity : entities) {
             if (currentEntity instanceof CreatorTrackedBridge) {
-                ((CreatorTrackedBridge) currentEntity).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((org.spongepowered.api.entity.living.player.server.ServerPlayer) player).uniqueId());
+                ((CreatorTrackedBridge) currentEntity).tracker$setTrackedUUID(PlayerTracker.Type.CREATOR, ((org.spongepowered.api.entity.living.player.server.ServerPlayer) player).uniqueId());
             } else {
                 currentEntity.offer(Keys.CREATOR, player.getUUID());
             }

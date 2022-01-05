@@ -99,7 +99,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
                 if (explosion.getSourceMob() == null && entity instanceof CreatorTrackedBridge) {
                     // check creator
                     final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) entity;
-                    creatorBridge.tracked$getCreatorUUID()
+                    creatorBridge.tracker$getCreatorUUID()
                             .flatMap(x -> Sponge.server().player(x))
                             .ifPresent(player -> {
                                 final IndirectEntityDamageSource damageSource = new IndirectEntityDamageSource("explosion.player", entity, (Entity) player);
