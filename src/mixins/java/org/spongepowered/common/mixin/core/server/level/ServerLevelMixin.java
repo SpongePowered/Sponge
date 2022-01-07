@@ -38,9 +38,13 @@ import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
@@ -51,11 +55,15 @@ import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
+import org.spongepowered.api.event.sound.PlaySoundEvent;
 import org.spongepowered.api.event.world.ChangeWeatherEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -87,22 +95,25 @@ import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin extends LevelMixin implements ServerLevelBridge, PlatformServerLevelBridge, ResourceKeyBridge {
@@ -435,6 +446,45 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Redirect(method = "updateSleepingPlayerList", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isSpectator()Z"))
     private boolean impl$handleSleepingIgnored(final net.minecraft.server.level.ServerPlayer serverPlayer) {
         return serverPlayer.isSpectator() || ((ServerPlayerBridge) serverPlayer).bridge$sleepingIgnored();
+    }
+
+    @Inject(method = "globalLevelEvent", at = @At("HEAD"), cancellable = true)
+    private void impl$throwBroadcastGlobalEvent(int effectID, BlockPos pos, int pitch, CallbackInfo ci) {
+        if (!this.bridge$isFake() && ShouldFire.PLAY_SOUND_EVENT_BROADCAST) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
+                final PlaySoundEvent.Broadcast event = SpongeCommonEventFactory.callPlaySoundBroadcastEvent(frame, this, pos, effectID);
+                if (event != null && event.isCancelled()) {
+                    ci.cancel();
+                }
+            }
+        }
+    }
+
+    @Inject(method = "levelEvent", at = @At("HEAD"), cancellable = true)
+    private void impl$throwBroadcastEvent(final Player player, final int eventID, final BlockPos pos, final int dataID, CallbackInfo ci) {
+        if(eventID == Constants.WorldEvents.PLAY_RECORD_EVENT && ShouldFire.PLAY_SOUND_EVENT_RECORD) {
+            try (final CauseStackManager.StackFrame frame = Sponge.server().causeStackManager().pushCauseFrame()) {
+                final BlockEntity tileEntity = this.shadow$getBlockEntity(pos);
+                if(tileEntity instanceof JukeboxBlockEntity) {
+                    final JukeboxBlockEntity jukebox = (JukeboxBlockEntity) tileEntity;
+                    final ItemStack record = jukebox.getRecord();
+                    frame.pushCause(jukebox);
+                    frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(record));
+                    if (!record.isEmpty()) {
+                        final Optional<MusicDisc> recordProperty = ((org.spongepowered.api.item.inventory.ItemStack) (Object) record).get(Keys.MUSIC_DISC);
+                        if(!recordProperty.isPresent()) {
+                            //Safeguard for https://github.com/SpongePowered/SpongeCommon/issues/2337
+                            return;
+                        }
+                        final MusicDisc recordType = recordProperty.get();
+                        final PlaySoundEvent.Record event = SpongeCommonEventFactory.callPlaySoundRecordEvent(frame.currentCause(), jukebox, recordType, dataID);
+                        if (event.isCancelled()) {
+                            ci.cancel();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override
