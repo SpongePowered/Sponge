@@ -84,6 +84,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoPacketAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundRespawnPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.client.server.IntegratedPlayerListBridge;
@@ -436,10 +437,10 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         )
     )
     private void impl$onlySendAddPlayerForUnvanishedPlayers(ServerGamePacketListenerImpl connection, Packet<?> packet) {
-        ClientboundPlayerInfoPacket pkt = (ClientboundPlayerInfoPacket) packet;
+        ClientboundPlayerInfoPacketAccessor playerInfoPacketAccessor = (ClientboundPlayerInfoPacketAccessor) packet;
 
         // size is always 1
-        VanishableBridge p = (VanishableBridge) this.playersByUUID.get(pkt.getEntries().get(0).getProfile().getId());
+        VanishableBridge p = (VanishableBridge) this.playersByUUID.get(playerInfoPacketAccessor.accessor$entries().get(0).getProfile().getId());
 
         // Effectively, don't notify new players of vanished players
         if (p.bridge$isVanished()) {
