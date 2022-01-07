@@ -50,6 +50,7 @@
         "server.level.TicketAccessor",
         "server.level.TicketTypeAccessor",
         "server.network.ServerLoginPacketListenerImplAccessor",
+        "server.packs.resources.ResourceAccessor",
         "server.players.GameProfileCache_GameProfileInfoAccessor",
         "server.players.IpBanListAccessor",
         "server.players.PlayerListAccessor",
