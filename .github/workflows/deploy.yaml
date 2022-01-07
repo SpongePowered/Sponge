@@ -58,6 +58,16 @@ jobs:
         with:
           name: SpongeVanilla Production Jar
           path: "${{ github.workspace }}/vanilla/build/libs/*-universal.jar"
+      - name: SpongeForge Production Jar
+        uses: actions/upload-artifact@v2
+        with:
+          name: SpongeForge Production Jar
+          path: "${{ github.workspace }}/forge/build/libs/*-universal.jar"
+      - name: SpongeVanilla libraries
+        uses: actions/upload-artifact@v2
+        with:
+          name: SpongeVanilla installer libraries
+          path: "${{ github.workspace }}/vanilla/build/resources/installer/libraries.json"
   integrationTest:
     needs: build
     timeout-minutes: 10
@@ -72,6 +82,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: code
+      - name: Download SpongeVanilla libraries as an additional hash file
+        uses: actions/download-artifact@v2
+        with:
+          name: SpongeVanilla installer libraries
+          path: "${{ github.workspace }}/code/libraries.json"
       - name: "Setup JDK ${{ matrix.java }}"
         uses: actions/setup-java@v1
         with:
@@ -79,7 +94,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: "${{ github.workspace}}/libraries"
-          key: "${{runner.os}}-${{matrix.java}}-it-libraries-${{ hashFiles('code/build.gradle.kts') }}"
+          key: "${{runner.os}}-${{matrix.java}}-it-libraries-${{ hashFiles('code/build.gradle.kts') }}-${{ github.workspace }}/code/libraries.json"
           restore-keys: "${{runner.os}}-${{matrix.java}}-it-libraries-"
       - name: Download SpongeVanilla server
         uses: actions/download-artifact@v2
