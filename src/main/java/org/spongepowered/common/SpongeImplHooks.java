@@ -166,13 +166,8 @@ public final class SpongeImplHooks {
         // Implemented in SF
     }
 
-    public static void firePlayerJoinSpawnEvent(
-        final EntityPlayerMP playerMP, final PhaseContext<?> context
-    ) {
-        try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            SpongeCommonEventFactory.callSpawnEntity(Collections.singletonList((Player) playerMP), context);
-        }
+    public static void firePlayerJoinSpawnEvent(final EntityPlayerMP playerMP) {
+        // Implemented in SF
     }
 
     public static void handlePostChangeDimensionEvent(final EntityPlayerMP playerIn, final WorldServer fromWorld, final WorldServer toWorld) {
