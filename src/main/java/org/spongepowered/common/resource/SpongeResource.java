@@ -27,7 +27,7 @@ package org.spongepowered.common.resource;
 import net.minecraft.server.packs.resources.Resource;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.resource.ResourcePath;
-import org.spongepowered.common.accessor.server.packs.resources.ResourceAccessor;
+import org.spongepowered.common.accessor.server.packs.resources.SimpleResourceAccessor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,8 +37,14 @@ public final class SpongeResource implements org.spongepowered.api.resource.Reso
     private final ResourcePath path;
     private InputStream stream;
 
-    public SpongeResource(final Resource resource) {
-        this.path = new SpongeResourcePath((ResourceKey) (Object) ((ResourceAccessor) resource).accessor$location());
+    public SpongeResource(final Resource resource, final ResourcePath path) {
+        if (resource instanceof SimpleResourceAccessor) {
+            // If we can get a location from the resource, then we use that, in case it's different from the
+            // one we supply.
+            this.path = new SpongeResourcePath((ResourceKey) (Object) ((SimpleResourceAccessor) resource).accessor$location());
+        } else {
+            this.path = path;
+        }
         this.stream = resource.getInputStream();
     }
 

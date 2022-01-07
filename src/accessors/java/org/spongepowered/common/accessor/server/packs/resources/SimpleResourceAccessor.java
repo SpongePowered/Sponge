@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(SimpleResource.class)
-public interface ResourceAccessor {
+public interface SimpleResourceAccessor {
 
     @Accessor("location") ResourceLocation accessor$location();
 }

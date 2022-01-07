@@ -53,7 +53,7 @@ public interface ResourceManagerMixin_API extends org.spongepowered.api.resource
 
     @Override
     default Resource load(final ResourcePath path) throws IOException {
-        return new SpongeResource(this.getResource((ResourceLocation) (Object) Objects.requireNonNull(path, "path").key()));
+        return new SpongeResource(this.getResource((ResourceLocation) (Object) Objects.requireNonNull(path, "path").key()), path);
     }
 
     @Override
