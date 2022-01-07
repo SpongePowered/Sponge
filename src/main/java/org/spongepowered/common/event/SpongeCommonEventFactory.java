@@ -124,7 +124,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -137,12 +136,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class SpongeCommonEventFactory {
-
-    public static int lastAnimationPacketTick = 0;
-    // For animation packet
-    public static int lastSecondaryPacketTick = 0;
-    public static int lastPrimaryPacketTick = 0;
-    @Nullable public static WeakReference<net.minecraft.server.level.ServerPlayer> lastAnimationPlayer;
 
     @SuppressWarnings("unchecked")
     public static <T extends net.minecraft.world.entity.Entity> CollideEntityEvent callCollideEntityEvent(
