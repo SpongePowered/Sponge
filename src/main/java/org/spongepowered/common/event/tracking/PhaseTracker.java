@@ -1049,7 +1049,7 @@ public final class PhaseTracker {
             world.updateAllPlayersSleepingFlag();
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-                SpongeCommonEventFactory.callSpawnEntity(Collections.singletonList((Player) entityplayer), context);
+                SpongeCommonEventFactory.callSpawnEntity(Collections.singletonList((Player) entityplayer), context, true);
                 SpongeImplHooks.firePlayerJoinSpawnEvent((EntityPlayerMP) entityplayer);
             }
         } else {
