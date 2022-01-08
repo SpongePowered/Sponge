@@ -47,12 +47,30 @@ public abstract class SpongeImplementationExtension {
     }
 
     public String generateImplementationVersionString(final String apiVersion, final String minecraftVersion, final String implRecommendedVersion, final String addedVersionInfo) {
-        final String[] apiSplit = apiVersion.replace("-SNAPSHOT", "").split("\\.");
-        final String minor = apiSplit.length > 1 ? apiSplit[1] : apiSplit.length > 0 ?  apiSplit[apiSplit.length - 1] : "-1";
-        final String apiReleaseVersion = apiSplit[0] + '.' + minor;
-        return Stream.of(minecraftVersion, addedVersionInfo, apiReleaseVersion + '.' + implRecommendedVersion)
+        final String latestApiVersion = generateApiReleasedVersion(apiVersion);
+        final String implementationVersion = latestApiVersion + "." + implRecommendedVersion;
+
+        return Stream.of(minecraftVersion, addedVersionInfo, implementationVersion)
             .filter(Objects::nonNull)
             .collect(Collectors.joining("-"));
+    }
+
+    private static String generateApiReleasedVersion(final String apiVersion) {
+        final String[] apiSplit = apiVersion.replace("-SNAPSHOT", "").split("\\.");
+        final boolean isSnapshot = apiVersion.contains("-SNAPSHOT");
+
+        // This is to determine if the split api version has at the least a minimum version.
+        final String apiMajor = apiSplit[0];
+        final String minorVersion;
+        if (apiSplit.length > 1) {
+            minorVersion = apiSplit[1];
+        } else {
+            minorVersion = "0";
+        }
+        final int latestReleasedVersion = Math.max(Integer.parseInt(minorVersion) - 1, 0);
+        // And then here, we determine if the api version still has a patch version, to just ignore it.
+        final String latestReleasedApiMinor = isSnapshot ? String.valueOf(latestReleasedVersion) : minorVersion;
+        return apiMajor + "." + latestReleasedApiMinor;
     }
 
     public String generatePlatformBuildVersionString(final String apiVersion, final String minecraftVersion, final String implRecommendedVersion) {
@@ -63,9 +81,7 @@ public abstract class SpongeImplementationExtension {
         final boolean isRelease = !implRecommendedVersion.endsWith("-SNAPSHOT");
 
         this.logger.lifecycle("Detected Implementation Version {} as {}", implRecommendedVersion, isRelease ? "Release" : "Snapshot");
-        final String[] apiSplit = apiVersion.replace("-SNAPSHOT", "").split("\\.");
-        final String minor = apiSplit.length > 1 ? apiSplit[1] : apiSplit.length > 0 ?  apiSplit[apiSplit.length - 1] : "-1";
-        final String apiReleaseVersion = apiSplit[0] + '.' + minor;
+        final String apiReleaseVersion = generateApiReleasedVersion(apiVersion);
         final String rawBuildNumber = System.getenv("BUILD_NUMBER");
         final int buildNumber = Integer.parseInt(rawBuildNumber == null ? "0" : rawBuildNumber);
         final String implVersionAsReleaseCandidateOrRecommended;
