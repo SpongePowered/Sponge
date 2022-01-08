@@ -954,6 +954,15 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
+    @Inject(method = "canBeSeenByAnyone", at = @At("HEAD"), cancellable = true)
+    private void impl$ifVanishedCantBeSeenByAnyone(final CallbackInfoReturnable<Boolean> cir) {
+        if (this instanceof VanishableBridge
+            && ((VanishableBridge) this).bridge$vanishState().untargetable()) {
+            // Sponge: Take into account untargetability from vanishing
+            cir.setReturnValue(false);
+        }
+    }
+
     @Inject(method = "stopSleeping", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;clearSleepingPos()V"))
     private void impl$callFinishSleepingEvent(final CallbackInfo ci) {
         if (this.level.isClientSide) {
