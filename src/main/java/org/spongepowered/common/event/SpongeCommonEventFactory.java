@@ -292,7 +292,7 @@ public class SpongeCommonEventFactory {
     }
 
     public static boolean callSpawnEntity(final List<Entity> entities, final PhaseContext<?> context) {
-        return SpongeCommonEventFactory.callSpawnEntity(entities, context, true);
+        return SpongeCommonEventFactory.callSpawnEntity(entities, context, false);
     }
 
     public static boolean callSpawnEntity(final List<Entity> entities, final PhaseContext<?> context, final boolean forPlayer) {
