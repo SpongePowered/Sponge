@@ -55,8 +55,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.Jukebox;
-import org.spongepowered.api.block.transaction.BlockTransaction;
-import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.NotePitch;
@@ -102,10 +100,8 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
@@ -128,9 +124,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3d;
-import org.spongepowered.math.vector.Vector3i;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -143,12 +137,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class SpongeCommonEventFactory {
-
-    public static int lastAnimationPacketTick = 0;
-    // For animation packet
-    public static int lastSecondaryPacketTick = 0;
-    public static int lastPrimaryPacketTick = 0;
-    @Nullable public static WeakReference<net.minecraft.server.level.ServerPlayer> lastAnimationPlayer;
 
     @SuppressWarnings("unchecked")
     public static <T extends net.minecraft.world.entity.Entity> CollideEntityEvent callCollideEntityEvent(
@@ -273,65 +261,6 @@ public final class SpongeCommonEventFactory {
                 SpongeEventFactory.createChangeBlockEventPre(frame.currentCause(), locations,
                     (ServerWorld) worldIn
                 );
-            SpongeCommon.post(event);
-            return event;
-        }
-    }
-
-    public static ChangeBlockEvent callChangeBlockEventModifyLiquidMix(
-        final Level worldIn, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState state, @Nullable Object source) {
-
-        final BlockState fromState = (BlockState) worldIn.getBlockState(pos);
-        final BlockState toState = (BlockState) state;
-        boolean pushSource = false;
-        if (source == null) {
-            // If source is null the source is the block itself
-            pushSource = true;
-            source = new SpongeLocatableBlockBuilder().state(fromState).world((ServerWorld) worldIn).position(pos.getX(), pos.getY(), pos.getZ()).build();
-        }
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            if (!pushSource) {
-                frame.pushCause(source);
-            }
-            frame.addContext(EventContextKeys.LIQUID_MIX, (ServerWorld) worldIn);
-
-            final WorldProperties world = ((ServerWorld) worldIn).properties();
-            final Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
-
-            final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, position);
-            final ChangeBlockEvent event = SpongeEventFactory.createChangeBlockEventPre(frame.currentCause(),
-                    Collections.singletonList(location), ((ServerWorld) worldIn));
-
-            SpongeCommon.post(event);
-            return event;
-        }
-    }
-
-    public static ChangeBlockEvent callChangeBlockEventModifyLiquidBreak(
-        final Level worldIn, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState targetState) {
-        return SpongeCommonEventFactory.callChangeBlockEventModifyLiquidBreak(worldIn, pos, worldIn.getBlockState(pos), targetState);
-    }
-
-    public static ChangeBlockEvent callChangeBlockEventModifyLiquidBreak(
-        final Level worldIn, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState fromState, final net.minecraft.world.level.block.state.BlockState toState) {
-        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
-        Object source =context.getSource(LocatableBlock.class).orElse(null);
-        if (source == null) {
-            source = worldIn; // Fallback
-        }
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(source);
-            frame.addContext(EventContextKeys.LIQUID_BREAK, (ServerWorld) worldIn);
-
-            final WorldProperties world = ((ServerWorld) worldIn).properties();
-            final Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
-
-            final SpongeBlockSnapshot from = SpongeBlockSnapshot.BuilderImpl.pooled().blockState(fromState).world((ServerLevel) worldIn).position(position).build();
-            final SpongeBlockSnapshot to = SpongeBlockSnapshot.BuilderImpl.pooled().blockState(toState).world((ServerLevel) worldIn).position(position).build();
-            final BlockTransaction transaction = new BlockTransaction(from, to, Operations.LIQUID_SPREAD.get());
-            final ChangeBlockEvent event = SpongeEventFactory.createChangeBlockEventAll(frame.currentCause(),
-                Collections.singletonList(transaction), ((ServerWorld) worldIn));
-
             SpongeCommon.post(event);
             return event;
         }
@@ -523,7 +452,7 @@ public final class SpongeCommonEventFactory {
             if (damageSource.getDirectEntity() instanceof CreatorTrackedBridge) {
                 final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) damageSource.getDirectEntity();
                 if (creatorBridge != null) {
-                    sourceCreator = creatorBridge.tracked$getCreatorUUID();
+                    sourceCreator = creatorBridge.tracker$getCreatorUUID();
                 }
             }
         }
@@ -566,7 +495,7 @@ public final class SpongeCommonEventFactory {
 
             if (entity instanceof CreatorTrackedBridge) {
                 final CreatorTrackedBridge spongeEntity = (CreatorTrackedBridge) entity;
-                spongeEntity.tracked$getCreatorUUID().ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
+                spongeEntity.tracker$getCreatorUUID().ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
             }
 
             // TODO: Add target side support

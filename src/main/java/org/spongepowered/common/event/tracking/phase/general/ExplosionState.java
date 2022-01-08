@@ -58,9 +58,9 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
             final @Nullable LivingEntity placedBy = explosion.getSourceMob();
             if (placedBy != null) {
                 if (placedBy instanceof CreatorTrackedBridge) {
-                    ((CreatorTrackedBridge) placedBy).tracked$getCreatorUUID()
+                    ((CreatorTrackedBridge) placedBy).tracker$getCreatorUUID()
                         .ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
-                    ((CreatorTrackedBridge) placedBy).tracked$getNotifierUUID()
+                    ((CreatorTrackedBridge) placedBy).tracker$getNotifierUUID()
                         .ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
                 }
                 frame.addContext(EventContextKeys.IGNITER, (Living) placedBy);

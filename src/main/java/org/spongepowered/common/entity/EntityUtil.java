@@ -171,7 +171,7 @@ public final class EntityUtil {
                     supplier.get()
                         .ifPresent(spawned -> {
                             if (entityToSpawn instanceof CreatorTrackedBridge) {
-                                ((CreatorTrackedBridge) entityToSpawn).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, spawned);
+                                ((CreatorTrackedBridge) entityToSpawn).tracker$setTrackedUUID(PlayerTracker.Type.CREATOR, spawned);
                             }
                         });
                     if (entityToSpawn.isRemoved()) {
@@ -249,7 +249,7 @@ public final class EntityUtil {
 
 
     public static boolean isUntargetable(final Entity from, final Entity target) {
-        if (((VanishableBridge) target).bridge$isVanished() && ((VanishableBridge) target).bridge$isVanishPreventsTargeting()) {
+        if (((VanishableBridge) target).bridge$vanishState().untargetable()) {
             return true;
         }
         // Temporary fix for https://bugs.mojang.com/browse/MC-149563

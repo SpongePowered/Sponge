@@ -34,9 +34,7 @@ import org.spongepowered.common.accessor.network.protocol.game.ServerboundIntera
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundInteractPacket_InteractionActionAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundInteractPacket_InteractionAtLocationActionAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.entity.player.SpongeUserView;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
@@ -83,7 +81,7 @@ public final class InteractEntityPacketState extends BasicPacketState {
             return;
         }
         if (entity instanceof CreatorTrackedBridge) {
-            ((CreatorTrackedBridge) entity).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, player.getUUID());
+            ((CreatorTrackedBridge) entity).tracker$setTrackedUUID(PlayerTracker.Type.CREATOR, player.getUUID());
         } else {
             ((Entity) entity).offer(Keys.NOTIFIER, player.getUUID());
         }

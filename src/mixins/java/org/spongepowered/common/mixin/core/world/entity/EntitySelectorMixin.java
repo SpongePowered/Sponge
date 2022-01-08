@@ -39,7 +39,7 @@ import net.minecraft.world.entity.player.Player;
 public abstract class EntitySelectorMixin {
 
     @Shadow @Final @Mutable public static Predicate<Entity> NO_SPECTATORS = entity -> {
-        if (entity instanceof VanishableBridge && ((VanishableBridge) entity).bridge$isVanished()) {
+        if (entity instanceof VanishableBridge && ((VanishableBridge) entity).bridge$vanishState().invisible()) {
             // Sponge: Count vanished entities as spectating
             return false;
         }

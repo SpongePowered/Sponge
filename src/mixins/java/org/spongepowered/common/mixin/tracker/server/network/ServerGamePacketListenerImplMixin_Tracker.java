@@ -115,6 +115,5 @@ public abstract class ServerGamePacketListenerImplMixin_Tracker {
         if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
             return;
         }
-        SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeCommon.server().getTickCount();
     }
 }

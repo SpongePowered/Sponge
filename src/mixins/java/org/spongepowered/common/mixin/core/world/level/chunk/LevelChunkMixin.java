@@ -184,15 +184,15 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
             if (blockEntity instanceof CreatorTrackedBridge) {
                 final CreatorTrackedBridge trackedBlockEntity = (CreatorTrackedBridge) blockEntity;
                 if (trackerType == PlayerTracker.Type.NOTIFIER) {
-                    if (Objects.equals(trackedBlockEntity.tracked$getNotifierUUID().orElse(null), uuid)) {
+                    if (Objects.equals(trackedBlockEntity.tracker$getNotifierUUID().orElse(null), uuid)) {
                         return;
                     }
-                    trackedBlockEntity.tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, uuid);
+                    trackedBlockEntity.tracker$setTrackedUUID(PlayerTracker.Type.NOTIFIER, uuid);
                 } else {
-                    if (Objects.equals(trackedBlockEntity.tracked$getCreatorUUID().orElse(null), uuid)) {
+                    if (Objects.equals(trackedBlockEntity.tracker$getCreatorUUID().orElse(null), uuid)) {
                         return;
                     }
-                    trackedBlockEntity.tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, uuid);
+                    trackedBlockEntity.tracker$setTrackedUUID(PlayerTracker.Type.CREATOR, uuid);
                 }
             }
         }

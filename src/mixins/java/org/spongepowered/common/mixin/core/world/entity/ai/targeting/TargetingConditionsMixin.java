@@ -22,23 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.client.player;
+package org.spongepowered.common.mixin.core.world.entity.ai.targeting;
 
-import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 
-@Mixin(AbstractClientPlayer.class)
-public abstract class AbstractClientPlayerMixin extends PlayerMixin {
+@Mixin(TargetingConditions.class)
+public abstract class TargetingConditionsMixin {
 
-    @Override
-    public boolean bridge$isInvisible() {
-        return false;
-    }
-
-    @Override
-    public void bridge$setInvisible(boolean invisible) {
-
+    @Redirect(
+        method = "test(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/LivingEntity;)Z",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;isSpectator()Z"))
+    private boolean impl$testCanBeSeenOrIsVanishedTargeted(LivingEntity instance) {
+        return instance.isSpectator() || ((VanishableBridge) instance).bridge$vanishState().untargetable();
     }
 
 }

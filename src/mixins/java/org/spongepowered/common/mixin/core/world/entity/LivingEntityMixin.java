@@ -584,7 +584,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
                     // if (flag1 && soundevent != null) { Vanilla
                     // Sponge - Check that we're not vanished
-                    if (!this.bridge$isVanished() && flag1 && soundevent != null) {
+                    if (this.bridge$vanishState().createsSounds() && flag1 && soundevent != null) {
                         this.shadow$playSound(soundevent, this.shadow$getSoundVolume(), this.shadow$getVoicePitch());
                     }
 
@@ -593,7 +593,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 }
             } else if (flag1) {
                 // Sponge - Check if we're vanished
-                if (!this.bridge$isVanished()) {
+                if (this.bridge$vanishState().createsSounds()) {
                     this.shadow$playHurtSound(source);
                 }
             }
@@ -619,11 +619,18 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
+    @Inject(method = "pushEntities", at = @At("HEAD"), cancellable = true)
+    private void impl$pushEntitiesIfNotVanished(final CallbackInfo ci) {
+        if (this.bridge$vanishState().ignoresCollisions()) {
+            ci.cancel();
+        }
+    }
+
     @Redirect(method = "triggerItemUseEffects",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/LivingEntity;spawnItemParticles(Lnet/minecraft/world/item/ItemStack;I)V"))
     private void impl$hideItemParticlesIfVanished(final LivingEntity livingEntity, final ItemStack stack, final int count) {
-        if (!this.bridge$isVanished()) {
+        if (this.bridge$vanishState().createsParticles()) {
             this.shadow$spawnItemParticles(stack, count);
         }
     }
@@ -672,7 +679,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
      */
     @Inject(method = "isPickable", at = @At("HEAD"), cancellable = true)
     private void impl$ifVanishedDoNotPick(final CallbackInfoReturnable<Boolean> cir) {
-        if (this.bridge$isVanished() && this.bridge$isVanishIgnoresCollision()) {
+        if (this.bridge$vanishState().ignoresCollisions()) {
             cir.setReturnValue(false);
         }
     }
@@ -688,7 +695,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         final net.minecraft.world.entity.player.Player player, final double x, final double y, final double z,
         final SoundEvent sound, final SoundSource category, final float volume, final float pitch
     ) {
-        if (this.bridge$isVanished()) {
+        if (!this.bridge$vanishState().createsSounds()) {
             return;
         }
         world.playSound(player, x, y, z, sound, category, volume, pitch);
@@ -704,7 +711,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final double zOffset,
             final double particleSpeed
     ) {
-        if (!this.bridge$isVanished()) {
+        if (this.bridge$vanishState().createsParticles()) {
             return serverLevel.sendParticles(options, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed);
         }
         return 0;
@@ -712,7 +719,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Inject(method = "broadcastBreakEvent(Lnet/minecraft/world/entity/EquipmentSlot;)V", at = @At("HEAD"), cancellable = true)
     private void impl$vanishDoesNotBroadcastBreakEvents(final EquipmentSlot slot, final CallbackInfo ci) {
-        if (this.bridge$isVanished()) {
+        if (this.bridge$vanishState().invisible()) {
             ci.cancel();
         }
     }
@@ -941,8 +948,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Inject(method = "canBeSeenAsEnemy", at = @At("HEAD"), cancellable = true)
     private void impl$makeVanishable(final CallbackInfoReturnable<Boolean> cir) {
         if (this instanceof VanishableBridge
-                && ((VanishableBridge) this).bridge$isVanished()
-                && ((VanishableBridge) this).bridge$isVanishPreventsTargeting()) {
+                && ((VanishableBridge) this).bridge$vanishState().untargetable()) {
             // Sponge: Take into account untargetability from vanishing
             cir.setReturnValue(false);
         }

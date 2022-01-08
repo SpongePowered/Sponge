@@ -22,23 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.client.player;
+package org.spongepowered.common.mixin.tracker;
 
-import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.world.entity.player.Player;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.entity.PlayerTracker;
 
-@Mixin(AbstractClientPlayer.class)
-public abstract class AbstractClientPlayerMixin extends PlayerMixin {
+import java.util.Optional;
+import java.util.UUID;
+
+@Mixin(Player.class)
+public abstract class CreatorTrackedPlayerMixin_Tracker implements CreatorTrackedBridge {
 
     @Override
-    public boolean bridge$isInvisible() {
-        return false;
+    public Optional<UUID> tracker$getCreatorUUID() {
+        return Optional.empty();
     }
 
     @Override
-    public void bridge$setInvisible(boolean invisible) {
-
+    public Optional<UUID> tracker$getNotifierUUID() {
+        return Optional.empty();
     }
 
+    @Override
+    public final void tracker$setTrackedUUID(PlayerTracker.Type type, @Nullable UUID uuid) {
+        // noop
+    }
 }

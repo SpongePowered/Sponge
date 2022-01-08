@@ -24,21 +24,16 @@
  */
 package org.spongepowered.common.bridge.data;
 
+import org.spongepowered.api.effect.VanishState;
+
 public interface VanishableBridge {
+
+    VanishState bridge$vanishState();
+
+    void bridge$vanishState(VanishState state);
 
     boolean bridge$isInvisible();
 
     void bridge$setInvisible(boolean invisible);
 
-    boolean bridge$isVanished();
-
-    void bridge$setVanished(boolean vanished);
-
-    boolean bridge$isVanishIgnoresCollision();
-
-    void bridge$setVanishIgnoresCollision(boolean uncollideable);
-
-    boolean bridge$isVanishPreventsTargeting();
-
-    void bridge$setVanishPreventsTargeting(boolean untargetable);
 }

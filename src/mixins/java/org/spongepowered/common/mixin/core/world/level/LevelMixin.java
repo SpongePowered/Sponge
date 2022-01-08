@@ -42,6 +42,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.WritableLevelData;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -84,10 +85,13 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
     @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos p_175726_1_);
     @Shadow public abstract DifficultyInstance shadow$getCurrentDifficultyAt(BlockPos p_175649_1_);
     @Shadow public abstract boolean shadow$isRaining();
+    @Shadow @javax.annotation.Nullable public abstract net.minecraft.world.level.block.entity.BlockEntity shadow$getBlockEntity(BlockPos p_175625_1_);
     @Shadow public abstract WorldBorder shadow$getWorldBorder();
+    @Shadow protected abstract void shadow$postGameEventInRadius(@javax.annotation.Nullable net.minecraft.world.entity.Entity $$0, GameEvent $$1, BlockPos $$2, int $$3);
     // @formatter on
 
     @Shadow @Final protected WritableLevelData levelData;
+
 
     @Override
     public boolean bridge$isFake() {

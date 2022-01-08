@@ -22,23 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.client.player;
+package org.spongepowered.common.accessor.world.level.block.entity;
 
-import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.entity.ConduitBlockEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(AbstractClientPlayer.class)
-public abstract class AbstractClientPlayerMixin extends PlayerMixin {
+@Mixin(ConduitBlockEntity.class)
+public interface ConduitBlockEntityAccessor {
 
-    @Override
-    public boolean bridge$isInvisible() {
-        return false;
-    }
+    @Accessor("destroyTarget") @Nullable LivingEntity accessor$destroyTarget();
 
-    @Override
-    public void bridge$setInvisible(boolean invisible) {
-
-    }
+    @Accessor("destroyTarget") void accessor$setDestroyTarget(@Nullable LivingEntity target);
 
 }

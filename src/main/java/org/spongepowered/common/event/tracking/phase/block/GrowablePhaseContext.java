@@ -55,7 +55,6 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
 
     public GrowablePhaseContext provideItem(final ItemStack stack) {
         this.usedItem = ItemStackUtil.snapshotOf(stack);
-        this.priorContext = PhaseTracker.getInstance().getPhaseContext();
         return this;
     }
 
@@ -81,6 +80,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         checkState(this.usedItem != null, "ItemUsed is null");
         checkState(this.priorContext != null, "Prior context is null");
         checkState(this.world != null, "World is null");
+        this.priorContext = this.createdTracker.getPhaseContext();
         final SpongeBlockSnapshot.BuilderImpl builder = SpongeBlockSnapshot.BuilderImpl.pooled()
             .world(((ServerLevel) this.world))
             .position(VecHelper.toVector3i(this.pos))

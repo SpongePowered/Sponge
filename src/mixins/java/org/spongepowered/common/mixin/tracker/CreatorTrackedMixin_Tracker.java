@@ -45,17 +45,17 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
     @Nullable private UUID tracker$notifier;
 
     @Override
-    public Optional<UUID> tracked$getCreatorUUID() {
+    public Optional<UUID> tracker$getCreatorUUID() {
         return Optional.ofNullable(this.tracker$creator);
     }
 
     @Override
-    public Optional<UUID> tracked$getNotifierUUID() {
+    public Optional<UUID> tracker$getNotifierUUID() {
         return Optional.ofNullable(this.tracker$notifier);
     }
 
     @Override
-    public void tracked$setTrackedUUID(final PlayerTracker.Type type, @Nullable final UUID uuid) {
+    public void tracker$setTrackedUUID(final PlayerTracker.Type type, @Nullable final UUID uuid) {
         if (PlayerTracker.Type.CREATOR == type) {
             this.tracker$creator = uuid;
             if (uuid == null) {
@@ -83,7 +83,7 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
             final TamableAnimal ownable = (TamableAnimal) (Object) this;
             final Entity owner = ownable.getOwner();
             if (owner instanceof Player) {
-                this.tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, owner.getUUID());
+                this.tracker$setTrackedUUID(PlayerTracker.Type.CREATOR, owner.getUUID());
                 return owner.getUUID();
             }
         } else if (this.tracker$notifier != null && PlayerTracker.Type.NOTIFIER == type) {

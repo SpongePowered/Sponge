@@ -22,36 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.generic;
+package org.spongepowered.common.data.provider.block.entity;
 
-import org.spongepowered.api.ResourceKey;
+import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.common.accessor.world.level.block.entity.ConduitBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.entity.PlayerTracker;
 
-public final class CreatorTrackedData {
+public final class ConduitData {
 
-    private CreatorTrackedData() {
+    private ConduitData() {
     }
 
-    // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
-
-        registrator.asMutable(CreatorTrackedBridge.class)
-                .create(Keys.NOTIFIER)
-                    .get(m -> m.tracker$getNotifierUUID().orElse(null))
-                    .set((b, n) -> b.tracker$setTrackedUUID(PlayerTracker.Type.NOTIFIER, n))
-                .create(Keys.CREATOR)
-                    .get(m -> m.tracker$getCreatorUUID().orElse(null))
-                    .set((b, n) -> b.tracker$setTrackedUUID(PlayerTracker.Type.CREATOR, n));
-
-        final ResourceKey dataStoreKey = ResourceKey.sponge("creator_tracked");
-        registrator.spongeDataStore(dataStoreKey, CreatorTrackedBridge.class, Keys.NOTIFIER, Keys.CREATOR);
-
-        SpongeDataManager.INSTANCE.registerLegacySpongeData(PlayerTracker.Type.NOTIFIER.compoundKey, dataStoreKey, Keys.NOTIFIER);
-        SpongeDataManager.INSTANCE.registerLegacySpongeData(PlayerTracker.Type.CREATOR.compoundKey, dataStoreKey, Keys.CREATOR);
+        //@formatter:off
+        registrator.asMutable(ConduitBlockEntityAccessor.class)
+            .create(Keys.TARGET_ENTITY)
+                .get(c -> (Entity) c.accessor$destroyTarget())
+                .deleteAnd(c -> {
+                    if (c.accessor$destroyTarget() == null) {
+                        return false;
+                    }
+                    c.accessor$setDestroyTarget(null);
+                    return true;
+                })
+                .setAnd((c, e) -> {
+                    if (!(e instanceof LivingEntity)) {
+                        return false;
+                    }
+                    c.accessor$setDestroyTarget((LivingEntity) e);
+                    return true;
+                });
+        //@formatter:on
     }
-    // @formatter:on
 }

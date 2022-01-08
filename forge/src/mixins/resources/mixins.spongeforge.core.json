@@ -12,8 +12,6 @@
         "api.event.entity.ChangeEntityWorldEvent_PreMixin_Forge",
         "api.event.entity.ChangeEventWorldEvent_PostMixin_Forge",
         "commands.CommandsMixin_Forge",
-        "world.entity.EntityMixin_Forge",
-        "world.entity.LivingEntityMixin_Forge",
         "minecraftforge.MinecraftForgeMixin_Forge",
         "minecraftforge.event.entity.EntityTravelToDimensionEventMixin_Forge",
         "minecraftforge.event.entity.player.PlayerEvent_PlayerChangedDimensionEventMixin_Forge",
@@ -29,12 +27,14 @@
         "server.level.ServerLevelMixin_Timings_Forge",
         "server.level.ServerPlayerMixin_Forge",
         "server.network.ServerGamePacketListenerImplMixin_Forge",
+        "world.entity.EntityMixin_Forge",
+        "world.entity.LivingEntityMixin_Forge",
         "world.entity.item.ItemEntityMixin_Forge",
         "world.entity.projectile.ThrownEnderpealMixin_Forge",
         "world.entity.vehicle.BoatMixin_Forge",
         "world.level.LevelMixin_Forge",
-        "world.level.storage.LevelStorageSourceMixin_Forge",
-        "world.level.block.FireBlockMixin_Forge"
+        "world.level.block.FireBlockMixin_Forge",
+        "world.level.storage.LevelStorageSourceMixin_Forge"
     ],
     "client": [
         "client.MinecraftMixin_Forge",

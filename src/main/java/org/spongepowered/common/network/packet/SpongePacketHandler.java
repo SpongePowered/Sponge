@@ -86,8 +86,8 @@ public final class SpongePacketHandler {
                     }
 
                     final CreatorTrackedBridge creatorTrackedBridge = (CreatorTrackedBridge) entity;
-                    final Optional<UUID> owner = creatorTrackedBridge.tracked$getCreatorUUID();
-                    final Optional<UUID> notifier = creatorTrackedBridge.tracked$getNotifierUUID();
+                    final Optional<UUID> owner = creatorTrackedBridge.tracker$getCreatorUUID();
+                    final Optional<UUID> notifier = creatorTrackedBridge.tracker$getNotifierUUID();
 
                     response.success(SpongePacketHandler.createTrackerDataResponse(owner, notifier));
                 });

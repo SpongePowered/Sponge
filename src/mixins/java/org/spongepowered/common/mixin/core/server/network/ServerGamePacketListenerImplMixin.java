@@ -375,12 +375,11 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/server/level/ServerPlayer;resetLastActionTime()V"),
             cancellable = true)
-    private void impl$throwAnimationEvent(final ServerboundSwingPacket packetIn, final CallbackInfo ci) {
+    private void impl$throwAnimationAndInteractEvents(final ServerboundSwingPacket packetIn, final CallbackInfo ci) {
         if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
             return;
         }
-        SpongeCommonEventFactory.lastAnimationPacketTick = SpongeCommon.server().getTickCount();
-        SpongeCommonEventFactory.lastAnimationPlayer = new WeakReference<>(this.player);
+        final InteractionHand hand = packetIn.getHand();
 
         if (!((ServerPlayerGameModeAccessor) this.player.gameMode).accessor$isDestroyingBlock()) {
             if (this.impl$ignorePackets > 0) {
@@ -391,16 +390,16 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
                     final Vec3 endPos = startPos.add(this.player.getLookAngle().scale(5d)); // TODO hook for blockReachDistance?
                     final HitResult result = this.player.getLevel().clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.player));
                     if (result.getType() == HitResult.Type.MISS) {
-                        final ItemStack heldItem = this.player.getItemInHand(packetIn.getHand());
-                        SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, heldItem, packetIn.getHand());
+                        final ItemStack heldItem = this.player.getItemInHand(hand);
+                        SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, heldItem, hand);
                     }
                 }
             }
         }
 
         if (ShouldFire.ANIMATE_HAND_EVENT) {
-            final HandType handType = (HandType) (Object) packetIn.getHand();
-            final ItemStack heldItem = this.player.getItemInHand(packetIn.getHand());
+            final HandType handType = (HandType) (Object) hand;
+            final ItemStack heldItem = this.player.getItemInHand(hand);
 
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));

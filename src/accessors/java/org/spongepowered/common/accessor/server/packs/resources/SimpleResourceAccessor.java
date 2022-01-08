@@ -22,23 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.client.player;
+package org.spongepowered.common.accessor.server.packs.resources;
 
-import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.SimpleResource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(AbstractClientPlayer.class)
-public abstract class AbstractClientPlayerMixin extends PlayerMixin {
+@Mixin(SimpleResource.class)
+public interface SimpleResourceAccessor {
 
-    @Override
-    public boolean bridge$isInvisible() {
-        return false;
-    }
-
-    @Override
-    public void bridge$setInvisible(boolean invisible) {
-
-    }
-
+    @Accessor("location") ResourceLocation accessor$location();
 }

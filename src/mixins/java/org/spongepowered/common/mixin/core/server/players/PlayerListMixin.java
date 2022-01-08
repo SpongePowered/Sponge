@@ -407,7 +407,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private void impl$sendScoreboard(final PlayerList playerList, final Packet<?> addPlayer,
         final Connection playerConnection, final net.minecraft.server.level.ServerPlayer serverPlayer
     ) {
-        if (((VanishableBridge) serverPlayer).bridge$isVanished()) {
+        if (((VanishableBridge) serverPlayer).bridge$vanishState().invisible()) {
             return;
         }
         playerList.broadcastAll(addPlayer);
@@ -432,13 +432,13 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         )
     )
     private void impl$onlySendAddPlayerForUnvanishedPlayers(ServerGamePacketListenerImpl connection, Packet<?> packet) {
-        ClientboundPlayerInfoPacket pkt = (ClientboundPlayerInfoPacket) packet;
+        ClientboundPlayerInfoPacket playerInfoPacket = (ClientboundPlayerInfoPacket) packet;
 
         // size is always 1
-        VanishableBridge p = (VanishableBridge) this.playersByUUID.get(pkt.getEntries().get(0).getProfile().getId());
+        VanishableBridge p = (VanishableBridge) this.playersByUUID.get(playerInfoPacket.getEntries().get(0).getProfile().getId());
 
         // Effectively, don't notify new players of vanished players
-        if (p.bridge$isVanished()) {
+        if (p.bridge$vanishState().invisible()) {
             return;
         }
 

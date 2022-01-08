@@ -34,6 +34,7 @@ public final class BlockEntityDataProviders extends DataProviderRegistratorBuild
         BeaconData.register(this.registrator);
         BrewingStandData.register(this.registrator);
         CommandBlockData.register(this.registrator);
+        ConduitData.register(this.registrator);
         EndGatewayData.register(this.registrator);
         AbstractFurnaceData.register(this.registrator);
         HopperData.register(this.registrator);
