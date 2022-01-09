@@ -998,6 +998,7 @@ public final class Constants {
             | Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE
             | Constants.BlockChangeFlags.NEIGHBOR_DROPS
             | Constants.BlockChangeFlags.PATHFINDING_UPDATES
+            | Constants.BlockChangeFlags.LIGHTING_UPDATES
             ;
 
 

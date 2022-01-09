@@ -86,7 +86,7 @@ class BlockChangeFlagManagerTest {
         assertFalse(none.updateNeighboringShapes());
         assertFalse(none.neighborDropsAllowed());
         assertFalse(none.movingBlocks());
-        assertTrue(none.updateLighting());
+        assertFalse(none.updateLighting());
         assertFalse(none.performBlockPhysics());
         assertFalse(none.notifyPathfinding());
     }
