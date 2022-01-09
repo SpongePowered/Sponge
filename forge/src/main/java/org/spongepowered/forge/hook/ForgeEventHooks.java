@@ -25,8 +25,14 @@
 package org.spongepowered.forge.hook;
 
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.common.hooks.EventHooks;
 
@@ -46,4 +52,21 @@ public final class ForgeEventHooks implements EventHooks {
         return pre;
     }
 
+    @Override
+    public void callItemDestroyedEvent(
+        final Player player, final ItemStack stack, final InteractionHand hand
+    ) {
+        ForgeEventFactory.onPlayerDestroyItem(player, stack, InteractionHand.MAIN_HAND);
+    }
+
+    @Override
+    public CriticalHitResult callCriticalHitEvent(
+        final Player player, final Entity targetEntity, final boolean isCriticalAttack, final float v
+    ) {
+        final CriticalHitEvent hitResult = ForgeHooks.getCriticalHit(player, targetEntity, isCriticalAttack, v);
+        if (hitResult != null) {
+            return new CriticalHitResult(true, hitResult.getDamageModifier() - 1.0F);
+        }
+        return new CriticalHitResult(false, v);
+    }
 }

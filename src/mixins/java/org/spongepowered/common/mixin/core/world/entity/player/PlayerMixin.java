@@ -109,6 +109,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
+import org.spongepowered.common.hooks.EventHooks;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin;
@@ -455,11 +456,12 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
 
                     isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.shadow$onClimbable() && !this.shadow$isInWater() && !this.shadow$hasEffect(MobEffects.BLINDNESS) && !this.shadow$isPassenger() && targetEntity instanceof LivingEntity;
                     isCriticalAttack = isCriticalAttack && !this.shadow$isSprinting();
-
+                    final EventHooks.CriticalHitResult criticalResult = PlatformHooks.INSTANCE.getEventHooks().callCriticalHitEvent((net.minecraft.world.entity.player.Player) (Object) this, targetEntity, isCriticalAttack, isCriticalAttack ? 1.5F : 1.0F);
+                    isCriticalAttack = criticalResult.criticalHit;
                     if (isCriticalAttack) {
                         // Sponge Start - add critical attack tuple
                         // damage *= 1.5F; // Sponge - This is handled in the event
-                        originalFunctions.add(DamageEventUtil.provideCriticalAttackTuple((net.minecraft.world.entity.player.Player) (Object) this));
+                        originalFunctions.add(DamageEventUtil.provideCriticalAttackTuple((net.minecraft.world.entity.player.Player) (Object) this, criticalResult.modifier));
                         // Sponge End
                     }
 
@@ -468,9 +470,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
 
                     final ItemStack heldItem = this.shadow$getMainHandItem();
                     if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.onGround && distanceWalkedDelta < (double) this.shadow$getSpeed()) {
-                        final ItemStack itemstack = heldItem;
-
-                        if (itemstack.getItem() instanceof SwordItem) {
+                        if (heldItem.getItem() instanceof SwordItem) {
                             isSweapingAttack = true;
                         }
                     }
@@ -621,13 +621,17 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                         final ItemStack itemstack1 = this.shadow$getMainHandItem();
                         Entity entity = targetEntity;
 
-                        if (targetEntity instanceof EnderDragonPart) {
-                            entity = ((EnderDragonPart) targetEntity).parentMob;
-                        }
+                        // Sponge - Forge compatibility for multi-part entities
+                        entity = PlatformHooks.INSTANCE.getEntityHooks().getParentPart(entity);
+                        // if (targetEntity instanceof EnderDragonPart) {
+                        //    entity = ((EnderDragonPart) targetEntity).parentMob;
+                        // }
 
                         if(!this.level.isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity) {
                             itemstack1.hurtEnemy((LivingEntity) entity, (net.minecraft.world.entity.player.Player) (Object) this);
                             if(itemstack1.isEmpty()) {
+                                // Sponge - platform hook for forge
+                                PlatformHooks.INSTANCE.getEventHooks().callItemDestroyedEvent((net.minecraft.world.entity.player.Player) (Object) this, itemstack1, InteractionHand.MAIN_HAND);
                                 this.shadow$setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                             }
                             // Sponge Start

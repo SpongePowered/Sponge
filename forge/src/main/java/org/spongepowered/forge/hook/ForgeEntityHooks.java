@@ -22,21 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.hooks;
+package org.spongepowered.forge.hook;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.entity.PartEntity;
+import org.spongepowered.common.hooks.EntityHooks;
 
-public interface EntityHooks {
-
-    default boolean checkAttackEntity(final Player player, final Entity victim) {
-        return true;
+public class ForgeEntityHooks implements EntityHooks {
+    @Override
+    public boolean checkAttackEntity(final Player player, final Entity victim) {
+        return ForgeHooks.onPlayerAttackTarget(player, victim);
     }
 
-    default Entity getParentPart(final Entity entity) {
-        if (entity instanceof EnderDragonPart) {
-            return ((EnderDragonPart) entity).parentMob;
+    @Override
+    public Entity getParentPart(final Entity entity) {
+        if (entity instanceof PartEntity) {
+            return ((PartEntity<?>) entity).getParent();
         }
         return entity;
     }
