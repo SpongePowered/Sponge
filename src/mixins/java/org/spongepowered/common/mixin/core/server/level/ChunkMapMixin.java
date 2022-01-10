@@ -24,21 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
-import com.mojang.datafixers.util.Either;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.chunk.ChunkEvent;
@@ -63,12 +58,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DirectionUtil;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
-
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin implements ChunkMapBridge {
@@ -149,38 +139,6 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
                 (ResourceKey) (Object) this.level.dimension().location());
             SpongeCommon.post(event);
         }
-    }
-
-    @Redirect(method = "*",
-            at = @At(value = "INVOKE",
-                    target = "net/minecraft/world/level/chunk/ChunkStatus.generate (Lnet/minecraft/server/level/ServerLevel;"
-                            + "Lnet/minecraft/world/level/chunk/ChunkGenerator;"
-                            + "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureManager;"
-                            + "Lnet/minecraft/server/level/ThreadedLevelLightEngine;Ljava/util/function/Function;Ljava/util/List;)"
-                            + "Ljava/util/concurrent/CompletableFuture;")
-    )
-    private CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> impl$attachEventToCompletedGeneration(final ChunkStatus status,
-            final ServerLevel param0, final ChunkGenerator param1,
-            final StructureManager param2, final ThreadedLevelLightEngine param3,
-            final Function<ChunkAccess, CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> param4,
-            final List<ChunkAccess> param5) {
-        final Function<ChunkAccess, CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> postProcessor;
-        if (ShouldFire.CHUNK_EVENT_GENERATED) {
-            postProcessor = chunkAccess -> {
-                final CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> result = param4.apply(chunkAccess);
-                result.thenAcceptAsync(either -> either.left().ifPresent(r -> {
-                    final Vector3i chunkPos = VecHelper.toVector3i(r.getPos());
-                    final ChunkEvent.Generated event = SpongeEventFactory.createChunkEventGenerated(
-                            PhaseTracker.getInstance().currentCause(), chunkPos,
-                            (ResourceKey) (Object) this.level.dimension().location());
-                    SpongeCommon.post(event);
-                }), SpongeCommon.server());
-                return result;
-            };
-        } else {
-            postProcessor = param4;
-        }
-        return status.generate(param0, param1, param2, param3, postProcessor, param5);
     }
 
     @Inject(method = "save", at = @At(value = "RETURN"))
