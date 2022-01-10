@@ -41,7 +41,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
 @Mixin(ChunkHolder.class)
-abstract class ChunkHolderMixin_API {
+public abstract class ChunkHolderMixin_API {
     @Inject(
             method = "replaceProtoChunk(Lnet/minecraft/world/level/chunk/ImposterProtoChunk;)V",
             at = @At("TAIL")
