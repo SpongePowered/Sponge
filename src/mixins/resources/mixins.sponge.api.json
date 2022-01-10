@@ -42,6 +42,7 @@
         "minecraft.resources.ResourceLocationMixin_API",
         "minecraft.server.MinecraftServerMixin_API",
         "minecraft.server.ServerScoreboardMixin_API",
+        "minecraft.server.level.ChunkHolderMixin_API",
         "minecraft.server.level.ChunkMapMixin_API",
         "minecraft.server.level.ServerLevelMixin_API",
         "minecraft.server.level.ServerPlayerMixin_API",
