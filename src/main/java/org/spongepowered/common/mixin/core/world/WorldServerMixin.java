@@ -1010,7 +1010,7 @@ public abstract class WorldServerMixin extends WorldMixin implements WorldServer
      * @param foundTile The found tile
      */
     @Override
-    protected void onCheckTileEntityForRemoval(final BlockPos pos, final CallbackInfo ci, @Nullable final TileEntity foundTile, final net.minecraft.world.World thisWorld, final BlockPos samePos) {
+    protected void impl$checkTileEntityRemoval(final BlockPos pos, final CallbackInfo ci, @Nullable final TileEntity foundTile) {
         if (PhaseTracker.getInstance().getCurrentState().isRestoring()) {
             return;
         }

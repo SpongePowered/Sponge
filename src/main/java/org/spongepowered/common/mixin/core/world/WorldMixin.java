@@ -61,7 +61,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -102,7 +101,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -342,7 +340,12 @@ public abstract class WorldMixin implements WorldBridge {
         locals = LocalCapture.CAPTURE_FAILEXCEPTION,
         cancellable = true
     )
-    protected void onCheckTileEntityForRemoval(final BlockPos pos, final CallbackInfo ci, final TileEntity found, final net.minecraft.world.World thisWorld, final BlockPos samePos) {
+    protected void impl$checkTileEntityRemoval(final BlockPos pos, final CallbackInfo ci, final TileEntity found, final net.minecraft.world.World thisWorld, final BlockPos samePos) {
+        this.impl$checkTileEntityRemoval(pos, ci, found);
+    }
+
+    @Surrogate
+    protected void impl$checkTileEntityRemoval(final BlockPos pos, final CallbackInfo ci, final TileEntity found) {
 
     }
 
