@@ -120,13 +120,7 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
 
     @Override
     public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
-        // Specifically requested to be available on the launch loader
-        final VanillaPluginPlatform platform = AppLaunch.pluginPlatform();
-        for (final Path path : platform.getStandardEnvironment().blackboard().getOrCreate(VanillaPluginPlatform.EXTRA_TRANSFORMABLE_PATHS, () -> Collections.emptyList())) {
-            builder.addTransformationPath(path);
-        }
-
-        // Plus everything else on the system loader
+        // Everything else on the system loader
         // todo: we might be able to eliminate this at some point, but that causes complications
         for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
             try {
@@ -142,6 +136,13 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
                 this.logger.error("Failed to add {} to transformation path", url, ex);
             }
         }
+
+        // Plus specifically requested to be available on the launch loader
+        final VanillaPluginPlatform platform = AppLaunch.pluginPlatform();
+        for (final Path path : platform.getStandardEnvironment().blackboard().getOrCreate(VanillaPluginPlatform.EXTRA_TRANSFORMABLE_PATHS, () -> Collections.emptyList())) {
+            builder.addTransformationPath(path);
+        }
+
 
         builder.setResourceEnumeratorLocator(this.getResourceLocator());
         builder.setManifestLocator(this.getManifestLocator());
