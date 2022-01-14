@@ -138,19 +138,6 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
             .flatMap(List::stream)
             .collect(Collectors.toList());
 
-        // TODO Deduplicate transactions needed?
-//        final Map<Slot, List<SlotTransaction>> collected = slotTransactions.stream().collect(Collectors.groupingBy(SlotTransaction::slot));
-//        slotTransactions.clear();
-//        collected.values().forEach(list -> {
-//            final SlotTransaction first = list.get(0);
-//            if (list.size() > 1) {
-//                final ItemStackSnapshot last = list.get(list.size() - 1).defaultReplacement();
-//                slotTransactions.add(new SlotTransaction(first.slot(), first.original(), last));
-//            } else {
-//                slotTransactions.add(first);
-//            }
-//        });
-
         if (this.craftingInventory != null) { // Event with Preview transaction on crafting inventory?
             Slot slot = this.craftingInventory.result();
             @Nullable final SlotTransaction preview = this.findPreviewTransaction(this.craftingInventory.result(), slotTransactions);

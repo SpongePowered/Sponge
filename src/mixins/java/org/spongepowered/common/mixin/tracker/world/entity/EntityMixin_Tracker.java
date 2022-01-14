@@ -29,12 +29,10 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -85,7 +83,6 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     @Shadow public abstract void shadow$remove();
     //@formatter:on
 
-    private boolean tracker$trackedInWorld = false;
     @Nullable private Cause tracker$destructCause;
     protected @MonotonicNonNull EffectTransactor tracker$dropsTransactor = null;
 
@@ -130,16 +127,8 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     }
 
     @Override
-    public boolean bridge$isWorldTracked() {
-        return this.tracker$trackedInWorld;
-    }
-
-    @Override
-    public void bridge$setWorldTracked(final boolean tracked) {
-        this.tracker$trackedInWorld = tracked;
-        // Since this is called during removeEntity from world, we can
-        // post the removal event here, basically.
-        if (!tracked && this.tracker$destructCause != null && ShouldFire.DESTRUCT_ENTITY_EVENT) {
+    public void bridge$markEntityRemovedFromLevel() {
+        if (this.tracker$destructCause != null && ShouldFire.DESTRUCT_ENTITY_EVENT) {
             final Audience originalChannel = Audience.empty();
             SpongeCommon.post(SpongeEventFactory.createDestructEntityEvent(
                 this.tracker$destructCause,

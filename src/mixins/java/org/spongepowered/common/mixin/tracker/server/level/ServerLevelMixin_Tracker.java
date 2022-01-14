@@ -143,18 +143,10 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     @Shadow @Final private List<ServerPlayer> players;
     // @formatting:on
 
-
-    @Inject(method = "add", at = @At("TAIL"))
-    private void tracker$setEntityTrackedInWorld(final net.minecraft.world.entity.Entity entityIn, final CallbackInfo ci) {
-        if (!this.bridge$isFake()) { // Only set the value if the entity is not fake
-            ((TrackableBridge) entityIn).bridge$setWorldTracked(true);
-        }
-    }
-
     @Inject(method = "onEntityRemoved", at = @At("TAIL"))
     private void tracker$setEntityUntrackedInWorld(final net.minecraft.world.entity.Entity entityIn, final CallbackInfo ci) {
         if (!this.bridge$isFake()) {
-            ((TrackableBridge) entityIn).bridge$setWorldTracked(false);
+            ((TrackableBridge) entityIn).bridge$markEntityRemovedFromLevel();
         }
     }
 

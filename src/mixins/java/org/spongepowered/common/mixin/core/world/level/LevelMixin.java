@@ -30,6 +30,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.Motive;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.item.FallingBlockEntity;
@@ -203,17 +204,12 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         }
 
         // TODO - replace this with an actual check
-        /*
-        if (entity instanceof EntityHanging) {
-            if (((EntityHanging) entity).facingDirection == null) {
-                // TODO Some sort of detection of a valid direction?
-                // i.e scan immediate blocks for something to attach onto.
-                ((EntityHanging) entity).facingDirection = EnumFacing.NORTH;
+
+        if (entity instanceof HangingEntity) {
+            if (!((HangingEntity) entity).survives()) {
+                throw new IllegalArgumentException("Hanging entity does not survive at the given position: " + position);
             }
-            if (!((EntityHanging) entity).onValidSurface()) {
-                return Optional.empty();
-            }
-        }*/
+        }
 
         if (naturally && entity instanceof Mob) {
             // Adding the default equipment

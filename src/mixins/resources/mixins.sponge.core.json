@@ -142,6 +142,7 @@
         "world.entity.npc.VillagerMixin",
         "world.entity.player.ChatVisiblityMixin",
         "world.entity.player.PlayerMixin",
+        "world.entity.player.PlayerMixin_Attack_Impl",
         "world.entity.projectile.AbstractArrowMixin",
         "world.entity.projectile.AbstractHurtingProjectileMixin",
         "world.entity.projectile.EyeOfEnderMixin",

@@ -204,28 +204,13 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
         this.tracker$postProcessContext.close();
         this.tracker$postProcessContext = null;
     }
-//
-//    @Redirect(method = "removeTileEntity",
-//        at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;remove()V"))
-//    private void tracker$resetTileEntityActiveChunk(final TileEntity tileEntityIn) {
-//        ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(null);
-//        tileEntityIn.remove();
-//    }
-//
-//    @Override
-//    public void bridge$removeTileEntity(final TileEntity removed) {
-//        final TileEntity tileentity = this.tileEntities.remove(removed.getPos());
-//        if (tileentity != removed && tileentity != null) {
-//            // Because multiple requests to remove a tile entity could cause for checks
-//            // without actually knowing if the chunk doesn't have the tile entity, this
-//            // avoids storing nulls.
-//            // Replace the pre-existing tile entity in case we remove a tile entity
-//            // we don't want to be removing.
-//            this.tileEntities.put(removed.getPos(), tileentity);
-//        }
-//        ((ActiveChunkReferantBridge) removed).bridge$setActiveChunk(null);
-//        removed.remove();
-//    }
+
+    @Redirect(method = "removeBlockEntity",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BlockEntity;setRemoved()V"))
+    private void tracker$resetTileEntityActiveChunk(final BlockEntity tileEntityIn) {
+        ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(null);
+        tileEntityIn.setRemoved();
+    }
 
     @Inject(
         method = "setBlockEntity(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntity;)V",
