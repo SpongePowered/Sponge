@@ -790,8 +790,6 @@ public final class SpongeRegistryLoaders {
             l.add(ParticleOptions.QUANTITY, k -> new SpongeParticleOption<>(Integer.class, v -> v < 1 ? new IllegalArgumentException("Quantity must be at least one") : null));
             l.add(ParticleOptions.SCALE, k -> new SpongeParticleOption<>(Double.class, v -> v < 0 ? new IllegalArgumentException("Scale must not be negative") : null));
             l.add(ParticleOptions.VELOCITY, k -> new SpongeParticleOption<>(Vector3d.class));
-            l.add(ParticleOptions.FIREWORK_EFFECTS, k -> new SpongeParticleOption<>(List.class));
-            l.add(ParticleOptions.NOTE, k -> new SpongeParticleOption<>(NotePitch.class));
         });
     }
 
