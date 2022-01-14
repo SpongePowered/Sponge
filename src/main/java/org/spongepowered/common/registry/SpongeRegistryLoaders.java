@@ -350,6 +350,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -789,6 +790,8 @@ public final class SpongeRegistryLoaders {
             l.add(ParticleOptions.QUANTITY, k -> new SpongeParticleOption<>(Integer.class, v -> v < 1 ? new IllegalArgumentException("Quantity must be at least one") : null));
             l.add(ParticleOptions.SCALE, k -> new SpongeParticleOption<>(Double.class, v -> v < 0 ? new IllegalArgumentException("Scale must not be negative") : null));
             l.add(ParticleOptions.VELOCITY, k -> new SpongeParticleOption<>(Vector3d.class));
+            l.add(ParticleOptions.FIREWORK_EFFECTS, k -> new SpongeParticleOption<>(List.class));
+            l.add(ParticleOptions.NOTE, k -> new SpongeParticleOption<>(NotePitch.class));
         });
     }
 
