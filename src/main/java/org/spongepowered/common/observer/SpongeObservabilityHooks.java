@@ -45,6 +45,12 @@ public class SpongeObservabilityHooks implements TrackerHooks {
         .labelNames("transaction_name")
         .build();
 
+    private static final Counter ASYNC_THREAD_ACCESS_COUNT = Meter.newCounter()
+        .name("sponge", "phase_tracker", "async_thread_access", "count")
+        .help("Number of async thread accesses to the PhaseTracker (should be 0)")
+        .labelNames("requesting_thread", "target_thread")
+        .build();
+
     @Override
     public void run(
         final Runnable process, final String name,
@@ -56,5 +62,10 @@ public class SpongeObservabilityHooks implements TrackerHooks {
     @Override
     public void incrementUnabsorbedTransaction(final Supplier<String> toGenericString) {
         SpongeObservabilityHooks.MISSED_TRANSACTION_CAPTURE.inc(toGenericString.get());
+    }
+
+    @Override
+    public void incrementIllegalThreadAccess(final Thread currentThread, final Thread sidedThread) {
+        SpongeObservabilityHooks.ASYNC_THREAD_ACCESS_COUNT.inc(currentThread.getName(), sidedThread.getName());
     }
 }

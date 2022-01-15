@@ -38,4 +38,7 @@ public interface TrackerHooks {
     default void incrementUnabsorbedTransaction(final Supplier<String> toGenericString) {
 
     }
+
+    default void incrementIllegalThreadAccess(final Thread currentThread, final Thread sidedThread) {
+    }
 }

@@ -58,6 +58,7 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.cause.entity.SpongeSpawnTypes;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -304,6 +305,7 @@ public final class PhaseTracker implements CauseStackManager {
 
     public IPhaseState<?> getCurrentState() {
         if (Thread.currentThread() != this.getSidedThread()) {
+            PlatformHooks.INSTANCE.getTrackerHooks().incrementIllegalThreadAccess(Thread.currentThread(), this.getSidedThread());
             throw new UnsupportedOperationException("Cannot access the PhaseTracker off-thread, please use the respective PhaseTracker for their proper thread.");
         }
         return this.stack.peekState();
@@ -311,6 +313,7 @@ public final class PhaseTracker implements CauseStackManager {
 
     public PhaseContext<?> getPhaseContext() {
         if (Thread.currentThread() != this.getSidedThread()) {
+            PlatformHooks.INSTANCE.getTrackerHooks().incrementIllegalThreadAccess(Thread.currentThread(), this.getSidedThread());
             throw new UnsupportedOperationException("Cannot access the PhaseTracker off-thread, please use the respective PhaseTracker for their proper thread.");
         }
         return this.stack.peekContext();
@@ -331,6 +334,7 @@ public final class PhaseTracker implements CauseStackManager {
                 .add(new Exception("Async Block Change Detected"))
                 .log(SpongeCommon.logger(), Level.ERROR);
             // Maybe? I don't think this is wise.
+            PlatformHooks.INSTANCE.getTrackerHooks().incrementIllegalThreadAccess(Thread.currentThread(), this.getSidedThread());
             return;
         }
         checkNotNull(state, "State cannot be null!");
@@ -354,7 +358,7 @@ public final class PhaseTracker implements CauseStackManager {
     @SuppressWarnings({"rawtypes", "unused", "try"})
     void completePhase(final PhaseContext<?> context) {
         if (context.createdTracker != this && Thread.currentThread() != this.getSidedThread()) {
-            // lol no, report the block change properly
+            PlatformHooks.INSTANCE.getTrackerHooks().incrementIllegalThreadAccess(Thread.currentThread(), this.getSidedThread());
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
                 .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
                 .add()
@@ -740,6 +744,7 @@ public final class PhaseTracker implements CauseStackManager {
     private void enforceMainThread() {
         // On clients, this may not be available immediately, we can't bomb out that early.
         if (Thread.currentThread() != this.getSidedThread()) {
+            PlatformHooks.INSTANCE.getTrackerHooks().incrementIllegalThreadAccess(Thread.currentThread(), this.getSidedThread());
             throw new IllegalStateException(String.format(
                 "CauseStackManager called from off main thread (current='%s', expected='%s')!",
                 ThreadUtil.getDescription(Thread.currentThread()),
