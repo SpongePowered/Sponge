@@ -31,13 +31,13 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.data.MemoryDataContainer;
 import org.spongepowered.common.hooks.TrackerHooks;
 import org.spongepowered.observer.metrics.Meter;
 import org.spongepowered.observer.metrics.meter.Counter;
 import org.spongepowered.observer.metrics.meter.Gauge;
 import org.spongepowered.observer.metrics.meter.Histogram;
 
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class SpongeObservabilityHooks implements TrackerHooks {
@@ -79,6 +79,9 @@ public class SpongeObservabilityHooks implements TrackerHooks {
     private static final Gauge WORLD_TICK = Meter.newGauge().name("minecraft", "world", "tps")
         .help("Overall TPS of worlds")
         .labelNames("world")
+        .build();
+    private static final Gauge FAKE_PLAYER_COUNT = Meter.newGauge().name("minecraftforge", "fake_player", "count")
+        .help("Number of fake players created")
         .build();
 
     @Override
@@ -123,5 +126,10 @@ public class SpongeObservabilityHooks implements TrackerHooks {
         final double averageTickTime = Mth.average(tickTimes) * 1.0E-6D;
         final double tps = Math.min(1000.0 / (averageTickTime), 20);
         SpongeObservabilityHooks.WORLD_TICK.set(tps, key.location().toString());
+    }
+
+    @Override
+    public void updateFakePlayerCount(final IntSupplier count) {
+        SpongeObservabilityHooks.FAKE_PLAYER_COUNT.set(count.getAsInt());
     }
 }

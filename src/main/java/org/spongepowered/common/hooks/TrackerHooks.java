@@ -28,6 +28,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public interface TrackerHooks {
@@ -58,6 +59,10 @@ public interface TrackerHooks {
     }
 
     default void updateWorldTps(final ServerLevel serverLevel) {
+
+    }
+
+    default void updateFakePlayerCount(final IntSupplier count) {
 
     }
 }
