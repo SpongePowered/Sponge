@@ -89,6 +89,11 @@ public class SpongeObservabilityHooks implements TrackerHooks {
         .help("Count of re-usable block snapshots. Useful for lower memory churn.")
         .build();
 
+    private static final Gauge EVENTS_TRANSACTED = Meter.newGauge()
+        .name("sponge", "phase_tracker", "events_transacted", "count")
+        .help("Number of events being transacted as a result of a game interaction")
+        .build();
+
     @Override
     public void run(
         final Runnable process, final String name,
@@ -141,5 +146,10 @@ public class SpongeObservabilityHooks implements TrackerHooks {
     @Override
     public void updatePooledSnapshotBuilder(final IntSupplier count) {
         SpongeObservabilityHooks.BLOCK_SNAPSHOT_POOL_SIZE.set(count.getAsInt());
+    }
+
+    @Override
+    public void setTransactedEventCount(final int size) {
+        SpongeObservabilityHooks.EVENTS_TRANSACTED.set(size);
     }
 }

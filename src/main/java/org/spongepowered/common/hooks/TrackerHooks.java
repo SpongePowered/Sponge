@@ -69,4 +69,8 @@ public interface TrackerHooks {
     default void updatePooledSnapshotBuilder(final IntSupplier count) {
 
     }
+
+    default void setTransactedEventCount(final int size) {
+
+    }
 }

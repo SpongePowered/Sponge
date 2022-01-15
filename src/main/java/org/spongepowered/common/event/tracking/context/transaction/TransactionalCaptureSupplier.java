@@ -211,6 +211,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
                 }
             }
         }
+        PlatformHooks.INSTANCE.getTrackerHooks().setTransactedEventCount(batched.size());
         builder.build().asMap()
             .forEach((transactionType, events) -> transactionType.createAndProcessPostEvents(context, events));
         return !cancelledAny;
