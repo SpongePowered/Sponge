@@ -70,4 +70,12 @@ public final class ModuleCategory {
     @Setting("movement-checks")
     @Comment("Allows configuring Vanilla movement and speed checks")
     public boolean movementChecks = false;
+
+    @Setting("observability")
+    @Comment("Enables Sponge observability metrics collection.\n" +
+        "Typically includes metrics for tick times, entity counts,\n" +
+        "block tick times, and potential counters for Minecraft's\n" +
+        "internals that may help identifying performance bottlenecks or\n" +
+        "extreme load.")
+    public boolean observability = false;
 }

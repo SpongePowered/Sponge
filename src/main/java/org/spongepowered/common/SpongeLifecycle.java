@@ -40,6 +40,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -52,8 +53,10 @@ import org.spongepowered.common.event.lifecycle.RegisterDataEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.observer.SpongeObservabilityHooks;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
@@ -147,6 +150,9 @@ public final class SpongeLifecycle implements Lifecycle {
     @Override
     public void initTimings() {
         ((SpongeTimingsFactory) this.game.factoryProvider().provide(TimingsFactory.class)).init();
+        if (SpongeConfigs.getCommon().get().modules.observability) {
+            PlatformHooks.INSTANCE.setTrackerHooks(new SpongeObservabilityHooks());
+        }
     }
 
     @Override

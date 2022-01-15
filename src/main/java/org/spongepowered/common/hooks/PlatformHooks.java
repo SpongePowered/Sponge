@@ -56,6 +56,7 @@ public final class PlatformHooks {
     private WorldHooks worldHooks = new WorldHooks() {};
     private ItemHooks itemHooks = new ItemHooks() {};
     private EntityHooks entityHooks = new EntityHooks() {};
+    private TrackerHooks trackerHooks = new TrackerHooks() {};
 
     public DimensionHooks getDimensionHooks() {
         return this.dimensionHooks;
@@ -119,5 +120,13 @@ public final class PlatformHooks {
 
     public void setEntityHooks(final EntityHooks entityHooks) {
         this.entityHooks = entityHooks;
+    }
+
+    public TrackerHooks getTrackerHooks() {
+        return this.trackerHooks;
+    }
+
+    public void setTrackerHooks(final TrackerHooks trackerHooks) {
+        this.trackerHooks = trackerHooks;
     }
 }

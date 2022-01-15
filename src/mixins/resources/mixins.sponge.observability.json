@@ -1,0 +1,7 @@
+{
+    "parent": "mixins.sponge.parent.json",
+    "package": "org.spongepowered.common.mixin.observability",
+    "plugin": "org.spongepowered.common.mixin.plugin.ConcurrentCheckPlugin",
+    "mixins": [
+    ]
+}
