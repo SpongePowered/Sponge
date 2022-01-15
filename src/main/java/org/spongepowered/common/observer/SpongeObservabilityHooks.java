@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.observer;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.common.hooks.TrackerHooks;
 import org.spongepowered.observer.metrics.Meter;
 import org.spongepowered.observer.metrics.meter.Counter;
@@ -51,6 +54,12 @@ public class SpongeObservabilityHooks implements TrackerHooks {
         .labelNames("requesting_thread", "target_thread")
         .build();
 
+    private static final Counter BLOCKS_RESTORED = Meter.newCounter()
+        .name("sponge", "events", "blocks_restored", "count")
+        .help("Number of blocks restored")
+        .labelNames("world")
+        .build();
+
     @Override
     public void run(
         final Runnable process, final String name,
@@ -67,5 +76,12 @@ public class SpongeObservabilityHooks implements TrackerHooks {
     @Override
     public void incrementIllegalThreadAccess(final Thread currentThread, final Thread sidedThread) {
         SpongeObservabilityHooks.ASYNC_THREAD_ACCESS_COUNT.inc(currentThread.getName(), sidedThread.getName());
+    }
+
+    @Override
+    public void incrementBlocksRestored(
+        final ServerLevel world, final BlockPos pos, final BlockState replaced
+    ) {
+        SpongeObservabilityHooks.BLOCKS_RESTORED.inc(world.dimension().location().toString());
     }
 }

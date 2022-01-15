@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.hooks;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.BlockState;
+
 import java.util.function.Supplier;
 
 public interface TrackerHooks {
@@ -40,5 +44,9 @@ public interface TrackerHooks {
     }
 
     default void incrementIllegalThreadAccess(final Thread currentThread, final Thread sidedThread) {
+    }
+
+    default void incrementBlocksRestored(final ServerLevel world, final BlockPos pos, final BlockState replaced) {
+
     }
 }

@@ -63,6 +63,7 @@ import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -189,6 +190,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
             if (!current.is(((net.minecraft.world.level.block.state.BlockState) this.blockState).getBlock())) {
                 world.removeBlockEntity(pos);
             }
+            PlatformHooks.INSTANCE.getTrackerHooks().incrementBlocksRestored(world, pos, replaced);
             world.setBlock(pos, replaced, BlockChangeFlagManager.andNotifyClients(flag).getRawFlag());
             if (this.compound != null) {
                 @Nullable BlockEntity te = world.getBlockEntity(pos);
