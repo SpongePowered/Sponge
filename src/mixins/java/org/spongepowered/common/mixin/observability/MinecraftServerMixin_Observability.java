@@ -22,38 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.hooks;
+package org.spongepowered.common.mixin.observability;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.server.MinecraftServer;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.hooks.PlatformHooks;
 
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
-public interface TrackerHooks {
+@Mixin(MinecraftServer.class)
+public class MinecraftServerMixin_Observability {
 
-    default void run(
-        final Runnable process, final String name,
-        final int chunkX, final int chunkZ
+    @Shadow @Final public long[] tickTimes;
+
+    @Shadow private int tickCount;
+
+    @Inject(method = "tickServer", at = @At(
+        value = "FIELD",
+        target = "Lnet/minecraft/server/MinecraftServer;averageTickTime:F",
+        shift = At.Shift.AFTER
+    ))
+    private void observability$captureTickTimeGauge(
+        final BooleanSupplier param0, final CallbackInfo ci
     ) {
-        process.run();
-    }
-
-    default void incrementUnabsorbedTransaction(final Supplier<String> toGenericString) {
-
-    }
-
-    default void incrementIllegalThreadAccess(final Thread currentThread, final Thread sidedThread) {
-    }
-
-    default void incrementBlocksRestored(final ServerLevel world, final BlockPos pos, final BlockState replaced) {
-
-    }
-
-    default void updateChunkGauge(final ServerLevel level) {
-    }
-
-    default void updateServerTickTime(final long tickTime) {
-
+        final long tickTime = this.tickTimes[this.tickCount % 100];
+        PlatformHooks.INSTANCE.getTrackerHooks().updateServerTickTime(tickTime);
     }
 }

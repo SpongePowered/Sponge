@@ -3,6 +3,7 @@
     "package": "org.spongepowered.common.mixin.observability",
     "plugin": "org.spongepowered.common.mixin.plugin.ObservabilityPlugin",
     "mixins": [
+        "MinecraftServerMixin_Observability",
         "server.level.ChunkMapMixin_Observer"
     ],
     "priority": 500

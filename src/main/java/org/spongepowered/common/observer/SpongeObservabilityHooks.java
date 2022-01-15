@@ -61,10 +61,15 @@ public class SpongeObservabilityHooks implements TrackerHooks {
         .labelNames("world")
         .build();
 
-    private static Gauge CHUNKS_LOADED = Meter.newGauge()
+    private static final Gauge CHUNKS_LOADED = Meter.newGauge()
         .name("minecraft", "chunks", "loaded")
         .help("Gauge of chunks loaded overall")
         .labelNames("world")
+        .build();
+
+    private static final Gauge SERVER_TICK = Meter.newGauge()
+        .name("minecraft", "server", "tick")
+        .help("Overall Milliseconds per Server Tick")
         .build();
 
     @Override
@@ -95,5 +100,10 @@ public class SpongeObservabilityHooks implements TrackerHooks {
     @Override
     public void updateChunkGauge(final ServerLevel level) {
         SpongeObservabilityHooks.CHUNKS_LOADED.set(level.getChunkSource().getLoadedChunksCount(), level.dimension().location().toString());
+    }
+
+    @Override
+    public void updateServerTickTime(final long tickTime) {
+        SpongeObservabilityHooks.SERVER_TICK.set(tickTime);
     }
 }
