@@ -84,6 +84,11 @@ public class SpongeObservabilityHooks implements TrackerHooks {
         .help("Number of fake players created")
         .build();
 
+    private static final Gauge BLOCK_SNAPSHOT_POOL_SIZE = Meter.newGauge()
+        .name("sponge", "phase_tracker", "block_snapshot", "pool_size")
+        .help("Count of re-usable block snapshots. Useful for lower memory churn.")
+        .build();
+
     @Override
     public void run(
         final Runnable process, final String name,
@@ -131,5 +136,10 @@ public class SpongeObservabilityHooks implements TrackerHooks {
     @Override
     public void updateFakePlayerCount(final IntSupplier count) {
         SpongeObservabilityHooks.FAKE_PLAYER_COUNT.set(count.getAsInt());
+    }
+
+    @Override
+    public void updatePooledSnapshotBuilder(final IntSupplier count) {
+        SpongeObservabilityHooks.BLOCK_SNAPSHOT_POOL_SIZE.set(count.getAsInt());
     }
 }

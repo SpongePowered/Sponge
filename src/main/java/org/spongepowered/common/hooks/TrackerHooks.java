@@ -65,4 +65,8 @@ public interface TrackerHooks {
     default void updateFakePlayerCount(final IntSupplier count) {
 
     }
+
+    default void updatePooledSnapshotBuilder(final IntSupplier count) {
+
+    }
 }

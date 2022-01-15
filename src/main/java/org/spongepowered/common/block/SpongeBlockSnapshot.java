@@ -414,7 +414,8 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
         }
 
         public static BuilderImpl pooled() {
-            final BuilderImpl builder = BuilderImpl.pool.pollFirst();
+            final @Nullable BuilderImpl builder = BuilderImpl.pool.pollFirst();
+            PlatformHooks.INSTANCE.getTrackerHooks().updatePooledSnapshotBuilder(BuilderImpl.pool::size);
             if (builder != null) {
                 return builder.reset();
             }
@@ -588,6 +589,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
             final SpongeBlockSnapshot spongeBlockSnapshot = new SpongeBlockSnapshot(this, !this.pooled);
             this.reset();
             if (this.pooled) {
+                PlatformHooks.INSTANCE.getTrackerHooks().updatePooledSnapshotBuilder(BuilderImpl.pool::size);
                 BuilderImpl.pool.push(this);
             }
             return spongeBlockSnapshot;
