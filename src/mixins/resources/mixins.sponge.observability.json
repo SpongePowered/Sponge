@@ -1,7 +1,9 @@
 {
     "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.mixin.observability",
-    "plugin": "org.spongepowered.common.mixin.plugin.ConcurrentCheckPlugin",
+    "plugin": "org.spongepowered.common.mixin.plugin.ObservabilityPlugin",
     "mixins": [
-    ]
+        "server.level.ChunkMapMixin_Observer"
+    ],
+    "priority": 500
 }

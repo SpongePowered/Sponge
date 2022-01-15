@@ -49,4 +49,7 @@ public interface TrackerHooks {
     default void incrementBlocksRestored(final ServerLevel world, final BlockPos pos, final BlockState replaced) {
 
     }
+
+    default void updateChunkGauge(final ServerLevel level) {
+    }
 }

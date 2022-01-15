@@ -24,16 +24,11 @@
  */
 package org.spongepowered.common.mixin.plugin;
 
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
 public class ObservabilityPlugin extends AbstractMixinConfigPlugin {
     @Override
     public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
-        final boolean observability = SpongeConfigs.getCommon().get().modules.observability;
-        if (!observability) {
-            return false;
-        }
-        return observability;
+        return SpongeConfigs.getCommon().get().modules.observability;
     }
 }

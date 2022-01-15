@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.common.hooks.TrackerHooks;
 import org.spongepowered.observer.metrics.Meter;
 import org.spongepowered.observer.metrics.meter.Counter;
+import org.spongepowered.observer.metrics.meter.Gauge;
 import org.spongepowered.observer.metrics.meter.Histogram;
 
 import java.util.function.Supplier;
@@ -60,6 +61,12 @@ public class SpongeObservabilityHooks implements TrackerHooks {
         .labelNames("world")
         .build();
 
+    private static Gauge CHUNKS_LOADED = Meter.newGauge()
+        .name("minecraft", "chunks", "loaded")
+        .help("Gauge of chunks loaded overall")
+        .labelNames("world")
+        .build();
+
     @Override
     public void run(
         final Runnable process, final String name,
@@ -83,5 +90,10 @@ public class SpongeObservabilityHooks implements TrackerHooks {
         final ServerLevel world, final BlockPos pos, final BlockState replaced
     ) {
         SpongeObservabilityHooks.BLOCKS_RESTORED.inc(world.dimension().location().toString());
+    }
+
+    @Override
+    public void updateChunkGauge(final ServerLevel level) {
+        SpongeObservabilityHooks.CHUNKS_LOADED.set(level.getChunkSource().getLoadedChunksCount(), level.dimension().location().toString());
     }
 }
