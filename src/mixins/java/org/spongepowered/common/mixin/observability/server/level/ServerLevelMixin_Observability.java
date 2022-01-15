@@ -22,42 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.hooks;
+package org.spongepowered.common.mixin.observability.server.level;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.hooks.PlatformHooks;
 
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
-public interface TrackerHooks {
+// We boost the priority here to allow for getting an up to date
+// tps for this level after the normal ServerLevelMixin has already been
+// applied. Normally observability is injected before things happen, but
+// this is a special case.
+@SuppressWarnings("ConstantConditions")
+@Mixin(value = ServerLevel.class, priority = 1500)
+public abstract class ServerLevelMixin_Observability {
 
-    default void run(
-        final Runnable process, final String name,
-        final int chunkX, final int chunkZ
+    @Inject(method = "tick", at = @At("RETURN"))
+    private void observability$updateWorldTps(
+        final BooleanSupplier param0, final CallbackInfo ci
     ) {
-        process.run();
+        PlatformHooks.INSTANCE.getTrackerHooks().updateWorldTps((ServerLevel) (Object) this);
     }
 
-    default void incrementUnabsorbedTransaction(final Supplier<String> toGenericString) {
-
-    }
-
-    default void incrementIllegalThreadAccess(final Thread currentThread, final Thread sidedThread) {
-    }
-
-    default void incrementBlocksRestored(final ServerLevel world, final BlockPos pos, final BlockState replaced) {
-
-    }
-
-    default void updateChunkGauge(final ServerLevel level) {
-    }
-
-    default void updateServerTickTime(final long tickTime) {
-
-    }
-
-    default void updateWorldTps(final ServerLevel serverLevel) {
-
-    }
 }

@@ -25,8 +25,13 @@
 package org.spongepowered.common.observer;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.data.MemoryDataContainer;
 import org.spongepowered.common.hooks.TrackerHooks;
 import org.spongepowered.observer.metrics.Meter;
 import org.spongepowered.observer.metrics.meter.Counter;
@@ -71,6 +76,10 @@ public class SpongeObservabilityHooks implements TrackerHooks {
         .name("minecraft", "server", "tick")
         .help("Overall Milliseconds per Server Tick")
         .build();
+    private static final Gauge WORLD_TICK = Meter.newGauge().name("minecraft", "world", "tps")
+        .help("Overall TPS of worlds")
+        .labelNames("world")
+        .build();
 
     @Override
     public void run(
@@ -105,5 +114,14 @@ public class SpongeObservabilityHooks implements TrackerHooks {
     @Override
     public void updateServerTickTime(final long tickTime) {
         SpongeObservabilityHooks.SERVER_TICK.set(tickTime);
+    }
+
+    @Override
+    public void updateWorldTps(final ServerLevel serverLevel) {
+        final ResourceKey<Level> key = serverLevel.dimension();
+        final long[] tickTimes = ((ServerLevelBridge) serverLevel).bridge$recentTickTimes();
+        final double averageTickTime = Mth.average(tickTimes) * 1.0E-6D;
+        final double tps = Math.min(1000.0 / (averageTickTime), 20);
+        SpongeObservabilityHooks.WORLD_TICK.set(tps, key.location().toString());
     }
 }
