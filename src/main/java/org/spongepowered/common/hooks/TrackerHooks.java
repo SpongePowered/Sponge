@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.hooks;
 
+import java.util.function.Supplier;
+
 public interface TrackerHooks {
 
     default void run(
@@ -31,5 +33,9 @@ public interface TrackerHooks {
         final int chunkX, final int chunkZ
     ) {
         process.run();
+    }
+
+    default void incrementUnabsorbedTransaction(final Supplier<String> toGenericString) {
+
     }
 }

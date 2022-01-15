@@ -39,6 +39,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
+import org.spongepowered.common.hooks.PlatformHooks;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -131,6 +132,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
             }
         }
         if (transaction.shouldHaveBeenAbsorbed()) {
+            PlatformHooks.INSTANCE.getTrackerHooks().incrementUnabsorbedTransaction(transaction.getClass()::toGenericString);
             SpongeCommon.logger().warn("Logged transaction without event transaction!", new Exception(transaction.getClass().getName()));
         }
         // Finally, mark the transaction as recorded, does any setup handling with regards to capturing details

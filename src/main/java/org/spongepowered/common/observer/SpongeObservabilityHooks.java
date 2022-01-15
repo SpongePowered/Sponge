@@ -26,7 +26,10 @@ package org.spongepowered.common.observer;
 
 import org.spongepowered.common.hooks.TrackerHooks;
 import org.spongepowered.observer.metrics.Meter;
+import org.spongepowered.observer.metrics.meter.Counter;
 import org.spongepowered.observer.metrics.meter.Histogram;
+
+import java.util.function.Supplier;
 
 public class SpongeObservabilityHooks implements TrackerHooks {
     private static final Histogram PHASE_TICK_DURATION = Meter.newHistogram()
@@ -36,11 +39,22 @@ public class SpongeObservabilityHooks implements TrackerHooks {
         .exponentialBuckets(1E-9, 10, 10)
         .build();
 
+    private static final Counter MISSED_TRANSACTION_CAPTURE = Meter.newCounter()
+        .name("sponge", "phase_tracker", "missed_transaction_capture", "count")
+        .help("Count of un-capturable transactions")
+        .labelNames("transaction_name")
+        .build();
+
     @Override
     public void run(
         final Runnable process, final String name,
         final int chunkX, final int chunkZ
     ) {
         SpongeObservabilityHooks.PHASE_TICK_DURATION.time(process, name, chunkX, chunkZ);
+    }
+
+    @Override
+    public void incrementUnabsorbedTransaction(final Supplier<String> toGenericString) {
+        SpongeObservabilityHooks.MISSED_TRANSACTION_CAPTURE.inc(toGenericString.get());
     }
 }
