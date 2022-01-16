@@ -302,7 +302,10 @@ interface TransactionSink {
                 this.logPlayerInventoryChange(((InventoryMenuAccessor) abstractContainerMenu).accessor$owner(),
                     PlayerInventoryTransaction.EventCreator.STANDARD);
             }
-            if (phaseContext instanceof EntityTickContext || phaseContext instanceof UnwindingPhaseContext) {
+            if (phaseContext instanceof UnwindingPhaseContext) {
+                return;
+            }
+            if (phaseContext instanceof EntityTickContext) {
                 // TODO remove warning when we got all cases covered
                 SpongeCommon.logger().warn("Ignoring slot transaction on InventoryMenu during {}. {}\nNo Event will be fired for this", phaseContext.getClass().getSimpleName(), newTransaction);
                 return;
