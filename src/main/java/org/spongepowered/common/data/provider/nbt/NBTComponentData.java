@@ -24,7 +24,11 @@
  */
 package org.spongepowered.common.data.provider.nbt;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.entity.SpongeEntityArchetype;
+import org.spongepowered.common.entity.SpongeEntitySnapshot;
+import org.spongepowered.common.util.Constants;
 
 public final class NBTComponentData {
 
@@ -33,17 +37,17 @@ public final class NBTComponentData {
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
-        // TODO register for implementations that are allowed instead of DataCompoungHolder
-//        registrator
-//                .asMutable(DataCompoundHolder.class)
-//                    .create(Keys.CAN_FLY)
-//                        .get(h -> NbtHelper.getNullableCompound(h.data$getCompound(), Constants.Entity.Player.ABILITIES).getBoolean(Constants.Entity.Player.Abilities.CAN_FLY))
-//                        .set((h, v) -> NbtHelper.getOrCreateCompound(h.data$getCompound(), Constants.Entity.Player.ABILITIES).putBoolean(Constants.Entity.Player.Abilities.CAN_FLY, v))
-//                        .supports(holder -> holder.getNbtDataType() == NBTDataTypes.ENTITY)
-//                    .create(Keys.IS_FLYING)
-//                        .get(h -> NbtHelper.getNullableCompound(h.data$getCompound(), Constants.Entity.Player.ABILITIES).getBoolean(Constants.Entity.Player.Abilities.IS_FLYING))
-//                        .set((h, v) -> NbtHelper.getOrCreateCompound(h.data$getCompound(), Constants.Entity.Player.ABILITIES).putBoolean(Constants.Entity.Player.Abilities.IS_FLYING, v))
-//                        .supports(holder -> holder.getNbtDataType() == NBTDataTypes.ENTITY);
+        registrator.newDataStore(SpongeEntitySnapshot.class, SpongeEntityArchetype.class)
+            .dataStore(Keys.CAN_FLY,
+                (v, f) -> v.set(Constants.Entity.Player.Abilities.CAN_FLY, f),
+                v -> v.getBoolean(Constants.Entity.Player.Abilities.CAN_FLY)
+            )
+            .dataStore(Keys.IS_FLYING,
+                (v, f) -> v.set(Constants.Entity.Player.Abilities.IS_FLYING, f),
+                v -> v.getBoolean(Constants.Entity.Player.Abilities.IS_FLYING)
+            )
+        ;
+        // TODO - the rest
     }
     // @formatter:on
 }

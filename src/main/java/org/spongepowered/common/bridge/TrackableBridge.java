@@ -24,26 +24,18 @@
  */
 package org.spongepowered.common.bridge;
 
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.common.config.tracker.TrackerConfig;
 
 public interface TrackableBridge {
 
     /**
-     * Gets whether this entity has been added to a World's tracked entity lists
-     * @return True if this entity is being tracked in a world's chunk lists.
-     */
-    default boolean bridge$isWorldTracked() {
-        return false;
-    }
-
-    /**
-     * Sets an entity to be tracked or untracked. Handy as a callback function
-     * to track some fields that otherwise are difficult to inject ensuring
-     * closure (like EffectTransactors).
+     * Sets an entity to be tracked or untracked. Specifically used in
+     * Level#add(Entity) and
+     * {@link net.minecraft.server.level.ServerLevel.EntityCallbacks#onTrackingEnd(Entity)}
      *
-     * @param tracked Tracked
      */
-    default void bridge$setWorldTracked(boolean tracked) {
+    default void bridge$markEntityRemovedFromLevel() {
     }
 
     default boolean bridge$shouldTick() {

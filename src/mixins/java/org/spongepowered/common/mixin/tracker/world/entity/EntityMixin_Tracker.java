@@ -82,7 +82,6 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     @Shadow public abstract float shadow$getYRot();
     //@formatter:on
 
-    private boolean tracker$trackedInWorld = false;
     @Nullable private Cause tracker$destructCause;
     protected @MonotonicNonNull EffectTransactor tracker$dropsTransactor = null;
 
@@ -127,16 +126,8 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     }
 
     @Override
-    public boolean bridge$isWorldTracked() {
-        return this.tracker$trackedInWorld;
-    }
-
-    @Override
-    public void bridge$setWorldTracked(final boolean tracked) {
-        this.tracker$trackedInWorld = tracked;
-        // Since this is called during removeEntity from world, we can
-        // post the removal event here, basically.
-        if (!tracked && this.tracker$destructCause != null && ShouldFire.DESTRUCT_ENTITY_EVENT) {
+    public void bridge$markEntityRemovedFromLevel() {
+        if (this.tracker$destructCause != null && ShouldFire.DESTRUCT_ENTITY_EVENT) {
             final Audience originalChannel = Audience.empty();
             SpongeCommon.post(SpongeEventFactory.createDestructEntityEvent(
                 this.tracker$destructCause,

@@ -350,12 +350,12 @@ public final class DamageEventUtil {
         return damageModifierFunctions;
     }
 
-    public static DamageFunction provideCriticalAttackTuple(final Player player) {
+    public static DamageFunction provideCriticalAttackTuple(final Player player, double criticalModifier) {
         final DamageModifier modifier = DamageModifier.builder()
                 .cause(Cause.of(EventContext.empty(), player))
                 .type(DamageModifierTypes.CRITICAL_HIT)
                 .build();
-        final DoubleUnaryOperator function = (damage) -> damage * .5F;
+        final DoubleUnaryOperator function = (damage) -> damage * criticalModifier;
         return new DamageFunction(modifier, function);
     }
 

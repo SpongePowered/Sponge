@@ -180,11 +180,6 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
                 container.set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
             }
         }
-        // We only need to include the custom data, not vanilla manipulators supported by sponge implementation
-//        final Collection<Mutable<?, ?>> manipulators = ((CustomDataHolderBridge) this).bridge$getCustomManipulators();
-//        if (!manipulators.isEmpty()) {
-//            container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
-//        }
         try {
             PlatformHooks.INSTANCE.getItemHooks().writeItemStackCapabilitiesToDataView(container, (net.minecraft.world.item.ItemStack) (Object) this);
         } catch (final Exception e) {

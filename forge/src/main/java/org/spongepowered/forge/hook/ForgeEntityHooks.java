@@ -22,22 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.server.level;
+package org.spongepowered.forge.hook;
 
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.TrackableBridge;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.entity.PartEntity;
+import org.spongepowered.common.hooks.EntityHooks;
 
-@Mixin(ServerLevel.EntityCallbacks.class)
-public abstract class ServerLevel$EntityCallbackMixin_Tracker {
-
-    @Inject(method = "onTrackingEnd(Lnet/minecraft/world/entity/Entity;)V", at = @At("TAIL"))
-    private void tracker$setEntityUntracked(Entity var1, CallbackInfo ci) {
-        ((TrackableBridge) var1).bridge$markEntityRemovedFromLevel();
+public class ForgeEntityHooks implements EntityHooks {
+    @Override
+    public boolean checkAttackEntity(final Player player, final Entity victim) {
+        return ForgeHooks.onPlayerAttackTarget(player, victim);
     }
 
+    @Override
+    public Entity getParentPart(final Entity entity) {
+        if (entity instanceof PartEntity) {
+            return ((PartEntity<?>) entity).getParent();
+        }
+        return entity;
+    }
 }

@@ -880,7 +880,8 @@ public final class Constants {
             public static final double PLAYER_Y_OFFSET = -0.35D;
 
             public static final class Abilities {
-                public static final String IS_FLYING = "flying";
+                public static final DataQuery IS_FLYING = of("abilities", "flying");
+                public static final DataQuery CAN_FLY = of("abilities", "mayfly");
             }
         }
 
@@ -1003,6 +1004,7 @@ public final class Constants {
             | Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE
             | Constants.BlockChangeFlags.NEIGHBOR_DROPS
             | Constants.BlockChangeFlags.PATHFINDING_UPDATES
+            | Constants.BlockChangeFlags.LIGHTING_UPDATES
             ;
 
 
