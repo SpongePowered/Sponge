@@ -26,8 +26,10 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.StructureSettings;
+import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
+import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.asm.mixin.Implements;
@@ -51,6 +53,8 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Shadow public abstract boolean shadow$isNoiseCavesEnabled();
     @Shadow public abstract boolean shadow$isOreVeinsEnabled();
     @Shadow public abstract boolean shadow$isNoodleCavesEnabled();
+    @Shadow @Deprecated protected abstract boolean shadow$disableMobGeneration();
+    @Shadow public abstract SurfaceRules.RuleSource shadow$surfaceRule();
     // @formatter:on
 
     @Override
@@ -96,5 +100,15 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Override
     public boolean noodleCaves() {
         return this.shadow$isNoodleCavesEnabled();
+    }
+
+    @Override
+    public boolean mobGeneration() {
+        return !this.shadow$disableMobGeneration();
+    }
+
+    @Intrinsic
+    public SurfaceRule surfaceRule() {
+        return (SurfaceRule) this.shadow$surfaceRule();
     }
 }

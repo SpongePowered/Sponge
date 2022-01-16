@@ -22,26 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.world.biome.provider;
 
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import org.spongepowered.api.registry.RegistryReference;
+import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.api.world.biome.provider.FixedBiomeConfig;
 
-import java.util.function.Supplier;
+import java.util.List;
 
-@Mixin(MultiNoiseBiomeSource.class)
-public interface MultiNoiseBiomeSourceAccessor {
+public final class SpongeFixedBiomeConfig extends AbstractBiomeProviderConfig implements FixedBiomeConfig {
 
-    @Accessor("parameters")
-    Climate.ParameterList<Supplier<Biome>> accessor$parameters();
+    private final RegistryReference<Biome> biome;
 
-    @Invoker("<init>")
-    static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Supplier<Biome>> $$0) {
-        throw new UntransformedInvokerError();
+    public SpongeFixedBiomeConfig(final RegistryReference<Biome> biome) {
+        super(List.of(biome));
+        this.biome = biome;
+    }
+
+    @Override
+    public RegistryReference<Biome> biome() {
+        return this.biome;
+    }
+
+    public static final class FactoryImpl implements Factory {
+
+        @Override
+        public FixedBiomeConfig biome(RegistryReference<Biome> biome) {
+            return new SpongeFixedBiomeConfig(biome);
+        }
     }
 }

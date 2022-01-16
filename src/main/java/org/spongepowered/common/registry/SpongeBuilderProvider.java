@@ -113,7 +113,6 @@ import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
 import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
-import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -208,8 +207,15 @@ import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
 import org.spongepowered.common.util.transformation.SpongeTransformationBuilder;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldTypeEffect;
+import org.spongepowered.common.world.biome.provider.SpongeCheckerboardBiomeConfig;
+import org.spongepowered.common.world.biome.provider.SpongeEndStyleBiomeConfig;
+import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.generation.SpongeWorldGenerationConfigMutableBuilder;
+import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfig;
+import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
+import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
+import org.spongepowered.common.world.generation.config.structure.SpongeStructureGenerationConfig;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
@@ -345,6 +351,13 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(WorldTypeEffect.Builder.class, SpongeWorldTypeEffect.BuilderImpl::new)
                 .register(WorldTypeTemplate.Builder.class, SpongeWorldTypeTemplate.BuilderImpl::new)
                 .register(WorldTemplate.Builder.class, SpongeWorldTemplate.BuilderImpl::new)
+                .register(NoiseConfig.Builder.class, SpongeNoiseConfig.BuilderImpl::new)
+                .register(StructureGenerationConfig.Builder.class, SpongeStructureGenerationConfig.BuilderImpl::new)
+                .register(FlatGeneratorConfig.Builder.class, SpongeFlatGeneratorConfig.BuilderImpl::new)
+                .register(NoiseGeneratorConfig.Builder.class, SpongeNoiseGeneratorConfig.BuilderImpl::new)
+                .register(CheckerboardBiomeConfig.Builder.class, SpongeCheckerboardBiomeConfig.BuilderImpl::new)
+                .register(EndStyleBiomeConfig.Builder.class, SpongeEndStyleBiomeConfig.BuilderImpl::new)
+                .register(MultiNoiseBiomeConfig.Builder.class, SpongeMultiNoiseBiomeConfig.BuilderImpl::new)
                 .register(MapColor.Builder.class, SpongeMapColorBuilder::new)
                 .register(MapDecoration.Builder.class, SpongeMapDecorationBuilder::new)
                 .register(MapCanvas.Builder.class, SpongeMapCanvasBuilder::new)

@@ -22,26 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.world.biome.provider;
 
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import org.spongepowered.api.registry.RegistryReference;
+import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.api.world.biome.provider.BiomeProviderConfig;
 
-import java.util.function.Supplier;
+import java.util.Collections;
+import java.util.List;
 
-@Mixin(MultiNoiseBiomeSource.class)
-public interface MultiNoiseBiomeSourceAccessor {
+public abstract class AbstractBiomeProviderConfig implements BiomeProviderConfig {
 
-    @Accessor("parameters")
-    Climate.ParameterList<Supplier<Biome>> accessor$parameters();
+    private final List<RegistryReference<Biome>> biomes;
 
-    @Invoker("<init>")
-    static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Supplier<Biome>> $$0) {
-        throw new UntransformedInvokerError();
+    protected AbstractBiomeProviderConfig(final List<RegistryReference<Biome>> biomes) {
+        this.biomes = biomes;
+    }
+
+    @Override
+    public List<RegistryReference<Biome>> biomes() {
+        return Collections.unmodifiableList(this.biomes);
     }
 }

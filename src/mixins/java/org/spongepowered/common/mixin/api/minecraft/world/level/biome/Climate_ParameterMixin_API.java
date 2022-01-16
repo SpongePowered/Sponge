@@ -22,26 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import org.spongepowered.api.util.Range;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.function.Supplier;
+@Mixin(Climate.Parameter.class)
+public abstract class Climate_ParameterMixin_API implements Range<Float> {
 
-@Mixin(MultiNoiseBiomeSource.class)
-public interface MultiNoiseBiomeSourceAccessor {
+    // @formatter:off
+    @Shadow @Final private long min;
+    @Shadow @Final private long max;
+    // @formatter:on
 
-    @Accessor("parameters")
-    Climate.ParameterList<Supplier<Biome>> accessor$parameters();
+    @Override
+    public Float min() {
+        return Climate.unquantizeCoord(this.min);
+    }
 
-    @Invoker("<init>")
-    static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Supplier<Biome>> $$0) {
-        throw new UntransformedInvokerError();
+    @Override
+    public Float max() {
+        return Climate.unquantizeCoord(this.max);
     }
 }

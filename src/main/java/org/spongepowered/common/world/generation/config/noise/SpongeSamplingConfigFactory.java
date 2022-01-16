@@ -22,26 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.world.generation.config.noise;
 
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
+import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
 
-import java.util.function.Supplier;
+public final class SpongeSamplingConfigFactory implements SamplingConfig.Factory {
 
-@Mixin(MultiNoiseBiomeSource.class)
-public interface MultiNoiseBiomeSourceAccessor {
-
-    @Accessor("parameters")
-    Climate.ParameterList<Supplier<Biome>> accessor$parameters();
-
-    @Invoker("<init>")
-    static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Supplier<Biome>> $$0) {
-        throw new UntransformedInvokerError();
+    @Override
+    public SamplingConfig of(final double xzScale, final double xzFactor, final double yScale, final double yFactor) {
+        return (SamplingConfig) new NoiseSamplingSettings(xzScale, yScale, xzFactor, yFactor);
     }
 }

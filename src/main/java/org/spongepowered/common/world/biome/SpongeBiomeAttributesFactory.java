@@ -22,26 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.world.biome;
 
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import org.spongepowered.api.world.biome.BiomeAttributes;
 
-import java.util.function.Supplier;
+public final class SpongeBiomeAttributesFactory implements BiomeAttributes.Factory {
 
-@Mixin(MultiNoiseBiomeSource.class)
-public interface MultiNoiseBiomeSourceAccessor {
+    @Override
+    public BiomeAttributes of(final float temperature, final float humidity, final float continentalness, final float erosion, final float depth, final float weirdness, final float offset) {
+        var mcTemperature = Climate.Parameter.point(temperature);
+        var mcHumidity = Climate.Parameter.point(humidity);
+        var mcContinentalness = Climate.Parameter.point(continentalness);
+        var mcErosion = Climate.Parameter.point(erosion);
+        var mcDepth = Climate.Parameter.point(depth);
+        var mcWeirdness = Climate.Parameter.point(weirdness);
+        var mcOffset = Climate.quantizeCoord(offset);
 
-    @Accessor("parameters")
-    Climate.ParameterList<Supplier<Biome>> accessor$parameters();
-
-    @Invoker("<init>")
-    static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Supplier<Biome>> $$0) {
-        throw new UntransformedInvokerError();
+        return (BiomeAttributes) (Object) new Climate.ParameterPoint(mcTemperature, mcHumidity, mcContinentalness, mcErosion, mcDepth, mcWeirdness, mcOffset);
     }
 }

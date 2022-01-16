@@ -22,26 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.levelgen.NoiseSlider;
+import org.spongepowered.api.world.generation.config.noise.SlideConfig;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.function.Supplier;
+@Mixin(NoiseSlider.class)
+public abstract class NoiseSliderMixin_API implements SlideConfig {
 
-@Mixin(MultiNoiseBiomeSource.class)
-public interface MultiNoiseBiomeSourceAccessor {
+    // @formatter:off
+    @Shadow @Final private double target;
+    @Shadow @Final private int size;
+    @Shadow @Final private int offset;
+    // @formatter:on
 
-    @Accessor("parameters")
-    Climate.ParameterList<Supplier<Biome>> accessor$parameters();
+    @Override
+    public double target() {
+        return this.target;
+    }
 
-    @Invoker("<init>")
-    static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Supplier<Biome>> $$0) {
-        throw new UntransformedInvokerError();
+    @Override
+    public int size() {
+        return this.size;
+    }
+
+    @Override
+    public int offset() {
+        return this.offset;
     }
 }

@@ -24,12 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
+import net.minecraft.world.level.biome.TerrainShaper;
 import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
 import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraft.world.level.levelgen.NoiseSlider;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
+import org.spongepowered.api.world.generation.config.noise.Shaper;
 import org.spongepowered.api.world.generation.config.noise.SlideConfig;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
@@ -48,7 +51,8 @@ public abstract class NoiseSettingsMixin_API implements NoiseConfig {
     @Shadow public abstract NoiseSlider shadow$bottomSlideSettings();
     @Shadow public abstract int shadow$noiseSizeHorizontal();
     @Shadow public abstract int shadow$noiseSizeVertical();
-    @Shadow @Deprecated public abstract boolean shadow$isAmplified();
+    @Shadow @Final public abstract boolean shadow$largeBiomes();
+    @Shadow @Final public abstract TerrainShaper shadow$terrainShaper();
     // @formatter:on
 
     @Intrinsic
@@ -82,7 +86,13 @@ public abstract class NoiseSettingsMixin_API implements NoiseConfig {
     }
 
     @Override
-    public boolean amplified() {
-        return this.shadow$isAmplified();
+    public boolean largeBiomes() {
+        return this.shadow$largeBiomes();
     }
+
+    @Override
+    public Shaper terrainShaper() {
+        return (Shaper) (Object) this.shadow$terrainShaper();
+    }
+
 }

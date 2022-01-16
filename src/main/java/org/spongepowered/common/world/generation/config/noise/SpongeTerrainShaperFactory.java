@@ -22,26 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.world.generation.config.noise;
 
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import net.minecraft.data.worldgen.TerrainProvider;
+import org.spongepowered.api.world.generation.config.noise.Shaper;
 
-import java.util.function.Supplier;
+public final class SpongeTerrainShaperFactory implements Shaper.Factory {
 
-@Mixin(MultiNoiseBiomeSource.class)
-public interface MultiNoiseBiomeSourceAccessor {
+    @Override
+    public Shaper overworld(final boolean ampflied) {
+        return (Shaper) (Object) TerrainProvider.overworld(ampflied);
+    }
 
-    @Accessor("parameters")
-    Climate.ParameterList<Supplier<Biome>> accessor$parameters();
+    @Override
+    public Shaper caves() {
+        return (Shaper) (Object) TerrainProvider.caves();
+    }
 
-    @Invoker("<init>")
-    static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Supplier<Biome>> $$0) {
-        throw new UntransformedInvokerError();
+    @Override
+    public Shaper floatingIslands() {
+        return (Shaper) (Object) TerrainProvider.floatingIslands();
+    }
+
+    @Override
+    public Shaper nether() {
+        return (Shaper) (Object) TerrainProvider.nether();
+    }
+
+    @Override
+    public Shaper end() {
+        return (Shaper) (Object) TerrainProvider.end();
     }
 }

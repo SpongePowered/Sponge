@@ -108,7 +108,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                     )
             );
 
-    public static final Codec<LevelStem> DIRECT_CODEC = new MapCodec.MapCodecCodec<>(new SpongeDataCodec<>(LevelStem.CODEC,
+    public static final Codec<LevelStem> DIRECT_CODEC = new MapCodec.MapCodecCodec<LevelStem>(new SpongeDataCodec<>(LevelStem.CODEC,
         SpongeWorldTemplate.SPONGE_CODEC, (type, data) -> ((LevelStemBridge) (Object) type).bridge$decorateData(data),
         type -> ((LevelStemBridge) (Object) type).bridge$createData()));
 

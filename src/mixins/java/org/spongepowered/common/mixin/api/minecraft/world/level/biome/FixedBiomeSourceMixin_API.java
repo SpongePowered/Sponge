@@ -22,26 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.FixedBiomeSource;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.world.biome.provider.ConfigurableBiomeProvider;
+import org.spongepowered.api.world.biome.provider.FixedBiomeConfig;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.function.Supplier;
 
-@Mixin(MultiNoiseBiomeSource.class)
-public interface MultiNoiseBiomeSourceAccessor {
+import javax.annotation.Nullable;
 
-    @Accessor("parameters")
-    Climate.ParameterList<Supplier<Biome>> accessor$parameters();
+@Mixin(FixedBiomeSource.class)
+public abstract class FixedBiomeSourceMixin_API extends BiomeSourceMixin_API implements ConfigurableBiomeProvider<FixedBiomeConfig> {
 
-    @Invoker("<init>")
-    static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Supplier<Biome>> $$0) {
-        throw new UntransformedInvokerError();
+    // @formatter:off
+    @Shadow @Final private Supplier<Biome> biome;
+    // @formatter:on
+
+    @Nullable private FixedBiomeConfig api$config;
+
+    @Override
+    public FixedBiomeConfig config() {
+        if (this.api$config == null) {
+            var biome = this.biome.get();
+            var biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
+            this.api$config = FixedBiomeConfig.of(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(biome)));
+        }
+        return this.api$config;
     }
 }

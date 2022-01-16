@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.world.server;
 
-import net.minecraft.resources.ResourceLocation;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -39,6 +41,8 @@ import org.spongepowered.api.world.WorldTypeEffects;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
+import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
+import org.spongepowered.common.data.fixer.SpongeDataCodec;
 import org.spongepowered.common.registry.provider.DimensionEffectProvider;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.MissingImplementationException;
@@ -59,7 +63,23 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     public final int minY, logicalHeight, maximumHeight;
     public final double coordinateScale;
 
-    SpongeWorldTypeTemplate(final BuilderImpl builder) {
+    private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
+        .create(r -> r
+            .group(
+                Codec.BOOL.optionalFieldOf("create_dragon_fight", Boolean.FALSE).forGetter(v -> v.createDragonFight)
+            )
+            .apply(r, r.stable(SpongeDataSection::new))
+        );
+
+    public static Codec<DimensionType> DIRECT_CODEC;
+
+    public static void internalCodec(final Codec<DimensionType> internalCodec) {
+        SpongeWorldTypeTemplate.DIRECT_CODEC = new MapCodec.MapCodecCodec<>(new SpongeDataCodec<>(internalCodec,
+            SpongeWorldTypeTemplate.SPONGE_CODEC, (type, data) -> ((DimensionTypeBridge) type).bridge$decorateData(data), type -> ((DimensionTypeBridge)
+            type).bridge$createData()));
+    }
+
+    protected SpongeWorldTypeTemplate(final BuilderImpl builder) {
         super(builder.key);
 
         this.effect = builder.effect;
@@ -78,6 +98,8 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         this.logicalHeight = builder.logicalHeight;
         this.maximumHeight = builder.maximumHeight;
         this.coordinateScale = builder.coordinateMultiplier;
+
+        // Sponge
         this.createDragonFight = builder.createDragonFight;
     }
 
@@ -200,11 +222,9 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     }
 
     public static final class SpongeDataSection {
-        public final ResourceLocation biomeSampler;
         public final boolean createDragonFight;
 
-        public SpongeDataSection(final ResourceLocation biomeSampler, final boolean createDragonFight) {
-            this.biomeSampler = biomeSampler;
+        public SpongeDataSection(final boolean createDragonFight) {
             this.createDragonFight = createDragonFight;
         }
     }

@@ -116,7 +116,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                         s.coordinateMultiplier(), s.createDragonFight(), s.piglinSafe(), s.bedsUsable(), s.respawnAnchorsUsable(), s.hasRaids(),
                         s.minY(), s.logicalHeight(), s.maximumHeight(), (ResourceLocation) (Object)
                             ((SpongeWorldTypeTemplate) s).infiniburn, (ResourceLocation) (Object) s.effect().key(), s.ambientLighting());
-                    return DimensionType.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), type).getOrThrow(false, e -> {});
+                    return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), type).getOrThrow(false, e -> {});
                 },
                 (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
                 true

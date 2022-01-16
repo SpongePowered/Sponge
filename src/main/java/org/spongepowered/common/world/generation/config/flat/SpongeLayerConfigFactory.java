@@ -22,26 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.world.generation.config.flat;
 
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.world.generation.config.flat.LayerConfig;
+import org.spongepowered.common.bridge.world.level.levelgen.flat.FlatLayerInfoBridge;
 
-import java.util.function.Supplier;
+public final class SpongeLayerConfigFactory implements LayerConfig.Factory {
 
-@Mixin(MultiNoiseBiomeSource.class)
-public interface MultiNoiseBiomeSourceAccessor {
-
-    @Accessor("parameters")
-    Climate.ParameterList<Supplier<Biome>> accessor$parameters();
-
-    @Invoker("<init>")
-    static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Supplier<Biome>> $$0) {
-        throw new UntransformedInvokerError();
+    @Override
+    public LayerConfig of(final int height, final BlockState block) {
+        final FlatLayerInfo layer = new FlatLayerInfo(height, (Block) block.type());
+        ((FlatLayerInfoBridge) layer).bridge$setBlockState((net.minecraft.world.level.block.state.BlockState) block);
+        return (LayerConfig) layer;
     }
 }

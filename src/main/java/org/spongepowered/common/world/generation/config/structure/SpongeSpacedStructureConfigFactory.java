@@ -22,26 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.world.generation.config.structure;
 
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
+import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
 
-import java.util.function.Supplier;
+public final class SpongeSpacedStructureConfigFactory implements SpacedStructureConfig.Factory {
 
-@Mixin(MultiNoiseBiomeSource.class)
-public interface MultiNoiseBiomeSourceAccessor {
-
-    @Accessor("parameters")
-    Climate.ParameterList<Supplier<Biome>> accessor$parameters();
-
-    @Invoker("<init>")
-    static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Supplier<Biome>> $$0) {
-        throw new UntransformedInvokerError();
+    @Override
+    public SpacedStructureConfig of(final int distance, final int spread, final int count) {
+        return (SpacedStructureConfig) new StrongholdConfiguration(distance, spread, count);
     }
 }
