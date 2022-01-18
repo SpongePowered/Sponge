@@ -1,0 +1,51 @@
+name: Implementation/Feature Request for SpongeForge and SpongeVanilla on Minecraft 1.16.5 or later
+description: Request implementation or a feature.
+labels: [ "status: needs triage", "type: feature request" ]
+body:
+  - type: markdown
+    attributes:
+      value: "## Before You Begin"
+  - type: markdown
+    attributes:
+      value: |
+        This is for requesting new features that may add new features to the server or change behaviours, but don't 
+        change the API itself, such as a new optimisation or a request to tweak an existing setting's behaviour/options.
+        In general, server owners requesting new features or plugin developers that are asking for updates to 
+        implementation only should be reporting their feedback here.
+        
+        Please make sure you have searched existing issues to see if someone else has reported your issue first. We will
+        close duplicates.
+        
+        If you are a plugin developer who is asking for an update to the API, such as adding a new method or features
+        that is intended for plugins to interact with, 
+        [you should make a request on the SpongeAPI repo instead.](https://github.com/SpongePowered/SpongeAPI/issues/new).
+        
+        Remember, Github Issues is not for support. If you require help, visit the 
+        [Sponge Docs](https://docs.spongepowered.org), our [Forums](https://forums.spongepowered.org) or 
+        [Discord Server](https://discord.gg/sponge).
+  - type: dropdown
+    id: type
+    attributes:
+      label: "Is this request specific to one implementation of Sponge?"
+      options:
+        - "No"
+        - "Yes, only SpongeForge"
+        - "Yes, only SpongeVanilla"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Sponge Version
+      description: What version number are you running that does not fulfil your requirements?
+      placeholder: ex. 1.16.5-36.2.5-8.0.0-RC921
+    validations:
+      required: true
+  - type: textarea
+    id: what-do-you-want
+    attributes:
+      label: What are you requesting?
+      description: Explain what what you're requesting and why you're requesting it. Please add as much detail as you can.
+    validations:
+      required: true
+
