@@ -13,12 +13,15 @@ body:
         In general, server owners requesting new features or plugin developers that are asking for updates to 
         implementation only should be reporting their feedback here.
         
+        
         Please make sure you have searched existing issues to see if someone else has reported your issue first. We will
         close duplicates.
+        
         
         If you are a plugin developer who is asking for an update to the API, such as adding a new method or features
         that is intended for plugins to interact with, 
         [you should make a request on the SpongeAPI repo instead.](https://github.com/SpongePowered/SpongeAPI/issues/new).
+        
         
         Remember, Github Issues is not for support. If you require help, visit the 
         [Sponge Docs](https://docs.spongepowered.org), our [Forums](https://forums.spongepowered.org) or 
