@@ -7,7 +7,7 @@ body:
       value: "## Before You Begin"
   - type: markdown
     attributes:
-      value: |
+      value: >
         This is for requesting new features that may add new features to the server or change behaviours, but don't 
         change the API itself, such as a new optimisation or a request to tweak an existing setting's behaviour/options.
         In general, server owners requesting new features or plugin developers that are asking for updates to 

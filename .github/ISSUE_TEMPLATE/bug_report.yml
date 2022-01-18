@@ -15,8 +15,7 @@ body:
         * [Need server support? Post on our official forums instead.](https://forums.spongepowered.org/)
         * [Got a quick question? Ask us on our official Discord guild](https://discord.gg/sponge)
         
-        If you are sure you have found a bug with Sponge, please make sure you have searched existing issues to see if
-        someone else has reported your issue first. We will close duplicates.
+        If you are sure you have found a bug with Sponge, please make sure you have searched existing issues to see if someone else has reported your issue first. We will close duplicates.
         
         If no-one has filed an issue describing the problem you're having yet, please fill out the form below.
   - type: dropdown
@@ -65,12 +64,10 @@ body:
     id: what-happened
     attributes:
       label: Describe the bug
-      description: >
-        Explain what the bug is, how to reproduce it, and any workarounds you may have already found. Please include as much detail as possible,
-        but please do not screenshot text. Logs should be provided in a Github Gist (preferred) or paste.gg and linked to in the section below.
+      description: |
+        Explain what the bug is, how to reproduce it, and any workarounds you may have already found. Please include as much detail as possible, but please do not screenshot text. Logs should be provided in a Github Gist (preferred) or paste.gg and linked to in the section below.
         
-        If you are a developer that is reporting issues based on your code, please include that code here, enough that we can copy/paste into
-        a test project and run it without modification and see the issue.
+        If you are a developer that is reporting issues based on your code, please include that code here, enough that we can copy/paste into a test project and run it without modification and see the issue.
     validations:
       required: true
   - type: input
