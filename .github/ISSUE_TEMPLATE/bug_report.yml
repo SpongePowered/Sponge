@@ -1,0 +1,77 @@
+name: Report a Bug on SpongeForge or SpongeVanilla for Minecraft 1.16.5 or later
+description: File a bug report. Please note that Github Issues is not for general support.
+labels: [ "status: needs triage", "type: bug" ]
+body:
+  - type: markdown
+    attributes:
+      value: "## Before You Begin"
+  - type: markdown
+    attributes:
+      value: |
+        Github Issues are for filing bug reports and requesting new features only. If you need general support, please check out the following places first:
+        
+        * [Running SpongeForge? Check to see if a mod you're running is incompatible here.](https://docs.spongepowered.org/stable/en/server/spongineer/incompatible.html)
+        * [Read more about how to set up a server on SpongeDocs.](https://docs.spongepowered.org/stable/en/server/index.html)
+        * [Need server support? Post on our official forums instead.](https://forums.spongepowered.org/)
+        * [Got a quick question? Ask us on our official Discord guild](https://discord.gg/sponge)
+        
+        If you are sure you have found a bug with Sponge, please make sure you have searched existing issues to see if someone else has reported your issue first. We will close duplicates.
+        
+        If no-one has filed an issue describing the problem you're having yet, please fill out the form below.
+  - type: dropdown
+    id: type
+    attributes:
+      label: Affected Product(s)
+      description: Which products does this bug affect?
+      options:
+        - "SpongeForge"
+        - "SpongeVanilla"
+      multiple: true
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of Sponge are you running?
+      placeholder: ex. 1.16.5-36.2.5-8.0.0-RC1000
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: e.g. Windows, macOS, Linux
+    validations:
+      required: true
+  - type: input
+    id: java
+    attributes:
+      label: Java Version
+      description: "You can get this by running `java -version` from the command line"
+    validations:
+      required: true
+  - type: textarea
+    id: plugins
+    attributes:
+      label: Plugins/Mods
+      description: |
+        List all plugins and mods that you are using. Please provide the list as a text list, do not screenshot your mod and plugin folders.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Describe the bug
+      description: |
+        Explain what the bug is, how to reproduce it, and any workarounds you may have already found. Please include as much detail as possible, but please do not screenshot text. Logs should be provided in a Github Gist (preferred) or paste.gg and linked to in the section below.
+        
+        If you are a developer that is reporting issues based on your code, please include that code here, enough that we can copy/paste into a test project and run it without modification and see the issue.
+    validations:
+      required: true
+  - type: input
+    id: logs
+    attributes:
+      label: Link to logs
+      description: "Please paste relevant logs to [Github Gist](https://gist.github.com) or [paste.gg](https://paste.gg), and paste a link to it here. Do not provide screenshots of logs."
