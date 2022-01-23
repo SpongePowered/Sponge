@@ -51,7 +51,7 @@ import java.nio.file.Path;
 public abstract class MainMixin {
 
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/DedicatedServerProperties;getWorldGenSettings(Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/world/level/levelgen/WorldGenSettings;", ordinal = 0))
-    private static WorldGenSettings redirectInitSettings(DedicatedServerProperties instance, RegistryAccess $$02) {
+    private static WorldGenSettings impl$redirectInitSettings(DedicatedServerProperties instance, RegistryAccess $$02) {
         var worldGenSettings = instance.getWorldGenSettings($$02);
         BootstrapProperties.init(worldGenSettings, instance.gamemode, instance.difficulty, instance.pvp, instance.hardcore, true, instance.viewDistance, $$02);
         return worldGenSettings;

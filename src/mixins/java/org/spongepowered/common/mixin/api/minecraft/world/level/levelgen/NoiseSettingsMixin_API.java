@@ -85,8 +85,8 @@ public abstract class NoiseSettingsMixin_API implements NoiseConfig {
         return this.shadow$noiseSizeVertical();
     }
 
-    @Override
-    public boolean largeBiomes() {
+    @Intrinsic
+    public boolean noiseConfig$largeBiomes() {
         return this.shadow$largeBiomes();
     }
 
