@@ -459,13 +459,14 @@ public abstract class SpongeWorldManager implements WorldManager {
             return CompletableFuture.completedFuture(false);
         }
 
-        try {
-            this.unloadWorld0((ServerLevel) world);
-        } catch (final IOException e) {
-            return FutureUtil.completedWithException(e);
-        }
-
-        return CompletableFuture.completedFuture(true);
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                this.unloadWorld0((ServerLevel) world);
+            } catch (final IOException e) {
+                return false;
+            }
+            return true;
+        }, SpongeCommon.server());
     }
 
     @Override

@@ -38,6 +38,8 @@ import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
+import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -485,6 +487,20 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                 }
             }
         }
+    }
+
+    @Redirect(method = "*",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;add(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/ai/village/poi/PoiType;)V"
+        )
+    )
+    private void impl$avoidAddingPoiUpdatesOnUnloadedWorld(final PoiManager manager, final BlockPos pos, final PoiType type) {
+        // Unloaded worlds should not notify PoiManager of changes
+        if (!SpongeCommon.server().levelKeys().contains(this.shadow$dimension())) {
+            return;
+        }
+        manager.add(pos, type);
     }
 
     @Override
