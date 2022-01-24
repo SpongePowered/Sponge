@@ -78,9 +78,9 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         checkState(this.pos != null, "BlockPos is null");
         checkState(this.blockState != null, "BlockState is null");
         checkState(this.usedItem != null, "ItemUsed is null");
-        checkState(this.priorContext != null, "Prior context is null");
         checkState(this.world != null, "World is null");
         this.priorContext = this.createdTracker.getPhaseContext();
+        checkState(this.priorContext != null, "Prior context is null");
         final SpongeBlockSnapshot.BuilderImpl builder = SpongeBlockSnapshot.BuilderImpl.pooled()
             .world(((ServerLevel) this.world))
             .position(VecHelper.toVector3i(this.pos))
