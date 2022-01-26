@@ -24,25 +24,20 @@
  */
 package org.spongepowered.common.mixin.inventory.impl;
 
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
-import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
-import org.spongepowered.common.inventory.custom.ViewableCustomInventory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.npc.ClientSideMerchant;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
+import org.spongepowered.common.inventory.custom.ViewableCustomInventory;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * {@link org.spongepowered.common.mixin.inventory.api.TraitMixin_Viewable_Inventory_API}
@@ -62,31 +57,25 @@ import net.minecraft.world.level.block.entity.LecternBlockEntity;
 })
 public abstract class TraitMixin_ViewableBridge_Inventory implements ViewableInventoryBridge {
 
-    private final List<AbstractContainerMenu> impl$openContainers = new ArrayList<>();
+    private final Set<ServerPlayer> impl$viewers = new HashSet<>();
 
     @Override
-    public void viewableBridge$addContainer(AbstractContainerMenu container) {
-        this.impl$openContainers.add(container);
+    public void viewableBridge$addPlayer(ServerPlayer container) {
+        this.impl$viewers.add(container);
     }
 
     @Override
-    public void viewableBridge$removeContainer(AbstractContainerMenu container) {
-        this.impl$openContainers.remove(container);
+    public void viewableBridge$removePlayer(ServerPlayer container) {
+        this.impl$viewers.remove(container);
     }
 
     @Override
     public Set<ServerPlayer> viewableBridge$getViewers() {
-        return this.impl$getPlayerStream() .collect(Collectors.toSet());
+        return this.impl$viewers;
     }
 
     @Override
     public boolean viewableBridge$hasViewers() {
-        return this.impl$getPlayerStream().findAny().isPresent();
-    }
-
-    private Stream<ServerPlayer> impl$getPlayerStream() {
-        return this.impl$openContainers.stream()
-                .flatMap(c -> ((ContainerBridge) c).bridge$listeners().stream())
-                .map(ServerPlayer.class::cast);
+        return !this.impl$viewers.isEmpty();
     }
 }

@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.bridge.world.inventory;
 
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Set;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public interface ViewableInventoryBridge {
 
-    void viewableBridge$addContainer(AbstractContainerMenu container);
+    void viewableBridge$addPlayer(ServerPlayer player);
 
-    void viewableBridge$removeContainer(AbstractContainerMenu container);
+    void viewableBridge$removePlayer(ServerPlayer player);
 
     Set<ServerPlayer> viewableBridge$getViewers();
 

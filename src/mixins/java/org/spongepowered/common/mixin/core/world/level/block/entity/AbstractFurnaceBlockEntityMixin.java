@@ -67,8 +67,8 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
 
     // @Formatter:off
     @Shadow protected NonNullList<ItemStack> items;
-    @Shadow private int cookingProgress;
-    @Shadow private int cookingTotalTime;
+    @Shadow int cookingProgress;
+    @Shadow int cookingTotalTime;
     @Shadow @Final private RecipeType<? extends AbstractCookingRecipe> recipeType;
 
     // @Formatter:on

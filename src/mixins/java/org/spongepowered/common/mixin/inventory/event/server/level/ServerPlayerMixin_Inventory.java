@@ -52,7 +52,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerInventoryBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -73,6 +73,7 @@ import java.util.OptionalInt;
 public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory {
 
     @Nullable private EffectTransactor inventory$effectTransactor = null;
+    @Nullable private Object inventory$menuProvider;
 
     // Ignore
     ServerPlayerMixin_Inventory(final EntityType<?> param0, final Level param1) {
@@ -134,6 +135,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
                 container.broadcastChanges();
             }
         }
+        this.impl$onCloseMenu(); // Handle Viewers
     }
 
     @Override
@@ -180,15 +182,39 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
             shift = At.Shift.AFTER
         )
     )
-    private void impl$onOpenMenu(final MenuProvider param0, final CallbackInfoReturnable<OptionalInt> cir) {
+    private void impl$afterOpenMenu(final MenuProvider param0, final CallbackInfoReturnable<OptionalInt> cir) {
         PhaseTracker.SERVER.getPhaseContext()
             .getTransactor()
             .logContainerSet((ServerPlayer) (Object) this);
     }
 
+    @Inject(method = "openMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V"))
+    private void impl$onOpenMenu(final MenuProvider $$0, final CallbackInfoReturnable<OptionalInt> cir) {
+        this.inventory$menuProvider = $$0;
+    }
+
     @Inject(method = "openHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V"))
     private void impl$onOpenHorseInventory(final AbstractHorse horse, final Container inventoryIn, final CallbackInfo ci) {
-        ((TrackedContainerBridge) this.containerMenu).bridge$trackViewable(inventoryIn);
+        this.inventory$menuProvider = inventoryIn;
+    }
+
+    @Inject(method = "initMenu", at = @At("HEAD"))
+    private void impl$onInitMenu(final AbstractContainerMenu $$0, final CallbackInfo ci) {
+        if (this.inventory$menuProvider instanceof ViewableInventoryBridge bridge) {
+            bridge.viewableBridge$addPlayer(((ServerPlayer) (Object) this));
+        }
+    }
+
+    @Inject(method = "doCloseContainer", at = @At("RETURN"))
+    private void impl$onDoCloseContainer(final CallbackInfo ci) {
+        this.impl$onCloseMenu();
+    }
+
+    private void impl$onCloseMenu() {
+        if (this.inventory$menuProvider instanceof ViewableInventoryBridge bridge) {
+            bridge.viewableBridge$removePlayer(((ServerPlayer) (Object) this));
+        }
+        this.inventory$menuProvider = null;
     }
 
     @Redirect(

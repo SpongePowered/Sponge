@@ -36,8 +36,6 @@ import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Final;
@@ -49,7 +47,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
@@ -58,6 +55,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.phase.tick.TileEntityTickContext;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -80,56 +78,21 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Shadow @Nullable private ContainerSynchronizer synchronizer;
 
     @Shadow protected abstract void shadow$doClick(int param0, int param1, ClickType param2, Player param3);
+    @Shadow protected abstract void shadow$updateDataSlotListeners(int $$0, int $$1);
+    @Shadow protected abstract void shadow$synchronizeDataSlotToRemote(int $$0, int $$1);
+    @Shadow protected abstract void shadow$synchronizeCarriedToRemote();
     //@formatter:on
 
     private boolean impl$isClicking; // Menu Callbacks are only called when clicking in a container
     // Detects if a mod overrides detectAndSendChanges
     private boolean impl$captureSuccess = false;
-    @Nullable private Object impl$viewed;
 
     @Override
     public boolean bridge$capturePossible() {
         return this.impl$captureSuccess;
     }
 
-    @Override
-    public void bridge$trackViewable(Object inventory) {
-        if (inventory instanceof Carrier) {
-            inventory = ((Carrier) inventory).inventory();
-        }
-        if (inventory instanceof Inventory) {
-            ((Inventory) inventory).asViewable().ifPresent(i -> ((ViewableInventoryBridge) i).viewableBridge$addContainer((AbstractContainerMenu) (Object) this));
-        }
-        this.impl$setViewed(inventory);
-        // TODO else unknown inventory - try to provide wrapper ViewableInventory?
-    }
-
-    private void impl$setViewed(@Nullable final Object viewed) {
-        if (viewed == null) {
-            this.impl$unTrackViewable(this.impl$viewed);
-        }
-        this.impl$viewed = viewed;
-    }
-
-    private void impl$unTrackViewable(@Nullable Object inventory) {
-        if (inventory instanceof Carrier) {
-            inventory = ((Carrier) inventory).inventory();
-        }
-        if (inventory instanceof Inventory) {
-            ((Inventory) inventory).asViewable().ifPresent(i -> ((ViewableInventoryBridge) i).viewableBridge$removeContainer(((AbstractContainerMenu) (Object) this)));
-        }
-        // TODO else unknown inventory - try to provide wrapper ViewableInventory?
-    }
-
     // Injects/Redirects -------------------------------------------------------------------------
-
-    @Inject(method = "removed", at = @At(value = "HEAD"))
-    private void onOnContainerClosed(final Player player, final CallbackInfo ci) {
-        if (((LevelBridge) player.level).bridge$isFake()) {
-            return;
-        }
-        this.impl$setViewed(null);
-    }
 
     @Redirect(method = "doClick",
         at = @At(
@@ -268,10 +231,12 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 }
             }
         }
+
+        this.shadow$synchronizeCarriedToRemote();
+        this.impl$broadcastDataSlots();
     }
 
     private void impl$sendSlotContents(final Integer i, final ItemStack oldStack) {
-
         for (final ContainerListener listener : this.containerListeners) {
             boolean isChangingQuantityOnly = true;
             if (listener instanceof ServerPlayer) {
@@ -285,25 +250,26 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         }
     }
 
-    private void impl$detectAndSendPropertyChanges() {
+    private void impl$broadcastDataSlots() {
         for(int j = 0; j < this.dataSlots.size(); ++j) {
-            final DataSlot intreferenceholder = this.dataSlots.get(j);
-            if (intreferenceholder.checkAndClearUpdateFlag()) {
-                for(final ContainerListener icontainerlistener1 : this.containerListeners) {
-                    icontainerlistener1.dataChanged((AbstractContainerMenu) (Object) this, j, intreferenceholder.get());
-                }
+            final DataSlot dataSlot = this.dataSlots.get(j);
+            if (dataSlot.checkAndClearUpdateFlag()) {
+                this.shadow$updateDataSlotListeners(j, dataSlot.get());
             }
+            this.shadow$synchronizeDataSlotToRemote(j, dataSlot.get());
         }
     }
 
     private void impl$capture(final Integer index, final ItemStack newStack, final ItemStack oldStack) {
-        if (PhaseTracker.SERVER.onSidedThread() && !PhaseTracker.SERVER.getPhaseContext().isRestoring()) {
+        final PhaseContext<?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
+        if (PhaseTracker.SERVER.onSidedThread() &&
+                 !(phaseContext.isRestoring() // do not capture when block restoring & initial sync on inventory open
+                || phaseContext instanceof TileEntityTickContext)) { // do not capture for open inventories when ticking BlockEntities
             final ItemStackSnapshot oldItem = ItemStackUtil.snapshotOf(oldStack);
             final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(newStack);
             try {
                 final org.spongepowered.api.item.inventory.Slot adapter = this.inventoryAdapter$getSlot(index).get();
                 final SlotTransaction newTransaction = new SlotTransaction(adapter, oldItem, newItem);
-                final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
                 phaseContext.getTransactor().logSlotTransaction(phaseContext, newTransaction, (AbstractContainerMenu) (Object) this);
             } catch (final IndexOutOfBoundsException e) {
                 SpongeCommon.logger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);

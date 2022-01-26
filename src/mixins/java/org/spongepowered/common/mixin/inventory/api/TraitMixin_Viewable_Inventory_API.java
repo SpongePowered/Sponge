@@ -34,6 +34,8 @@ import org.spongepowered.common.inventory.custom.ViewableCustomInventory;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.npc.AbstractVillager;
@@ -65,7 +67,7 @@ public abstract class TraitMixin_Viewable_Inventory_API implements ViewableInven
     @Override
     public Set<ServerPlayer> viewers() {
         if (this instanceof ViewableInventoryBridge) {
-            return ((ViewableInventoryBridge) this).viewableBridge$getViewers();
+            return ((ViewableInventoryBridge) this).viewableBridge$getViewers().stream().map(ServerPlayer.class::cast).collect(Collectors.toSet());
         }
         return Collections.emptySet();
     }

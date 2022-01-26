@@ -64,6 +64,7 @@ import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
@@ -87,6 +88,7 @@ import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -185,6 +187,17 @@ public final class TrackingUtil {
                 PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_ENTITY_TICK, () -> "Wrapping Entity Tick: " + tile.toString());
                 tile.tick();
             }
+
+
+            // If we know the viewers force broadcast now to associate the inventory change with its blockentity
+            // otherwise the viewing players update this during their ticking
+            if (blockEntity instanceof ViewableInventoryBridge) {
+                final Set<ServerPlayer> players = ((ViewableInventoryBridge) blockEntity).viewableBridge$getViewers();
+                if (players.size() > 0) {
+                    players.forEach(player -> player.containerMenu.broadcastChanges());
+                }
+            }
+
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, context);
         }

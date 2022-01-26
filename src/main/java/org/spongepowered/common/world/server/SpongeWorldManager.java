@@ -874,6 +874,8 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         SpongeCommon.logger().info("Unloading world '{}' ({})", registryKey.location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) world.dimensionType()));
 
+        SpongeCommon.post(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.world.server.ServerWorld) world));
+
         final BlockPos spawnPoint = world.getSharedSpawnPos();
         world.getChunkSource().removeRegionTicket(SpongeWorldManager.SPAWN_CHUNKS, new ChunkPos(spawnPoint), 11, registryKey.location());
 
@@ -889,8 +891,6 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         this.worlds.remove(registryKey);
-
-        SpongeCommon.post(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.world.server.ServerWorld) world));
     }
 
     public void loadLevel() {

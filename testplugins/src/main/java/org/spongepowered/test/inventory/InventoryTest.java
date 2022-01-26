@@ -38,6 +38,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.block.entity.CookingEvent;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
@@ -137,6 +138,12 @@ public final class InventoryTest implements LoadableModule {
         }
 
         @Listener
+        private void onCooking(final CookingEvent event) {
+            final String recipe = event.recipe().isPresent() ? event.recipe().get().key().toString() : "no recipe";
+            this.plugin.logger().info("{} in {} using {}", event.getClass().getSimpleName(), event.blockEntity().getClass().getSimpleName(), recipe);
+        }
+
+        @Listener
         private void onInteractContainer(final InteractContainerEvent event) {
             if (event instanceof EnchantItemEvent) {
                 this.plugin.logger().info("{} [{}] S:{}", event.getClass().getSimpleName(), ((EnchantItemEvent) event).option(),
@@ -215,10 +222,13 @@ public final class InventoryTest implements LoadableModule {
             if (event instanceof TransferInventoryEvent.Post) {
                 this.plugin.logger().info("{} {}=>{}", event.getClass().getSimpleName(), event.sourceInventory().getClass().getSimpleName(), event.targetInventory()
                         .getClass().getSimpleName());
-                final Integer sourceIdx = ((TransferInventoryEvent.Post) event).sourceSlot().get(Keys.SLOT_INDEX).get();
-                final Integer targetIdx = ((TransferInventoryEvent.Post) event).targetSlot().get(Keys.SLOT_INDEX).get();
+                final Slot source = ((TransferInventoryEvent.Post) event).sourceSlot();
+                final Integer sourceIdx = source.get(Keys.SLOT_INDEX).get();
+                final Slot target = ((TransferInventoryEvent.Post) event).targetSlot();
+                final Integer targetIdx = target.get(Keys.SLOT_INDEX).get();
                 final ItemStackSnapshot item = ((TransferInventoryEvent.Post) event).transferredItem();
-                this.plugin.logger().info("[{}] -> [{}] {}x{}", sourceIdx, targetIdx, item.type(), item.quantity());
+                this.plugin.logger().info("{}[{}] -> {}[{}] {}x{}", source.parent().getClass().getSimpleName(), sourceIdx,
+                        target.parent().getClass().getSimpleName(), targetIdx, ItemTypes.registry().valueKey(item.type()), item.quantity());
             }
         }
 
