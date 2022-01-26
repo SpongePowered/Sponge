@@ -51,6 +51,4 @@ public interface ContainerBridge {
 
     boolean bridge$isInUse();
 
-    List<ServerPlayer> bridge$listeners();
-
 }

@@ -311,8 +311,7 @@ interface TransactionSink {
                 return;
             }
         }
-        final ContainerSlotTransaction transaction = new ContainerSlotTransaction(
-            abstractContainerMenu, newTransaction);
+        final ContainerSlotTransaction transaction = new ContainerSlotTransaction(abstractContainerMenu, newTransaction);
         this.logTransaction(transaction);
     }
 

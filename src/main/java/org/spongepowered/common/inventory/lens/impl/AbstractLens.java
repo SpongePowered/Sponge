@@ -188,7 +188,7 @@ public abstract class AbstractLens implements Lens {
                 }
             }
 
-            return Collections.emptyMap();
+            return dataMap;
         }
 
         return this.handleMap.get(child);

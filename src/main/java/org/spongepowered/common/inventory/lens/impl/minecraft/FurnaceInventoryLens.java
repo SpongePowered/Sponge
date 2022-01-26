@@ -52,15 +52,15 @@ public class FurnaceInventoryLens extends RealLens {
     }
 
     protected void init(final SlotLensProvider slots) {
-        this.addChild(new DefaultIndexedLens(0, 3, slots));
+        this.addSpanningChild(new DefaultIndexedLens(0, 3, slots));
 
         this.input = new InputSlotLens(slots.getSlotLens(0), ItemStackFilter.filterIInventory(0));
         this.fuel = new FuelSlotLens(slots.getSlotLens(1), ItemStackFilter.filterIInventory(1));
         this.output = new OutputSlotLens(slots.getSlotLens(2), ItemStackFilter.filterIInventory(2));
 
-        this.addSpanningChild(this.input, KeyValuePair.slotIndex(0));
-        this.addSpanningChild(this.fuel, KeyValuePair.slotIndex(1));
-        this.addSpanningChild(this.output, KeyValuePair.slotIndex(2));
+        this.addChild(this.input, KeyValuePair.slotIndex(0));
+        this.addChild(this.fuel, KeyValuePair.slotIndex(1));
+        this.addChild(this.output, KeyValuePair.slotIndex(2));
     }
 
 }

@@ -164,12 +164,10 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
                 .map(Optional::get)
                 .findFirst();
         if (!event.isPresent() && !slotTransactions.isEmpty()) {
-            SpongeCommon.logger().warn("Logged slot transactions without event! {}", gameTransactions.size(), new Exception(""));
+            SpongeCommon.logger().warn("Logged slot transactions without event! {} {}", gameTransactions.size(), this.menu.getClass().getName(), new Exception(""));
             for (final SlotTransaction slotTransaction : slotTransactions) {
                 SpongeCommon.logger().warn(slotTransaction);
             }
-
-
         }
         return event;
     }

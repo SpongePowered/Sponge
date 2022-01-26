@@ -113,11 +113,4 @@ public abstract class AbstractContainerMenuMixin_Bridge_Inventory implements Car
         return this.impl$inUse;
     }
 
-    @Override
-    public List<ServerPlayer> bridge$listeners() {
-        return this.containerListeners.stream().filter(ServerPlayer.class::isInstance)
-                .map(ServerPlayer.class::cast)
-                .collect(Collectors.toList());
-    }
-
 }
