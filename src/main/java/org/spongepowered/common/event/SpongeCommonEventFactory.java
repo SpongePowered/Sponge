@@ -373,6 +373,10 @@ public final class SpongeCommonEventFactory {
         }
     }
 
+    private static boolean areSameGridSpots(final double a, final double b) {
+        return (long) (a * 8) == (long) (b * 8);
+    }
+
     /**
      * Performs the logic necessary to post the {@link MoveEntityEvent position event} for an {@link Entity}.
      *
@@ -383,11 +387,10 @@ public final class SpongeCommonEventFactory {
             return;
         }
 
-        final double deltaX = entity.xOld - entity.getX();
-        final double deltaY = entity.yOld - entity.getY();
-        final double deltaZ = entity.zOld - entity.getZ();
-        final double deltaChange = Math.pow(deltaX, 2) + Math.pow(deltaY, 2) + Math.pow(deltaZ, 2);
-        if (deltaChange < 1f / 256) {
+        // Here, we logically split each block into 1/8 x 1/8 x 1/8 cubes, and check to see if the entity has moved
+        // outside of this cube - if so, we call the event.
+        if (areSameGridSpots(entity.xOld, entity.getX()) && areSameGridSpots(entity.zOld, entity.getZ())
+            && areSameGridSpots(entity.yOld, entity.getY())) {
             return;
         }
 
