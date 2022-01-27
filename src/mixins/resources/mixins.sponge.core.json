@@ -105,6 +105,7 @@
         "world.entity.EntityTypeMixin",
         "world.entity.GrieferBridgeMixin",
         "world.entity.LivingEntityMixin",
+        "world.entity.LivingEntityMixin_Attack_impl",
         "world.entity.MobMixin",
         "world.entity.ai.goal.BreakDoorGoalMixin",
         "world.entity.ai.goal.BreedGoalMixin",

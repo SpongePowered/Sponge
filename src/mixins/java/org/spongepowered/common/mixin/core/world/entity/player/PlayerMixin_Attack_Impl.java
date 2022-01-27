@@ -408,4 +408,13 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
         }
     }
 
+    /**
+     * @author gabizou - January 26th, 2022
+     * @reason Add changes according to
+     */
+    @Override
+    @Overwrite
+    protected void actuallyHurt(final DamageSource damageSource, final float damage) {
+        this.bridge$damageEntity(damageSource, damage);
+    }
 }

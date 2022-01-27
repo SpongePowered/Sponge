@@ -22,30 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.entity;
+package org.spongepowered.forge.mixin.core.world.entity.player;
 
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.forge.mixin.core.world.entity.LivingEntityMixin_Forge;
 
-/**
- * Bridge methods designed as hooks for various methods called on an {@link Entity}
- * where a platform would want to adjust logic
- */
-public interface PlatformLivingEntityBridge {
-
-    /**
-     * Called when the {@link Entity} is to be not marked as removed.
-     */
-    default boolean bridge$onLivingAttack(final LivingEntity entity, final DamageSource source, final float amount) {
+@Mixin(Player.class)
+public class PlayerMixin_Forge extends LivingEntityMixin_Forge {
+    @Override
+    public boolean bridge$onLivingAttack(
+        final LivingEntity entity, final DamageSource source, final float amount
+    ) {
         return true;
-    }
-
-    default float bridge$applyModDamage(final LivingEntity entity, final DamageSource source, final float damage) {
-        return damage;
-    }
-
-    default float bridge$applyModDamageBeforeFunctions(final LivingEntity entity, final DamageSource source, final float damage) {
-        return damage;
     }
 }

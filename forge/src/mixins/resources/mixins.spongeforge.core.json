@@ -30,6 +30,7 @@
         "world.entity.EntityMixin_Forge",
         "world.entity.LivingEntityMixin_Forge",
         "world.entity.item.ItemEntityMixin_Forge",
+        "world.entity.player.PlayerMixin_Forge",
         "world.entity.projectile.ThrownEnderpealMixin_Forge",
         "world.entity.vehicle.BoatMixin_Forge",
         "world.level.LevelMixin_Forge",
