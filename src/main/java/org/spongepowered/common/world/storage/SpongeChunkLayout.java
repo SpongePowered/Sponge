@@ -25,39 +25,54 @@
 package org.spongepowered.common.world.storage;
 
 import org.spongepowered.api.world.storage.ChunkLayout;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3i;
 
 public final class SpongeChunkLayout implements ChunkLayout {
 
     public static final SpongeChunkLayout INSTANCE = new SpongeChunkLayout();
 
-    public static final Vector3i CHUNK_SIZE = new Vector3i(16, 256, 16);
-    public static final Vector3i CHUNK_MASK = SpongeChunkLayout.CHUNK_SIZE.sub(1, 1, 1);
-    private static final Vector3i SPACE_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1).div(SpongeChunkLayout.CHUNK_SIZE);
-    private static final Vector3i SPACE_MIN = new Vector3i(-30000000, 0, -30000000).div(SpongeChunkLayout.CHUNK_SIZE);
-    private static final Vector3i SPACE_SIZE = SpongeChunkLayout.SPACE_MAX.sub(SpongeChunkLayout.SPACE_MIN).add(1, 1, 1);
+    private final Vector3i size;
+    private final Vector3i mask;
+    private final Vector3i spaceMin;
+    private final Vector3i spaceMax;
+    private final Vector3i spaceSize;
+
+    public SpongeChunkLayout(final int minY, final int height) {
+        final var totalHeight = Math.abs(minY) + height;
+        this.size = new Vector3i(16, totalHeight, 16);
+        this.mask = this.size.sub(1, 1, 1);
+        this.spaceMax = new Vector3i(Constants.World.BLOCK_MAX.x(), height, Constants.World.BLOCK_MAX.z()).sub(1, 1, 1);
+        this.spaceMin = new Vector3i(Constants.World.BLOCK_MIN.x(), minY, Constants.World.BLOCK_MIN.z());
+        this.spaceSize = this.spaceMax.sub(this.spaceMin).add(1, 1, 1);
+    }
 
     private SpongeChunkLayout() {
+        this(-64, 384);
+    }
+
+    public Vector3i getMask() {
+        return this.mask;
     }
 
     @Override
     public Vector3i chunkSize() {
-        return SpongeChunkLayout.CHUNK_SIZE;
+        return this.size;
     }
 
     @Override
     public Vector3i spaceMax() {
-        return SpongeChunkLayout.SPACE_MAX;
+        return this.spaceMax;
     }
 
     @Override
     public Vector3i spaceMin() {
-        return SpongeChunkLayout.SPACE_MIN;
+        return this.spaceMin;
     }
 
     @Override
     public Vector3i spaceSize() {
-        return SpongeChunkLayout.SPACE_SIZE;
+        return this.spaceSize;
     }
 
     @Override
@@ -68,8 +83,7 @@ public final class SpongeChunkLayout implements ChunkLayout {
     @Override
     public boolean isInChunk(final int x, final int y, final int z) {
         // no bits allowed outside the mask!
-        return (x & ~SpongeChunkLayout.CHUNK_MASK.x()) == 0 && (y & ~SpongeChunkLayout.CHUNK_MASK.y()) == 0 && (z & ~SpongeChunkLayout.CHUNK_MASK
-            .z()) == 0;
+        return (x & ~this.mask.x()) == 0 && (y & ~this.mask.y()) == 0 && (z & ~this.mask.z()) == 0;
     }
 
     @Override

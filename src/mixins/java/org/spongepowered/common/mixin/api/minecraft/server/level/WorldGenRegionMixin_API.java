@@ -35,9 +35,9 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.generation.GenerationChunk;
 import org.spongepowered.api.world.generation.GenerationRegion;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -60,6 +60,7 @@ public abstract class WorldGenRegionMixin_API implements GenerationRegion {
     @Shadow public abstract ChunkAccess shadow$getChunk(int param0, int param1);
     // @formatter:on
 
+    @Shadow @Final private ServerLevel level;
     private ResourceKey api$serverWorldKey;
     private @MonotonicNonNull Vector3i api$minBlock;
     private @MonotonicNonNull Vector3i api$maxBlock;
@@ -140,9 +141,10 @@ public abstract class WorldGenRegionMixin_API implements GenerationRegion {
     }
 
     private Vector3i convertToBlock(final Vector3i chunk, final boolean isMax) {
-        final Vector3i chunkMin = Sponge.server().chunkLayout().forceToWorld(chunk);
+        final var layout = (SpongeChunkLayout) ((ServerWorld) this.level).chunkLayout();
+        final Vector3i chunkMin = layout.forceToWorld(chunk);
         if (isMax) {
-            return chunkMin.add(SpongeChunkLayout.CHUNK_MASK);
+            return chunkMin.add(layout.getMask());
         }
         return chunkMin;
     }

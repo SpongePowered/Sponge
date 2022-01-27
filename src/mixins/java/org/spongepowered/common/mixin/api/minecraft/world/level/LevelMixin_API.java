@@ -49,6 +49,7 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.LevelData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -133,8 +134,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     private Context api$context;
     private RegistryHolderLogic api$registryHolder;
-    private Vector3i api$worldMin;
-    private Vector3i api$worldMax;
+    protected @MonotonicNonNull SpongeChunkLayout api$chunkLayout;
 
     // World
 
@@ -157,7 +157,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public Optional<WorldChunk> loadChunk(final int cx, final int cy, final int cz, final boolean shouldGenerate) {
-        if (!SpongeChunkLayout.INSTANCE.isValidChunk(cx, cy, cz)) {
+        if (!this.api$chunkLayout().isValidChunk(cx, cy, cz)) {
             return Optional.empty();
         }
         final ChunkSource chunkProvider = ((LevelAccessor) this).getChunkSource();
@@ -213,23 +213,26 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public Vector3i min() {
-        if (this.api$worldMin == null) {
-            this.api$worldMin = Vector3i.from(Constants.World.BLOCK_MIN.x(), ((LevelHeightAccessor)this).getMinBuildHeight(), Constants.World.BLOCK_MIN.z());
-        }
-        return this.api$worldMin;
+        return this.api$chunkLayout().spaceMin();
     }
 
     @Override
     public Vector3i max() {
-        if (this.api$worldMax == null) {
-            this.api$worldMax = Vector3i.from(Constants.World.BLOCK_MAX.x(), ((LevelHeightAccessor)this).getMaxBuildHeight(), Constants.World.BLOCK_MAX.z());
-        }
-        return this.api$worldMax;
+        return this.api$chunkLayout().spaceMin();
     }
 
     @Override
     public Vector3i size() {
-        return Constants.World.BLOCK_SIZE;
+        return this.api$chunkLayout().spaceSize();
+    }
+
+    private SpongeChunkLayout api$chunkLayout() {
+        if (this.api$chunkLayout == null) {
+            final var min = ((Level) (Object) this).getMinBuildHeight();
+            final var height = ((Level) (Object) this).getHeight();
+            this.api$chunkLayout = new SpongeChunkLayout(min, height);
+        }
+        return this.api$chunkLayout;
     }
 
     // ContextSource

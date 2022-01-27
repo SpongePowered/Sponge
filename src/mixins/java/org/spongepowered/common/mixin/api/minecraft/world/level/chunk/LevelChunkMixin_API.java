@@ -103,6 +103,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
 
     private @Nullable Vector3i api$blockMin;
     private @Nullable Vector3i api$blockMax;
+    private @Nullable SpongeChunkLayout api$chunkLayout;
 
     public LevelChunkMixin_API(
         final ChunkPos $$0, final UpgradeData $$1, final LevelHeightAccessor $$2, final Registry<net.minecraft.world.level.biome.Biome> $$3, final long $$4,
@@ -332,7 +333,10 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
     @Override
     public Vector3i min() {
         if (this.api$blockMin == null) {
-            this.api$blockMin = SpongeChunkLayout.INSTANCE.forceToWorld(this.chunkPosition());
+            if (this.api$chunkLayout == null) {
+                this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinBuildHeight(), this.level.getHeight());
+            }
+            this.api$blockMin = this.api$chunkLayout.forceToWorld(this.chunkPosition());
         }
         return this.api$blockMin;
     }
@@ -340,14 +344,20 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
     @Override
     public Vector3i max() {
         if (this.api$blockMax == null) {
-            this.api$blockMax = this.min().add(SpongeChunkLayout.CHUNK_SIZE).sub(1, 1, 1);
+            if (this.api$chunkLayout == null) {
+                this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinBuildHeight(), this.level.getHeight());
+            }
+            this.api$blockMax = this.min().add(this.api$chunkLayout.chunkSize()).sub(1, 1, 1);
         }
         return this.api$blockMax;
     }
 
     @Override
     public Vector3i size() {
-        return SpongeChunkLayout.CHUNK_SIZE;
+        if (this.api$chunkLayout == null) {
+            this.api$chunkLayout = new SpongeChunkLayout(this.level.getMinBuildHeight(), this.level.getHeight());
+        }
+        return this.api$chunkLayout.chunkSize();
     }
 
     @Override
