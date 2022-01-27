@@ -46,6 +46,7 @@ import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnType;
@@ -422,5 +423,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     default boolean doesContainerCaptureEntitySpawn(final C context, final Entity entityIn) {
         return false;
+    }
+
+    default boolean forceRollbackEvents(C asContext) {
+        return false;
+    }
+
+    default void notifyEventChanges(C asContext, Event event) {
     }
 }

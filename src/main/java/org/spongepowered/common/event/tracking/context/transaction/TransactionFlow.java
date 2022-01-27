@@ -42,10 +42,10 @@ import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEn
  * A flow is a transaction being constructed or transformed in flight between
  * a source, such as a block change, to the destination, the {@link TransactionSink}.
  * Often times the sink just blindly accepts any transaction as the final
- * destination in {@link TransactionSink#logTransaction(GameTransaction)}, but
+ * destination in {@link TransactionSink#logTransaction(StatefulTransaction)}, but
  * on certain cases, the transaction itself can have a specific flow as an
  * intermediary step, specifically by usage of
- * {@link #parentAbsorber()}.
+ * {@link AbsorbingFlowStep#absorb(PhaseContext, TransactionFlow)}.
  * <p>This is to plainly say that not all transactions are treated equal, but
  * from the source of creating a transaction, it's a "fire and forget" basis,
  * whereas the transaction itself may have behaviors that involve batching with

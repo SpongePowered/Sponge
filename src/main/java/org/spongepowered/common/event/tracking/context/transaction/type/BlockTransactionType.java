@@ -33,7 +33,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
-import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -43,10 +42,9 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 public final class BlockTransactionType extends TransactionType<ChangeBlockEvent.All> {
@@ -92,19 +90,7 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
             final ImmutableList<BlockTransactionReceipt> transactions = positions.asMap()
                 .values()
                 .stream()
-                .map(spongeBlockSnapshots -> {
-                    final List<SpongeBlockSnapshot> snapshots = new ArrayList<>(spongeBlockSnapshots);
-                    if (snapshots.isEmpty() || snapshots.size() < 2) {
-                        // Error case
-                        return Optional.<BlockTransactionReceipt>empty();
-                    }
-                    final SpongeBlockSnapshot original = snapshots.get(0);
-                    final SpongeBlockSnapshot result = snapshots.get(snapshots.size() - 1);
-                    final Operation operation = context.getBlockOperation(original, result);
-                    final BlockTransactionReceipt eventTransaction = new BlockTransactionReceipt(original, result, operation);
-                    context.postBlockTransactionApplication(original.blockChange, eventTransaction);
-                    return Optional.of(eventTransaction);
-                })
+                .map(TrackingUtil.createBlockTransactionReceipt(context, context::postBlockTransactionApplication))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(ImmutableList.toImmutableList());

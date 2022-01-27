@@ -48,6 +48,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
+import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -72,6 +73,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginTransaction;
 import org.spongepowered.common.event.tracking.phase.tick.BlockEventTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
@@ -83,11 +85,14 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -540,5 +545,25 @@ public final class TrackingUtil {
         }
         builder.flag(updateFlag);
         return builder.build();
+    }
+
+    public static Function<Collection<SpongeBlockSnapshot>, Optional<BlockTransactionReceipt>> createBlockTransactionReceipt(
+        final PhaseContext<?> context,
+        final BiConsumer<BlockChange, BlockTransactionReceipt> receiptConsumer
+    ) {
+        return spongeBlockSnapshots -> {
+            final List<SpongeBlockSnapshot> snapshots = new ArrayList<>(spongeBlockSnapshots);
+            if (snapshots.isEmpty() || snapshots.size() < 2) {
+                // Error case
+                return Optional.empty();
+            }
+            final SpongeBlockSnapshot original = snapshots.get(0);
+            final SpongeBlockSnapshot result = snapshots.get(snapshots.size() - 1);
+            final Operation operation = context.getBlockOperation(original, result);
+            final BlockTransactionReceipt eventTransaction = new BlockTransactionReceipt(original, result, operation);
+            receiptConsumer.accept(original.blockChange, eventTransaction);
+            return Optional.of(eventTransaction);
+        };
+
     }
 }

@@ -36,6 +36,7 @@ public final class PluginPhase {
         public static final IPhaseState<BasicPluginContext> SCHEDULED_TASK = new ScheduledTaskPhaseState();
         public static final IPhaseState<DelayedTaskPhaseState.Context> DELAYED_TASK = new DelayedTaskPhaseState();
         public static final IPhaseState<BasicPluginContext> TELEPORT = new BasicPluginState();
+        public static final IPhaseState<PluginTransaction.TransactionContext> PLUGIN_TRANSACTION = new PluginTransaction();
 
         private State() {
         }

@@ -43,6 +43,7 @@ import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
@@ -57,6 +58,7 @@ import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EventByTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.block.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
@@ -329,5 +331,13 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
 
     default boolean doesContainerCaptureEntitySpawn(final Entity entityIn) {
         return this.getState().doesContainerCaptureEntitySpawn(this.asContext(), entityIn);
+    }
+
+    default boolean forceRollbackEvents() {
+        return this.getState().forceRollbackEvents(this.asContext());
+    }
+
+    default void notifyEventChanges(Event event) {
+        this.getState().notifyEventChanges(this.asContext(), event);
     }
 }

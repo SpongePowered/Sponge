@@ -180,7 +180,13 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
                 eventWithTransactions.markCancelled();
                 continue;
             }
+            if (context.forceRollbackEvents()) {
+                eventWithTransactions.markCancelled();
+                cancelledAny = true;
+                continue;
+            }
             Sponge.eventManager().post(event);
+            context.notifyEventChanges(event);
             if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
                 eventWithTransactions.markCancelled();
                 cancelledAny = true;

@@ -47,6 +47,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.ServerLevelData;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
@@ -66,6 +67,7 @@ import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.server.ChunkManager;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerTransaction;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.storage.ChunkLayout;
@@ -78,6 +80,12 @@ import org.spongepowered.common.accessor.world.entity.raid.RaidsAccessor;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.data.holder.SpongeLocationBaseDataHolder;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhasePrinter;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhaseState;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginTransaction;
 import org.spongepowered.common.mixin.api.minecraft.world.level.LevelMixin_API;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.VecHelper;
@@ -85,6 +93,7 @@ import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
+import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -96,6 +105,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerLevel.class)
@@ -185,6 +195,28 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Override
     public Server engine() {
         return (Server) this.shadow$getServer();
+    }
+
+    @Override
+    public boolean transact(
+        final PluginContainer container, final Runnable operation, final Predicate<ServerTransaction> shouldRollback
+    ) {
+        final MutableBoolean succeeded = new MutableBoolean();
+        final PluginTransaction.TransactionContext context = PluginPhase.State.PLUGIN_TRANSACTION
+            .createPhaseContext(PhaseTracker.SERVER)
+            .source(container)
+            .setContainer(container)
+            .setPredicate(shouldRollback)
+            .setRunnable(operation)
+            .setSuccessContainer(succeeded);
+        try (final PhaseContext<?> switched = context) {
+            switched.buildAndSwitch();
+            operation.run();
+        } catch (final Exception e) {
+            PhasePrinter.printMessageWithCaughtException(PhaseTracker.SERVER, "Caught Exception during Plugin Transaction", "Plugin transaction resulted in an exception, please report to the plugin developer for plugin: " + container.metadata().name().orElseGet(container.metadata()::id), e);
+            context.rollBack();
+        }
+        return succeeded.booleanValue();
     }
 
     @Override
@@ -281,7 +313,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     // LocationBaseDataHolder
 
     @Override
-    public ServerLocation impl$dataholder(int x, int y, int z) {
+    public ServerLocation impl$dataholder(final int x, final int y, final int z) {
         return ServerLocation.of(this, x, y, z);
     }
 
