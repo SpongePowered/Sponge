@@ -25,7 +25,6 @@
 package org.spongepowered.test.collide;
 
 import com.google.inject.Inject;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
@@ -33,10 +32,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
-import org.spongepowered.api.effect.sound.SoundTypes;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.entity.vehicle.minecart.Minecart;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.filter.cause.First;

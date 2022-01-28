@@ -47,27 +47,26 @@ import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.AttributedBiome;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
 import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
-import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
-import org.spongepowered.api.world.generation.config.noise.Shaper;
-import org.spongepowered.api.world.generation.structure.Structure;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
+import org.spongepowered.api.world.generation.config.noise.Shaper;
 import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
+import org.spongepowered.api.world.generation.structure.Structure;
+import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.server.WorldTemplate;
-import org.spongepowered.api.world.WorldType;
-import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -362,7 +361,7 @@ public final class WorldTest {
                 .addStructures(rareStructures)
                 .build();
 
-        Shaper[] shapers = {Shaper.overworld(), Shaper.amplified(), Shaper.caves(), Shaper.floatingIslands(), Shaper.nether(), Shaper.end()};
+        final Shaper[] shapers = {Shaper.overworld(), Shaper.amplified(), Shaper.caves(), Shaper.floatingIslands(), Shaper.nether(), Shaper.end()};
         final NoiseConfig noiseConfig = NoiseConfig.builder().minY(random.nextInt(128/16)*16-64).height(256)
                 .terrainShaper(shapers[random.nextInt(shapers.length)])
                 .build();
@@ -375,8 +374,8 @@ public final class WorldTest {
 
         final ResourceKey worldKey = ResourceKey.of(this.plugin, owner.toLowerCase());
         final List<AttributedBiome> attributedBiomes = biomes.stream().map(biomeRef -> {
-                    Biome biome = biomeRef.get(Sponge.server());
-                    BiomeAttributes attr = BiomeAttributes.of((float) biome.temperature(),
+                    final Biome biome = biomeRef.get(Sponge.server());
+                    final BiomeAttributes attr = BiomeAttributes.of((float) biome.temperature(),
                             (float) biome.humidity(),
                             random.nextFloat() * 4 - 2,
                             random.nextFloat() * 4 - 2,

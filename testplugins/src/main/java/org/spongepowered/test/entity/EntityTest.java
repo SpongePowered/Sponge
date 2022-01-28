@@ -34,6 +34,7 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.Command.Parameterized;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -59,21 +60,21 @@ public class EntityTest {
     @Listener
     public void onRegisterCommand(final RegisterCommandEvent<Parameterized> event) {
         final Parameter.Value<EntityType<@NonNull ?>> entityTypeParam =
-                Parameter.registryElement(new TypeToken<EntityType<@NonNull ?>>() {}, RegistryTypes.ENTITY_TYPE, "minecraft").key("entityType").build();
+                Parameter.registryElement(new TypeToken<EntityType<@NonNull ? extends Entity>>() {}, RegistryTypes.ENTITY_TYPE, "minecraft").key("entityType").build();
         event.register(this.plugin, Command.builder()
                 .addChild(Command.builder()
                         .addParameter(entityTypeParam)
                         .executor(ctx -> {
-                            EntityType<@NonNull ?> type = ctx.requireOne(entityTypeParam);
-                            blockedSpawn.remove(type);
+                            final EntityType<@NonNull ?> type = ctx.requireOne(entityTypeParam);
+                            this.blockedSpawn.remove(type);
                             ctx.sendMessage(Identity.nil(), Component.text("Entity type ").append(type).append(Component.text(" spawn is no longer blocked.")));
                             return CommandResult.success();
                         }).build(), "allow")
                 .addChild(Command.builder()
                         .addParameter(entityTypeParam)
                         .executor(ctx -> {
-                            EntityType<@NonNull ?> type = ctx.requireOne(entityTypeParam);
-                            blockedSpawn.add(type);
+                            final EntityType<@NonNull ?> type = ctx.requireOne(entityTypeParam);
+                            this.blockedSpawn.add(type);
                             ctx.sendMessage(Identity.nil(), Component.text("Entity type ").append(type).append(Component.text(" spawn is now blocked.")));
                             return CommandResult.success();
                         }).build(), "deny")
