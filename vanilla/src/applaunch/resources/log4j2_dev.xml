@@ -17,7 +17,7 @@
       </PatternLayout>
     </TerminalConsole>
     <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz" immediateFlush="false">
-      <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level]: %msg{nolookups}%n"/>
+      <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level] [%c{1.3}%notEmpty{/%markerSimpleName}]: %msg{nolookups}%n"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
         <OnStartupTriggeringPolicy/>
