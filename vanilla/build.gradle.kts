@@ -27,6 +27,7 @@ val vanillaLibrariesConfig = configurations.register("libraries")
 val vanillaAppLaunchConfig = configurations.register("applaunch") {
     extendsFrom(vanillaBootstrapLibrariesConfig.get())
     extendsFrom(configurations.minecraft.get())
+
 }
 val mlpatcherConfig = configurations.register("mlpatcher")
 val vanillaInstallerConfig = configurations.register("installer") {
@@ -300,6 +301,8 @@ dependencies {
     // and below library can be removed.
     // https://github.com/SpongePowered/Sponge/issues/3429
     bootstrapLibraries("org.fusesource.jansi:jansi:$jansiVersion")
+    // Must be on the base ClassLoader since ModLauncher has a dependency on log4j
+    bootstrapLibraries("org.apache.logging.log4j:log4j-jpl:$log4jVersion")
     
     bootstrapLibraries(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
     bootstrapLibraries("org.spongepowered:configurate-core") {

@@ -163,7 +163,7 @@ dependencies {
     // ASM - required for generating event listeners
     implementation("org.ow2.asm:asm-util:$asmVersion")
     implementation("org.ow2.asm:asm-tree:$asmVersion")
-
+    
     // Implementation-only Adventure
     implementation(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
     implementation("net.kyori:adventure-serializer-configurate4")
@@ -183,7 +183,6 @@ dependencies {
     launchConfig("com.google.code.gson:gson:2.8.0")
     launchConfig("org.ow2.asm:asm-tree:$asmVersion")
     launchConfig("org.ow2.asm:asm-util:$asmVersion")
-    launchConfig("org.apache.logging.log4j:log4j-jpl:$log4jVersion")
 
     // Applaunch -- initialization that needs to occur without game access
     applaunchConfig("org.checkerframework:checker-qual:$checkerVersion")
@@ -202,6 +201,7 @@ dependencies {
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
     applaunchConfig("org.apache.logging.log4j:log4j-core:$log4jVersion")
+    applaunchConfig("org.apache.logging.log4j:log4j-jpl:$log4jVersion")
 
     mixinsConfig(sourceSets.named("main").map { it.output })
     mixinsConfig("org.spongepowered:timings:$timingsVersion")
