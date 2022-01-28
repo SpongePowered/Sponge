@@ -237,6 +237,12 @@
             "name": "Vanish Test",
             "entrypoint": "org.spongepowered.test.vanish.VanishTest",
             "description": "Vanish Testing"
+        },
+        { 
+            "id": "logging-test",
+            "name": "Logging Test",
+            "entrypoint": "org.spongepowered.test.logging.LoggingTest",
+            "description": "Logging Testing"
         }
     ]
 }

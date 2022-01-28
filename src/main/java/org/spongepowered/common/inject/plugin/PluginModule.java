@@ -52,7 +52,9 @@ public final class PluginModule extends AbstractModule {
 
         this.bind(PluginContainer.class).toInstance(this.container);
         this.bind(Logger.class).toInstance(this.container.logger());
+        this.bind(System.Logger.class).toProvider(() -> System.getLogger(this.container.logger().getName())).in(Scopes.SINGLETON);
 
         this.install(new PluginConfigurationModule());
     }
+
 }

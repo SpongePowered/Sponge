@@ -183,6 +183,7 @@ dependencies {
     launchConfig("com.google.code.gson:gson:2.8.0")
     launchConfig("org.ow2.asm:asm-tree:$asmVersion")
     launchConfig("org.ow2.asm:asm-util:$asmVersion")
+    launchConfig("org.apache.logging.log4j:log4j-jpl:$log4jVersion")
 
     // Applaunch -- initialization that needs to occur without game access
     applaunchConfig("org.checkerframework:checker-qual:$checkerVersion")
