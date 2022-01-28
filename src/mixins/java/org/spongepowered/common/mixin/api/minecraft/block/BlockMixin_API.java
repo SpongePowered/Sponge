@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.block;
 
+import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -56,6 +57,11 @@ public abstract class BlockMixin_API extends AbstractBlockMixin_API implements S
     @Shadow public abstract String shadow$getDescriptionId();
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$defaultBlockState();
     // @formatter:on
+
+    @Override
+    public ImmutableList<BlockState> validStates() {
+        return (ImmutableList) this.stateDefinition.getPossibleStates();
+    }
 
     @Override
     public BlockState defaultState() {
