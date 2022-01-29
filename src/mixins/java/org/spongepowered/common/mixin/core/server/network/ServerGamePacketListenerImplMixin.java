@@ -304,7 +304,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
                 packetIn.getXRot(this.player.xRot), 0);
 
         // common checks and throws are done here.
-        final Tuple<Vector3d, Vector3d> events = this.impl$createAndFireMoveAndRotationEvents(
+        final Tuple<Vector3d, Vector3d> events = SpongeCommonEventFactory.createAndFireMoveAndRotateEvents(
                 player,
                 fireMoveEvent ? fromPosition : null,
                 fireRotationEvent ? fromRotation : null,
@@ -372,7 +372,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     )
     private void impl$handleVehicleMoveEvent(final ServerboundMoveVehiclePacket param0, final CallbackInfo ci) {
         final ServerboundMoveVehiclePacketAccessor packet = (ServerboundMoveVehiclePacketAccessor) param0;
-        final ServerPlayer player = (ServerPlayer) this.player;
         final Entity rootVehicle = this.player.getRootVehicle();
         final Vector3d fromRotation = new Vector3d(rootVehicle.yRot, rootVehicle.xRot, 0);
 
@@ -384,7 +383,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
         final Vector3d originalToRotation = new Vector3d(param0.getYRot(), param0.getXRot(), 0);
 
         // common checks and throws are done here.
-        final Tuple<Vector3d, Vector3d> events = this.impl$createAndFireMoveAndRotationEvents(
+        final Tuple<Vector3d, Vector3d> events = SpongeCommonEventFactory.createAndFireMoveAndRotateEvents(
                 (org.spongepowered.api.entity.Entity) rootVehicle,
                 fromPosition,
                 fromRotation,
@@ -422,44 +421,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
             this.vehicleLastGoodY = toPosition.y();
             this.vehicleLastGoodZ = toPosition.z();
         }
-    }
-
-    private Tuple<@Nullable Vector3d, @Nullable Vector3d> impl$createAndFireMoveAndRotationEvents(
-            final org.spongepowered.api.entity.Entity movingEntity,
-            final @Nullable Vector3d fromPosition,
-            final @Nullable Vector3d fromRotation,
-            final @Nullable Vector3d toPosition,
-            final @Nullable Vector3d toRotation) {
-
-        final @Nullable Vector3d finalPosition;
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-        // Call move & rotate event as needed...
-        if (ShouldFire.MOVE_ENTITY_EVENT && fromPosition != null && toPosition != null && fromPosition.distanceSquared(toPosition) > (1.0d/256.0d)) {
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(cause, movingEntity, fromPosition,
-                    toPosition, toPosition);
-            if (SpongeCommon.post(event)) {
-                finalPosition = null;
-            } else {
-                finalPosition = event.destinationPosition();
-            }
-        } else {
-            finalPosition = toPosition;
-        }
-
-        final @Nullable Vector3d finalRotation;
-        if (ShouldFire.ROTATE_ENTITY_EVENT && fromRotation != null && toRotation != null && fromRotation.distanceSquared(toRotation) > (.15f * .15f)) {
-            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(cause, (ServerPlayer) this.player, fromRotation,
-                    toRotation);
-            if (SpongeCommon.post(event)) {
-                finalRotation = null;
-            } else {
-                finalRotation = event.toRotation();
-            }
-        } else {
-            finalRotation = toRotation;
-        }
-
-        return new Tuple<>(finalPosition, finalRotation);
     }
 
     @Inject(

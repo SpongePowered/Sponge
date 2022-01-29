@@ -32,6 +32,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
@@ -136,6 +137,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class SpongeCommonEventFactory {
+
+    private static final double MOVEMENT_DELTA = 1.0d/256.0d;
+    private static final double ROTATION_DELTA = 0.15f * 0.15f;
 
     @SuppressWarnings("unchecked")
     public static <T extends net.minecraft.world.entity.Entity> CollideEntityEvent callCollideEntityEvent(
@@ -383,26 +387,23 @@ public final class SpongeCommonEventFactory {
             return;
         }
 
-        final double deltaX = entity.xOld - entity.getX();
-        final double deltaY = entity.yOld - entity.getY();
-        final double deltaZ = entity.zOld - entity.getZ();
-        final double deltaChange = Math.pow(deltaX, 2) + Math.pow(deltaY, 2) + Math.pow(deltaZ, 2);
-        if (deltaChange < 1f / 256) {
-            return;
-        }
-
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entity);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
 
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(), (Entity) entity,
-                    new Vector3d(entity.xOld, entity.yOld, entity.zOld), new Vector3d(entity.getX(), entity.getY(), entity.getZ()),
-                    new Vector3d(entity.getX(), entity.getY(), entity.getZ()));
+            final @Nullable Vector3d finalPosition =
+                    SpongeCommonEventFactory.createAndFireMoveAndRotateEvents(
+                            (Entity) entity,
+                            new Vector3d(entity.xOld, entity.yOld, entity.zOld),
+                            null,
+                            new Vector3d(entity.getX(), entity.getY(), entity.getZ()),
+                            null
+                    ).getA();
 
-            if (SpongeCommon.post(event)) {
+            if (finalPosition == null) {
                 entity.setPos(entity.xOld, entity.yOld, entity.zOld);
             } else {
-                entity.setPos(event.destinationPosition().x(), event.destinationPosition().y(), event.destinationPosition().z());
+                entity.setPos(finalPosition.x(), finalPosition.y(), finalPosition.z());
             }
         }
     }
@@ -420,17 +421,64 @@ public final class SpongeCommonEventFactory {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entity);
 
-            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(frame.currentCause(), (Entity) entity,
-                    new Vector3d(entity.xRotO, entity.yRotO, 0), new Vector3d(entity.xRot, entity.yRot, 0));
+            // x and y are the opposite way around to the rotation in the API.
+            final @Nullable Vector3d finalRotation =
+                    SpongeCommonEventFactory.createAndFireMoveAndRotateEvents(
+                            (Entity) entity,
+                            null,
+                            new Vector3d(entity.yRotO, entity.xRotO, 0),
+                            null,
+                            new Vector3d(entity.yRot, entity.xRot, 0)
+                    ).getB();
 
-            if (SpongeCommon.post(event)) {
+            if (finalRotation == null) {
                 entity.xRot = entity.xRotO;
                 entity.yRot = entity.yRotO;
             } else {
-                entity.xRot = (float) event.toRotation().x();
-                entity.yRot = (float) event.toRotation().y();
+                entity.xRot = (float) finalRotation.y();
+                entity.yRot = (float) finalRotation.x();
             }
         }
+    }
+
+    public static Tuple<@Nullable Vector3d, @Nullable Vector3d> createAndFireMoveAndRotateEvents(
+            final org.spongepowered.api.entity.Entity movingEntity,
+            final @Nullable Vector3d fromPosition,
+            final @Nullable Vector3d fromRotation,
+            final @Nullable Vector3d toPosition,
+            final @Nullable Vector3d toRotation) {
+
+        final @Nullable Vector3d finalPosition;
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+        // Call move & rotate event as needed...
+        if (ShouldFire.MOVE_ENTITY_EVENT && fromPosition != null && toPosition != null &&
+                fromPosition.distanceSquared(toPosition) > SpongeCommonEventFactory.MOVEMENT_DELTA) {
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(cause, movingEntity, fromPosition,
+                    toPosition, toPosition);
+            if (SpongeCommon.post(event)) {
+                finalPosition = null;
+            } else {
+                finalPosition = event.destinationPosition();
+            }
+        } else {
+            finalPosition = toPosition;
+        }
+
+        final @Nullable Vector3d finalRotation;
+        if (ShouldFire.ROTATE_ENTITY_EVENT && fromRotation != null && toRotation != null &&
+                fromRotation.distanceSquared(toRotation) > SpongeCommonEventFactory.ROTATION_DELTA) {
+            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(cause, movingEntity, fromRotation,
+                    toRotation);
+            if (SpongeCommon.post(event)) {
+                finalRotation = null;
+            } else {
+                finalRotation = event.toRotation();
+            }
+        } else {
+            finalRotation = toRotation;
+        }
+
+        return new Tuple<>(finalPosition, finalRotation);
     }
 
     public static DestructEntityEvent.Death callDestructEntityEventDeath(final LivingEntity entity, final @Nullable DamageSource source) {
