@@ -301,20 +301,30 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
                 packetIn.getXRot(this.player.xRot), 0);
 
         // common checks and throws are done here.
-        final Tuple<Vector3d, Vector3d> events = SpongeCommonEventFactory.callMoveAndRotateEvents(
-                player,
-                fireMoveEvent ? fromPosition : null,
-                fireRotationEvent ? fromRotation : null,
-                fireMoveEvent ? originalToPosition : null,
-                fireRotationEvent ? originalToRotation : null
-        );
+        final @Nullable Vector3d toPosition;
+        if (fireMoveEvent) {
+            toPosition = SpongeCommonEventFactory.callMoveEvent(
+                    player,
+                    fromPosition,
+                    originalToPosition);
+        } else {
+            toPosition = null;
+        }
 
         // Rotation result
-        final Vector3d toRotation = events.getB() == null ? fromRotation : events.getB();
+        final Vector3d toRotation;
+        if (fireRotationEvent) {
+            toRotation = SpongeCommonEventFactory.callRotateEvent(
+                    player,
+                    fromRotation,
+                    originalToRotation);
+        } else {
+            toRotation = null;
+        }
 
         // At this point, we cancel out and let the "confirmed teleport" code run through to update the
         // player position and update the player's relation in the chunk manager.
-        if (events.getA() == null) {
+        if (toPosition == null) {
             if (fromPosition.distanceSquared(originalToPosition) > 0) {
                 // Set the location, as if the player was teleporting
                 this.awaitingTeleportTime = this.tickCount;
@@ -328,7 +338,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
         }
 
         // Handle event results
-        final Vector3d toPosition = events.getA();
         if (!toPosition.equals(originalToPosition)) {
             // Check if we have to say it's a "teleport" vs a standard move
             final double d4 = packetIn.getX(this.player.getX());
@@ -380,16 +389,22 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
         final Vector3d originalToRotation = new Vector3d(param0.getYRot(), param0.getXRot(), 0);
 
         // common checks and throws are done here.
-        final Tuple<Vector3d, Vector3d> events = SpongeCommonEventFactory.callMoveAndRotateEvents(
+        Vector3d toPosition = SpongeCommonEventFactory.callMoveEvent(
                 (org.spongepowered.api.entity.Entity) rootVehicle,
                 fromPosition,
+                originalToPosition
+        );
+        if (toPosition == null) {
+            toPosition = fromPosition;
+        }
+        Vector3d toRotation = SpongeCommonEventFactory.callRotateEvent(
+                (org.spongepowered.api.entity.Entity) rootVehicle,
                 fromRotation,
-                originalToPosition,
                 originalToRotation
         );
-
-        final Vector3d toPosition = events.getA() != null ? events.getA() : fromPosition;
-        final Vector3d toRotation = events.getB() != null ? events.getB() : fromRotation;
+        if (toRotation == null) {
+            toRotation = fromRotation;
+        }
 
         if (fromPosition.equals(toPosition)) {
             // no point doing all that processing, just account for a potential rotation change.

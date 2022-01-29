@@ -32,7 +32,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
@@ -392,13 +391,10 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
 
             final @Nullable Vector3d finalPosition =
-                    SpongeCommonEventFactory.callMoveAndRotateEvents(
+                    SpongeCommonEventFactory.callMoveEvent(
                             (Entity) entity,
                             new Vector3d(entity.xOld, entity.yOld, entity.zOld),
-                            null,
-                            new Vector3d(entity.getX(), entity.getY(), entity.getZ()),
-                            null
-                    ).getA();
+                            new Vector3d(entity.getX(), entity.getY(), entity.getZ()));
 
             if (finalPosition == null) {
                 entity.setPos(entity.xOld, entity.yOld, entity.zOld);
@@ -423,13 +419,11 @@ public final class SpongeCommonEventFactory {
 
             // x and y are the opposite way around to the rotation in the API.
             final @Nullable Vector3d finalRotation =
-                    SpongeCommonEventFactory.callMoveAndRotateEvents(
+                    SpongeCommonEventFactory.callRotateEvent(
                             (Entity) entity,
-                            null,
                             new Vector3d(entity.yRotO, entity.xRotO, 0),
-                            null,
                             new Vector3d(entity.yRot, entity.xRot, 0)
-                    ).getB();
+                    );
 
             if (finalRotation == null) {
                 entity.xRot = entity.xRotO;
@@ -441,28 +435,11 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    /**
-     * Returns a tuple of position and rotation {@link Vector3d}s.
-     *
-     * <p>To fire a movement event, fromPosition and toPosition must be
-     * non-null. Similar story for the rotation event and parameters.</p>
-     *
-     * @param movingEntity The entity that is moving
-     * @param fromPosition The position the entity starts at
-     * @param fromRotation The rotation the entity starts at
-     * @param toPosition The position the entity is moving to
-     * @param toRotation The rotation the entity is rotating to
-     * @return A tuple of a position and rotation vector. If null, the event
-     *  was cancelled.
-     */
-    public static Tuple<@Nullable Vector3d, @Nullable Vector3d> callMoveAndRotateEvents(
+    public static @Nullable Vector3d callMoveEvent(
             final org.spongepowered.api.entity.Entity movingEntity,
-            final @Nullable Vector3d fromPosition,
-            final @Nullable Vector3d fromRotation,
-            final @Nullable Vector3d toPosition,
-            final @Nullable Vector3d toRotation) {
+            final Vector3d fromPosition,
+            final Vector3d toPosition) {
 
-        final @Nullable Vector3d finalPosition;
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         // Call move & rotate event as needed...
         if (ShouldFire.MOVE_ENTITY_EVENT && fromPosition != null && toPosition != null &&
@@ -471,30 +448,35 @@ public final class SpongeCommonEventFactory {
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(cause, movingEntity, fromPosition,
                     toPosition, toPosition);
             if (SpongeCommon.post(event)) {
-                finalPosition = null;
+                return null;
             } else {
-                finalPosition = event.destinationPosition();
+                return event.destinationPosition();
             }
         } else {
-            finalPosition = toPosition;
+            return toPosition;
         }
+    }
 
-        final @Nullable Vector3d finalRotation;
+    public static @Nullable Vector3d callRotateEvent(
+            final org.spongepowered.api.entity.Entity movingEntity,
+            final Vector3d fromRotation,
+            final Vector3d toRotation
+    ) {
+
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         if (ShouldFire.ROTATE_ENTITY_EVENT && fromRotation != null && toRotation != null &&
                 !fromRotation.mul(SpongeCommonEventFactory.ROTATION_GRID_POINTS_PER_UNIT).toInt()
                         .equals(toRotation.mul(SpongeCommonEventFactory.ROTATION_GRID_POINTS_PER_UNIT).toInt())) {
             final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(cause, movingEntity, fromRotation,
                     toRotation);
             if (SpongeCommon.post(event)) {
-                finalRotation = null;
+                return null;
             } else {
-                finalRotation = event.toRotation();
+                return event.toRotation();
             }
         } else {
-            finalRotation = toRotation;
+            return toRotation;
         }
-
-        return new Tuple<>(finalPosition, finalRotation);
     }
 
     public static DestructEntityEvent.Death callDestructEntityEventDeath(final LivingEntity entity, final @Nullable DamageSource source) {
