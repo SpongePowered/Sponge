@@ -24,33 +24,21 @@
  */
 package org.spongepowered.common.accessor.network.protocol.game;
 
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ServerboundMovePlayerPacket.class)
-public interface ServerboundMovePlayerPacketAccessor {
-
-    @Accessor("x") double accessor$x();
+@Mixin(ServerboundMoveVehiclePacket.class)
+public interface ServerboundMoveVehiclePacketAccessor {
 
     @Accessor("x") void accessor$x(final double x);
 
-    @Accessor("y") double accessor$y();
-
     @Accessor("y") void accessor$y(final double y);
-
-    @Accessor("z") double accessor$z();
 
     @Accessor("z") void accessor$z(final double z);
 
-    @Accessor("xRot") void accessor$xRot(final float xRot);
-
     @Accessor("yRot") void accessor$yRot(final float yRot);
 
-    @Accessor("hasPos") boolean accessor$hasPos();
-
-    @Accessor("hasPos") void accessor$hasPos(final boolean hasPos);
-
-    @Accessor("hasRot") boolean accessor$hasRot();
+    @Accessor("xRot") void accessor$xRot(final float xRot);
 
 }

@@ -35,6 +35,7 @@
         "network.protocol.game.ServerboundClientInformationPacketAccessor",
         "network.protocol.game.ServerboundCustomPayloadPacketAccessor",
         "network.protocol.game.ServerboundMovePlayerPacketAccessor",
+        "network.protocol.game.ServerboundMoveVehiclePacketAccessor",
         "network.protocol.game.ServerboundResourcePackPacketAccessor",
         "network.protocol.handshake.ClientIntentionPacketAccessor",
         "network.protocol.login.ClientboundCustomQueryPacketAccessor",

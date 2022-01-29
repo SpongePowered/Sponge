@@ -43,10 +43,12 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockBreakAckPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
+import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
@@ -56,6 +58,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
@@ -100,6 +103,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundMovePlayerPacketAccessor;
+import org.spongepowered.common.accessor.network.protocol.game.ServerboundMoveVehiclePacketAccessor;
 import org.spongepowered.common.accessor.server.level.ServerPlayerGameModeAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -123,7 +127,6 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -147,6 +150,12 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     @Shadow private int knownMovePacketCount;
     @Shadow private int tickCount;
     @Shadow private int awaitingTeleportTime;
+    @Shadow private double vehicleFirstGoodX;
+    @Shadow private double vehicleFirstGoodY;
+    @Shadow private double vehicleFirstGoodZ;
+    @Shadow private double vehicleLastGoodX;
+    @Shadow private double vehicleLastGoodY;
+    @Shadow private double vehicleLastGoodZ;
 
     @Shadow protected abstract boolean shadow$isSingleplayerOwner();
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch);
@@ -278,8 +287,8 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
         }
 
         final boolean goodMovementPacket = this.receivedMovePacketCount - this.knownMovePacketCount <= 5;
-        final boolean fireMoveEvent = goodMovementPacket && packetInAccessor.accessor$hasPos() && ShouldFire.MOVE_ENTITY_EVENT;
-        final boolean fireRotationEvent = goodMovementPacket && packetInAccessor.accessor$hasRot() && ShouldFire.ROTATE_ENTITY_EVENT;
+        final boolean fireMoveEvent = goodMovementPacket && packetInAccessor.accessor$hasPos();
+        final boolean fireRotationEvent = goodMovementPacket && packetInAccessor.accessor$hasRot();
 
         final ServerPlayer player = (ServerPlayer) this.player;
         final Vector3d fromRotation = new Vector3d(this.player.yRot, this.player.xRot, 0);
@@ -288,42 +297,27 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
         // We need this because we ignore very small position changes as to not spam as many move events.
         final Vector3d fromPosition = player.position();
 
-        Vector3d toPosition = new Vector3d(packetIn.getX(this.player.getX()),
+        final Vector3d originalToPosition = new Vector3d(packetIn.getX(this.player.getX()),
                 packetIn.getY(this.player.getY()), packetIn.getZ(this.player.getZ()));
-        Vector3d toRotation = new Vector3d(packetIn.getYRot(this.player.yRot),
+        final Vector3d originalToRotation = new Vector3d(packetIn.getYRot(this.player.yRot),
                 packetIn.getXRot(this.player.xRot), 0);
 
-        final boolean significantRotation = fromRotation.distanceSquared(toRotation) > (.15f * .15f);
+        // common checks and throws are done here.
+        final Tuple<Vector3d, Vector3d> events = this.impl$createAndFireMoveAndRotationEvents(
+                player,
+                fireMoveEvent ? fromPosition : null,
+                fireRotationEvent ? fromRotation : null,
+                fireMoveEvent ? originalToPosition : null,
+                fireRotationEvent ? originalToRotation : null
+        );
 
-        final Vector3d originalToPosition = toPosition;
-        boolean cancelMovement = false;
-        boolean cancelRotation = false;
-        // Call move & rotate event as needed...
-        if (fireMoveEvent) {
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerPlayer) this.player, fromPosition,
-                    toPosition, toPosition);
-            if (SpongeCommon.post(event)) {
-                cancelMovement = true;
-            } else {
-                toPosition = event.destinationPosition();
-            }
-        }
-
-        if (significantRotation && fireRotationEvent) {
-            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerPlayer) this.player, fromRotation,
-                    toRotation);
-            if (SpongeCommon.post(event)) {
-                cancelRotation = true;
-                toRotation = fromRotation;
-            } else {
-                toRotation = event.toRotation();
-            }
-        }
+        // Rotation result
+        final Vector3d toRotation = events.getB() == null ? fromRotation : events.getB();
 
         // At this point, we cancel out and let the "confirmed teleport" code run through to update the
         // player position and update the player's relation in the chunk manager.
-        if (cancelMovement) {
-            if (fromPosition.distanceSquared(toPosition) > 0) {
+        if (events.getA() == null) {
+            if (fromPosition.distanceSquared(originalToPosition) > 0) {
                 // Set the location, as if the player was teleporting
                 this.awaitingTeleportTime = this.tickCount;
                 this.shadow$teleport(fromPosition.x(), fromPosition.y(), fromPosition.z(), (float) toRotation.x(), (float) toRotation.y());
@@ -335,9 +329,8 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
             return;
         }
 
-        // TODO handle cancelRotation or rotation change
-
         // Handle event results
+        final Vector3d toPosition = events.getA();
         if (!toPosition.equals(originalToPosition)) {
             // Check if we have to say it's a "teleport" vs a standard move
             final double d4 = packetIn.getX(this.player.getX());
@@ -362,8 +355,109 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
                 packetInAccessor.accessor$x(toPosition.x());
                 packetInAccessor.accessor$y(toPosition.y());
                 packetInAccessor.accessor$z(toPosition.z());
+                if (packetInAccessor.accessor$hasRot()) {
+                    // this is intended, see the from rotation line above.
+                    packetInAccessor.accessor$xRot((float) toRotation.y());
+                    packetInAccessor.accessor$yRot((float) toRotation.x());
+                }
             }
         }
+    }
+
+    @Inject(
+            method = "handleMoveVehicle",
+            cancellable = true,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getLevel()Lnet/minecraft/server/level/ServerLevel;")
+    )
+    private void impl$handleVehicleMoveEvent(final ServerboundMoveVehiclePacket param0, final CallbackInfo ci) {
+        final ServerboundMoveVehiclePacketAccessor packet = (ServerboundMoveVehiclePacketAccessor) param0;
+        final ServerPlayer player = (ServerPlayer) this.player;
+        final Entity rootVehicle = this.player.getRootVehicle();
+        final Vector3d fromRotation = new Vector3d(rootVehicle.yRot, rootVehicle.xRot, 0);
+
+        // Use the position of the last movement with an event or the current player position if never called
+        // We need this because we ignore very small position changes as to not spam as many move events.
+        final Vector3d fromPosition = VecHelper.toVector3d(rootVehicle.position());
+
+        final Vector3d originalToPosition = new Vector3d(param0.getX(), param0.getY(), param0.getZ());
+        final Vector3d originalToRotation = new Vector3d(param0.getYRot(), param0.getXRot(), 0);
+
+        // common checks and throws are done here.
+        final Tuple<Vector3d, Vector3d> events = this.impl$createAndFireMoveAndRotationEvents(
+                player,
+                fromPosition,
+                fromRotation,
+                originalToPosition,
+                originalToRotation
+        );
+
+        final Vector3d toPosition = events.getA() != null ? events.getA() : fromPosition;
+        final Vector3d toRotation = events.getB() != null ? events.getB() : fromRotation;
+
+        if (fromPosition.equals(toPosition)) {
+            // no point doing all that processing, just account for a potential rotation change.
+            if (!fromRotation.equals(toRotation)) {
+                rootVehicle.absMoveTo(rootVehicle.getX(), rootVehicle.getY(), rootVehicle.getZ(), (float) toRotation.y(), (float) toRotation.x());
+            }
+            this.connection.send(new ClientboundMoveVehiclePacket(rootVehicle));
+            ci.cancel();
+            return;
+        }
+
+        packet.accessor$yRot((float) toRotation.x());
+        packet.accessor$xRot((float) toRotation.y());
+
+        if (!toPosition.equals(originalToPosition)) {
+            // update the packet, let MC take care of the rest.
+            packet.accessor$x(toPosition.x());
+            packet.accessor$y(toPosition.y());
+            packet.accessor$z(toPosition.z());
+
+            // set the first and last good position now so we don't cause the "moved wrongly" warnings later down the line.
+            this.vehicleFirstGoodX = toPosition.x();
+            this.vehicleFirstGoodY = toPosition.y();
+            this.vehicleFirstGoodZ = toPosition.z();
+            this.vehicleLastGoodX = toPosition.x();
+            this.vehicleLastGoodY = toPosition.y();
+            this.vehicleLastGoodZ = toPosition.z();
+        }
+    }
+
+    private Tuple<@Nullable Vector3d, @Nullable Vector3d> impl$createAndFireMoveAndRotationEvents(
+            final org.spongepowered.api.entity.Entity movingEntity,
+            final @Nullable Vector3d fromPosition,
+            final @Nullable Vector3d fromRotation,
+            final @Nullable Vector3d toPosition,
+            final @Nullable Vector3d toRotation) {
+
+        final @Nullable Vector3d finalPosition;
+        if (ShouldFire.MOVE_ENTITY_EVENT && fromPosition != null && toPosition != null) {
+            // Call move & rotate event as needed...
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), movingEntity, fromPosition,
+                    toPosition, toPosition);
+            if (SpongeCommon.post(event)) {
+                finalPosition = null;
+            } else {
+                finalPosition = event.destinationPosition();
+            }
+        } else {
+            finalPosition = toPosition;
+        }
+
+        final @Nullable Vector3d finalRotation;
+        if (ShouldFire.ROTATE_ENTITY_EVENT && fromRotation != null && toRotation != null && fromRotation.distanceSquared(toRotation) > (.15f * .15f)) {
+            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerPlayer) this.player, fromRotation,
+                    toRotation);
+            if (SpongeCommon.post(event)) {
+                finalRotation = null;
+            } else {
+                finalRotation = event.toRotation();
+            }
+        } else {
+            finalRotation = toRotation;
+        }
+
+        return new Tuple<>(finalPosition, finalRotation);
     }
 
     @Inject(
