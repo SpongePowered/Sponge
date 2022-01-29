@@ -80,6 +80,7 @@ import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -431,9 +432,10 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
             final @Nullable Vector3d toRotation) {
 
         final @Nullable Vector3d finalPosition;
-        if (ShouldFire.MOVE_ENTITY_EVENT && fromPosition != null && toPosition != null) {
-            // Call move & rotate event as needed...
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), movingEntity, fromPosition,
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+        // Call move & rotate event as needed...
+        if (ShouldFire.MOVE_ENTITY_EVENT && fromPosition != null && toPosition != null && fromPosition.distanceSquared(toPosition) > (1.0d/256.0d)) {
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(cause, movingEntity, fromPosition,
                     toPosition, toPosition);
             if (SpongeCommon.post(event)) {
                 finalPosition = null;
@@ -446,7 +448,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
 
         final @Nullable Vector3d finalRotation;
         if (ShouldFire.ROTATE_ENTITY_EVENT && fromRotation != null && toRotation != null && fromRotation.distanceSquared(toRotation) > (.15f * .15f)) {
-            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerPlayer) this.player, fromRotation,
+            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(cause, (ServerPlayer) this.player, fromRotation,
                     toRotation);
             if (SpongeCommon.post(event)) {
                 finalRotation = null;
