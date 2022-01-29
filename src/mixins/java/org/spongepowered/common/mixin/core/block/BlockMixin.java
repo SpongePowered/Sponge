@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import co.aikar.timings.Timing;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -41,11 +40,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
-import co.aikar.timings.sponge.SpongeTimings;
 
 import javax.annotation.Nullable;
 
@@ -56,12 +53,11 @@ import org.spongepowered.common.util.ReflectionUtil;
 import org.spongepowered.math.vector.Vector3d;
 
 @Mixin(value = Block.class)
-public abstract class BlockMixin implements BlockBridge, TrackableBridge, TimingBridge {
+public abstract class BlockMixin implements BlockBridge, TrackableBridge {
 
     private final boolean impl$isVanilla = this.getClass().getName().startsWith("net.minecraft.");
     private final boolean impl$hasCollideLogic = ReflectionUtil.isStepOnDeclared(this.getClass());
     private final boolean impl$hasCollideWithStateLogic = ReflectionUtil.isEntityInsideDeclared(this.getClass());
-    @Nullable private Timing impl$timing;
 
     /**
      * We captured the dye color when creating the Block.Properties.
@@ -123,13 +119,5 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     @Override
     public boolean bridge$hasCollideWithStateLogic() {
         return this.impl$hasCollideWithStateLogic;
-    }
-
-    @Override
-    public Timing bridge$timings() {
-        if (this.impl$timing == null) {
-            this.impl$timing = SpongeTimings.blockTiming((BlockType) this);
-        }
-        return this.impl$timing;
     }
 }

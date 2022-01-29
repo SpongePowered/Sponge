@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import co.aikar.timings.Timing;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -59,7 +58,6 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
@@ -128,15 +126,12 @@ public final class TrackingUtil {
         }
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
-        try (final EntityTickContext context = tickContext;
-             final Timing entityTiming = ((TimingBridge) entity.getType()).bridge$timings()
-        ) {
+        try (final EntityTickContext context = tickContext) {
             if (entity instanceof CreatorTrackedBridge) {
                 ((CreatorTrackedBridge) entity).tracker$getNotifierUUID().ifPresent(context::notifier);
                 ((CreatorTrackedBridge) entity).tracker$getCreatorUUID().ifPresent(context::creator);
             }
             context.buildAndSwitch();
-            entityTiming.startTiming();
             consumer.accept(entity);
             if (ShouldFire.MOVE_ENTITY_EVENT) {
                 SpongeCommonEventFactory.callNaturalMoveEntityEvent(entity);
@@ -157,11 +152,7 @@ public final class TrackingUtil {
         }
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
-        try (
-             final EntityTickContext context = tickContext;
-             final Timing entityTiming = ((TimingBridge) entity.getType()).bridge$timings()
-             ) {
-            entityTiming.startTiming();
+        try (final EntityTickContext context = tickContext) {
             if (entity instanceof CreatorTrackedBridge) {
                 ((CreatorTrackedBridge) entity).tracker$getNotifierUUID().ifPresent(context::notifier);
                 ((CreatorTrackedBridge) entity).tracker$getCreatorUUID().ifPresent(context::creator);
@@ -209,10 +200,7 @@ public final class TrackingUtil {
             // Finally, switch the context now that we have the owner and notifier
             phaseContext.buildAndSwitch();
 
-            try (final Timing timing = ((TimingBridge) tileEntity.getType()).bridge$timings().startTiming()) {
-                tile.tick();
-            }
-
+            tile.tick();
 
             // If we know the viewers force broadcast now to associate the inventory change with its blockentity
             // otherwise the viewing players update this during their ticking
@@ -255,9 +243,7 @@ public final class TrackingUtil {
         currentContext.appendNotifierPreBlockTick(world, pos, phaseContext);
         // Now actually switch to the new phase
 
-        try (final PhaseContext<@NonNull ?> context = phaseContext;
-             final Timing timing = ((TimingBridge) block.getBlock()).bridge$timings()) {
-            timing.startTiming();
+        try (final PhaseContext<@NonNull ?> context = phaseContext) {
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, () -> "Wrapping Block Tick: " + block.toString());
             block.tick(world, pos, random);
@@ -293,9 +279,7 @@ public final class TrackingUtil {
         currentContext.appendNotifierPreBlockTick(world, pos, phaseContext);
         // Now actually switch to the new phase
 
-        try (final PhaseContext<?> context = phaseContext;
-            final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$timings()) {
-            timing.startTiming();
+        try (final PhaseContext<?> context = phaseContext) {
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.FLUID_TICK, () -> "Wrapping Fluid Tick: " + fluidState.toString());
             fluidState.tick(world, pos);

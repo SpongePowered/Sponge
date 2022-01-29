@@ -24,20 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
-import co.aikar.timings.Timing;
 import net.minecraft.world.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
-import co.aikar.timings.sponge.SpongeTimings;
 
 @Mixin(EntityType.class)
-public abstract class EntityTypeMixin implements EntityTypeBridge, TimingBridge {
+public abstract class EntityTypeMixin implements EntityTypeBridge {
 
     private boolean impl$isActivationRangeInitialized = false;
     private boolean impl$hasCheckedDamageEntity = false;
     private boolean impl$overridesDamageEntity = false;
-    private Timing impl$timings;
 
     @Override
     public boolean bridge$isActivationRangeInitialized() {
@@ -67,13 +63,5 @@ public abstract class EntityTypeMixin implements EntityTypeBridge, TimingBridge 
     @Override
     public void bridge$setOverridesDamageEntity(final boolean damagesEntity) {
         this.impl$overridesDamageEntity = damagesEntity;
-    }
-
-    @Override
-    public Timing bridge$timings() {
-        if (this.impl$timings == null) {
-            this.impl$timings = SpongeTimings.entityTiming((EntityType) (Object) this);
-        }
-        return this.impl$timings;
     }
 }

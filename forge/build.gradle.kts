@@ -175,7 +175,6 @@ dependencies {
     val apiAdventureVersion: String by project
     val apiConfigurateVersion: String by project
     val apiPluginSpiVersion: String by project
-    val timingsVersion: String by project
     val log4jVersion: String by project
 
     api(project(":", configuration = "launch")) {
@@ -206,7 +205,6 @@ dependencies {
     }
 
     val libraries = forgeLibrariesConfig.name
-    libraries("org.spongepowered:timings:$timingsVersion")
     libraries("org.spongepowered:spongeapi:$apiVersion")
     libraries("javax.inject:javax.inject:1") // wat
     libraries("com.zaxxer:HikariCP:2.6.3")
