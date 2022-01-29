@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.tracker.server.level;
 
-import co.aikar.timings.Timing;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -72,7 +71,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
@@ -166,11 +164,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     private void tracker$wrapNormalEntityTick(final ServerLevel level, final Consumer<Entity> entityUpdateConsumer,
         final Entity entity
     ) {
-        final Timing entityTickTiming = ((TimingBridge) entity.getType()).bridge$timings();
-        entityTickTiming.startTiming();
         final PhaseContext<@NonNull ?> currentState = PhaseTracker.SERVER.getPhaseContext();
         TrackingUtil.tickEntity(entityUpdateConsumer, entity);
-        entityTickTiming.stopTiming();
     }
 
     @Override
@@ -237,10 +232,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/state/BlockState;randomTick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Ljava/util/Random;)V"))
     private void tracker$wrapBlockRandomTick(final BlockState blockState, final ServerLevel worldIn, final BlockPos posIn, final Random randomIn) {
-        try (final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$timings()) {
-            timing.startTiming();
-            TrackingUtil.randomTickBlock(this, blockState, posIn, this.random);
-        }
+        TrackingUtil.randomTickBlock(this, blockState, posIn, this.random);
     }
 
     @Redirect(method = "tickChunk",

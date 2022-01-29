@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.registry;
 
-import co.aikar.timings.TimingsFactory;
-import co.aikar.timings.sponge.SpongeTimingsFactory;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.ResourceKey;
@@ -219,7 +217,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(ResourcePack.Factory.class, new SpongeResourcePack.Factory())
                 .registerFactory(ServerLocation.Factory.class, new SpongeServerLocation.Factory())
                 .registerFactory(SpongeComponents.Factory.class, new SpongeAdventure.Factory())
-                .registerFactory(TimingsFactory.class, new SpongeTimingsFactory())
                 .registerFactory(Transform.Factory.class, new SpongeTransform.Factory())
                 .registerFactory(VariableValueParameters.Factory.class, new SpongeVariableValueParametersFactory())
                 .registerFactory(ChannelExceptionHandler.Factory.class, new SpongeChannelExceptionHandlerFactory())
