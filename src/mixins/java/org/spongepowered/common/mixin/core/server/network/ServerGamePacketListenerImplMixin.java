@@ -80,15 +80,12 @@ import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.entity.ChangeSignEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
@@ -304,7 +301,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
                 packetIn.getXRot(this.player.xRot), 0);
 
         // common checks and throws are done here.
-        final Tuple<Vector3d, Vector3d> events = SpongeCommonEventFactory.createAndFireMoveAndRotateEvents(
+        final Tuple<Vector3d, Vector3d> events = SpongeCommonEventFactory.callMoveAndRotateEvents(
                 player,
                 fireMoveEvent ? fromPosition : null,
                 fireRotationEvent ? fromRotation : null,
@@ -383,7 +380,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
         final Vector3d originalToRotation = new Vector3d(param0.getYRot(), param0.getXRot(), 0);
 
         // common checks and throws are done here.
-        final Tuple<Vector3d, Vector3d> events = SpongeCommonEventFactory.createAndFireMoveAndRotateEvents(
+        final Tuple<Vector3d, Vector3d> events = SpongeCommonEventFactory.callMoveAndRotateEvents(
                 (org.spongepowered.api.entity.Entity) rootVehicle,
                 fromPosition,
                 fromRotation,

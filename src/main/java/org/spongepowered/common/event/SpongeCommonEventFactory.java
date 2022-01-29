@@ -138,8 +138,8 @@ import java.util.stream.Stream;
 
 public final class SpongeCommonEventFactory {
 
-    private static final double MOVEMENT_DELTA = 1.0d/256.0d;
-    private static final double ROTATION_DELTA = 0.15f * 0.15f;
+    private static final double MOVEMENT_GRID_POINTS_PER_BLOCK = 8.0d;
+    private static final double ROTATION_GRID_POINTS_PER_UNIT = 20.0f;
 
     @SuppressWarnings("unchecked")
     public static <T extends net.minecraft.world.entity.Entity> CollideEntityEvent callCollideEntityEvent(
@@ -392,7 +392,7 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
 
             final @Nullable Vector3d finalPosition =
-                    SpongeCommonEventFactory.createAndFireMoveAndRotateEvents(
+                    SpongeCommonEventFactory.callMoveAndRotateEvents(
                             (Entity) entity,
                             new Vector3d(entity.xOld, entity.yOld, entity.zOld),
                             null,
@@ -423,7 +423,7 @@ public final class SpongeCommonEventFactory {
 
             // x and y are the opposite way around to the rotation in the API.
             final @Nullable Vector3d finalRotation =
-                    SpongeCommonEventFactory.createAndFireMoveAndRotateEvents(
+                    SpongeCommonEventFactory.callMoveAndRotateEvents(
                             (Entity) entity,
                             null,
                             new Vector3d(entity.yRotO, entity.xRotO, 0),
@@ -441,7 +441,21 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static Tuple<@Nullable Vector3d, @Nullable Vector3d> createAndFireMoveAndRotateEvents(
+    /**
+     * Returns a tuple of position and rotation {@link Vector3d}s.
+     *
+     * <p>To fire a movement event, fromPosition and toPosition must be
+     * non-null. Similar story for the rotation event and parameters.</p>
+     *
+     * @param movingEntity The entity that is moving
+     * @param fromPosition The position the entity starts at
+     * @param fromRotation The rotation the entity starts at
+     * @param toPosition The position the entity is moving to
+     * @param toRotation The rotation the entity is rotating to
+     * @return A tuple of a position and rotation vector. If null, the event
+     *  was cancelled.
+     */
+    public static Tuple<@Nullable Vector3d, @Nullable Vector3d> callMoveAndRotateEvents(
             final org.spongepowered.api.entity.Entity movingEntity,
             final @Nullable Vector3d fromPosition,
             final @Nullable Vector3d fromRotation,
@@ -452,7 +466,8 @@ public final class SpongeCommonEventFactory {
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         // Call move & rotate event as needed...
         if (ShouldFire.MOVE_ENTITY_EVENT && fromPosition != null && toPosition != null &&
-                fromPosition.distanceSquared(toPosition) > SpongeCommonEventFactory.MOVEMENT_DELTA) {
+                !fromPosition.mul(SpongeCommonEventFactory.MOVEMENT_GRID_POINTS_PER_BLOCK).toInt()
+                        .equals(toPosition.mul(SpongeCommonEventFactory.MOVEMENT_GRID_POINTS_PER_BLOCK).toInt())) {
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(cause, movingEntity, fromPosition,
                     toPosition, toPosition);
             if (SpongeCommon.post(event)) {
@@ -466,7 +481,8 @@ public final class SpongeCommonEventFactory {
 
         final @Nullable Vector3d finalRotation;
         if (ShouldFire.ROTATE_ENTITY_EVENT && fromRotation != null && toRotation != null &&
-                fromRotation.distanceSquared(toRotation) > SpongeCommonEventFactory.ROTATION_DELTA) {
+                !fromRotation.mul(SpongeCommonEventFactory.ROTATION_GRID_POINTS_PER_UNIT).toInt()
+                        .equals(toRotation.mul(SpongeCommonEventFactory.ROTATION_GRID_POINTS_PER_UNIT).toInt())) {
             final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(cause, movingEntity, fromRotation,
                     toRotation);
             if (SpongeCommon.post(event)) {
