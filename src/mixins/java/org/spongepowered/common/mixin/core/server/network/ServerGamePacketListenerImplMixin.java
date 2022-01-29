@@ -385,7 +385,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
 
         // common checks and throws are done here.
         final Tuple<Vector3d, Vector3d> events = this.impl$createAndFireMoveAndRotationEvents(
-                player,
+                (org.spongepowered.api.entity.Entity) rootVehicle,
                 fromPosition,
                 fromRotation,
                 originalToPosition,
