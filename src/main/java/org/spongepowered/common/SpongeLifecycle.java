@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common;
 
+import co.aikar.timings.TimingsFactory;
+import co.aikar.timings.sponge.SpongeTimingsFactory;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -140,6 +142,11 @@ public final class SpongeLifecycle implements Lifecycle {
     public void callRegisterChannelEvent() {
         this.game.eventManager().post(new RegisterChannelEventImpl(Cause.of(EventContext.empty(), this.game), this.game,
                 (SpongeChannelManager) this.game.channelManager()));
+    }
+
+    @Override
+    public void initTimings() {
+        ((SpongeTimingsFactory) this.game.factoryProvider().provide(TimingsFactory.class)).init();
     }
 
     @Override

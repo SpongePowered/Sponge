@@ -22,63 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package co.aikar.timings.sponge;
 
-import com.google.inject.Injector;
-import org.spongepowered.api.Client;
-import org.spongepowered.api.Engine;
-import org.spongepowered.api.Server;
-
-import java.nio.file.Path;
+import co.aikar.timings.Timing;
+import net.minecraft.world.level.Level;
 
 /**
- * Represents the core series of calls Sponge needs to make when the platform is starting up
+ * Set of timers per world, to track world specific Timings.
  */
-public interface Lifecycle {
+public final class WorldTimingsHandler {
 
-    Injector platformInjector();
+    public final Timing scheduledBlocks;
+    public final Timing entityRemoval;
+    public final Timing blockEntityTick;
+    public final Timing blockEntityPending;
+    public final Timing blockEntityRemoval;
+    public final Timing tick;
+    public final Timing tickEntities;
 
-    void establishFactories();
+    public WorldTimingsHandler(final Level level) {
+        final String name = level.dimension().location() + " - ";
 
-    void establishBuilders();
+        this.tick = SpongeTimingsFactory.ofSafe(name + "Tick");
+        this.tickEntities = SpongeTimingsFactory.ofSafe(name + "Tick Entities", this.tick);
 
-    void callRegisterFactoryEvent();
-
-    void callRegisterBuilderEvent();
-
-    void establishGlobalRegistries();
-
-    void establishDataProviders();
-
-    void callRegisterDataEvent();
-
-    void establishDataKeyListeners();
-
-    void callRegisterDataPackValueEvent(Path datapackDir);
-
-    void callRegisterChannelEvent();
-
-    void initTimings();
-
-    void establishGameServices();
-
-    void establishServerServices();
-
-    void establishServerFeatures();
-
-    void callConstructEvent();
-
-    void establishServerRegistries(Server server);
-
-    void establishClientRegistries(Client client);
-
-    void callStartingEngineEvent(Engine engine);
-
-    void callStartedEngineEvent(Engine engine);
-
-    void callLoadedGameEvent();
-
-    void callStoppingEngineEvent(Engine engine);
-
-    void callStoppedGameEvent();
+        this.scheduledBlocks = SpongeTimingsFactory.ofSafe(name + "Scheduled Blocks", this.tick);
+        this.entityRemoval = SpongeTimingsFactory.ofSafe(name + "entityRemoval");
+        this.blockEntityTick = SpongeTimingsFactory.ofSafe(name + "blockEntityTick");
+        this.blockEntityPending = SpongeTimingsFactory.ofSafe(name + "blockEntityPending");
+        this.blockEntityRemoval = SpongeTimingsFactory.ofSafe(name + "blockEntityRemoval");
+    }
 }

@@ -22,63 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package co.aikar.timings.sponge;
 
-import com.google.inject.Injector;
-import org.spongepowered.api.Client;
-import org.spongepowered.api.Engine;
-import org.spongepowered.api.Server;
+import co.aikar.timings.Timing;
+import net.minecraft.server.MinecraftServer;
 
-import java.nio.file.Path;
+public final class ServerTimingsHandler {
 
-/**
- * Represents the core series of calls Sponge needs to make when the platform is starting up
- */
-public interface Lifecycle {
+    public final Timing save;
 
-    Injector platformInjector();
-
-    void establishFactories();
-
-    void establishBuilders();
-
-    void callRegisterFactoryEvent();
-
-    void callRegisterBuilderEvent();
-
-    void establishGlobalRegistries();
-
-    void establishDataProviders();
-
-    void callRegisterDataEvent();
-
-    void establishDataKeyListeners();
-
-    void callRegisterDataPackValueEvent(Path datapackDir);
-
-    void callRegisterChannelEvent();
-
-    void initTimings();
-
-    void establishGameServices();
-
-    void establishServerServices();
-
-    void establishServerFeatures();
-
-    void callConstructEvent();
-
-    void establishServerRegistries(Server server);
-
-    void establishClientRegistries(Client client);
-
-    void callStartingEngineEvent(Engine engine);
-
-    void callStartedEngineEvent(Engine engine);
-
-    void callLoadedGameEvent();
-
-    void callStoppingEngineEvent(Engine engine);
-
-    void callStoppedGameEvent();
+    public ServerTimingsHandler(final MinecraftServer server) {
+        this.save = SpongeTimingsFactory.ofSafe("Level Save");
+    }
 }

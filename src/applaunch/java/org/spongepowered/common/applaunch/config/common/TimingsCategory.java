@@ -24,50 +24,30 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
+import java.util.Collections;
+import java.util.List;
+
 @ConfigSerializable
-public final class ModuleCategory {
+public final class TimingsCategory {
 
     @Setting
-    @Comment("Enables support for BungeeCord and Velocity IP forwarding.\n" +
-        "Additional options must be configured in the 'ip-forwarding' configuration section.")
-    public boolean ipForwarding = false;
-
-    @Setting("entity-activation-range")
-    public boolean entityActivationRange = true;
-
-    @Setting("block-entity-activation")
-    @Comment("Controls block range and tick rate of block entities. \n"
-             + "Use with caution as this can break intended functionality.")
-    public boolean blockEntityActivationRange = false;
-
-    @Setting("entity-collision")
-    public boolean entityCollision = true;
+    public boolean verbose = false;
 
     @Setting
-    public boolean timings = true;
+    public boolean enabled = true;
 
-    @Setting
-    @Comment("Controls whether any exploit patches are applied.\n"
-             + "If there are issues with any specific exploits, please\n"
-             + "test in the exploit category first, before disabling all\n"
-             + "exploits with this toggle.")
-    public boolean exploits = true;
+    @Setting("server-name-privacy")
+    public boolean serverNamePrivacy = false;
 
-    @Setting
-    public boolean optimizations = true;
+    @Setting("hidden-config-entries")
+    public final List<String> hiddenConfigEntries = Collections.singletonList("sponge.sql");
 
-    @Setting
-    public boolean tracking = true;
+    @Setting("history-interval")
+    public int historyInterval = 300;
 
-    @Setting("real-time")
-    @Comment("Use real (wall) time instead of ticks as much as possible")
-    public boolean realTime = false;
-
-    @Setting("movement-checks")
-    @Comment("Allows configuring Vanilla movement and speed checks")
-    public boolean movementChecks = false;
+    @Setting("history-length")
+    public int historyLength = 3600;
 }

@@ -22,32 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server;
+package org.spongepowered.common.mixin.core.world.level.block.entity;
 
-import co.aikar.timings.sponge.ServerTimingsHandler;
-import com.google.inject.Injector;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.Difficulty;
+import co.aikar.timings.Timing;
+import co.aikar.timings.sponge.SpongeTimings;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
-import org.spongepowered.common.user.SpongeUserManager;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.TimingBridge;
 
-public interface MinecraftServerBridge {
+@Mixin(BlockEntityType.class)
+public abstract class BlockEntityTypeMixin implements TimingBridge {
 
-    void bridge$initServices(Game game, Injector injector);
+    private @Nullable Timing impl$timing;
 
-    SpongeServerScopedServiceProvider bridge$getServiceProvider();
-
-    @Nullable ResourcePack bridge$getResourcePack();
-
-    void bridge$setDifficulty(ServerLevel world, Difficulty newDifficulty, boolean forceDifficulty);
-
-    boolean bridge$performAutosaveChecks();
-
-    ServerTimingsHandler bridge$timingsHandler();
-
-    SpongeUserManager bridge$userManager();
-
+    @Override
+    public Timing bridge$timings() {
+        if (this.impl$timing == null) {
+            this.impl$timing = SpongeTimings.blockEntityTiming((BlockEntityType<?>) (Object) this);
+        }
+        return this.impl$timing;
+    }
 }

@@ -22,63 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package org.spongepowered.common.bridge;
 
-import com.google.inject.Injector;
-import org.spongepowered.api.Client;
-import org.spongepowered.api.Engine;
-import org.spongepowered.api.Server;
+import co.aikar.timings.Timing;
 
-import java.nio.file.Path;
+public interface TimingBridge {
 
-/**
- * Represents the core series of calls Sponge needs to make when the platform is starting up
- */
-public interface Lifecycle {
-
-    Injector platformInjector();
-
-    void establishFactories();
-
-    void establishBuilders();
-
-    void callRegisterFactoryEvent();
-
-    void callRegisterBuilderEvent();
-
-    void establishGlobalRegistries();
-
-    void establishDataProviders();
-
-    void callRegisterDataEvent();
-
-    void establishDataKeyListeners();
-
-    void callRegisterDataPackValueEvent(Path datapackDir);
-
-    void callRegisterChannelEvent();
-
-    void initTimings();
-
-    void establishGameServices();
-
-    void establishServerServices();
-
-    void establishServerFeatures();
-
-    void callConstructEvent();
-
-    void establishServerRegistries(Server server);
-
-    void establishClientRegistries(Client client);
-
-    void callStartingEngineEvent(Engine engine);
-
-    void callStartedEngineEvent(Engine engine);
-
-    void callLoadedGameEvent();
-
-    void callStoppingEngineEvent(Engine engine);
-
-    void callStoppedGameEvent();
+    Timing bridge$timings();
 }

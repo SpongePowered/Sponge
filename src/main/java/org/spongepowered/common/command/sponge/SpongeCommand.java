@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.command.sponge;
 
+import co.aikar.timings.Timings;
+import co.aikar.timings.sponge.SpongeTimingsFactory;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -158,6 +160,9 @@ public class SpongeCommand {
                 .addChild(pluginsInfoCommand, "info")
                 .build();
 
+        // /sponge timings
+        final Command.Parameterized timingsCommand = this.timingsSubcommand();
+
         // /sponge tps
         final Command.Parameterized tpsCommand = Command.builder()
                 .permission("sponge.command.tps")
@@ -210,6 +215,7 @@ public class SpongeCommand {
                 .addChild(chunksCommand, "chunks")
                 .addChild(heapCommand, "heap")
                 .addChild(pluginsCommand, "plugins")
+                .addChild(timingsCommand, "timings")
                 .addChild(tpsCommand, "tps")
                 .addChild(versionCommand, "version")
                 .addChild(whichCommand, "which")
@@ -488,6 +494,75 @@ public class SpongeCommand {
 
         context.sendMessage(Identity.nil(), Component.text("Completed plugin refresh."));
         return CommandResult.success();
+    }
+
+    private Command.@NonNull Parameterized timingsSubcommand() {
+        return Command.builder()
+                .permission("sponge.command.timings")
+                .shortDescription(Component.text("Manages Sponge Timings data to see performance of the server."))
+                .addChild(Command.builder()
+                        .executor(context -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
+                            }
+                            Timings.reset();
+                            context.sendMessage(Identity.nil(), Component.text("Timings reset"));
+                            return CommandResult.success();
+                        })
+                        .build(), "reset")
+                .addChild(Command.builder()
+                        .executor(context -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
+                            }
+                            Timings.generateReport(context.cause().audience());
+                            return CommandResult.success();
+                        })
+                        .build(), "report", "paste")
+                .addChild(Command.builder()
+                        .executor(context -> {
+                            Timings.setTimingsEnabled(true);
+                            context.sendMessage(Identity.nil(), Component.text("Enabled Timings & Reset"));
+                            return CommandResult.success();
+                        })
+                        .build(), "on")
+                .addChild(Command.builder()
+                        .executor(context -> {
+                            Timings.setTimingsEnabled(false);
+                            context.sendMessage(Identity.nil(), Component.text("Disabled Timings"));
+                            return CommandResult.success();
+                        })
+                        .build(), "off")
+                .addChild(Command.builder()
+                        .executor(context -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
+                            }
+                            Timings.setVerboseTimingsEnabled(true);
+                            context.sendMessage(Identity.nil(), Component.text("Enabled Verbose Timings"));
+                            return CommandResult.success();
+                        })
+                        .build(), "verbon")
+                .addChild(Command.builder()
+                        .executor(context -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
+                            }
+                            Timings.setVerboseTimingsEnabled(false);
+                            context.sendMessage(Identity.nil(), Component.text("Disabled Verbose Timings"));
+                            return CommandResult.success();
+                        })
+                        .build(), "verboff")
+                .addChild(Command.builder()
+                        .executor(context -> {
+                            if (!Timings.isTimingsEnabled()) {
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
+                            }
+                            context.sendMessage(Identity.nil(), Component.text("Timings cost: " + SpongeTimingsFactory.getCost()));
+                            return CommandResult.success();
+                        })
+                        .build(), "cost")
+                .build();
     }
 
     private @NonNull CommandResult tpsExecutor(final CommandContext context) {

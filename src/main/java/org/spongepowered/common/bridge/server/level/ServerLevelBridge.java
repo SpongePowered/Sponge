@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.server.level;
 
+import co.aikar.timings.sponge.WorldTimingsHandler;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.world.entity.Entity;
@@ -45,6 +46,8 @@ public interface ServerLevelBridge {
     void bridge$updateRotation(Entity entityIn);
 
     void bridge$addEntityRotationUpdate(Entity entity, Vector3d rotation);
+
+    WorldTimingsHandler bridge$getTimingsHandler();
 
     void bridge$triggerExplosion(Explosion explosion);
 

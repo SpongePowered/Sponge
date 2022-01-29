@@ -22,32 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server;
+package org.spongepowered.vanilla.mixin.core.server.level;
 
-import co.aikar.timings.sponge.ServerTimingsHandler;
-import com.google.inject.Injector;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.Difficulty;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
-import org.spongepowered.common.user.SpongeUserManager;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 
-public interface MinecraftServerBridge {
+import java.util.function.BooleanSupplier;
 
-    void bridge$initServices(Game game, Injector injector);
+@Mixin(ServerLevel.class)
+public abstract class ServerLevelMixin_Timings_Vanilla implements ServerLevelBridge {
 
-    SpongeServerScopedServiceProvider bridge$getServiceProvider();
-
-    @Nullable ResourcePack bridge$getResourcePack();
-
-    void bridge$setDifficulty(ServerLevel world, Difficulty newDifficulty, boolean forceDifficulty);
-
-    boolean bridge$performAutosaveChecks();
-
-    ServerTimingsHandler bridge$timingsHandler();
-
-    SpongeUserManager bridge$userManager();
-
+    /**
+     * Due to method changes in Forge (onEntityRemoved -> removeEntityComplete), we do this in Vanilla instead
+     */
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;onEntityRemoved(Lnet/minecraft/world/entity/Entity;)V", shift = At.Shift.AFTER))
+    protected void vanilla$stopEntityRemovalTimings(BooleanSupplier var1, CallbackInfo ci) {
+        this.bridge$getTimingsHandler().entityRemoval.startTiming();
+    }
 }

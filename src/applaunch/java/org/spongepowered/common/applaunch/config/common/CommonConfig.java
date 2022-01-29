@@ -95,6 +95,9 @@ public final class CommonConfig implements Config {
     public final DebugCategory debug = new DebugCategory();
 
     @Setting
+    public final TimingsCategory timings = new TimingsCategory();
+
+    @Setting
     public final WorldCategory world = new WorldCategory();
 
     public static ConfigurationTransformation transformation() {

@@ -22,32 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server;
+package co.aikar.timings.sponge;
 
-import co.aikar.timings.sponge.ServerTimingsHandler;
-import com.google.inject.Injector;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.Difficulty;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
-import org.spongepowered.common.user.SpongeUserManager;
+import co.aikar.timings.util.JSONUtil;
+import com.google.gson.JsonArray;
 
-public interface MinecraftServerBridge {
+class TimingHistoryEntry {
 
-    void bridge$initServices(Game game, Injector injector);
+    final TimingData data;
+    final TimingData[] children;
 
-    SpongeServerScopedServiceProvider bridge$getServiceProvider();
+    TimingHistoryEntry(TimingHandler handler) {
+        this.data = handler.record.clone();
+        this.children = new TimingData[handler.children.size()];
+        int i = 0;
+        for (TimingData child : handler.children.values()) {
+            this.children[i++] = child.clone();
+        }
+    }
 
-    @Nullable ResourcePack bridge$getResourcePack();
-
-    void bridge$setDifficulty(ServerLevel world, Difficulty newDifficulty, boolean forceDifficulty);
-
-    boolean bridge$performAutosaveChecks();
-
-    ServerTimingsHandler bridge$timingsHandler();
-
-    SpongeUserManager bridge$userManager();
-
+    JsonArray export() {
+        JsonArray result = this.data.export();
+        if (this.children.length > 0) {
+            result.add(JSONUtil.mapArray(this.children, TimingData::export));
+        }
+        return result;
+    }
 }

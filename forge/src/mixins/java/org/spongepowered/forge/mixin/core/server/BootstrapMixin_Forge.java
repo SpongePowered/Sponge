@@ -60,5 +60,6 @@ public abstract class BootstrapMixin_Forge {
         launch.setLifecycle(lifecycle);
         lifecycle.establishFactories();
         lifecycle.establishBuilders();
+        lifecycle.initTimings();
     }
 }

@@ -21,6 +21,7 @@
         "brigadier.exceptions.CommandSyntaxExceptionMixin_Vanilla",
         "server.BootstrapMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",
+        "server.level.ServerLevelMixin_Timings_Vanilla",
         "server.level.ServerPlayerMixin_Vanilla",
         "server.network.ServerGamePacketListenerImplMixin_Vanilla",
         "server.network.ServerLoginPacketListenerImpl_1Mixin_Vanilla",
