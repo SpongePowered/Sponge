@@ -239,6 +239,12 @@
             "description": "Vanish Testing"
         },
         {
+            "id": "blockstate-test",
+            "name": "BlockState Test",
+            "entrypoint": "org.spongepowered.test.blockstate.BlockStateTest",
+            "description": "BlockState Testing"
+        },
+        {
             "id": "key-test",
             "name": "Key Listener Test",
             "entrypoint": "org.spongepowered.test.keys.KeyTest",
