@@ -22,29 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network.syncher;
+package org.spongepowered.common.data.datasync.entity;
 
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.world.entity.Entity;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.bridge.network.syncher.EntityDataAccessorBridge;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-import net.minecraft.network.syncher.EntityDataAccessor;
-
-@Mixin(EntityDataAccessor.class)
-public abstract class EntityDataAccessorMixin<T> implements EntityDataAccessorBridge<T> {
-
-    @Nullable private DataParameterConverter<T> impl$converter;
-
-    @Override
-    public void bridge$setDataConverter(final DataParameterConverter<T> converter) {
-        this.impl$converter = converter;
+public class LivingHealthConverter extends DataParameterConverter<Float> {
+    public LivingHealthConverter() {
+        super(LivingEntityAccessor.accessor$DATA_HEALTH_ID());
     }
 
     @Override
-    public Optional<DataParameterConverter<T>> bridge$getDataConverter() {
-        return Optional.ofNullable(this.impl$converter);
+    public Optional<DataTransactionResult> createTransaction(
+        final Entity entity, final Float currentValue, final Float value
+    ) {
+        return Optional.of(DataTransactionResult.builder()
+            .replace(Value.immutableOf(Keys.HEALTH, (double) currentValue))
+            .success(Value.immutableOf(Keys.HEALTH, (double) value))
+            .result(DataTransactionResult.Type.SUCCESS)
+            .build());
+    }
+
+    @Override
+    public Float getValueFromEvent(final Float originalValue, final DataTransactionResult result) {
+        return result.successfulValue(Keys.HEALTH)
+            .orElse(Value.immutableOf(Keys.HEALTH, (double) originalValue))
+            .get()
+            .floatValue();
     }
 }

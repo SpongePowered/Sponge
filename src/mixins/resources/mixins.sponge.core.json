@@ -45,6 +45,8 @@
         "network.protocol.game.ClientboundResourcePackPacketMixin",
         "network.protocol.status.ClientboundStatusResponsePacketMixin",
         "network.protocol.status.ServerStatusMixin",
+        "network.syncher.EntityDataAccessorMixin",
+        "network.syncher.SynchedEntityDataMixin",
         "server.MainMixin",
         "server.MinecraftServerMixin",
         "server.PlayerAdvancementsMixin",
