@@ -36,7 +36,6 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -57,15 +56,12 @@ import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.WorldLike;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.WorldLike;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
@@ -85,7 +81,6 @@ import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.living.human.HumanEntity;
-import org.spongepowered.common.registry.InitialRegistryData;
 import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.util.Constants;
@@ -105,7 +100,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -194,37 +188,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     }
 
     @Override
-    public <T> org.spongepowered.api.registry.Registry<T> registry(final RegistryType<T> type) {
-        return this.api$registryHolder().registry(Objects.requireNonNull(type, "type"));
-    }
-
-    @Override
-    public <T> Optional<org.spongepowered.api.registry.Registry<T>> findRegistry(final RegistryType<T> type) {
-        return this.api$registryHolder().findRegistry(Objects.requireNonNull(type, "type"));
-    }
-
-    @Override
-    public Stream<org.spongepowered.api.registry.Registry<?>> streamRegistries(final org.spongepowered.api.ResourceKey root) {
-        return this.api$registryHolder().streamRegistries(Objects.requireNonNull(root, "root"));
-    }
-
-    @Override
-    public void setRootMinecraftRegistry(final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> registry) {
-        this.api$registryHolder().setRootMinecraftRegistry(registry);
-    }
-
-    @Override
-    public <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, @Nullable final InitialRegistryData<T> defaultValues, final boolean isDynamic,
-        @Nullable final BiConsumer<ResourceKey<T>, T> callback) {
-        return this.api$registryHolder().createRegistry(type, defaultValues, isDynamic, callback);
-    }
-
-    @Override
-    public <T> void wrapTagHelperAsRegistry(final RegistryType<Tag<T>> type, final StaticTagHelper<T> helper) {
-        this.api$registryHolder().wrapTagHelperAsRegistry(type, helper);
-    }
-
-    private RegistryHolderLogic api$registryHolder() {
+    public RegistryHolderLogic registryHolder() {
         if (this.api$registryHolder == null) {
             this.api$registryHolder = new RegistryHolderLogic(((LevelAccessor) this).registryAccess());
         }
