@@ -67,6 +67,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
@@ -230,7 +231,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
             method = "handleInteract",
             constant = @Constant(doubleValue = 36.0D)
     )
-    private double impl$getPlatformReach(final double thirtySix, ServerboundInteractPacket p_147340_1_) {
+    private double impl$getPlatformReach(final double thirtySix, final ServerboundInteractPacket p_147340_1_) {
         return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, p_147340_1_.getTarget(this.player.level));
     }
 
@@ -319,7 +320,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
                     fromRotation,
                     originalToRotation);
         } else {
-            toRotation = null;
+            toRotation = fromRotation;
         }
 
         // At this point, we cancel out and let the "confirmed teleport" code run through to update the
@@ -425,13 +426,10 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
             packet.accessor$y(toPosition.y());
             packet.accessor$z(toPosition.z());
 
-            // set the first and last good position now so we don't cause the "moved wrongly" warnings later down the line.
+            // set the first and last good position now so we don't cause the "moved too quickly" warnings.
             this.vehicleFirstGoodX = toPosition.x();
             this.vehicleFirstGoodY = toPosition.y();
             this.vehicleFirstGoodZ = toPosition.z();
-            this.vehicleLastGoodX = toPosition.x();
-            this.vehicleLastGoodY = toPosition.y();
-            this.vehicleLastGoodZ = toPosition.z();
         }
     }
 
@@ -490,7 +488,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
                 if (ShouldFire.INTERACT_ITEM_EVENT_PRIMARY) {
                     final Vec3 startPos = this.player.getEyePosition(1);
                     final Vec3 endPos = startPos.add(this.player.getLookAngle().scale(5d)); // TODO hook for blockReachDistance?
-                    HitResult result = this.player.getLevel().clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.player));
+                    final HitResult result = this.player.getLevel().clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.player));
                     if (result.getType() == HitResult.Type.MISS) {
                         final ItemStack heldItem = this.player.getItemInHand(hand);
                         SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, heldItem, hand);
@@ -577,7 +575,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
 
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"))
-    public void impl$handlePlayerDisconnect(final PlayerList playerList, final net.minecraft.network.chat.Component component, final ChatType chatType, UUID uuid) {
+    public void impl$handlePlayerDisconnect(final PlayerList playerList, final net.minecraft.network.chat.Component component, final ChatType chatType, final UUID uuid) {
         // If this happens, the connection has not been fully established yet so we've kicked them during ClientConnectionEvent.Login,
         // but FML has created this handler earlier to send their handshake. No message should be sent, no disconnection event should
         // be fired either.
@@ -589,7 +587,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this.player);
             final Component message = SpongeAdventure.asAdventure(component);
-            Audience audience = Sponge.server().broadcastAudience();
+            final Audience audience = Sponge.server().broadcastAudience();
             final ServerSideConnectionEvent.Disconnect event = SpongeEventFactory.createServerSideConnectionEventDisconnect(
                     PhaseTracker.getCauseStackManager().currentCause(), audience, Optional.of(audience), message, message,
                     spongePlayer.connection(), spongePlayer);
@@ -601,7 +599,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     }
 
     @Redirect(method = "handleSignUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;filterTextPacket(Ljava/util/List;Ljava/util/function/Consumer;)V"))
-    private void impl$switchToSignPhaseState(ServerGamePacketListenerImpl serverPlayNetHandler, List<String> p_244537_1_, Consumer<List<String>> p_244537_2_) {
+    private void impl$switchToSignPhaseState(final ServerGamePacketListenerImpl serverPlayNetHandler, final List<String> p_244537_1_, final Consumer<List<String>> p_244537_2_) {
         try (final BasicPacketContext context = PacketPhase.General.UPDATE_SIGN.createPhaseContext(PhaseTracker.getInstance())
                 .packetPlayer(this.player)
                 .buildAndSwitch()
@@ -612,7 +610,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     }
 
     @Redirect(method = "updateSignText", at = @At(value = "INVOKE", remap = false, target = "Ljava/util/List;size()I"))
-    private int impl$callChangeSignEvent(final List<String> list, ServerboundSignUpdatePacket p_244542_1_, List<String> p_244542_2_) {
+    private int impl$callChangeSignEvent(final List<String> list, final ServerboundSignUpdatePacket p_244542_1_, final List<String> p_244542_2_) {
         final SignBlockEntity blockEntity = (SignBlockEntity) this.player.level.getBlockEntity(p_244542_1_.getPos());
         final ListValue<Component> originalLinesValue = ((Sign) blockEntity).getValue(Keys.SIGN_LINES)
                 .orElseGet(() -> new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.of()));
