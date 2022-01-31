@@ -263,8 +263,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
             final float f = (float) event.finalDamage() - (float) absorptionModifier;
             this.shadow$setAbsorptionAmount(Math.max(this.shadow$getAbsorptionAmount() + (float) absorptionModifier, 0.0F));
-            if (f > 0.0F && f < 3.4028235E37F && damageSource.getEntity() instanceof net.minecraft.server.level.ServerPlayer) {
-                ((net.minecraft.server.level.ServerPlayer) damageSource.getEntity()).awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(f * 10.0F));
+            if (f > 0.0F && f < 3.4028235E37F && ((LivingEntity) (Object) this) instanceof net.minecraft.server.level.ServerPlayer) {
+                ((Player) (Object) this).awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(f * 10.0F));
             }
             if (damage != 0.0F) {
                 if (isHuman) {
@@ -277,7 +277,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
                 if (isHuman) {
                     if (damage < 3.4028235E37F) {
-                        ((net.minecraft.server.level.ServerPlayer) damageSource.getEntity()).awardStat(Stats.DAMAGE_TAKEN, Math.round(damage * 10.0F));
+                        ((Player) (Object) this).awardStat(Stats.DAMAGE_TAKEN, Math.round(damage * 10.0F));
                     }
                     return true;
                 }

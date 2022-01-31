@@ -104,4 +104,12 @@ public final class SpongeKey<V extends Value<E>, E> extends AbstractResourceKeye
     public EmptyDataProvider<V, E> getEmptyDataProvider() {
         return this.emptyDataProvider;
     }
+
+    @Override
+    public String toString() {
+        return "SpongeKey{" +
+            "key=" + this.key() +
+            ", elementType=" + elementType +
+            '}';
+    }
 }

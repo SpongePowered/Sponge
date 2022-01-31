@@ -237,6 +237,12 @@
             "name": "Vanish Test",
             "entrypoint": "org.spongepowered.test.vanish.VanishTest",
             "description": "Vanish Testing"
+        },
+        {
+            "id": "key-test",
+            "name": "Key Listener Test",
+            "entrypoint": "org.spongepowered.test.keys.KeyTest",
+            "description": "Key Listener Testing"
         }
     ]
 }

@@ -54,14 +54,18 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
@@ -73,6 +77,7 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.weather.Weather;
@@ -85,12 +90,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
@@ -501,6 +508,32 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             return;
         }
         manager.add(pos, type);
+    }
+
+    @Inject(method = "add", at = @At("HEAD"))
+    private void impl$constructPostEventForAdd(final Entity entity, final CallbackInfo cir) {
+        this.impl$constructPostEventForEntityAdd(entity, null);
+    }
+
+    @Inject(method = "addEntity", at = @At("HEAD"))
+    private void impl$constructPostEventForEntityAdd(final Entity entity, final CallbackInfoReturnable<Boolean> cir) {
+        if (!(entity instanceof EntityBridge)) {
+            return;
+        }
+        if (!((EntityBridge) entity).bridge$isConstructing()) {
+            return;
+        }
+        ((EntityBridge) entity).bridge$fireConstructors();
+        final Vec3 position = entity.position();
+        final ServerLocation location = ServerLocation.of((ServerWorld) this, position.x(), position.y(), position.z());
+        final Vec2 rotationVector = entity.getRotationVector();
+        final Vector3d rotation = new Vector3d(rotationVector.x, rotationVector.y, 0);
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
+            frame.pushCause(entity);
+            final Event construct = SpongeEventFactory.createConstructEntityEventPost(frame.currentCause(), (org.spongepowered.api.entity.Entity) entity, location, rotation,
+                ((EntityType<?>) entity.getType()));
+            SpongeCommon.post(construct);
+        }
     }
 
     @Override
