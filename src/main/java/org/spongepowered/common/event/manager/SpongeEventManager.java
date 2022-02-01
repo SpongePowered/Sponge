@@ -277,13 +277,23 @@ public abstract class SpongeEventManager implements EventManager {
         // getMethods() doesn't return private methods. Do another check to warn
         // about those.
         for (Class<?> handleParent = handle; handleParent != Object.class; handleParent = handleParent.getSuperclass()) {
-            for (final Method method : handleParent.getDeclaredMethods()) {
-                if (method.getAnnotation(Listener.class) != null && !methodErrors.containsKey(method)) {
-                    final String error = SpongeEventManager.getHandlerErrorOrNull(method);
-                    if (error != null) {
-                        methodErrors.put(method, error);
+            try {
+                for (final Method method : handleParent.getDeclaredMethods()) {
+                    if (method.getAnnotation(Listener.class) != null && !methodErrors.containsKey(method)) {
+                        final String error = SpongeEventManager.getHandlerErrorOrNull(method);
+                        if (error != null) {
+                            methodErrors.put(method, error);
+                        }
                     }
                 }
+            } catch (final RuntimeException re) {
+                // This is the Forge classloader that checks for client sided classes
+                if (re.getMessage().startsWith("Attempted to load class")) {
+                    continue;
+                }
+                SpongeCommon.logger().warn("Exception trying to register superclass listeners", re);
+            } catch (final Exception e) {
+                SpongeCommon.logger().warn("Attempted to register listeners but had an exception loading listeners for super classes", e);
             }
         }
 
