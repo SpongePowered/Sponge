@@ -22,22 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.test;
+package org.spongepowered.common.util;
 
-import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.launch.Launch;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.common.event.gen.DefineableClassLoader;
 
-public class UnitTestExtension implements BeforeAllCallback {
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class ReferencedDefinableClassLoader extends DefineableClassLoader {
+    private final Map<String, byte[]> definedClasses;
+    public ReferencedDefinableClassLoader(final ClassLoader parent) {
+        super(parent);
+        this.definedClasses = new ConcurrentHashMap<>();
+    }
+
     @Override
-    public void beforeAll(final ExtensionContext context) throws Exception {
-        final TestPluginPlatform platform = new TestPluginPlatform();
-        if (AppLaunch.pluginPlatform() == null) {
-            AppLaunch.setPluginPlatform(platform);
-            Launch.setInstance(new TestLaunch(platform));
-            SpongeConfigs.getCommon();
+    public <T> Class<T> defineClass(final String name, final byte[] b) {
+        this.definedClasses.put(name, b);
+        return super.defineClass(name, b);
+    }
+
+
+    @Nullable
+    @Override
+    public InputStream getResourceAsStream(final String name) {
+        final String normalized = name.replace("/", ".").replace(".class", "");
+        if (this.definedClasses.containsKey(normalized)) {
+            final byte[] buf = this.definedClasses.get(normalized);
+            final byte[] cloned = buf.clone();
+            return new ByteArrayInputStream(cloned);
         }
+        return super.getResourceAsStream(name);
     }
 }

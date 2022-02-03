@@ -22,22 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.test;
+package org.spongepowered.common.test.block;
 
-import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.launch.Launch;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class UnitTestExtension implements BeforeAllCallback {
+@SuppressWarnings("deprecation")
+public class SpongeBlock extends Block {
+    public SpongeBlock(Properties param0) {
+        super(param0);
+    }
+
     @Override
-    public void beforeAll(final ExtensionContext context) throws Exception {
-        final TestPluginPlatform platform = new TestPluginPlatform();
-        if (AppLaunch.pluginPlatform() == null) {
-            AppLaunch.setPluginPlatform(platform);
-            Launch.setInstance(new TestLaunch(platform));
-            SpongeConfigs.getCommon();
-        }
+    public void neighborChanged(
+        BlockState param0, Level param1, BlockPos param2, Block param3, BlockPos param4, boolean param5
+    ) {
+        super.neighborChanged(param0, param1, param2, param3, param4, param5);
     }
 }
