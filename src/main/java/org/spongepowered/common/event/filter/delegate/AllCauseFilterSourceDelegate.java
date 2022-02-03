@@ -39,35 +39,36 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.filter.cause.All;
-
-import java.lang.reflect.Parameter;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 
 public class AllCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
 
     private final All anno;
 
-    public AllCauseFilterSourceDelegate(All anno) {
+    public AllCauseFilterSourceDelegate(final All anno) {
         this.anno = anno;
     }
 
     @Override
-    protected void insertCauseCall(MethodVisitor mv, Parameter param, Class<?> targetType) {
-        if (targetType.isArray()) {
-            mv.visitLdcInsn(Type.getType(targetType.getComponentType()));
+    protected void insertCauseCall(
+        final MethodVisitor mv, final ListenerClassVisitor.ListenerParameter param, final Type targetType) {
+        if (targetType.getSort() == Type.ARRAY) {
+            mv.visitLdcInsn(targetType.getElementType());
         } else {
             throw new IllegalStateException(
-                    "Parameter " + param.getName() + " is marked with @All but is not an array type");
+                    "Parameter " + param.name() + " is marked with @All but is not an array type");
         }
         mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Cause.class), "allOf",
                 "(Ljava/lang/Class;)Ljava/util/List;", false);
     }
 
     @Override
-    protected void insertTransform(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
+    protected void insertTransform(
+        final MethodVisitor mv, final ListenerClassVisitor.ListenerParameter param, final Type targetType, final int local) {
         if (this.anno.ignoreEmpty()) {
             // Check that the list is not empty
             mv.visitVarInsn(ALOAD, local);
-            Label success = new Label();
+            final Label success = new Label();
             mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "isEmpty", "()Z", true);
             mv.visitJumpInsn(IFEQ, success);
             mv.visitInsn(ACONST_NULL);
@@ -77,7 +78,7 @@ public class AllCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
 
         mv.visitVarInsn(ALOAD, local);
         mv.visitInsn(ICONST_0);
-        mv.visitTypeInsn(ANEWARRAY, Type.getInternalName(targetType.getComponentType()));
+        mv.visitTypeInsn(ANEWARRAY, targetType.getElementType().getInternalName());
         mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "toArray", "([Ljava/lang/Object;)[Ljava/lang/Object;", true);
         mv.visitVarInsn(ASTORE, local);
     }

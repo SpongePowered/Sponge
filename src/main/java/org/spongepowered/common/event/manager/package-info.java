@@ -22,15 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.filter.delegate;
+@DefaultQualifier(NonNull.class)
+package org.spongepowered.common.event.manager;
 
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MethodVisitor;
-import org.spongepowered.common.event.manager.ListenerClassVisitor;
-
-public interface FilterDelegate {
-
-    int write(String name, ClassWriter cw, MethodVisitor mv, ListenerClassVisitor.DiscoveredMethod method, int locals) throws
-        ClassNotFoundException;
-
-}
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.framework.qual.DefaultQualifier;

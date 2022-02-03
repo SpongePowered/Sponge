@@ -22,15 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.filter.delegate;
+package org.spongepowered.common.test;
 
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MethodVisitor;
-import org.spongepowered.common.event.manager.ListenerClassVisitor;
+import org.spongepowered.common.event.manager.SpongeEventManager;
 
-public interface FilterDelegate {
-
-    int write(String name, ClassWriter cw, MethodVisitor mv, ListenerClassVisitor.DiscoveredMethod method, int locals) throws
-        ClassNotFoundException;
-
+public class TestEventManager extends SpongeEventManager {
 }

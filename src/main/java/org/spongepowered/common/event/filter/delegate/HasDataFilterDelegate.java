@@ -41,10 +41,9 @@ import org.objectweb.asm.Type;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.event.filter.data.Has;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Optional;
 
 public class HasDataFilterDelegate implements ParameterFilterDelegate {
@@ -57,8 +56,11 @@ public class HasDataFilterDelegate implements ParameterFilterDelegate {
     }
 
     @Override
-    public void write(final ClassWriter cw, final MethodVisitor mv, final Method method, final Parameter param, final int localParam) {
-        if (!ValueContainer.class.isAssignableFrom(param.getType())) {
+    public void write(
+        final ClassWriter cw, final MethodVisitor mv,
+        final ListenerClassVisitor.ListenerParameter param, final int localParam
+    ) throws ClassNotFoundException {
+        if (!ValueContainer.class.isAssignableFrom(param.clazz())) {
             throw new IllegalStateException("Annotated type for data filter is not a ValueContainer");
         }
 
@@ -76,7 +78,7 @@ public class HasDataFilterDelegate implements ParameterFilterDelegate {
         mv.visitVarInsn(ALOAD, localParam);
         mv.visitTypeInsn(CHECKCAST, Type.getInternalName(ValueContainer.class));
         mv.visitFieldInsn(GETSTATIC, Type.getInternalName(this.anno.container()), this.anno.value(), Type.getDescriptor(Key.class));
-        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(param.getType()), "get", HasDataFilterDelegate.HAS_DESC, true);
+        mv.visitMethodInsn(INVOKEINTERFACE, param.type().getInternalName(), "get", HasDataFilterDelegate.HAS_DESC, true);
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "isPresent", "()Z", false);
         final Label success = new Label();
         if (this.anno.inverse()) {

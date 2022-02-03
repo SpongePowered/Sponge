@@ -62,20 +62,20 @@ import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.event.gen.LoaderClassWriter;
 import org.spongepowered.common.util.generator.GeneratorUtils;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class ClassEventListenerFactory implements AnnotatedEventListener.Factory {
 
     private final AtomicInteger id = new AtomicInteger();
     private final DefineableClassLoader classLoader;
-    private final LoadingCache<Method, Class<? extends AnnotatedEventListener>> cache = Caffeine.newBuilder()
+    private final LoadingCache<ListenerClassVisitor.DiscoveredMethod, Class<? extends AnnotatedEventListener>> cache = Caffeine.newBuilder()
         .weakValues().build(this::createClass);
-    private FilterFactory filterFactory;
+    private final FilterFactory filterFactory;
 
     private final String targetPackage;
 
-    public ClassEventListenerFactory(String targetPackage, FilterFactory factory, DefineableClassLoader classLoader) {
+    public ClassEventListenerFactory(
+        final String targetPackage, final FilterFactory factory, final DefineableClassLoader classLoader) {
         checkNotNull(targetPackage, "targetPackage");
         checkArgument(!targetPackage.isEmpty(), "targetPackage cannot be empty");
         this.targetPackage = targetPackage + '.';
@@ -84,20 +84,20 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
     }
 
     @Override
-    public AnnotatedEventListener create(Object handle, Method method) throws Exception {
+    public AnnotatedEventListener create(final Object handle, final ListenerClassVisitor.DiscoveredMethod method) throws Exception {
         return this.cache.get(method)
-                .getConstructor(method.getDeclaringClass())
+                .getConstructor(method.declaringClass())
                 .newInstance(handle);
     }
 
-    Class<? extends AnnotatedEventListener> createClass(Method method) throws Exception {
-        Class<?> handle = method.getDeclaringClass();
-        Class<?> eventClass = method.getParameterTypes()[0];
-        String name = this.targetPackage + eventClass.getSimpleName() + "Listener_" + handle.getSimpleName() + '_' + method.getName()
+    Class<? extends AnnotatedEventListener> createClass(final ListenerClassVisitor.DiscoveredMethod method) throws Exception {
+        final Class<?> handle = method.declaringClass();
+        final Class<?> eventClass = method.parameterTypes()[0].clazz();
+        final String name = this.targetPackage + eventClass.getSimpleName() + "Listener_" + handle.getSimpleName() + '_' + method.methodName()
                 + this.id.incrementAndGet();
-        Class<? extends EventFilter> filter = this.filterFactory.createFilter(method);
+        final Class<? extends EventFilter> filter = this.filterFactory.createFilter(method);
 
-        if (filter == null && method.getParameterCount() != 1) {
+        if (filter == null && method.parameterTypes().length != 1) {
             // basic sanity check
             throw new IllegalStateException("Failed to generate EventFilter for non trivial filtering operation.");
         }
@@ -112,20 +112,16 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
     private static final String HANDLE_METHOD_DESCRIPTOR = '(' + Type.getDescriptor(Event.class) + ")V";
     private static final String FILTER_DESCRIPTOR = "(" + Type.getDescriptor(Event.class) + ")[Ljava/lang/Object;";
 
-    private static byte[] generateClass(String name, Class<?> handle, Method method, Class<?> eventClass, Class<? extends EventFilter> filter) {
+    private static byte[] generateClass(String name, final Class<?> handle, final ListenerClassVisitor.DiscoveredMethod method, final Class<?> eventClass, final Class<? extends EventFilter> filter) {
         name = name.replace('.', '/');
         final String handleName = Type.getInternalName(handle);
         final String handleDescriptor = Type.getDescriptor(handle);
         final String filterName = Type.getInternalName(filter);
-        String eventDescriptor = "(";
-        for (int i = 0; i < method.getParameterCount(); i++) {
-            eventDescriptor += Type.getDescriptor(method.getParameterTypes()[i]);
-        }
-        eventDescriptor += ")V";
+        final String eventDescriptor = method.descriptor();
 
-        ClassWriter cw = new LoaderClassWriter(handle.getClassLoader(), ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        final ClassWriter cw = new LoaderClassWriter(handle.getClassLoader(), ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         MethodVisitor mv;
-        FieldVisitor fv;
+        final FieldVisitor fv;
 
         cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, ClassEventListenerFactory.BASE_HANDLER, null);
         {
@@ -163,19 +159,19 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
                 ClassEventListenerFactory.FILTER_DESCRIPTOR, true);
             mv.visitVarInsn(ASTORE, 2);
             mv.visitVarInsn(ALOAD, 2);
-            Label l2 = new Label();
+            final Label l2 = new Label();
             mv.visitJumpInsn(IFNULL, l2);
             mv.visitVarInsn(ALOAD, 0);
             mv.visitFieldInsn(GETFIELD, name, "handle", "Ljava/lang/Object;");
             mv.visitTypeInsn(CHECKCAST, handleName);
-            for (int i = 0; i < method.getParameterCount(); i++) {
+            for (int i = 0; i < method.parameterTypes().length; i++) {
                 mv.visitVarInsn(ALOAD, 2);
                 mv.visitIntInsn(BIPUSH, i);
                 mv.visitInsn(AALOAD);
-                Type paramType = Type.getType(method.getParameterTypes()[i]);
+                final Type paramType = method.parameterTypes()[i].type();
                 GeneratorUtils.visitUnboxingMethod(mv, paramType);
             }
-            mv.visitMethodInsn(INVOKEVIRTUAL, handleName, method.getName(), eventDescriptor, false);
+            mv.visitMethodInsn(INVOKEVIRTUAL, handleName, method.methodName(), eventDescriptor, false);
             mv.visitLabel(l2);
             mv.visitInsn(RETURN);
             mv.visitMaxs(0, 0);
@@ -186,13 +182,13 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
         return cw.toByteArray();
     }
 
-    private static byte[] generateClass(String name, Class<?> handle, Method method, Class<?> eventClass) {
+    private static byte[] generateClass(String name, final Class<?> handle, final ListenerClassVisitor.DiscoveredMethod method, final Class<?> eventClass) {
         name = name.replace('.', '/');
         final String handleName = Type.getInternalName(handle);
         final String handleDescriptor = Type.getDescriptor(handle);
         final String eventName = Type.getInternalName(eventClass);
 
-        ClassWriter cw = new LoaderClassWriter(handle.getClassLoader(), ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        final ClassWriter cw = new LoaderClassWriter(handle.getClassLoader(), ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         MethodVisitor mv;
 
         cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, ClassEventListenerFactory.BASE_HANDLER, null);
@@ -215,7 +211,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
             mv.visitTypeInsn(CHECKCAST, handleName);
             mv.visitVarInsn(ALOAD, 1);
             mv.visitTypeInsn(CHECKCAST, eventName);
-            mv.visitMethodInsn(INVOKEVIRTUAL, handleName, method.getName(), "(L" + eventName + ";)V", false);
+            mv.visitMethodInsn(INVOKEVIRTUAL, handleName, method.methodName(), "(L" + eventName + ";)V", false);
             mv.visitInsn(RETURN);
             mv.visitMaxs(0, 0);
             mv.visitEnd();

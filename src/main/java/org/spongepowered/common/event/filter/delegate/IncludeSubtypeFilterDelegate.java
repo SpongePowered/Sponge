@@ -40,30 +40,31 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.event.filter.type.Include;
-
-import java.lang.reflect.Method;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 
 public class IncludeSubtypeFilterDelegate extends SubtypeFilterDelegate {
 
-    public IncludeSubtypeFilterDelegate(Include anno) {
+    public IncludeSubtypeFilterDelegate(final Include anno) {
         super(anno.value());
     }
 
     @Override
-    public int write(String name, ClassWriter cw, MethodVisitor mv, Method method, int locals) {
+    public int write(final String name, final ClassWriter cw, final MethodVisitor mv,
+        final ListenerClassVisitor.DiscoveredMethod method, final int locals
+    ) {
         // TODO could do an optimization here to inline a single instanceof if
         // the set would contain only a single member
 
-        Label successLabel = new Label();
+        final Label successLabel = new Label();
 
         mv.visitVarInsn(ALOAD, 0);
         mv.visitFieldInsn(GETFIELD, name, "classes", "Ljava/util/Set;");
         // Loop through the classes set's members
         mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Set", "iterator", "()Ljava/util/Iterator;", true);
         mv.visitVarInsn(ASTORE, locals);
-        Label continueLabel = new Label();
+        final Label continueLabel = new Label();
         mv.visitJumpInsn(GOTO, continueLabel);
-        Label loopStart = new Label();
+        final Label loopStart = new Label();
         mv.visitLabel(loopStart);
         mv.visitVarInsn(ALOAD, locals);
         mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Iterator", "next", "()Ljava/lang/Object;", true);

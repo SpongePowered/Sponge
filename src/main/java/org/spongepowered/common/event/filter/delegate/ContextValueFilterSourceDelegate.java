@@ -43,9 +43,9 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.filter.cause.ContextValue;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Parameter;
 
 public class ContextValueFilterSourceDelegate extends CauseFilterSourceDelegate {
     private static final Type EVENT_CONTEXT = Type.getType(EventContext.class);
@@ -59,7 +59,7 @@ public class ContextValueFilterSourceDelegate extends CauseFilterSourceDelegate 
     }
 
     @Override
-    protected void insertCauseCall(final MethodVisitor mv, final Parameter param, final Class<?> targetType) {
+    protected void insertCauseCall(final MethodVisitor mv, final ListenerClassVisitor.ListenerParameter param, final Type targetType) {
         final Field targetField;
         try {
             targetField = EventContextKeys.class.getField(this.anno.value());
@@ -95,7 +95,7 @@ public class ContextValueFilterSourceDelegate extends CauseFilterSourceDelegate 
     }
 
     @Override
-    protected void insertTransform(final MethodVisitor mv, final Parameter param, final Class<?> targetType, final int local) {
+    protected void insertTransform(final MethodVisitor mv, final ListenerClassVisitor.ListenerParameter param, final Type targetType, final int local) {
         mv.visitVarInsn(ALOAD, local);
         final Label failure = new Label();
         final Label success = new Label();
@@ -122,7 +122,7 @@ public class ContextValueFilterSourceDelegate extends CauseFilterSourceDelegate 
 
         mv.visitVarInsn(ALOAD, local);
 
-        mv.visitTypeInsn(INSTANCEOF, Type.getInternalName(targetType));
+        mv.visitTypeInsn(INSTANCEOF, targetType.getInternalName());
 
         if (this.anno.typeFilter().length != 0) {
             mv.visitJumpInsn(IFEQ, failure);

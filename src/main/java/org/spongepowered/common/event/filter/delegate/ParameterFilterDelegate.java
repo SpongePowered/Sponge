@@ -26,12 +26,12 @@ package org.spongepowered.common.event.filter.delegate;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 
 public interface ParameterFilterDelegate {
 
-    void write(ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int localParam);
+    void write(
+        ClassWriter cw, MethodVisitor mv, ListenerClassVisitor.ListenerParameter param, int localParam
+    ) throws ClassNotFoundException;
 
 }

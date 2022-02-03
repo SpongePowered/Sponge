@@ -30,20 +30,18 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.common.event.filter.EventFilter;
 import org.spongepowered.common.event.filter.FilterFactory;
 
-import java.lang.reflect.Method;
-
 public final class InvokeEventListenerFactory implements AnnotatedEventListener.Factory {
 
     private FilterFactory filterFactory;
 
-    public InvokeEventListenerFactory(FilterFactory factory) {
+    public InvokeEventListenerFactory(final FilterFactory factory) {
         this.filterFactory = checkNotNull(factory, "filterFactory");
     }
 
     @Override
-    public AnnotatedEventListener create(Object handle, Method method) throws Exception {
+    public AnnotatedEventListener create(final Object handle, final ListenerClassVisitor.DiscoveredMethod method) throws Exception {
         final Class<? extends EventFilter> eventFilter = this.filterFactory.createFilter(method);
-        if (eventFilter == null && method.getParameterCount() != 1) {
+        if (eventFilter == null && method.parameterTypes().length != 1) {
             // basic sanity check
             throw new IllegalStateException("Failed to generate EventFilter for non trivial filtering operation.");
         }
@@ -53,29 +51,29 @@ public final class InvokeEventListenerFactory implements AnnotatedEventListener.
 
     private static class InvokeEventHandler extends AnnotatedEventListener {
 
-        private final Method method;
+        private final ListenerClassVisitor.DiscoveredMethod method;
         private final EventFilter filter;
 
-        InvokeEventHandler(Object handle, Method method, EventFilter filter) {
+        InvokeEventHandler(final Object handle, final ListenerClassVisitor.DiscoveredMethod method, final EventFilter filter) {
             super(handle);
             this.method = checkNotNull(method, "method");
             this.filter = filter;
         }
 
         @Override
-        public void handle(Event event) throws Exception {
-            if (this.filter != null) {
-                Object[] filtered = this.filter.filter(event);
-                if (filtered != null) {
-                    StringBuilder args = new StringBuilder();
-                    for (Object o : filtered) {
-                        args.append(o.getClass().getName()).append(" ");
-                    }
-                    this.method.invoke(this.handle, filtered);
-                }
-            } else {
-                this.method.invoke(this.handle, event);
-            }
+        public void handle(final Event event) throws Exception {
+//            if (this.filter != null) {
+//                final Object[] filtered = this.filter.filter(event);
+//                if (filtered != null) {
+//                    final StringBuilder args = new StringBuilder();
+//                    for (final Object o : filtered) {
+//                        args.append(o.getClass().getName()).append(" ");
+//                    }
+//                    this.method.invoke(this.handle, filtered);
+//                }
+//            } else {
+//                this.method.invoke(this.handle, event);
+//            }
         }
     }
 }

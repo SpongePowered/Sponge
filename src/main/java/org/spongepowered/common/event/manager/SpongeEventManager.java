@@ -56,8 +56,8 @@ import org.spongepowered.common.util.TypeTokenUtil;
 import org.spongepowered.configurate.util.Types;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -124,8 +124,9 @@ public abstract class SpongeEventManager implements EventManager {
         }
     }
 
-    private static @Nullable String getHandlerErrorOrNull(final Method method) {
-        final int modifiers = method.getModifiers();
+    private static @Nullable String getHandlerErrorOrNull(final ListenerClassVisitor.DiscoveredMethod method) throws
+        ClassNotFoundException {
+        final int modifiers = method.access();
         final List<String> errors = new ArrayList<>();
         if (Modifier.isStatic(modifiers)) {
             errors.add("method must not be static");
@@ -136,14 +137,14 @@ public abstract class SpongeEventManager implements EventManager {
         if (Modifier.isAbstract(modifiers)) {
             errors.add("method must not be abstract");
         }
-        if (method.getDeclaringClass().isInterface()) {
+        if (method.declaringClass().isInterface()) {
             errors.add("interfaces cannot declare listeners");
         }
-        if (method.getReturnType() != void.class) {
+        if (!method.descriptor().endsWith("V")) {
             errors.add("method must return void");
         }
-        final Class<?>[] parameters = method.getParameterTypes();
-        if (parameters.length == 0 || !Event.class.isAssignableFrom(parameters[0])) {
+        final ListenerClassVisitor.ListenerParameter[] parameters = method.parameterTypes();
+        if (parameters.length == 0 || !Event.class.isAssignableFrom(parameters[0].clazz())) {
             errors.add("method must have an Event as its first parameter");
         }
         if (errors.isEmpty()) {
@@ -155,7 +156,7 @@ public abstract class SpongeEventManager implements EventManager {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static <T extends Event> RegisteredListener<T> createRegistration(final PluginContainer plugin, final Type eventType,
             final Order order, final boolean beforeModifications, final EventListener<? super T> handler) {
-        Type genericType = null;
+        @Nullable Type genericType = null;
         final Class<?> erased = GenericTypeReflector.erase(eventType);
         if (GenericEvent.class.isAssignableFrom(erased)) {
             genericType = TypeTokenUtil.typeArgumentFromSupertype(eventType, GenericEvent.class, 0);
@@ -239,7 +240,7 @@ public abstract class SpongeEventManager implements EventManager {
         }
 
         final List<RegisteredListener<? extends Event>> handlers = new ArrayList<>();
-        final Map<Method, String> methodErrors = new HashMap<>();
+        final Map<ListenerClassVisitor.DiscoveredMethod, String> methodErrors = new HashMap<>();
 
         final Class<?> handle = listenerObject.getClass();
         final ClassLoader handleLoader = handle.getClassLoader();
@@ -251,13 +252,13 @@ public abstract class SpongeEventManager implements EventManager {
                     new FilterFactory("org.spongepowered.common.event.filters", classLoader), classLoader);
             this.classLoaders.put(handleLoader, handlerFactory);
         }
-
-        for (final Method method : handle.getMethods()) {
-            final Listener listener = method.getAnnotation(Listener.class);
-            if (listener != null) {
-                final String error = SpongeEventManager.getHandlerErrorOrNull(method);
+        try {
+            final List<ListenerClassVisitor.DiscoveredMethod> methods = ListenerClassVisitor.getEventListenerMethods(handle);
+            for (final ListenerClassVisitor.DiscoveredMethod method : methods) {
+                final Listener listener = method.listener();
+                final @Nullable String error = SpongeEventManager.getHandlerErrorOrNull(method);
                 if (error == null) {
-                    final Type eventType = method.getGenericParameterTypes()[0];
+                    final Type eventType = method.parameterTypes()[0].genericType();
                     final AnnotatedEventListener handler;
                     try {
                         handler = handlerFactory.create(listenerObject, method);
@@ -267,20 +268,27 @@ public abstract class SpongeEventManager implements EventManager {
                     }
 
                     handlers.add(SpongeEventManager.createRegistration(plugin, eventType, listener.order(), listener.beforeModifications(),
-                            handler));
+                        handler));
                 } else {
                     methodErrors.put(method, error);
                 }
             }
+        } catch (final IOException ioe) {
+            SpongeCommon.logger().warn("Exception trying to register superclass listeners", ioe);
+        } catch (final NoSuchMethodException nsme) {
+            SpongeCommon.logger().warn("Discovered method listener somehow not found for class " + handle.getName(), nsme);
+        } catch (final ClassNotFoundException e) {
+            SpongeCommon.logger().warn("Somehow couldn't classload a class while trying to register event listeners for containing class: " + handle.getName(), e);
         }
 
         // getMethods() doesn't return private methods. Do another check to warn
         // about those.
         for (Class<?> handleParent = handle; handleParent != Object.class; handleParent = handleParent.getSuperclass()) {
             try {
-                for (final Method method : handleParent.getDeclaredMethods()) {
-                    if (method.getAnnotation(Listener.class) != null && !methodErrors.containsKey(method)) {
-                        final String error = SpongeEventManager.getHandlerErrorOrNull(method);
+                final List<ListenerClassVisitor.DiscoveredMethod> methods = ListenerClassVisitor.getEventListenerMethods(handleParent);
+                for (final ListenerClassVisitor.DiscoveredMethod method : methods) {
+                    if (!methodErrors.containsKey(method)) {
+                        final @Nullable String error = SpongeEventManager.getHandlerErrorOrNull(method);
                         if (error != null) {
                             methodErrors.put(method, error);
                         }
@@ -297,9 +305,9 @@ public abstract class SpongeEventManager implements EventManager {
             }
         }
 
-        for (final Map.Entry<Method, String> method : methodErrors.entrySet()) {
+        for (final Map.Entry<ListenerClassVisitor.DiscoveredMethod, String> method : methodErrors.entrySet()) {
             SpongeCommon.logger().warn("Invalid listener method {} in {}: {}", method.getKey(),
-                    method.getKey().getDeclaringClass().getName(), method.getValue());
+                    method.getKey().declaringClass().getName(), method.getValue());
         }
 
         this.registeredListeners.add(listenerObject);
@@ -370,7 +378,7 @@ public abstract class SpongeEventManager implements EventManager {
         for (final RegisteredListener handler : handlers) {
             try (
                     final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
-                    final PhaseContext<@NonNull ?> context = SpongeEventManager.createListenerContext(handler.getPlugin())
+                    final @Nullable PhaseContext<@NonNull ?> context = SpongeEventManager.createListenerContext(handler.getPlugin())
             ) {
                 frame.pushCause(handler.getPlugin());
                 if (context != null) {

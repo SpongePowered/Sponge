@@ -39,8 +39,7 @@ import org.objectweb.asm.Type;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.util.Tristate;
-
-import java.lang.reflect.Method;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 
 public class CancellationEventFilterDelegate implements FilterDelegate {
 
@@ -55,17 +54,19 @@ public class CancellationEventFilterDelegate implements FilterDelegate {
     }
 
     @Override
-    public int write(String name, ClassWriter cw, MethodVisitor mv, Method method, int locals) {
+    public int write(final String name, final ClassWriter cw, final MethodVisitor mv,
+        final ListenerClassVisitor.DiscoveredMethod method, final int locals
+    ) throws ClassNotFoundException {
         if (this.state == Tristate.UNDEFINED) {
             return locals;
         }
-        if (!Cancellable.class.isAssignableFrom(method.getParameterTypes()[0])) {
+        if (!Cancellable.class.isAssignableFrom(method.parameterTypes()[0].clazz())) {
             throw new IllegalStateException("Attempted to filter a non-cancellable event type by its cancellation status");
         }
         mv.visitVarInsn(ALOAD, 1);
         mv.visitTypeInsn(CHECKCAST, Type.getInternalName(Cancellable.class));
         mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Cancellable.class), "isCancelled", "()Z", true);
-        Label success = new Label();
+        final Label success = new Label();
         if (this.state == Tristate.TRUE) {
             mv.visitJumpInsn(IFNE, success);
         } else {
