@@ -22,39 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject.plugin;
+package org.spongepowered.test.logging;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Scopes;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.inject.InjectionPointProvider;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule;
-import org.spongepowered.plugin.PluginContainer;
+import com.google.inject.Inject;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
-/**
- * A module installed for each plugin.
- */
-public final class PluginModule extends AbstractModule {
+@Plugin("logging-test")
+public class LoggingTest {
 
-    private final PluginContainer container;
-    private final Class<?> pluginClass;
+    private final System.Logger platformLogger;
 
-    public PluginModule(final PluginContainer container, final Class<?> pluginClass) {
-        this.container = container;
-        this.pluginClass = pluginClass;
+    @Inject
+    LoggingTest(final System.Logger platformLogger) {
+        this.platformLogger = platformLogger;
     }
 
-    @Override
-    protected void configure() {
-        this.bind(this.pluginClass).in(Scopes.SINGLETON);
 
-        this.install(new InjectionPointProvider());
-
-        this.bind(PluginContainer.class).toInstance(this.container);
-        this.bind(Logger.class).toInstance(this.container.logger());
-        this.bind(System.Logger.class).toProvider(() -> System.getLogger(this.container.logger().getName())).in(Scopes.SINGLETON);
-
-        this.install(new PluginConfigurationModule());
+    @Listener
+    private void onConstructed(final ConstructPluginEvent event) {
+        this.platformLogger.log(
+            System.Logger.Level.INFO,
+            "Hello from {} on a platform logger",
+            event.plugin().metadata().id()
+        );
     }
 
 }
