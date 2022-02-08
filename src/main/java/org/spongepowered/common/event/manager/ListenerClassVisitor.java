@@ -131,6 +131,11 @@ public class ListenerClassVisitor extends ClassVisitor {
                             parameter.genericType = Type.getType("L" + name + ";");
                         }
                     }
+
+                    @Override
+                    public void visitTypeArgument() {
+                        parameter.wildcard = true;
+                    }
                 });
             }
             parameter.name = name;
@@ -359,6 +364,7 @@ public class ListenerClassVisitor extends ClassVisitor {
         private final DiscoveredMethod method;
         private final Type type;
         private final List<ListenerAnnotation> annotations;
+        public boolean wildcard = false;
         @MonotonicNonNull Type baseType;
         @MonotonicNonNull Type genericType;
         @MonotonicNonNull String name;
@@ -410,6 +416,9 @@ public class ListenerClassVisitor extends ClassVisitor {
 
         public java.lang.reflect.Type genericType() throws ClassNotFoundException {
             if (this.genericType == null) {
+                if (this.wildcard) {
+                    return TypeFactory.parameterizedClass(this.clazz(), TypeFactory.unboundWildcard());
+                }
                 return TypeFactory.parameterizedClass(this.clazz());
             }
             final java.lang.reflect.Type generic = TypeFactory.parameterizedClass(this.method.classByLoader(this.genericType.getClassName()));

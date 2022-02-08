@@ -35,6 +35,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
@@ -58,6 +59,13 @@ public class EventManagerRegistrationTest {
         final EventManager eventManager = new TestEventManager();
         final PluginContainer mock = Mockito.mock(PluginContainer.class);
         eventManager.registerListeners(mock, new Dummy());
+    }
+
+    @Test
+    public void wildcardCanRegister() {
+        final EventManager eventManager = new TestEventManager();
+        final PluginContainer mock = Mockito.mock(PluginContainer.class);
+        eventManager.registerListeners(mock, new Wildcard());
     }
 
     @Test
@@ -148,6 +156,14 @@ public class EventManagerRegistrationTest {
             final @First(inverse = true) EntityDamageSource source,
             final @Getter("entity") Player target
         ) {
+
+        }
+    }
+
+    static final class Wildcard {
+
+        @Listener
+        public void onCriteria(final CriterionEvent.Trigger<?> e) {
 
         }
     }
