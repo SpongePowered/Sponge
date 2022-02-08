@@ -22,22 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.hooks;
+package org.spongepowered.forge.hook;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.WorldEvent;
+import org.spongepowered.common.hooks.WorldHooks;
 
-public interface WorldHooks {
+public class ForgeWorldHooks implements WorldHooks {
 
-    default Entity getCustomEntityIfItem(final Entity entity) {
+    @Override
+    public Entity getCustomEntityIfItem(final Entity entity) {
+        if (entity.getClass().equals(ItemEntity.class)) {
+            final ItemStack stack = ((ItemEntity) entity).getItem();
+            final Item item = stack.getItem();
+            if (item.hasCustomEntity(stack)) {
+                final Entity newEntity = item.createEntity(entity.level, entity, stack);
+                if (newEntity != null) {
+                    entity.remove();
+                    return newEntity;
+                }
+            }
+        }
         return null;
     }
 
-    default boolean isRestoringBlocks(final Level world) {
-        return PhaseTracker.getInstance().getPhaseContext().isRestoring();
+    @Override
+    public boolean isRestoringBlocks(final Level world) {
+        return world.restoringBlockSnapshots;
     }
 
-    default void postLoadWorld(ServerLevel world) { }
+    @Override
+    public void postLoadWorld(final ServerLevel world) {
+        MinecraftForge.EVENT_BUS.post(new WorldEvent.Load(world));
+    }
 }
