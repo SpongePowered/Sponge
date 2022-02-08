@@ -65,6 +65,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DataUtil;
+import org.spongepowered.common.util.MemoizedSupplier;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -80,6 +81,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.function.Supplier;
 
 @DefaultQualifier(NonNull.class)
 public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutableDataHolder<BlockSnapshot>, DataContainerHolder.Immutable<BlockSnapshot>, DataCompoundHolder {
@@ -649,11 +651,11 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     }
 
     public static final class FactoryImpl implements Factory {
-        private static final SpongeBlockSnapshot EMPTY = new SpongeBlockSnapshot();
+        private static final Supplier<SpongeBlockSnapshot> EMPTY = MemoizedSupplier.memoize(SpongeBlockSnapshot::new);
 
         @Override
         public BlockSnapshot empty() {
-            return FactoryImpl.EMPTY;
+            return FactoryImpl.EMPTY.get();
         }
     }
 }
