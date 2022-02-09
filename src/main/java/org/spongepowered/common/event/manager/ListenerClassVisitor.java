@@ -121,24 +121,19 @@ public class ListenerClassVisitor extends ClassVisitor {
                 return;
             }
             final ListenerParameter parameter = this.discoveredMethod.parameters[index - 1];
-            if (signature != null && index == 1) { // We only care about the first parameter
-                new SignatureReader(signature).accept(new SignatureVisitor(ListenerClassVisitor.ASM_VERSION) {
-                    @Override
-                    public void visitClassType(final String name) {
-                        if (parameter.baseType == null) {
-                            parameter.baseType = Type.getType("L" + name + ";");
-                        } else if (parameter.genericType == null) {
-                            parameter.genericType = Type.getType("L" + name + ";");
-                        }
-                    }
-
-                    @Override
-                    public void visitTypeArgument() {
-                        parameter.wildcard = true;
-                    }
-                });
-            }
             parameter.name = name;
+            if (index != 1) {
+                return;
+            }
+            if (signature != null) { // We only care about the first parameter
+                new SignatureReader(signature).accept(new ListenerSignatureVisitor(parameter));
+            } else if (this.discoveredMethod.signature != null) {
+                // In some compiled languages, the local variable signature is
+                // not available, but we can still grab it from the method's
+                // generic signature.
+                new SignatureReader(this.discoveredMethod.signature)
+                    .accept(new ListenerSignatureVisitor(parameter));
+            }
         }
 
         @Override
@@ -179,6 +174,35 @@ public class ListenerClassVisitor extends ClassVisitor {
             return new ListenerAnnotationVisitor(annotation);
         }
 
+    }
+
+    static final class ListenerSignatureVisitor extends SignatureVisitor {
+        private final ListenerParameter parameter;
+
+        public ListenerSignatureVisitor(final ListenerParameter parameter) {
+            super(ListenerClassVisitor.ASM_VERSION);
+            this.parameter = parameter;
+        }
+
+        @Override
+        public void visitClassType(final String name) {
+            // The order of operations is that visitClassType gets called
+            // twice, once for the generic class, then a second time for
+            // the generic type. Ideally we don't have to deal with additional
+            // nested types, but if we do, well, we'll just ignore them.
+            if (this.parameter.baseType == null) {
+                this.parameter.baseType = Type.getType("L" + name + ";");
+            } else if (this.parameter.genericType == null) {
+                this.parameter.genericType = Type.getType("L" + name + ";");
+            }
+        }
+
+        @Override
+        public void visitTypeArgument() {
+            // And sometimes, some plugins just care about the parent type
+            // and wildcard their bounds.
+            this.parameter.wildcard = true;
+        }
     }
 
     static final class ListenerAnnotationVisitor extends AnnotationVisitor {
@@ -272,7 +296,7 @@ public class ListenerClassVisitor extends ClassVisitor {
         private final int access;
         private final String methodName;
         private final String descriptor;
-        private final @Nullable String signature;
+        final @Nullable String signature;
         final ListenerParameter[] parameters;
         final List<ListenerAnnotation> annotations;
         @MonotonicNonNull Listener listenerAnnotation;
