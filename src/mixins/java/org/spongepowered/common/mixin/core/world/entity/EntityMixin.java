@@ -1280,6 +1280,11 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return !this.shadow$fireImmune();
     }
 
+    @Inject(method = "discard", at = @At("TAIL"))
+    private void impl$throwExpireForDiscards(final CallbackInfo ci) {
+        SpongeCommon.post(SpongeEventFactory.createExpireEntityEvent(PhaseTracker.getInstance().currentCause(), (org.spongepowered.api.entity.Entity) this));
+    }
+
     /*@Redirect(
         method = "setRemainingFireTicks",
         at = @At(
