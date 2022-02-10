@@ -29,16 +29,15 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.mapping.SpongeMappingManager;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResourceLocatorService;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.builtin.MetadataContainer;
 import org.spongepowered.plugin.metadata.builtin.MetadataParser;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.launch.inject.SpongeVanillaModule;
 import org.spongepowered.vanilla.launch.mapping.VanillaMappingManager;
 import org.spongepowered.vanilla.launch.plugin.VanillaDummyPluginContainer;
@@ -63,8 +62,7 @@ public abstract class VanillaLaunch extends Launch {
     private final VanillaMappingManager mappingManager;
     private PluginContainer vanillaPlugin;
 
-    protected VanillaLaunch(final VanillaPluginPlatform pluginPlatform, final Stage injectionStage) {
-        super(pluginPlatform);
+    protected VanillaLaunch(final Stage injectionStage) {
         this.injectionStage = injectionStage;
         this.pluginManager = new VanillaPluginManager();
         this.mappingManager = new VanillaMappingManager();
@@ -86,11 +84,6 @@ public abstract class VanillaLaunch extends Launch {
         }
 
         return this.vanillaPlugin;
-    }
-
-    @Override
-    public final VanillaPluginPlatform pluginPlatform() {
-        return (VanillaPluginPlatform) this.pluginPlatform;
     }
 
     @Override
@@ -122,7 +115,7 @@ public abstract class VanillaLaunch extends Launch {
     protected abstract void performBootstrap(final String[] args);
 
     protected final void createPlatformPlugins() {
-        final String metadataFileLocation = this.pluginPlatform.metadataFilePath();
+        final String metadataFileLocation = AppLaunch.corePlatform().pluginMetadataFilePath();
         try {
             // This is a bit nasty, but allows Sponge to detect builtin platform plugins when it's not the first entry on the classpath.
             final URL classUrl = VanillaLaunch.class.getResource("/" + VanillaLaunch.class.getName().replace('.', '/') + ".class");

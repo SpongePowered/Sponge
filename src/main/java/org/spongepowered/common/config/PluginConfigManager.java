@@ -26,10 +26,10 @@ package org.spongepowered.common.config;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Singleton;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.config.ConfigRoot;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.reference.WatchServiceListener;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;
@@ -65,14 +65,14 @@ public final class PluginConfigManager implements ConfigManager {
 
     @Override
     public ConfigRoot sharedConfig(final PluginContainer container) {
-        return new PluginConfigRoot(this.serializers, container.metadata().id().toLowerCase(),
-                                    SpongeCommon.pluginConfigDirectory());
+        return new PluginConfigRoot(this.serializers, container.metadata().id().toLowerCase(), AppLaunch.corePlatform().paths()
+                .pluginConfigsDirectory());
     }
 
     @Override
     public ConfigRoot pluginConfig(final PluginContainer container) {
-        return new PluginConfigRoot(this.serializers, container.metadata().id().toLowerCase(),
-                                    SpongeCommon.pluginConfigDirectory().resolve(container.metadata().id().toLowerCase()));
+        return new PluginConfigRoot(this.serializers, container.metadata().id().toLowerCase(), AppLaunch.corePlatform().paths()
+                .pluginConfigsDirectory().resolve(container.metadata().id().toLowerCase()));
     }
 
     @Override

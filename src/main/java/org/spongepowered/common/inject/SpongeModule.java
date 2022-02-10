@@ -25,7 +25,7 @@
 package org.spongepowered.common.inject;
 
 import com.google.inject.AbstractModule;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.inject.provider.ConfigDirAnnotation;
 
 import java.nio.file.Path;
@@ -34,7 +34,7 @@ public final class SpongeModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        this.bind(Path.class).annotatedWith(ConfigDirAnnotation.SHARED).toInstance(SpongeCommon.pluginConfigDirectory());
+        this.bind(Path.class).annotatedWith(ConfigDirAnnotation.SHARED).toInstance(AppLaunch.corePlatform().paths().pluginConfigsDirectory());
     }
 
 }

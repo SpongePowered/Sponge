@@ -32,7 +32,6 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.launch.mapping.SpongeMappingManager;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.PluginContainer;
@@ -45,15 +44,13 @@ public abstract class Launch {
     private static Launch INSTANCE;
     private static final String ID = "sponge";
 
-    protected final PluginPlatform pluginPlatform;
     private final Logger logger;
     private final List<PluginContainer> launcherPlugins;
     private PluginContainer minecraftPlugin, apiPlugin, commonPlugin;
     private Lifecycle lifecycle;
 
-    protected Launch(final PluginPlatform pluginPlatform) {
+    protected Launch() {
         this.logger = LogManager.getLogger("launch");
-        this.pluginPlatform = pluginPlatform;
         this.launcherPlugins = new ArrayList<>();
     }
 
@@ -96,10 +93,6 @@ public abstract class Launch {
 
     public final Logger logger() {
         return this.logger;
-    }
-
-    public PluginPlatform pluginPlatform() {
-        return this.pluginPlatform;
     }
 
     public abstract Stage injectionStage();

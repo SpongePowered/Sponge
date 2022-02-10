@@ -29,7 +29,6 @@ import net.minecraft.server.Bootstrap;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.applaunch.util.MixinLoggerInjector;
 
 import java.util.Queue;
@@ -38,13 +37,13 @@ public class IntegrationTestLaunch extends VanillaLaunch {
     private final boolean isServer;
     private Queue<String> capturedMessages;
 
-    protected IntegrationTestLaunch(final VanillaPluginPlatform pluginPlatform, final boolean isServer) {
-        super(pluginPlatform, Stage.DEVELOPMENT);
+    protected IntegrationTestLaunch(final boolean isServer) {
+        super(Stage.DEVELOPMENT);
         this.isServer = isServer;
     }
 
-    public static void launch(final VanillaPluginPlatform pluginPlatform, final Boolean isServer, final String[] args) {
-        final IntegrationTestLaunch launcher = new IntegrationTestLaunch(pluginPlatform, isServer);
+    public static void launch(final Boolean isServer, final String[] args) {
+        final IntegrationTestLaunch launcher = new IntegrationTestLaunch(isServer);
         Launch.setInstance(launcher);
         launcher.launchPlatform(args);
     }

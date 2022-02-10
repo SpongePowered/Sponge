@@ -25,11 +25,8 @@
 package org.spongepowered.vanilla.applaunch.handler.test;
 
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
-import org.spongepowered.vanilla.applaunch.Main;
 import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 public class ClientTestLaunchHandler extends AbstractVanillaLaunchHandler {
 
@@ -41,7 +38,7 @@ public class ClientTestLaunchHandler extends AbstractVanillaLaunchHandler {
     @Override
     protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
         Class.forName("org.spongepowered.vanilla.launch.IntegrationTestLaunch", true, launchClassLoader.getInstance())
-            .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
-            .invoke(null, AppLaunch.pluginPlatform(), /* isServer = */ Boolean.FALSE, arguments);
+            .getMethod("launch", Boolean.class, String[].class)
+            .invoke(null, /* isServer = */ Boolean.FALSE, arguments);
     }
 }

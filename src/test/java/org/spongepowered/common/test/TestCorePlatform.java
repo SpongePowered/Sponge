@@ -26,13 +26,11 @@ package org.spongepowered.common.test;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.applaunch.plugin.PluginPlatform;
+import org.spongepowered.common.applaunch.CorePaths;
+import org.spongepowered.common.applaunch.CorePlatform;
 import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * The absolute minimum required to have a plugin platform to function
@@ -40,19 +38,16 @@ import java.util.List;
  * to be used if the {@link org.spongepowered.common.event.tracking.PhaseTracker}
  * is being utilized since the configurations are being checked.
  */
-public class TestPluginPlatform implements PluginPlatform {
+public class TestCorePlatform implements CorePlatform {
 
     private static final Logger LOGGER = LogManager.getLogger("UnitTestPlatform");
+    private final CorePaths paths;
 
-    private final Path outputDirectory;
-    private final Path pluginDirectory;
-
-    public TestPluginPlatform() {
+    public TestCorePlatform() {
         final ClassLoader classLoader = this.getClass().getClassLoader();
         final String directory = classLoader.getResource(".").getFile();
         final File file = new File(directory);
-        this.outputDirectory = file.toPath();
-        this.pluginDirectory = new File(file, "plugins").toPath();
+        this.paths = new CorePaths(file.toPath());
     }
 
     @Override
@@ -61,42 +56,17 @@ public class TestPluginPlatform implements PluginPlatform {
     }
 
     @Override
-    public void setVersion(final String version) {
-
-    }
-
-    @Override
     public Logger logger() {
-        return TestPluginPlatform.LOGGER;
+        return TestCorePlatform.LOGGER;
     }
 
     @Override
-    public Path baseDirectory() {
-        return this.outputDirectory;
+    public CorePaths paths() {
+        return this.paths;
     }
 
     @Override
-    public void setBaseDirectory(final Path baseDirectory) {
-
-    }
-
-    @Override
-    public List<Path> pluginDirectories() {
-        return Collections.singletonList(this.pluginDirectory);
-    }
-
-    @Override
-    public void setPluginDirectories(final List<Path> pluginDirectories) {
-
-    }
-
-    @Override
-    public String metadataFilePath() {
+    public String pluginMetadataFilePath() {
         return PluginPlatformConstants.METADATA_FILE_LOCATION;
-    }
-
-    @Override
-    public void setMetadataFilePath(final String metadataFilePath) {
-
     }
 }

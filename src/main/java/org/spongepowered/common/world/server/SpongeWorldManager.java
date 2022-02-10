@@ -93,6 +93,7 @@ import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
 import org.spongepowered.common.accessor.world.level.storage.LevelStorageSource_LevelStorageAccessAccessor;
 import org.spongepowered.common.accessor.world.level.storage.PrimaryLevelDataAccessor;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
@@ -782,11 +783,9 @@ public abstract class SpongeWorldManager implements WorldManager {
             return FutureUtil.completedWithException(e);
         }
 
-        final Path configFile = SpongeCommon.spongeConfigDirectory().resolve(Launch.instance().id()).resolve("worlds").resolve(key
-                .namespace()).resolve(key.value() + ".conf");
+        final Path configFile = AppLaunch.corePlatform().paths().spongeConfigWorldsDirectory().resolve(key.namespace()).resolve(key.value() + ".conf");
 
-        final Path copiedConfigFile = SpongeCommon.spongeConfigDirectory().resolve(Launch.instance().id()).resolve("worlds")
-                .resolve(movedKey.namespace()).resolve(movedKey.value() + ".conf");
+        final Path copiedConfigFile = AppLaunch.corePlatform().paths().spongeConfigWorldsDirectory().resolve(movedKey.namespace()).resolve(movedKey.value() + ".conf");
 
         try {
             Files.createDirectories(copiedConfigFile.getParent());
@@ -847,8 +846,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             }
         }
 
-        final Path configFile = SpongeCommon.spongeConfigDirectory().resolve(Launch.instance().id()).resolve("worlds").resolve(key.namespace())
-            .resolve(key.value() + ".conf");
+        final Path configFile = AppLaunch.corePlatform().paths().spongeConfigWorldsDirectory().resolve(key.namespace()).resolve(key.value() + ".conf");
 
         try {
             Files.deleteIfExists(configFile);

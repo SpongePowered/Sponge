@@ -22,18 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.plugin;
+package org.spongepowered.common.applaunch;
 
 import org.apache.logging.log4j.Logger;
 
-import java.nio.file.Path;
-import java.util.List;
-
-public interface PluginPlatform {
+public interface CorePlatform {
 
     String version();
-
-    void setVersion(String version);
 
     Logger logger();
 
@@ -41,17 +36,7 @@ public interface PluginPlatform {
         return true;
     }
 
-    Path baseDirectory();
+    CorePaths paths();
 
-    void setBaseDirectory(Path baseDirectory);
-
-    List<Path> pluginDirectories();
-
-    void setPluginDirectories(List<Path> pluginDirectories);
-
-    String metadataFilePath();
-
-    void setMetadataFilePath(String metadataFilePath);
-
-
+    String pluginMetadataFilePath();
 }

@@ -24,35 +24,25 @@
  */
 package org.spongepowered.vanilla.applaunch;
 
+import com.google.common.collect.Lists;
 import cpw.mods.modlauncher.Launcher;
 import org.fusesource.jansi.AnsiConsole;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
+import org.spongepowered.plugin.blackboard.Keys;
 import org.spongepowered.plugin.builtin.StandardEnvironment;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
+import org.spongepowered.plugin.builtin.jvm.JVMKeys;
 import org.spongepowered.vanilla.applaunch.util.ArgumentList;
 import org.spongepowered.vanilla.applaunch.util.Java8SpaceDetection;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 public final class Main {
 
     static {
         AnsiConsole.systemInstall();
-    }
-
-    private final VanillaPluginPlatform pluginPlatform;
-    private final Path[] extraPaths;
-
-    public Main(final Path[] extraPaths) {
-        this.pluginPlatform = AppLaunch.setPluginPlatform(new VanillaPluginPlatform(new StandardEnvironment()));
-        this.extraPaths = extraPaths;
     }
 
     public static void main(final String[] args) throws Exception {
@@ -65,28 +55,27 @@ public final class Main {
         new Main(extraPaths).run();
     }
 
-    public void run() throws IOException {
+    private final Path[] extraPaths;
+
+    public Main(final Path[] extraPaths) {
+        this.extraPaths = extraPaths;
+    }
+
+    public void run() {
         final String implementationVersion = StandardEnvironment.class.getPackage().getImplementationVersion();
 
-        this.pluginPlatform.setVersion(implementationVersion == null ? "dev" : implementationVersion);
-        this.pluginPlatform.setBaseDirectory(AppCommandLine.gameDirectory);
+        // Build the environment
+        final StandardEnvironment standardEnvironment = new StandardEnvironment();
+        standardEnvironment.blackboard().getOrCreate(Keys.BASE_DIRECTORY, () -> AppCommandLine.gameDirectory);
+        standardEnvironment.blackboard().getOrCreate(Keys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
+        standardEnvironment.blackboard().getOrCreate(JVMKeys.METADATA_FILE_PATH, () -> PluginPlatformConstants.METADATA_FILE_LOCATION);
 
-        final Path modsDirectory = AppCommandLine.gameDirectory.resolve("mods");
-        if (Files.notExists(modsDirectory)) {
-            Files.createDirectories(modsDirectory);
-        }
-        final Path pluginsDirectory = AppCommandLine.gameDirectory.resolve("plugins");
-        final List<Path> pluginDirectories = new ArrayList<>();
-        pluginDirectories.add(modsDirectory);
-        if (Files.exists(pluginsDirectory)) {
-            pluginDirectories.add(pluginsDirectory);
-        }
-        this.pluginPlatform.setPluginDirectories(pluginDirectories);
-        this.pluginPlatform.setMetadataFilePath(PluginPlatformConstants.METADATA_FILE_LOCATION);
+        final VanillaCorePlatform corePlatform = AppLaunch.setCorePlatform(new VanillaCorePlatform(standardEnvironment));
+        standardEnvironment.blackboard().getOrCreate(Keys.PLUGIN_DIRECTORIES, () -> Lists.newArrayList(corePlatform.paths().pluginsDirectory()));
 
         // Extra paths that are on the TCL but not the system loader
-        this.pluginPlatform.getStandardEnvironment().blackboard().getOrCreate(
-            VanillaPluginPlatform.EXTRA_TRANSFORMABLE_PATHS,
+        corePlatform.standardEnvironment().blackboard().getOrCreate(
+            VanillaCorePlatform.EXTRA_TRANSFORMABLE_PATHS,
             () -> Collections.unmodifiableList(Arrays.asList(this.extraPaths))
         );
 

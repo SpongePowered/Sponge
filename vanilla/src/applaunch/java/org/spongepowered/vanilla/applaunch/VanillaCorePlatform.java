@@ -22,10 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.plugin;
+package org.spongepowered.vanilla.applaunch;
 
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.applaunch.plugin.PluginPlatform;
+import org.spongepowered.common.applaunch.CorePaths;
+import org.spongepowered.common.applaunch.CorePlatform;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginLanguageService;
 import org.spongepowered.plugin.PluginResource;
@@ -38,7 +39,6 @@ import org.spongepowered.plugin.builtin.jvm.JVMKeys;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -48,19 +48,21 @@ import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
 
-public final class VanillaPluginPlatform implements PluginPlatform {
+public final class VanillaCorePlatform implements CorePlatform {
 
     public static final Key<List<Path>> EXTRA_TRANSFORMABLE_PATHS = Key.of("spongevanilla:transformable_paths", List.class);
 
     private final StandardEnvironment standardEnvironment;
+    private final CorePaths paths;
     private final Map<String, PluginResourceLocatorService<PluginResource>> locatorServices;
     private final Map<String, PluginLanguageService<PluginResource>> languageServices;
 
     private final Map<String, Set<PluginResource>> locatorResources;
     private final Map<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> pluginCandidates;
 
-    public VanillaPluginPlatform(final StandardEnvironment standardEnvironment) {
+    public VanillaCorePlatform(final StandardEnvironment standardEnvironment) {
         this.standardEnvironment = standardEnvironment;
+        this.paths = new CorePaths(this.standardEnvironment.blackboard().get(Keys.BASE_DIRECTORY));
         this.locatorServices = new HashMap<>();
         this.languageServices = new HashMap<>();
         this.locatorResources = new HashMap<>();
@@ -73,63 +75,38 @@ public final class VanillaPluginPlatform implements PluginPlatform {
     }
 
     @Override
-    public void setVersion(final String version) {
-        this.standardEnvironment.blackboard().getOrCreate(Keys.VERSION, () -> version);
-    }
-
-    @Override
     public Logger logger() {
         return this.standardEnvironment.logger();
     }
 
     @Override
-    public Path baseDirectory() {
-        return this.standardEnvironment.blackboard().get(Keys.BASE_DIRECTORY);
+    public CorePaths paths() {
+        return this.paths;
     }
 
     @Override
-    public void setBaseDirectory(final Path baseDirectory) {
-        this.standardEnvironment.blackboard().getOrCreate(Keys.BASE_DIRECTORY, () -> baseDirectory);
-    }
-
-    @Override
-    public List<Path> pluginDirectories() {
-        return this.standardEnvironment.blackboard().get(Keys.PLUGIN_DIRECTORIES);
-    }
-
-    @Override
-    public void setPluginDirectories(final List<Path> pluginDirectories) {
-        this.standardEnvironment.blackboard().getOrCreate(Keys.PLUGIN_DIRECTORIES, () -> pluginDirectories);
-    }
-
-    @Override
-    public String metadataFilePath() {
+    public String pluginMetadataFilePath() {
         return this.standardEnvironment.blackboard().get(JVMKeys.METADATA_FILE_PATH);
     }
 
-    @Override
-    public void setMetadataFilePath(final String metadataFilePath) {
-        this.standardEnvironment.blackboard().getOrCreate(JVMKeys.METADATA_FILE_PATH, () -> metadataFilePath);
-    }
-
-    public StandardEnvironment getStandardEnvironment() {
+    public StandardEnvironment standardEnvironment() {
         return this.standardEnvironment;
     }
 
-    public Map<String, PluginResourceLocatorService<PluginResource>> getLocatorServices() {
+    public Map<String, PluginResourceLocatorService<PluginResource>> locatorServices() {
         return Collections.unmodifiableMap(this.locatorServices);
     }
 
-    public Map<String, PluginLanguageService<PluginResource>> getLanguageServices() {
+    public Map<String, PluginLanguageService<PluginResource>> languageServices() {
         return Collections.unmodifiableMap(this.languageServices);
     }
 
-    public Map<String, Set<PluginResource>> getResources() {
+    public Map<String, Set<PluginResource>> resources() {
         return Collections.unmodifiableMap(this.locatorResources);
     }
 
-    public Map<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> getCandidates() {
-        return Collections.unmodifiableMap(this.pluginCandidates);
+    public Map<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> candidates() {
+        return this.pluginCandidates;
     }
 
     public void initialize() {
@@ -158,7 +135,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
 
     public void discoverLanguageServices() {
         final ServiceLoader<PluginLanguageService<PluginResource>> serviceLoader = (ServiceLoader<PluginLanguageService<PluginResource>>) (Object) ServiceLoader.load(
-                PluginLanguageService.class, VanillaPluginPlatform.class.getClassLoader());
+                PluginLanguageService.class, VanillaCorePlatform.class.getClassLoader());
 
         for (final Iterator<PluginLanguageService<PluginResource>> iter = serviceLoader.iterator(); iter.hasNext(); ) {
             final PluginLanguageService<PluginResource> next;

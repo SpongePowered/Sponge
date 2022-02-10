@@ -29,7 +29,7 @@ import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.applaunch.AppLaunch;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -112,8 +112,8 @@ public abstract class SpongeResourcePack implements ResourcePack {
 
         private static InputStream openStream(final URI uri) throws IOException {
             if (uri.toString().startsWith(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL)) {
-                return Files.newInputStream(SpongeCommon.gameDirectory().resolve(uri.toString().substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length
-                        ())));
+                return Files.newInputStream(AppLaunch.corePlatform().paths().baseDirectory().resolve(uri.toString().substring(SpongeWorldResourcePack
+                        .LEVEL_PACK_PROTOCOL.length())));
             }
             return uri.toURL().openStream();
         }

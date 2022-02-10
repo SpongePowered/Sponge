@@ -26,7 +26,6 @@ package org.spongepowered.common.test;
 
 import com.google.inject.Injector;
 import com.google.inject.Stage;
-import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.mapping.SpongeMappingManager;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
@@ -34,10 +33,6 @@ import org.spongepowered.plugin.PluginContainer;
 
 public class TestLaunch extends Launch {
     private final SpongeMappingManager mappingManager = new TestMappingsManager();
-
-    protected TestLaunch(final PluginPlatform pluginPlatform) {
-        super(pluginPlatform);
-    }
 
     @Override
     public boolean dedicatedServer() {

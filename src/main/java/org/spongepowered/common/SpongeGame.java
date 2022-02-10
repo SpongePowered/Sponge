@@ -41,6 +41,7 @@ import org.spongepowered.api.registry.FactoryProvider;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
@@ -97,7 +98,7 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
 
     @Override
     public Path gameDirectory() {
-        return SpongeCommon.gameDirectory();
+        return AppLaunch.corePlatform().paths().baseDirectory();
     }
 
     @Override

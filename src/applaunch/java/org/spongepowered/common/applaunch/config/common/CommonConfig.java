@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
+import org.spongepowered.common.applaunch.config.core.Config;
+import org.spongepowered.common.applaunch.config.core.IpSet;
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.common.applaunch.config.core.Config;
-import org.spongepowered.common.applaunch.config.core.IpSet;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.configurate.transformation.TransformAction;
 
@@ -51,9 +51,6 @@ import java.util.function.Predicate;
 public final class CommonConfig implements Config {
 
     public static final String FILE_NAME = "sponge.conf";
-
-    @Setting
-    public final GeneralCategory general = new GeneralCategory();
 
     @Setting
     @Comment("Configuration options related to the SQL manager, including connection aliases etc")

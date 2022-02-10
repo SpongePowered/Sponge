@@ -33,14 +33,11 @@ import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @Singleton
 public final class SpongeCommon {
@@ -99,18 +96,6 @@ public final class SpongeCommon {
 
     public static AsyncScheduler asyncScheduler() {
         return SpongeCommon.game().asyncScheduler();
-    }
-
-    public static Path gameDirectory() {
-        return Launch.instance().pluginPlatform().baseDirectory();
-    }
-
-    public static Path pluginConfigDirectory() {
-        return Paths.get(SpongeConfigs.getCommon().get().general.configDir.getParsed());
-    }
-
-    public static Path spongeConfigDirectory() {
-        return SpongeCommon.gameDirectory().resolve("config");
     }
 
     public static boolean post(final Event event) {

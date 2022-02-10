@@ -33,7 +33,6 @@ import org.spongepowered.common.inject.SpongeGuice;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 public final class VanillaBootstrap {
@@ -46,7 +45,7 @@ public final class VanillaBootstrap {
         Launch.instance().setLifecycle(lifecycle);
         lifecycle.establishFactories();
         lifecycle.establishBuilders();
-        ((VanillaPluginManager) Launch.instance().pluginManager()).loadPlugins((VanillaPluginPlatform) Launch.instance().pluginPlatform());
+        ((VanillaPluginManager) Launch.instance().pluginManager()).loadPlugins();
         lifecycle.callConstructEvent();
         lifecycle.callRegisterFactoryEvent();
         lifecycle.callRegisterBuilderEvent();

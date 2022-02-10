@@ -27,16 +27,15 @@ package org.spongepowered.vanilla.launch;
 import com.google.inject.Stage;
 import net.minecraft.client.main.Main;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 public final class ClientLaunch extends VanillaLaunch {
 
-    protected ClientLaunch(final VanillaPluginPlatform pluginEngine, final Stage injectionStage) {
-        super(pluginEngine, injectionStage);
+    private ClientLaunch(final Stage injectionStage) {
+        super(injectionStage);
     }
 
-    public static void launch(final VanillaPluginPlatform pluginEngine, final Boolean isDeveloperEnvironment, final String[] args) {
-        final ClientLaunch launcher = new ClientLaunch(pluginEngine, isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
+    public static void launch(final Boolean isDeveloperEnvironment, final String[] args) {
+        final ClientLaunch launcher = new ClientLaunch(isDeveloperEnvironment ? Stage.DEVELOPMENT : Stage.PRODUCTION);
         Launch.setInstance(launcher);
         launcher.launchPlatform(args);
     }

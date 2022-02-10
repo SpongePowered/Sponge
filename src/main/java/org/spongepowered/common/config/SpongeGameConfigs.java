@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.config;
 
+import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -42,10 +44,8 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import net.minecraft.world.level.Level;
 
 /**
  * SpongeCommon configurations that need to interact with game state
@@ -85,19 +85,21 @@ public final class SpongeGameConfigs {
     }
 
     public static boolean doesWorldConfigExist(final ResourceKey world) {
-        final Path configPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", world.namespace(), world.value() + ".conf"));
-        return Files.exists(configPath);
+        return Files.exists(AppLaunch.corePlatform().paths().spongeConfigWorldsDirectory().resolve(world.namespace()).resolve(world.value() +
+                ".conf"));
     }
 
     public static InheritableConfigHandle<WorldConfig> createWorld(final @Nullable ResourceKey dimensionTypeKey, final ResourceKey world) {
+        final Path configPath = AppLaunch.corePlatform().paths().spongeConfigWorldsDirectory().resolve(world.namespace()).resolve(world.value() +
+                ".conf");
         // Path format: config/sponge/worlds/<world-namespace>/<world-value>.conf
-        final Path configPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", world.namespace(), world.value() + ".conf"));
         if (dimensionTypeKey != null) {
             // Legacy config path: config/sponge/worlds/<dim-namespace>/<dim-value>/<world-name>/world.conf
             final String legacyName = SpongeGameConfigs.getLegacyWorldName(world);
             if (legacyName != null) {
-                final Path legacyPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", dimensionTypeKey.namespace(),
-                        SpongeGameConfigs.getLegacyValue(dimensionTypeKey), legacyName, "world.conf"));
+                final Path legacyPath =
+                        AppLaunch.corePlatform().paths().spongeConfigWorldsDirectory().resolve(dimensionTypeKey.namespace()).resolve(SpongeGameConfigs
+                                .getLegacyValue(dimensionTypeKey)).resolve(legacyName).resolve("world.conf");
                 if (legacyPath.toFile().isFile() && !configPath.toFile().isFile()) {
                     try {
                         Files.createDirectories(configPath.getParent());
@@ -115,8 +117,8 @@ public final class SpongeGameConfigs {
             }
         }
         try {
-            final InheritableConfigHandle<WorldConfig> config = new InheritableConfigHandle<>(WorldConfig.class, BaseConfig::transformation, SpongeConfigs.createLoader(configPath),
-                    SpongeGameConfigs.getGlobalInheritable());
+            final InheritableConfigHandle<WorldConfig> config = new InheritableConfigHandle<>(WorldConfig.class, BaseConfig::transformation,
+                    SpongeConfigs.createLoader(configPath, SpongeConfigs.OPTIONS), SpongeGameConfigs.getGlobalInheritable());
             config.load();
             return config;
         } catch (final IOException ex) {
@@ -155,7 +157,7 @@ public final class SpongeGameConfigs {
                     try {
                         SpongeGameConfigs.global = new InheritableConfigHandle<>(GlobalConfig.class,
                                 BaseConfig::transformation,
-                                SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(GlobalConfig.FILE_NAME)), null);
+                                SpongeConfigs.createLoader(AppLaunch.corePlatform().paths().spongeConfigsDirectory().resolve(GlobalConfig.FILE_NAME), SpongeConfigs.OPTIONS), null);
                         SpongeGameConfigs.global.load();
                     } catch (final IOException e) {
                         SpongeGameConfigs.LOGGER.error("Unable to load global world configuration in {}. Sponge will run with default settings",

@@ -26,26 +26,25 @@ package org.spongepowered.common.applaunch;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 
 public final class AppLaunch {
 
     private static final Logger LOGGER = LogManager.getLogger("app launch");
-    private static PluginPlatform pluginPlatform;
+    private static CorePlatform corePlatform;
 
     public static Logger logger() {
         return AppLaunch.LOGGER;
     }
 
-    public static <P extends PluginPlatform> P setPluginPlatform(final PluginPlatform pluginPlatform) {
-        if (AppLaunch.pluginPlatform != null) {
-            throw new RuntimeException("The plugin platform cannot be set twice! (Same classloader ?)");
+    public static <P extends CorePlatform> P setCorePlatform(final CorePlatform corePlatform) {
+        if (AppLaunch.corePlatform != null) {
+            throw new RuntimeException("The core platform cannot be set twice! (Same classloader ?)");
         }
-        AppLaunch.pluginPlatform = pluginPlatform;
-        return (P) pluginPlatform;
+        AppLaunch.corePlatform = corePlatform;
+        return (P) corePlatform;
     }
 
-    public static <P extends PluginPlatform> P pluginPlatform() {
-        return (P) AppLaunch.pluginPlatform;
+    public static <P extends CorePlatform> P corePlatform() {
+        return (P) AppLaunch.corePlatform;
     }
 }
