@@ -111,11 +111,10 @@ public abstract class ServerEntityMixin {
                     ordinal = 0)
     )
     public void impl$sendHumanSpawnPacket(final Consumer<Packet<?>> consumer, final Object spawnPacket) {
-        if (!(this.entity instanceof HumanEntity)) {
+        if (!(this.entity instanceof final HumanEntity human)) {
             consumer.accept((Packet<?>) spawnPacket);
             return;
         }
-        final HumanEntity human = (HumanEntity) this.entity;
         // Adds the GameProfile to the client
         consumer.accept(human.createPlayerListPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER));
         // Actually spawn the human (a player)
@@ -132,18 +131,17 @@ public abstract class ServerEntityMixin {
 
     @Inject(method = "sendDirtyEntityData", at = @At("HEAD"))
     public void impl$sendHumanMetadata(final CallbackInfo ci) {
-        if (!(this.entity instanceof HumanEntity)) {
+        if (!(this.entity instanceof final HumanEntity human)) {
             return;
         }
-        final HumanEntity human = (HumanEntity) this.entity;
-        Stream<Packet<?>> packets = human.popQueuedPackets(null);
+        final Stream<Packet<?>> packets = human.popQueuedPackets(null);
         packets.forEach(this.broadcast);
         // Note that this will further call in ChunkManager_EntityTrackerMixin
         // for any player specific packets to send.
     }
 
     @ModifyArg(method = "sendDirtyEntityData", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ClientboundUpdateAttributesPacket;<init>(ILjava/util/Collection;)V"))
-    private Collection<AttributeInstance> impl$injectScaledHealth(Collection<AttributeInstance> set) {
+    private Collection<AttributeInstance> impl$injectScaledHealth(final Collection<AttributeInstance> set) {
         if (this.entity instanceof ServerPlayer) {
             if (((ServerPlayerBridge) this.entity).bridge$isHealthScaled()) {
                 ((ServerPlayerBridge) this.entity).bridge$injectScaledHealth(set);
@@ -153,7 +151,7 @@ public abstract class ServerEntityMixin {
     }
 
     @Redirect(method = "sendDirtyEntityData", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket"))
-    private ClientboundSetEntityDataPacket impl$createSpoofedPacket(int entityId, SynchedEntityData dataManager, boolean p_i46917_3_) {
+    private ClientboundSetEntityDataPacket impl$createSpoofedPacket(final int entityId, final SynchedEntityData dataManager, final boolean p_i46917_3_) {
         if (!(this.entity instanceof ServerPlayerBridge && ((ServerPlayerBridge) this.entity).bridge$isHealthScaled())) {
             return new ClientboundSetEntityDataPacket(entityId, dataManager, p_i46917_3_);
         }

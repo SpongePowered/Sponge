@@ -52,8 +52,7 @@ public abstract class ServerPlayer_ContainerListenerMixin  implements ContainerL
      * @reason Vanilla is not updating the Client when Slot is SlotCrafting - this is an issue when plugins register new recipes
      */
     // Because this is an anonymous reference
-    @SuppressWarnings("UnresolvedMixinReference")
-    @Inject(method = "slotChanged", at = @At("HEAD"))
+    @Inject(method = "slotChanged(Lnet/minecraft/world/inventory/AbstractContainerMenu;ILnet/minecraft/world/item/ItemStack;)V", at = @At("HEAD"))
     private void sendSlotContents(
             final net.minecraft.world.inventory.AbstractContainerMenu containerToSend, final int slotIn, final ItemStack stack, final CallbackInfo ci) {
         if (containerToSend.getSlot(slotIn) instanceof ResultSlot) {

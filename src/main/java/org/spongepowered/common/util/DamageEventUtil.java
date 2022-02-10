@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffects;
@@ -38,7 +37,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -47,6 +45,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -57,7 +56,6 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
-import org.spongepowered.api.item.inventory.ArmorEquipable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -81,15 +79,13 @@ public final class DamageEventUtil {
 
     public static final DoubleUnaryOperator HARD_HAT_FUNCTION = damage -> -(damage - (damage * 0.75F));
 
-    private static double enchantmentDamageTracked;
-
     private DamageEventUtil() {
     }
 
     public static DoubleUnaryOperator createResistanceFunction(final int resistanceAmplifier) {
         final int base = (resistanceAmplifier + 1) * 5;
         final int modifier = 25 - base;
-        return damage -> -(damage - ((damage * modifier) / 25.0F));
+        return damage -> -(damage - (Math.max(((damage * modifier) / 25.0F), 0.0f)));
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -110,29 +106,17 @@ public final class DamageEventUtil {
             return Optional.empty();
         }
 
-        final int totalArmorValue = living.getArmorValue();
-        final float totalArmor = (float) totalArmorValue;
-        final AttributeInstance attribute = living.getAttribute(Attributes.ARMOR_TOUGHNESS);
-        final double armorToughness = attribute.getValue();
-        final float f = 2.0F + (float) armorToughness / 4.0F;
-
-        final DoubleUnaryOperator function = incomingDamage -> {
-            final float f1 = Mth.clamp(totalArmor - (float) incomingDamage / f, totalArmor * 0.2F, 20.0F);
-            return -(incomingDamage - (incomingDamage * (1.0F - f1 / 25.0F)));
-        };
-        final Cause.Builder builder = Cause.builder();
-        final EventContext.Builder contextBuilder = EventContext.builder();
-        if (living instanceof ArmorEquipable) {
-            // TODO - Add the event context keys for these armor pieces
-            final ItemStackSnapshot helmet = ((ArmorEquipable) living).head().createSnapshot();
-            final ItemStackSnapshot chest = ((ArmorEquipable) living).chest().createSnapshot();
-            final ItemStackSnapshot legs = ((ArmorEquipable) living).legs().createSnapshot();
-            final ItemStackSnapshot feet = ((ArmorEquipable) living).feet().createSnapshot();
-        }
-        final DamageFunction armorModifier = DamageFunction.of(DamageModifier.builder()
-                .cause(Cause.of(EventContext.empty(), attribute, living))
+        final DoubleUnaryOperator function = incomingDamage -> -(incomingDamage - CombatRules.getDamageAfterAbsorb((float) incomingDamage, living.getArmorValue(), (float) living.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
+        final DamageFunction armorModifier;
+        try (final CauseStackManager.StackFrame frame = ((Server) living.getServer()).causeStackManager().pushCauseFrame()){
+            frame.pushCause(living);
+            frame.pushCause(Attributes.ARMOR_TOUGHNESS);
+            armorModifier = DamageFunction.of(DamageModifier.builder()
+                .cause(frame.currentCause())
                 .type(DamageModifierTypes.ARMOR)
                 .build(), function);
+        }
+
         return Optional.of(armorModifier);
     }
 
@@ -152,90 +136,24 @@ public final class DamageEventUtil {
         if (damageSource.isBypassMagic()) {
             return Optional.empty();
         }
-
         final Iterable<net.minecraft.world.item.ItemStack> inventory = living.getArmorSlots();
-        if (EnchantmentHelper.getDamageProtection(inventory, damageSource) <= 0) {
+        final int damageProtection = EnchantmentHelper.getDamageProtection(inventory, damageSource);
+        if (damageProtection <= 0) {
             return Optional.empty();
         }
         final List<DamageFunction> modifiers = new ArrayList<>();
-        boolean first = true;
-        int totalModifier = 0;
-        for (final net.minecraft.world.item.ItemStack itemStack : inventory) {
-            if (itemStack.isEmpty()) {
-                continue;
-            }
-            final ListTag enchantmentList = itemStack.getEnchantmentTags();
-            if (enchantmentList.isEmpty()) {
-                continue;
-            }
-
-            final Multimap<Enchantment, Short> enchantments = LinkedHashMultimap.create();
-            for (int i = 0; i < enchantmentList.size(); ++i) {
-                final short enchantmentId = enchantmentList.getCompound(i).getShort(Constants.Item.ITEM_ENCHANTMENT_ID);
-                final short level = enchantmentList.getCompound(i).getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
-
-                final Enchantment enchantment = Registry.ENCHANTMENT.byId(enchantmentId);
-                if (enchantment != null) {
-                    // Ok, we have an enchantment!
-                    final int temp = enchantment.getDamageProtection(level, damageSource);
-                    if (temp != 0) {
-                        enchantments.put(enchantment, level);
-                    }
-                }
-            }
-            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
-
-            for (final Map.Entry<Enchantment, Collection<Short>> enchantment : enchantments.asMap().entrySet()) {
-                final DamageObject object = new DamageObject();
-                int modifierTemp = 0;
-                for (final short level : enchantment.getValue()) {
-                    modifierTemp += enchantment.getKey().getDamageProtection(level, damageSource);
-                }
-                final int modifier = modifierTemp;
-                object.previousDamage = totalModifier;
-                if (object.previousDamage > 25) {
-                    object.previousDamage = 25;
-                }
-                totalModifier += modifier;
-                object.augment = first;
-                object.ratio = modifier;
-                final DoubleUnaryOperator enchantmentFunction = damageIn -> {
-                    if (object.augment) {
-                        DamageEventUtil.enchantmentDamageTracked = damageIn;
-                    }
-                    if (damageIn <= 0) {
-                        return 0D;
-                    }
-                    final double actualDamage = DamageEventUtil.enchantmentDamageTracked;
-                    if (object.previousDamage > 25) {
-                        return 0D;
-                    }
-                    double modifierDamage = actualDamage;
-                    final double magicModifier;
-                    if (modifier > 0 && modifier <= 20) {
-                        final int j = 25 - modifier;
-                        magicModifier = modifierDamage * j;
-                        modifierDamage = magicModifier / 25.0F;
-                    }
-                    return -Math.max(actualDamage - modifierDamage, 0.0D);
-                };
-                if (first) {
-                    first = false;
-                }
-
-                final DamageModifier enchantmentModifier = DamageModifier.builder()
-                        .cause(Cause.of(EventContext.empty(), enchantment, snapshot, living))
-                        .type(DamageModifierTypes.ARMOR_ENCHANTMENT)
-                        .build();
-                modifiers.add(new DamageFunction(enchantmentModifier, enchantmentFunction));
-            }
+        final DoubleUnaryOperator enchantmentFunction = incomingDamage -> -(incomingDamage - CombatRules.getDamageAfterMagicAbsorb((float) incomingDamage, damageProtection));
+        try (final CauseStackManager.StackFrame frame = ((Server) living.getServer()).causeStackManager().pushCauseFrame()) {
+            frame.pushCause(living);
+            final DamageModifier enchantmentModifier = DamageModifier.builder()
+                .cause(frame.currentCause())
+                .type(DamageModifierTypes.ARMOR_ENCHANTMENT)
+                .build();
+            modifiers.add(new DamageFunction(enchantmentModifier, enchantmentFunction));
         }
 
-        if (!modifiers.isEmpty()) {
-            return Optional.of(modifiers);
-        }
+        return Optional.of(modifiers);
 
-        return Optional.empty();
     }
 
     public static Optional<DamageFunction> createAbsorptionModifier(final LivingEntity living) {
@@ -380,13 +298,5 @@ public final class DamageEventUtil {
             return Optional.of(new DamageFunction(modifier, (damage) -> -damage));
         }
         return Optional.empty();
-    }
-
-    private static final class DamageObject {
-
-        int slot;
-        double ratio;
-        boolean augment;
-        double previousDamage;
     }
 }

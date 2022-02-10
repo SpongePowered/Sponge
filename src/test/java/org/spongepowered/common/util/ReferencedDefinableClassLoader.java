@@ -22,15 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.filter.delegate;
+package org.spongepowered.common.util;
 
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MethodVisitor;
-import org.spongepowered.common.event.manager.ListenerClassVisitor;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.common.event.gen.DefineableClassLoader;
 
-public interface FilterDelegate {
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-    int write(String name, ClassWriter cw, MethodVisitor mv, ListenerClassVisitor.DiscoveredMethod method, int locals) throws
-        ClassNotFoundException;
+public class ReferencedDefinableClassLoader extends DefineableClassLoader {
+    private final Map<String, byte[]> definedClasses;
+    public ReferencedDefinableClassLoader(final ClassLoader parent) {
+        super(parent);
+        this.definedClasses = new ConcurrentHashMap<>();
+    }
 
+    @Override
+    public <T> Class<T> defineClass(final String name, final byte[] b) {
+        this.definedClasses.put(name, b);
+        return super.defineClass(name, b);
+    }
+
+
+    @Nullable
+    @Override
+    public InputStream getResourceAsStream(final String name) {
+        final String normalized = name.replace("/", ".").replace(".class", "");
+        if (this.definedClasses.containsKey(normalized)) {
+            final byte[] buf = this.definedClasses.get(normalized);
+            final byte[] cloned = buf.clone();
+            return new ByteArrayInputStream(cloned);
+        }
+        return super.getResourceAsStream(name);
+    }
 }

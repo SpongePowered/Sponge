@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.filter;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
@@ -44,5 +45,5 @@ public interface FilterFactory {
      * @return a new filter instance, if any filtering is necessary
      * @throws IllegalAccessException if the provided {@code lookup} does not have full privilege access
      */
-    @Nullable EventFilter create(final Method method, final MethodHandles.Lookup lookup) throws IllegalAccessException;
+    @Nullable EventFilter create(final ListenerClassVisitor.DiscoveredMethod method, final MethodHandles.Lookup lookup) throws IllegalAccessException, ClassNotFoundException;
 }

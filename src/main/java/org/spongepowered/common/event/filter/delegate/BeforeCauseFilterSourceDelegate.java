@@ -40,28 +40,29 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.filter.cause.Before;
-
-import java.lang.reflect.Parameter;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 
 public class BeforeCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
 
     private final Before anno;
 
-    public BeforeCauseFilterSourceDelegate(Before anno) {
+    public BeforeCauseFilterSourceDelegate(final Before anno) {
         this.anno = anno;
     }
 
     @Override
-    protected void insertCauseCall(MethodVisitor mv, Parameter param, Class<?> targetType) {
+    protected void insertCauseCall(
+        final MethodVisitor mv, final ListenerClassVisitor.ListenerParameter param, final Type targetType) {
         mv.visitLdcInsn(Type.getType(this.anno.value()));
         mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Cause.class), "before", "(Ljava/lang/Class;)Ljava/util/Optional;", false);
     }
 
     @Override
-    protected void insertTransform(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
+    protected void insertTransform(
+        final MethodVisitor mv, final ListenerClassVisitor.ListenerParameter param, final Type targetType, final int local) {
         mv.visitVarInsn(ALOAD, local);
-        Label failure = new Label();
-        Label success = new Label();
+        final Label failure = new Label();
+        final Label success = new Label();
 
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "isPresent", "()Z", false);
         mv.visitJumpInsn(IFEQ, failure);
@@ -72,14 +73,14 @@ public class BeforeCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
         mv.visitVarInsn(ASTORE, local);
         mv.visitVarInsn(ALOAD, local);
 
-        mv.visitTypeInsn(INSTANCEOF, Type.getInternalName(targetType));
+        mv.visitTypeInsn(INSTANCEOF, targetType.getInternalName());
 
         if (this.anno.typeFilter().length != 0) {
             mv.visitJumpInsn(IFEQ, failure);
             mv.visitVarInsn(ALOAD, local);
             // For each type we do an instance check and jump to either failure or success if matched
             for (int i = 0; i < this.anno.typeFilter().length; i++) {
-                Class<?> filter = this.anno.typeFilter()[i];
+                final Class<?> filter = this.anno.typeFilter()[i];
                 if (i < this.anno.typeFilter().length - 1) {
                     mv.visitInsn(DUP);
                 }

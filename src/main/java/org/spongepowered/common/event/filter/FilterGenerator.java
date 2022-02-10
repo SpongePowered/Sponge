@@ -40,6 +40,7 @@ import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V11;
 
+import io.leangen.geantyref.AnnotationFormatException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
@@ -81,6 +82,7 @@ import org.spongepowered.common.event.filter.delegate.RootCauseFilterSourceDeleg
 import org.spongepowered.common.event.filter.delegate.SubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.SupportsDataFilterDelegate;
 import org.spongepowered.common.event.gen.LoaderClassWriter;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 import org.spongepowered.common.util.generator.GeneratorUtils;
 
 import java.io.File;
@@ -110,13 +112,15 @@ public class FilterGenerator {
     FilterGenerator() {
     }
 
-    public static @Nullable EventFilter create(final Method method, final MethodHandles.Lookup lookup) throws IllegalAccessException {
+    public static @Nullable EventFilter create(
+        final ListenerClassVisitor.DiscoveredMethod method, final MethodHandles.Lookup lookup
+    ) throws IllegalAccessException, ClassNotFoundException {
         if (!lookup.hasFullPrivilegeAccess()) {
             throw new IllegalArgumentException("The provided lookup '" + lookup
                 + "' does not have full privilege access required to create a hidden class");
         }
-        final Class<?> handle = method.getDeclaringClass();
-        final String name = "Filter_" + method.getName();
+        final Class<?> handle = method.declaringClass();
+        final String name = "Filter_" + method.methodName();
         final byte[] cls = FilterGenerator.getInstance().generateClass(handle, name, method);
         if (cls == null) {
             return null;
@@ -130,16 +134,23 @@ public class FilterGenerator {
         }
     }
 
-    public byte[] generateClass(final Class<?> handle, final String localName, final Method method) {
+    public byte[] generateClass(final Class<?> handle, final String localName, final ListenerClassVisitor.DiscoveredMethod method) throws
+        ClassNotFoundException {
         final String name = Type.getInternalName(handle) + '_' + localName;
-        final Parameter[] params = method.getParameters();
+        final ListenerClassVisitor.ListenerParameter[] parameters = method.parameterTypes();
 
         SubtypeFilterDelegate sfilter = null;
         final List<FilterDelegate> additional = new ArrayList<>();
 
         boolean cancellation = false;
-        for (final Annotation anno : method.getAnnotations()) {
-            final Object obj = FilterGenerator.filterFromAnnotation(anno.annotationType());
+        for (final ListenerClassVisitor.ListenerAnnotation anno : method.annotations()) {
+            final Annotation annotation;
+            try {
+                annotation = anno.annotation();
+            } catch (final AnnotationFormatException e) {
+                throw new ClassNotFoundException("Failed to load annotation", e);
+            }
+            final Object obj = FilterGenerator.filterFromAnnotation(method.classByLoader(anno.type().getClassName()));
             if (obj == null) {
                 continue;
             }
@@ -147,24 +158,25 @@ public class FilterGenerator {
                 if (sfilter != null) {
                     throw new IllegalStateException("Cannot have both @Include and @Exclude annotations present at once");
                 }
-                sfilter = ((SubtypeFilter) obj).getDelegate(anno);
-            } else if (obj instanceof final EventTypeFilter etf) {
-                additional.add(etf.getDelegate(anno));
+                sfilter = ((SubtypeFilter) obj).getDelegate(annotation);
+            } else if (obj instanceof EventTypeFilter) {
+                final EventTypeFilter etf = (EventTypeFilter) obj;
+                additional.add(etf.getDelegate(annotation));
                 if (etf == EventTypeFilter.CANCELLATION) {
                     cancellation = true;
                 }
             }
         }
-        if (!cancellation && Cancellable.class.isAssignableFrom(params[0].getType())) {
+        if (!cancellation && Cancellable.class.isAssignableFrom(parameters[0].clazz())) {
             additional.add(new CancellationEventFilterDelegate(Tristate.FALSE));
         }
 
         // we know there are no filters, skip generating a class
-        if (additional.isEmpty() && sfilter == null && params.length == 1) {
+        if (additional.isEmpty() && sfilter == null && parameters.length == 1) {
             return null;
         }
 
-        final ClassWriter cw = new LoaderClassWriter(method.getDeclaringClass().getClassLoader(), ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        final ClassWriter cw = new LoaderClassWriter(method.declaringClass().getClassLoader(), ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         MethodVisitor mv;
 
         cw.visit(V11, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, "java/lang/Object", new String[] { Type.getInternalName(EventFilter.class) });
@@ -197,47 +209,53 @@ public class FilterGenerator {
             }
 
             // local var indices of the parameters values
-            final int[] plocals = new int[params.length - 1];
-            for (int i = 1; i < params.length; i++) {
-                final Parameter param = params[i];
+            final int[] plocals = new int[parameters.length - 1];
+            for (int i = 1; i < parameters.length; i++) {
+                final ListenerClassVisitor.ListenerParameter param = parameters[i];
                 ParameterFilterSourceDelegate source = null;
                 final List<ParameterFilterDelegate> paramFilters = new ArrayList<>();
-                for (final Annotation anno : param.getAnnotations()) {
-                    final Object obj = FilterGenerator.filterFromAnnotation(anno.annotationType());
+                for (final ListenerClassVisitor.ListenerAnnotation anno : param.annotations()) {
+                    final Object obj = FilterGenerator.filterFromAnnotation(method.classByLoader(anno.type().getClassName()));
                     if (obj == null) {
                         continue;
                     }
+                    final Annotation annotation;
+                    try {
+                        annotation = anno.annotation();
+                    } catch (AnnotationFormatException e) {
+                        throw new ClassNotFoundException("Failed to load annotation", e);
+                    }
                     if (obj instanceof ParameterSource) {
                         if (source != null) {
-                            throw new IllegalStateException("Cannot have multiple parameter filter source annotations (for " + param.getName() + ")");
+                            throw new IllegalStateException("Cannot have multiple parameter filter source annotations (for " + param.name() + ")");
                         }
-                        source = ((ParameterSource) obj).getDelegate(anno);
+                        source = ((ParameterSource) obj).getDelegate(annotation);
                     } else if (obj instanceof ParameterFilter) {
-                        paramFilters.add(((ParameterFilter) obj).getDelegate(anno));
+                        paramFilters.add(((ParameterFilter) obj).getDelegate(annotation));
                     }
                 }
                 if (source == null) {
-                    throw new IllegalStateException("Cannot have additional parameters filters without a source (for " + param.getName() + ")");
+                    throw new IllegalStateException("Cannot have additional parameters filters without a source (for " + param.name() + ")");
                 }
                 if (source instanceof AllCauseFilterSourceDelegate && !paramFilters.isEmpty()) {
                     // TODO until better handling for filtering arrays is added
                     throw new IllegalStateException(
-                            "Cannot have additional parameters filters without an array source (for " + param.getName() + ")");
+                            "Cannot have additional parameters filters without an array source (for " + param.name() + ")");
                 }
-                final Tuple<Integer, Integer> localState = source.write(cw, mv, method, i, local, plocals, params);
+                final Tuple<Integer, Integer> localState = source.write(cw, mv, method, i, local, plocals, parameters);
                 local = localState.first();
                 plocals[i - 1] = localState.second();
 
                 for (final ParameterFilterDelegate paramFilter : paramFilters) {
-                    paramFilter.write(cw, mv, method, param, plocals[i - 1]);
+                    paramFilter.write(cw, mv, param, plocals[i - 1]);
                 }
             }
 
             // create the return array
-            if (params.length == 1) {
+            if (parameters.length == 1) {
                 mv.visitInsn(ICONST_1);
             } else {
-                mv.visitIntInsn(BIPUSH, params.length);
+                mv.visitIntInsn(BIPUSH, parameters.length);
             }
             mv.visitTypeInsn(ANEWARRAY, "java/lang/Object");
             // load the event into the array
@@ -246,10 +264,10 @@ public class FilterGenerator {
             mv.visitVarInsn(ALOAD, 1);
             mv.visitInsn(AASTORE);
             // load all the params into the array
-            for (int i = 1; i < params.length; i++) {
+            for (int i = 1; i < parameters.length; i++) {
                 mv.visitInsn(DUP);
                 mv.visitIntInsn(BIPUSH, i);
-                final Type paramType = Type.getType(params[i].getType());
+                final Type paramType = parameters[i].type();
                 mv.visitVarInsn(paramType.getOpcode(ILOAD), plocals[i - 1]);
                 GeneratorUtils.visitBoxingMethod(mv, paramType);
                 mv.visitInsn(AASTORE);
@@ -277,7 +295,7 @@ public class FilterGenerator {
         return data;
     }
 
-    private static Object filterFromAnnotation(final Class<? extends Annotation> cls) {
+    private static Object filterFromAnnotation(final Class<?> cls) {
         Object filter;
         if ((filter = SubtypeFilter.valueOf(cls)) != null)
             return filter;
@@ -309,7 +327,7 @@ public class FilterGenerator {
             return this.factory.apply(anno);
         }
 
-        public static SubtypeFilter valueOf(final Class<? extends Annotation> cls) {
+        public static SubtypeFilter valueOf(final Class<?> cls) {
             return SubtypeFilter.BY_CLAZZ.get(cls);
         }
 
@@ -340,7 +358,7 @@ public class FilterGenerator {
             return this.factory.apply(anno);
         }
 
-        public static EventTypeFilter valueOf(final Class<? extends Annotation> cls) {
+        public static EventTypeFilter valueOf(final Class<?> cls) {
             return EventTypeFilter.BY_CLAZZ.get(cls);
         }
 
@@ -379,7 +397,7 @@ public class FilterGenerator {
             return this.factory.apply(anno);
         }
 
-        public static ParameterSource valueOf(final Class<? extends Annotation> cls) {
+        public static ParameterSource valueOf(final Class<?> cls) {
             return ParameterSource.BY_CLAZZ.get(cls);
         }
 
@@ -411,7 +429,7 @@ public class FilterGenerator {
             return this.factory.apply(anno);
         }
 
-        public static ParameterFilter valueOf(final Class<? extends Annotation> cls) {
+        public static ParameterFilter valueOf(final Class<?> cls) {
             return ParameterFilter.BY_CLAZZ.get(cls);
         }
 

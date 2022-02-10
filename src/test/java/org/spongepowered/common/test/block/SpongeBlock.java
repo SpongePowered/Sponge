@@ -22,15 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.filter.delegate;
+package org.spongepowered.common.test.block;
 
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MethodVisitor;
-import org.spongepowered.common.event.manager.ListenerClassVisitor;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
-public interface FilterDelegate {
+@SuppressWarnings("deprecation")
+public class SpongeBlock extends Block {
+    public SpongeBlock(Properties param0) {
+        super(param0);
+    }
 
-    int write(String name, ClassWriter cw, MethodVisitor mv, ListenerClassVisitor.DiscoveredMethod method, int locals) throws
-        ClassNotFoundException;
-
+    @Override
+    public void neighborChanged(
+        BlockState param0, Level param1, BlockPos param2, Block param3, BlockPos param4, boolean param5
+    ) {
+        super.neighborChanged(param0, param1, param2, param3, param4, param5);
+    }
 }

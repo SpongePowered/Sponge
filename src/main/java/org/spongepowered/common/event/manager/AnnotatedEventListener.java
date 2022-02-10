@@ -29,13 +29,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.common.event.SpongeEventListener;
 
-import java.lang.reflect.Method;
-
 public abstract class AnnotatedEventListener implements SpongeEventListener<Event> {
 
     protected final Object handle;
 
-    protected AnnotatedEventListener(Object handle) {
+    protected AnnotatedEventListener(final Object handle) {
         this.handle = checkNotNull(handle, "handle");
     }
 
@@ -46,7 +44,7 @@ public abstract class AnnotatedEventListener implements SpongeEventListener<Even
 
     public interface Factory {
 
-        AnnotatedEventListener create(Object handle, Method method) throws Throwable;
+        AnnotatedEventListener create(Object handle, ListenerClassVisitor.DiscoveredMethod method) throws Throwable;
 
     }
 

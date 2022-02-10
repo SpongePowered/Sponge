@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static org.apache.commons.lang3.ClassUtils.isAssignable;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -36,26 +33,18 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.launch.Launch;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.StringJoiner;
 
-/**
- * A handy utility for doing some neat things with generics and reflection.
- * This is primarily used for {@link ImmutableDataCachingUtil} to create
- * {@link org.spongepowered.api.data.DataManipulator.Immutable}s
- * and {@link org.spongepowered.api.data.value.Value.Immutable}s for caching.
- *
- * <p>Note that this utility is not at all safe to create complex objects
- * that require pre-processing, it's always simpler to just call the
- * constructors.</p>
- */
 public final class ReflectionUtil {
 
     public static final Marker REFLECTION_SCANNING = MarkerManager.getMarker("REFLECTION_SCANNING");
@@ -88,7 +77,8 @@ public final class ReflectionUtil {
             targetClass,
             Block.class,
             "neighborChanged",
-            ReflectionUtil.NEIGHBOR_CHANGED_METHOD_ARGS
+            ReflectionUtil.NEIGHBOR_CHANGED_METHOD_ARGS,
+            void.class
         );
     }
 
@@ -97,7 +87,8 @@ public final class ReflectionUtil {
             targetClass,
             BlockBehaviour.class,
             "entityInside",
-            ReflectionUtil.ENTITY_INSIDE_METHOD_ARGS
+            ReflectionUtil.ENTITY_INSIDE_METHOD_ARGS,
+            void.class
         );
     }
 
@@ -106,7 +97,8 @@ public final class ReflectionUtil {
             targetClass,
             Block.class,
             "stepOn",
-            ReflectionUtil.STEP_ON_METHOD_ARGS
+            ReflectionUtil.STEP_ON_METHOD_ARGS,
+            void.class
         );
     }
 
@@ -115,7 +107,8 @@ public final class ReflectionUtil {
             targetClass,
             Entity.class,
             "playerTouch",
-            ReflectionUtil.PLAYER_TOUCH_METHOD_ARGS
+            ReflectionUtil.PLAYER_TOUCH_METHOD_ARGS,
+            void.class
         );
     }
 
@@ -123,87 +116,75 @@ public final class ReflectionUtil {
         final Class<?> targetClass,
         final Class<?> ignoredClass,
         final String methodName,
-        final Class<?>[] methodParameters
+        final Class<?>[] methodParameters,
+        final Class<?> returnType
     ) {
         final String targetMethodForEnvironment = Launch.instance().mappingManager().toRuntimeMethodName(targetClass, methodName, methodParameters);
+
         try {
-            final Class<?> declaringClass = targetClass.getMethod(targetMethodForEnvironment, methodParameters).getDeclaringClass();
-            return !ignoredClass.equals(declaringClass);
-        } catch (final NoSuchMethodException e) {
-            SpongeCommon.logger().fatal(ReflectionUtil.REFLECTION_SCANNING, "Could not find desired method {} in class {} under environment method "
-                + "name {}", methodName, targetClass.getSimpleName(), targetMethodForEnvironment);
-            return true;
+
+            Class<?> clazz = targetClass;
+            while (clazz != null) {
+                if (clazz == Object.class || clazz == ignoredClass || clazz.getClassLoader() == null) {
+                    return false;
+                }
+                final InputStream targetClassStream = clazz.getClassLoader().getResourceAsStream(
+                    clazz.getName().replace('.', '/') + ".class");
+                if (targetClassStream == null) {
+                    return true;
+                }
+                final ClassReader reader = new ClassReader(targetClassStream);
+                final MethodCheckerClassVisitor visitor = new MethodCheckerClassVisitor(targetMethodForEnvironment, methodParameters, returnType);
+                reader.accept(visitor, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+                final boolean declared  = visitor.wasMethodDeclared();
+                if (declared) {
+                    return true;
+                }
+                clazz = clazz.getSuperclass();
+            }
+            return false;
         } catch (final NoClassDefFoundError e) {
-            SpongeCommon.logger().fatal(ReflectionUtil.REFLECTION_SCANNING, "Failed to load class in {} while scanning desired method {} under environment method name {}", targetClass, methodName, targetMethodForEnvironment);
+            SpongeCommon.logger().fatal(ReflectionUtil.REFLECTION_SCANNING, String.format("Failed to load class in %s while scanning desired method %s under environment method name %s", targetClass, methodName, targetMethodForEnvironment), e);
+            return true;
+        } catch (final IOException e) {
+            SpongeCommon.logger().fatal(ReflectionUtil.REFLECTION_SCANNING, String.format("Class file exception while trying to load %s looking for method %s (%s in targeted environment)", targetClass, methodName, targetMethodForEnvironment), e);
             return true;
         }
-    }
-
-    public static <T> T createInstance(final Class<T> objectClass, Object... args) {
-        checkArgument(!Modifier.isAbstract(objectClass.getModifiers()), "Cannot construct an instance of an abstract class!");
-        checkArgument(!Modifier.isInterface(objectClass.getModifiers()), "Cannot construct an instance of an interface!");
-        if (args == null) {
-            args = new Object[] {null};
-        }
-        final Constructor<T> ctor = ReflectionUtil.findConstructor(objectClass, args);
-        try {
-            return ctor.newInstance(args);
-        } catch (final InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            SpongeCommon.logger().error("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
-                                         + "with the args: " + Arrays.toString(args), e);
-        }
-        throw new IllegalArgumentException("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
-         + "the args: " + Arrays.toString(args));
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Constructor<T> findConstructor(final Class<T> objectClass, Object... args) {
-        final Constructor<?>[] ctors = objectClass.getConstructors();
-        if (args == null) {
-            args = new Object[] {null};
-        }
-        // labeled loops
-        dance:
-        for (final Constructor<?> ctor : ctors) {
-            final Class<?>[] paramTypes = ctor.getParameterTypes();
-            if (paramTypes.length != args.length) {
-                for (final Object object : args) {
-                    if (object != null) { // hahahah
-                        if (object.getClass().isArray()) {
-                            final Object[] objects = ReflectionUtil.deconstructArray(args).toArray();
-                            return ReflectionUtil.findConstructor(objectClass, objects);
-                        }
-                    }
-                }
-                continue; // we haven't found the right constructor
-            }
-            for (int i = 0; i < paramTypes.length; i++) {
-                final Class<?> parameter = paramTypes[i];
-                if (!isAssignable(args[i] == null ? null : args[i].getClass(), parameter, true)) {
-                    continue dance; // continue the outer loop since we didn't find the right one
-                }
-            }
-            // We've found the right constructor, now to actually construct it!
-            return (Constructor<T>) ctor;
-        }
-        throw new IllegalArgumentException("Applicable constructor not found for class: " + objectClass.getCanonicalName() + " with args: " + Arrays.toString(args));
-    }
-
-    private static List<Object> deconstructArray(final Object[] objects) {
-        final List<Object> list = new ArrayList<>();
-        for (final Object object : objects) {
-            if (object == null) {
-                list.add(null);
-                continue;
-            }
-            if (object.getClass().isArray()) {
-                list.addAll(ReflectionUtil.deconstructArray((Object[]) object));
-            } else {
-                list.add(object);
-            }
-        }
-        return list;
     }
 
     private ReflectionUtil() {}
+
+    static class MethodCheckerClassVisitor extends ClassVisitor {
+
+        private final String targetMethod;
+        private final String methodDescriptor;
+        private boolean declared = false;
+
+        public MethodCheckerClassVisitor(
+            final String targetMethodForEnvironment, final Class<?>[] methodParameters, final Class<?> returnType
+        ) {
+            super(Opcodes.ASM8);
+            this.targetMethod = targetMethodForEnvironment;
+            final StringJoiner joiner = new StringJoiner("", "(", ")");
+            for (final Class<?> clazz : methodParameters) {
+                joiner.add(Type.getType(clazz).getDescriptor());
+            }
+            this.methodDescriptor = joiner + Type.getType(returnType).getDescriptor();
+        }
+
+        @Override
+        public MethodVisitor visitMethod(
+            final int access, final String name, final String descriptor, final String signature, final String[] exceptions
+        ) {
+            if (this.targetMethod.equals(name) && this.methodDescriptor.equals(descriptor)) {
+                this.declared = true;
+            }
+            return super.visitMethod(access, name, descriptor, signature, exceptions);
+        }
+
+        public boolean wasMethodDeclared() {
+            return this.declared;
+        }
+    }
+
 }

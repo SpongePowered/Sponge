@@ -65,6 +65,15 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotDataBuilder;
+import org.spongepowered.common.data.datasync.entity.EntityBabyConverter;
+import org.spongepowered.common.data.datasync.entity.EntityCustomNameConverter;
+import org.spongepowered.common.data.datasync.entity.EntityCustomNameVisibleConverter;
+import org.spongepowered.common.data.datasync.entity.EntityFlagsConverter;
+import org.spongepowered.common.data.datasync.entity.EntityNoGravityConverter;
+import org.spongepowered.common.data.datasync.entity.EntitySilentConverter;
+import org.spongepowered.common.data.datasync.entity.LivingEntityArrowCountConverter;
+import org.spongepowered.common.data.datasync.entity.LivingHealthConverter;
+import org.spongepowered.common.data.datasync.entity.MobEntityAIFlagsConverter;
 import org.spongepowered.common.data.key.KeyBasedDataListener;
 import org.spongepowered.common.data.persistence.datastore.DataStoreRegistry;
 import org.spongepowered.common.data.provider.CustomDataProvider;
@@ -320,6 +329,15 @@ public final class SpongeDataManager implements DataManager {
 
     public void registerDefaultProviders() {
         this.dataProviderRegistry.registerDefaultProviders();
+        new EntityBabyConverter();
+        new EntityCustomNameConverter();
+        new EntityCustomNameVisibleConverter();
+        new EntityFlagsConverter();
+        new EntityNoGravityConverter();
+        new EntitySilentConverter();
+        new LivingEntityArrowCountConverter();
+        new LivingHealthConverter();
+        new MobEntityAIFlagsConverter();
 
     }
 

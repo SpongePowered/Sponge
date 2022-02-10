@@ -24,147 +24,112 @@
  */
 package org.spongepowered.common.util;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.spongepowered.common.util.ReflectionUtil.createInstance;
-import static org.spongepowered.common.util.ReflectionUtil.findConstructor;
-
-import io.leangen.geantyref.TypeToken;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.persistence.DataQuery;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.event.EventListener;
-import org.spongepowered.api.event.data.ChangeDataHolderEvent;
-import org.spongepowered.common.data.value.ImmutableSpongeValue;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.spongepowered.common.event.gen.DefineableClassLoader;
+import org.spongepowered.common.test.UnitTestExtension;
+import org.spongepowered.common.test.block.SpongeBlock;
 
-import java.lang.reflect.Type;
+import java.lang.reflect.Method;
 
+@ExtendWith(UnitTestExtension.class)
 public class ReflectionTest {
 
     @Test
-    public void testFindConstructor() {
-        new Dummy("derp");
-        findConstructor(Dummy.class, "break");
-        createInstance(Dummy.class, "dance");
+    public void testCheckNeighborChangedDeclared() {
+        final boolean isNeighborChangedDeclared = ReflectionUtil.isNeighborChangedDeclared(SpongeBlock.class);
+        Assertions.assertTrue(isNeighborChangedDeclared, "NeighborChanged should be declared on SpongeBlock");
     }
 
     @Test
-    public void testIllegalArgs() {
-        assertThrows(IllegalArgumentException.class, () -> findConstructor(Dummy.class));
+    public void testEntityInsideNotDeclared() {
+        final boolean entityInsideDeclared = ReflectionUtil.isEntityInsideDeclared(SpongeBlock.class);
+        Assertions.assertFalse(entityInsideDeclared, "isEntityInsideDeclared is not declared on SpongeBlock");
     }
 
     @Test
-    public void testIllegalArgs2() {
-        assertThrows(IllegalArgumentException.class, () -> findConstructor(Dummy.class, "break", "dance"));
-    }
-
-    @Test
-    public void testComplexCtor() {
-        createInstance(Complex.class, 10, "break", "dancing!", false);
-    }
-
-    @Test
-    public void testNulls() {
-        findConstructor(Dummy.class, (Object) null);
-        createInstance(Dummy.class, (Object) null);
-    }
-
-    @Test
-    public void testIllegalNullCtor() {
-        assertThrows(IllegalArgumentException.class, () -> findConstructor(Complex.class, null, null, null, null));
-    }
-
-    @Test
-    public void testIllegalNulls() {
-        // This is valid to the compiler, but for java,
-        // primitives can never be null, they're always a default value of 0 or false.
-        // So, in this case, the runtime will throw an IllegalArgumentException when
-        // the constructor tries to construct a new instance!
-        assertThrows(IllegalArgumentException.class, () -> createInstance(Complex.class, null, null, null, null));
-    }
-
-    @Test
-    public void testMultiCtor() {
-        createInstance(Complex.class, 1, "");
-        createInstance(Complex.class, 1, "", null, false);
-    }
-
-    @Test
-    public void testNoArgs() {
-        createInstance(NoArgs.class);
-    }
-
-   /* @Test
-    public void testImmutableValueCache() {
-        final Key<Value<Double>> key = new Key<Value<Double>>() {
-
-            private final TypeToken<Double> type = new TypeToken<Double>() {
-                private static final long serialVersionUID = 2192586007346356478L;
-            };
-
-            private final TypeToken<Value<Double>> token = new TypeToken<Value<Double>>() {
-                private static final long serialVersionUID = -5667097529739857142L;
-            };
-
-            @Override
-            public String id() {
-                return "test";
-            }
-
-            @Override
-            public String getName() {
-                return "test";
-            }
-
-            @Override
-            public Type valueType() {
-                return this.token;
-            }
-
-            @Override
-            public Type elementType() {
-                return Double.class;
-            }
-
-            @Override
-            public DataQuery getQuery() {
-                return DataQuery.of("Herp");
-            }
-
-            @Override
-            public <E extends DataHolder> void registerEvent(Class<E> holderFilter, EventListener<ChangeDataHolderEvent.ValueChange> listener) {
-
-            }
-        };
-
-        final ImmutableValue<Double> myVal = ImmutableSpongeValue.cached(key, 10D, 1D);
-        final ImmutableValue<Double> testVal = ImmutableSpongeValue.cachedOf(key, 10D, 1d);
-
-        assert myVal == testVal;
-
-    } */
-
-    public static final class Complex {
-
-        public Complex(final int start, final String dancing) {
-
+    public void testNonExistentMethodOnCustomClass() {
+        final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        writer.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, "org/spongepowered/common/test/block/BombDummy", null, "net/minecraft/world/level/block/Block", null);
+        {
+            final MethodVisitor ctor = writer.visitMethod(
+                Opcodes.ACC_PUBLIC,
+                "<init>",
+                "(Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V",
+                null,
+                null
+            );
+            ctor.visitCode();
+            ctor.visitVarInsn(Opcodes.ALOAD, 0);
+            ctor.visitVarInsn(Opcodes.ALOAD, 1);
+            ctor.visitMethodInsn(
+                Opcodes.INVOKESPECIAL,
+                "net/minecraft/world/level/block/Block",
+                "<init>",
+                "(Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;)V",
+                false
+            );
+            ctor.visitInsn(Opcodes.RETURN);
+            ctor.visitMaxs(0, 0);
+        }
+        {
+            final MethodVisitor el = writer.visitMethod(
+                Opcodes.ACC_PUBLIC,
+                "neighborChanged",
+                "(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;Lnet/minecraft/core/BlockPos;Z)V",
+                null,
+                null
+            );
+            el.visitCode();
+            el.visitInsn(Opcodes.RETURN);
+            el.visitMaxs(0,0);
+        }
+        {
+            final MethodVisitor bomb = writer.visitMethod(
+                Opcodes.ACC_PUBLIC,
+                "throwup",
+                "(Lcom/example/doesnt/Exist;)V",
+                null,
+                null
+            );
+            bomb.visitCode();
+            bomb.visitInsn(Opcodes.RETURN);
+            bomb.visitMaxs(0, 0);
         }
 
-        public Complex(final int start, final String dancing, final Object lol, final boolean test) {
-
+        final DefineableClassLoader loader = new ReferencedDefinableClassLoader(this.getClass().getClassLoader());
+        final byte[] bombClazzBytes = writer.toByteArray();
+        final Class<?> clazz = loader.defineClass("org.spongepowered.common.test.block.BombDummy", bombClazzBytes);
+        final boolean neighborChanged = ReflectionUtil.isNeighborChangedDeclared(clazz);
+        Assertions.assertTrue(neighborChanged, "NeighborChanged should have been defined on BombDummy");
+        final boolean entityInside = ReflectionUtil.isEntityInsideDeclared(clazz);
+        Assertions.assertFalse(entityInside, "isEntityInsideDeclared is not defined on BombDummy");
+        NoClassDefFoundError e = null;
+        try {
+            getNeighborChanged(clazz);
+        } catch (final Exception ex) {
+            Assertions.fail("Expected a class not found exception for com/example/doesnt/Exist");
+        } catch (final NoClassDefFoundError ee) {
+            e = ee;
         }
+        Assertions.assertNotNull(e, "Should have gotten a class exception");
     }
 
-    public static final class Dummy {
-        public Dummy(final Object object) {
-
-        }
+    private static void getNeighborChanged(final Class<?> clazz) throws Exception, Error {
+        final Method m = clazz.getMethod("neighborChanged", BlockState.class,
+            Level.class,
+            BlockPos.class,
+            Block.class,
+            BlockPos.class,
+            boolean.class);
     }
 
-    public static final class NoArgs {
-        public NoArgs() {
-
-        }
-    }
 }

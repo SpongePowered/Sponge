@@ -231,6 +231,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     // @formatter:on
 
 
+    @Shadow public abstract float getYRot();
+
     private boolean impl$isConstructing = true;
     private VanishState impl$vanishState = VanishState.unvanished();
     private boolean impl$pendingVisibilityUpdate = false;

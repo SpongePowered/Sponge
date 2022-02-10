@@ -28,15 +28,14 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Optional;
 
 public interface ParameterFilterSourceDelegate {
     Type OPTIONAL = Type.getType(Optional.class);
 
     Tuple<Integer, Integer> write(
-        ClassWriter cw, MethodVisitor mv, Method method, int paramIdx, int local, final int[] plocals, final Parameter[] params
-    );
+        ClassWriter cw, MethodVisitor mv, ListenerClassVisitor.DiscoveredMethod method, int paramIdx, int local, final int[] plocals, final ListenerClassVisitor.ListenerParameter[] params
+    ) throws ClassNotFoundException;
 }

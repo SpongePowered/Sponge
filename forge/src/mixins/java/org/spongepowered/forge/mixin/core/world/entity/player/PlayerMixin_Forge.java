@@ -22,15 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.filter.delegate;
+package org.spongepowered.forge.mixin.core.world.entity.player;
 
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.MethodVisitor;
-import org.spongepowered.common.event.manager.ListenerClassVisitor;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.forge.mixin.core.world.entity.LivingEntityMixin_Forge;
 
-public interface FilterDelegate {
-
-    int write(String name, ClassWriter cw, MethodVisitor mv, ListenerClassVisitor.DiscoveredMethod method, int locals) throws
-        ClassNotFoundException;
-
+@Mixin(Player.class)
+public class PlayerMixin_Forge extends LivingEntityMixin_Forge {
+    @Override
+    public boolean bridge$onLivingAttack(
+        final LivingEntity entity, final DamageSource source, final float amount
+    ) {
+        return true;
+    }
 }

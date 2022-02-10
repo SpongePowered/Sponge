@@ -22,30 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.entity;
+package org.spongepowered.common.data.datasync.entity;
 
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
+import org.spongepowered.common.data.datasync.DataParameterConverter;
 
-/**
- * Bridge methods designed as hooks for various methods called on an {@link Entity}
- * where a platform would want to adjust logic
- */
-public interface PlatformLivingEntityBridge {
+import java.util.Optional;
 
-    /**
-     * Called when the {@link Entity} is to be not marked as removed.
-     */
-    default boolean bridge$onLivingAttack(final LivingEntity entity, final DamageSource source, final float amount) {
-        return true;
+public class LivingHealthConverter extends DataParameterConverter<Float> {
+    public LivingHealthConverter() {
+        super(LivingEntityAccessor.accessor$DATA_HEALTH_ID());
     }
 
-    default float bridge$applyModDamage(final LivingEntity entity, final DamageSource source, final float damage) {
-        return damage;
+    @Override
+    public Optional<DataTransactionResult> createTransaction(
+        final Entity entity, final Float currentValue, final Float value
+    ) {
+        return Optional.of(DataTransactionResult.builder()
+            .replace(Value.immutableOf(Keys.HEALTH, (double) currentValue))
+            .success(Value.immutableOf(Keys.HEALTH, (double) value))
+            .result(DataTransactionResult.Type.SUCCESS)
+            .build());
     }
 
-    default float bridge$applyModDamageBeforeFunctions(final LivingEntity entity, final DamageSource source, final float damage) {
-        return damage;
+    @Override
+    public Float getValueFromEvent(final Float originalValue, final DataTransactionResult result) {
+        return result.successfulValue(Keys.HEALTH)
+            .orElse(Value.immutableOf(Keys.HEALTH, (double) originalValue))
+            .get()
+            .floatValue();
     }
 }

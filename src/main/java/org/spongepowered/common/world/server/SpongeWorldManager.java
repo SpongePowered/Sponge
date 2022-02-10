@@ -102,6 +102,7 @@ import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.DataPackSerializer;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.user.SpongeUserManager;
@@ -1036,6 +1037,7 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         SpongeCommon.post(SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(),
             (org.spongepowered.api.world.server.ServerWorld) world, isInitialized));
+        PlatformHooks.INSTANCE.getWorldHooks().postLoadWorld(world);
 
         // Set the view distance back on it's self to trigger the logic
         ((PrimaryLevelDataBridge) world.getLevelData()).bridge$viewDistance().ifPresent(v -> ((PrimaryLevelDataBridge) world.getLevelData()).bridge$setViewDistance(v));
