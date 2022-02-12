@@ -98,22 +98,19 @@ public abstract class AbstractMutableBlockEntityArchetypeBuffer extends Abstract
         return this.blockBuffer.highestYAt(x, z);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public VolumeStream<BlockEntityArchetypeVolume.Mutable, BlockState> blockStateStream(final Vector3i min, final Vector3i max,
         final StreamOptions options) {
-        final Vector3i blockMin = this.min();
-        final Vector3i blockMax = this.max();
-        VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
+        VolumeStreamUtils.validateStreamArgs(min, max, this.min(), this.max(), options);
         final ArrayMutableBlockBuffer buffer;
         if (options.carbonCopy()) {
             buffer = this.blockBuffer.copy();
         } else {
             buffer = this.blockBuffer;
         }
-        final Stream<VolumeElement<BlockEntityArchetypeVolume.Mutable, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
-            .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
-                .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
+        final Stream<VolumeElement<BlockEntityArchetypeVolume.Mutable, BlockState>> stateStream = IntStream.range(min.x(), max.x() + 1)
+            .mapToObj(x -> IntStream.range(min.z(), max.z() + 1)
+                .mapToObj(z -> IntStream.range(min.y(), max.y() + 1)
                     .mapToObj(y -> VolumeElement.of((BlockEntityArchetypeVolume.Mutable) this, () -> buffer.block(x, y, z), new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
