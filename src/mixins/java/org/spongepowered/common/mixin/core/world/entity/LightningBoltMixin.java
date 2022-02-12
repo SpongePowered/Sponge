@@ -24,98 +24,71 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
-import com.google.common.collect.Lists;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.event.entity.ExpireEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.math.vector.Vector3i;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Mixin(LightningBolt.class)
 public abstract class LightningBoltMixin extends EntityMixin {
 
-    private final List<Entity> impl$struckEntities = Lists.newArrayList();
-    private boolean impl$effect = false; // TODO never set?
+    //@formatter:off
+    @Shadow private boolean visualOnly;
+    //@formatter:on
 
-    @Redirect(method = "spawnFire",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;setBlockAndUpdate(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Z"))
-    private boolean impl$throwEventForChangingBlocks(final net.minecraft.world.level.Level world, final BlockPos pos, final BlockState blockState) {
-        return this.impl$strikeBlockAndAddSnapshot(world, pos, blockState);
-    }
+    @Shadow private int life;
 
-    @Redirect(method = "spawnFire(I)V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;setBlockAndUpdate(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)Z"))
-    private boolean impl$throwEventForChangingBlockDuringUpdate(final net.minecraft.world.level.Level world, final BlockPos pos, final BlockState blockState) {
-        return this.impl$strikeBlockAndAddSnapshot(world, pos, blockState);
-    }
-
-    private boolean impl$strikeBlockAndAddSnapshot(final net.minecraft.world.level.Level world, final BlockPos pos, final BlockState blockState) {
-        if (!this.impl$effect && ((World) world).contains(pos.getX(), pos.getY(), pos.getZ())) {
-            final Vector3i pos3i = VecHelper.toVector3i(pos);
-            final Transaction<BlockSnapshot> transaction = new Transaction<>(
-                SpongeBlockSnapshot.BuilderImpl.pooled()
-                    .blockState(world.getBlockState(pos))
-                    .world((ServerLevel) world)
-                    .position(pos3i)
-                    .build(),
-                SpongeBlockSnapshot.BuilderImpl.pooled()
-                    .blockState(blockState)
-                    .world((ServerLevel) world)
-                    .position(pos3i)
-                    .build());
-            return true;
+    @SuppressWarnings("unchecked")
+    @Redirect(
+        method = "tick()V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/level/Level;getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;)Ljava/util/List;"
+        )
+    )
+    private List<Entity> impl$ThrowEventAndProcess(final Level level, final Entity thisEntity, final AABB boundingBox, final Predicate<Entity> predicate) {
+        if (this.removed || this.level.isClientSide) {
+            return Collections.emptyList();
         }
-        return false;
-    }
-
-    @Redirect(method = "tick()V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;thunderHit(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LightningBolt;)V"))
-    private void impl$AddEntityToListForEvent(final net.minecraft.world.entity.Entity mcEntity, final ServerLevel level, final LightningBolt lightningBolt) {
-        if (!this.impl$effect) {
-            final Entity entity = (Entity) mcEntity;
-            if (!this.impl$struckEntities.contains(entity)) {
-                this.impl$struckEntities.add(entity);
+        final List<Entity> originalEntities = level.getEntities(thisEntity, boundingBox, predicate);
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            final LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(frame.currentCause(), (List<org.spongepowered.api.entity.Entity>) (List<?>) originalEntities);
+            Sponge.eventManager().post(strike);
+            if (strike.isCancelled()) {
+                return Collections.emptyList();
             }
         }
+        return originalEntities;
     }
 
     @Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LightningBolt;remove()V"))
-    private void impl$ThrowEventAndProcess(final CallbackInfo ci) {
-        if (this.removed || this.level.isClientSide) {
+    private void impl$ThrowLightningPost(final CallbackInfo ci) {
+        if (this.level.isClientSide || this.life >= 0) {
             return;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(frame.currentCause(), this.impl$struckEntities);
+            frame.pushCause(this);
+            final LightningEvent.Post strike = SpongeEventFactory.createLightningEventPost(frame.currentCause());
             Sponge.eventManager().post(strike);
-
-            if (!strike.isCancelled()) {
-                for (final Entity e : strike.entities()) {
-                    ((net.minecraft.world.entity.Entity) e).thunderHit((ServerLevel) this.level, (LightningBolt) (Object) this);
-                }
-                SpongeCommon.post(SpongeEventFactory.createLightningEventPost(frame.currentCause()));
-            }
+            final ExpireEntityEvent event = SpongeEventFactory.createExpireEntityEvent(frame.currentCause(), (org.spongepowered.api.entity.Entity) (Object) this);
+            Sponge.eventManager().post(event);
         }
     }
-
 
 }

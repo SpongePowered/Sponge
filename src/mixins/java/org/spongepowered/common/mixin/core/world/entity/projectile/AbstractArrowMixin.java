@@ -24,8 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.projectile.arrow.ArrowEntity;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,14 +42,6 @@ import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 
 import javax.annotation.Nullable;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
 
 @Mixin(AbstractArrow.class)
 public abstract class AbstractArrowMixin extends ProjectileMixin {
@@ -59,10 +57,10 @@ public abstract class AbstractArrowMixin extends ProjectileMixin {
     @Shadow public abstract void shadow$setPierceLevel(byte level);
     @Shadow public abstract void shadow$setShotFromCrossbow(boolean fromCrossbow);
     @Shadow protected abstract ItemStack shadow$getPickupItem();
+    @Shadow protected abstract void resetPiercedEntities();
     // @formatter:on
 
 
-    @Shadow protected abstract void resetPiercedEntities();
 
     // Not all ProjectileSources are entities (e.g. BlockProjectileSource).
     // This field is used to store a ProjectileSource that isn't an entity.
@@ -75,15 +73,15 @@ public abstract class AbstractArrowMixin extends ProjectileMixin {
     private void onProjectileHit(final BlockHitResult hitResult, final CallbackInfo ci) {
         if (!((LevelBridge) this.level).bridge$isFake() && hitResult.getType() != HitResult.Type.MISS) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent((AbstractArrow) (Object) this,
-                    ((ArrowEntity) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
+                    this.impl$getProjectileSource(), hitResult)) {
                 this.shadow$playSound(SoundEvents.ARROW_HIT, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
                 // Make it almost look like it collided with something
-                BlockHitResult blockraytraceresult = (BlockHitResult)hitResult;
-                BlockState blockstate = this.level.getBlockState(blockraytraceresult.getBlockPos());
+                final BlockHitResult blockraytraceresult = (BlockHitResult)hitResult;
+                final BlockState blockstate = this.level.getBlockState(blockraytraceresult.getBlockPos());
                 this.lastState = blockstate;
-                Vec3 vec3d = blockraytraceresult.getLocation().subtract(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
+                final Vec3 vec3d = blockraytraceresult.getLocation().subtract(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
                 this.shadow$setDeltaMovement(vec3d);
-                Vec3 vec3d1 = vec3d.normalize().scale(0.05F);
+                final Vec3 vec3d1 = vec3d.normalize().scale(0.05F);
                 this.shadow$setPos(this.shadow$getX() - vec3d1.x, this.shadow$getY() - vec3d1.y, this.shadow$getZ() -
                         vec3d1.z);
                 this.inGround = true;
@@ -104,7 +102,7 @@ public abstract class AbstractArrowMixin extends ProjectileMixin {
     private void onProjectileHit(final EntityHitResult hitResult, final CallbackInfo ci) {
         if (!((LevelBridge) this.level).bridge$isFake() && hitResult.getType() != HitResult.Type.MISS) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent((AbstractArrow) (Object) this,
-                    ((ArrowEntity) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
+                this.impl$getProjectileSource(), hitResult)) {
                 this.shadow$playSound(SoundEvents.ARROW_HIT, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
                 // Make it almost look like it collided with something
 
@@ -123,6 +121,14 @@ public abstract class AbstractArrowMixin extends ProjectileMixin {
                 ci.cancel();
             }
         }
+    }
+
+    @Inject(
+        method = "tickDespawn",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/AbstractArrow;remove()V")
+    )
+    private void impl$throwExpireArrow(final CallbackInfo ci) {
+        this.impl$callExpireEntityEvent();
     }
 
 }

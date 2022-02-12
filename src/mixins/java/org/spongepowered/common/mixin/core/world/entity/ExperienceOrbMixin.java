@@ -22,30 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.projectile;
+package org.spongepowered.common.mixin.core.world.entity;
 
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
-import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.entity.ExperienceOrb;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(AbstractHurtingProjectile.class)
-public abstract class AbstractHurtingProjectileMixin extends ProjectileMixin {
+@Mixin(ExperienceOrb.class)
+public abstract class ExperienceOrbMixin extends EntityMixin {
 
-    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/AbstractHurtingProjectile;onHit(Lnet/minecraft/world/phys/HitResult;)V"))
-    private void impl$callCollideImpactEvent(AbstractHurtingProjectile projectile, HitResult result) {
-        if (result.getType() == HitResult.Type.MISS || ((LevelBridge) this.level).bridge$isFake()) {
-            this.shadow$onHit(result);
-            return;
-        }
-
-        if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.impl$getProjectileSource(), result)) {
-            this.shadow$remove();
-        } else {
-            this.shadow$onHit(result);
-        }
+    @Inject(
+        method = "tick",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ExperienceOrb;remove()V")
+    )
+    private void impl$throwExpireEvent(final CallbackInfo ci) {
+        this.impl$callExpireEntityEvent();
     }
+
 }
