@@ -226,7 +226,8 @@ public class ListenerClassVisitor extends ClassVisitor {
         @Override
         public void visitEnum(final String name, final String descriptor, final String value) {
             try {
-                this.visit(name, Enum.valueOf((Class<? extends Enum>) this.annotation.discoveredMethod.classByLoader(descriptor), value));
+                final String className = Type.getType(descriptor).getClassName();
+                this.visit(name, Enum.valueOf((Class<? extends Enum>) this.annotation.discoveredMethod.classByLoader(className), value));
             } catch (final ClassNotFoundException e) {
                 e.printStackTrace();
             }
