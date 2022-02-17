@@ -22,7 +22,6 @@
         "minecraftforge.fml.ModContainerMixin_Forge",
         "minecraftforge.util.ITeleporterMixin_Forge",
         "server.BootstrapMixin_Forge",
-        "server.MainMixin_Forge",
         "server.MinecraftServerMixin_Forge",
         "server.level.ServerLevelMixin_Timings_Forge",
         "server.level.ServerPlayerMixin_Forge",
@@ -40,5 +39,8 @@
     "client": [
         "client.MinecraftMixin_Forge",
         "client.main.MainMixin_Forge"
+    ],
+    "server": [
+        "server.MainMixin_Forge"
     ]
 }

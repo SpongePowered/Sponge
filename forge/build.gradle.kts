@@ -79,12 +79,12 @@ extensions.configure(LoomGradleExtension::class) {
 }
 
 // Forge extra configurations
-val forgeBootstrapLibrariesConfig = configurations.register("bootstrapLibraries")
-val mlTransformersConfig = configurations.register("mltransformers")
-val forgeLibrariesConfig = configurations.register("spongeLibraries") {
+val forgeBootstrapLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("bootstrapLibraries")
+val mlTransformersConfig: NamedDomainObjectProvider<Configuration> = configurations.register("mltransformers")
+val forgeLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeLibraries") {
     extendsFrom(mlTransformersConfig.get())
 }
-val forgeAppLaunchConfig = configurations.register("applaunch") {
+val forgeAppLaunchConfig: NamedDomainObjectProvider<Configuration> = configurations.register("applaunch") {
     extendsFrom(forgeBootstrapLibrariesConfig.get())
     extendsFrom(mlTransformersConfig.get())
     extendsFrom(configurations.getByName("minecraftNamed"))
@@ -92,13 +92,13 @@ val forgeAppLaunchConfig = configurations.register("applaunch") {
 }
 
 // Common source sets and configurations
-val launchConfig = commonProject.configurations.named("launch")
-val accessors = commonProject.sourceSets.named("accessors")
-val launch = commonProject.sourceSets.named("launch")
-val applaunch = commonProject.sourceSets.named("applaunch")
-val mixins = commonProject.sourceSets.named("mixins")
-val main = commonProject.sourceSets.named("main")
-val mlTransformers = transformersProject.sourceSets.named("main")
+val launchConfig: NamedDomainObjectProvider<Configuration> = commonProject.configurations.named("launch")
+val accessors: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("accessors")
+val launch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("launch")
+val applaunch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("applaunch")
+val mixins: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("mixins")
+val main: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("main")
+val mlTransformers: NamedDomainObjectProvider<SourceSet> = transformersProject.sourceSets.named("main")
 
 // Forge source sets
 val forgeMain by sourceSets.named("main") {
@@ -249,8 +249,8 @@ val forgeManifest = java.manifest {
     System.getenv()["GIT_BRANCH"]?.apply { attributes("Git-Branch" to this) }
 }
 
-val mixinConfigs = spongeImpl.mixinConfigurations
-val mods = extensions.getByType(LoomGradleExtension::class).unmappedModCollection
+val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
+val mods: ConfigurableFileCollection = extensions.getByType(LoomGradleExtension::class).unmappedModCollection
 tasks.withType(net.fabricmc.loom.task.AbstractRunTask::class) {
     setClasspath(files(mods, sourceSets.main.get().runtimeClasspath, forgeAppLaunch.runtimeClasspath))
     argumentProviders += CommandLineArgumentProvider {
@@ -392,6 +392,7 @@ tasks {
         manifest {
             attributes(mapOf(
                 "Access-Widener" to "common.accesswidener",
+                "Superclass-Transformer" to "common.superclasschange,forge.superclasschange",
                 "Multi-Release" to true,
                 "MixinConfigs" to mixinConfigs.joinToString(",")
             ))
@@ -403,11 +404,17 @@ tasks {
         from(commonProject.sourceSets.named("launch").map {it.output })
         from(commonProject.sourceSets.named("applaunch").map {it.output })
         from(transformersProject.sourceSets.named("main").map { it.output })
+
+        // Pull dependencies from the mlTransformers project
+        from(mlTransformersConfig.get().files)
+
         from(forgeAppLaunch.output)
         from(forgeLaunch.output)
         from(forgeAccessors.output)
         from(forgeMixins.output)
 
+        // Make sure to relocate access widener so that we don't conflict with other
+        // coremods also using access widener
         relocate("net.fabricmc.accesswidener", "org.spongepowered.forge.libs.accesswidener")
     }
 

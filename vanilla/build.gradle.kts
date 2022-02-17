@@ -460,7 +460,7 @@ tasks {
         archiveClassifier.set("universal")
         manifest {
             attributes(mapOf(
-                    "Superclass-Transformer" to "common.superclasschange",
+                    "Superclass-Transformer" to "common.superclasschange,vanilla.superclasschange",
                     "Access-Widener" to "common.accesswidener",
                     "MixinConfigs" to mixinConfigs.joinToString(","),
                     "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",

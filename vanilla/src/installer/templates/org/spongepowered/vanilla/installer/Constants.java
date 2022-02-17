@@ -47,5 +47,6 @@ public final class Constants {
 
         public static final String ACCESS_WIDENER = "Access-Widener";
         public static final String LAUNCH_TARGET = "Launch-Target";
+        public static final String SUPERCLASS_CHANGE = "Superclass-Transformer";
     }
 }
