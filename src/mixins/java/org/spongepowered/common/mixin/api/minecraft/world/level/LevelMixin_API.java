@@ -40,6 +40,7 @@ import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -138,6 +139,8 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     private Context api$context;
     private RegistryHolderLogic api$registryHolder;
+    private Vector3i api$worldMin;
+    private Vector3i api$worldMax;
 
     // World
 
@@ -246,12 +249,18 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public Vector3i min() {
-        return Constants.World.BLOCK_MIN;
+        if (this.api$worldMin == null) {
+            this.api$worldMin = Vector3i.from(Constants.World.BLOCK_MIN.x(), ((LevelHeightAccessor)this).getMinBuildHeight(), Constants.World.BLOCK_MIN.z());
+        }
+        return this.api$worldMin;
     }
 
     @Override
     public Vector3i max() {
-        return Constants.World.BLOCK_MAX;
+        if (this.api$worldMax == null) {
+            this.api$worldMax = Vector3i.from(Constants.World.BLOCK_MAX.x(), ((LevelHeightAccessor)this).getMaxBuildHeight(), Constants.World.BLOCK_MAX.z());
+        }
+        return this.api$worldMax;
     }
 
     @Override
