@@ -24,12 +24,6 @@
  */
 package org.spongepowered.common.registry.provider;
 
-import org.spongepowered.api.entity.ai.goal.GoalType;
-import org.spongepowered.api.entity.ai.goal.GoalTypes;
-
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Optional;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -40,29 +34,36 @@ import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
 import net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import org.spongepowered.api.entity.ai.goal.GoalType;
+import org.spongepowered.api.entity.ai.goal.GoalTypes;
+
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public final class GoalTypeProvider {
 
     public static final GoalTypeProvider INSTANCE = new GoalTypeProvider();
 
-    private final Map<Class<? extends Goal>, GoalType> mappings;
+    private final Map<Class<? extends Goal>, Supplier<GoalType>> mappings;
 
     GoalTypeProvider() {
         this.mappings = new IdentityHashMap<>();
 
-        this.mappings.put(AvoidEntityGoal.class, GoalTypes.AVOID_LIVING.get());
-        this.mappings.put(MeleeAttackGoal.class, GoalTypes.ATTACK_LIVING.get());
-        this.mappings.put(NearestAttackableTargetGoal.class, GoalTypes.FIND_NEAREST_ATTACKABLE.get());
-        this.mappings.put(LookAtPlayerGoal.class, GoalTypes.LOOK_AT.get());
-        this.mappings.put(RandomLookAroundGoal.class, GoalTypes.LOOK_RANDOMLY.get());
-        this.mappings.put(RandomStrollGoal.class, GoalTypes.RANDOM_WALKING.get());
-        this.mappings.put(RangedAttackGoal.class, GoalTypes.RANGED_ATTACK_AGAINST_AGENT.get());
-        this.mappings.put(RunAroundLikeCrazyGoal.class, GoalTypes.RUN_AROUND_LIKE_CRAZY.get());
-        this.mappings.put(FloatGoal.class, GoalTypes.SWIM.get());
+        this.mappings.put(AvoidEntityGoal.class, GoalTypes.AVOID_LIVING);
+        this.mappings.put(MeleeAttackGoal.class, GoalTypes.ATTACK_LIVING);
+        this.mappings.put(NearestAttackableTargetGoal.class, GoalTypes.FIND_NEAREST_ATTACKABLE);
+        this.mappings.put(LookAtPlayerGoal.class, GoalTypes.LOOK_AT);
+        this.mappings.put(RandomLookAroundGoal.class, GoalTypes.LOOK_RANDOMLY);
+        this.mappings.put(RandomStrollGoal.class, GoalTypes.RANDOM_WALKING);
+        this.mappings.put(RangedAttackGoal.class, GoalTypes.RANGED_ATTACK_AGAINST_AGENT);
+        this.mappings.put(RunAroundLikeCrazyGoal.class, GoalTypes.RUN_AROUND_LIKE_CRAZY);
+        this.mappings.put(FloatGoal.class, GoalTypes.SWIM);
 
     }
 
-    public Optional<GoalType> get(Class<? extends Goal> type) {
+    public Optional<Supplier<GoalType>> get(Class<? extends Goal> type) {
         return Optional.ofNullable(this.mappings.get(type));
     }
 }
