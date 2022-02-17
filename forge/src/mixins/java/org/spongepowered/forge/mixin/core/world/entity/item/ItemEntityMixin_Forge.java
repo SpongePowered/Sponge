@@ -42,8 +42,11 @@ public abstract class ItemEntityMixin_Forge {
     // @formatter:on
 
     @Inject(method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V", at = @At("RETURN"))
-    private void forge$setLifespanFromConfig(EntityType<? extends ItemEntity> type, Level level, CallbackInfo ci) {
-        if (!level.isClientSide) {
+    private void forge$setLifespanFromConfig(final EntityType<? extends ItemEntity> type, final Level level,
+        final CallbackInfo ci
+    ) {
+        // Check the level is not null to avoid an NPE
+        if (level != null && !level.isClientSide) {
             this.lifespan = SpongeGameConfigs.getForWorld(level).get().entity.item.despawnRate;
         }
     }
