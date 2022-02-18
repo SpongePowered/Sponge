@@ -44,7 +44,7 @@ import org.spongepowered.common.service.server.permission.SpongePermissionServic
 @Mixin(DedicatedPlayerList.class)
 public abstract class DedicatedPlayerListMixin extends PlayerList {
 
-    public DedicatedPlayerListMixin(final MinecraftServer server, final RegistryAccess.RegistryHolder registryHolder,
+    public DedicatedPlayerListMixin(final MinecraftServer server, final RegistryAccess.Frozen registryHolder,
                                     final PlayerDataStorage playerIo, final int maxPlayers) {
         super(server, registryHolder, playerIo, maxPlayers);
     }

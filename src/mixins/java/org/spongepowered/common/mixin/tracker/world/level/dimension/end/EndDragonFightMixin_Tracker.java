@@ -24,6 +24,15 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level.dimension.end;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.dimension.end.DragonRespawnAnimation;
+import net.minecraft.world.level.dimension.end.EndDragonFight;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,15 +45,6 @@ import org.spongepowered.common.event.tracking.phase.world.dragon.SpawnDragonCon
 
 import java.util.List;
 import java.util.Random;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.end.DragonRespawnAnimation;
-import net.minecraft.world.level.dimension.end.EndDragonFight;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 
 @Mixin(EndDragonFight.class)
 public abstract class EndDragonFightMixin_Tracker {
@@ -63,7 +63,7 @@ public abstract class EndDragonFightMixin_Tracker {
             context
                     .world((ServerLevel) worldIn)
                     .generator(generator)
-                    .feature(configuredFeature.feature)
+                    .feature(configuredFeature.feature())
                     .origin(pos)
             ;
             context.buildAndSwitch();

@@ -46,7 +46,7 @@ public final class SpongeNoiseConfig {
 
         public SamplingConfig sampling;
         public SlideConfig top, bottom;
-        
+
         public int minY, height, horizontalSize, verticalSize;
         public boolean largeBiomes, islandNoiseOverride;
 
@@ -111,7 +111,7 @@ public final class SpongeNoiseConfig {
         }
 
         @Override
-        public NoiseConfig.Builder terrainShaper(Shaper terrainShaper) {
+        public NoiseConfig.Builder terrainShaper(final Shaper terrainShaper) {
             this.terrainShaper = terrainShaper;
             return this;
         }
@@ -155,8 +155,8 @@ public final class SpongeNoiseConfig {
             Objects.requireNonNull(this.top, "top");
             Objects.requireNonNull(this.bottom, "bottom");
 
-            return (NoiseConfig) (Object) NoiseSettings.create(this.minY, this.height, (NoiseSamplingSettings) this.sampling,
-                    (NoiseSlider) this.top, (NoiseSlider) this.bottom,
+            return (NoiseConfig) (Object) NoiseSettings.create(this.minY, this.height, (NoiseSamplingSettings) (Object) this.sampling,
+                    (NoiseSlider) (Object) this.top, (NoiseSlider) (Object) this.bottom,
                     this.horizontalSize, this.verticalSize, this.islandNoiseOverride, false, this.largeBiomes,
                     (TerrainShaper) (Object) this.terrainShaper);
         }

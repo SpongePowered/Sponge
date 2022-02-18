@@ -95,10 +95,10 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.MAP_DECORATION_TYPE, SpongeRegistryLoaders.mapDecorationType());
         holder.createRegistry(RegistryTypes.MAP_SHADE, SpongeRegistryLoaders.mapShade());
         holder.createRegistry(RegistryTypes.TAG_TYPES, SpongeRegistryLoaders.tagTypes());
-        holder.wrapTagHelperAsRegistry(RegistryTypes.BLOCK_TYPE_TAGS, (StaticTagHelper<BlockType>) (Object) BlockTagsAccessor.accessor$HELPER());
+        /*holder.wrapTagHelperAsRegistry(RegistryTypes.BLOCK_TYPE_TAGS, (StaticTagHelper<BlockType>) (Object) BlockTagsAccessor.accessor$HELPER());
         holder.wrapTagHelperAsRegistry(RegistryTypes.ITEM_TYPE_TAGS, (StaticTagHelper<ItemType>) (Object) ItemTagsAccessor.accessor$HELPER());
         holder.wrapTagHelperAsRegistry(RegistryTypes.ENTITY_TYPE_TAGS, (StaticTagHelper<EntityType<?>>) (Object) EntityTypeTagsAccessor.accessor$HELPER());
-        holder.wrapTagHelperAsRegistry(RegistryTypes.FLUID_TYPE_TAGS, (StaticTagHelper<FluidType>) (Object) FluidTagsAccessor.accessor$HELPER());
+        holder.wrapTagHelperAsRegistry(RegistryTypes.FLUID_TYPE_TAGS, (StaticTagHelper<FluidType>) (Object) FluidTagsAccessor.accessor$HELPER());*/
         holder.createIdentityRegistry(RegistryTypes.BOOLEAN_STATE_PROPERTY, SpongeRegistryLoaders.booleanStateProperties());
         holder.createIdentityRegistry(RegistryTypes.INTEGER_STATE_PROPERTY, SpongeRegistryLoaders.integerStateProperties());
         holder.createIdentityRegistry(RegistryTypes.ENUM_STATE_PROPERTY, SpongeRegistryLoaders.enumStateProperties());

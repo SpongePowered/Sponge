@@ -30,7 +30,6 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.StaticTagHelper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
@@ -214,7 +213,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
         return (Registry<T>) registry;
     }
 
-    public <T> Registry<T> wrapTagHelperAsRegistry(final RegistryType<Tag<T>> type, final StaticTagHelper<T> staticTagHelper) {
+    public <T> Registry<T> wrapTagHelperAsRegistry(final RegistryType<Tag<T>> type, final Object staticTagHelper) {
         final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(Objects.requireNonNull(type, "type").root());
         if (root == null) {
             throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));

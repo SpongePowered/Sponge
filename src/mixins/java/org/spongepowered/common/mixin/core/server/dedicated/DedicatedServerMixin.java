@@ -27,15 +27,13 @@ package org.spongepowered.common.mixin.core.server.dedicated;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.server.ServerResources;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -50,13 +48,12 @@ import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 public abstract class DedicatedServerMixin extends MinecraftServerMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void impl$setServerOnGame(Thread p_i232601_1_, RegistryAccess.RegistryHolder p_i232601_2_, LevelStorageSource.LevelStorageAccess p_i232601_3_,
-            PackRepository p_i232601_4_, ServerResources p_i232601_5_, WorldData p_i232601_6_, DedicatedServerSettings p_i232601_7_,
-            DataFixer p_i232601_8_, MinecraftSessionService p_i232601_9_, GameProfileRepository p_i232601_10_, GameProfileCache p_i232601_11_,
-            ChunkProgressListenerFactory p_i232601_12_, CallbackInfo ci) {
+    private void impl$setServerOnGame(final Thread $$0, final LevelStorageSource.LevelStorageAccess $$1, final PackRepository $$2,
+        final WorldStem $$3, final DedicatedServerSettings $$4, final DataFixer $$5, final MinecraftSessionService $$6,
+        final GameProfileRepository $$7, final GameProfileCache $$8, final ChunkProgressListenerFactory $$9, final CallbackInfo ci) {
 
         SpongeCommon.game().setServer(this);
-        p_i232601_11_.load();
+        $$8.load();
     }
 
     @Override

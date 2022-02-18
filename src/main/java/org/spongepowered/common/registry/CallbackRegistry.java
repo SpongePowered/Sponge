@@ -25,10 +25,12 @@
 package org.spongepowered.common.registry;
 
 import com.mojang.serialization.Lifecycle;
-import java.util.function.BiConsumer;
+import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
+
+import java.util.function.BiConsumer;
 
 public final class CallbackRegistry<T> extends MappedRegistry<T> {
 
@@ -41,15 +43,15 @@ public final class CallbackRegistry<T> extends MappedRegistry<T> {
     }
 
     @Override
-    public <V extends T> V register(final ResourceKey<T> key, final V instance, final Lifecycle lifecycle) {
-        V value = super.register(key, instance, lifecycle);
+    public Holder<T> register(final ResourceKey<T> key, final T instance, final Lifecycle lifecycle) {
+        final Holder<T> value = super.register(key, instance, lifecycle);
         if (this.callbackEnabled) {
             this.callback.accept(key, instance);
         }
         return value;
     }
 
-    public void setCallbackEnabled(boolean callbackEnabled) {
+    public void setCallbackEnabled(final boolean callbackEnabled) {
         this.callbackEnabled = callbackEnabled;
     }
 }

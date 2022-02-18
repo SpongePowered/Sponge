@@ -25,6 +25,8 @@
 package org.spongepowered.common.world.biome;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
@@ -64,7 +66,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     public <T extends MultiNoiseBiomeConfig> ConfigurableBiomeProvider<T> multiNoise(final T config) {
         final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
         final List<Pair<net.minecraft.world.level.biome.Climate.ParameterPoint, Supplier<Biome>>> climateParams = new ArrayList<>();
-        for (AttributedBiome attributedBiome : config.attributedBiomes()) {
+        for (final AttributedBiome attributedBiome : config.attributedBiomes()) {
             final BiomeAttributes attr = attributedBiome.attributes();
             final net.minecraft.world.level.biome.Climate.ParameterPoint point = net.minecraft.world.level.biome.Climate.parameters(
                     net.minecraft.world.level.biome.Climate.Parameter.span(attr.temperature().min(), attr.temperature().max()),
@@ -108,18 +110,18 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     @Override
     public <T extends CheckerboardBiomeConfig> ConfigurableBiomeProvider<T> checkerboard(final T config) {
         final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-        final List<Supplier<Biome>> biomes = new ArrayList<>();
+        final List<Holder<Biome>> biomes = new ArrayList<>();
         for (final RegistryReference<org.spongepowered.api.world.biome.Biome> biome : config.biomes()) {
-            biomes.add(() -> biomeRegistry.get((ResourceLocation) (Object) biome.location()));
+            biomes.add(biomeRegistry.getHolderOrThrow((ResourceLocation) (Object) biome.location()));
         }
 
-        return (ConfigurableBiomeProvider<T>) new CheckerboardColumnBiomeSource(biomes, config.scale());
+        return (ConfigurableBiomeProvider<T>) new CheckerboardColumnBiomeSource(HolderSet.direct(biomes), config.scale());
     }
 
     @Override
     public BiomeProvider fixed(final RegistryReference<org.spongepowered.api.world.biome.Biome> biome) {
         Objects.requireNonNull(biome, "biome");
 
-        return (BiomeProvider) new FixedBiomeSource(() -> (Biome) (Object) biome.get(Sponge.server()));
+        return (BiomeProvider) new FixedBiomeSource((Holder<Biome>) (Object) biome);
     }
 }

@@ -27,7 +27,6 @@ package org.spongepowered.common.registry;
 import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.StaticTagHelper;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -35,7 +34,6 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.tag.Tag;
-import org.spongepowered.common.accessor.tags.StaticTagHelperAccessor;
 import org.spongepowered.common.bridge.core.RegistryBridge;
 import org.spongepowered.common.bridge.tags.TagWrapperBridge;
 
@@ -52,7 +50,7 @@ import java.util.stream.Stream;
 @DefaultQualifier(NonNull.class)
 public final class TagRegistry<T> extends net.minecraft.core.Registry<Tag<T>> {
 
-    private final StaticTagHelper<T> staticTagHelper;
+    private final net.minecraft.core.Registry<T> registry;
     // A cache of wrappers, because they aren't mapped. (SetTags are).
     // Doesn't need clearing at any point because the tags themselves are wrapped.
     private final Map<ResourceKey, Tag<T>> wrapperCache = HashBiMap.create();
@@ -61,10 +59,10 @@ public final class TagRegistry<T> extends net.minecraft.core.Registry<Tag<T>> {
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     public TagRegistry(final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<Tag<T>>> registryKey,
-                       final StaticTagHelper<T> staticTagHelper,
+                       final net.minecraft.core.Registry<T> backingRegistry,
                        final Lifecycle lifecycle) {
         super(registryKey, lifecycle);
-        this.staticTagHelper = staticTagHelper;
+        this.registry = backingRegistry;
         this.lifecycle = lifecycle;
         final RegistryBridge<Tag<T>> bridge = ((RegistryBridge<Tag<T>>) (Object) this);
         this.type = bridge.bridge$type();

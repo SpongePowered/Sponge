@@ -62,17 +62,17 @@ public abstract class NoiseSettingsMixin_API implements NoiseConfig {
 
     @Override
     public SamplingConfig samplingConfig() {
-        return (SamplingConfig) this.shadow$noiseSamplingSettings();
+        return (SamplingConfig) (Object) this.shadow$noiseSamplingSettings();
     }
 
     @Override
     public SlideConfig topConfig() {
-        return (SlideConfig) this.shadow$topSlideSettings();
+        return (SlideConfig) (Object) this.shadow$topSlideSettings();
     }
 
     @Override
     public SlideConfig bottomConfig() {
-        return (SlideConfig) this.shadow$bottomSlideSettings();
+        return (SlideConfig) (Object) this.shadow$bottomSlideSettings();
     }
 
     @Override

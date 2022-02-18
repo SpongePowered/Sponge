@@ -277,10 +277,10 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     }
 
     @Override
-    public void bridge$populateFromDimension(final LevelStem stem) {
-        final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) stem;
-        this.impl$key = ((ResourceKeyBridge) (Object) stem).bridge$getKey();
-        this.impl$dimensionType = stem.type();
+    public void bridge$populateFromDimension(final LevelStem dimension) {
+        final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) dimension;
+        this.impl$key = ((ResourceKeyBridge) (Object) dimension).bridge$getKey();
+        this.impl$dimensionType = dimension.typeHolder();
         this.impl$displayName = levelStemBridge.bridge$displayName().orElse(null);
         levelStemBridge.bridge$difficulty().ifPresent(v -> {
             ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(RegistryTypes.DIFFICULTY.get().value((ResourceKey) (Object) v));
