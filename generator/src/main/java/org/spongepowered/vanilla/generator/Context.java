@@ -36,6 +36,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.server.ReloadableServerResources;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -48,12 +49,14 @@ final class Context {
     static final String BASE_PACKAGE = "org.spongepowered.api";
     private final Path outputDirectory;
     private final RegistryAccess registries;
+    private final ReloadableServerResources resources;
     private final String licenseHeader;
     private final SourceRoot sourceRoot;
 
-    Context(final Path outputDirectory, final RegistryAccess registries, final String licenseHeader) {
+    Context(final Path outputDirectory, final RegistryAccess registries, final ReloadableServerResources resources, final String licenseHeader) {
         this.outputDirectory = outputDirectory;
         this.registries = registries;
+        this.resources = resources;
         this.licenseHeader = licenseHeader;
         this.sourceRoot = new SourceRoot(outputDirectory);
         this.sourceRoot.getParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_16);
@@ -69,6 +72,10 @@ final class Context {
 
     public RegistryAccess registries() {
         return this.registries;
+    }
+
+    public ReloadableServerResources resources() {
+        return this.resources;
     }
 
     public ClassName relativeClass(final String relativePackage, final String simpleName, final String... simpleNames) {
@@ -96,6 +103,7 @@ final class Context {
     /**
      * Write the provided type to a file in the defined base package.
      *
+     * @param relativePackage package relative to the declared base output package
      * @param spec type to write out to file
      * @throws IOException if thrown by javapoet
      */

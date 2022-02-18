@@ -53,6 +53,8 @@ final class Types {
 
     public static final ClassName DEFAULTED_REGISTRY_REFERENCE = ClassName.get(Context.BASE_PACKAGE + ".registry", "DefaultedRegistryReference");
 
+    public static final ClassName REGISTRY = ClassName.get(Context.BASE_PACKAGE + ".registry", "Registry");
+
     public static final ClassName REGISTRY_KEY = ClassName.get(Context.BASE_PACKAGE + ".registry", "RegistryKey");
 
     public static final ClassName REGISTRY_REFERENCE = ClassName.get(Context.BASE_PACKAGE + ".registry", "RegistryReference");
@@ -63,7 +65,11 @@ final class Types {
 
     public static final ClassName REGISTRY_TYPES = ClassName.get(Context.BASE_PACKAGE + ".registry", "RegistryTypes");
 
+    public static final ClassName SERVER_WORLD = ClassName.get(Context.BASE_PACKAGE + ".world.server", "ServerWorld");
+
     public static final ClassName TAG = ClassName.get(Context.BASE_PACKAGE + ".tag", "Tag");
+
+    public static final ClassName WORLD = ClassName.get(Context.BASE_PACKAGE + ".world", "World");
 
 
     private Types() {

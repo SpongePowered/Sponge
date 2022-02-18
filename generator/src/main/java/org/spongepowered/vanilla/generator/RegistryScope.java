@@ -28,6 +28,7 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.MethodSpec.Builder;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -53,6 +54,11 @@ enum RegistryScope {
         AnnotationSpec registryScopeAnnotation() {
             return RegistryScope.registryScopeAnnotation("GAME");
         }
+
+        @Override
+        void populateRegistryGetter(final Builder builder, final CodeBlock registryType) {
+            builder.addCode("return $T.game().registry($L);", Types.SPONGE, registryType);
+        }
     },
     SERVER {
         @Override
@@ -68,6 +74,11 @@ enum RegistryScope {
         @Override
         AnnotationSpec registryScopeAnnotation() {
             return RegistryScope.registryScopeAnnotation("ENGINE");
+        }
+
+        @Override
+        void populateRegistryGetter(final Builder builder, final CodeBlock registryType) {
+            builder.addCode("return $T.server().registry($L);", Types.SPONGE, registryType);
         }
     },
     WORLD {
@@ -85,6 +96,16 @@ enum RegistryScope {
         AnnotationSpec registryScopeAnnotation() {
             return RegistryScope.registryScopeAnnotation("WORLD");
         }
+
+        @Override
+        void populateRegistryGetter(
+            final Builder builder,
+            final CodeBlock registryType
+        ) {
+            final var holderParam = ParameterSpec.builder(Types.SERVER_WORLD, "world", Modifier.FINAL).build();
+            builder.addParameter(holderParam);
+            builder.addCode("return $N.registry($L);", holderParam, registryType);
+        }
     };
 
     protected static AnnotationSpec registryScopeAnnotation(final String registryScope) {
@@ -100,6 +121,8 @@ enum RegistryScope {
 
     abstract AnnotationSpec registryScopeAnnotation();
 
+    abstract void populateRegistryGetter(final MethodSpec.Builder builder, final CodeBlock registryType);
+
     final MethodSpec registryReferenceFactory(final String registryTypeName, final TypeName valueType) {
         final var locationParam = ParameterSpec.builder(Types.RESOURCE_KEY, "location", Modifier.FINAL).build();
         return MethodSpec.methodBuilder("key")
@@ -114,5 +137,15 @@ enum RegistryScope {
                 locationParam,
                 this.registryKeyToReference()
             ).build();
+    }
+
+    final MethodSpec registryGetter(final String registryTypeName, final TypeName valueType) {
+        final var methodBuilder = MethodSpec.methodBuilder("registry")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .returns(ParameterizedTypeName.get(Types.REGISTRY, valueType));
+
+        final CodeBlock registryType = CodeBlock.of("$T.$L", Types.REGISTRY_TYPES, registryTypeName.toUpperCase(Locale.ROOT));
+        this.populateRegistryGetter(methodBuilder, registryType);
+        return methodBuilder.build();
     }
 }

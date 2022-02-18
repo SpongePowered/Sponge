@@ -39,6 +39,7 @@ interface Generator {
      * Generate data given the provided context.
      *
      * @param ctx context
+     * @throws IOException when failing to write files
      */
     void generate(final Context ctx) throws IOException;
 

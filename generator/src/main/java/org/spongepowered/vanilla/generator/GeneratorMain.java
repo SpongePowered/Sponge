@@ -25,17 +25,26 @@
 package org.spongepowered.vanilla.generator;
 
 import com.github.javaparser.utils.Log;
+import com.mojang.datafixers.util.Pair;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.WildcardTypeName;
 import net.minecraft.SharedConstants;
+import net.minecraft.Util;
+import net.minecraft.commands.Commands.CommandSelection;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.EntityTypeTags;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ReloadableServerResources;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.repository.ServerPacksSource;
+import net.minecraft.server.packs.resources.CloseableResourceManager;
+import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.world.level.DataPackConfig;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -44,6 +53,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
@@ -62,18 +72,20 @@ public final class GeneratorMain {
     public static void main(final String[] args) {
         Logger.info("Begining bootstrap");
         Log.setAdapter(new JavaparserLog());
+        if (args.length != 2) {
+            Logger.error("Invalid arguments. Usage: generator <outputDir> <licenseHeader>");
+            System.exit(1);
+            return;
+        }
+
         SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
         Bootstrap.validate();
 
         // Create a generator context based on arguments
-        if(args.length != 2) {
-            Logger.error("Invalid arguments. Usage: generator <outputDir> <licenseHeader>");
-            System.exit(1);
-        }
         final var outputDir = Path.of(args[0]);
         final String licenseHeader;
-        try(var reader = Files.newBufferedReader(Path.of(args[1]), StandardCharsets.UTF_8)) {
+        try(final var reader = Files.newBufferedReader(Path.of(args[1]), StandardCharsets.UTF_8)) {
             licenseHeader = reader.lines().map(line -> (" * " + line).stripTrailing()).collect(Collectors.joining("\n", "\n", "\n "));
         } catch (final IOException ex) {
             Logger.error("Failed to read license header file!", ex);
@@ -81,7 +93,8 @@ public final class GeneratorMain {
             return;
         }
 
-        final var context = new Context(outputDir, RegistryAccess.builtin(), licenseHeader);
+        final var dataPacks = GeneratorMain.loadVanillaDatapack();
+        final var context = new Context(outputDir, dataPacks.getFirst(), dataPacks.getSecond(), licenseHeader);
         Logger.info("Generating data for Minecraft version {}", context.gameVersion());
 
         // Execute every generator
@@ -103,6 +116,48 @@ public final class GeneratorMain {
         context.complete();
         // Success!
         Logger.info("Successfully generated data!");
+    }
+
+    private static Pair<RegistryAccess.Frozen, ReloadableServerResources> loadVanillaDatapack() {
+        // Load resource packs, see WorldStem.load
+        // and call to WorldStem.load in net.minecraft.server.Main
+        // We don't currently try to load any datapacks here
+        final var packRepository = new PackRepository(PackType.SERVER_DATA, new ServerPacksSource());
+        MinecraftServer.configurePackRepository(packRepository, DataPackConfig.DEFAULT, /* safeMode = */ false);
+        final CloseableResourceManager resourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, packRepository.openAllSelected());
+
+        final RegistryAccess.Writable registriesBuilder = RegistryAccess.builtinCopy();
+        // Load the registry contents -- we don't need the result here, since we don't have any level data to read
+        RegistryOps.createAndLoad(NbtOps.INSTANCE, registriesBuilder, resourceManager);
+        final RegistryAccess.Frozen registries = registriesBuilder.freeze();
+
+        final var resourcesFuture = ReloadableServerResources.loadResources(
+            resourceManager,
+            registries,
+            CommandSelection.ALL,
+            2, // functionPermissionLevel
+            Util.backgroundExecutor(), // prepareExecutor
+            Runnable::run // applyExecutor
+        );
+
+        Logger.info("Datapack load initiated");
+
+        final ReloadableServerResources resources;
+        try {
+            resources = resourcesFuture.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            Logger.error(ex, "Failed to load registries/datapacks");
+            System.exit(1);
+            throw new RuntimeException();
+        }
+
+        Logger.info("Datapack load complete");
+        resources.updateRegistryTags(registries);
+
+        return Pair.of(
+            registries,
+            resources
+        );
     }
 
     private static List<Generator> generators(final Context context) {
@@ -258,33 +313,29 @@ public final class GeneratorMain {
             ),
             new BlockStatePropertiesGenerator(),
             new TagGenerator(
-                    "BlockType Tags",
                     "BLOCK_TYPE_TAGS",
-                    BlockTags.class,
+                    Registry.BLOCK_REGISTRY,
                     context.relativeClass("block", "BlockType"),
                     "tag",
                     "BlockTypeTags"
             ),
             new TagGenerator(
-                    "ItemType Tags",
                     "ITEM_TYPE_TAGS",
-                    ItemTags.class,
+                    Registry.ITEM_REGISTRY,
                     context.relativeClass("item", "ItemType"),
                     "tag",
                     "ItemTypeTags"
             ),
             new TagGenerator(
-                    "EntityType Tags",
                     "ENTITY_TYPE_TAGS",
-                    EntityTypeTags.class,
+                    Registry.ENTITY_TYPE_REGISTRY,
                     ParameterizedTypeName.get(context.relativeClass("entity", "EntityType"), WildcardTypeName.subtypeOf(Object.class)),
                     "tag",
                     "EntityTypeTags"
             ),
             new TagGenerator(
-                    "FluidType Tags",
                     "FLUID_TYPE_TAGS",
-                    FluidTags.class,
+                    Registry.FLUID_REGISTRY,
                     context.relativeClass("fluid", "FluidType"),
                     "tag",
                     "FluidTypeTags"

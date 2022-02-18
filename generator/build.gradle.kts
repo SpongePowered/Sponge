@@ -24,6 +24,7 @@ dependencies {
     implementation("com.github.javaparser:javaparser-core:3.22.1")
     implementation("org.tinylog:tinylog-api:$tinyLogVersion")
     runtimeOnly("org.tinylog:tinylog-impl:$tinyLogVersion")
+    // runtimeOnly("org.tinylog:slf4j-tinylog:$tinyLogVersion") // todo: doesn't work for some reason?
 
     // Decompiler
     forgeFlower("net.minecraftforge:forgeflower:$forgeFlowerVersion")

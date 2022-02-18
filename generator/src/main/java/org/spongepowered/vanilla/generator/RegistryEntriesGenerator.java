@@ -117,6 +117,7 @@ class RegistryEntriesGenerator<V> implements Generator {
 
         clazz.addAnnotation(scopeType.registryScopeAnnotation());
         final var fieldType = ParameterizedTypeName.get(scopeType.registryReferenceType(), this.valueType);
+        final var registryMethod = scopeType.registryGetter(this.registryTypeName, this.valueType);
         final var factoryMethod = scopeType.registryReferenceFactory(this.registryTypeName, this.valueType);
 
         final Registry<V> finalRegistry = registry;
@@ -126,6 +127,7 @@ class RegistryEntriesGenerator<V> implements Generator {
             .map(v -> this.makeField(this.targetClassSimpleName, fieldType, factoryMethod, finalRegistry.getKey(v)))
             .forEachOrdered(clazz::addField);
 
+        clazz.addMethod(registryMethod);
         clazz.addMethod(factoryMethod);
 
         ctx.write(this.relativePackageName, clazz.build());
