@@ -236,11 +236,12 @@ minecraft {
 dependencies {
     val apiAdventureVersion: String by project
     val apiConfigurateVersion: String by project
+    val apiGsonVersion: String by project
+    val apiGuavaVersion: String by project
     val apiPluginSpiVersion: String by project
     val asmVersion: String by project
     val forgeFlowerVersion: String by project
     val forgeAutoRenamingToolVersion: String by project
-    val guavaVersion: String by project
     val jlineVersion: String by project
     val jansiVersion: String by project
     val log4jVersion: String by project
@@ -256,7 +257,7 @@ dependencies {
     vanillaMixinsImplementation(project(commonProject.path))
 
     val installer = vanillaInstallerConfig.name
-    installer("com.google.code.gson:gson:2.8.0")
+    installer("com.google.code.gson:gson:$apiGsonVersion")
     installer("org.spongepowered:configurate-hocon:$apiConfigurateVersion")
     installer("org.spongepowered:configurate-core:$apiConfigurateVersion")
     installer("org.spongepowered:configurate-jackson:$apiConfigurateVersion")
@@ -329,7 +330,7 @@ dependencies {
     bootstrapLibraries("org.spongepowered:mixin:$mixinVersion")
     bootstrapLibraries("org.ow2.asm:asm-util:$asmVersion")
     bootstrapLibraries("org.ow2.asm:asm-tree:$asmVersion")
-    bootstrapLibraries("com.google.guava:guava:$guavaVersion")
+    bootstrapLibraries("com.google.guava:guava:$apiGuavaVersion")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     // Not needing to be source-visible past the init phase

@@ -20,12 +20,13 @@ val recommendedVersion: String by project
 
 val apiAdventureVersion: String by project
 val apiConfigurateVersion: String by project
+val apiGsonVersion: String by project
+val apiGuavaVersion: String by project
 val apiPluginSpiVersion: String by project
 val asmVersion: String by project
 val log4jVersion: String by project
 val modlauncherVersion: String by project
 val mixinVersion: String by project
-val guavaVersion: String by project
 val junitVersion: String by project
 val mockitoVersion: String by project
 val checkerVersion: String by project
@@ -168,22 +169,22 @@ dependencies {
     launchConfig("org.spongepowered:spongeapi:$apiVersion")
     launchConfig("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
     launchConfig("org.spongepowered:mixin:$mixinVersion")
-    launchConfig("org.checkerframework:checker-qual:3.13.0")
-    launchConfig("com.google.guava:guava:$guavaVersion") {
+    launchConfig("org.checkerframework:checker-qual:$checkerVersion")
+    launchConfig("com.google.guava:guava:$apiGuavaVersion") {
         exclude(group = "com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
         exclude(group = "com.google.j2objc", module = "j2objc-annotations")
         exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
-    launchConfig("com.google.code.gson:gson:2.8.0")
+    launchConfig("com.google.code.gson:gson:$apiGsonVersion")
     launchConfig("org.ow2.asm:asm-tree:$asmVersion")
     launchConfig("org.ow2.asm:asm-util:$asmVersion")
 
     // Applaunch -- initialization that needs to occur without game access
     applaunchConfig("org.checkerframework:checker-qual:$checkerVersion")
     applaunchConfig("org.apache.logging.log4j:log4j-api:$log4jVersion")
-    applaunchConfig("com.google.guava:guava:$guavaVersion")
+    applaunchConfig("com.google.guava:guava:$apiGuavaVersion")
     applaunchConfig(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
     applaunchConfig("org.spongepowered:configurate-core") {
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
