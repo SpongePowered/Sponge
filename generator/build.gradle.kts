@@ -17,6 +17,10 @@ minecraft {
             }
 }
 
+configurations.configureEach {
+    exclude(group = "org.apache.logging.log4j", module = "log4j-slf4j18-impl")
+}
+
 dependencies {
     val forgeFlowerVersion: String by project
     val tinyLogVersion: String by project
@@ -24,7 +28,7 @@ dependencies {
     implementation("com.github.javaparser:javaparser-core:3.22.1")
     implementation("org.tinylog:tinylog-api:$tinyLogVersion")
     runtimeOnly("org.tinylog:tinylog-impl:$tinyLogVersion")
-    // runtimeOnly("org.tinylog:slf4j-tinylog:$tinyLogVersion") // todo: doesn't work for some reason?
+    runtimeOnly("org.tinylog:slf4j-tinylog:$tinyLogVersion") // todo: doesn't work for some reason?
 
     // Decompiler
     forgeFlower("net.minecraftforge:forgeflower:$forgeFlowerVersion")
