@@ -26,6 +26,7 @@ package org.spongepowered.common.bridge.server.level;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.resources.ResourceKey;
@@ -90,7 +91,7 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
     default void bridge$sendDimensionData(final Connection manager, final DimensionType dimensionType, final ResourceKey<Level> key) {
     }
 
-    default void bridge$sendChangeDimension(final DimensionType dimensionType, final ResourceKey<Level> key, final long hashedSeed,
+    default void bridge$sendChangeDimension(final Holder<DimensionType> dimensionType, final ResourceKey<Level> key, final long hashedSeed,
             final GameType gameType, final GameType previousGameType, final boolean isDebug, final boolean isFlat, final boolean keepPlayerData) {
         ((ServerPlayer) this).connection.send(new ClientboundRespawnPacket(dimensionType, key, hashedSeed, gameType, previousGameType, isDebug,
                 isFlat, keepPlayerData));
