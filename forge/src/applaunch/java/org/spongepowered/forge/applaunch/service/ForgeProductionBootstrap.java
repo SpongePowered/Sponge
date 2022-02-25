@@ -34,13 +34,14 @@ import joptsimple.OptionSpecBuilder;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.ModDirTransformerDiscoverer;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.transformers.modlauncher.AccessWidenerTransformationService;
+import org.spongepowered.transformers.modlauncher.SuperclassChanger;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -90,11 +91,13 @@ public class ForgeProductionBootstrap implements ITransformationService {
                 throw new RuntimeException("Failed to register SpongeForge", ex);
             }
             // Register SF as an AW
-            final Optional<AccessWidenerTransformationService> aw = environment.getProperty(AccessWidenerTransformationService.INSTANCE.get());
-            if (aw.isPresent()) {
-                // todo: actually read this from the jar manifest
-                aw.get().offerResource(ForgeProductionBootstrap.class.getResource("/common.accesswidener"), "SpongeForge injected");
-            }
+            // todo: actually read this from the jar manifest
+            environment.getProperty(AccessWidenerTransformationService.INSTANCE.get()).ifPresent(aWTS ->
+                aWTS.offerResource(ForgeProductionBootstrap.class.getResource("/common.accesswidener"), "SpongeForge injected"));
+            environment.getProperty(SuperclassChanger.INSTANCE.get()).ifPresent(scc -> {
+                scc.offerResource(ForgeProductionBootstrap.class.getResource("/common.superclasschange"), "SpongeForge injected");
+                scc.offerResource(ForgeProductionBootstrap.class.getResource("/forge.superclasschange"), "SpongeForge injected");
+            });
         }
     }
 

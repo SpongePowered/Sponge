@@ -39,6 +39,9 @@ public abstract class MainMixin_Forge {
 
     @Inject(method = "<clinit>", at = @At("RETURN"))
     private static void forge$initLaunch(final CallbackInfo ci) {
+        if (Launch.instance() != null) {
+            return;
+        }
         final PluginPlatform pluginPlatform = AppLaunch.pluginPlatform();
         final ForgeLaunch launch = new ForgeLaunch(pluginPlatform);
         Launch.setInstance(launch);
