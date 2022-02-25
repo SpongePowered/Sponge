@@ -228,6 +228,17 @@ license {
     newLine(false)
 }
 
+idea {
+    if (project != null) {
+        (project as ExtensionAware).extensions["settings"].run {
+            (this as ExtensionAware).extensions.getByType(org.jetbrains.gradle.ext.TaskTriggersConfig::class).run {
+                afterSync(":modlauncher-transformers:build")
+            }
+        }
+    }
+}
+
+
 allprojects {
     configurations.configureEach {
         resolutionStrategy.dependencySubstitution {

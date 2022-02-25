@@ -36,6 +36,7 @@ plugins {
 apply(plugin = "dev.architectury.loom") // we can't use the plugins block because we have to declare the dep in buildscript
 
 val commonProject = parent!!
+val transformersProject = parent!!.project(":modlauncher-transformers")
 val apiVersion: String by project
 val minecraftVersion: String by project
 val forgeVersion: String by project
@@ -79,9 +80,13 @@ extensions.configure(LoomGradleExtension::class) {
 
 // Forge extra configurations
 val forgeBootstrapLibrariesConfig = configurations.register("bootstrapLibraries")
-val forgeLibrariesConfig = configurations.register("spongeLibraries")
+val mlTransformersConfig = configurations.register("mltransformers")
+val forgeLibrariesConfig = configurations.register("spongeLibraries") {
+    extendsFrom(mlTransformersConfig.get())
+}
 val forgeAppLaunchConfig = configurations.register("applaunch") {
     extendsFrom(forgeBootstrapLibrariesConfig.get())
+    extendsFrom(mlTransformersConfig.get())
     extendsFrom(configurations.getByName("minecraftNamed"))
     extendsFrom(configurations.getByName("loaderLibraries"))
 }
@@ -93,6 +98,7 @@ val launch = commonProject.sourceSets.named("launch")
 val applaunch = commonProject.sourceSets.named("applaunch")
 val mixins = commonProject.sourceSets.named("mixins")
 val main = commonProject.sourceSets.named("main")
+val mlTransformers = transformersProject.sourceSets.named("main")
 
 // Forge source sets
 val forgeMain by sourceSets.named("main") {
@@ -114,6 +120,9 @@ val forgeLaunch by sourceSets.register("launch") {
     configurations.named(implementationConfigurationName) {
         extendsFrom(forgeAppLaunchConfig.get())
         extendsFrom(forgeLibrariesConfig.get())
+    }
+    configurations.named(runtimeClasspathConfigurationName) {
+        extendsFrom(mlTransformersConfig.get())
     }
 }
 val forgeAccessors by sourceSets.register("accessors") {
@@ -149,6 +158,7 @@ val forgeAppLaunch by sourceSets.register("applaunch") {
     spongeImpl.applyNamedDependencyOnOutput(commonProject, main.get(), this, project, this.runtimeOnlyConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.runtimeOnlyConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, forgeMain, this, project, this.runtimeOnlyConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(transformersProject, mlTransformers.get(), this, project, this.runtimeOnlyConfigurationName)
 }
 val forgeMixinsImplementation by configurations.named(forgeMixins.implementationConfigurationName) {
     extendsFrom(forgeLibrariesConfig.get())
@@ -157,6 +167,7 @@ val forgeMixinsImplementation by configurations.named(forgeMixins.implementation
 configurations.named(forgeAppLaunch.implementationConfigurationName) {
     extendsFrom(forgeAppLaunchConfig.get())
     extendsFrom(launchConfig.get())
+    extendsFrom(mlTransformersConfig.get())
 }
 val forgeAppLaunchRuntime by configurations.named(forgeAppLaunch.runtimeOnlyConfigurationName)
 
@@ -201,9 +212,11 @@ dependencies {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    appLaunch("net.fabricmc:access-widener:1.0.2") {
-        exclude(group = "org.apache.logging.log4j")
+    appLaunch("org.spongepowered:configurate-jackson") {
+        exclude(group = "org.spongepowered", module = "configurate-core")
+        exclude(group = "org.checkerframework", module = "checker-qual")
     }
+    mlTransformersConfig.name(project(transformersProject.path))
 
     val libraries = forgeLibrariesConfig.name
     libraries("org.spongepowered:timings:$timingsVersion")
@@ -389,6 +402,7 @@ tasks {
         from(commonProject.sourceSets.named("accessors").map {it.output })
         from(commonProject.sourceSets.named("launch").map {it.output })
         from(commonProject.sourceSets.named("applaunch").map {it.output })
+        from(transformersProject.sourceSets.named("main").map { it.output })
         from(forgeAppLaunch.output)
         from(forgeLaunch.output)
         from(forgeAccessors.output)
