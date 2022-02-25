@@ -117,7 +117,6 @@ public final class DataProviderRegistry {
      * @param <E> The element type
      * @return The delegate data provider
      */
-    @SuppressWarnings("unchecked")
     private static <V extends Value<E>, E> DataProvider<V, E> buildDelegateProvider(final Key<V> key, final List<DataProvider<V, E>> providers) {
         if (providers.isEmpty()) {
             return ((SpongeKey<V, E>) key).getEmptyDataProvider();

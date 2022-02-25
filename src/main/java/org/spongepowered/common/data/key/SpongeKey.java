@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.key;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -40,6 +41,7 @@ import org.spongepowered.plugin.PluginContainer;
 
 import java.lang.reflect.Type;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
@@ -111,5 +113,22 @@ public final class SpongeKey<V extends Value<E>, E> extends AbstractResourceKeye
             "key=" + this.key() +
             ", elementType=" + elementType +
             '}';
+    }
+
+    @Override
+    public boolean equals(final @Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final SpongeKey<?, ?> spongeKey = (SpongeKey<?, ?>) o;
+        return this.valueType.equals(spongeKey.valueType) && this.elementType.equals(spongeKey.elementType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.valueType, this.elementType);
     }
 }

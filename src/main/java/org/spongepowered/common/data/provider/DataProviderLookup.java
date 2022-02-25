@@ -37,7 +37,7 @@ public final class DataProviderLookup {
 
     private final Map<Key<?>, DataProvider<?, ?>> providerMap;
 
-    DataProviderLookup(Map<Key<?>, DataProvider<?, ?>> providerMap) {
+    DataProviderLookup(final Map<Key<?>, DataProvider<?, ?>> providerMap) {
         this.providerMap = ImmutableMap.copyOf(providerMap);
     }
 
@@ -59,7 +59,7 @@ public final class DataProviderLookup {
      * @return The delegate provider
      */
     @SuppressWarnings("unchecked")
-    public <V extends Value<E>, E> DataProvider<V, E> getProvider(Key<V> key) {
+    public <V extends Value<E>, E> DataProvider<V, E> getProvider(final Key<V> key) {
         return (DataProvider<V, E>) this.providerMap.getOrDefault(key, ((SpongeKey<V, E>) key).getEmptyDataProvider());
     }
 }

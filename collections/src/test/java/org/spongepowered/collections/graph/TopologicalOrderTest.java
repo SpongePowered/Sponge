@@ -22,15 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util.graph;
+package org.spongepowered.collections.graph;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.spongepowered.common.util.graph.DirectedGraph.DataNode;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -38,8 +37,8 @@ public class TopologicalOrderTest {
 
     @Test
     public void testEmptyGraph() {
-        DirectedGraph<Integer> graph = new DirectedGraph<>();
-        List<Integer> order = TopologicalOrder.createOrderedLoad(graph);
+        final DirectedGraph<Integer> graph = new DirectedGraph<>();
+        final List<Integer> order = TopologicalOrder.createOrderedLoad(graph);
         assertNotNull(order);
         assertTrue(order.isEmpty());
     }
@@ -49,10 +48,10 @@ public class TopologicalOrderTest {
 //        
 //          1
 //        
-        DirectedGraph<Integer> graph = new DirectedGraph<>();
+        final DirectedGraph<Integer> graph = new DirectedGraph<>();
         graph.add(1);
 
-        List<Integer> order = TopologicalOrder.createOrderedLoad(graph);
+        final List<Integer> order = TopologicalOrder.createOrderedLoad(graph);
         assertNotNull(order);
         assertEquals(1, order.size());
         assertEquals(Integer.valueOf(1), order.get(0));
@@ -63,12 +62,12 @@ public class TopologicalOrderTest {
 //        
 //          1 - 2 - 3 - 4
 //        
-        DirectedGraph<Integer> graph = new DirectedGraph<>();
+        final DirectedGraph<Integer> graph = new DirectedGraph<>();
         graph.addEdge(1, 2);
         graph.addEdge(2, 3);
         graph.addEdge(3, 4);
 
-        List<Integer> order = TopologicalOrder.createOrderedLoad(graph);
+        final List<Integer> order = TopologicalOrder.createOrderedLoad(graph);
         assertNotNull(order);
         assertEquals(4, order.size());
         assertEquals(Integer.valueOf(4), order.get(0));
@@ -84,15 +83,15 @@ public class TopologicalOrderTest {
 //           \ /
 //            .
 //        
-        DirectedGraph<Integer> graph = new DirectedGraph<>();
+        final DirectedGraph<Integer> graph = new DirectedGraph<>();
         graph.addEdge(1, 1);
         try {
             TopologicalOrder.createOrderedLoad(graph);
-            Assert.fail();
-        } catch (CyclicGraphException e) {
-            List<DataNode<?>[]> cycles = e.getCycles();
+            fail();
+        } catch (final CyclicGraphException e) {
+            final List<DirectedGraph.DataNode<?>[]> cycles = e.getCycles();
             assertEquals(1, cycles.size());
-            DataNode<?>[] cycle1 = cycles.get(0);
+            final DirectedGraph.DataNode<?>[] cycle1 = cycles.get(0);
             assertEquals(1, cycle1.length);
             assertEquals(1, cycle1[0].getData());
         }
@@ -100,22 +99,22 @@ public class TopologicalOrderTest {
 
     @Test
     public void testSimpleCycle() {
-//        
+//
 //          1 - 2
 //           \ /
 //            3
-//        
-        DirectedGraph<Integer> graph = new DirectedGraph<>();
+//
+        final DirectedGraph<Integer> graph = new DirectedGraph<>();
         graph.addEdge(1, 2);
         graph.addEdge(2, 3);
         graph.addEdge(3, 1);
         try {
             TopologicalOrder.createOrderedLoad(graph);
-            Assert.fail();
-        } catch (CyclicGraphException e) {
-            List<DataNode<?>[]> cycles = e.getCycles();
+            fail();
+        } catch (final CyclicGraphException e) {
+            final List<DirectedGraph.DataNode<?>[]> cycles = e.getCycles();
             assertEquals(1, cycles.size());
-            DataNode<?>[] cycle1 = cycles.get(0);
+            final DirectedGraph.DataNode<?>[] cycle1 = cycles.get(0);
             assertEquals(3, cycle1.length);
             assertEquals(3, cycle1[0].getData());
             assertEquals(2, cycle1[1].getData());
@@ -125,13 +124,13 @@ public class TopologicalOrderTest {
 
     @Test
     public void testSimpleCycle2() {
-//        
+//
 //          1 - 2
 //          |\  |
 //          | \ |
 //          4 - 3
-//        
-        DirectedGraph<Integer> graph = new DirectedGraph<>();
+//
+        final DirectedGraph<Integer> graph = new DirectedGraph<>();
         graph.addEdge(1, 2);
         graph.addEdge(2, 3);
         graph.addEdge(3, 1);
@@ -139,13 +138,13 @@ public class TopologicalOrderTest {
         graph.addEdge(4, 1);
         try {
             TopologicalOrder.createOrderedLoad(graph);
-            Assert.fail();
-        } catch (CyclicGraphException e) {
+            fail();
+        } catch (final CyclicGraphException e) {
             // The cycle detected outputs the largest cycle for any strongly
             // connected group
-            List<DataNode<?>[]> cycles = e.getCycles();
+            final List<DirectedGraph.DataNode<?>[]> cycles = e.getCycles();
             assertEquals(1, cycles.size());
-            DataNode<?>[] cycle1 = cycles.get(0);
+            final DirectedGraph.DataNode<?>[] cycle1 = cycles.get(0);
             assertEquals(4, cycle1.length);
             assertEquals(4, cycle1[0].getData());
             assertEquals(3, cycle1[1].getData());
@@ -156,12 +155,12 @@ public class TopologicalOrderTest {
 
     @Test
     public void testMulti() {
-//        
+//
 //          1 - 2 - 4 - 5
 //           \ /     \ /
 //            3       6
-//        
-        DirectedGraph<Integer> graph = new DirectedGraph<>();
+//
+        final DirectedGraph<Integer> graph = new DirectedGraph<>();
         graph.addEdge(1, 2);
         graph.addEdge(2, 3);
         graph.addEdge(3, 1);
@@ -171,16 +170,16 @@ public class TopologicalOrderTest {
         graph.addEdge(6, 4);
         try {
             TopologicalOrder.createOrderedLoad(graph);
-            Assert.fail();
-        } catch (CyclicGraphException e) {
-            List<DataNode<?>[]> cycles = e.getCycles();
+            fail();
+        } catch (final CyclicGraphException e) {
+            final List<DirectedGraph.DataNode<?>[]> cycles = e.getCycles();
             assertEquals(2, cycles.size());
-            DataNode<?>[] cycle1 = cycles.get(0);
+            final DirectedGraph.DataNode<?>[] cycle1 = cycles.get(0);
             assertEquals(3, cycle1.length);
             assertEquals(6, cycle1[0].getData());
             assertEquals(5, cycle1[1].getData());
             assertEquals(4, cycle1[2].getData());
-            DataNode<?>[] cycle2 = cycles.get(1);
+            final DirectedGraph.DataNode<?>[] cycle2 = cycles.get(1);
             assertEquals(3, cycle2.length);
             assertEquals(3, cycle2[0].getData());
             assertEquals(2, cycle2[1].getData());

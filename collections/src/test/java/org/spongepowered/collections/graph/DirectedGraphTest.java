@@ -22,20 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util.graph;
+package org.spongepowered.collections.graph;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
-import org.spongepowered.common.util.graph.DirectedGraph.DataNode;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
 
 public class DirectedGraphTest {
 
     @Test
     public void testNodeCount() {
-        DirectedGraph<Integer> graph = new DirectedGraph<>();
+        final DirectedGraph<Integer> graph = new DirectedGraph<>();
         assertEquals(0, graph.getNodeCount());
         graph.add(1);
         graph.add(2);
@@ -52,7 +52,7 @@ public class DirectedGraphTest {
 
     @Test
     public void testEdgeCount() {
-        DirectedGraph<Integer> graph = new DirectedGraph<>();
+        final DirectedGraph<Integer> graph = new DirectedGraph<>();
         graph.addEdge(1, 3);
         graph.addEdge(2, 3);
         assertEquals(2, graph.getEdgeCount());
@@ -67,7 +67,7 @@ public class DirectedGraphTest {
 
     @Test
     public void testContains() {
-        DirectedGraph<Integer> graph = new DirectedGraph<>();
+        final DirectedGraph<Integer> graph = new DirectedGraph<>();
         graph.add(1);
         graph.add(2);
         assertTrue(graph.contains(1));
@@ -76,12 +76,12 @@ public class DirectedGraphTest {
 
     @Test
     public void testGet() {
-        DirectedGraph<Integer> graph = new DirectedGraph<>();
+        final DirectedGraph<Integer> graph = new DirectedGraph<>();
         // any sequence of add and get should return the same node instance
-        DataNode<Integer> a = graph.add(1);
-        DataNode<Integer> b = graph.get(1);
-        DataNode<Integer> c = graph.add(1);
-        DataNode<Integer> d = graph.get(1);
+        final DirectedGraph.DataNode<Integer> a = graph.add(1);
+        final DirectedGraph.DataNode<Integer> b = graph.get(1);
+        final DirectedGraph.DataNode<Integer> c = graph.add(1);
+        final DirectedGraph.DataNode<Integer> d = graph.get(1);
         assertEquals(a, b);
         assertEquals(b, c);
         assertEquals(c, d);
@@ -89,14 +89,14 @@ public class DirectedGraphTest {
 
     @Test
     public void testReverse() {
-        DirectedGraph<Integer> graph = new DirectedGraph<>();
+        final DirectedGraph<Integer> graph = new DirectedGraph<>();
         graph.addEdge(1, 2);
         graph.addEdge(2, 4);
         graph.addEdge(3, 1);
         graph.addEdge(3, 4);
         graph.addEdge(4, 5);
 
-        DirectedGraph<Integer> rev = graph.reverse();
+        final DirectedGraph<Integer> rev = graph.reverse();
         assertEquals(5, rev.getEdgeCount());
         assertTrue(rev.get(2).isAdjacent(rev.get(1)));
         assertTrue(rev.get(4).isAdjacent(rev.get(2)));

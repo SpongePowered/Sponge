@@ -166,6 +166,9 @@ dependencies {
     implementation(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
     implementation("net.kyori:adventure-serializer-configurate4")
 
+    // Collections
+    implementation(project(":collections"))
+
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig("org.spongepowered:spongeapi:$apiVersion")
     launchConfig("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
