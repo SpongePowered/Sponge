@@ -77,7 +77,7 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
                 .packetPlayer(player)
         ) {
             ctx.buildAndSwitch();
-            try (final EffectTransactor ignored = ctx.getTransactor().logCloseInventory(player, true)) {
+            try (final EffectTransactor ignored = ctx.getTransactor().logCloseInventory(player, false)) {
                 this.containerMenu.removed(player); // Drop & capture cursor item
                 this.containerMenu.broadcastChanges();
             }
