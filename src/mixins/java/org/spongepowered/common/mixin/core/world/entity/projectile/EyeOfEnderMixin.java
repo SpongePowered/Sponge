@@ -27,6 +27,9 @@ package org.spongepowered.common.mixin.core.world.entity.projectile;
 import net.minecraft.world.entity.projectile.EyeOfEnder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.LocationTargetingBridge;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.math.vector.Vector3d;
@@ -46,10 +49,18 @@ public abstract class EyeOfEnderMixin extends EntityMixin implements LocationTar
     }
 
     @Override
-    public void bridge$setTargetedPosition(Vector3d vec) {
+    public void bridge$setTargetedPosition(final Vector3d vec) {
         this.tx = vec.x();
         this.ty = vec.y();
         this.tz = vec.z();
+    }
+
+    @Inject(
+        method = "tick",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/EyeOfEnder;discard()V")
+    )
+    private void impl$expireEnderEye(final CallbackInfo ci) {
+        this.impl$callExpireEntityEvent();
     }
 
 }

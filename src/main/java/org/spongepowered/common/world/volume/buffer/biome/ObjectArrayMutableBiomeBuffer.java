@@ -143,18 +143,16 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
         final Vector3i max,
         final StreamOptions options
     ) {
-        final Vector3i blockMin = this.min();
-        final Vector3i blockMax = this.max();
-        VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
+        VolumeStreamUtils.validateStreamArgs(min, max, this.min(), this.max(), options);
         final RegistryKey<Biome>[] buffer;
         if (options.carbonCopy()) {
             buffer = Arrays.copyOf(this.biomes, this.biomes.length);
         } else {
             buffer = this.biomes;
         }
-        final Stream<VolumeElement<ObjectArrayMutableBiomeBuffer, Biome>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
-            .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
-                .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
+        final Stream<VolumeElement<ObjectArrayMutableBiomeBuffer, Biome>> stateStream = IntStream.range(min.x(), max.x() + 1)
+            .mapToObj(x -> IntStream.range(min.z(), max.z() + 1)
+                .mapToObj(z -> IntStream.range(min.y(), max.y() + 1)
                     .mapToObj(y -> VolumeElement.of(this, () ->  {
                         final RegistryKey<Biome> key = buffer[this.getIndex(x, y, z)];
                         final Biome biome = this.registry.value(key);

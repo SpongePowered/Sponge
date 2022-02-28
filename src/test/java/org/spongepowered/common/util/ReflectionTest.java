@@ -34,7 +34,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.test.UnitTestExtension;
 import org.spongepowered.common.test.block.SpongeBlock;
 
@@ -105,7 +104,7 @@ public class ReflectionTest {
             bomb.visitMaxs(0, 0);
         }
 
-        final DefineableClassLoader loader = new ReferencedDefinableClassLoader(this.getClass().getClassLoader());
+        final DefinableClassLoader loader = new DefinableClassLoader(this.getClass().getClassLoader());
         final byte[] bombClazzBytes = writer.toByteArray();
         final Class<?> clazz = loader.defineClass("org.spongepowered.common.test.block.BombDummy", bombClazzBytes);
         final boolean neighborChanged = ReflectionUtil.isNeighborChangedDeclared(clazz);
@@ -114,7 +113,7 @@ public class ReflectionTest {
         Assertions.assertFalse(entityInside, "isEntityInsideDeclared is not defined on BombDummy");
         NoClassDefFoundError e = null;
         try {
-            getNeighborChanged(clazz);
+            ReflectionTest.getNeighborChanged(clazz);
         } catch (final Exception ex) {
             Assertions.fail("Expected a class not found exception for com/example/doesnt/Exist");
         } catch (final NoClassDefFoundError ee) {

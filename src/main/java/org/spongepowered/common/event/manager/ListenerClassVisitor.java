@@ -43,6 +43,7 @@ import org.spongepowered.api.event.Order;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -226,7 +227,13 @@ public class ListenerClassVisitor extends ClassVisitor {
         @Override
         public void visitEnum(final String name, final String descriptor, final String value) {
             try {
-                this.visit(name, Enum.valueOf((Class<? extends Enum>) this.annotation.discoveredMethod.classByLoader(descriptor), value));
+                final String className = Type.getType(descriptor).getClassName();
+                this.visit(
+                    name,
+                    Enum.valueOf((Class<? extends Enum>) this.annotation.discoveredMethod.classByLoader(className),
+                        value
+                    )
+                );
             } catch (final ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -357,9 +364,11 @@ public class ListenerClassVisitor extends ClassVisitor {
                 return false;
             }
             final DiscoveredMethod that = (DiscoveredMethod) o;
-            return this.access == that.access && this.declaringClass.equals(that.declaringClass) && this.methodName.equals(
+            return this.access == that.access && this.declaringClass.equals(
+                that.declaringClass) && this.methodName.equals(
                 that.methodName) && this.descriptor.equals(that.descriptor) && Objects.equals(
-                this.signature, that.signature) && Arrays.equals(this.parameters, that.parameters) && this.annotations.equals(
+                this.signature, that.signature) && Arrays.equals(
+                this.parameters, that.parameters) && this.annotations.equals(
                 that.annotations) && Objects.equals(this.listenerAnnotation, that.listenerAnnotation);
         }
 
@@ -430,7 +439,8 @@ public class ListenerClassVisitor extends ClassVisitor {
                 return false;
             }
             final ListenerParameter that = (ListenerParameter) o;
-            return this.method.equals(that.method) && this.type.equals(that.type) && this.annotations.equals(that.annotations);
+            return this.method.equals(that.method) && this.type.equals(that.type) && this.annotations.equals(
+                that.annotations);
         }
 
         @Override
@@ -445,7 +455,8 @@ public class ListenerClassVisitor extends ClassVisitor {
                 }
                 return TypeFactory.parameterizedClass(this.clazz());
             }
-            final java.lang.reflect.Type generic = TypeFactory.parameterizedClass(this.method.classByLoader(this.genericType.getClassName()));
+            final java.lang.reflect.Type generic = TypeFactory.parameterizedClass(
+                this.method.classByLoader(this.genericType.getClassName()));
             return TypeFactory.parameterizedClass(this.clazz(), generic);
         }
     }
@@ -474,13 +485,17 @@ public class ListenerClassVisitor extends ClassVisitor {
             AnnotationFormatException {
             this.values.put(name, value);
             this.annotation = TypeFactory.annotation(
-                (Class<? extends Annotation>) this.discoveredMethod.classByLoader(this.type.getClassName()), this.values);
+                (Class<? extends Annotation>) this.discoveredMethod.classByLoader(this.type.getClassName()),
+                this.values
+            );
         }
 
         public Annotation annotation() throws ClassNotFoundException, AnnotationFormatException {
             if (this.annotation == null) {
                 this.annotation = TypeFactory.annotation(
-                    (Class<? extends Annotation>) this.discoveredMethod.classByLoader(this.type.getClassName()), this.values);
+                    (Class<? extends Annotation>) this.discoveredMethod.classByLoader(this.type.getClassName()),
+                    this.values
+                );
             }
             return this.annotation;
         }

@@ -1280,6 +1280,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return !this.shadow$fireImmune();
     }
 
+    protected void impl$callExpireEntityEvent() {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this);
+            Sponge.eventManager().post(SpongeEventFactory.createExpireEntityEvent(frame.currentCause(), (org.spongepowered.api.entity.Entity) this));
+        }
+    }
     @Inject(method = "discard", at = @At("TAIL"))
     private void impl$throwExpireForDiscards(final CallbackInfo ci) {
         SpongeCommon.post(SpongeEventFactory.createExpireEntityEvent(PhaseTracker.getInstance().currentCause(), (org.spongepowered.api.entity.Entity) this));

@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.test;
 
+import net.minecraft.DetectedVersion;
+import net.minecraft.SharedConstants;
+import net.minecraft.WorldVersion;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.spongepowered.common.applaunch.AppLaunch;
@@ -38,6 +41,7 @@ public class UnitTestExtension implements BeforeAllCallback {
             AppLaunch.setPluginPlatform(platform);
             Launch.setInstance(new TestLaunch(platform));
             SpongeConfigs.getCommon();
+            SharedConstants.setVersion(DetectedVersion.tryDetectVersion());
         }
     }
 }

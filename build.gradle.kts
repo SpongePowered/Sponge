@@ -163,7 +163,7 @@ dependencies {
     // ASM - required for generating event listeners
     implementation("org.ow2.asm:asm-util:$asmVersion")
     implementation("org.ow2.asm:asm-tree:$asmVersion")
-    
+
     // Implementation-only Adventure
     implementation(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
     implementation("net.kyori:adventure-serializer-configurate4")
@@ -239,6 +239,7 @@ idea {
         (project as ExtensionAware).extensions["settings"].run {
             (this as ExtensionAware).extensions.getByType(org.jetbrains.gradle.ext.TaskTriggersConfig::class).run {
                 afterSync(":modlauncher-patcher:build")
+                afterSync(":modlauncher-transformers:build")
             }
         }
     }

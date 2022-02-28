@@ -22,39 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.common.mixin.core.world.entity.monster;
 
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.common.event.gen.DefineableClassLoader;
+import net.minecraft.world.entity.monster.Endermite;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+@Mixin(Endermite.class)
+public abstract class EndermiteMixin extends MonsterMixin {
 
-public class ReferencedDefinableClassLoader extends DefineableClassLoader {
-    private final Map<String, byte[]> definedClasses;
-    public ReferencedDefinableClassLoader(final ClassLoader parent) {
-        super(parent);
-        this.definedClasses = new ConcurrentHashMap<>();
+    @Inject(
+        method = "aiStep",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/monster/Endermite;discard()V")
+    )
+    private void impl$throwExpiredEvent(final CallbackInfo ci) {
+        this.impl$callExpireEntityEvent();
     }
 
-    @Override
-    public <T> Class<T> defineClass(final String name, final byte[] b) {
-        this.definedClasses.put(name, b);
-        return super.defineClass(name, b);
-    }
-
-
-    @Nullable
-    @Override
-    public InputStream getResourceAsStream(final String name) {
-        final String normalized = name.replace("/", ".").replace(".class", "");
-        if (this.definedClasses.containsKey(normalized)) {
-            final byte[] buf = this.definedClasses.get(normalized);
-            final byte[] cloned = buf.clone();
-            return new ByteArrayInputStream(cloned);
-        }
-        return super.getResourceAsStream(name);
-    }
 }

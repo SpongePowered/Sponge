@@ -191,18 +191,16 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
 
     @Override
     public VolumeStream<BlockVolume.Mutable, BlockState> blockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
-        final Vector3i blockMin = this.min();
-        final Vector3i blockMax = this.max();
-        VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
+        VolumeStreamUtils.validateStreamArgs(min, max, this.min(), this.max(), options);
         final ArrayMutableBlockBuffer buffer;
         if (options.carbonCopy()) {
-            buffer = new ArrayMutableBlockBuffer(this.palette, this.data.copyOf(), this.start, this.size);
+            buffer = this.copy();
         } else {
             buffer = this;
         }
-        final Stream<VolumeElement<BlockVolume.Mutable, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
-                .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
-                        .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
+        final Stream<VolumeElement<BlockVolume.Mutable, BlockState>> stateStream = IntStream.range(min.x(), max.x() + 1)
+                .mapToObj(x -> IntStream.range(min.z(), max.z() + 1)
+                        .mapToObj(z -> IntStream.range(min.y(), max.y() + 1)
                                 .mapToObj(y -> VolumeElement.of((BlockVolume.Mutable) this, () -> buffer.block(x, y, z), new Vector3d(x, y, z)))
                         ).flatMap(Function.identity())
                 ).flatMap(Function.identity());

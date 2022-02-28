@@ -24,13 +24,25 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
-import javax.annotation.Nullable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.HitResult;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.projectile.source.EntityProjectileSource;
+import org.spongepowered.api.projectile.source.ProjectileSource;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
+
+import javax.annotation.Nullable;
 
 @Mixin(Projectile.class)
 public abstract class ProjectileMixin extends EntityMixin {
@@ -38,7 +50,33 @@ public abstract class ProjectileMixin extends EntityMixin {
     // @formatter:off
     @Shadow protected abstract void shadow$onHit(HitResult result);
     @Shadow public abstract void shadow$setOwner(@Nullable Entity p_212361_1_);
-    @Shadow public abstract Entity shadow$getOwner();
+    @Shadow public abstract @Nullable Entity shadow$getOwner();
     // @formatter:on
+    private ProjectileSource impl$projectileSource = UnknownProjectileSource.UNKNOWN;
+
+    protected ProjectileSource impl$getProjectileSource() {
+        if (this.impl$projectileSource != UnknownProjectileSource.UNKNOWN) {
+            return this.impl$projectileSource;
+        }
+        final @org.checkerframework.checker.nullness.qual.Nullable Entity owner = this.shadow$getOwner();
+        if (owner != null) {
+            return (EntityProjectileSource) owner;
+        }
+        return this.impl$projectileSource;
+    }
+
+    @Inject(method = "setOwner", at = @At("RETURN"))
+    private void impl$assignProjectileSource(final @Nullable Entity owner, final CallbackInfo ci) {
+        this.impl$projectileSource = owner == null ? UnknownProjectileSource.UNKNOWN : (EntityProjectileSource) owner;
+    }
+
+    @Override
+    protected void impl$callExpireEntityEvent() {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this);
+            frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$getProjectileSource());
+            Sponge.eventManager().post(SpongeEventFactory.createExpireEntityEvent(frame.currentCause(), (org.spongepowered.api.entity.Entity) this));
+        }
+    }
 
 }

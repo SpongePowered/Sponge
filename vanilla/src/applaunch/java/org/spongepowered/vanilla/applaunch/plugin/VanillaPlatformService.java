@@ -35,7 +35,8 @@ import org.spongepowered.asm.launch.MixinLaunchPluginLegacy;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResource;
-import org.spongepowered.vanilla.applaunch.service.AccessWidenerTransformationService;
+import org.spongepowered.transformers.modlauncher.AccessWidenerTransformationService;
+import org.spongepowered.transformers.modlauncher.SuperclassChanger;
 import org.spongepowered.vanilla.installer.Constants;
 
 import java.net.MalformedURLException;
@@ -72,8 +73,8 @@ public final class VanillaPlatformService implements ITransformationService {
         VanillaPlatformService.pluginPlatform.locatePluginResources();
         VanillaPlatformService.pluginPlatform.createPluginCandidates();
         final AccessWidenerTransformationService accessWidener = environment.getProperty(AccessWidenerTransformationService.INSTANCE.get()).orElse(null);
+        final SuperclassChanger superclassChanger = environment.getProperty(SuperclassChanger.INSTANCE.get()).orElse(null);
         final ILaunchPluginService mixin = environment.findLaunchPlugin(MixinLaunchPluginLegacy.NAME).orElse(null);
-
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
 
@@ -82,7 +83,7 @@ public final class VanillaPlatformService implements ITransformationService {
             for (final PluginResource resource : resources) {
 
                 // Handle Access Transformers
-                if ((accessWidener != null || mixin != null) && resource instanceof JVMPluginResource) {
+                if ((accessWidener != null || mixin != null || superclassChanger != null) && resource instanceof JVMPluginResource) {
                     if (mixin != null) {
                         // Offer jar to the Mixin service
                         mixin.offerResource(((JVMPluginResource) resource).path(), ((JVMPluginResource) resource).path().getFileName().toString());
@@ -118,6 +119,28 @@ public final class VanillaPlatformService implements ITransformationService {
                                     "Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the "
                                         + "problem to Sponge!", ((JVMPluginResource) resource).path()
                                 );
+                            }
+                        }
+                        if (superclassChanger != null) {
+                            final String superclassChangeFiles = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.SUPERCLASS_CHANGE);
+                            if (superclassChangeFiles != null) {
+                                for (final String superclassChangeFile : superclassChangeFiles.split(",")) {
+                                    if (!superclassChangeFile.endsWith(SuperclassChanger.SUPER_CLASS_EXTENSION)) {
+                                        continue;
+                                    }
+                                    try {
+                                        superclassChanger.offerResource(
+                                            ((JVMPluginResource) resource).fileSystem().getPath(superclassChangeFile).toUri().toURL(),
+                                            superclassChangeFile
+                                        );
+                                    } catch (final MalformedURLException ex) {
+                                        VanillaPlatformService.pluginPlatform.logger().warn(
+                                            "Failed to read declared superclass changer {}, from {}:",
+                                            superclassChangeFile,
+                                            resource.locator()
+                                        );
+                                    }
+                                }
                             }
                         }
                     });

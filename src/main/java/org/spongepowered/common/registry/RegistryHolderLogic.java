@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -133,7 +134,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
 
     public <T> Registry<T> createRegistry(final RegistryType<T> type, final @Nullable Supplier<Map<ResourceKey, T>> defaultValues,
         final boolean isDynamic) {
-        return this.createRegistry(type, InitialRegistryData.noIds(defaultValues), isDynamic, null);
+        return this.createRegistry(type, InitialRegistryData.noIds(defaultValues), this.registrySupplier(isDynamic, null));
     }
 
     public <T> Registry<T> createRegistry(final RegistryType<T> type, final RegistryLoader<T> loader) {
@@ -141,11 +142,41 @@ public final class RegistryHolderLogic implements RegistryHolder {
     }
 
     public <T> Registry<T> createRegistry(final RegistryType<T> type, final RegistryLoader<T> loader, final boolean isDynamic) {
-        return this.createRegistry(type, loader, isDynamic, null);
+        return this.createRegistry(type, loader, this.registrySupplier(isDynamic, null));
     }
 
-    public <T> Registry<T> createRegistry(final RegistryType<T> type, final @Nullable InitialRegistryData<T> defaultValues, final boolean isDynamic,
-        final @Nullable BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback) {
+    @SuppressWarnings("unchecked")
+    public <T> Function<net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>>, net.minecraft.core.Registry<T>> registrySupplier(
+            final boolean isDynamic,
+            final @Nullable BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback) {
+        if (callback == null) {
+            return (key) -> {
+                final MappedRegistry<T> reg = new MappedRegistry<>(key, Lifecycle.stable());
+                ((WritableRegistryBridge<T>)reg).bridge$setDynamic(isDynamic);
+                return reg;
+            };
+        } else {
+            return (key) -> {
+                final CallbackRegistry<T> reg = new CallbackRegistry<>(key, Lifecycle.stable(), callback);
+                ((WritableRegistryBridge<T>) (Object) reg).bridge$setDynamic(isDynamic);
+                return reg;
+            };
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Function<net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>>, net.minecraft.core.Registry<T>> identityRegistrySupplier(
+            final boolean isDynamic) {
+        return (key) -> {
+            final SpongeMappedRegistry<T> reg = new SpongeMappedRegistry<T>(key, Lifecycle.stable());
+            ((WritableRegistryBridge<T>) (Object) reg).bridge$setDynamic(isDynamic);
+            return reg;
+        };
+    }
+
+
+    public <T> Registry<T> createRegistry(final RegistryType<T> type, final @Nullable InitialRegistryData<T> defaultValues,
+            final Function<net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>>, net.minecraft.core.Registry<T>> registrySupplier) {
         final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(Objects.requireNonNull(type, "type").root());
         if (root == null) {
             throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
@@ -163,16 +194,10 @@ public final class RegistryHolderLogic implements RegistryHolder {
                     (ResourceLocation) (Object) type.location()
             );
         }
-        if (callback == null) {
-            registry = new MappedRegistry<>(key, Lifecycle.stable());
+        registry = registrySupplier.apply(key);
 
-        } else {
-            registry = new CallbackRegistry<>(key, Lifecycle.stable(), callback);
-        }
-
-        ((WritableRegistryBridge<T>) registry).bridge$setDynamic(isDynamic);
         if (defaultValues != null) {
-            final net.minecraft.core.MappedRegistry<T> mr = (MappedRegistry<T>) registry;
+            final WritableRegistry<T> mr = (WritableRegistry<T>) registry;
             defaultValues.forEach((vk, vi, vv) -> {
                 mr.registerOrOverride(
                         vi,

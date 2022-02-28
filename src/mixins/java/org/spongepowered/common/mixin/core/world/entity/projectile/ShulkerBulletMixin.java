@@ -26,24 +26,21 @@ package org.spongepowered.common.mixin.core.world.entity.projectile;
 
 import net.minecraft.world.entity.projectile.ShulkerBullet;
 import net.minecraft.world.phys.HitResult;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 
 @Mixin(ShulkerBullet.class)
-public abstract class ShulkerBulletMixin extends EntityMixin {
+public abstract class ShulkerBulletMixin extends ProjectileMixin {
 
     @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
     private void onBulletHitBlock(final HitResult result, final CallbackInfo ci) {
         if (!((LevelBridge) this.level).bridge$isFake() && result.getType() != HitResult.Type.MISS
                 && SpongeCommonEventFactory.handleCollideImpactEvent(
-                (net.minecraft.world.entity.Entity) (Object) this, ((Projectile) this).get(Keys.SHOOTER).orElse(null), result)) {
+                (ShulkerBullet) (Object) this, this.impl$getProjectileSource(), result)) {
             this.shadow$discard();
             ci.cancel();
         }

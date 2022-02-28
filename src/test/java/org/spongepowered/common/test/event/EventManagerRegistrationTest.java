@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.common.test.event;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,10 +43,9 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.event.lifecycle.StoppedGameEvent;
 import org.spongepowered.api.service.economy.EconomyService;
-import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.test.TestEventManager;
 import org.spongepowered.common.test.UnitTestExtension;
-import org.spongepowered.common.util.ReferencedDefinableClassLoader;
+import org.spongepowered.common.util.DefinableClassLoader;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.lang.reflect.InvocationTargetException;
@@ -74,7 +73,8 @@ public class EventManagerRegistrationTest {
         InvocationTargetException,
         InstantiationException,
         IllegalAccessException {
-        final EventManager eventManager = new TestEventManager();
+        final var loader = new DefinableClassLoader(Thread.currentThread().getContextClassLoader());
+        final EventManager eventManager = new TestEventManager(loader);
         final PluginContainer mock = Mockito.mock(PluginContainer.class);
         final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         writer.visit(
@@ -123,10 +123,7 @@ public class EventManagerRegistrationTest {
         );
         bomb.visitCode();
         bomb.visitInsn(Opcodes.RETURN);
-
-        final DefineableClassLoader loader = new ReferencedDefinableClassLoader(this.getClass().getClassLoader());
-        final Class<?> clazz = loader.defineClass(
-            "org.spongepowered.common.test.event.BombDummy", writer.toByteArray());
+        final Class<?> clazz = loader.defineClass("org.spongepowered.common.test.event.BombDummy", writer.toByteArray());
         final Object o = clazz.getConstructor().newInstance();
 
         eventManager.registerListeners(mock, o);

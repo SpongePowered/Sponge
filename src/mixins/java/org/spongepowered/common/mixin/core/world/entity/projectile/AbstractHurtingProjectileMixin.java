@@ -27,8 +27,6 @@ package org.spongepowered.common.mixin.core.world.entity.projectile;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.phys.HitResult;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.projectile.DamagingProjectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -45,7 +43,7 @@ public abstract class AbstractHurtingProjectileMixin extends ProjectileMixin {
             return;
         }
 
-        if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, ((DamagingProjectile) this).get(Keys.SHOOTER).orElse(null), result)) {
+        if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.impl$getProjectileSource(), result)) {
             this.shadow$remove(Entity.RemovalReason.DISCARDED);
         } else {
             this.shadow$onHit(result);

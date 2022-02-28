@@ -58,6 +58,7 @@ includeBuild("SpongeAPI") {
 }
 include(":SpongeVanilla")
 project(":SpongeVanilla").projectDir = file("vanilla")
+include("modlauncher-transformers")
 include("generator")
 include("modlauncher-patcher")
 

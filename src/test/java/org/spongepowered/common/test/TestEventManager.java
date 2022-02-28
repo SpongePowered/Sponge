@@ -24,7 +24,31 @@
  */
 package org.spongepowered.common.test;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.event.filter.FilterGenerator;
+import org.spongepowered.common.event.manager.AnnotatedEventListener;
+import org.spongepowered.common.event.manager.ClassEventListenerFactory;
 import org.spongepowered.common.event.manager.SpongeEventManager;
+import org.spongepowered.common.util.DefinableClassLoader;
+import org.spongepowered.plugin.PluginContainer;
 
 public class TestEventManager extends SpongeEventManager {
+
+    private final @Nullable DefinableClassLoader loader;
+
+    public TestEventManager(final DefinableClassLoader loader) {
+        this.loader = loader;
+    }
+
+    public TestEventManager() {
+        this.loader = null;
+    }
+
+
+    @Override
+    protected AnnotatedEventListener.Factory computeFactory(
+        final PluginContainer key
+    ) {
+        return new ClassEventListenerFactory(FilterGenerator::create, this.loader != null ? this.loader.lookup() : SpongeEventManager.OWN_LOOKUP);
+    }
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.world.entity.LightningBolt;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.LightningBoltAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -48,7 +49,14 @@ public final class LightningBoltData {
                             return true;
                         })
                     .create(Keys.IS_EFFECT_ONLY)
-                        .get(LightningBoltAccessor::accessor$visualOnly);
+                        .get(LightningBoltAccessor::accessor$visualOnly)
+                        .setAnd((h, v) -> {
+                            if (h.accessor$visualOnly() == v) {
+                                return false;
+                            }
+                            ((LightningBolt)h).setVisualOnly(v);
+                            return true;
+                        });
     }
     // @formatter:on
 }

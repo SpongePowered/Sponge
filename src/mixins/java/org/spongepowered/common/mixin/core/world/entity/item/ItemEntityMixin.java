@@ -30,9 +30,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.ExpireEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,7 +39,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.world.entity.item.ItemEntityBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
@@ -171,11 +168,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
             // erroneously be calling this twice.
             return;
         }
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(this);
-            final ExpireEntityEvent event = SpongeEventFactory.createExpireEntityEvent(frame.currentCause(), (Item) this);
-            SpongeCommon.post(event);
-        }
+        this.impl$callExpireEntityEvent();
     }
 
     @ModifyConstant(method = "isMergable", constant = @Constant(intValue = 6000))

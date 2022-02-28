@@ -138,9 +138,9 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Bl
     ) {
         VolumeStreamUtils.validateStreamArgs(min, max, this.min(), this.max(), options);
         // We don't need to copy since this is immutable.
-        final Stream<VolumeElement<Immutable, BlockState>> stateStream = IntStream.range(this.min().x(), this.max().x() + 1)
-            .mapToObj(x -> IntStream.range(this.min().z(), this.max().z() + 1)
-                .mapToObj(z -> IntStream.range(this.min().y(), this.max().y() + 1)
+        final Stream<VolumeElement<Immutable, BlockState>> stateStream = IntStream.range(min.x(), max.x() + 1)
+            .mapToObj(x -> IntStream.range(min.z(), max.z() + 1)
+                .mapToObj(z -> IntStream.range(min.y(), max.y() + 1)
                     .mapToObj(y -> VolumeElement.<Immutable, BlockState>of(this, () -> this.block(x, y, z), new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());

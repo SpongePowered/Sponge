@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity.ai.goal;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.world.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,30 +35,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.entity.ai.GoalBridge;
 import org.spongepowered.common.registry.provider.GoalTypeProvider;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
-import net.minecraft.world.entity.ai.goal.Goal;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-@Mixin(net.minecraft.world.entity.ai.goal.Goal.class)
+@Mixin(Goal.class)
 public abstract class GoalMixin implements GoalBridge {
 
-    private GoalType impl$type;
+    private Supplier<GoalType> impl$type;
     private GoalExecutor<?> impl$owner;
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     private void assignAITaskType(final CallbackInfo ci) {
-        this.impl$type = GoalTypeProvider.INSTANCE.get((Class<Goal>) (Object) this.getClass()).orElse(null);
+        this.impl$type = GoalTypeProvider.INSTANCE.get(((Goal) (Object) this).getClass()).orElse(null);
     }
 
     @Override
     public GoalType bridge$getType() {
-        return this.impl$type;
+        return this.impl$type.get();
     }
 
     @Override
     public void bridge$setType(final GoalType type) {
-        this.impl$type = type;
+        this.impl$type = () -> type;
     }
 
     @Override

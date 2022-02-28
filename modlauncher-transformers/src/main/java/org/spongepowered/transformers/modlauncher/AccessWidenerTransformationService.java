@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.applaunch.service;
+package org.spongepowered.transformers.modlauncher;
 
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
@@ -38,7 +38,9 @@ import net.fabricmc.accesswidener.AccessWidenerReader;
 import net.fabricmc.accesswidener.AccessWidenerVisitor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
@@ -55,17 +57,18 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+@DefaultQualifier(NonNull.class)
 public class AccessWidenerTransformationService implements ITransformationService {
 
     public static final String NAME = "access_widener";
     public static final String ACCESS_WIDENER_EXTENSION = "accesswidener";
     public static final Supplier<TypesafeMap.Key<AccessWidenerTransformationService>>
         INSTANCE = IEnvironment.buildKey("sponge:aw", AccessWidenerTransformationService.class);
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
 
     private final AccessWidener widener = new AccessWidener();
     private final AccessWidenerReader reader = new AccessWidenerReader(this.widener);
-    private OptionSpec<String> configSpec;
+    private @MonotonicNonNull OptionSpec<String> configSpec;
 
     @NonNull
     @Override

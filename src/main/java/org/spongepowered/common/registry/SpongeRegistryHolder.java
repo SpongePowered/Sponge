@@ -33,15 +33,24 @@ import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.tag.Tag;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public interface SpongeRegistryHolder extends RegistryHolder {
 
-    void setRootMinecraftRegistry(Registry<Registry<?>> registry);
+    RegistryHolderLogic registryHolder();
 
-    <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final @Nullable InitialRegistryData<T> defaultValues,
-        final boolean isDynamic, final @Nullable BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback);
+    default void setRootMinecraftRegistry(Registry<Registry<?>> registry) {
+        this.registryHolder().setRootMinecraftRegistry(registry);
+    }
+
+    default <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final @Nullable InitialRegistryData<T> defaultValues,
+        final boolean isDynamic, final @Nullable BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback) {
+        return this.registryHolder().createRegistry(type, defaultValues, this.registryHolder().registrySupplier(isDynamic, callback));
+    }
 
     default <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final @Nullable Map<ResourceKey, T> defaultValues) {
         return this.createRegistry(type, defaultValues != null ? () -> defaultValues : null, false);
@@ -60,10 +69,31 @@ public interface SpongeRegistryHolder extends RegistryHolder {
         return this.createRegistry(type, loader, false);
     }
 
+    default <T> org.spongepowered.api.registry.Registry<T> createIdentityRegistry(final RegistryType<T> type, final RegistryLoader<T> loader) {
+        return this.registryHolder().createRegistry(type, loader, this.registryHolder().identityRegistrySupplier(false));
+    }
+
     default <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final RegistryLoader<T> loader,
         final boolean isDynamic) {
         return this.createRegistry(type, loader, isDynamic, null);
     }
 
-    <T> void wrapTagHelperAsRegistry(RegistryType<Tag<T>> type, StaticTagHelper<T> helper);
+    default <T> void wrapTagHelperAsRegistry(RegistryType<Tag<T>> type, StaticTagHelper<T> helper) {
+        this.registryHolder().wrapTagHelperAsRegistry(type, helper);
+    }
+
+    @Override
+    default Stream<org.spongepowered.api.registry.Registry<?>> streamRegistries(final ResourceKey root) {
+        return this.registryHolder().streamRegistries(Objects.requireNonNull(root, "root"));
+    }
+
+    @Override
+    default <T> Optional<org.spongepowered.api.registry.Registry<T>> findRegistry(final RegistryType<T> type) {
+        return this.registryHolder().findRegistry(Objects.requireNonNull(type, "type"));
+    }
+
+    @Override
+    default <T> org.spongepowered.api.registry.Registry<T> registry(final RegistryType<T> type) {
+        return this.registryHolder().registry(Objects.requireNonNull(type, "type"));
+    }
 }
