@@ -40,6 +40,7 @@ import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.event.filter.type.Include;
 import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.event.lifecycle.StoppedGameEvent;
 import org.spongepowered.api.service.economy.EconomyService;
@@ -150,6 +151,7 @@ public class EventManagerRegistrationTest {
 
         }
 
+        @Include(DamageEntityEvent.class)
         @Listener(order = Order.FIRST)
         public void onFirst(
             final DamageEntityEvent event,

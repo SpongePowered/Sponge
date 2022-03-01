@@ -43,6 +43,8 @@ import org.spongepowered.api.event.Order;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -54,6 +56,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ListenerClassVisitor extends ClassVisitor {
 
     public static final String LISTENER_DESCRIPTOR = Type.getDescriptor(Listener.class);
+    public static final String SPONGE_API_ANNOTATION_PREFIX = "org.spongepowered.api";
+
     public static final int ASM_VERSION = Opcodes.ASM9;
 
     final List<DiscoveredMethod> foundListenerMethods = new LinkedList<>();
@@ -138,9 +142,10 @@ public class ListenerClassVisitor extends ClassVisitor {
 
         @Override
         public AnnotationVisitor visitAnnotation(final String descriptor, final boolean visible) {
+            final Type type = Type.getType(descriptor);
             if (Objects.equals(descriptor, ListenerClassVisitor.LISTENER_DESCRIPTOR)) {
                 this.classVisitor.foundListenerMethods.add(this.discoveredMethod);
-                final ListenerAnnotation e = new ListenerAnnotation(Type.getType(descriptor), this.discoveredMethod);
+                final ListenerAnnotation e = new ListenerAnnotation(type, this.discoveredMethod);
                 this.discoveredMethod.annotations.add(e);
                 this.discoveredMethod.listenerAnnotation = new Listener() {
                     @Override
@@ -161,7 +166,12 @@ public class ListenerClassVisitor extends ClassVisitor {
                 return new ListenerExtractor(this.discoveredMethod);
             }
 
-            final ListenerAnnotation e = new ListenerAnnotation(Type.getType(descriptor), this.discoveredMethod);
+            // Ignore non Sponge API annotations
+            if (!type.getClassName().startsWith(ListenerClassVisitor.SPONGE_API_ANNOTATION_PREFIX)) {
+                return null;
+            }
+
+            final ListenerAnnotation e = new ListenerAnnotation(type, this.discoveredMethod);
             this.discoveredMethod.annotations.add(e);
             return new ListenerAnnotationVisitor(e);
         }
@@ -216,10 +226,16 @@ public class ListenerClassVisitor extends ClassVisitor {
         @Override
         public void visit(final String name, final Object value) {
             try {
-                this.annotation.put(name, value);
+                this.annotation.put(name == null ? "value" : name, value);
             } catch (final ClassNotFoundException | AnnotationFormatException e) {
                 e.printStackTrace();
             }
+        }
+
+        @Override
+        public AnnotationVisitor visitArray(String name) {
+            annotation.initReturnTypes();
+            return this;
         }
 
         @SuppressWarnings({"unchecked", "rawtypes"})
@@ -457,6 +473,7 @@ public class ListenerClassVisitor extends ClassVisitor {
         private final Type type;
         final DiscoveredMethod discoveredMethod;
         private final Map<String, Object> values = new ConcurrentHashMap<>();
+        private final Map<String, Class<?>> returnTypes = new ConcurrentHashMap<>();
         private @MonotonicNonNull Annotation annotation;
 
         ListenerAnnotation(
@@ -473,7 +490,33 @@ public class ListenerClassVisitor extends ClassVisitor {
 
         public void put(final String name, final Object value) throws ClassNotFoundException,
             AnnotationFormatException {
-            this.values.put(name, value);
+
+            Object realValue = value;
+            if (value instanceof Type) {
+                try {
+                    realValue = this.discoveredMethod.classByLoader(((Type) value).getClassName());
+                } catch (ClassNotFoundException ignored) {
+                }
+            }
+
+            final Class<?> returnType = this.returnTypes.get(name);
+            if (returnType != null && returnType.isArray()) {
+                final Class<?> componentType = returnType.getComponentType();
+                final Object previous = this.values.get(name);
+                Object newArray;
+                if (previous == null) {
+                    newArray = Array.newInstance(componentType, 1);
+                    Array.set(newArray, 0, realValue);
+                } else {
+                    newArray = Array.newInstance(componentType, Array.getLength(previous) + 1);
+                    System.arraycopy(previous, 0, newArray, 0, Array.getLength(previous));
+                    Array.set(newArray, Array.getLength(previous), realValue);
+                }
+                this.values.put(name, newArray);
+            } else {
+                this.values.put(name, realValue);
+            }
+
             this.annotation = TypeFactory.annotation(
                 (Class<? extends Annotation>) this.discoveredMethod.classByLoader(this.type.getClassName()), this.values);
         }
@@ -486,5 +529,14 @@ public class ListenerClassVisitor extends ClassVisitor {
             return this.annotation;
         }
 
+        public void initReturnTypes() {
+            try {
+                for (Method element : this.discoveredMethod.classByLoader(this.type.getClassName()).getDeclaredMethods()) {
+                    this.returnTypes.put(element.getName(), element.getReturnType());
+                }
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
