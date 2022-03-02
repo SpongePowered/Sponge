@@ -77,7 +77,9 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
     public GrowablePhaseContext buildAndSwitch() {
         checkState(this.pos != null, "BlockPos is null");
         checkState(this.blockState != null, "BlockState is null");
-        checkState(this.usedItem != null, "ItemUsed is null");
+        if (this.usedItem == null) {
+            this.usedItem = ItemStackSnapshot.empty(); // No used item when growing naturally
+        }
         checkState(this.world != null, "World is null");
         this.priorContext = this.createdTracker.getPhaseContext();
         checkState(this.priorContext != null, "Prior context is null");
