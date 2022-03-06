@@ -71,10 +71,10 @@ public class BlockStateTest implements LoadableModule {
                 player.sendMessage(Component.text("Interacted Block has the following block state properties:").color(NamedTextColor.GREEN));
                 state.statePropertyMap().forEach((prop, value) -> player.sendMessage(Component.text(prop.name()+ ": " + value.toString())));
                 for (Map.Entry<StateProperty<?>, ?> entry : state.statePropertyMap().entrySet()) {
-                    if (entry.getKey().equals(BooleanStateProperties.GRASS_BLOCK_SNOWY.get())) {
+                    if (entry.getKey().equals(BooleanStateProperties.property_SNOWY())) {
                         final ResourceKey key = RegistryTypes.BOOLEAN_STATE_PROPERTY.get().valueKey((BooleanStateProperty) entry.getKey());
                         player.sendMessage(Component.text(key.toString()));
-                        event.block().location().get().setBlock(state.withStateProperty(BooleanStateProperties.GRASS_BLOCK_SNOWY, !(Boolean) entry.getValue()).get());
+                        event.block().location().get().setBlock(state.withStateProperty(BooleanStateProperties.property_SNOWY(), !(Boolean) entry.getValue()).get());
                     }
                 }
             }

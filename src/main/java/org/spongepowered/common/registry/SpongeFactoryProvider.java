@@ -67,6 +67,9 @@ import org.spongepowered.api.resource.pack.PackType;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.service.permission.NodeTree;
+import org.spongepowered.api.state.BooleanStateProperty;
+import org.spongepowered.api.state.EnumStateProperty;
+import org.spongepowered.api.state.IntegerStateProperty;
 import org.spongepowered.api.state.StateMatcher;
 import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.api.util.AABB;
@@ -107,6 +110,7 @@ import org.spongepowered.common.advancement.criterion.SpongeAndCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeOrCriterion;
 import org.spongepowered.common.adventure.AudiencesFactory;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.block.BlockStatePropertyImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.command.SpongeCommandCompletionFactory;
 import org.spongepowered.common.command.manager.SpongeCommandCauseFactory;
@@ -283,6 +287,9 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(PackStatus.Factory.class, new SpongePackStatusFactory())
                 .registerFactory(ResourcePath.Factory.class, new SpongeResourcePath.FactoryImpl())
                 .registerFactory(VanishState.Factory.class, new SpongeVanishState.SpongeVanishStateFactory())
+                .registerFactory(BooleanStateProperty.Factory.class, new BlockStatePropertyImpl.BooleanFactoryImpl())
+                .registerFactory(IntegerStateProperty.Factory.class, new BlockStatePropertyImpl.IntegerFactoryImpl())
+                .registerFactory(EnumStateProperty.Factory.class, new BlockStatePropertyImpl.EnumFactoryImpl())
         ;
     }
 }
