@@ -399,7 +399,11 @@
         "minecraft.world.level.biome.MultiNoiseBiomeSourceMixin_API",
         "minecraft.world.level.biome.CheckerboardColumnBiomeSourceMixin_API",
         "minecraft.world.level.biome.TheEndBiomeSourceMixin_API",
-        "minecraft.world.level.biome.FixedBiomeSourceMixin_API"
+        "minecraft.world.level.biome.FixedBiomeSourceMixin_API",
+        "minecraft.world.level.block.state.properties.BambooLeavesMixin_API",
+        "minecraft.world.level.block.state.properties.WallSideMixin_API",
+        "minecraft.world.level.block.state.properties.BellAttachTypeMixin_API",
+        "minecraft.world.level.block.state.properties.FrontAndTopMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",
