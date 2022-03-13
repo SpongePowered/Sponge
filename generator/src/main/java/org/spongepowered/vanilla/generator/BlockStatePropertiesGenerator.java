@@ -28,17 +28,21 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import net.minecraft.core.Direction;
+import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
+import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BellAttachType;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.block.state.properties.ComparatorMode;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.DripstoneThickness;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Half;
@@ -124,27 +128,31 @@ public class BlockStatePropertiesGenerator implements Generator {
     static {
         vanillaEnumTypeMapping.put(StructureMode.class, BlockStatePropertiesGenerator.inDataTypePkg("StructureMode"));
         vanillaEnumTypeMapping.put(PistonType.class, BlockStatePropertiesGenerator.inDataTypePkg("PistonType"));
-         vanillaEnumTypeMapping.put(BambooLeaves.class, BlockStatePropertiesGenerator.inDataTypePkg("BambooLeavesType"));
-         vanillaEnumTypeMapping.put(WallSide.class, BlockStatePropertiesGenerator.inDataTypePkg("WallType"));
-        // vanillaEnumTypeMapping.put(Direction.Axis.class, BlockStatePropertiesGenerator.inDataType()); // TODO conversion via AxisUtil
+        vanillaEnumTypeMapping.put(BambooLeaves.class, BlockStatePropertiesGenerator.inDataTypePkg("BambooLeavesType"));
+        vanillaEnumTypeMapping.put(WallSide.class, BlockStatePropertiesGenerator.inDataTypePkg("WallType"));
         vanillaEnumTypeMapping.put(RailShape.class, BlockStatePropertiesGenerator.inDataTypePkg("RailDirection"));
         vanillaEnumTypeMapping.put(AttachFace.class, BlockStatePropertiesGenerator.inDataTypePkg("AttachmentSurface"));
-        vanillaEnumTypeMapping.put(Half.class, BlockStatePropertiesGenerator.inDataTypePkg("PortionType"));
-        // vanillaEnumTypeMapping.put(Direction.class, BlockStatePropertiesGenerator.inDataType()); // TODO conversion via DirectionUtil
-        // vanillaEnumTypeMapping.put(BedPart.class, BlockStatePropertiesGenerator.inDataType()); // TODO conversion via PortionTypeUtil
-        // vanillaEnumTypeMapping.put(DoubleBlockHalf.class, BlockStatePropertiesGenerator.inDataType()); // TODO conversion via PortionTypeUtil
         vanillaEnumTypeMapping.put(Tilt.class, BlockStatePropertiesGenerator.inDataTypePkg("Tilt"));
         vanillaEnumTypeMapping.put(RedstoneSide.class, BlockStatePropertiesGenerator.inDataTypePkg("WireAttachmentType"));
         vanillaEnumTypeMapping.put(ChestType.class, BlockStatePropertiesGenerator.inDataTypePkg("ChestAttachmentType"));
         vanillaEnumTypeMapping.put(SlabType.class, BlockStatePropertiesGenerator.inDataTypePkg("SlabPortion"));
-        vanillaEnumTypeMapping.put(BellAttachType.class, BlockStatePropertiesGenerator.inDataTypePkg("BellAttachmentTypes"));
+        vanillaEnumTypeMapping.put(BellAttachType.class, BlockStatePropertiesGenerator.inDataTypePkg("BellAttachmentType"));
         vanillaEnumTypeMapping.put(SculkSensorPhase.class, BlockStatePropertiesGenerator.inDataTypePkg("SculkSensorState"));
         vanillaEnumTypeMapping.put(DoorHingeSide.class, BlockStatePropertiesGenerator.inDataTypePkg("DoorHinge"));
         vanillaEnumTypeMapping.put(NoteBlockInstrument.class, BlockStatePropertiesGenerator.inDataTypePkg("InstrumentType"));
         vanillaEnumTypeMapping.put(StairsShape.class, BlockStatePropertiesGenerator.inDataTypePkg("StairShape"));
         vanillaEnumTypeMapping.put(DripstoneThickness.class, BlockStatePropertiesGenerator.inDataTypePkg("DripstoneSegment"));
-        // vanillaEnumTypeMapping.put(FrontAndTop.class, BlockStatePropertiesGenerator.inDataType()); // TODO missing in API (JigsawBlock)
+        vanillaEnumTypeMapping.put(FrontAndTop.class, BlockStatePropertiesGenerator.inDataTypePkg("JigsawBlockOrientation"));
         vanillaEnumTypeMapping.put(ComparatorMode.class, BlockStatePropertiesGenerator.inDataTypePkg("ComparatorMode"));
+
+        // Custom Mapping required see StateHolderMixin_API
+        final ClassName portionTypeClass = BlockStatePropertiesGenerator.inDataTypePkg("PortionType");
+        vanillaEnumTypeMapping.put(Half.class, portionTypeClass);
+        vanillaEnumTypeMapping.put(BedPart.class, portionTypeClass);
+        vanillaEnumTypeMapping.put(DoubleBlockHalf.class, portionTypeClass);
+        vanillaEnumTypeMapping.put(Direction.Axis.class, ClassName.get("org.spongepowered.api.util", "Axis"));
+        vanillaEnumTypeMapping.put(Direction.class, ClassName.get("org.spongepowered.api.util", "Direction"));
+
     }
 
 

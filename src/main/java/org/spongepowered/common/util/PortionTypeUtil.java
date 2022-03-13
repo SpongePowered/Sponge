@@ -24,57 +24,82 @@
  */
 package org.spongepowered.common.util;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.type.PortionType;
-import org.spongepowered.api.data.type.PortionTypes;
-
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Half;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.PortionTypes;
 
 public final class PortionTypeUtil {
 
+    public static PortionType getFor(BedPart part) {
+        return switch (part) {
+            case HEAD -> PortionTypes.TOP.get();
+            case FOOT -> PortionTypes.BOTTOM.get();
+        };
+    }
+
+    public static PortionType getFor(DoubleBlockHalf part) {
+        return switch (part) {
+            case UPPER -> PortionTypes.TOP.get();
+            case LOWER -> PortionTypes.BOTTOM.get();
+        };
+    }
+
+    public static PortionType getFor(Half half) {
+        // half == Half.BOTTOM ? PortionTypes.BOTTOM.get() : PortionTypes.TOP.get();
+        return (PortionType) (Object) half;
+    }
+
+    public static BedPart getBedPartFor(PortionType value) {
+        return value == PortionTypes.TOP.get() ? BedPart.HEAD :
+               value == PortionTypes.BOTTOM.get() ? BedPart.FOOT : null;
+    }
+
+    public static DoubleBlockHalf getDoubleBlockHalfFor(PortionType value) {
+        return value == PortionTypes.TOP.get() ? DoubleBlockHalf.UPPER :
+               value == PortionTypes.BOTTOM.get() ? DoubleBlockHalf.LOWER : null;
+    }
+
+    public static Half getHalfFor(PortionType value) {
+        return value == PortionTypes.TOP.get() ? Half.TOP :
+               value == PortionTypes.BOTTOM.get() ? Half.BOTTOM : null;
+    }
+
     public static @Nullable PortionType getFromBedBlock(final BlockState holder, final EnumProperty<BedPart> property) {
-        final BedPart part = holder.getValue(property);
-        switch (part) {
-            case HEAD:
-                return PortionTypes.TOP.get();
-            case FOOT:
-                return PortionTypes.BOTTOM.get();
-            default:
-                return null;
-        }
+        return PortionTypeUtil.getFor(holder.getValue(property));
     }
 
     public static @Nullable BlockState setForBedBlock(final BlockState holder, final PortionType value, final EnumProperty<BedPart> property) {
-        if (value == PortionTypes.TOP.get()) {
-            return holder.setValue(property, BedPart.HEAD);
+        final BedPart bedPart = PortionTypeUtil.getBedPartFor(value);
+        if (bedPart == null) {
+            return null;
         }
-        if (value == PortionTypes.BOTTOM.get()) {
-            return holder.setValue(property, BedPart.FOOT);
-        }
-        return null;
+        return holder.setValue(property, bedPart);
     }
 
     public static PortionType getFromDoubleBlock(final BlockState holder, final EnumProperty<DoubleBlockHalf> property) {
-        final DoubleBlockHalf half = holder.getValue(property);
-        return half == DoubleBlockHalf.LOWER ? PortionTypes.BOTTOM.get() : PortionTypes.TOP.get();
+        return PortionTypeUtil.getFor(holder.getValue(property));
     }
 
     public static BlockState setForDoubleBlock(final BlockState holder, final PortionType value, final EnumProperty<DoubleBlockHalf> property) {
-        final DoubleBlockHalf half = value == PortionTypes.TOP.get() ? DoubleBlockHalf.UPPER : DoubleBlockHalf.LOWER;
+        final DoubleBlockHalf half = PortionTypeUtil.getDoubleBlockHalfFor(value);
+        if (half == null) {
+            return null;
+        }
         return holder.setValue(property, half);
     }
 
     public static PortionType getFromHalfBlock(final BlockState holder, final EnumProperty<Half> property) {
         final Half half = holder.getValue(property);
-        return half == Half.BOTTOM ? PortionTypes.BOTTOM.get() : PortionTypes.TOP.get();
+        return PortionTypeUtil.getFor(half);
     }
 
     public static BlockState setForHalfBlock(final BlockState holder, final PortionType value, final EnumProperty<Half> property) {
-        final Half half = value == PortionTypes.TOP.get() ? Half.TOP : Half.BOTTOM;
+        final Half half = PortionTypeUtil.getHalfFor(value);
         return holder.setValue(property, half);
     }
 

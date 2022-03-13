@@ -25,10 +25,16 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.state;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.properties.BedPart;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.state.State;
 import org.spongepowered.api.state.StateProperty;
+import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Cycleable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,8 +43,13 @@ import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.Property;
+import org.spongepowered.common.util.AxisUtil;
+import org.spongepowered.common.util.DirectionUtil;
+import org.spongepowered.common.util.PortionTypeUtil;
 
 @Mixin(StateHolder.class)
 public abstract class StateHolderMixin_API<S extends State<S>, C> implements State<S>, SpongeImmutableDataHolder<S> {
@@ -51,13 +62,60 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
     @Shadow public abstract ImmutableMap<Property<?>, Comparable<?>> shadow$getValues();
     // @formatter:on
 
+    @SuppressWarnings("unchecked")
+    private <ApiT extends Comparable<ApiT>, T extends Comparable<?>> ApiT api$mapToApi(T value) {
+        if (value instanceof Direction.Axis axis) {
+            return (ApiT) AxisUtil.getFor(axis);
+        }
+        if (value instanceof Direction dir) {
+            return (ApiT) DirectionUtil.getFor(dir);
+        }
+        if (value instanceof BedPart bedPart) {
+            return (ApiT) PortionTypeUtil.getFor(bedPart);
+        }
+        if (value instanceof DoubleBlockHalf half) {
+            return (ApiT) PortionTypeUtil.getFor(half);
+        }
+        return (ApiT) value;
+    }
+
+    private <ApiT extends Comparable<ApiT>, T extends Comparable<T>, V extends T> V api$mapFromApi(StateProperty<ApiT> stateProperty, ApiT value) {
+        if (value instanceof Axis axis) {
+            return (V) AxisUtil.getFor(axis);
+        }
+        if (value instanceof org.spongepowered.api.util.Direction dir) {
+            final V mappedValue = (V) DirectionUtil.getFor(dir);
+            if (mappedValue == null) {
+                throw new UnsupportedOperationException("Unsupported Direction " + dir);
+            }
+            return mappedValue;
+        }
+        if (value instanceof PortionType portion) {
+            final V mappedValue;
+            if (stateProperty.equals(BlockStateProperties.BED_PART)) {
+                mappedValue = (V) PortionTypeUtil.getBedPartFor(portion);
+            } else if (stateProperty.equals(BlockStateProperties.DOUBLE_BLOCK_HALF)) {
+                mappedValue = (V) PortionTypeUtil.getDoubleBlockHalfFor(portion);
+            } else if (stateProperty.equals(BlockStateProperties.HALF)) {
+                mappedValue = (V) PortionTypeUtil.getHalfFor(portion);
+            } else {
+                mappedValue = null;
+            }
+            if (mappedValue == null) {
+                throw new UnsupportedOperationException("Unsupported Portion " + portion + " for " + this);
+            }
+            return mappedValue;
+        }
+        return (V) value;
+    }
+
     @Override
     public <T extends Comparable<T>> Optional<T> stateProperty(StateProperty<T> stateProperty) {
-        if (!this.shadow$hasProperty((Property) stateProperty)) {
+        if (!this.shadow$hasProperty((Property<?>) stateProperty)) {
             return Optional.empty();
         }
-
-        return Optional.of((T) this.shadow$getValue((Property<?>) stateProperty));
+        final T value = this.shadow$getValue((Property<T>)stateProperty);
+        return Optional.of(this.api$mapToApi(value));
     }
 
     @Override
@@ -67,11 +125,10 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
 
     @Override
     public <T extends Comparable<T>, V extends T> Optional<S> withStateProperty(StateProperty<T> stateProperty, V value) {
-        if (!this.shadow$hasProperty((Property) stateProperty)) {
+        if (!this.shadow$hasProperty((Property<?>) stateProperty)) {
             return Optional.empty();
         }
-
-        return Optional.of((S) this.shadow$setValue((Property) stateProperty, value));
+        return Optional.of((S) this.shadow$setValue((Property<T>)stateProperty, this.api$mapFromApi(stateProperty, value)));
     }
 
     @Override
@@ -102,11 +159,11 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
 
     @Override
     public Collection<?> statePropertyValues() {
-        return this.shadow$getValues().values();
+        return this.shadow$getValues().values().stream().map(this::api$mapToApi).toList();
     }
 
     @Override
     public Map<StateProperty<?>, ?> statePropertyMap() {
-        return (Map) this.shadow$getValues();
+        return (Map) this.shadow$getValues().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> this.api$mapToApi(e.getValue())));
     }
 }

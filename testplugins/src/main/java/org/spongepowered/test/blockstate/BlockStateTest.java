@@ -31,12 +31,15 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.state.BooleanStateProperties;
 import org.spongepowered.api.state.BooleanStateProperty;
@@ -46,6 +49,7 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Plugin("blockstate-test")
 public class BlockStateTest implements LoadableModule {
@@ -59,6 +63,9 @@ public class BlockStateTest implements LoadableModule {
 
     @Override
     public void enable(final CommandContext ctx) {
+        final ItemStack stick = ItemStack.of(ItemTypes.STICK);
+        stick.offer(Keys.CUSTOM_NAME, Component.text("State Stick"));
+        ctx.cause().first(ServerPlayer.class).ifPresent(player -> player.inventory().offer(stick));
         Sponge.eventManager().registerListeners(this.plugin, new BlockStateTestListener());
     }
 
@@ -66,15 +73,18 @@ public class BlockStateTest implements LoadableModule {
 
         @Listener
         public void onSpawnEntity(final InteractBlockEvent.Secondary event, @First ServerPlayer player) {
-            if (event.context().get(EventContextKeys.USED_HAND).map(hand -> hand == HandTypes.MAIN_HAND.get()).orElse(false)) {
+            if (event.context().get(EventContextKeys.USED_HAND).map(hand -> hand == HandTypes.MAIN_HAND.get()).orElse(false) &&
+                event.context().get(EventContextKeys.USED_ITEM).flatMap(item -> item.get(Keys.CUSTOM_NAME)).map(t -> t.equals(Component.text("State Stick"))).orElse(false)
+            ) {
                 final BlockState state = event.block().state();
-                player.sendMessage(Component.text("Interacted Block has the following block state properties:").color(NamedTextColor.GREEN));
-                state.statePropertyMap().forEach((prop, value) -> player.sendMessage(Component.text(prop.name()+ ": " + value.toString())));
-                for (Map.Entry<StateProperty<?>, ?> entry : state.statePropertyMap().entrySet()) {
-                    if (entry.getKey().equals(BooleanStateProperties.property_SNOWY())) {
-                        final ResourceKey key = RegistryTypes.BOOLEAN_STATE_PROPERTY.get().valueKey((BooleanStateProperty) entry.getKey());
-                        player.sendMessage(Component.text(key.toString()));
-                        event.block().location().get().setBlock(state.withStateProperty(BooleanStateProperties.property_SNOWY(), !(Boolean) entry.getValue()).get());
+                final Map<StateProperty<?>, ?> propertyMap = state.statePropertyMap();
+                if (!propertyMap.isEmpty()) {
+                    player.sendMessage(Component.text("Interacted Block has the following block state properties:").color(NamedTextColor.GREEN));
+                    propertyMap.forEach((prop, value) -> player.sendMessage(Component.text(prop.name()+ ": " + value.toString())));
+                    for (Map.Entry<StateProperty<?>, ?> entry : propertyMap.entrySet()) {
+                        final Optional<BlockState> cycled = state.cycleStateProperty(entry.getKey());
+                        cycled.ifPresent(blockState -> event.block().location().get().setBlock(blockState));
+                        break;
                     }
                 }
             }
