@@ -130,7 +130,7 @@ public final class VanillaPlatformService implements ITransformationService {
                                             superclassChangeFile
                                         );
                                     } catch (final MalformedURLException ex) {
-                                        VanillaPlatformService.pluginPlatform.logger().warn(
+                                        corePlatform.logger().warn(
                                             "Failed to read declared superclass changer {}, from {}:",
                                             superclassChangeFile,
                                             resource.locator()
