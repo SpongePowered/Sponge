@@ -171,8 +171,7 @@ public final class SpongeConfigs {
             NodePath.path("teleport-helper"),
             NodePath.path("broken-mods"),
             NodePath.path("service-registration"),
-            NodePath.path("debug"),
-            NodePath.path("timings"))
+            NodePath.path("debug"))
         .map(SpongeConfigs.PATH_PREFIX::plus)
         .collect(ImmutableSet.toImmutableSet());
 

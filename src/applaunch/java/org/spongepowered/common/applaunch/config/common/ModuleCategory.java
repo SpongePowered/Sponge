@@ -48,9 +48,6 @@ public final class ModuleCategory {
     public boolean entityCollision = true;
 
     @Setting
-    public boolean timings = true;
-
-    @Setting
     @Comment("Controls whether any exploit patches are applied.\n"
              + "If there are issues with any specific exploits, please\n"
              + "test in the exploit category first, before disabling all\n"

@@ -230,7 +230,6 @@ dependencies {
     val log4jVersion: String by project
     val mixinVersion: String by project
     val modlauncherVersion: String by project
-    val timingsVersion: String by project
     val tinyLogVersion: String by project
 
     api(project(":", configuration = "launch"))
@@ -274,7 +273,6 @@ dependencies {
     libraries("org.spongepowered:spongeapi:$apiVersion")
     libraries(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
     libraries("net.kyori:adventure-serializer-configurate4")
-    libraries("org.spongepowered:timings:$timingsVersion")
     libraries("javax.inject:javax.inject:1")
     libraries("org.spongepowered:configurate-jackson") {
         exclude(group = "org.spongepowered", module = "configurate-core")

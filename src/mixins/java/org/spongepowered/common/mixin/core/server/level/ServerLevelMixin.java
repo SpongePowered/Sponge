@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
-import co.aikar.timings.sponge.WorldTimingsHandler;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -134,7 +133,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Shadow protected abstract void shadow$saveLevelData();
     // @formatter:on
 
-    protected final WorldTimingsHandler impl$timings = new WorldTimingsHandler((ServerLevel) (Object) this);
     private final long[] impl$recentTickTimes = new long[100];
 
     private LevelStorageSource.LevelStorageAccess impl$levelSave;
@@ -298,11 +296,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Override
     public ResourceKey bridge$getKey() {
         return (ResourceKey) (Object) this.shadow$dimension().location();
-    }
-
-    @Override
-    public WorldTimingsHandler bridge$getTimingsHandler() {
-        return this.impl$timings;
     }
 
     @Override
