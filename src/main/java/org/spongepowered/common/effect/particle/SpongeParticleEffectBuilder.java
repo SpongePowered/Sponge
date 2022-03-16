@@ -30,19 +30,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.api.data.persistence.DataSerializable;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.common.data.DataDeserializer;
 import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 @SuppressWarnings("unchecked")
 public final class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEffect> implements ParticleEffect.Builder {
@@ -65,12 +67,8 @@ public final class SpongeParticleEffectBuilder extends AbstractDataBuilder<Parti
         Map<ParticleOption<?>, Object> options = new HashMap<>();
         container.getViewList(Constants.Particles.PARTICLE_OPTIONS).get().forEach(view -> {
             ParticleOption<?> option = view.getRegistryValue(Constants.Particles.PARTICLE_OPTION_KEY, RegistryTypes.PARTICLE_OPTION, Sponge.game()).get();
-            Object value;
-            if (option.valueType().isAssignableFrom(DataSerializable.class)) {
-                value = view.getSerializable(Constants.Particles.PARTICLE_OPTION_VALUE, (Class<? extends DataSerializable>) option.valueType()).get();
-            } else {
-                value = view.getObject(Constants.Particles.PARTICLE_OPTION_VALUE, option.valueType()).get();
-            }
+            final BiFunction<DataView, DataQuery, Optional<Object>> deserializer = DataDeserializer.deserializer(option.valueType());
+            final Object value = deserializer.apply(view, Constants.Particles.PARTICLE_OPTION_VALUE).get();
             options.put(option, value);
         });
         return Optional.of(new SpongeParticleEffect(particleType, options));
