@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.provider;
 import net.kyori.adventure.text.Component;
 import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.api.data.persistence.DataTranslator;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.data.persistence.NBTTranslator;
@@ -91,6 +92,7 @@ public final class DataTranslatorProvider {
         this.mappings.put(Month.class, DataSerializers.MONTH_DATA_SERIALIZER);
         this.mappings.put(CompoundTag.class, NBTTranslator.INSTANCE);
         this.mappings.put(Schematic.class, SchematicTranslator.get());
+        this.mappings.put(Direction.class, DataSerializers.DIRECTION_SERIALIZER);
     }
 
 
