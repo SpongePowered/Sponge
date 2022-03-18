@@ -85,6 +85,7 @@ import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.level.chunk.SpongeEmptyChunk;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.archetype.SpongeArchetypeVolume;
@@ -146,7 +147,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         if (chunk instanceof ImposterProtoChunk) {
             return (WorldChunk) ((ImposterProtoChunk) chunk).getWrapped();
         }
-        throw new IllegalStateException("Chunk is a Proto-Chunk"); // TODO this may return a ProtoChunk
+        return new SpongeEmptyChunk((Level) (Object) this, chunk);
     }
 
     @Override
@@ -157,7 +158,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         final ChunkSource chunkProvider = ((LevelAccessor) this).getChunkSource();
 
         // If we aren't generating, return the chunk
-        final ChunkStatus status = shouldGenerate ? ChunkStatus.EMPTY : ChunkStatus.FULL;
+        final ChunkStatus status = shouldGenerate ? ChunkStatus.FULL : ChunkStatus.EMPTY;
         final @Nullable ChunkAccess chunkAccess = chunkProvider.getChunk(cx, cz, status, true);
         if (chunkAccess == null) {
             return Optional.empty();
@@ -167,7 +168,10 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             return Optional.of((WorldChunk) ((ImposterProtoChunk) chunkAccess).getWrapped());
         }
 
-        return Optional.of((WorldChunk) chunkAccess);
+        if (chunkAccess instanceof WorldChunk) {
+            return Optional.of((WorldChunk) chunkAccess);
+        }
+        return Optional.empty();
     }
 
     @Override
