@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.volume.buffer.biome;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -69,6 +70,10 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
 
         this.biomes[this.getIndex(x, y, z)] = (byte) this.palette.orAssign(biome);
         return true;
+    }
+
+    public byte[] getCopiedBackingData() {
+        return ArrayUtils.clone(this.biomes);
     }
 
     @Override

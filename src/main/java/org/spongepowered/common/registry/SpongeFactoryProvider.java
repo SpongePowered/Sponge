@@ -97,7 +97,9 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerLocationCreator;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.volume.archetype.entity.EntityArchetypeEntry;
+import org.spongepowered.api.world.volume.biome.BiomeVolumeFactory;
 import org.spongepowered.api.world.volume.block.BlockVolumeFactory;
+import org.spongepowered.api.world.volume.entity.EntityVolume;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.advancement.criterion.SpongeAndCriterion;
@@ -164,7 +166,9 @@ import org.spongepowered.common.world.server.SpongeServerLocationCreatorFactory;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 import org.spongepowered.common.world.volume.archetype.entity.SpongeEntityArchetypeEntryFactory;
+import org.spongepowered.common.world.volume.biome.SpongeBiomeVolumeFactory;
 import org.spongepowered.common.world.volume.block.SpongeBlockVolumeFactory;
+import org.spongepowered.common.world.volume.entity.SpongeEntityVolumeFactory;
 import org.spongepowered.common.world.weather.SpongeWeather;
 
 import java.util.Map;
@@ -239,6 +243,8 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(RegistryReference.Factory.class, new SpongeRegistryReference.FactoryImpl())
                 .registerFactory(DataPackType.Factory.class, new SpongeDataPackType.FactoryImpl())
                 .registerFactory(BlockVolumeFactory.class, new SpongeBlockVolumeFactory())
+                .registerFactory(EntityVolume.EntityVolumeFactory.class, new SpongeEntityVolumeFactory())
+                .registerFactory(BiomeVolumeFactory.class, new SpongeBiomeVolumeFactory())
                 .registerFactory(DamageSource.Factory.class, new SpongeDamageSourceFactory())
                 .registerFactory(PaletteReference.Factory.class, new SpongePaletteReferenceFactory())
                 .registerFactory(EntityArchetypeEntry.Factory.class, new SpongeEntityArchetypeEntryFactory())
