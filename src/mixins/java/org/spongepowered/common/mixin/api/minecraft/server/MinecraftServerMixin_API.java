@@ -39,14 +39,12 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerResources;
 import net.minecraft.server.ServerScoreboard;
-import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.Mth;
-import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -70,7 +68,6 @@ import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -104,9 +101,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+@SuppressWarnings("rawtypes")
 @Mixin(MinecraftServer.class)
-@Implements(value = @Interface(iface = Server.class, prefix = "server$", remap = Remap.NONE))
-public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLoop<TickTask> implements SpongeServer, SpongeRegistryHolder {
+@Implements(value = @Interface(iface = Server.class, prefix = "server$", remap = Interface.Remap.NONE))
+public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRegistryHolder {
 
     // @formatter:off
     @Shadow @Final public long[] tickTimes;
@@ -144,10 +142,6 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     private RegistryHolderLogic api$registryHolder;
     private SpongeUserManager api$userManager;
 
-    public MinecraftServerMixin_API(final String name) {
-        super(name);
-    }
-
     @Inject(method = "<init>", at = @At("TAIL"))
     public void api$initializeSpongeFields(final Thread p_i232576_1_, final RegistryAccess.RegistryHolder p_i232576_2_,
             final LevelStorageSource.LevelStorageAccess p_i232576_3_, final WorldData p_i232576_4_, final PackRepository p_i232576_5_,
@@ -162,6 +156,8 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
         this.api$registryHolder = new RegistryHolderLogic(p_i232576_2_);
         this.api$userManager = new SpongeUserManager((MinecraftServer) (Object) this);
     }
+
+
 
     @Override
     public RecipeManager recipeManager() {
@@ -417,7 +413,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
 
     @Override
     public boolean onMainThread() {
-        return this.isSameThread();
+        return ((MinecraftServer) (Object) this).isSameThread();
     }
 
     @Override
