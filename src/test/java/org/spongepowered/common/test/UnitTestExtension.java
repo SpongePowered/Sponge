@@ -30,11 +30,19 @@ import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.launch.Launch;
 
+import java.lang.reflect.Field;
+
 public final class UnitTestExtension implements BeforeAllCallback {
+
+    private static boolean hasCreatedTestCorePlatform = false;
+
     @Override
     public void beforeAll(final ExtensionContext context) throws Exception {
-        AppLaunch.setCorePlatform(new TestCorePlatform());
-        Launch.setInstance(new TestLaunch());
+        if (!UnitTestExtension.hasCreatedTestCorePlatform) {
+            AppLaunch.setCorePlatform(new TestCorePlatform());
+            Launch.setInstance(new TestLaunch());
+            UnitTestExtension.hasCreatedTestCorePlatform = true;
+        }
         SpongeConfigs.getCommon();
     }
 }
