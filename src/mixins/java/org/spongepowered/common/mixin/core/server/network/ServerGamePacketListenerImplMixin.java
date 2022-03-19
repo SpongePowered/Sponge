@@ -82,6 +82,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.entity.ChangeSignEvent;
+import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
@@ -300,6 +301,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
         boolean cancelRotation = false;
         // Call move & rotate event as needed...
         if (fireMoveEvent) {
+            PhaseTracker.getCauseStackManager().addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerPlayer) this.player, fromPosition,
                     toPosition, toPosition);
             if (SpongeCommon.post(event)) {
@@ -307,6 +309,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
             } else {
                 toPosition = event.destinationPosition();
             }
+            PhaseTracker.getCauseStackManager().removeContext(EventContextKeys.MOVEMENT_TYPE);
         }
 
         if (significantRotation && fireRotationEvent) {

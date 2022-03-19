@@ -33,22 +33,26 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.CommonParameters;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.cause.entity.MovementType;
+import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
-import org.spongepowered.api.event.filter.cause.Root;
+import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
+
+import java.util.Optional;
 
 @Plugin("movementtest")
 public final class MovementTest implements LoadableModule {
@@ -56,12 +60,10 @@ public final class MovementTest implements LoadableModule {
     static final Marker marker = MarkerManager.getMarker("MOVEMENT");
 
     final PluginContainer plugin;
-    boolean cancelAll = false;
-    boolean waterProofRedstone = false;
-    boolean printMoveEntityEvents = false;
     boolean printRotationEvents = false;
     boolean cancelMovement = false;
     boolean teleportOnMove = false;
+    boolean cancelUnnaturalMovement = false;
 
     @Inject
     public MovementTest(final PluginContainer plugin) {
@@ -70,140 +72,112 @@ public final class MovementTest implements LoadableModule {
 
     @Override
     public void enable(final CommandContext ctx) {
-        Sponge.eventManager().registerListeners(this.plugin, new MoveEntityListener());
-        Sponge.eventManager().registerListeners(this.plugin, new RotationEventListener());
-        Sponge.eventManager().registerListeners(this.plugin, new MoveEntityTeleportListener());
-        Sponge.eventManager().registerListeners(this.plugin, new MoveEntityCancellation());
+        Sponge.eventManager().registerListeners(this.plugin, new MovementTestListener());
     }
 
     @Listener
     public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
 
+        final Command.Parameterized toggleAllMovement = Command.builder().executor(this::toggleMovement).build();
+        final Command.Parameterized toggleUnnaturalMovement = Command.builder().executor(this::toggleUnnatural).build();
+        final Command.Parameterized teleportOnMove = Command.builder().executor(this::teleportOnMove).build();
+        final Command.Parameterized setPos = Command.builder().addParameter(CommonParameters.POSITION).executor(this::setPos).build();
+        final Command.Parameterized setLoc = Command.builder().addParameter(CommonParameters.LOCATION_ONLINE_ONLY).executor(this::setLoc).build();
 
         event.register(this.plugin, Command.builder()
-            .executor(context -> {
-                this.cancelMovement = !this.cancelMovement;
-                final Component newState = Component.text(this.cancelMovement ? "OFF" : "ON", this.cancelMovement ? NamedTextColor.RED : NamedTextColor.GREEN);
-                context.sendMessage(Identity.nil(), Component.text("Cancel Entity Movement : ").append(newState));
+                .addChild(toggleAllMovement, "toggleAllMovement")
+                .addChild(toggleUnnaturalMovement, "toggleUnnaturalMovement")
+                .addChild(teleportOnMove, "teleportOnMove")
+                .addChild(setPos, "setpos")
+                .addChild(setLoc, "setloc")
+                .build(), "movementtest");
+    }
+
+    private CommandResult setPos(CommandContext context) {
+        if (context.cause().root() instanceof ServerPlayer) {
+            final ServerPlayer serverPlayer = (ServerPlayer) context.cause().root();
+            final boolean success = serverPlayer.setPosition(context.requireOne(CommonParameters.POSITION));
+            if (success) {
+                context.sendMessage(Identity.nil(), Component.text("Successfully changed position"));
                 return CommandResult.success();
-            })
-            .build(), "toggleMovement"
-        );
-        event.register(this.plugin, Command.builder()
-            .executor(context -> {
-                this.teleportOnMove = !this.teleportOnMove;
-                final Component newState = Component.text(this.teleportOnMove ? "ON" : "OFF", this.teleportOnMove ? NamedTextColor.GREEN : NamedTextColor.RED);
-                context.sendMessage(Identity.nil(), Component.text("Teleport Entity on Movement : ").append(newState));
+            }
+            return CommandResult.error(Component.text("Could not change position."));
+        }
+        return CommandResult.error(Component.text("You must be a player to set your position."));
+    }
+
+    private CommandResult setLoc(CommandContext context) {
+        if (context.cause().root() instanceof ServerPlayer) {
+            final ServerPlayer serverPlayer = (ServerPlayer) context.cause().root();
+            final boolean success = serverPlayer.setLocation(context.requireOne(CommonParameters.LOCATION_ONLINE_ONLY));
+            if (success) {
+                context.sendMessage(Identity.nil(), Component.text("Successfully changed location"));
                 return CommandResult.success();
-            })
-            .build(), "toggleTeleportOnMove"
-        );
-        event.register(this.plugin, Command.builder()
-            .addParameter(CommonParameters.POSITION)
-            .executor(context -> {
-                if (context.cause().root() instanceof ServerPlayer) {
-                    final ServerPlayer serverPlayer = (ServerPlayer) context.cause().root();
-                    final boolean success = serverPlayer.setPosition(context.requireOne(CommonParameters.POSITION));
-                    if (success) {
-                        context.sendMessage(Identity.nil(), Component.text("Successfully changed position"));
-                        return CommandResult.success();
-                    } else {
-                        return CommandResult.error(Component.text("Could not change position."));
-                    }
-                } else {
-                    return CommandResult.error(Component.text("You must be a player to set your position."));
+            }
+            return CommandResult.error(Component.text("Could not change location."));
+        }
+        return CommandResult.error(Component.text("You must be a player to set your location."));
+    }
+
+    private CommandResult toggleMovement(CommandContext context) {
+        this.cancelMovement = !this.cancelMovement;
+        final Component newState = Component.text(this.cancelMovement ? "OFF" : "ON", this.cancelMovement ? NamedTextColor.RED : NamedTextColor.GREEN);
+        context.sendMessage(Identity.nil(), Component.text("Cancel Player All Movement : ").append(newState));
+        return CommandResult.success();
+    }
+
+    private CommandResult toggleUnnatural(CommandContext context) {
+        this.cancelUnnaturalMovement = !this.cancelUnnaturalMovement;
+        final Component newState = Component.text(this.cancelUnnaturalMovement ? "OFF" : "ON", this.cancelUnnaturalMovement ? NamedTextColor.RED : NamedTextColor.GREEN);
+        context.sendMessage(Identity.nil(), Component.text("Cancel Player Unnatural Movement : ").append(newState));
+        return CommandResult.success();
+    }
+
+    private CommandResult teleportOnMove(CommandContext context) {
+        this.teleportOnMove = !this.teleportOnMove;
+        final Component newState = Component.text(this.teleportOnMove ? "ON" : "OFF", this.teleportOnMove ? NamedTextColor.GREEN : NamedTextColor.RED);
+        context.sendMessage(Identity.nil(), Component.text("Teleport Player on Movement : ").append(newState));
+        return CommandResult.success();
+    }
+
+    public final class MovementTestListener {
+        @Listener
+        public void onRotatePlayer(final RotateEntityEvent event, final @Getter("entity") ServerPlayer player) {
+            if (MovementTest.this.printRotationEvents) {
+                final Logger pluginLogger = MovementTest.this.plugin.logger();
+                pluginLogger.log(Level.INFO, MovementTest.marker, "/*************");
+                pluginLogger.log(Level.INFO, MovementTest.marker, "/* RotateEntityEvent");
+                pluginLogger.log(Level.INFO, MovementTest.marker, "/");
+                pluginLogger.log(Level.INFO, MovementTest.marker, "/ Cause:");
+                for (final Object o : event.cause()) {
+                    pluginLogger.log(Level.INFO, MovementTest.marker, "/ - " + o);
                 }
-            }).build(), "setpos");
-        event.register(this.plugin, Command.builder()
-            .addParameter(CommonParameters.LOCATION_ONLINE_ONLY)
-            .executor(context -> {
-                if (context.cause().root() instanceof ServerPlayer) {
-                    final ServerPlayer serverPlayer = (ServerPlayer) context.cause().root();
-                    final boolean success = serverPlayer.setLocation(context.requireOne(CommonParameters.LOCATION_ONLINE_ONLY));
-                    if (success) {
-                        context.sendMessage(Identity.nil(), Component.text("Successfully changed location"));
-                        return CommandResult.success();
-                    } else {
-                        return CommandResult.error(Component.text("Could not change location."));
-                    }
-                } else {
-                    return CommandResult.error(Component.text("You must be a player to set your location."));
+                pluginLogger.log(Level.INFO, MovementTest.marker, "/");
+            }
+        }
+
+        @Listener
+        public void onMovePlayer(final MoveEntityEvent event, final @Getter("entity") ServerPlayer player) {
+            final Optional<MovementType> type = event.context().get(EventContextKeys.MOVEMENT_TYPE);
+            final Logger logger = MovementTest.this.plugin.logger();
+            logger.info(MovementTest.marker, player.name() + ": Movement Type: " + type.map(t -> RegistryTypes.MOVEMENT_TYPE.get().valueKey(t).toString()).orElse("?"));
+
+            if (MovementTest.this.cancelMovement) {
+                event.setCancelled(true);
+                return;
+            }
+            if (MovementTest.this.cancelUnnaturalMovement && type.map(t -> !t.equals(MovementTypes.NATURAL.get())).orElse(false)) {
+                event.setCancelled(true);
+                return;
+            }
+            if (MovementTest.this.teleportOnMove) {
+                final Vector3d sub = event.originalDestinationPosition().sub(event.originalPosition());
+                if (sub.lengthSquared() != 0) {
+                    final Vector3d mul = sub.normalize().mul(5);
+                    event.setDestinationPosition(event.originalDestinationPosition().add(mul));
+                    MovementTest.this.teleportOnMove = false;
+                    return;
                 }
-            }).build(), "setlocation");
-    }
-
-    public final class RotationEventListener {
-        @Listener
-        public void onEntitySpawn(final RotateEntityEvent event) {
-            if (!MovementTest.this.printRotationEvents) {
-                return;
-            }
-            final Logger pluginLogger = MovementTest.this.plugin.logger();
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/*************");
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/* RotateEntityEvent");
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/");
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/ Cause:");
-            for (final Object o : event.cause()) {
-                pluginLogger.log(Level.INFO, MovementTest.marker, "/ - " + o);
-            }
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/");
-        }
-    }
-
-    public final class MoveEntityTeleportListener {
-        @Listener
-        public void onEntitySpawn(final MoveEntityEvent event, final @Root Player player) {
-            if (!MovementTest.this.teleportOnMove) {
-                return;
-            }
-            final Logger pluginLogger = MovementTest.this.plugin.logger();
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/*************");
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/* MoveEntityEvent testing with teleport");
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/");
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/ Cause:");
-            for (final Object o : event.cause()) {
-                pluginLogger.log(Level.INFO, MovementTest.marker, "/ - " + o);
-            }
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/");
-            final Vector3d sub = event.originalDestinationPosition().sub(event.originalPosition());
-            final Vector3d mul = sub.mul(5);
-            event.setDestinationPosition(event.originalDestinationPosition().add(mul));
-            MovementTest.this.teleportOnMove = false;
-        }
-    }
-
-    public class MoveEntityCancellation {
-        @Listener
-        public void onEntitySpawn(final MoveEntityEvent event, @Root Player player) {
-            if (!MovementTest.this.cancelMovement) {
-                return;
-            }
-            event.setCancelled(true);
-        }
-    }
-
-    public class MoveEntityListener {
-        @Listener
-        public void onChangeBlock(final MoveEntityEvent post) {
-            if (!MovementTest.this.printMoveEntityEvents) {
-                return;
-            }
-            final Logger pluginLogger = MovementTest.this.plugin.logger();
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/*************");
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/* MoveEntityEvent");
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/");
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/* Event Impl: " + post.getClass().getSimpleName());
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/");
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/ Cause:");
-            for (final Object o : post.cause()) {
-                pluginLogger.log(Level.INFO, MovementTest.marker, "/ - " + o);
-            }
-            pluginLogger.log(Level.INFO, MovementTest.marker, "/");
-            if (MovementTest.this.cancelAll && post.cause().containsType(BlockSnapshot.class)) {
-                post.setCancelled(true);
-            }
-            if (MovementTest.this.waterProofRedstone) {
-
             }
         }
     }
