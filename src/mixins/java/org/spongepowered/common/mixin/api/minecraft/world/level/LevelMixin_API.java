@@ -126,6 +126,9 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     @Shadow public abstract <T extends net.minecraft.world.entity.Entity> List<T> shadow$getEntitiesOfClass(Class<? extends T> param0,
             net.minecraft.world.phys.AABB param1,
             @org.jetbrains.annotations.Nullable Predicate<? super T> param2);
+    @Shadow public abstract boolean shadow$destroyBlock(BlockPos p_241212_1_, boolean p_241212_2_,
+            @org.jetbrains.annotations.Nullable net.minecraft.world.entity.Entity p_241212_3_, int p_241212_4_);
+    @Shadow public abstract boolean shadow$setBlock(BlockPos p_180501_1_, BlockState p_180501_2_, int p_180501_3_);
     // @formatter:on
 
     private Context api$context;
@@ -273,7 +276,6 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     @Override
     public void resetBlockChange(final int x, final int y, final int z) {
         final ClientboundBlockUpdatePacket packet = new ClientboundBlockUpdatePacket((LevelReader) this, new BlockPos(x, y, z));
-
         ((net.minecraft.world.level.Level) (Object) this).players().stream()
                 .filter(ServerPlayer.class::isInstance)
                 .map(ServerPlayer.class::cast)

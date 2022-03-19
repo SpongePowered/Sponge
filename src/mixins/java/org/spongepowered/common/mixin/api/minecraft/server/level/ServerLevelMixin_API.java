@@ -35,6 +35,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ProgressListener;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
@@ -47,25 +49,30 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.ServerLevelData;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.fluid.FluidType;
-import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.registry.RegistryScope;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.server.ChunkManager;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.storage.ChunkLayout;
@@ -78,18 +85,20 @@ import org.spongepowered.common.accessor.world.entity.raid.RaidsAccessor;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.data.holder.SpongeLocationBaseDataHolder;
+import org.spongepowered.common.entity.player.SpongeFakePlayer;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.api.minecraft.world.level.LevelMixin_API;
-import org.spongepowered.common.util.MissingImplementationException;
+import org.spongepowered.common.profile.SpongeGameProfile;
+import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -97,10 +106,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerLevel.class)
-public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowered.api.world.server.ServerWorld, ServerLocation> implements
-    org.spongepowered.api.world.server.ServerWorld, SpongeLocationBaseDataHolder {
+public abstract class ServerLevelMixin_API extends LevelMixin_API<ServerWorld, ServerLocation> implements ServerWorld, SpongeLocationBaseDataHolder {
 
     // @formatter:off
     @Shadow @Final private ServerTickList<Block> blockTicks;
@@ -320,6 +331,81 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Override
     public ChunkManager chunkManager() {
         return (ChunkManager) this.shadow$getChunkSource().chunkMap;
+    }
+
+    // InteractableVolume
+
+    // TODO !!! TESTING TESTING TESTING !!!
+
+    @Override
+    public boolean hitBlock(int x, int y, int z, Direction side, GameProfile profile) {
+        final BlockPos pos = new BlockPos(x, y, z);
+        final Player fakePlayer = new SpongeFakePlayer((ServerLevel) (Object) this, SpongeGameProfile.toMcProfile(profile));
+        this.shadow$getBlockState(pos).attack((Level) (Object) this, pos, fakePlayer);
+        return true;
+    }
+
+    @Override
+    public boolean interactBlock(int x, int y, int z, Direction side, GameProfile profile) {
+        final BlockPos pos = new BlockPos(x, y, z);
+        final BlockHitResult blockHit = new BlockHitResult(Vec3.atBottomCenterOf(pos), DirectionUtil.getFor(side), pos, false);
+        final Player fakePlayer = new SpongeFakePlayer((ServerLevel) (Object) this, SpongeGameProfile.toMcProfile(profile));
+        final InteractionResult result = this.shadow$getBlockState(pos).use((Level) (Object) this,
+                fakePlayer, InteractionHand.MAIN_HAND, blockHit);
+        return result == InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public boolean interactBlockWith(int x, int y, int z, ItemStack itemStack, Direction side, GameProfile profile) {
+        final BlockPos pos = new BlockPos(x, y, z);
+        final BlockHitResult blockHit = new BlockHitResult(Vec3.atBottomCenterOf(pos), DirectionUtil.getFor(side), pos, false);
+        final Player fakePlayer = new SpongeFakePlayer((ServerLevel) (Object) this, SpongeGameProfile.toMcProfile(profile));
+        fakePlayer.setItemInHand(InteractionHand.MAIN_HAND, ItemStackUtil.toNative(itemStack));
+        // TODO useOn with item
+        final InteractionResult result = this.shadow$getBlockState(pos).use((Level) (Object) this,
+                fakePlayer, InteractionHand.MAIN_HAND, blockHit);
+        return result == InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public boolean placeBlock(int x, int y, int z, BlockState block, Direction side, GameProfile profile) {
+        final BlockPos pos = new BlockPos(x, y, z);
+        final Player fakePlayer = new SpongeFakePlayer((ServerLevel) (Object) this, SpongeGameProfile.toMcProfile(profile));
+        final net.minecraft.world.level.block.state.BlockState blockState = (net.minecraft.world.level.block.state.BlockState) block;
+        // see BlockItem#place
+        final boolean set = this.shadow$setBlock(pos, blockState, 2);
+        blockState.getBlock().setPlacedBy((Level) (Object) this, pos, blockState, fakePlayer, net.minecraft.world.item.ItemStack.EMPTY);
+        return set;
+    }
+
+    @Override
+    public boolean digBlock(int x, int y, int z, GameProfile profile) {
+        final BlockPos pos = new BlockPos(x, y, z);
+        final Player fakePlayer = new SpongeFakePlayer((ServerLevel) (Object) this, SpongeGameProfile.toMcProfile(profile));
+        return this.shadow$destroyBlock(pos, true, fakePlayer, 512);
+    }
+
+    @Override
+    public boolean digBlockWith(int x, int y, int z, ItemStack itemStack, GameProfile profile) {
+        final BlockPos pos = new BlockPos(x, y, z);
+        final net.minecraft.world.level.block.state.BlockState blockState = this.shadow$getBlockState(pos);
+        final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.toNative(itemStack);
+        final boolean doDrops = nativeStack.isCorrectToolForDrops(blockState);
+        final Player fakePlayer = new SpongeFakePlayer((ServerLevel) (Object) this, SpongeGameProfile.toMcProfile(profile));
+        return this.shadow$destroyBlock(pos, doDrops, fakePlayer, 512);
+    }
+
+    @Override
+    public Duration blockDigTimeWith(int x, int y, int z, ItemStack itemStack, GameProfile profile) {
+        final BlockPos pos = new BlockPos(x, y, z);
+        final net.minecraft.world.level.block.state.BlockState blockState = this.shadow$getBlockState(pos);
+        final Player fakePlayer = new SpongeFakePlayer((ServerLevel) (Object) this, SpongeGameProfile.toMcProfile(profile));
+        fakePlayer.setItemInHand(InteractionHand.MAIN_HAND, ItemStackUtil.toNative(itemStack));
+        final float speed = blockState.getDestroyProgress(fakePlayer, (Level) (Object) this, pos);
+        if (speed > 1f) {
+            return Duration.ZERO;
+        }
+        return Ticks.of((int) Math.ceil(1 / speed)).expectedDuration(Sponge.server());
     }
 
 }
