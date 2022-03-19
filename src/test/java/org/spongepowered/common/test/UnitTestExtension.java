@@ -30,14 +30,12 @@ import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.launch.Launch;
 
-import java.lang.reflect.Field;
-
 public final class UnitTestExtension implements BeforeAllCallback {
 
     private static boolean hasCreatedTestCorePlatform = false;
 
     @Override
-    public void beforeAll(final ExtensionContext context) throws Exception {
+    public void beforeAll(final ExtensionContext context) {
         if (!UnitTestExtension.hasCreatedTestCorePlatform) {
             AppLaunch.setCorePlatform(new TestCorePlatform());
             Launch.setInstance(new TestLaunch());
