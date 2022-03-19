@@ -45,10 +45,13 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.world.UnloadWorldEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectProxy;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -164,6 +167,14 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Override
     public void bridge$addToCauseStack(final CauseStackManager.StackFrame frame) {
         frame.pushCause(Sponge.systemSubject());
+    }
+
+    @Inject(method = "stopServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;saveAllChunks(ZZZ)Z"))
+    private void impl$callUnloadWorldEvents(final CallbackInfo ci) {
+        for(ServerLevel level : this.shadow$getAllLevels()) {
+            final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerWorld) level);
+            SpongeCommon.post(unloadWorldEvent);
+        }
     }
 
     @Inject(method = "stopServer", at = @At(value = "TAIL"))
