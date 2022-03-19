@@ -29,9 +29,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,7 +37,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedAccessorError;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Mixin(Entity.class)
@@ -56,7 +54,7 @@ public interface EntityAccessor {
     }
 
     @Accessor("DATA_CUSTOM_NAME")
-    static EntityDataAccessor<Component> accessor$DATA_CUSTOM_NAME() {
+    static EntityDataAccessor<Optional<Component>> accessor$DATA_CUSTOM_NAME() {
         throw new UntransformedAccessorError();
     }
 
