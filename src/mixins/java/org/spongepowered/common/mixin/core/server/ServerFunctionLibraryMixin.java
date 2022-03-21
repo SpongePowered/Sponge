@@ -79,7 +79,14 @@ public abstract class ServerFunctionLibraryMixin implements ServerFunctionLibrar
             final Executor param5,
             final CallbackInfoReturnable<CompletableFuture<Void>> cir) {
         if (!Sponge.isServerAvailable()) {
-            this.impl$capturedReload = () -> this.shadow$reload(param0, param1, param2, param3, param4, param5);
+            final PreparableReloadListener.PreparationBarrier dummy = new PreparableReloadListener.PreparationBarrier() {
+                @Override
+                public <T> CompletableFuture<T> wait(final T var1) {
+                    return CompletableFuture.completedFuture(null);
+                }
+            };
+            this.impl$capturedReload = () -> this.shadow$reload(dummy, param1, param2, param3, param4, param5);
+            param0.wait(null);
             cir.setReturnValue(CompletableFuture.completedFuture(null));
         }
     }
