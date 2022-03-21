@@ -29,6 +29,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerFunctionManager;
+import net.minecraft.server.ServerResources;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
@@ -69,6 +71,7 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.commands.CommandSourceBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
+import org.spongepowered.common.bridge.server.ServerFunctionLibraryBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -109,9 +112,11 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract PackRepository shadow$getPackRepository();
     @Shadow protected abstract void shadow$detectBundledResources();
 
-    @Shadow protected abstract void loadLevel();
+    @Shadow protected abstract void shadow$loadLevel();
     // @formatter:on
 
+    @Shadow @Final private ServerFunctionManager functionManager;
+    @Shadow private ServerResources resources;
     private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
     private @Nullable ResourcePack impl$resourcePack;
 
@@ -329,6 +334,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         if (this.impl$serviceProvider == null) {
             this.impl$serviceProvider = new SpongeServerScopedServiceProvider(this, game, injector);
             this.impl$serviceProvider.init();
+
+            // We now have our services, so we can replay the captured reload for the function library.
+            // We let this go at its own pace.
+            ((ServerFunctionLibraryBridge) this.resources.getFunctionLibrary()).bridge$triggerCapturedReload();
         }
     }
 

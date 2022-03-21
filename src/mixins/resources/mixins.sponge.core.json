@@ -50,6 +50,7 @@
         "server.MainMixin",
         "server.MinecraftServerMixin",
         "server.PlayerAdvancementsMixin",
+        "server.ServerFunctionLibraryMixin",
         "server.ServerFunctionManagerMixin",
         "server.ServerScoreboardMixin",
         "server.bossevents.CustomBossEventMixin",
