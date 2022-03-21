@@ -103,6 +103,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow @Final private static Logger LOGGER;
     @Shadow private int tickCount;
     @Shadow @Final protected LevelStorageSource.LevelStorageAccess storageSource;
+    @Shadow private ServerResources resources;
 
     @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
     @Shadow public abstract Iterable<ServerLevel> shadow$getAllLevels();
@@ -111,12 +112,8 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract PackRepository shadow$getPackRepository();
     @Shadow protected abstract void shadow$detectBundledResources();
-
-    @Shadow protected abstract void shadow$loadLevel();
     // @formatter:on
 
-    @Shadow @Final private ServerFunctionManager functionManager;
-    @Shadow private ServerResources resources;
     private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
     private @Nullable ResourcePack impl$resourcePack;
 
@@ -153,6 +150,14 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Override
     public ResourcePack bridge$getResourcePack() {
         return this.impl$resourcePack;
+    }
+
+    @Inject(method = "loadLevel", at = @At("HEAD"), cancellable = true)
+    private void impl$overrideLoadLevel(final CallbackInfo ci) {
+        this.impl$loadLevel(ci);
+    }
+
+    protected void impl$loadLevel(final CallbackInfo ci) {
     }
 
     @Inject(method = "tickServer", at = @At(value = "HEAD"))

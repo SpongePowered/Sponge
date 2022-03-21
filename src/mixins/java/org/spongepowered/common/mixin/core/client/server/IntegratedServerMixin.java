@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.client.server;
 import net.minecraft.client.server.IntegratedServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 
 @Mixin(IntegratedServer.class)
@@ -37,9 +38,10 @@ public abstract class IntegratedServerMixin extends MinecraftServerMixin {
     // @formatter:on
 
     @Override
-    public void shadow$loadLevel() {
+    public void impl$loadLevel(final CallbackInfo ci) {
         this.shadow$detectBundledResources();
         this.worldManager().loadLevel();
+        ci.cancel();
     }
 
     @Override
