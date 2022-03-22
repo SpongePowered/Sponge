@@ -316,6 +316,13 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     @Override
+    public Collection<ServerWorld> worldsOfType(final WorldType type) {
+        Objects.requireNonNull(type, "type");
+
+        return this.worlds().stream().filter(w -> w.worldType() == type).collect(Collectors.toList());
+    }
+
+    @Override
     public CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld(final WorldTemplate template) {
         final ResourceKey key = Objects.requireNonNull(template, "template").key();
         final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(key);
