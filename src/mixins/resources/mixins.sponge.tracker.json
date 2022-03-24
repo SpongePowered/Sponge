@@ -16,6 +16,7 @@
         "server.level.ServerChunkCacheMixin_Tracker",
         "server.level.ServerLevelMixin_Tracker",
         "server.level.ServerPlayerGameModeMixin_Tracker",
+        "server.level.ServerPlayerGameModeMixin_UseItemOverwrite_Tracker",
         "server.level.ServerPlayerMixin_Tracker",
         "server.network.ServerGamePacketListenerImplMixin_Tracker",
         "server.players.PlayerListMixin_Tracker",
