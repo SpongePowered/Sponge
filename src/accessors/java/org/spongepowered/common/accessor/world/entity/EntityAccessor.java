@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedAccessorError;
 
+import java.util.Optional;
 import java.util.Random;
 
 @Mixin(Entity.class)
@@ -56,7 +57,7 @@ public interface EntityAccessor {
     }
 
     @Accessor("DATA_CUSTOM_NAME")
-    static EntityDataAccessor<Component> accessor$DATA_CUSTOM_NAME() {
+    static EntityDataAccessor<Optional<Component>> accessor$DATA_CUSTOM_NAME() {
         throw new UntransformedAccessorError();
     }
 

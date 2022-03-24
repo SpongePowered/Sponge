@@ -1189,6 +1189,7 @@ public final class Constants {
         public static final DataQuery Y_POS = of("y");
         public static final DataQuery Z_POS = of("z");
         public static final DataQuery W_POS = of("w");
+        public static final DataQuery DIRECTION = of("Direction");
     }
 
     public static final class Fluids {

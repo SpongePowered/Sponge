@@ -22,11 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge;
+package org.spongepowered.common.world;
 
-import co.aikar.timings.Timing;
+import net.minecraft.world.level.Level;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.world.DefaultWorldKeys;
 
-public interface TimingBridge {
+public final class SpongeDefaultWorldKeysFactory implements DefaultWorldKeys.Factory {
 
-    Timing bridge$timings();
+    @Override
+    public ResourceKey defaultWorld() {
+        return (ResourceKey) (Object) Level.OVERWORLD.location();
+    }
+
+    @Override
+    public ResourceKey theNether() {
+        return (ResourceKey) (Object) Level.NETHER.location();
+    }
+
+    @Override
+    public ResourceKey theEnd() {
+        return (ResourceKey) (Object) Level.END.location();
+    }
 }

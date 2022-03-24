@@ -58,8 +58,6 @@ public interface Lifecycle {
 
     void callRegisterChannelEvent();
 
-    void initTimings();
-
     void establishGameServices();
 
     void establishServerServices();

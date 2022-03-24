@@ -30,6 +30,7 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -37,8 +38,6 @@ import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
@@ -52,8 +51,7 @@ import java.util.UUID;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(PrimaryLevelData.class)
-@Implements(@Interface(iface = ServerWorldProperties.class, prefix = "serverWorldProperties$"))
-public abstract class PrimaryLevelDataMixin_API implements ServerWorldProperties {
+public abstract class PrimaryLevelDataMixin_API implements WorldData, ServerWorldProperties {
 
     // @formatter:off
     @Shadow private UUID wanderingTraderId;
@@ -72,6 +70,11 @@ public abstract class PrimaryLevelDataMixin_API implements ServerWorldProperties
     @Override
     public Optional<ServerWorld> world() {
         return Optional.ofNullable((ServerWorld) ((PrimaryLevelDataBridge) this).bridge$world());
+    }
+
+    @Override
+    public String name() {
+        return this.getLevelName();
     }
 
     @Override

@@ -31,8 +31,10 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 
 import java.lang.reflect.Type;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 class DelegateDataProvider<V extends Value<E>, E> implements DataProvider<V, E> {
 
@@ -40,8 +42,44 @@ class DelegateDataProvider<V extends Value<E>, E> implements DataProvider<V, E> 
     private final List<DataProvider<V, E>> providers;
 
     DelegateDataProvider(Key<V> key, List<DataProvider<V, E>> providers) {
-        this.providers = providers;
+        this.providers = providers.stream().sorted(HierarchyComparator.COMPARATOR).collect(Collectors.toList());
         this.key = key;
+    }
+
+    public static class HierarchyComparator implements Comparator<DataProvider> {
+        public static final HierarchyComparator COMPARATOR = new HierarchyComparator();
+
+        public int compare(DataProvider c1, DataProvider c2) {
+            if (c1.equals(c2)) {
+                return 0;
+            }
+            final boolean firstKnown = c1 instanceof AbstractDataProvider.KnownHolderType;
+            final boolean secondKnown = c2 instanceof AbstractDataProvider.KnownHolderType;
+            if (firstKnown && secondKnown) {
+                final Class<?> firstType = ((AbstractDataProvider.KnownHolderType) c1).getHolderType();
+                final Class<?> secondType = ((AbstractDataProvider.KnownHolderType) c2).getHolderType();
+                if (firstType.equals(secondType)) {
+                    return 0;
+                }
+                if (firstType.isAssignableFrom(secondType)) {
+                    return 1;
+                }
+                if (secondType.isAssignableFrom(firstType)) {
+                    return -1;
+                }
+                return firstType.toString().compareTo(secondType.toString());
+            }
+            if (firstKnown) {
+                return 1;
+            }
+            if (secondKnown) {
+                return -1;
+            }
+            return 0;
+        }
+
+        private HierarchyComparator() {
+        }
     }
 
     @Override

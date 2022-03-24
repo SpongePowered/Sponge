@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import co.aikar.timings.Timing;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -37,7 +36,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RedstoneLampBlock;
 import net.minecraft.world.level.block.RedstoneTorchBlock;
 import net.minecraft.world.level.block.RepeaterBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.material.FluidState;
 import org.apache.logging.log4j.Level;
@@ -47,8 +45,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.TickBlockEvent;
@@ -61,7 +61,6 @@ import org.spongepowered.common.accessor.world.level.chunk.LevelChunk$Rebindable
 import org.spongepowered.common.accessor.world.level.chunk.LevelChunkAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
@@ -91,6 +90,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -116,10 +116,7 @@ public final class TrackingUtil {
         }
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
-        try (final EntityTickContext context = tickContext;
-             final Timing entityTiming = ((TimingBridge) entity.getType()).bridge$timings()
-        ) {
-            entityTiming.startTiming();
+        try (final EntityTickContext context = tickContext) {
             if (entity instanceof CreatorTrackedBridge) {
                 ((CreatorTrackedBridge) entity).tracker$getNotifierUUID().ifPresent(context::notifier);
                 ((CreatorTrackedBridge) entity).tracker$getCreatorUUID().ifPresent(context::creator);
@@ -183,11 +180,8 @@ public final class TrackingUtil {
             // Finally, switch the context now that we have the owner and notifier
             phaseContext.buildAndSwitch();
 
-            try (final Timing timing = ((TimingBridge) blockEntity.getType()).bridge$timings().startTiming()) {
-                PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_ENTITY_TICK, () -> "Wrapping Entity Tick: " + tile.toString());
-                tile.tick();
-            }
-
+            PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_ENTITY_TICK, () -> "Wrapping Entity Tick: " + tile.toString());
+            tile.tick();
 
             // If we know the viewers force broadcast now to associate the inventory change with its blockentity
             // otherwise the viewing players update this during their ticking
@@ -207,6 +201,7 @@ public final class TrackingUtil {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     public static void updateTickBlock(
             final TrackedWorldBridge mixinWorld, final net.minecraft.world.level.block.state.BlockState block, final BlockPos pos, final Random random) {
         final ServerLevel world = (ServerLevel) mixinWorld;
@@ -229,9 +224,7 @@ public final class TrackingUtil {
         currentContext.appendNotifierPreBlockTick(world, pos, phaseContext);
         // Now actually switch to the new phase
 
-        try (final PhaseContext<@NonNull ?> context = phaseContext;
-             final Timing timing = ((TimingBridge) block.getBlock()).bridge$timings()) {
-            timing.startTiming();
+        try (final PhaseContext<@NonNull ?> context = phaseContext) {
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, () -> "Wrapping Block Tick: " + block.toString());
             block.tick(world, pos, random);
@@ -267,9 +260,7 @@ public final class TrackingUtil {
         currentContext.appendNotifierPreBlockTick(world, pos, phaseContext);
         // Now actually switch to the new phase
 
-        try (final PhaseContext<?> context = phaseContext;
-            final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$timings()) {
-            timing.startTiming();
+        try (final PhaseContext<?> context = phaseContext) {
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.FLUID_TICK, () -> "Wrapping Fluid Tick: " + fluidState.toString());
             fluidState.tick(world, pos);
@@ -279,6 +270,7 @@ public final class TrackingUtil {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     public static void randomTickBlock(final TrackedWorldBridge mixinWorld,
                                        final net.minecraft.world.level.block.state.BlockState state, final BlockPos pos, final Random random) {
         final ServerLevel world = (ServerLevel) mixinWorld;
@@ -314,7 +306,7 @@ public final class TrackingUtil {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
         }
     }
-
+    @SuppressWarnings("rawtypes")
     public static void randomTickFluid(final TrackedWorldBridge mixinWorld,
         final FluidState state, final BlockPos pos, final Random random) {
         final ServerLevel world = (ServerLevel) mixinWorld;

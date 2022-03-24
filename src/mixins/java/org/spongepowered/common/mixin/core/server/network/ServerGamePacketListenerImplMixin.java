@@ -58,6 +58,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.TextFilter;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -82,6 +83,8 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.entity.ChangeSignEvent;
+import org.spongepowered.api.event.cause.entity.MovementTypes;
+import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
@@ -304,6 +307,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         boolean cancelRotation = false;
         // Call move & rotate event as needed...
         if (fireMoveEvent) {
+            PhaseTracker.getCauseStackManager().addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerPlayer) this.player, fromPosition,
                     toPosition, toPosition);
             if (SpongeCommon.post(event)) {
@@ -311,6 +315,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
             } else {
                 toPosition = event.destinationPosition();
             }
+            PhaseTracker.getCauseStackManager().removeContext(EventContextKeys.MOVEMENT_TYPE);
         }
 
         if (significantRotation && fireRotationEvent) {

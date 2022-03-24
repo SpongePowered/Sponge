@@ -23,7 +23,6 @@
         "minecraftforge.util.ITeleporterMixin_Forge",
         "server.BootstrapMixin_Forge",
         "server.MinecraftServerMixin_Forge",
-        "server.level.ServerLevelMixin_Timings_Forge",
         "server.level.ServerPlayerMixin_Forge",
         "server.network.ServerGamePacketListenerImplMixin_Forge",
         "world.entity.EntityMixin_Forge",

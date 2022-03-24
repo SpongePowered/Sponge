@@ -28,7 +28,6 @@ val mixinVersion: String by project
 val guavaVersion: String by project
 val junitVersion: String by project
 val mockitoVersion: String by project
-val timingsVersion: String by project
 val checkerVersion: String by project
 
 val commonManifest = the<JavaPluginConvention>().manifest {
@@ -157,9 +156,6 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.20.0")
     implementation("javax.inject:javax.inject:1")
 
-    // Timings
-    implementation("org.spongepowered:timings:$timingsVersion")
-
     // ASM - required for generating event listeners
     implementation("org.ow2.asm:asm-util:$asmVersion")
     implementation("org.ow2.asm:asm-tree:$asmVersion")
@@ -204,7 +200,6 @@ dependencies {
     applaunchConfig("org.apache.logging.log4j:log4j-jpl:$log4jVersion")
 
     mixinsConfig(sourceSets.named("main").map { it.output })
-    mixinsConfig("org.spongepowered:timings:$timingsVersion")
     add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 
     // Tests

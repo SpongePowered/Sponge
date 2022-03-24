@@ -69,7 +69,6 @@ import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.chat.HoverEvent_ItemStackInfoAccessor;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.adventure.ComponentBridge;
@@ -131,10 +130,6 @@ public final class SpongeAdventure {
             .build();
 
     private static final Set<ServerBossEvent> ACTIVE_BOSS_BARS = ConcurrentHashMap.newKeySet();
-
-    public static ComponentFlattener flattener() {
-        return ComponentFlattenerProvider.INSTANCE;
-    }
 
     // --------------
     // ---- Core ----
@@ -622,10 +617,10 @@ public final class SpongeAdventure {
         return SpongeAdventure.asVanilla(source);
     }
 
-    public static Iterable<? extends Audience> unpackAudiences(Audience audience) {
+    public static Iterable<? extends Audience> unpackAudiences(final Audience audience) {
         if (audience instanceof ForwardingAudience) {
-            List<Audience> list = new ArrayList<>();
-            for (Audience subAudience : ((ForwardingAudience) audience).audiences()) {
+            final List<Audience> list = new ArrayList<>();
+            for (final Audience subAudience : ((ForwardingAudience) audience).audiences()) {
                 SpongeAdventure.unpackAudiences(subAudience).forEach(list::add);
             }
             return list;
@@ -682,6 +677,11 @@ public final class SpongeAdventure {
             final @NonNull DefaultedRegistryReference<ResolveOperation>@NonNull... otherOperations
         ) {
             return this.render(component, senderContext, null, firstOperation, otherOperations);
+        }
+
+        @Override
+        public ComponentFlattener flattener() {
+            return ComponentFlattenerProvider.INSTANCE;
         }
     }
 

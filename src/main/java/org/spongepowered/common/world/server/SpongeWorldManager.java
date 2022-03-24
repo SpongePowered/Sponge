@@ -77,12 +77,15 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.world.LoadWorldEvent;
+import org.spongepowered.api.event.world.UnloadWorldEvent;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypes;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
@@ -309,6 +312,13 @@ public abstract class SpongeWorldManager implements WorldManager {
             .map(w -> (org.spongepowered.api.world.server.ServerWorld) w)
             .map(org.spongepowered.api.world.server.ServerWorld::key)
             .findAny();
+    }
+
+    @Override
+    public Collection<ServerWorld> worldsOfType(final WorldType type) {
+        Objects.requireNonNull(type, "type");
+
+        return this.worlds().stream().filter(w -> w.worldType() == type).collect(Collectors.toList());
     }
 
     @Override
@@ -875,7 +885,8 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         SpongeCommon.logger().info("Unloading world '{}' ({})", registryKey.location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) world.dimensionType()));
 
-        SpongeCommon.post(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.world.server.ServerWorld) world));
+        final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerWorld) world);
+        SpongeCommon.post(unloadWorldEvent);
 
         final BlockPos spawnPoint = world.getSharedSpawnPos();
         world.getChunkSource().removeRegionTicket(SpongeWorldManager.SPAWN_CHUNKS, new ChunkPos(spawnPoint), 11, registryKey.location());
@@ -1035,8 +1046,8 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         final boolean isInitialized = levelData.isInitialized();
 
-        SpongeCommon.post(SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(),
-            (org.spongepowered.api.world.server.ServerWorld) world, isInitialized));
+        final LoadWorldEvent loadWorldEvent = SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerWorld) world, isInitialized);
+        SpongeCommon.post(loadWorldEvent);
         PlatformHooks.INSTANCE.getWorldHooks().postLoadWorld(world);
 
         // Set the view distance back on it's self to trigger the logic

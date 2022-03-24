@@ -29,12 +29,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.event.HoverEventSource;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.SerializableDataHolder;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -53,16 +56,19 @@ import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
+import java.util.Objects;
+import java.util.function.UnaryOperator;
 
 @Mixin(net.minecraft.world.item.ItemStack.class)
 @Implements(@Interface(iface = ItemStack.class, prefix = "itemStack$", remap = Remap.NONE)) // We need to soft implement this interface due to a synthetic bridge method
-public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutable, ComponentLike {       // conflict from overriding ValueContainer#copy() from DataHolder
+public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutable, ComponentLike, HoverEventSource<HoverEvent.ShowItem> {       // conflict from overriding ValueContainer#copy() from DataHolder
 
     // @formatter:off
     @Shadow public abstract int shadow$getCount();
@@ -79,6 +85,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Shadow public abstract Multimap<Attribute, net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getAttributeModifiers(EquipmentSlot equipmentSlot);
     @Shadow public abstract void shadow$addAttributeModifier(Attribute attribute, net.minecraft.world.entity.ai.attributes.AttributeModifier modifier, @Nullable EquipmentSlot equipmentSlot);
     @Shadow public abstract String shadow$getDescriptionId();
+    @Shadow public abstract net.minecraft.network.chat.Component shadow$getDisplayName();
     // @formatter:on
 
     public int itemStack$quantity() {
@@ -206,6 +213,17 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
     @Override
     public Component asComponent() {
-        return Component.translatable(this.shadow$getDescriptionId());
+        return SpongeAdventure.asAdventure(this.shadow$getDisplayName());
     }
+
+    @Override
+    public @NotNull HoverEvent<HoverEvent.ShowItem> asHoverEvent(@NotNull final UnaryOperator<HoverEvent.ShowItem> op) {
+        final HoverEvent.ShowItem event = HoverEvent.ShowItem.of(
+            SpongeAdventure.asAdventure(Registry.ITEM.getKey(this.shadow$getItem())),
+            this.shadow$getCount(),
+            SpongeAdventure.asBinaryTagHolder(this.shadow$getTag())
+        );
+        return HoverEvent.showItem(Objects.requireNonNull(op, "op").apply(event));
+    }
+
 }

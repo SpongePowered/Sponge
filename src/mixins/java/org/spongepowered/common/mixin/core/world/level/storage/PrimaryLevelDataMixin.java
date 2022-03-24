@@ -100,9 +100,8 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Shadow private float spawnAngle;
 
     @Shadow public abstract boolean shadow$isDifficultyLocked();
-    @Shadow public abstract void setSpawn(BlockPos p_176143_1_, float p_176143_2_);
+    @Shadow public abstract void shadow$setSpawn(BlockPos p_176143_1_, float p_176143_2_);
     // @formatter:on
-
 
     @Nullable private ResourceKey impl$key;
     private DimensionType impl$dimensionType;
@@ -118,7 +117,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     private int impl$trackedUniqueIdCount = 0;
 
     private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$loadOnStartup,
-        impl$performsSpawnLogic;
+            impl$performsSpawnLogic;
 
     private BiMap<Integer, UUID> impl$mapUUIDIndex = HashBiMap.create();
 
@@ -278,10 +277,10 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     }
 
     @Override
-    public void bridge$populateFromDimension(final LevelStem dimension) {
-        final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) dimension;
-        this.impl$key = ((ResourceKeyBridge) (Object) dimension).bridge$getKey();
-        this.impl$dimensionType = dimension.type();
+    public void bridge$populateFromDimension(final LevelStem stem) {
+        final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) stem;
+        this.impl$key = ((ResourceKeyBridge) (Object) stem).bridge$getKey();
+        this.impl$dimensionType = stem.type();
         this.impl$displayName = levelStemBridge.bridge$displayName().orElse(null);
         levelStemBridge.bridge$difficulty().ifPresent(v -> {
             ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(RegistryTypes.DIFFICULTY.get().value((ResourceKey) (Object) v));
@@ -292,7 +291,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
             this.impl$customGameType = true;
         });
         levelStemBridge.bridge$spawnPosition().ifPresent(v -> {
-            this.setSpawn(VecHelper.toBlockPos(v), this.spawnAngle);
+            this.shadow$setSpawn(VecHelper.toBlockPos(v), this.spawnAngle);
             this.impl$customSpawnPosition = true;
         });
         levelStemBridge.bridge$hardcore().ifPresent(v -> ((LevelSettingsAccessor) (Object) this.settings).accessor$hardcode(v));
@@ -314,7 +313,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     }
 
     @Override
-    public int bridge$getIndexForUniqueId(UUID uuid) {
+    public int bridge$getIndexForUniqueId(final UUID uuid) {
         final Integer index = this.impl$playerUniqueIdMap.inverse().get(uuid);
         if (index != null) {
             return index;
@@ -378,7 +377,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
 
     @Override
     @SuppressWarnings("deprecated")
-    public void bridge$readSpongeLevelData(Dynamic<Tag> dynamic) {
+    public void bridge$readSpongeLevelData(final Dynamic<Tag> dynamic) {
         if (dynamic == null) {
             this.bridge$setUniqueId(UUID.randomUUID());
             return;

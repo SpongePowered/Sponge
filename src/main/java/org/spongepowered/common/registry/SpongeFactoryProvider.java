@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.registry;
 
-import co.aikar.timings.TimingsFactory;
-import co.aikar.timings.sponge.SpongeTimingsFactory;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.ResourceKey;
@@ -79,13 +77,16 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
+import org.spongepowered.api.world.biome.BiomeSampler;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.FixedBiomeConfig;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
+import org.spongepowered.api.world.biome.provider.multinoise.MultiNoiseConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
@@ -148,12 +149,14 @@ import org.spongepowered.common.util.SpongeRange;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.SpongeTransform;
 import org.spongepowered.common.util.raytrace.SpongeRayTraceFactory;
+import org.spongepowered.common.world.SpongeDefaultWorldKeysFactory;
 import org.spongepowered.common.world.SpongeWorldTypeEffect;
 import org.spongepowered.common.world.biome.SpongeAttributedBiome;
 import org.spongepowered.common.world.biome.SpongeBiomeAttributesFactory;
 import org.spongepowered.common.world.biome.SpongeBiomeProviderFactory;
 import org.spongepowered.common.world.biome.provider.SpongeFixedBiomeConfig;
 import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
+import org.spongepowered.common.world.biome.provider.multinoise.SpongeMultiNoiseConfigFactory;
 import org.spongepowered.common.world.generation.SpongeChunkGeneratorFactory;
 import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfig;
 import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
@@ -225,7 +228,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(ResourcePack.Factory.class, new SpongeResourcePack.Factory())
                 .registerFactory(ServerLocation.Factory.class, new SpongeServerLocation.Factory())
                 .registerFactory(SpongeComponents.Factory.class, new SpongeAdventure.Factory())
-                .registerFactory(TimingsFactory.class, new SpongeTimingsFactory())
                 .registerFactory(Transform.Factory.class, new SpongeTransform.Factory())
                 .registerFactory(VariableValueParameters.Factory.class, new SpongeVariableValueParametersFactory())
                 .registerFactory(ChannelExceptionHandler.Factory.class, new SpongeChannelExceptionHandlerFactory())
@@ -290,6 +292,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(BooleanStateProperty.Factory.class, new BlockStatePropertyImpl.BooleanFactoryImpl())
                 .registerFactory(IntegerStateProperty.Factory.class, new BlockStatePropertyImpl.IntegerFactoryImpl())
                 .registerFactory(EnumStateProperty.Factory.class, new BlockStatePropertyImpl.EnumFactoryImpl())
+                .registerFactory(DefaultWorldKeys.Factory.class, new SpongeDefaultWorldKeysFactory())
         ;
     }
 }

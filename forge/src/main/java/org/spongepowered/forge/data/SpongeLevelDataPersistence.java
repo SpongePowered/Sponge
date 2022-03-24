@@ -24,10 +24,17 @@
  */
 package org.spongepowered.forge.data;
 
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.DynamicOps;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import net.minecraftforge.fml.WorldPersistenceHooks;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.server.BootstrapProperties;
+import org.spongepowered.common.util.Constants;
 
 public final class SpongeLevelDataPersistence implements WorldPersistenceHooks.WorldPersistenceHook {
 
@@ -39,15 +46,16 @@ public final class SpongeLevelDataPersistence implements WorldPersistenceHooks.W
      */
     @Override
     public String getModId() {
-        return "SpongeData";
+        return Constants.Sponge.Data.V2.SPONGE_DATA;
     }
 
     @Override
     public CompoundTag getDataForWriting(LevelStorageSource.LevelStorageAccess arg, WorldData arg2) {
-        return new CompoundTag();
+        return ((PrimaryLevelDataBridge) arg2).bridge$writeSpongeLevelData();
     }
 
     @Override
     public void readData(LevelStorageSource.LevelStorageAccess arg, WorldData arg2, CompoundTag arg3) {
+        ((PrimaryLevelDataBridge) arg2).bridge$readSpongeLevelData(new Dynamic<>((DynamicOps<Tag>) BootstrapProperties.worldSettingsAdapter, arg3));
     }
 }

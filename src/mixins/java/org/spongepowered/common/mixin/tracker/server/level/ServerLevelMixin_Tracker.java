@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.tracker.server.level;
 
-import co.aikar.timings.Timing;
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -38,10 +37,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockEventData;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.piston.PistonBaseBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -66,13 +68,14 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
@@ -92,11 +95,15 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.block.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.block.RemoveBlockEntity;
+import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToLoadedListInWorldEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToTickableListEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToWorldWhileProcessingEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.CheckBlockPostPlacementIsSameEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EffectResult;
 import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyClientEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.NotifyNeighborSideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PerformBlockDropsFromDestruction;
+import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.RemoveTileEntityFromChunkEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.SetAndRegisterBlockEntityToLevelChunk;
 import org.spongepowered.common.event.tracking.context.transaction.effect.UpdateConnectingBlocksEffect;
@@ -108,6 +115,7 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Chun
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.TileEntityPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.tracker.world.level.LevelMixin_Tracker;
 import org.spongepowered.common.util.Constants;
@@ -144,10 +152,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     private void tracker$wrapNormalEntityTick(final ServerLevel level, final Consumer<Entity> entityUpdateConsumer,
         final Entity entity
     ) {
-        final Timing entityTickTiming = ((TimingBridge) entity.getType()).bridge$timings();
-        entityTickTiming.startTiming();
+        final PhaseContext<@NonNull ?> currentState = PhaseTracker.SERVER.getPhaseContext();
         TrackingUtil.tickEntity(entityUpdateConsumer, entity);
-        entityTickTiming.stopTiming();
     }
 
     @Override
@@ -232,10 +238,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/state/BlockState;randomTick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Ljava/util/Random;)V"))
     private void tracker$wrapBlockRandomTick(final BlockState blockState, final ServerLevel worldIn, final BlockPos posIn, final Random randomIn) {
-        try (final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$timings()) {
-            timing.startTiming();
-            TrackingUtil.randomTickBlock(this, blockState, posIn, this.random);
-        }
+        TrackingUtil.randomTickBlock(this, blockState, posIn, this.random);
     }
 
     @Redirect(method = "tickChunk(Lnet/minecraft/world/level/chunk/LevelChunk;I)V",
@@ -615,6 +618,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
      * @param pos The position of the tile entity to remove
      * @author gabizou - July 31st, 2020 - Minecraft 1.14.3
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public void shadow$removeBlockEntity(final BlockPos pos) {
         final BlockPos immutable = pos.immutable();
