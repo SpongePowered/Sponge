@@ -45,17 +45,10 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
-import co.aikar.timings.sponge.SpongeTimings;
-
-import javax.annotation.Nullable;
-
-import net.minecraft.world.level.block.Block;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.ReflectionUtil;
 import org.spongepowered.math.vector.Vector3d;
-
-import javax.annotation.Nullable;
 
 @Mixin(value = Block.class)
 public abstract class BlockMixin implements BlockBridge, TrackableBridge {
@@ -94,9 +87,6 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge {
         if (!ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             return;
         }
-        final double xPos = (double) pos.getX() + xOffset;
-        final double yPos = (double) pos.getY() + yOffset;
-        final double zPos = (double) pos.getZ() + zOffset;
         // Go ahead and throw the construction event
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(level.getBlockState(pos));
