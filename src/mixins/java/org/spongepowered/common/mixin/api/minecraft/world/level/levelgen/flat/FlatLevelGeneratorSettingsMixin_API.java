@@ -31,7 +31,6 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
-import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.server.BootstrapProperties;
@@ -54,11 +53,6 @@ public abstract class FlatLevelGeneratorSettingsMixin_API implements FlatGenerat
     @Shadow public abstract StructureSettings shadow$structureSettings();
     @Shadow public abstract List<FlatLayerInfo> shadow$getLayersInfo();
     // @formatter:on
-
-    @Override
-    public StructureGenerationConfig structureConfig() {
-        return (StructureGenerationConfig) this.shadow$structureSettings();
-    }
 
     @Override
     public List<LayerConfig> layers() {

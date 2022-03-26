@@ -59,8 +59,6 @@ import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.Shaper;
-import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;
-import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.api.world.generation.structure.Structure;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -345,29 +343,12 @@ public final class WorldTest {
             biomes.add(Biomes.PLAINS);
         }
 
-        final List<Structure> allStructures = RegistryTypes.STRUCTURE.get().stream().collect(Collectors.toList());
-
-        final Map<Structure, SeparatedStructureConfig> abundantStructures = IntStream.range(0, random.nextInt(allStructures.size()))
-                .mapToObj(i -> allStructures.get(random.nextInt(allStructures.size())))
-                .distinct()
-                .collect(Collectors.toMap(s -> s, s -> SeparatedStructureConfig.of(random.nextInt(3) + 2, 1, random.nextInt(10))));
-        final Map<Structure, SeparatedStructureConfig> rareStructures = IntStream.range(0, random.nextInt(8) + 2)
-                .mapToObj(i -> allStructures.get(random.nextInt(allStructures.size())))
-                .distinct()
-                .collect(Collectors.toMap(s -> s, s -> SeparatedStructureConfig.of(random.nextInt(10) + 6, 5, random.nextInt(10))));
-
-        final StructureGenerationConfig structureConfig = StructureGenerationConfig.builder()
-                .addStructures(abundantStructures)
-                .addStructures(rareStructures)
-                .build();
-
         final Shaper[] shapers = {Shaper.overworld(), Shaper.amplified(), Shaper.caves(), Shaper.floatingIslands(), Shaper.nether(), Shaper.end()};
         final NoiseConfig noiseConfig = NoiseConfig.builder().minY(random.nextInt(128/16)*16-64).height(256)
                 .terrainShaper(shapers[random.nextInt(shapers.length)])
                 .build();
 
         final NoiseGeneratorConfig noiseGenConfig = NoiseGeneratorConfig.builder()
-                .structureConfig(structureConfig)
                 .noiseConfig(noiseConfig)
                 .seaLevel(random.nextInt(61 - 1) + 1 + random.nextInt(30)) // 2 rolls
                 .build();

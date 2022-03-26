@@ -94,9 +94,6 @@ import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
 import org.spongepowered.api.world.generation.config.noise.Shaper;
 import org.spongepowered.api.world.generation.config.noise.SlideConfig;
-import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;
-import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
-import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerLocationCreator;
@@ -163,9 +160,6 @@ import org.spongepowered.common.world.generation.config.noise.SpongeSamplingConf
 import org.spongepowered.common.world.generation.config.noise.SpongeSlideConfigFactory;
 import org.spongepowered.common.world.generation.config.noise.SpongeSurfaceRulesFactory;
 import org.spongepowered.common.world.generation.config.noise.SpongeTerrainShaperFactory;
-import org.spongepowered.common.world.generation.config.structure.SpongeSeparatedStructureConfigFactory;
-import org.spongepowered.common.world.generation.config.structure.SpongeSpacedStructureConfigFactory;
-import org.spongepowered.common.world.generation.config.structure.SpongeStructureGenerationConfig;
 import org.spongepowered.common.world.schematic.SpongePaletteReferenceFactory;
 import org.spongepowered.common.world.server.SpongeServerLocation;
 import org.spongepowered.common.world.server.SpongeServerLocationCreatorFactory;
@@ -265,8 +259,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(SlideConfig.Factory.class, new SpongeSlideConfigFactory())
                 .registerFactory(Shaper.Factory.class, new SpongeTerrainShaperFactory())
                 .registerFactory(SurfaceRule.Factory.class, new SpongeSurfaceRulesFactory())
-                .registerFactory(SeparatedStructureConfig.Factory.class, new SpongeSeparatedStructureConfigFactory())
-                .registerFactory(SpacedStructureConfig.Factory.class, new SpongeSpacedStructureConfigFactory())
                 .registerFactory(NoiseGeneratorConfig.Factory.class, new SpongeNoiseGeneratorConfig.FactoryImpl())
                 .registerFactory(ChunkGenerator.Factory.class, new SpongeChunkGeneratorFactory())
                 .registerFactory(ItemStackComparators.Factory.class, new SpongeItemStackComparatorFactory())
@@ -278,7 +270,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(TagTemplate.Factory.class, new SpongeTagTemplateFactory())
                 .registerFactory(EventListenerRegistration.Factory.class, new SpongeEventListenerRegistration.FactoryImpl())
                 .registerFactory(FlatGeneratorConfig.Factory.class, new SpongeFlatGeneratorConfig.FactoryImpl())
-                .registerFactory(StructureGenerationConfig.Factory.class, new SpongeStructureGenerationConfig.FactoryImpl())
                 .registerFactory(CommandResult.Factory.class, new SpongeCommandResultFactory())
                 .registerFactory(ItemStack.Factory.class, new SpongeItemStack.FactoryImpl())
                 .registerFactory(BlockSnapshot.Factory.class, new SpongeBlockSnapshot.FactoryImpl())

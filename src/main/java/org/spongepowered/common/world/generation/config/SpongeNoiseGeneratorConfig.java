@@ -32,7 +32,6 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
-import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.common.accessor.world.level.levelgen.NoiseGeneratorSettingsAccessor;
 
 import java.util.Objects;
@@ -41,7 +40,6 @@ public final class SpongeNoiseGeneratorConfig {
 
     public static final class BuilderImpl implements NoiseGeneratorConfig.Builder {
 
-        public StructureGenerationConfig structureConfig;
         public NoiseConfig noiseConfig;
         public BlockState defaultBlock, defaultFluid;
         public int seaLevel;
@@ -50,12 +48,6 @@ public final class SpongeNoiseGeneratorConfig {
 
         public BuilderImpl() {
             this.reset();
-        }
-
-        @Override
-        public NoiseGeneratorConfig.Builder structureConfig(final StructureGenerationConfig config) {
-            this.structureConfig = Objects.requireNonNull(config, "config");
-            return this;
         }
 
         @Override
@@ -127,7 +119,6 @@ public final class SpongeNoiseGeneratorConfig {
 
         @Override
         public NoiseGeneratorConfig.Builder reset() {
-            this.structureConfig = (StructureGenerationConfig) new StructureSettings(true);
             this.noiseConfig = NoiseConfig.overworld();
             this.defaultBlock = BlockTypes.STONE.get().defaultState();
             this.defaultFluid = BlockTypes.WATER.get().defaultState();
@@ -143,7 +134,6 @@ public final class SpongeNoiseGeneratorConfig {
 
         @Override
         public NoiseGeneratorConfig.Builder from(final NoiseGeneratorConfig value) {
-            this.structureConfig = value.structureConfig();
             this.noiseConfig = value.noiseConfig();
             this.defaultBlock = value.defaultBlock();
             this.defaultFluid = value.defaultFluid();
@@ -158,7 +148,7 @@ public final class SpongeNoiseGeneratorConfig {
 
         @Override
         public NoiseGeneratorConfig build() {
-            final NoiseGeneratorSettings settings = NoiseGeneratorSettingsAccessor.invoker$new((StructureSettings) this.structureConfig,
+            final NoiseGeneratorSettings settings = NoiseGeneratorSettingsAccessor.invoker$new(new StructureSettings(true),
                     (net.minecraft.world.level.levelgen.NoiseSettings) (Object) this.noiseConfig,
                     (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
                     (net.minecraft.world.level.block.state.BlockState) this.defaultFluid,

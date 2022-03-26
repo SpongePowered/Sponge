@@ -33,7 +33,6 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
-import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.common.accessor.world.level.levelgen.flat.FlatLevelGeneratorSettingsAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 
@@ -50,19 +49,12 @@ import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 public final class SpongeFlatGeneratorConfig {
 
     public static final class BuilderImpl implements FlatGeneratorConfig.Builder {
-        public @Nullable StructureGenerationConfig structureConfig;
         public final List<LayerConfig> layers = new ArrayList<>();
         public @Nullable RegistryReference<org.spongepowered.api.world.biome.Biome> biome;
         public boolean performDecoration, populateLakes;
 
         public BuilderImpl() {
             this.reset();
-        }
-
-        @Override
-        public FlatGeneratorConfig.Builder structureConfig(final StructureGenerationConfig config) {
-            this.structureConfig = Objects.requireNonNull(config, "config");
-            return this;
         }
 
         @Override
@@ -109,7 +101,6 @@ public final class SpongeFlatGeneratorConfig {
 
         @Override
         public FlatGeneratorConfig.Builder reset() {
-            this.structureConfig = null;
             this.biome = null;
             this.layers.clear();
             this.performDecoration = false;
@@ -119,7 +110,6 @@ public final class SpongeFlatGeneratorConfig {
 
         @Override
         public FlatGeneratorConfig.Builder from(final FlatGeneratorConfig value) {
-            this.structureConfig = Objects.requireNonNull(value, "value").structureConfig();
             this.layers.addAll(value.layers());
             this.performDecoration = value.performDecoration();
             this.populateLakes = value.populateLakes();
@@ -128,9 +118,6 @@ public final class SpongeFlatGeneratorConfig {
 
         @Override
         public @NonNull FlatGeneratorConfig build() {
-            if (this.structureConfig == null) {
-                throw new IllegalStateException("Flat generation requires structure configuration!");
-            }
             if (this.biome == null) {
                 throw new IllegalStateException("Flat generation requires a biome to be specified!");
             }
@@ -140,7 +127,7 @@ public final class SpongeFlatGeneratorConfig {
             final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
             return (FlatGeneratorConfig) FlatLevelGeneratorSettingsAccessor.invoker$new(
                     biomeRegistry,
-                    (StructureSettings) this.structureConfig, (List<FlatLayerInfo>) (Object) this.layers, this.populateLakes,
+                    new StructureSettings(true), (List<FlatLayerInfo>) (Object) this.layers, this.populateLakes,
                     this.performDecoration, Optional.of(() -> BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY)
                     .get((ResourceLocation) (Object) this.biome.location())));
         }
