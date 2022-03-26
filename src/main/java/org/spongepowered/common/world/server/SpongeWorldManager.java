@@ -41,9 +41,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryReadOps;
 import net.minecraft.resources.RegistryResourceAccess;
-import net.minecraft.resources.RegistryWriteOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
@@ -379,8 +377,8 @@ public abstract class SpongeWorldManager implements WorldManager {
         final LevelStemBridge templateBridge = (LevelStemBridge) (Object) template;
         final ResourceKey worldKey = ((ResourceKeyBridge) templateBridge).bridge$getKey();
 
-        final WorldType worldType = (WorldType) template.type();
-        final ResourceKey worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) template.type());
+        final WorldType worldType = (WorldType) template.typeHolder();
+        final ResourceKey worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) template.typeHolder());
 
         MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey);
         final String directoryName = this.getDirectoryName(worldKey);
@@ -929,8 +927,8 @@ public abstract class SpongeWorldManager implements WorldManager {
                 continue;
             }
 
-            final WorldType worldType = (WorldType) template.type();
-            final ResourceKey worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) template.type());
+            final WorldType worldType = (WorldType) template.typeHolder();
+            final ResourceKey worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) template.typeHolder());
 
             MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey);
             if (!isDefaultWorld && !templateBridge.bridge$loadOnStartup()) {

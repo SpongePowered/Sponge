@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.accessor.world.level.levelgen.flat;
 
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
@@ -40,7 +41,7 @@ import java.util.function.Supplier;
 @Mixin(FlatLevelGeneratorSettings.class)
 public interface FlatLevelGeneratorSettingsAccessor {
 
-    @Invoker("<init>") static FlatLevelGeneratorSettings invoker$new(Registry<Biome>var1, StructureSettings var2, List<FlatLayerInfo> var3, boolean var4,
+    @Invoker("<init>") static FlatLevelGeneratorSettings invoker$new(Registry<Biome>var1, Optional<HolderSet<StructureSet>> var2, List<FlatLayerInfo> var3, boolean var4,
             boolean var5, Optional<Supplier<Biome>> var6) {
         throw new UntransformedInvokerError();
     }

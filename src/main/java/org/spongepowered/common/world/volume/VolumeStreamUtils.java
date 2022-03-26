@@ -26,6 +26,7 @@ package org.spongepowered.common.world.volume;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.data.BuiltinRegistries;
@@ -328,12 +329,12 @@ public final class VolumeStreamUtils {
         if (section == null) {
             return false;
         }
-        final PalettedContainer<Biome> biomes = section.getBiomes();
+        final PalettedContainer<Holder<Biome>> biomes = section.getBiomes();
 
         final int maskedX = x & 3;
         final int maskedY = y & 3;
         final int maskedZ = z & 3;
-        biomes.set(maskedX, maskedY, maskedZ, (Biome) (Object) biome);
+        biomes.set(maskedX, maskedY, maskedZ, Holder.direct((Biome) (Object) biome));
 
         return true;
     }

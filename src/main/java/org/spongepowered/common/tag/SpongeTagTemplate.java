@@ -106,11 +106,19 @@ public final class SpongeTagTemplate implements TagTemplate {
         this.elements.forEach((k, v) -> {
             final ResourceLocation location = (ResourceLocation) (Object) k;
             // "N/A" is supposed to be the source, but we don't know it, and we're serializing it so it isn't used anyway. (Gone when we serializeToJson)
-            builder.add(v ? new Tag.ElementEntry(location) : new Tag.OptionalElementEntry(location), "N/A");
+            if (v) {
+                builder.addElement(location, "N/A");
+            } else {
+                builder.addOptionalElement(location, "N/A");
+            }
         });
         this.subTags.forEach((k, v) -> {
             final ResourceLocation location = (ResourceLocation) (Object) k;
-            builder.add(v ? new Tag.TagEntry(location) : new Tag.OptionalTagEntry(location), "N/A");
+            if (v) {
+                builder.addElement(location, "N/A");
+            } else {
+                builder.addOptionalElement(location, "N/A");
+            }
         });
         return builder.serializeToJson();
     }

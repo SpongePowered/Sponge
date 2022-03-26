@@ -52,13 +52,15 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
 
     @Override
     public <T extends FlatGeneratorConfig> ConfigurableChunkGenerator<T> flat(final T config) {
-        return (ConfigurableChunkGenerator<T>) new FlatLevelSource((FlatLevelGeneratorSettings) config);
+        var structureRegistry = BootstrapProperties.registries.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
+        return (ConfigurableChunkGenerator<T>) new FlatLevelSource(structureRegistry, (FlatLevelGeneratorSettings) config);
     }
 
     private <T extends NoiseGeneratorConfig> ConfigurableChunkGenerator<T> noiseBasedChunkGenerator(final long seed, final BiomeSource biomeSource, final Supplier<NoiseGeneratorSettings> noiseGeneratorSettings) {
         var noiseRegistry = BootstrapProperties.registries.registryOrThrow(Registry.NOISE_REGISTRY);
+        var structureRegistry = BootstrapProperties.registries.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
         return (ConfigurableChunkGenerator<T>) (Object)
-                new NoiseBasedChunkGenerator(noiseRegistry, biomeSource, seed, noiseGeneratorSettings);
+                new NoiseBasedChunkGenerator(structureRegistry, noiseRegistry, biomeSource, seed, noiseGeneratorSettings);
     }
 
     @Override

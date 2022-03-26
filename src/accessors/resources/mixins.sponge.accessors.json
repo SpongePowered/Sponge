@@ -192,7 +192,6 @@
         "world.level.dimension.DimensionTypeAccessor",
         "world.level.entity.EntityTickListAccessor",
         "world.level.entity.PersistentEntitySectionManagerAccessor",
-        "world.level.levelgen.NoiseGeneratorSettingsAccessor",
         "world.level.levelgen.flat.FlatLevelGeneratorSettingsAccessor",
         "world.level.saveddata.maps.MapItemSavedDataAccessor",
         "world.level.storage.LevelStorageSource_LevelStorageAccessAccessor",

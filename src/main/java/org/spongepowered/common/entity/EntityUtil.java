@@ -97,7 +97,7 @@ public final class EntityUtil {
         // We send dimension change for portals before loading chunks
         if (!isPortal) {
             // Sponge Start - Allow the platform to handle how dimension changes are sent down
-            ((ServerPlayerBridge) player).bridge$sendChangeDimension(toWorld.dimensionType(), toWorld.dimension(), BiomeManager.obfuscateSeed(toWorld.getSeed()),
+            ((ServerPlayerBridge) player).bridge$sendChangeDimension(toWorld.dimensionTypeRegistration(), toWorld.dimension(), BiomeManager.obfuscateSeed(toWorld.getSeed()),
                     player.gameMode.getGameModeForPlayer(), player.gameMode.getPreviousGameModeForPlayer(),
                     toWorld.isDebug(), toWorld.isFlat(), true);
         }

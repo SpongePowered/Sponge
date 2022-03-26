@@ -48,7 +48,6 @@ public final class SpongeNoiseConfig {
         public SlideConfig top, bottom;
 
         public int minY, height, horizontalSize, verticalSize;
-        public boolean largeBiomes, islandNoiseOverride;
 
         private Shaper terrainShaper;
 
@@ -99,18 +98,6 @@ public final class SpongeNoiseConfig {
         }
 
         @Override
-        public NoiseConfig.Builder islandNoiseOverride(final boolean islandNoiseOverride) {
-            this.islandNoiseOverride = islandNoiseOverride;
-            return this;
-        }
-
-        @Override
-        public NoiseConfig.Builder largeBiomes(final boolean largeBiomes) {
-            this.largeBiomes = largeBiomes;
-            return this;
-        }
-
-        @Override
         public NoiseConfig.Builder terrainShaper(final Shaper terrainShaper) {
             this.terrainShaper = terrainShaper;
             return this;
@@ -127,8 +114,6 @@ public final class SpongeNoiseConfig {
             this.bottom = SlideConfig.of(0.1171875D, 3, 0);
             this.horizontalSize = 1;
             this.verticalSize = 2;
-            this.islandNoiseOverride = false;
-            this.largeBiomes = false;
             this.terrainShaper = Shaper.overworld();
             return this;
         }
@@ -143,8 +128,6 @@ public final class SpongeNoiseConfig {
             this.bottom = value.bottomConfig();
             this.horizontalSize = value.horizontalSize();
             this.verticalSize = value.verticalSize();
-            this.islandNoiseOverride = value.islandNoiseOverride();
-            this.largeBiomes = value.largeBiomes();
             this.terrainShaper = value.terrainShaper();
             return this;
         }
@@ -157,8 +140,7 @@ public final class SpongeNoiseConfig {
 
             return (NoiseConfig) (Object) NoiseSettings.create(this.minY, this.height, (NoiseSamplingSettings) (Object) this.sampling,
                     (NoiseSlider) (Object) this.top, (NoiseSlider) (Object) this.bottom,
-                    this.horizontalSize, this.verticalSize, this.islandNoiseOverride, false, this.largeBiomes,
-                    (TerrainShaper) (Object) this.terrainShaper);
+                    this.horizontalSize, this.verticalSize, (TerrainShaper) (Object) this.terrainShaper);
         }
     }
 
@@ -169,15 +151,15 @@ public final class SpongeNoiseConfig {
             // See NoiseGeneratorSettings#overworld
             private static final NoiseConfig OVERWORLD = (NoiseConfig) (Object) NoiseSettings.create(-64, 384,
                     new NoiseSamplingSettings(1.0D, 1.0D, 80.0D, 160.0D), new NoiseSlider(-0.078125D, 2, 8),
-                    new NoiseSlider(0.1171875D, 3, 0), 1, 2, false, false, false, TerrainProvider.overworld(false));
+                    new NoiseSlider(0.1171875D, 3, 0), 1, 2, TerrainProvider.overworld(false));
             // See NoiseGeneratorSettings#nether
             private static final NoiseConfig NETHER = (NoiseConfig) (Object) NoiseSettings.create(0, 128,
                     new NoiseSamplingSettings(1.0D, 3.0D, 80.0D, 60.0D), new NoiseSlider(0.9375D, 3, 0),
-                    new NoiseSlider(2.5D, 4, -1), 1, 2, false, false, false, TerrainProvider.nether());
+                    new NoiseSlider(2.5D, 4, -1), 1, 2, TerrainProvider.nether());
             // See NoiseGeneratorSettings#end
             private static final NoiseConfig END = (NoiseConfig) (Object) NoiseSettings.create(0, 128,
                     new NoiseSamplingSettings(2.0D, 1.0D, 80.0D, 160.0D), new NoiseSlider(-23.4375D, 64, -46),
-                    new NoiseSlider(-0.234375D, 7, 1), 2, 1, true, false, false, TerrainProvider.end());
+                    new NoiseSlider(-0.234375D, 7, 1), 2, 1, TerrainProvider.end());
         }
 
         @Override

@@ -26,13 +26,11 @@ package org.spongepowered.common.world.generation.config;
 
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.StructureSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
-import org.spongepowered.common.accessor.world.level.levelgen.NoiseGeneratorSettingsAccessor;
 
 import java.util.Objects;
 
@@ -43,7 +41,7 @@ public final class SpongeNoiseGeneratorConfig {
         public NoiseConfig noiseConfig;
         public BlockState defaultBlock, defaultFluid;
         public int seaLevel;
-        public boolean aquifers, noiseCaves, oreVeins, noodleCaves, legacyRandomSource, disableMobGeneration;
+        public boolean aquifers, oreVeins, legacyRandomSource, disableMobGeneration;
         public SurfaceRule surfaceRule;
 
         public BuilderImpl() {
@@ -94,20 +92,8 @@ public final class SpongeNoiseGeneratorConfig {
         }
 
         @Override
-        public NoiseGeneratorConfig.Builder noiseCaves(final boolean enableNoiseCaves) {
-            this.noiseCaves = enableNoiseCaves;
-            return this;
-        }
-
-        @Override
         public NoiseGeneratorConfig.Builder oreVeins(final boolean enableOreVeins) {
             this.oreVeins = enableOreVeins;
-            return this;
-        }
-
-        @Override
-        public NoiseGeneratorConfig.Builder noodleCaves(final boolean noodleCaves) {
-            this.noodleCaves = noodleCaves;
             return this;
         }
 
@@ -125,9 +111,7 @@ public final class SpongeNoiseGeneratorConfig {
             this.surfaceRule = SurfaceRule.overworld();
             this.seaLevel = 63;
             this.aquifers = false;
-            this.noiseCaves = false;
             this.oreVeins = false;
-            this.noodleCaves = false;
             this.legacyRandomSource = false;
             return this;
         }
@@ -140,25 +124,22 @@ public final class SpongeNoiseGeneratorConfig {
             this.surfaceRule = value.surfaceRule();
             this.seaLevel = value.seaLevel();
             this.aquifers = value.aquifers();
-            this.noiseCaves = value.noiseCaves();
-            this.noodleCaves = value.noodleCaves();
             this.legacyRandomSource = value.legacyRandomSource();
             return this;
         }
 
         @Override
         public NoiseGeneratorConfig build() {
-            final NoiseGeneratorSettings settings = NoiseGeneratorSettingsAccessor.invoker$new(new StructureSettings(true),
+            final NoiseGeneratorSettings settings = new NoiseGeneratorSettings(
                     (net.minecraft.world.level.levelgen.NoiseSettings) (Object) this.noiseConfig,
                     (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
                     (net.minecraft.world.level.block.state.BlockState) this.defaultFluid,
+                    BuiltinRegistries.NOISE_GENERATOR_SETTINGS.get(NoiseGeneratorSettings.OVERWORLD).noiseRouter(),
                     (net.minecraft.world.level.levelgen.SurfaceRules.RuleSource)this.surfaceRule,
                     this.seaLevel,
                     this.disableMobGeneration,
                     this.aquifers,
-                    this.noiseCaves,
                     this.oreVeins,
-                    this.noodleCaves,
                     this.legacyRandomSource
                 );
             return (NoiseGeneratorConfig) (Object) settings;

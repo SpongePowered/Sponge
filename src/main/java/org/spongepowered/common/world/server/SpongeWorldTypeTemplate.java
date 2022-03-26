@@ -341,7 +341,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             super.reset();
             this.effect = WorldTypeEffects.OVERWORLD;
             this.fixedTime = null;
-            this.infiniburn = (ResourceKey) (Object) BlockTags.INFINIBURN_OVERWORLD.getName();
+            this.infiniburn = (ResourceKey) (Object) BlockTags.INFINIBURN_OVERWORLD.location();
             this.scorching = false;
             this.natural = true;
             this.skylight = true;
@@ -365,7 +365,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
             this.effect = value.effect();
             this.fixedTime = value.fixedTime().orElse(null);
-            this.infiniburn = (ResourceKey) (Object) BlockTags.INFINIBURN_OVERWORLD.getName();
+            this.infiniburn = (ResourceKey) (Object) BlockTags.INFINIBURN_OVERWORLD.location();
             this.scorching = value.scorching();
             this.natural = value.natural();
             this.skylight = value.hasSkylight();

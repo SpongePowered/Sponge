@@ -155,7 +155,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         super(((ResourceKeyBridge) (Object) template).bridge$getKey());
         final LevelStemBridge templateBridge = (LevelStemBridge) (Object) template;
         this.displayName = templateBridge.bridge$displayName().orElse(null);
-        this.worldType = ((WorldType) template.type()).asDefaultedReference(RegistryTypes.WORLD_TYPE);
+        this.worldType = ((WorldType) template.typeHolder()).asDefaultedReference(RegistryTypes.WORLD_TYPE);
         this.generator = (ChunkGenerator) template.generator();
         this.generationConfig = WorldGenerationConfig.Mutable.builder().from((WorldGenerationConfig.Mutable) BootstrapProperties.worldGenSettings).build();
         this.gameMode = templateBridge.bridge$gameMode().isPresent() ? RegistryTypes.GAME_MODE.referenced((ResourceKey) (Object) templateBridge.bridge$gameMode().get()) : null;

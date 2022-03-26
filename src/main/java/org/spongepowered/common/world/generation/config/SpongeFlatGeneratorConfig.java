@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.world.generation.config;
 
+import net.minecraft.core.HolderSet;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -42,7 +44,6 @@ import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 
@@ -125,9 +126,13 @@ public final class SpongeFlatGeneratorConfig {
                 throw new IllegalStateException("Flat generation requires at least 1 Layer!");
             }
             final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
+            final Optional<HolderSet<StructureSet>> defaultStructures =FlatLevelGeneratorSettings.getDefault(
+                    BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY),
+                    BootstrapProperties.registries.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY)
+            ).structureOverrides();
             return (FlatGeneratorConfig) FlatLevelGeneratorSettingsAccessor.invoker$new(
                     biomeRegistry,
-                    new StructureSettings(true), (List<FlatLayerInfo>) (Object) this.layers, this.populateLakes,
+                    defaultStructures, (List<FlatLayerInfo>) (Object) this.layers, this.populateLakes,
                     this.performDecoration, Optional.of(() -> BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY)
                     .get((ResourceLocation) (Object) this.biome.location())));
         }
@@ -138,7 +143,8 @@ public final class SpongeFlatGeneratorConfig {
         @Override
         public FlatGeneratorConfig standard() {
             final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-            return (FlatGeneratorConfig) FlatLevelGeneratorSettings.getDefault(biomeRegistry);
+            final Registry<StructureSet> structureRegistry = BootstrapProperties.registries.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
+            return (FlatGeneratorConfig) FlatLevelGeneratorSettings.getDefault(biomeRegistry, structureRegistry);
         }
     }
 }

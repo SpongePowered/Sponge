@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
@@ -43,15 +42,12 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorConfig {
 
     // @formatter:off
-    @Shadow public abstract StructureSettings shadow$structureSettings();
     @Shadow public abstract net.minecraft.world.level.levelgen.NoiseSettings shadow$noiseSettings();
     @Shadow public abstract int shadow$seaLevel();
-    @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$getDefaultBlock();
-    @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$getDefaultFluid();
+    @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$defaultBlock();
+    @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$defaultFluid();
     @Shadow public abstract boolean shadow$isAquifersEnabled();
-    @Shadow public abstract boolean shadow$isNoiseCavesEnabled();
-    @Shadow public abstract boolean shadow$isOreVeinsEnabled();
-    @Shadow public abstract boolean shadow$isNoodleCavesEnabled();
+    @Shadow public abstract boolean shadow$oreVeinsEnabled();
     @Shadow @Deprecated protected abstract boolean shadow$disableMobGeneration();
     @Shadow public abstract SurfaceRules.RuleSource shadow$surfaceRule();
     // @formatter:on
@@ -63,12 +59,12 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
 
     @Override
     public BlockState defaultBlock() {
-        return (BlockState) this.shadow$getDefaultBlock();
+        return (BlockState) this.shadow$defaultBlock();
     }
 
     @Override
     public BlockState defaultFluid() {
-        return (BlockState) this.shadow$getDefaultFluid();
+        return (BlockState) this.shadow$defaultFluid();
     }
 
     @Intrinsic
@@ -82,18 +78,8 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     }
 
     @Override
-    public boolean noiseCaves() {
-        return this.shadow$isNoiseCavesEnabled();
-    }
-
-    @Override
     public boolean oreVeins() {
-        return this.shadow$isOreVeinsEnabled();
-    }
-
-    @Override
-    public boolean noodleCaves() {
-        return this.shadow$isNoodleCavesEnabled();
+        return this.shadow$oreVeinsEnabled();
     }
 
     @Override
