@@ -31,7 +31,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
-import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
@@ -56,11 +55,6 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Shadow @Deprecated protected abstract boolean shadow$disableMobGeneration();
     @Shadow public abstract SurfaceRules.RuleSource shadow$surfaceRule();
     // @formatter:on
-
-    @Override
-    public StructureGenerationConfig structureConfig() {
-        return (StructureGenerationConfig) this.shadow$structureSettings();
-    }
 
     @Override
     public NoiseConfig noiseConfig() {
