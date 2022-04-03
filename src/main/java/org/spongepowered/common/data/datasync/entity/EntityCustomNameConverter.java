@@ -54,10 +54,11 @@ public final class EntityCustomNameConverter extends DataParameterConverter<Opti
         if (component.isPresent()) {
             try {
                 return Optional.of(SpongeAdventure.asVanilla(component.get()));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 return oldValue;
             }
         }
-        return oldValue;
+        // no successful value -- name was removed, so don't try to set it back to the old value
+        return Optional.empty();
     }
 }
