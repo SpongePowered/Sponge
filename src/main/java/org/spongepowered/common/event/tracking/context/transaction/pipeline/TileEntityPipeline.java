@@ -66,7 +66,7 @@ public final class TileEntityPipeline implements BlockPipeline {
         final WeakReference<ServerLevel> worldRef = new WeakReference<>(world);
         final LevelChunk chunk = world.getChunkAt(pos);
         final WeakReference<LevelChunk> chunkRef = new WeakReference<>(chunk);
-        final WeakReference<LevelChunkSection> sectionRef = new WeakReference<>(chunk.getSections()[pos.getY() >> 4]);
+        final WeakReference<LevelChunkSection> sectionRef = new WeakReference<>(chunk.getSection(chunk.getSectionIndex(pos.getY())));
         final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld de-referenced");
         final Supplier<LevelChunk> chunkSupplier = () -> Objects.requireNonNull(chunkRef.get(), "Chunk de-referenced");
         final Supplier<LevelChunkSection> chunkSectionSupplier = () -> Objects.requireNonNull(sectionRef.get(), "ChunkSection de-referenced");
