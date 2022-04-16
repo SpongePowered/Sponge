@@ -60,7 +60,7 @@ public final class SpawnEggItemStackData {
                         return builder.build();
                     })
             .asImmutable(ItemStack.class)
-                .create((Key<? extends Value<org.spongepowered.api.entity.EntityType>>) Keys.ENTITY_TYPE)
+                .create(Keys.ENTITY_TYPE)
                     .supports(stack -> !stack.isEmpty() && stack.getItem() instanceof net.minecraft.world.item.SpawnEggItem)
                     .get(stack -> {
                         final Item item = stack.getItem();
