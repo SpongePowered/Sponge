@@ -263,7 +263,9 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public void removeBlockEntity(final int x, final int y, final int z) {
-        this.shadow$removeBlockEntity(new BlockPos(x, y, z));
+        // *Just* removing the block entity is going to give is a glitchy state that should never happen.
+        // So just remove the whole block.
+        this.blockEntity(x, y, z).ifPresent(ignored -> this.removeBlock(x, y, z));
     }
 
     // UpdateableVolume

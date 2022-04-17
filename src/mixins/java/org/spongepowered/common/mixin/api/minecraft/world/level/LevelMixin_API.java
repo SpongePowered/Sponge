@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level;
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.resources.ResourceKey;
@@ -116,7 +117,6 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     @Shadow public abstract void shadow$playSound(@javax.annotation.Nullable net.minecraft.world.entity.player.Player p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundSource p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow public abstract LevelData shadow$getLevelData();
     @Shadow public abstract void shadow$setBlockEntity(BlockPos pos, @javax.annotation.Nullable net.minecraft.world.level.block.entity.BlockEntity tileEntityIn);
-    @Shadow public abstract void shadow$removeBlockEntity(BlockPos pos);
     @Shadow public abstract ResourceKey<net.minecraft.world.level.Level> shadow$dimension();
     @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos param0);
     @Shadow public abstract List<net.minecraft.world.entity.Entity> shadow$getEntities(
@@ -308,7 +308,23 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public void addBlockEntity(final int x, final int y, final int z, final BlockEntity blockEntity) {
-        this.shadow$setBlockEntity(new BlockPos(x, y, z), (net.minecraft.world.level.block.entity.BlockEntity) Objects.requireNonNull(blockEntity, "blockEntity"));
+        // So, here we basically want to copy the given block entity into the location.
+        // BlockEntity stores its location, as well as it being mutable and stuff, so just setting what we've given here
+        // would cause unexpected bugs.
+        final net.minecraft.world.level.block.entity.BlockEntity mcOriginalBlockEntity = (net.minecraft.world.level.block.entity.BlockEntity) Objects.requireNonNull(blockEntity, "blockEntity");
+        // Save the nbt so we can copy it
+        final CompoundTag tag = mcOriginalBlockEntity.save(new CompoundTag());
+        // Ensure that where we are placing this blockentity is the right blockstate, so that minecraft will actually accept it.
+        this.world().setBlock(x, y, z, (org.spongepowered.api.block.BlockState) mcOriginalBlockEntity.getBlockState());
+
+        // Retrieve a "blank" block entity from the one we just created (or already existed) through sponge.
+        final net.minecraft.world.level.block.entity.BlockEntity mcNewBlockEntity = (net.minecraft.world.level.block.entity.BlockEntity) this.blockEntity(x, y, z)
+                .orElseThrow(() -> new IllegalStateException("Failed to create Block Entity at " + this.location(Vector3i.from(x, y, z))));
+
+        // Load the data into it.
+        mcNewBlockEntity.load(mcOriginalBlockEntity.getBlockState(), tag);
+        // Finally, inform minecraft about our actions.
+        this.shadow$setBlockEntity(new BlockPos(x, y, z), mcNewBlockEntity);
     }
 
     // MutableEntityVolume

@@ -291,12 +291,12 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
 
     @Override
     public void addBlockEntity(int x, int y, int z, BlockEntity blockEntity) {
-        this.shadow$setBlockEntity(new BlockPos(x, y, z), (net.minecraft.world.level.block.entity.BlockEntity) blockEntity);
+        this.world().addBlockEntity(x, y, z, blockEntity);
     }
 
     @Override
     public void removeBlockEntity(int x, int y, int z) {
-        this.shadow$removeBlockEntity(new BlockPos(x, y, z));
+        this.world().removeBlockEntity(x, y, z);
     }
 
     @Override
