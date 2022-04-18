@@ -200,7 +200,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     }
 
     public boolean itemStack$equalTo(final ItemStack that) {
-        return net.minecraft.world.item.ItemStack.tagMatches(
+        return net.minecraft.world.item.ItemStack.matches(
                 (net.minecraft.world.item.ItemStack) (Object) this,
                 (net.minecraft.world.item.ItemStack) (Object) that
         );
