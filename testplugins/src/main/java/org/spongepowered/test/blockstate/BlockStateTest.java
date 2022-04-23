@@ -65,10 +65,10 @@ public class BlockStateTest implements LoadableModule {
     public static class BlockStateTestListener {
 
         @Listener
-        public void onSpawnEntity(final InteractBlockEvent.Secondary event, @First ServerPlayer player) {
+        public void onInteractBlock(final InteractBlockEvent.Secondary event, @First ServerPlayer player) {
             if (event.context().get(EventContextKeys.USED_HAND).map(hand -> hand == HandTypes.MAIN_HAND.get()).orElse(false)) {
                 final BlockState state = event.block().state();
-                player.sendMessage(Component.text("Interacted Block has the following block state properties:").color(NamedTextColor.GREEN));
+                player.sendMessage(Component.text("Interacted block is " + state.asString() + " and has the following properties:").color(NamedTextColor.GREEN));
                 state.statePropertyMap().forEach((prop, value) -> player.sendMessage(Component.text(prop.name()+ ": " + value.toString())));
                 for (Map.Entry<StateProperty<?>, ?> entry : state.statePropertyMap().entrySet()) {
                     if (entry.getKey().equals(BooleanStateProperties.GRASS_BLOCK_SNOWY.get())) {
