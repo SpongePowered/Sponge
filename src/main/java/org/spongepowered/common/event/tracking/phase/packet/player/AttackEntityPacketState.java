@@ -52,11 +52,12 @@ public final class AttackEntityPacketState extends BasicPacketState {
     private final BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>
         ATTACK_MODIFIER = super.getFrameModifier().andThen((frame, ctx) -> {
         frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
-        frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
         final ServerboundInteractPacket useEntityPacket = ctx.getPacket();
         final ServerPlayer player = ctx.getPacketPlayer();
         final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(player.level);
         if (entity != null) {
+            // hand is not populated if we don't have an entity in scope that caused this.
+            frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
             frame.pushCause(entity);
         }
         frame.pushCause(player);
