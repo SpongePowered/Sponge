@@ -72,7 +72,7 @@ public class BlockStateTest implements LoadableModule {
     public static class BlockStateTestListener {
 
         @Listener
-        public void onSpawnEntity(final InteractBlockEvent.Secondary event, @First ServerPlayer player) {
+        public void onSpawnEntity(final InteractBlockEvent.Secondary event, @First final ServerPlayer player) {
             if (event.context().get(EventContextKeys.USED_HAND).map(hand -> hand == HandTypes.MAIN_HAND.get()).orElse(false) &&
                 event.context().get(EventContextKeys.USED_ITEM).flatMap(item -> item.get(Keys.CUSTOM_NAME)).map(t -> t.equals(Component.text("State Stick"))).orElse(false)
             ) {
@@ -81,7 +81,7 @@ public class BlockStateTest implements LoadableModule {
                 if (!propertyMap.isEmpty()) {
                     player.sendMessage(Component.text("Interacted Block has the following block state properties:").color(NamedTextColor.GREEN));
                     propertyMap.forEach((prop, value) -> player.sendMessage(Component.text(prop.name()+ ": " + value.toString())));
-                    for (Map.Entry<StateProperty<?>, ?> entry : propertyMap.entrySet()) {
+                    for (final Map.Entry<StateProperty<?>, ?> entry : propertyMap.entrySet()) {
                         final Optional<BlockState> cycled = state.cycleStateProperty(entry.getKey());
                         cycled.ifPresent(blockState -> event.block().location().get().setBlock(blockState));
                         break;

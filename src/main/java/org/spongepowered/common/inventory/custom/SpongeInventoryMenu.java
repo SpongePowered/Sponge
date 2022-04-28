@@ -120,6 +120,11 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     @Override
+    public Optional<Component> title() {
+        return Optional.ofNullable(this.title);
+    }
+
+    @Override
     public InventoryMenu setReadOnly(final boolean readOnly) {
         this.readonly = readOnly;
         return this;

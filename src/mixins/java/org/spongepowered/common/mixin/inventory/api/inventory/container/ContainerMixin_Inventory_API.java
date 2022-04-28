@@ -32,11 +32,13 @@ import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.server.level.ServerPlayer_ContainerListenerAccessor;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
+import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -131,4 +133,8 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Optional<InventoryMenu> currentMenu() {
+        return Optional.ofNullable(((MenuBridge) this).bridge$getMenu());
+    }
 }

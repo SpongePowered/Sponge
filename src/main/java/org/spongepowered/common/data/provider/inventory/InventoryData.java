@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.inventory;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.Nameable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.Container;
@@ -69,6 +70,10 @@ public final class InventoryData {
         }
         if (inventory instanceof Nameable) {
             final net.minecraft.network.chat.Component displayName = ((Nameable) inventory).getDisplayName();
+            return ((BaseComponentBridge) displayName).bridge$asAdventureComponent();
+        }
+        if (inventory instanceof MenuProvider) {
+            final net.minecraft.network.chat.Component displayName = ((MenuProvider) inventory).getDisplayName();
             return ((BaseComponentBridge) displayName).bridge$asAdventureComponent();
         }
         return null;

@@ -88,6 +88,11 @@ public final class StubState implements BlockState, SpongeImmutableDataHolder<Bl
     }
 
     @Override
+    public String asString() {
+        return null;
+    }
+
+    @Override
     public <E> Optional<E> get(
         final Direction direction, final Key<? extends Value<E>> key
     ) {

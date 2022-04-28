@@ -271,7 +271,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
                         d1 = (Math.random() - Math.random()) * 0.01D;
                     }
 
-                    this.hurtDir = (float) (Mth.atan2(d0, d1) * 57.2957763671875D - (double) this.getYRot());
+                    this.hurtDir = (float) (Mth.atan2(d0, d1) * 57.2957763671875D - (double) this.shadow$getYRot());
                     this.shadow$knockback(0.4F, d1, d0);
                 } else {
                     this.hurtDir = (float) (Math.random() * 2.0D * 180);

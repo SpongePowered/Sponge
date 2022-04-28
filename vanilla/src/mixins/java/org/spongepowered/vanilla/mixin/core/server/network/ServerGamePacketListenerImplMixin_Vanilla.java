@@ -24,25 +24,17 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.network;
 
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.TextFilter;
-import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.Recipe;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
@@ -56,7 +48,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -64,15 +55,12 @@ import org.spongepowered.common.event.tracking.context.transaction.Transactional
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.vanilla.chat.ChatFormatter;
 
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
-
-@Mixin(ServerGamePacketListenerImpl.class)
+@Mixin(value = ServerGamePacketListenerImpl.class, priority = 999)
 public abstract class ServerGamePacketListenerImplMixin_Vanilla implements ServerGamePacketListener {
 
-    @Shadow public net.minecraft.server.level.ServerPlayer player;
+    // @formatter:on
     @Shadow @Final private MinecraftServer server;
+    // @formatter:off
 
     @Inject(method = "handleCustomPayload", at = @At(value = "HEAD"))
     private void vanilla$onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
@@ -88,43 +76,15 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Ljava/util/function/Function;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"),
-            cancellable = true,
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vanilla$onProcessChatMessage(final TextFilter.FilteredText message, final CallbackInfo ci, final String plain, final String filteredPlain, final net.minecraft.network.chat.Component filtered, final net.minecraft.network.chat.Component unfiltered) {
-        // todo(zml): See where mojang takes these chat filtering changes
-        ChatFormatter.formatChatComponent((net.minecraft.network.chat.TranslatableComponent) unfiltered);
-        final ServerPlayer player = (ServerPlayer) this.player;
-        final PlayerChatFormatter chatFormatter = player.chatFormatter();
-        final TextComponent rawMessage = Component.text(plain);
-
-        try (CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
-            frame.pushCause(this.player);
-            final Audience audience = (Audience) this.server;
-            final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(frame.currentCause(), audience, Optional.of(audience), chatFormatter, Optional.of(chatFormatter), rawMessage, rawMessage);
-            if (SpongeCommon.post(event)) {
-                ci.cancel();
-            } else {
-                event.chatFormatter().ifPresent(formatter ->
-                    event.audience().map(SpongeAdventure::unpackAudiences).ifPresent(targets -> {
-                        for (final Audience target : targets) {
-                            formatter.format(player, target, event.message(), event.originalMessage()).ifPresent(formattedMessage ->
-                                target.sendMessage(player, formattedMessage));
-                        }
-                    })
-                );
-            }
+    private void vanilla$onProcessChatMessage(final TextFilter.FilteredText $$0x, final CallbackInfo ci, final String $$1x, final String $$2x, final Component $$3, final Component $$4) {
+        if ($$3 != null) {
+            ChatFormatter.formatChatComponent((TranslatableComponent) $$3);
         }
+        ChatFormatter.formatChatComponent((TranslatableComponent) $$4);
     }
 
-    @Redirect(method = "handleChat(Lnet/minecraft/server/network/TextFilter$FilteredText;)V",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Ljava/util/function/Function;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V") )
-    private void vanilla$cancelSendChatMsgImpl(final PlayerList playerList, final net.minecraft.network.chat.Component p_232641_1_, final Function<ServerPlayer, Component> messageProvider, final ChatType p_232641_2_, final UUID p_232641_3_) {
-        // Do nothing
-    }
-
-    @SuppressWarnings({"UnresolvedMixinReference", "unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "lambda$handlePlaceRecipe$9",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
     private void vanilla$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final net.minecraft.server.level.ServerPlayer player) {
