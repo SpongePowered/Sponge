@@ -40,6 +40,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockBreakAckPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
@@ -75,6 +76,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -88,6 +90,7 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
+import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -99,6 +102,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundMovePlayerPacketAccessor;
 import org.spongepowered.common.accessor.server.level.ServerPlayerGameModeAccessor;
@@ -148,6 +152,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     @Shadow private int knownMovePacketCount;
     @Shadow private int tickCount;
     @Shadow private int awaitingTeleportTime;
+    @Shadow private int chatSpamTickCount;
 
     @Shadow protected abstract boolean shadow$isSingleplayerOwner();
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch);
@@ -575,5 +580,43 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     public void bridge$captureCurrentPlayerPosition() {
         this.shadow$resetPosition();
     }
+
+    @Redirect(method = "handleChat(Ljava/lang/String;)V",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V") )
+    private void impl$postChatMessageEventAndSend(final PlayerList playerList, final net.minecraft.network.chat.Component component, final ChatType chatType, final UUID playerUUID, final String initialMessage) {
+        final ServerPlayer player = (ServerPlayer) this.player;
+        final PlayerChatFormatter chatFormatter = player.chatFormatter();
+        final Component initialComponent = Component.text(initialMessage);
+        final Component currentMessage;
+        if (component instanceof TranslatableComponent && ((TranslatableComponent) component).getArgs().length == 2 && ((TranslatableComponent) component).getArgs()[1] instanceof net.minecraft.network.chat.Component) {
+            currentMessage = SpongeAdventure.asAdventure((net.minecraft.network.chat.Component) ((TranslatableComponent) component).getArgs()[1]);
+        } else {
+            currentMessage = initialComponent;
+        }
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
+            frame.pushCause(this.player);
+            final Audience audience = (Audience) this.server;
+            // Forge's event is accounted for in here.
+            final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(frame.currentCause(), audience, Optional.of(audience), chatFormatter, Optional.of(chatFormatter), initialComponent, currentMessage);
+            if (SpongeCommon.post(event)) {
+                // We reduce the chatSpamTickCount by 20 to account for the fact we cancelled the event (the method increments by 20).
+                // Otherwise, we need do nothing.
+                this.chatSpamTickCount -= 20;
+            } else {
+                event.chatFormatter().ifPresent(formatter ->
+                        event.audience().map(SpongeAdventure::unpackAudiences).ifPresent(targets -> {
+                            for (final Audience target : targets) {
+                                formatter.format(player, target, event.message(), event.originalMessage()).ifPresent(formattedMessage ->
+                                        target.sendMessage(player, formattedMessage));
+                            }
+                        })
+                );
+            }
+        }
+    }
+
 
 }
