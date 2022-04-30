@@ -60,7 +60,8 @@ public final class RegistryHolderLogic implements RegistryHolder {
             (ResourceKey) (Object) new ResourceLocation("minecraft", "root"),
             new MappedRegistry<>(
                 net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) RegistryRoots.MINECRAFT),
-                Lifecycle.experimental()
+                Lifecycle.experimental(),
+                null
             )
         );
         final ResourceLocation sponge = new ResourceLocation("sponge", "root");
@@ -71,7 +72,8 @@ public final class RegistryHolderLogic implements RegistryHolder {
                     sponge,
                     sponge
                 ),
-                Lifecycle.stable()
+                Lifecycle.stable(),
+                null
             )
         );
     }
@@ -150,7 +152,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
             final @Nullable BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback) {
         if (callback == null) {
             return (key) -> {
-                final MappedRegistry<T> reg = new MappedRegistry<>(key, Lifecycle.stable());
+                final MappedRegistry<T> reg = new MappedRegistry<>(key, Lifecycle.stable(), null);
                 ((WritableRegistryBridge<T>)reg).bridge$setDynamic(isDynamic);
                 return reg;
             };
@@ -210,30 +212,6 @@ public final class RegistryHolderLogic implements RegistryHolder {
         if (registry instanceof CallbackRegistry) {
             ((CallbackRegistry<?>) registry).setCallbackEnabled(true);
         }
-        return (Registry<T>) registry;
-    }
-
-    public <T> Registry<T> wrapTagHelperAsRegistry(final RegistryType<Tag<T>> type, final Object staticTagHelper) {
-        final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(Objects.requireNonNull(type, "type").root());
-        if (root == null) {
-            throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
-        }
-        net.minecraft.core.Registry<?> registry = root.get((ResourceLocation) (Object) type.location());
-        if (registry != null) {
-            throw new DuplicateRegistrationException(String.format("Registry '%s' in root '%s' has already been defined", type.location(), type.root()));
-        }
-        final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<Tag<T>>> key;
-        if (net.minecraft.core.Registry.ROOT_REGISTRY_NAME.equals(type.root())) {
-            key = net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) type.location());
-        } else {
-            key = ResourceKeyAccessor.invoker$create(
-                    (ResourceLocation) (Object) RegistryRoots.SPONGE,
-                    (ResourceLocation) (Object) type.location()
-            );
-        }
-        registry = new TagRegistry<>(key, staticTagHelper, Lifecycle.stable());
-
-        ((WritableRegistry) root).register(key, registry, Lifecycle.stable());
         return (Registry<T>) registry;
     }
 }

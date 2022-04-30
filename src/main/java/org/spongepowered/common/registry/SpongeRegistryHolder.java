@@ -25,12 +25,10 @@
 package org.spongepowered.common.registry;
 
 import net.minecraft.core.Registry;
-import net.minecraft.tags.StaticTagHelper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
-import org.spongepowered.api.tag.Tag;
 
 import java.util.Map;
 import java.util.Objects;
@@ -76,10 +74,6 @@ public interface SpongeRegistryHolder extends RegistryHolder {
     default <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final RegistryLoader<T> loader,
         final boolean isDynamic) {
         return this.createRegistry(type, loader, isDynamic, null);
-    }
-
-    default <T> void wrapTagHelperAsRegistry(RegistryType<Tag<T>> type, StaticTagHelper<T> helper) {
-        this.registryHolder().wrapTagHelperAsRegistry(type, helper);
     }
 
     @Override

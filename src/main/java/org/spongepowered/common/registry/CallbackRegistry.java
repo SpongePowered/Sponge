@@ -38,7 +38,7 @@ public final class CallbackRegistry<T> extends MappedRegistry<T> {
     private boolean callbackEnabled;
 
     public CallbackRegistry(final ResourceKey<? extends Registry<T>> key, final Lifecycle lifecycle, final BiConsumer<ResourceKey<T>, T> callback) {
-        super(key, lifecycle);
+        super(key, lifecycle, null);
         this.callback = callback;
     }
 

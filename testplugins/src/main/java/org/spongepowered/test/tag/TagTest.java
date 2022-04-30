@@ -73,7 +73,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Plugin("tagtest")
+@Plugin("tagtest") //TODO FIX THIS
 public final class TagTest {
 
     private final PluginContainer pluginContainer;
@@ -186,7 +186,7 @@ public final class TagTest {
                     final Tag<BlockType> tag = ctx.requireOne(blockTypeTagParameter);
 
                     final BlockType blockType = TagTest.raytraceBlock(ctx).blockState().type();
-                    TagTest.sendTagMessage(blockType, RegistryTypes.BLOCK_TYPE, tag, tag.key(RegistryTypes.BLOCK_TYPE_TAGS), ctx.cause().audience());
+                    //TagTest.sendTagMessage(blockType, RegistryTypes.BLOCK_TYPE, tag, tag.key(RegistryTypes.BLOCK_TYPE_TAGS), ctx.cause().audience());
                     return CommandResult.success();
                 })
                 .build();
@@ -198,7 +198,7 @@ public final class TagTest {
                     final Tag<ItemType> tag = ctx.requireOne(itemTypeTagParameter);
 
                     final ItemType itemType = TagTest.requireItemInHand(ctx);
-                    TagTest.sendTagMessage(itemType, RegistryTypes.ITEM_TYPE, tag, tag.key(RegistryTypes.ITEM_TYPE_TAGS), ctx.cause().audience());
+                    //TagTest.sendTagMessage(itemType, RegistryTypes.ITEM_TYPE, tag, tag.key(RegistryTypes.ITEM_TYPE_TAGS), ctx.cause().audience());
                     return CommandResult.success();
                 })
                 .build();
@@ -211,7 +211,7 @@ public final class TagTest {
 
                     final EntityType<?> type = TagTest.raytraceEntity(ctx);
 
-                    TagTest.sendTagMessage(type, RegistryTypes.ENTITY_TYPE, tag, tag.key(RegistryTypes.ENTITY_TYPE_TAGS), ctx.cause().audience());
+                    //TagTest.sendTagMessage(type, RegistryTypes.ENTITY_TYPE, tag, tag.key(RegistryTypes.ENTITY_TYPE_TAGS), ctx.cause().audience());
                     return CommandResult.success();
                 })
                 .build();
@@ -224,7 +224,7 @@ public final class TagTest {
 
                     final FluidType fluidType = TagTest.raytraceBlock(ctx).serverLocation().fluid().type();
 
-                    TagTest.sendTagMessage(fluidType, RegistryTypes.FLUID_TYPE, tag, tag.key(RegistryTypes.FLUID_TYPE_TAGS), ctx.cause().audience());
+                    //TagTest.sendTagMessage(fluidType, RegistryTypes.FLUID_TYPE, tag, tag.key(RegistryTypes.FLUID_TYPE_TAGS), ctx.cause().audience());
 
                     return CommandResult.success();
                 })
@@ -354,13 +354,6 @@ public final class TagTest {
             throw new CommandException(Component.text("You must hold an item in your main hand!"));
         }
         return heldItem.type();
-    }
-
-    private static <S extends T, T extends Taggable<@NonNull T>> void sendTagMessage(final S taggable, final DefaultedRegistryType<S> registry, final Tag<T> tag, final ResourceKey tagKey, final Audience audience) {
-        final boolean contained = tag.contains(taggable);
-        final Component message = contained ? Component.text(taggable.key(registry) + " has tag " + tagKey, NamedTextColor.GREEN)
-                : Component.text(taggable.key(registry) + " does not have tag " + tagKey, NamedTextColor.RED);
-        audience.sendMessage(message);
     }
 
     private static <T extends Taggable<@NonNull T>> void sendTags(final Audience audience, final T taggable) {

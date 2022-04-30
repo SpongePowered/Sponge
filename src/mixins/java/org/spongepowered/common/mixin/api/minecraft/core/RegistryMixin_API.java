@@ -24,12 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.core;
 
+import net.minecraft.core.HolderSet;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
+import org.spongepowered.api.tag.Tag;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
@@ -39,8 +42,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.core.RegistryBridge;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Mixin(net.minecraft.core.Registry.class)
@@ -50,9 +56,11 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     // @formatter:off
     @Shadow public abstract net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> shadow$key();
     @Shadow @Nullable public abstract ResourceLocation shadow$getKey(T p_177774_1_);
+    @Shadow public abstract Optional<HolderSet.Named<T>> shadow$getTag(TagKey<T> var1);
     @Shadow public abstract Optional<T> shadow$getOptional(@Nullable net.minecraft.resources.ResourceLocation param0);
     // @formatter:on
 
+    @Shadow public abstract net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> key();
 
     @Override
     public RegistryType<T> type() {
@@ -92,6 +100,14 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     public <V extends T> V value(final ResourceKey key) {
         return (V) this.shadow$getOptional((ResourceLocation) (Object) Objects.requireNonNull(key, "key"))
             .orElseThrow(() -> new ValueNotFoundException(String.format("No value was found for key '%s'!", key)));
+    }
+
+    @Override
+    public <V extends T> Set<V> taggedValues(final Tag<T> key) {
+        return this.shadow$getTag((TagKey<T>) (Object) key).stream()
+                .flatMap(s -> s.stream())
+                .map(h -> (V) h.value())
+                .collect(Collectors.toSet());
     }
 
     @Override

@@ -485,7 +485,6 @@ public final class SpongeRegistryLoaders {
     public static RegistryLoader<CommandCompletionProvider> clientSuggestionProvider() {
         return RegistryLoader.of(l -> {
             l.add(CommandCompletionProviders.ALL_RECIPES, k -> (CommandCompletionProvider) SuggestionProviders.ALL_RECIPES);
-            l.add(CommandCompletionProviders.AVAILABLE_BIOMES, k -> (CommandCompletionProvider) SuggestionProviders.AVAILABLE_BIOMES);
             l.add(CommandCompletionProviders.AVAILABLE_SOUNDS, k -> (CommandCompletionProvider) SuggestionProviders.AVAILABLE_SOUNDS);
             l.add(CommandCompletionProviders.SUMMONABLE_ENTITIES, k -> (CommandCompletionProvider) SuggestionProviders.SUMMONABLE_ENTITIES);
         });
