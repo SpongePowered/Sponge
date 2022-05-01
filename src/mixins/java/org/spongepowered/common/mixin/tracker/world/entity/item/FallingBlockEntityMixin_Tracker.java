@@ -80,11 +80,15 @@ public abstract class FallingBlockEntityMixin_Tracker extends EntityMixin_Tracke
     @Inject(method = "tick()V",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/Level;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z",
+//                    target = "Lnet/minecraft/world/level/Level;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z",
                     shift = At.Shift.AFTER
             ),
             cancellable = true
     )
     private void tracker$handleBlockCapture(final CallbackInfo ci) {
+        if (true) {
+            throw new IllegalStateException("fix me");
+        }
         final BlockPos pos = new BlockPos(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
         // So, there's two cases here: either the world is not cared for, or the
         // ChangeBlockEvent is not being listened to. If it's not being listened to,

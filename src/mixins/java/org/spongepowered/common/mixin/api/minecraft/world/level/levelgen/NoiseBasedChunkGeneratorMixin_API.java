@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
+import net.minecraft.core.Holder;
 import org.spongepowered.api.world.generation.ConfigurableChunkGenerator;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.asm.mixin.Final;
@@ -38,11 +39,11 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 public abstract class NoiseBasedChunkGeneratorMixin_API extends ChunkGeneratorMixin_API implements ConfigurableChunkGenerator<NoiseGeneratorConfig> {
 
     // @formatter:off
-    @Shadow @Final protected Supplier<NoiseGeneratorSettings> settings;
+    @Shadow @Final protected Holder<NoiseGeneratorSettings> settings;
     // @formatter:on
 
     @Override
     public NoiseGeneratorConfig config() {
-        return (NoiseGeneratorConfig) (Object) this.settings.get();
+        return (NoiseGeneratorConfig) (Object) this.settings.value();
     }
 }

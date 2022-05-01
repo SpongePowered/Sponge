@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.server.level;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.bossevents.CustomBossEvents;
@@ -35,7 +36,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.ProgressListener;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
@@ -44,12 +44,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
@@ -110,26 +112,29 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
-import java.util.function.LongPredicate;
-import java.util.function.Supplier;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin extends LevelMixin implements ServerLevelBridge, PlatformServerLevelBridge, ResourceKeyBridge {
 
     // @formatter:off
     @Shadow @Final private ServerLevelData serverLevelData;
+    @Shadow @Final private LevelTicks<Block> blockTicks;
+    @Shadow @Final private LevelTicks<Fluid> fluidTicks;
 
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow protected abstract void shadow$saveLevelData();
     // @formatter:on
+
+    @Shadow public abstract void levelEvent(@org.jetbrains.annotations.Nullable Player $$0, int $$1, BlockPos $$2, int $$3);
 
     private final long[] impl$recentTickTimes = new long[100];
 
@@ -141,30 +146,17 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     private boolean impl$isManualSave = false;
     private long impl$preTickTime = 0L;
 
-    @SuppressWarnings("unchecked")
-    @Redirect(
-        method = "<init>",
-        at = @At(
-            value = "NEW",
-            target = "(Ljava/util/function/LongPredicate;Ljava/util/function/Supplier;)Lnet/minecraft/world/ticks/LevelTicks;"
-        )
-    )
-    private <T> LevelTicks<T> impl$createLevelTicks(final LongPredicate predicate, final Supplier<ProfilerFiller> supplier) {
-        final var levelTicks = new LevelTicks<T>(predicate, supplier);
-        final var levelData = this.levelData;
-        ((LevelTicksBridge<T>) levelTicks).bridge$setGameTimeSupplier(levelData::getGameTime);
-        return levelTicks;
-    }
-
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$cacheLevelSave(final MinecraftServer p_i241885_1_, final Executor p_i241885_2_, final LevelStorageSource.LevelStorageAccess p_i241885_3_,
-                                     final ServerLevelData p_i241885_4_, final net.minecraft.resources.ResourceKey<Level> p_i241885_5_, final DimensionType p_i241885_6_, final ChunkProgressListener p_i241885_7_,
+                                     final ServerLevelData p_i241885_4_, final net.minecraft.resources.ResourceKey<Level> p_i241885_5_, final Holder<DimensionType> p_i241885_6_, final ChunkProgressListener p_i241885_7_,
                                      final ChunkGenerator p_i241885_8_, final boolean p_i241885_9_, final long p_i241885_10_, final List<CustomSpawner> p_i241885_12_, final boolean p_i241885_13_,
                                      final CallbackInfo ci) {
         this.impl$levelSave = p_i241885_3_;
         this.impl$chunkStatusListener = p_i241885_7_;
         this.impl$rotationUpdates = new Object2ObjectOpenHashMap<>();
         this.impl$prevWeather = ((ServerWorld) this).weather();
+        ((LevelTicksBridge<?>) this.blockTicks).bridge$setGameTimeSupplier(this.levelData::getGameTime);
+        ((LevelTicksBridge<?>) this.fluidTicks).bridge$setGameTimeSupplier(this.levelData::getGameTime);
     }
 
     @Redirect(method = "getSeed", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/WorldData;worldGenSettings()Lnet/minecraft/world/level/levelgen/WorldGenSettings;"))
@@ -513,7 +505,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
     }
 
-    @Redirect(method = "lambda$onBlockStateChange$16",
+    @Redirect(method = "lambda$onBlockStateChange$15",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;add(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/ai/village/poi/PoiType;)V"
