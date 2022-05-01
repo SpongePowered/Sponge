@@ -1137,56 +1137,5 @@ public final class SpongeRegistryLoaders {
             l.add(TagTypes.ITEM_TYPE, k -> new SpongeTagType<@NonNull ItemType>("items", RegistryTypes.ITEM_TYPE, RegistryTypes.ITEM_TYPE_TAGS));
         });
     }
-
-    private static final Pattern ILLEGAL_FIELD_CHARACTERS = Pattern.compile("[./-]");
-
-    private static String sanitizedKey(String key) {
-        return SpongeRegistryLoaders.ILLEGAL_FIELD_CHARACTERS.matcher(key).replaceAll("_").toLowerCase(Locale.ROOT);
-    }
-
-    private static <T> Map<String, T> stateProperties(Class<T> clazz) {
-        Map<String, T> propertyMap = new HashMap<>();
-        Registry.BLOCK.forEach(block -> block.defaultBlockState().getProperties().forEach(prop -> {
-            if (clazz.isInstance(prop)) {
-                final String key = Registry.BLOCK.getKey(block).getPath() + "_" + prop.getName();
-                propertyMap.put(SpongeRegistryLoaders.sanitizedKey(key), clazz.cast(prop));
-            }
-        }));
-        return propertyMap;
-    }
-
-    public static RegistryLoader<BooleanStateProperty> booleanStateProperties() {
-        return RegistryLoader.of(l -> {
-            final Map<String, BooleanProperty> props = SpongeRegistryLoaders.stateProperties(BooleanProperty.class);
-            final Map<String, BooleanProperty> finalProps = new HashMap<>();
-            props.forEach((key, value) -> finalProps.put(key, BooleanProperty.create(value.getName()))); // Create clones for API States
-            props.values().stream().distinct().forEach(property -> finalProps.put(sanitizedKey(property.getName()), property)); // Add real keys of properties
-            finalProps.forEach((key, value) -> l.add(RegistryKey.of(RegistryTypes.BOOLEAN_STATE_PROPERTY, ResourceKey.sponge(key)), k -> (BooleanStateProperty) value));
-        });
-    }
-
-    public static RegistryLoader<IntegerStateProperty> integerStateProperties() {
-        return RegistryLoader.of(l -> {
-            final Map<String, IntegerProperty> props = SpongeRegistryLoaders.stateProperties(IntegerProperty.class);
-            final Map<String, IntegerProperty> finalProps = new HashMap<>();
-            props.forEach((key, value) -> finalProps.put(key, IntegerProperty.create(value.getName(),
-                    value.getPossibleValues().stream().min(Integer::compare).get(),
-                    value.getPossibleValues().stream().max(Integer::compare).get()))); // Create clones for API States
-            props.values().stream().distinct().forEach(property -> finalProps.put(sanitizedKey(property.getName()), property)); // Add real keys of properties
-            finalProps.forEach((key, value) -> l.add(RegistryKey.of(RegistryTypes.INTEGER_STATE_PROPERTY, ResourceKey.sponge(key)), k -> (IntegerStateProperty) value));
-        });
-    }
-
-    @SuppressWarnings("rawtypes")
-    public static RegistryLoader<EnumStateProperty<?>> enumStateProperties() {
-        return RegistryLoader.of(l -> {
-            final Map<String, EnumProperty> props = SpongeRegistryLoaders.stateProperties(EnumProperty.class);
-            final Map<String, EnumProperty> finalProps = new HashMap<>();
-            props.forEach((key, value) -> finalProps.put(key, EnumProperty.create(value.getName(), value.getValueClass(), value.getPossibleValues()))); // Create clones for API States
-            props.values().stream().distinct().forEach(property -> finalProps.put(sanitizedKey(property.getName()), property)); // Add real keys of properties
-            finalProps.forEach((key, value) -> l.add(RegistryKey.of(RegistryTypes.ENUM_STATE_PROPERTY, ResourceKey.sponge(key)), k -> (EnumStateProperty<?>) value));
-        });
-    }
-
     // @formatter:on
 }

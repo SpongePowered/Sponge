@@ -164,17 +164,6 @@ public final class RegistryHolderLogic implements RegistryHolder {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> Function<net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>>, net.minecraft.core.Registry<T>> identityRegistrySupplier(
-            final boolean isDynamic) {
-        return (key) -> {
-            final SpongeMappedRegistry<T> reg = new SpongeMappedRegistry<T>(key, Lifecycle.stable());
-            ((WritableRegistryBridge<T>) (Object) reg).bridge$setDynamic(isDynamic);
-            return reg;
-        };
-    }
-
-
     public <T> Registry<T> createRegistry(final RegistryType<T> type, final @Nullable InitialRegistryData<T> defaultValues,
             final Function<net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>>, net.minecraft.core.Registry<T>> registrySupplier) {
         final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(Objects.requireNonNull(type, "type").root());

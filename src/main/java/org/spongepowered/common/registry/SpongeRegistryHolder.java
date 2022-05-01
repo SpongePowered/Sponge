@@ -69,10 +69,6 @@ public interface SpongeRegistryHolder extends RegistryHolder {
         return this.createRegistry(type, loader, false);
     }
 
-    default <T> org.spongepowered.api.registry.Registry<T> createIdentityRegistry(final RegistryType<T> type, final RegistryLoader<T> loader) {
-        return this.registryHolder().createRegistry(type, loader, this.registryHolder().identityRegistrySupplier(false));
-    }
-
     default <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final RegistryLoader<T> loader,
         final boolean isDynamic) {
         return this.createRegistry(type, loader, isDynamic, null);

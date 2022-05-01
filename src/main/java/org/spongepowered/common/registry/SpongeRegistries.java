@@ -99,9 +99,6 @@ public final class SpongeRegistries {
         holder.wrapTagHelperAsRegistry(RegistryTypes.ITEM_TYPE_TAGS, (StaticTagHelper<ItemType>) (Object) ItemTagsAccessor.accessor$HELPER());
         holder.wrapTagHelperAsRegistry(RegistryTypes.ENTITY_TYPE_TAGS, (StaticTagHelper<EntityType<?>>) (Object) EntityTypeTagsAccessor.accessor$HELPER());
         holder.wrapTagHelperAsRegistry(RegistryTypes.FLUID_TYPE_TAGS, (StaticTagHelper<FluidType>) (Object) FluidTagsAccessor.accessor$HELPER());
-        holder.createIdentityRegistry(RegistryTypes.BOOLEAN_STATE_PROPERTY, SpongeRegistryLoaders.booleanStateProperties());
-        holder.createIdentityRegistry(RegistryTypes.INTEGER_STATE_PROPERTY, SpongeRegistryLoaders.integerStateProperties());
-        holder.createIdentityRegistry(RegistryTypes.ENUM_STATE_PROPERTY, SpongeRegistryLoaders.enumStateProperties());
     }
 
     public static void registerServerRegistries(final RegistryHolder holder) {
