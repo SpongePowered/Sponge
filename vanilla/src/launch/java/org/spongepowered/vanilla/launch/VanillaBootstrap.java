@@ -30,6 +30,7 @@ import net.minecraft.SharedConstants;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeLifecycle;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.inject.SpongeGuice;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.network.channel.SpongeChannelManager;

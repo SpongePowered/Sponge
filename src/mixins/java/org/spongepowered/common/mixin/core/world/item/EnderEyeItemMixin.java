@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.item;
 
+import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
@@ -90,7 +91,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         cancellable = true
     )
     private void impl$ThrowForPreEvent(final Level worldIn, final Player playerIn, final InteractionHand handIn,
-        final CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, final ItemStack used, final HitResult rayTraceResult, @Nullable final BlockPos targetPos) {
+        final CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, final ItemStack used, final HitResult rayTraceResult, final ServerLevel world, final BlockPos targetPos) {
         if (targetPos != null && !((LevelBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final ConstructEntityEvent.Pre event =
                     SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().currentCause(),

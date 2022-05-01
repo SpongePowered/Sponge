@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.FixedBiomeSource;
@@ -36,15 +37,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.server.BootstrapProperties;
 
-import java.util.function.Supplier;
-
 import javax.annotation.Nullable;
 
 @Mixin(FixedBiomeSource.class)
 public abstract class FixedBiomeSourceMixin_API extends BiomeSourceMixin_API implements ConfigurableBiomeProvider<FixedBiomeConfig> {
 
     // @formatter:off
-    @Shadow @Final private Supplier<Biome> biome;
+    @Shadow @Final private Holder<Biome> biome;
     // @formatter:on
 
     @Nullable private FixedBiomeConfig api$config;
@@ -52,7 +51,7 @@ public abstract class FixedBiomeSourceMixin_API extends BiomeSourceMixin_API imp
     @Override
     public FixedBiomeConfig config() {
         if (this.api$config == null) {
-            var biome = this.biome.get();
+            var biome = this.biome.value();
             var biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
             this.api$config = FixedBiomeConfig.of(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(biome)));
         }

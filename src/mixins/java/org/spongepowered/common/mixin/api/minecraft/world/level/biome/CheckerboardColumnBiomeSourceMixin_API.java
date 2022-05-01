@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
@@ -36,8 +38,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.server.BootstrapProperties;
 
-import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -46,7 +46,7 @@ import javax.annotation.Nullable;
 public abstract class CheckerboardColumnBiomeSourceMixin_API extends BiomeSourceMixin_API implements ConfigurableBiomeProvider<CheckerboardBiomeConfig> {
 
     // @formatter:off
-    @Shadow @Final private List<Supplier<Biome>> allowedBiomes;
+    @Shadow @Final private HolderSet<Biome> allowedBiomes;
     // @formatter:on
 
     @Nullable private CheckerboardBiomeConfig api$config;
@@ -56,7 +56,7 @@ public abstract class CheckerboardColumnBiomeSourceMixin_API extends BiomeSource
         if (this.api$config == null) {
 
             var biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
-            var biomes = this.allowedBiomes.stream().map(Supplier::get)
+            var biomes = this.allowedBiomes.stream().map(Holder::value)
                     .map(biome -> RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(biome)))
                     .collect(Collectors.toList());
             this.api$config = CheckerboardBiomeConfig.builder()

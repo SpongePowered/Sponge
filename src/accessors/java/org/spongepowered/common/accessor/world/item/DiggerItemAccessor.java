@@ -24,18 +24,16 @@
  */
 package org.spongepowered.common.accessor.world.item;
 
-import net.minecraft.tags.Tag;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-
-import java.util.Set;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.level.block.Block;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(DiggerItem.class)
 public interface DiggerItemAccessor {
 
-    @Accessor("blocks") Tag<Block> accessor$blocks();
+    @Accessor("blocks") TagKey<Block> accessor$blocks();
 
     @Accessor("speed") float accessor$speed();
 

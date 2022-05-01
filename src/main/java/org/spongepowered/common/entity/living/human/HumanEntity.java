@@ -94,6 +94,7 @@ import java.util.stream.Stream;
 
 public final class HumanEntity extends PathfinderMob implements TeamMember, RangedAttackMob {
     public static final ResourceKey<EntityType<?>> KEY = ResourceKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation("sponge", "human"));
+    // TODO registry is already frozen
     public static final EntityType<HumanEntity> TYPE = Registry.register(Registry.ENTITY_TYPE, HumanEntity.KEY,
         EntityType.Builder.of(HumanEntity::new, MobCategory.MISC)
             .noSave()

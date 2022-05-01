@@ -27,6 +27,10 @@ package org.spongepowered.vanilla.mixin.core.server;
 import net.minecraft.server.Bootstrap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 
 @Mixin(Bootstrap.class)
 public abstract class BootstrapMixin_Vanilla {
@@ -38,5 +42,11 @@ public abstract class BootstrapMixin_Vanilla {
     @Overwrite
     private static void wrapStreams() {
         // Handled by TerminalConsoleAppender
+    }
+
+    @Inject(method = "bootStrap", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Registry;freezeBuiltins()V"))
+    private static void impl$bootStrapHumanType(CallbackInfo ci)
+    {
+        HumanEntity.KEY.location(); // static init to register EntityType early
     }
 }
