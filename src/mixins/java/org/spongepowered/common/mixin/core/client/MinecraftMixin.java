@@ -31,7 +31,7 @@ import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.level.DataPackConfig;
@@ -143,25 +143,16 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         Launch.instance().lifecycle().callStoppedGameEvent();
     }
 
-    @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/resources/RegistryReadOps;"))
-    private static <T> RegistryReadOps<T> impl$setWorldSettingsAdapter(final DynamicOps<T> ops, final ResourceManager resourceManager, final RegistryAccess registryAccess) {
-        final RegistryReadOps<T> worldSettingsAdapter = RegistryReadOps.create(ops, resourceManager, registryAccess);
+    @Redirect(method = "lambda$createLevel$33", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess$Writable;Lnet/minecraft/server/packs/resources/ResourceManager;)Lnet/minecraft/resources/RegistryOps;"))
+    private static <T> RegistryOps<T> impl$setWorldSettingsAdapter(final DynamicOps<T> $$0, final RegistryAccess.Writable $$1, final ResourceManager $$2) {
+        final RegistryOps<T> worldSettingsAdapter = RegistryOps.createAndLoad($$0, $$1, $$2);
         BootstrapProperties.worldSettingsAdapter(worldSettingsAdapter);
         return worldSettingsAdapter;
     }
 
-    @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getDataTag(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/world/level/DataPackConfig;)Lnet/minecraft/world/level/storage/WorldData;"))
-    private static WorldData impl$serializeDelayedDataPackOnLoadAndSetBootstrapProperties(final LevelStorageSource.LevelStorageAccess levelSave, final DynamicOps<Tag> p_237284_1_, final DataPackConfig p_237284_2_, final LevelStorageSource.LevelStorageAccess p_238181_0_, final RegistryAccess.RegistryHolder p_238181_1_) {
-        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
-        final WorldData saveData = levelSave.getDataTag(p_237284_1_, p_237284_2_);
-        BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(), saveData.getDifficulty(), true, saveData.isHardcore(),
-                saveData.getAllowCommands(), 10, p_238181_1_);
-        return saveData;
-    }
-
     @Inject(method = "createLevel", at = @At("HEAD"))
     private void impl$setBootstrapProperties(final String levelName, final LevelSettings settings,
-                                             final RegistryAccess.RegistryHolder registries,
+                                             final RegistryAccess registries,
                                              final WorldGenSettings dimensionGeneratorSettings,
                                              final CallbackInfo ci) {
         BootstrapProperties.init(dimensionGeneratorSettings, settings.gameType(), settings.difficulty(), true, settings.hardcore(),
@@ -169,8 +160,8 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         BootstrapProperties.setIsNewLevel(true);
     }
 
-    @Redirect(method = "makeServerStem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
-    private Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
+    @Redirect(method = "createPackRepository ", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
+    private static Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
         final Path datapackDir = levelSave.getLevelPath(folderName);
         Launch.instance().lifecycle().callRegisterDataPackValueEvent(datapackDir);
         return datapackDir;

@@ -94,13 +94,11 @@ import java.util.stream.Stream;
 
 public final class HumanEntity extends PathfinderMob implements TeamMember, RangedAttackMob {
     public static final ResourceKey<EntityType<?>> KEY = ResourceKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation("sponge", "human"));
-    public static final EntityType<HumanEntity> TYPE = Registry.ENTITY_TYPE.register(
-        HumanEntity.KEY,
+    public static final EntityType<HumanEntity> TYPE = Registry.register(Registry.ENTITY_TYPE, HumanEntity.KEY,
         EntityType.Builder.of(HumanEntity::new, MobCategory.MISC)
             .noSave()
             .clientTrackingRange(Constants.Entity.Player.TRACKING_RANGE)
-            .build("sponge:human"),
-        Lifecycle.stable()
+            .build("sponge:human")
     );
     public static final AttributeSupplier ATTRIBUTES = Mob.createMobAttributes()
         .add(Attributes.ATTACK_DAMAGE, 1.0d) // Player

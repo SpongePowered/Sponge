@@ -28,6 +28,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
@@ -90,13 +91,12 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     @Override
     public <T extends EndStyleBiomeConfig> ConfigurableBiomeProvider<T> endStyle(final T config) {
         final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-        return (ConfigurableBiomeProvider<T>) TheEndBiomeSourceAccessor.invoker$new(biomeRegistry,
-                config.seed(),
-                biomeRegistry.get((ResourceLocation) (Object) config.endBiome().location()),
-                biomeRegistry.get((ResourceLocation) (Object) config.highlandsBiome().location()),
-                biomeRegistry.get((ResourceLocation) (Object) config.midlandsBiome().location()),
-                biomeRegistry.get((ResourceLocation) (Object) config.islandsBiome().location()),
-                biomeRegistry.get((ResourceLocation) (Object) config.barrensBiome().location())
+        return (ConfigurableBiomeProvider<T>) TheEndBiomeSourceAccessor.invoker$new(config.seed(),
+                biomeRegistry.getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) config.endBiome().location())),
+                biomeRegistry.getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) config.highlandsBiome().location())),
+                biomeRegistry.getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) config.midlandsBiome().location())),
+                biomeRegistry.getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) config.islandsBiome().location())),
+                biomeRegistry.getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) config.barrensBiome().location()))
         );
     }
 
@@ -112,7 +112,8 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
         final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
         final List<Holder<Biome>> biomes = new ArrayList<>();
         for (final RegistryReference<org.spongepowered.api.world.biome.Biome> biome : config.biomes()) {
-            biomes.add(biomeRegistry.getHolderOrThrow((ResourceLocation) (Object) biome.location()));
+            final ResourceKey<Biome> key = ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) biome.location());
+            biomes.add(biomeRegistry.getHolderOrThrow(key));
         }
 
         return (ConfigurableBiomeProvider<T>) new CheckerboardColumnBiomeSource(HolderSet.direct(biomes), config.scale());

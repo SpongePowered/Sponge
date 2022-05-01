@@ -192,7 +192,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         // Some entities need to have non-null fields (and the easiest way to
         // set them is to use the more specialised constructor).
         if (type == net.minecraft.world.entity.EntityType.FALLING_BLOCK) {
-            entity = new FallingBlockEntity(thisWorld, x, y, z, Blocks.SAND.defaultBlockState());
+            entity = FallingBlockEntity.fall(thisWorld, new BlockPos(x, y, z), Blocks.SAND.defaultBlockState());
         }
         if (type == net.minecraft.world.entity.EntityType.ITEM) {
             entity = new ItemEntity(thisWorld, x, y, z, new ItemStack(Blocks.STONE));

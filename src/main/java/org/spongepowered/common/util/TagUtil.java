@@ -35,9 +35,11 @@ import java.util.stream.Collectors;
 public final class TagUtil {
 
     public static <T extends Taggable<T>> Collection<Tag<T>> getAssociatedTags(final T taggable, final RegistryType<Tag<T>> taggableRegistry) {
-        return Sponge.game().registry(taggableRegistry).stream()
-                .filter(tag -> tag.contains(taggable))
-                .collect(Collectors.toList());
+        // TODO fix tags
+        throw new UnsupportedOperationException("not implemented");
+//        return Sponge.game().registry(taggableRegistry).stream()
+//                .filter(tag -> tag.contains(taggable))
+//                .collect(Collectors.toList());
     }
 
     private TagUtil() {

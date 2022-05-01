@@ -40,7 +40,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.datapack.DataPackTypes;
@@ -211,7 +211,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
      */
     @Inject(method = "sendMessage", at = @At("HEAD"), cancellable = true)
     private void impl$useTranslatingLogger(final net.minecraft.network.chat.Component input, final UUID sender, final CallbackInfo ci) {
-        MinecraftServerMixin.LOGGER.info(input);
+        MinecraftServerMixin.LOGGER.info(input.getString());
         ci.cancel();
     }
 

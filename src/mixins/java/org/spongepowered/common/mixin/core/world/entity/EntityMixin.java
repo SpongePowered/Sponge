@@ -225,6 +225,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow protected abstract Vec3 shadow$collide(Vec3 param0);
     @Shadow protected abstract boolean shadow$fireImmune();
     @Shadow public abstract boolean shadow$isPickable();
+    @Shadow protected abstract void shadow$markHurt();
 
     @Shadow protected String stringUUID;
     @Shadow @Nullable protected abstract PortalInfo shadow$findDimensionEntryPoint(ServerLevel param0);

@@ -29,6 +29,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -75,7 +76,13 @@ public final class LivingData {
                         .delete(LivingEntity::releaseUsingItem)
                     .create(Keys.AUTO_SPIN_ATTACK_TICKS)
                         .get(h -> Ticks.of(((LivingEntityAccessor)h).accessor$autoSpinAttackTicks()))
-                        .set((h, v) -> h.startAutoSpinAttack((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (h instanceof Player p) {
+                                p.startAutoSpinAttack((int) v.ticks());
+                                return true;
+                            }
+                            return false;
+                        })
                     .create(Keys.BODY_ROTATIONS)
                         .get(h -> {
                             final double headYaw = h.getYHeadRot();

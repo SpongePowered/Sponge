@@ -35,10 +35,9 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerResources;
 import net.minecraft.server.ServerScoreboard;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -109,7 +108,6 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     // @formatter:off
     @Shadow @Final public long[] tickTimes;
     @Shadow @Final protected WorldData worldData;
-    @Shadow private ServerResources resources;
 
     @Shadow public abstract net.minecraft.world.item.crafting.RecipeManager shadow$getRecipeManager();
     @Shadow public abstract PlayerList shadow$getPlayerList();
@@ -122,11 +120,12 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     @Shadow public abstract boolean shadow$isHardcore();
     @Shadow public abstract boolean shadow$isPvpAllowed();
     @Shadow public abstract boolean shadow$isCommandBlockEnabled();
-    @Shadow protected abstract boolean shadow$isSpawningMonsters();
+    @Shadow public abstract boolean shadow$isSpawningMonsters();
     @Shadow public abstract boolean shadow$isSpawningAnimals();
     @Shadow public abstract boolean shadow$isNetherEnabled();
     @Shadow public abstract Commands shadow$getCommands();
     @Shadow public abstract PackRepository shadow$getPackRepository();
+    @Shadow public abstract net.minecraft.server.packs.resources.ResourceManager shadow$getResourceManager();
     // @formatter:on
 
     private Iterable<? extends Audience> audiences;
@@ -142,21 +141,16 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     private SpongeUserManager api$userManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void api$initializeSpongeFields(final Thread p_i232576_1_, final RegistryAccess.RegistryHolder p_i232576_2_,
-            final LevelStorageSource.LevelStorageAccess p_i232576_3_, final WorldData p_i232576_4_, final PackRepository p_i232576_5_,
-            final Proxy p_i232576_6_, final DataFixer p_i232576_7_, final ServerResources p_i232576_8_, final MinecraftSessionService p_i232576_9_,
-            final GameProfileRepository p_i232576_10_, final GameProfileCache p_i232576_11_, final ChunkProgressListenerFactory p_i232576_12_,
-            final CallbackInfo ci) {
-
+    public void api$initializeSpongeFieldsfinal (Thread $$0, final LevelStorageSource.LevelStorageAccess $$1, final PackRepository $$2,
+            final WorldStem $$3, final Proxy $$4, final DataFixer $$5, final MinecraftSessionService $$6, final GameProfileRepository $$7,
+            final GameProfileCache $$8, final ChunkProgressListenerFactory $$9, final CallbackInfo ci) {
         this.api$scheduler = new ServerScheduler();
         this.api$playerDataHandler = new SpongePlayerDataManager(this);
         this.api$teleportHelper = new SpongeTeleportHelper();
         this.api$mapStorage = new SpongeMapStorage();
-        this.api$registryHolder = new RegistryHolderLogic(p_i232576_2_);
+        this.api$registryHolder = new RegistryHolderLogic($$3.registryAccess());
         this.api$userManager = new SpongeUserManager((MinecraftServer) (Object) this);
     }
-
-
 
     @Override
     public RecipeManager recipeManager() {
@@ -402,7 +396,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
     @Override
     public ResourceManager resourceManager() {
-        return (ResourceManager) this.resources.getResourceManager();
+        return (ResourceManager) this.shadow$getResourceManager();
     }
 
     @Override

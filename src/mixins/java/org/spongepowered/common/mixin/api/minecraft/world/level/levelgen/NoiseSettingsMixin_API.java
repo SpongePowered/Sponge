@@ -51,7 +51,6 @@ public abstract class NoiseSettingsMixin_API implements NoiseConfig {
     @Shadow public abstract NoiseSlider shadow$bottomSlideSettings();
     @Shadow public abstract int shadow$noiseSizeHorizontal();
     @Shadow public abstract int shadow$noiseSizeVertical();
-    @Shadow @Final public abstract boolean shadow$largeBiomes();
     @Shadow @Final public abstract TerrainShaper shadow$terrainShaper();
     // @formatter:on
 
@@ -83,11 +82,6 @@ public abstract class NoiseSettingsMixin_API implements NoiseConfig {
     @Override
     public int verticalSize() {
         return this.shadow$noiseSizeVertical();
-    }
-
-    @Intrinsic
-    public boolean noiseConfig$largeBiomes() {
-        return this.shadow$largeBiomes();
     }
 
     @Override

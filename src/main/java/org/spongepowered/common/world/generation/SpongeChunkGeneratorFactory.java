@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.generation;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
@@ -56,7 +57,7 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
         return (ConfigurableChunkGenerator<T>) new FlatLevelSource(structureRegistry, (FlatLevelGeneratorSettings) config);
     }
 
-    private <T extends NoiseGeneratorConfig> ConfigurableChunkGenerator<T> noiseBasedChunkGenerator(final long seed, final BiomeSource biomeSource, final Supplier<NoiseGeneratorSettings> noiseGeneratorSettings) {
+    private <T extends NoiseGeneratorConfig> ConfigurableChunkGenerator<T> noiseBasedChunkGenerator(final long seed, final BiomeSource biomeSource, final Holder<NoiseGeneratorSettings> noiseGeneratorSettings) {
         var noiseRegistry = BootstrapProperties.registries.registryOrThrow(Registry.NOISE_REGISTRY);
         var structureRegistry = BootstrapProperties.registries.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
         return (ConfigurableChunkGenerator<T>) (Object)
@@ -68,14 +69,14 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
         var seed = BootstrapProperties.worldGenSettings.seed();
         var biomeSource = (BiomeSource) Objects.requireNonNull(provider, "provider");
         var noiseGeneratorSettings = (NoiseGeneratorSettings) (Object) Objects.requireNonNull(config, "config");
-        return this.noiseBasedChunkGenerator(seed, biomeSource, () -> noiseGeneratorSettings);
+        return this.noiseBasedChunkGenerator(seed, biomeSource, Holder.direct(noiseGeneratorSettings));
     }
 
     @Override
     public <T extends NoiseGeneratorConfig> ConfigurableChunkGenerator<T> noise(final BiomeProvider provider, final long seed, final T config) {
         var biomeSource = (net.minecraft.world.level.biome.BiomeSource) Objects.requireNonNull(provider, "provider");
         var noiseGeneratorSettings = (NoiseGeneratorSettings) (Object) Objects.requireNonNull(config, "config");
-        return this.noiseBasedChunkGenerator(seed, biomeSource, () -> noiseGeneratorSettings);
+        return this.noiseBasedChunkGenerator(seed, biomeSource, Holder.direct(noiseGeneratorSettings));
     }
 
     @Override
@@ -98,7 +99,7 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
         var seed = BootstrapProperties.worldGenSettings.seed();
         var biomeSource = MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomeRegistry);
 
-        return this.noiseBasedChunkGenerator(seed, biomeSource, () -> noiseGeneratorSettingsRegistry.getOrThrow(NoiseGeneratorSettings.NETHER));
+        return this.noiseBasedChunkGenerator(seed, biomeSource, noiseGeneratorSettingsRegistry.getHolderOrThrow(NoiseGeneratorSettings.NETHER));
     }
 
     @Override
@@ -109,6 +110,6 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
         var seed = BootstrapProperties.worldGenSettings.seed();
         var biomeSource = new TheEndBiomeSource(biomeRegistry, seed);
 
-        return this.noiseBasedChunkGenerator(seed, biomeSource, () -> noiseGeneratorSettingsRegistry.getOrThrow(NoiseGeneratorSettings.END));
+        return this.noiseBasedChunkGenerator(seed, biomeSource, noiseGeneratorSettingsRegistry.getHolderOrThrow(NoiseGeneratorSettings.END));
     }
 }

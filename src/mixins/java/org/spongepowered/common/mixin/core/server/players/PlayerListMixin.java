@@ -29,6 +29,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
@@ -56,6 +57,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
@@ -73,6 +75,7 @@ import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -144,6 +147,10 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow @Nullable public abstract CompoundTag shadow$load(net.minecraft.server.level.ServerPlayer playerIn);
     @Shadow public abstract boolean shadow$canBypassPlayerLimit(com.mojang.authlib.GameProfile param0);
     // @formatter:on
+
+    @Shadow @Final private PlayerDataStorage playerIo;
+
+    @Shadow public abstract void placeNewPlayer(Connection $$0, net.minecraft.server.level.ServerPlayer $$1);
 
     private boolean impl$isGameMechanicRespawn = false;
     ResourceKey<Level> impl$newDestination = null;
@@ -324,14 +331,14 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Redirect(method = "placeNewPlayer",
         at = @At(value = "INVOKE",
-            target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V",
+            target = "Lorg/slf4j/Logger;info(Ljava/lang/String;[Ljava/lang/Object;)V",
             remap = false
         )
     )
-    private void impl$onInitPlayer_printPlayerWorldInJoinFeedback(
-            final Logger logger, final String message, final Object p0, final Object p1, final Object p2, final Object p3,
-            final Object p4, final Object p5, final Connection manager, final net.minecraft.server.level.ServerPlayer entity) {
-        logger.info("{}[{}] logged in to world '{}' with entity id {} at ({}, {}, {})", p0, p1, ((org.spongepowered.api.world.server.ServerWorld) entity.getLevel()).key(), p2, p3, p4, p5);
+    private void impl$onInitPlayer_printPlayerWorldInJoinFeedback(final org.slf4j.Logger logger, final String s, final Object[] objects) {
+        net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) objects[1];
+        logger.info("{}[{}] logged in to world '{}' with entity id {} at ({}, {}, {})", player.getName().getString(), player,
+                ((ServerWorld)player.getLevel()).key(), player.getId(), player.getX(), player.getY(), player.getZ());
     }
 
     @Redirect(method = "placeNewPlayer",
@@ -378,7 +385,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundLoginPacket"))
     private ClientboundLoginPacket impl$usePerWorldViewDistance(final int $$0, final boolean $$1, final GameType $$2, final GameType $$3, final Set<ResourceKey<Level>> $$4,
-        final RegistryAccess.RegistryHolder $$5, final DimensionType $$6, final ResourceKey<Level> $$7, final long $$8, final int $$9, final int $$10, final int $$11, final boolean $$12, final boolean $$13,
+        final RegistryAccess.Frozen $$5, final Holder<DimensionType> $$6, final ResourceKey<Level> $$7, final long $$8, final int $$9, final int $$10, final int $$11, final boolean $$12, final boolean $$13,
         final boolean $$14, final boolean $$15, final Connection conn, final net.minecraft.server.level.ServerPlayer player) {
 
         return new ClientboundLoginPacket($$0, $$1, $$2, $$3, $$4, $$5, $$6, $$7,
@@ -547,7 +554,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         final ServerLevel targetWorld = (ServerLevel) event.destinationWorld();
         ((ServerPlayerBridge) recreatedPlayer).bridge$sendChangeDimension(
-            targetWorld.dimensionType(),
+            Holder.direct(targetWorld.dimensionType()),
             ((ClientboundRespawnPacket) packetIn).getDimension(),
             ((ClientboundRespawnPacket) packetIn).getSeed(),
             recreatedPlayer.gameMode.getGameModeForPlayer(),

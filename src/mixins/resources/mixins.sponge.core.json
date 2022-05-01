@@ -241,7 +241,8 @@
         "world.scores.ScoreboardMixin",
         "world.scores.ScoreMixin",
         "world.ticks.LevelTicksMixin",
-        "world.ticks.ScheduledTickMixin"
+        "world.ticks.ScheduledTickMixin",
+        "server.WorldStem_WorldDataSupplierMixin"
     ],
     "client": [
         "client.MinecraftMixin",

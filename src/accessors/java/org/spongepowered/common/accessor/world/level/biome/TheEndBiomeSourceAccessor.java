@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.accessor.world.level.biome;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,8 +34,8 @@ import org.spongepowered.common.UntransformedInvokerError;
 @Mixin(TheEndBiomeSource.class)
 public interface TheEndBiomeSourceAccessor {
 
-    @Invoker("<init>") static TheEndBiomeSource invoker$new(final Registry<Biome> registry, final long seed, final Biome endBiome, final Biome highlandsBiome,
-            final Biome midlandsBiome, final Biome islandsBiome, final Biome barrenBiome) {
+    @Invoker("<init>") static TheEndBiomeSource invoker$new(final long seed, final Holder<Biome> endBiome, final Holder<Biome> highlandsBiome,
+            final Holder<Biome> midlandsBiome, final Holder<Biome> islandsBiome, final Holder<Biome> barrenBiome) {
         throw new UntransformedInvokerError();
     }
 }

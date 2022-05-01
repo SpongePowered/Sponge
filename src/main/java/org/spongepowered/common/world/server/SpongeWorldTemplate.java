@@ -29,10 +29,12 @@ import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.kyori.adventure.text.Component;
+import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -256,9 +258,10 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     }
 
     public LevelStem asLevelStem() {
-        final LevelStem scratch =
-                new LevelStem(() -> BootstrapProperties.registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get((ResourceLocation) (Object) this.worldType.location()),
-                        (net.minecraft.world.level.chunk.ChunkGenerator) this.generator);
+        final Registry<DimensionType> dimensionTypeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+        final net.minecraft.resources.ResourceKey<DimensionType> key =
+                net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, (ResourceLocation) (Object) this.worldType.location());
+        final LevelStem scratch = new LevelStem(dimensionTypeRegistry.getHolderOrThrow(key), (net.minecraft.world.level.chunk.ChunkGenerator) this.generator);
         ((LevelStemBridge) (Object) scratch).bridge$setFromSettings(false);
         ((LevelStemBridge) (Object) scratch).bridge$populateFromTemplate(this);
         return scratch;
@@ -402,7 +405,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             final WorldGenSettings generationSettings = BootstrapProperties.worldGenSettings;
             this.generationConfig = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$new(generationSettings.seed(),
                     generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
-                    new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()),
+                    new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), null),
                     ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$legacyCustomOptions());
             this.gameMode = null;
             this.difficulty = null;
@@ -426,7 +429,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             final WorldGenSettings generationSettings = (WorldGenSettings) template.generationConfig();
             this.generationConfig = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$new(generationSettings.seed(),
                     generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
-                    new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable()),
+                    new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), null),
                     ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$legacyCustomOptions());
             this.gameMode = template.gameMode().orElse(null);
             this.difficulty = template.difficulty().orElse(null);

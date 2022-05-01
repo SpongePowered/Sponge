@@ -26,16 +26,14 @@ package org.spongepowered.common.mixin.core.world.level.levelgen;
 
 import static net.minecraft.world.level.levelgen.WorldGenSettings.makeDefaultOverworld;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -56,11 +54,6 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
     @Shadow @Final private boolean generateFeatures;
     @Shadow @Final private boolean generateBonusChest;
     @Shadow @Final private MappedRegistry<LevelStem> dimensions;
-
-    @Shadow public static MappedRegistry<LevelStem> withOverworld(Registry<DimensionType> p_242749_0_,
-            MappedRegistry<LevelStem> p_242749_1_, ChunkGenerator p_242749_2_) {
-        return null;
-    }
     // @formatter:on
 
     @Override
@@ -68,8 +61,8 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
         return new WorldGenSettings(this.seed, this.generateFeatures, this.generateBonusChest, this.dimensions);
     }
 
-    @Redirect(method = "guardExperimental", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/MappedRegistry;get(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"))
-    private Object impl$useBootstrapDimensionRegistryForGuard(MappedRegistry registry, ResourceKey<LevelStem> registryKey) {
+    @Redirect(method = "guardExperimental", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Registry;get(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"))
+    private Object impl$useBootstrapDimensionRegistryForGuard(Registry<LevelStem> registry, ResourceKey<LevelStem> registryKey) {
         if (BootstrapProperties.worldGenSettings == null) {
             BootstrapProperties.worldGenSettings = (WorldGenSettings) (Object) this;
         }
@@ -81,8 +74,8 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
         return BootstrapProperties.worldGenSettings.dimensions().get(registryKey);
     }
 
-    @Redirect(method = "overworld", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/MappedRegistry;get(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"))
-    private Object impl$useBootstrapDimensionRegistryForGenerator(MappedRegistry registry, ResourceKey<LevelStem> registryKey) {
+    @Redirect(method = "overworld", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Registry;get(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"))
+    private Object impl$useBootstrapDimensionRegistryForGenerator(Registry<LevelStem> registry, ResourceKey<LevelStem> registryKey) {
         if (BootstrapProperties.worldGenSettings == null) {
             BootstrapProperties.worldGenSettings = (WorldGenSettings) (Object) this;
         }
@@ -102,9 +95,9 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
     public static WorldGenSettings makeDefault(RegistryAccess $$0) {
         long $$1 = (new Random()).nextLong();
         // Sponge Start - Cache the world gen settings as early as possible
-        final WorldGenSettings worldGenSettings =
-            new WorldGenSettings($$1, true, false, withOverworld($$0.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY),
-                DimensionType.defaultDimensions($$0, $$1), makeDefaultOverworld($$0, $$1)));
+        final WorldGenSettings worldGenSettings = new WorldGenSettings($$1, true, false,
+                WorldGenSettings.withOverworld($$0.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY), DimensionType.defaultDimensions($$0, $$1),
+                        makeDefaultOverworld($$0, $$1)));
         BootstrapProperties.worldGenSettings = worldGenSettings;
         // Sponge End
         return worldGenSettings;

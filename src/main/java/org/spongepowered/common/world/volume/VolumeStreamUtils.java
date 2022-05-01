@@ -178,7 +178,7 @@ public final class VolumeStreamUtils {
         final int maskedX = x & 3;
         final int maskedY = y & 3;
         final int maskedZ = z & 3;
-        section.getBiomes().set(maskedX, maskedY, maskedZ, (Biome) (Object) biome);
+        section.getBiomes().set(maskedX, maskedY, maskedZ, Holder.direct((Biome) (Object) biome));
 
         finalizer.run();
         return true;
@@ -357,13 +357,13 @@ public final class VolumeStreamUtils {
         return ((chunk, chunkSection, pos, world) -> {
             if (chunk.getSection(chunk.getSectionIndex(pos.getY())) == null) {
                 if (chunk instanceof LevelChunk) {
-                    return ((LevelChunk) chunk).getLevel().getNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
+                    return ((LevelChunk) chunk).getLevel().getNoiseBiome(pos.getX(), pos.getY(), pos.getZ()).value();
                 } else {
                     // Failover to use the World
-                    return world.getUncachedNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
+                    return world.getUncachedNoiseBiome(pos.getX(), pos.getY(), pos.getZ()).value();
                 }
             }
-            return chunk.getNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
+            return chunk.getNoiseBiome(pos.getX(), pos.getY(), pos.getZ()).value();
         }
         );
     }
@@ -538,7 +538,7 @@ public final class VolumeStreamUtils {
             (blockPos, world) -> {
                 final net.minecraft.world.level.biome.Biome biome = shouldCarbonCopy
                     ? backingVolume.getNativeBiome(blockPos.getX(), blockPos.getY(), blockPos.getZ())
-                    : ((LevelReader) world).getBiome(blockPos);
+                    : ((LevelReader) world).getBiome(blockPos).value();
                 return new Tuple<>(blockPos, biome);
             }
         );

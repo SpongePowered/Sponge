@@ -27,14 +27,12 @@ package org.spongepowered.vanilla.mixin.api.minecraft.server;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerResources;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -51,11 +49,9 @@ public abstract class MinecraftServerMixin_Vanilla_API implements VanillaServer 
     private SpongeWorldManager vanillaAPI$worldManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void vanillaAPI$setupSpongeFields(Thread p_i232576_1_, RegistryAccess.RegistryHolder p_i232576_2_,
-            LevelStorageSource.LevelStorageAccess p_i232576_3_,
-            WorldData p_i232576_4_, PackRepository p_i232576_5_, Proxy p_i232576_6_, DataFixer p_i232576_7_,
-            ServerResources p_i232576_8_, MinecraftSessionService p_i232576_9_, GameProfileRepository p_i232576_10_,
-            GameProfileCache p_i232576_11_, ChunkProgressListenerFactory p_i232576_12_, CallbackInfo ci) {
+    private void vanillaAPI$setupSpongeFields(final Thread $$0, final LevelStorageSource.LevelStorageAccess $$1, final PackRepository $$2,
+            final WorldStem $$3, final Proxy $$4, final DataFixer $$5, final MinecraftSessionService $$6, final GameProfileRepository $$7,
+            final GameProfileCache $$8, final ChunkProgressListenerFactory $$9, final CallbackInfo ci) {
 
         this.vanillaAPI$worldManager = new VanillaWorldManager((MinecraftServer) (Object) this);
     }

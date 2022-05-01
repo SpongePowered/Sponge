@@ -319,7 +319,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
             (blockPos, world) -> {
                 final net.minecraft.world.level.biome.Biome biome = shouldCarbonCopy
                     ? backingVolume.getNativeBiome(blockPos.getX(), blockPos.getY(), blockPos.getZ())
-                    : ((LevelReader) world.world()).getBiome(blockPos);
+                    : ((LevelReader) world.world()).getBiome(blockPos).value();
                 return new Tuple<>(blockPos, biome);
             }
         );

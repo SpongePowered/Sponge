@@ -71,7 +71,6 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
     @Shadow protected abstract boolean shadow$isDamageSourceBlocked(DamageSource param0);
     @Shadow protected abstract void shadow$actuallyHurt(DamageSource param0, float param1);
     @Shadow public abstract void shadow$setLastHurtByMob(@Nullable LivingEntity param0);
-    @Shadow protected abstract void shadow$markHurt();
     @Shadow public abstract void shadow$knockback(double param0, double param1, double param2);
     @Shadow protected abstract boolean shadow$checkTotemDeathProtection(DamageSource param0);
     @Shadow @javax.annotation.Nullable protected abstract SoundEvent shadow$getDeathSound();

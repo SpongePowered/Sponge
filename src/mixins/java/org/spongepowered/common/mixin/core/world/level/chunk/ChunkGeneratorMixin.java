@@ -24,23 +24,27 @@
  */
 package org.spongepowered.common.mixin.core.world.level.chunk;
 
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.StructureSettings;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.level.biome.BiomeSourceBridge;
 
+import java.util.Optional;
+
 @Mixin(ChunkGenerator.class)
 public abstract class ChunkGeneratorMixin {
 
-    @Inject(method = "<init>(Lnet/minecraft/world/level/biome/BiomeSource;Lnet/minecraft/world/level/biome/BiomeSource;Lnet/minecraft/world/level/levelgen/StructureSettings;J)V", at = @At("RETURN"))
-    private void impl$assignGeneratorRefToSource(final BiomeSource $$0, final BiomeSource $$1, final StructureSettings $$2, final long $$3,
-        final CallbackInfo ci) {
+    @Inject(method = "<init>(Lnet/minecraft/core/Registry;Ljava/util/Optional;Lnet/minecraft/world/level/biome/BiomeSource;Lnet/minecraft/world/level/biome/BiomeSource;J)V", at = @At("RETURN"))
+    private void impl$assignGeneratorRefToSource(final Registry<StructureSet> $$0, final Optional<HolderSet<StructureSet>> $$1,
+            final BiomeSource $$2, final BiomeSource $$3, final long $$4, final CallbackInfo ci) {
 
-        ((BiomeSourceBridge) $$0).bridge$setChunkGenerator((ChunkGenerator) (Object) this);
-        ((BiomeSourceBridge) $$1).bridge$setChunkGenerator((ChunkGenerator) (Object) this);
+        ((BiomeSourceBridge) $$2).bridge$setChunkGenerator((ChunkGenerator) (Object) this);
+        ((BiomeSourceBridge) $$3).bridge$setChunkGenerator((ChunkGenerator) (Object) this);
     }
 }

@@ -280,7 +280,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     public void bridge$populateFromDimension(final LevelStem dimension) {
         final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) dimension;
         this.impl$key = ((ResourceKeyBridge) (Object) dimension).bridge$getKey();
-        this.impl$dimensionType = dimension.typeHolder();
+        this.impl$dimensionType = dimension.typeHolder().value();
         this.impl$displayName = levelStemBridge.bridge$displayName().orElse(null);
         levelStemBridge.bridge$difficulty().ifPresent(v -> {
             ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(RegistryTypes.DIFFICULTY.get().value((ResourceKey) (Object) v));
@@ -346,7 +346,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
             return codec.encodeStart(ops, dimensionGeneratorSettings);
         }
         dimensionGeneratorSettings = ((WorldGenSettingsBridge) input).bridge$copy();
-        final MappedRegistry<LevelStem> registry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
+        final MappedRegistry<LevelStem> registry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), null);
         ((org.spongepowered.api.registry.Registry<LevelStem>) (Object) dimensionGeneratorSettings.dimensions()).streamEntries().forEach(entry -> {
             if (Constants.MINECRAFT.equals(entry.key().namespace())) {
                 ((org.spongepowered.api.registry.Registry<LevelStem>) (Object) registry).register(entry.key(), entry.value());

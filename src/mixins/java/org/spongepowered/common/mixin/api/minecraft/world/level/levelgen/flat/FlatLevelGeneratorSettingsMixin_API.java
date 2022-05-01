@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.flat;
 
+import net.minecraft.core.Holder;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryReference;
@@ -38,7 +39,6 @@ import org.spongepowered.common.server.BootstrapProperties;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.Registry;
-import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 
@@ -49,8 +49,7 @@ public abstract class FlatLevelGeneratorSettingsMixin_API implements FlatGenerat
     @Shadow private boolean decoration;
     @Shadow private boolean addLakes;
 
-    @Shadow public abstract net.minecraft.world.level.biome.Biome getBiome();
-    @Shadow public abstract StructureSettings shadow$structureSettings();
+    @Shadow public abstract Holder<net.minecraft.world.level.biome.Biome> shadow$getBiome();
     @Shadow public abstract List<FlatLayerInfo> shadow$getLayersInfo();
     // @formatter:on
 
@@ -66,7 +65,7 @@ public abstract class FlatLevelGeneratorSettingsMixin_API implements FlatGenerat
 
     @Override
     public RegistryReference<Biome> biome() {
-        return RegistryKey.of(RegistryTypes.BIOME, (ResourceKey) (Object) BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.getBiome())).asReference();
+        return RegistryKey.of(RegistryTypes.BIOME, (ResourceKey) (Object) BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.shadow$getBiome().value())).asReference();
     }
     
     @Override

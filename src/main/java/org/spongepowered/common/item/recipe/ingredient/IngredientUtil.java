@@ -29,9 +29,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -66,11 +66,8 @@ public class IngredientUtil {
     }
 
     public static org.spongepowered.api.item.recipe.crafting.@Nullable Ingredient of(ResourceKey tagKey) {
-        Tag<Item> itemTag = ItemTags.getAllTags().getTag(((ResourceLocation) (Object) tagKey));
-        if (itemTag == null) {
-            return null;
-        }
-        return IngredientUtil.fromNative(Ingredient.of(itemTag));
+        final TagKey<Item> key = TagKey.create(Registry.ITEM_REGISTRY, (ResourceLocation) (Object) tagKey);
+        return IngredientUtil.fromNative(Ingredient.of(key));
     }
 
     private static net.minecraft.world.item.ItemStack[] toNativeStacks(ItemStack[] stacks) {

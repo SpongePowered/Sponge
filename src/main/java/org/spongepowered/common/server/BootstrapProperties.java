@@ -25,7 +25,7 @@
 package org.spongepowered.common.server;
 
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.spongepowered.api.ResourceKey;
@@ -48,7 +48,7 @@ public final class BootstrapProperties {
     public static boolean commands;
     public static int viewDistance = 10;
     public static RegistryAccess registries;
-    public static RegistryReadOps<?> worldSettingsAdapter;
+    public static RegistryOps<?> worldSettingsAdapter;
     public static boolean isNewLevel = false;
 
     public static void init(final WorldGenSettings worldGenSettings, final GameType gameType, final net.minecraft.world.Difficulty difficulty,
@@ -64,7 +64,7 @@ public final class BootstrapProperties {
         BootstrapProperties.serializationBehavior = SerializationBehavior.AUTOMATIC;
     }
 
-    public static <T> void worldSettingsAdapter(final RegistryReadOps<T> worldSettingsAdapter) {
+    public static <T> void worldSettingsAdapter(final RegistryOps<T> worldSettingsAdapter) {
         BootstrapProperties.worldSettingsAdapter = worldSettingsAdapter;
     }
 

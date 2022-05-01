@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.entity.player;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -35,7 +36,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stat;
-import net.minecraft.tags.TagContainer;
 import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -49,6 +49,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.Scoreboard;
@@ -254,11 +255,11 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
      */
     @Redirect(method = "mayUseItemAt",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/item/ItemStack;hasAdventureModePlaceTagForBlock(Lnet/minecraft/tags/TagContainer;Lnet/minecraft/world/level/block/state/pattern/BlockInWorld;)Z"))
-    private boolean impl$callChangeBlockPre(final ItemStack stack, final TagContainer tagSupplier, final BlockInWorld cachedBlockInfo) {
+            target = "Lnet/minecraft/world/item/ItemStack;hasAdventureModePlaceTagForBlock(Lnet/minecraft/core/Registry;Lnet/minecraft/world/level/block/state/pattern/BlockInWorld;)Z"))
+    private boolean impl$callChangeBlockPre(final ItemStack stack, final Registry<Block> registry, final BlockInWorld cachedBlockInfo) {
         // Lazy evaluation, if the stack isn't placeable anyways, might as well not
         // call the logic.
-        if (!stack.hasAdventureModePlaceTagForBlock(tagSupplier, cachedBlockInfo)) {
+        if (!stack.hasAdventureModePlaceTagForBlock(registry, cachedBlockInfo)) {
             return false;
         }
         // If we're going to throw an event, then do it.

@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.Main;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
-import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
@@ -42,7 +42,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
@@ -57,10 +56,9 @@ public abstract class MainMixin {
         return worldGenSettings;
     }
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/resources/RegistryReadOps;"))
-    private static <T> RegistryReadOps<T> impl$cacheWorldSettingsAdapter(final DynamicOps<T> ops, final ResourceManager resourceAccess,
-            final RegistryAccess registryAccess) {
-        final RegistryReadOps<T> worldSettingsAdapter = RegistryReadOps.createAndLoad(ops, resourceAccess, registryAccess);
+    @Redirect(method = "lambda$main$1", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess$Writable;Lnet/minecraft/server/packs/resources/ResourceManager;)Lnet/minecraft/resources/RegistryOps;"))
+    private static <T> RegistryOps<T> impl$cacheWorldSettingsAdapter(final DynamicOps<T> ops, final RegistryAccess.Writable registryAccess, final ResourceManager resourceAccess) {
+        final RegistryOps<T> worldSettingsAdapter = RegistryOps.createAndLoad(ops, registryAccess, resourceAccess);
         BootstrapProperties.worldSettingsAdapter(worldSettingsAdapter);
         SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
         return worldSettingsAdapter;
@@ -69,7 +67,7 @@ public abstract class MainMixin {
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
     private static Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
         final Path datapackDir = levelSave.getLevelPath(folderName);
-        final Lifecycle lifecycle = Launch.instance().lifecycle();
+        final var lifecycle = Launch.instance().lifecycle();
         lifecycle.establishGlobalRegistries();
         lifecycle.establishDataProviders();
         lifecycle.callRegisterDataEvent();
@@ -77,9 +75,8 @@ public abstract class MainMixin {
         return datapackDir;
     }
 
-    @Redirect(method = "main", at = @At(value = "NEW", target = "net/minecraft/world/level/storage/PrimaryLevelData"))
-    private static PrimaryLevelData impl$setIsNewLevel(final LevelSettings settings, final WorldGenSettings generationSettings, final
-            com.mojang.serialization.Lifecycle lifecycle) {
+    @Redirect(method = "lambda$main$1", at = @At(value = "NEW", target = "net/minecraft/world/level/storage/PrimaryLevelData"))
+    private static PrimaryLevelData impl$setIsNewLevel(final LevelSettings settings, final WorldGenSettings generationSettings, final Lifecycle lifecycle) {
         BootstrapProperties.setIsNewLevel(true);
         return new PrimaryLevelData(settings, generationSettings, lifecycle);
     }

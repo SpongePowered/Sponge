@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.core;
 
 import com.mojang.serialization.Lifecycle;
+import net.minecraft.core.Holder;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.ResourceKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -38,7 +39,7 @@ import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 public abstract class WritableRegistryMixin<T> extends RegistryMixin<T> implements WritableRegistryBridge<T>, RegistryBridge<T> {
 
     // @formatter:off
-    @Shadow public abstract <V extends T> V shadow$register(ResourceKey<T> p_218381_1_, V p_218381_2_, Lifecycle p_218381_3_);
+    @Shadow public abstract <V extends T> Holder<V> shadow$register(ResourceKey<T> p_218381_1_, V p_218381_2_, Lifecycle p_218381_3_);
     // @formatter:on
 
     private boolean impl$isDynamic = true;

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.level.LevelReader;
@@ -69,7 +70,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     @Deprecated @Shadow boolean shadow$hasChunksAt(int p_217344_1_, int p_217344_2_, int p_217344_3_, int p_217344_4_, int p_217344_5_, int p_217344_6_);
     @Shadow net.minecraft.world.level.dimension.DimensionType shadow$dimensionType();
     @Shadow boolean shadow$containsAnyLiquid(net.minecraft.world.phys.AABB bb);
-    @Shadow net.minecraft.world.level.biome.Biome shadow$getBiome(BlockPos p_226691_1_);
+    @Shadow Holder<net.minecraft.world.level.biome.Biome> shadow$getBiome(BlockPos p_226691_1_);
     // @formatter:on
 
     // Region

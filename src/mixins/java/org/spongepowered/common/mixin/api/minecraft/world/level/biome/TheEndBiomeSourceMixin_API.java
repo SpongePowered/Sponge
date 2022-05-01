@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
@@ -42,11 +43,11 @@ import javax.annotation.Nullable;
 public abstract class TheEndBiomeSourceMixin_API extends BiomeSourceMixin_API implements ConfigurableBiomeProvider<EndStyleBiomeConfig> {
 
     // @formatter:off
-    @Shadow @Final private Biome end;
-    @Shadow @Final private Biome highlands;
-    @Shadow @Final private Biome midlands;
-    @Shadow @Final private Biome islands;
-    @Shadow @Final private Biome barrens;
+    @Shadow @Final private Holder<Biome> end;
+    @Shadow @Final private Holder<Biome> highlands;
+    @Shadow @Final private Holder<Biome> midlands;
+    @Shadow @Final private Holder<Biome> islands;
+    @Shadow @Final private Holder<Biome> barrens;
     @Shadow @Final private long seed;
     // @formatter:on
 
@@ -58,11 +59,11 @@ public abstract class TheEndBiomeSourceMixin_API extends BiomeSourceMixin_API im
 
             var biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
             this.api$config = EndStyleBiomeConfig.builder()
-                    .endBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.end)))
-                    .highlandsBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.highlands)))
-                    .midlandsBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.midlands)))
-                    .islandsBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.islands)))
-                    .barrensBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.barrens)))
+                    .endBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.end.value())))
+                    .highlandsBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.highlands.value())))
+                    .midlandsBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.midlands.value())))
+                    .islandsBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.islands.value())))
+                    .barrensBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.barrens.value())))
                     .seed(this.seed).build();
         }
         return this.api$config;
