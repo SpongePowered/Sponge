@@ -51,6 +51,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ListenerClassVisitor extends ClassVisitor {
@@ -141,6 +142,7 @@ public class ListenerClassVisitor extends ClassVisitor {
         }
 
         @Override
+        @Nullable
         public AnnotationVisitor visitAnnotation(final String descriptor, final boolean visible) {
             final Type type = Type.getType(descriptor);
             if (Objects.equals(descriptor, ListenerClassVisitor.LISTENER_DESCRIPTOR)) {
@@ -224,7 +226,7 @@ public class ListenerClassVisitor extends ClassVisitor {
         }
 
         @Override
-        public void visit(final String name, final Object value) {
+        public void visit(final @Nullable String name, final Object value) {
             try {
                 this.annotation.put(name == null ? "value" : name, value);
             } catch (final ClassNotFoundException | AnnotationFormatException e) {
@@ -233,8 +235,8 @@ public class ListenerClassVisitor extends ClassVisitor {
         }
 
         @Override
-        public AnnotationVisitor visitArray(String name) {
-            annotation.initReturnTypes();
+        public AnnotationVisitor visitArray(final String name) {
+            this.annotation.initReturnTypes();
             return this;
         }
 
@@ -339,6 +341,14 @@ public class ListenerClassVisitor extends ClassVisitor {
 
         public Class<?> classByLoader(final String className) throws ClassNotFoundException {
             return Class.forName(className, false, this.declaringClass.getClassLoader());
+        }
+
+        public Optional<Class<?>> optionalClassByLoader(final String className) {
+            try {
+                return Optional.of(this.classByLoader(className));
+            } catch (final ClassNotFoundException e) {
+                return Optional.empty();
+            }
         }
 
         public String methodName() {

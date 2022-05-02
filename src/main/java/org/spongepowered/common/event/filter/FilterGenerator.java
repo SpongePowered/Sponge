@@ -41,6 +41,7 @@ import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_6;
 
 import io.leangen.geantyref.AnnotationFormatException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
@@ -93,6 +94,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class FilterGenerator {
@@ -121,7 +123,7 @@ public class FilterGenerator {
             } catch (final AnnotationFormatException e) {
                 throw new ClassNotFoundException("Failed to load annotation", e);
             }
-            final Object obj = FilterGenerator.filterFromAnnotation(method.classByLoader(anno.type().getClassName()));
+            final Object obj = FilterGenerator.filterFromAnnotation(method, anno);
             if (obj == null) {
                 continue;
             }
@@ -186,14 +188,14 @@ public class FilterGenerator {
                 ParameterFilterSourceDelegate source = null;
                 final List<ParameterFilterDelegate> paramFilters = new ArrayList<>();
                 for (final ListenerClassVisitor.ListenerAnnotation anno : param.annotations()) {
-                    final Object obj = FilterGenerator.filterFromAnnotation(method.classByLoader(anno.type().getClassName()));
+                    final Object obj = FilterGenerator.filterFromAnnotation(method, anno);
                     if (obj == null) {
                         continue;
                     }
                     final Annotation annotation;
                     try {
                         annotation = anno.annotation();
-                    } catch (AnnotationFormatException e) {
+                    } catch (final AnnotationFormatException e) {
                         throw new ClassNotFoundException("Failed to load annotation", e);
                     }
                     if (obj instanceof ParameterSource) {
@@ -266,17 +268,23 @@ public class FilterGenerator {
         return data;
     }
 
-    private static Object filterFromAnnotation(final Class<?> cls) {
-        Object filter;
-        if ((filter = SubtypeFilter.valueOf(cls)) != null)
-            return filter;
-        if ((filter = EventTypeFilter.valueOf(cls)) != null)
-            return filter;
-        if ((filter = ParameterSource.valueOf(cls)) != null)
-            return filter;
-        if ((filter = ParameterFilter.valueOf(cls)) != null)
-            return filter;
-        return null;
+    @Nullable
+    private static Object filterFromAnnotation(
+        final ListenerClassVisitor.DiscoveredMethod method,
+        final ListenerClassVisitor.ListenerAnnotation anno) {
+        final Optional<Class<?>> clazz = method.optionalClassByLoader(anno.type().getClassName());
+        return clazz.map(cls -> {
+            Object filter;
+            if ((filter = SubtypeFilter.valueOf(cls)) != null)
+                return filter;
+            if ((filter = EventTypeFilter.valueOf(cls)) != null)
+                return filter;
+            if ((filter = ParameterSource.valueOf(cls)) != null)
+                return filter;
+            if ((filter = ParameterFilter.valueOf(cls)) != null)
+                return filter;
+            return null;
+        }).orElse(null);
     }
 
     private enum SubtypeFilter {
