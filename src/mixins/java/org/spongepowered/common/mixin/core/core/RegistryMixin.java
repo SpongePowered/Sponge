@@ -26,7 +26,9 @@ package org.spongepowered.common.mixin.core.core;
 
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.Registry;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,6 +39,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
 import org.spongepowered.common.bridge.core.RegistryBridge;
+import org.spongepowered.common.entity.living.human.HumanEntity;
+import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
 import org.spongepowered.common.registry.SpongeRegistryType;
 
 import java.util.LinkedHashMap;
@@ -66,6 +70,18 @@ public abstract class RegistryMixin<T> implements RegistryBridge<T> {
                                  final Lifecycle p_i232510_2_, final CallbackInfo ci) {
         this.impl$type = new SpongeRegistryType<T>((ResourceKey) (Object) ((ResourceKeyAccessor) key).accessor$registryName(),
                 (ResourceKey) (Object) key.location());
+    }
+
+    @Inject(method = "lambda$static$18", at = @At(value = "FIELD", target = "Lnet/minecraft/world/item/crafting/RecipeSerializer;SHAPELESS_RECIPE:Lnet/minecraft/world/item/crafting/RecipeSerializer;"))
+    private static void impl$staticInitSpongeRecipeSerializers(final Registry $$0, final CallbackInfoReturnable<RecipeSerializer> cir)
+    {
+        final var serializer = SpongeRecipeSerializers.SPONGE_BLASTING;
+    }
+
+    @Inject(method = "lambda$static$6", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/EntityType;PIG:Lnet/minecraft/world/entity/EntityType;"))
+    private static void impl$staticInitSpongeEntityTypes(final Registry $$0, final CallbackInfoReturnable<EntityType> cir)
+    {
+        final var type = HumanEntity.TYPE;
     }
 
     @Override

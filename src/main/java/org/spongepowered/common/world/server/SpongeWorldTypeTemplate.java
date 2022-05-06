@@ -28,6 +28,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -56,7 +58,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
     public final WorldTypeEffect effect;
     @Nullable public final MinecraftDayTime fixedTime;
-    public final ResourceKey infiniburn;
+    public final TagKey<Block> infiniburn;
 
     public final boolean ultraWarm, natural, skylight, ceiling, piglinSafe, bedWorks, respawnAnchorWorks, hasRaids, createDragonFight;
     public final float ambientLight;
@@ -74,7 +76,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     public static Codec<DimensionType> DIRECT_CODEC;
 
     public static void internalCodec(final Codec<DimensionType> internalCodec) {
-        SpongeWorldTypeTemplate.DIRECT_CODEC = new MapCodec.MapCodecCodec<>(new SpongeDataCodec<>(internalCodec,
+        SpongeWorldTypeTemplate.DIRECT_CODEC = new MapCodec.MapCodecCodec<DimensionType>(new SpongeDataCodec<>(internalCodec,
             SpongeWorldTypeTemplate.SPONGE_CODEC, (type, data) -> ((DimensionTypeBridge) type).bridge$decorateData(data), type -> ((DimensionTypeBridge)
             type).bridge$createData()));
     }
@@ -120,7 +122,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         this.minY = dimensionType.minY();
         this.logicalHeight = dimensionType.logicalHeight();
         this.maximumHeight = dimensionType.height();
-        this.infiniburn = (ResourceKey) (Object) ((DimensionTypeAccessor)dimensionType).accessor$infiniburn();
+        this.infiniburn = dimensionType.infiniburn();
         this.effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) ((DimensionTypeAccessor) dimensionType).accessor$effectsLocation());
         this.ambientLight = ((DimensionTypeAccessor) dimensionType).accessor$ambientLight();
         this.createDragonFight = dimensionType.createDragonFight();
@@ -233,7 +235,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
         @Nullable protected WorldTypeEffect effect;
         @Nullable protected MinecraftDayTime fixedTime;
-        @Nullable protected ResourceKey infiniburn;
+        @Nullable protected TagKey<Block> infiniburn;
 
         protected boolean scorching, natural, skylight, ceiling, piglinSafe, bedsUsable, respawnAnchorsUsable, hasRaids, createDragonFight;
         protected float ambientLighting;
@@ -341,7 +343,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             super.reset();
             this.effect = WorldTypeEffects.OVERWORLD;
             this.fixedTime = null;
-            this.infiniburn = (ResourceKey) (Object) BlockTags.INFINIBURN_OVERWORLD.location();
+            this.infiniburn = BlockTags.INFINIBURN_OVERWORLD;
             this.scorching = false;
             this.natural = true;
             this.skylight = true;
@@ -365,7 +367,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
             this.effect = value.effect();
             this.fixedTime = value.fixedTime().orElse(null);
-            this.infiniburn = (ResourceKey) (Object) BlockTags.INFINIBURN_OVERWORLD.location();
+            this.infiniburn = BlockTags.INFINIBURN_OVERWORLD;
             this.scorching = value.scorching();
             this.natural = value.natural();
             this.skylight = value.hasSkylight();

@@ -29,7 +29,6 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -37,7 +36,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -59,13 +57,6 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
     protected final ResourceLocation advancementId;
     protected final Advancement.Builder advancementBuilder = Advancement.Builder.advancement();
     protected final String group;
-
-    public static <S extends RecipeSerializer<T>, T extends Recipe<?>> S register(final String spongeName, final S recipeSerializer) {
-        return (S)(Registry.<RecipeSerializer<?>>register(Registry.RECIPE_SERIALIZER, new ResourceLocation("sponge", spongeName).toString(), recipeSerializer));
-    }
-    public static <S extends RecipeSerializer<T>, T extends Recipe<?>> S register(final ResourceLocation resourceLocation, final S recipeSerializer) {
-        return (S)(Registry.<RecipeSerializer<?>>register(Registry.RECIPE_SERIALIZER, resourceLocation.toString(), recipeSerializer));
-    }
 
     public SpongeRecipeRegistration(final ResourceLocation key, final RecipeSerializer<?> serializer, final Item resultItem, final String group) {
         this.key = key;

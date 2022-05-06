@@ -29,7 +29,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import org.spongepowered.common.accessor.world.item.crafting.ShapedRecipeAccessor;
-import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
@@ -43,7 +42,6 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 
 /**
@@ -54,8 +52,6 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
  * remaining items function
  */
 public class SpongeShapedCraftingRecipeSerializer extends ShapedRecipe.Serializer {
-
-    public static RecipeSerializer<?> SPONGE_CRAFTING_SHAPED = SpongeRecipeRegistration.register("crafting_shaped", new SpongeShapedCraftingRecipeSerializer());
 
     @Override
     public ShapedRecipe fromJson(ResourceLocation recipeId, JsonObject json) {

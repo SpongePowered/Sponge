@@ -25,7 +25,6 @@
 package org.spongepowered.common.item.recipe.stonecutting;
 
 import com.google.gson.JsonObject;
-import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
@@ -42,8 +41,6 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SingleItemRecipe;
 
 public class SpongeStonecuttingRecipeSerializer<R extends SingleItemRecipe> implements RecipeSerializer<R> {
-
-    public static RecipeSerializer<?> SPONGE_STONECUTTING = SpongeRecipeRegistration.register("stonecutting", new SpongeStonecuttingRecipeSerializer<>());
 
     @SuppressWarnings("unchecked")
     @Override

@@ -103,7 +103,7 @@ public final class PackTest {
     public void onStartedEngine(final StartedEngineEvent<@NonNull Engine> event) {
         this.logger.warn("Printing packs for engine: {}", event.engine().toString());
         for (final Pack pack : event.engine().packRepository().all()) {
-            this.logger.error(pack.id());
+            this.logger.info(pack.id());
         }
     }
 

@@ -35,6 +35,7 @@ import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
+import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
@@ -128,7 +129,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
 
         final ItemStack resultStack = ItemStackUtil.toNative(this.result);
         final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(resultStack, this.resultFunction, this.remainingItemsFunction,
-                this.ingredients, RecipeSerializer.SHAPELESS_RECIPE, SpongeShapelessCraftingRecipeSerializer.SPONGE_CRAFTING_SHAPELESS);
+                this.ingredients, RecipeSerializer.SHAPELESS_RECIPE, SpongeRecipeSerializers.SPONGE_CRAFTING_SHAPELESS);
         return new SpongeShapelessCraftingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredients, resultStack, this.resultFunction, this.remainingItemsFunction);
     }
 

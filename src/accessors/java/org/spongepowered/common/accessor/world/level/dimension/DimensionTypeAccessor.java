@@ -67,6 +67,4 @@ public interface DimensionTypeAccessor {
     @Accessor("effectsLocation") ResourceLocation accessor$effectsLocation();
 
     @Accessor("ambientLight") float accessor$ambientLight();
-
-    @Accessor("infiniburn") TagKey<Block> accessor$infiniburn();
 }

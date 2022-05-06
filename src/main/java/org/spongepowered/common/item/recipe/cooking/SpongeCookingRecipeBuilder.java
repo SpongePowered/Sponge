@@ -149,22 +149,22 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
             if (this.cookingTime == null) {
                 this.cookingTime = Ticks.of(100);
             }
-            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.BLASTING_RECIPE, SpongeCookingRecipeSerializer.Blasting.SPONGE_BLASTING);
+            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.BLASTING_RECIPE, SpongeRecipeSerializers.SPONGE_BLASTING);
         } else if (this.type == net.minecraft.world.item.crafting.RecipeType.CAMPFIRE_COOKING) {
             if (this.cookingTime == null) {
                 this.cookingTime = Ticks.of(600);
             }
-            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.CAMPFIRE_COOKING_RECIPE, SpongeCookingRecipeSerializer.Campfire.SPONGE_CAMPFIRE_COOKING);
+            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.CAMPFIRE_COOKING_RECIPE, SpongeRecipeSerializers.SPONGE_CAMPFIRE_COOKING);
         } else if (this.type == net.minecraft.world.item.crafting.RecipeType.SMOKING) {
             if (this.cookingTime == null) {
                 this.cookingTime = Ticks.of(100);
             }
-            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.SMOKING_RECIPE, SpongeCookingRecipeSerializer.Smoking.SPONGE_SMOKING);
+            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.SMOKING_RECIPE, SpongeRecipeSerializers.SPONGE_SMOKING);
         } else if (this.type == net.minecraft.world.item.crafting.RecipeType.SMELTING) {
             if (this.cookingTime == null) {
                 this.cookingTime = Ticks.of(200);
             }
-            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.SMELTING_RECIPE, SpongeCookingRecipeSerializer.Smelting.SPONGE_SMELTING);
+            serializer = SpongeRecipeRegistration.determineSerializer(this.result, this.resultFunction, null, ingredientList, RecipeSerializer.SMELTING_RECIPE, SpongeRecipeSerializers.SPONGE_SMELTING);
         } else {
             throw new IllegalArgumentException("Unknown RecipeType " + this.type);
         }

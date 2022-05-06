@@ -26,7 +26,6 @@ package org.spongepowered.common.item.recipe.cooking;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
@@ -87,8 +86,6 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
 
     public static class Smelting extends SpongeCookingRecipeSerializer<SmeltingRecipe> {
 
-        public static final SpongeCookingRecipeSerializer<SmeltingRecipe> SPONGE_SMELTING = SpongeRecipeRegistration.register("smelting", new Smelting());
-
         public Smelting() {
             super(200);
         }
@@ -101,8 +98,6 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
     }
 
     public static class Blasting extends SpongeCookingRecipeSerializer<BlastingRecipe> {
-
-        public static final SpongeCookingRecipeSerializer<BlastingRecipe> SPONGE_BLASTING = SpongeRecipeRegistration.register("blasting", new Blasting());
 
         public Blasting() {
             super(100);
@@ -117,8 +112,6 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
 
     public static class Smoking extends SpongeCookingRecipeSerializer<SmokingRecipe> {
 
-        public static final SpongeCookingRecipeSerializer<SmokingRecipe> SPONGE_SMOKING = SpongeRecipeRegistration.register("smoking", new Smoking());
-
         public Smoking() {
             super(100);
         }
@@ -131,8 +124,6 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
     }
 
     public static class Campfire extends SpongeCookingRecipeSerializer<CampfireCookingRecipe> {
-
-        public static final SpongeCookingRecipeSerializer<CampfireCookingRecipe> SPONGE_CAMPFIRE_COOKING = SpongeRecipeRegistration.register("campfire_cooking", new Campfire());
 
         public Campfire() {
             super(100);

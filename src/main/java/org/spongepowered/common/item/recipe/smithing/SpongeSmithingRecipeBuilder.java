@@ -33,18 +33,15 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
-import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.api.item.recipe.smithing.SmithingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
+import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
-import org.spongepowered.common.item.recipe.stonecutting.SpongeStonecuttingRecipeRegistration;
-import org.spongepowered.common.item.recipe.stonecutting.SpongeStonecuttingRecipeSerializer;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.function.Function;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -120,7 +117,7 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
     public RecipeRegistration build0() {
         final net.minecraft.world.item.ItemStack result = ItemStackUtil.toNative(this.result);
         final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(result, this.resultFunction, null, Arrays.asList(this.base, this.addition),
-                RecipeSerializer.SMITHING, SpongeSmithingRecipeSerializer.SPONGE_SMITHING);
+                RecipeSerializer.SMITHING, SpongeRecipeSerializers.SPONGE_SMITHING);
 
         return new SpongeSmithingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.base, this.addition, result, this.resultFunction);
     }

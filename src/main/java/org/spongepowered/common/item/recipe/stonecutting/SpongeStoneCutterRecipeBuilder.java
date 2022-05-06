@@ -36,6 +36,7 @@ import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
+import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
@@ -103,7 +104,7 @@ public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedB
     public RecipeRegistration build0() {
         final net.minecraft.world.item.ItemStack result = ItemStackUtil.toNative(this.result);
         final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(result, this.resultFunction, null, Collections.singleton(this.ingredient),
-                RecipeSerializer.STONECUTTER, SpongeStonecuttingRecipeSerializer.SPONGE_STONECUTTING);
+                RecipeSerializer.STONECUTTER, SpongeRecipeSerializers.SPONGE_STONECUTTING);
 
         return new SpongeStonecuttingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredient, result, this.resultFunction);
     }

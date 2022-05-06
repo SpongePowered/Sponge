@@ -38,6 +38,7 @@ import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
+import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
@@ -195,7 +196,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
 //        ingredientsMap.putIfAbsent(' ', net.minecraft.item.crafting.Ingredient.EMPTY);
         final net.minecraft.world.item.ItemStack resultStack = ItemStackUtil.toNative(this.result);
         final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(resultStack, this.resultFunction, this.remainingItemsFunction, ingredientsMap,
-                RecipeSerializer.SHAPED_RECIPE, SpongeShapedCraftingRecipeSerializer.SPONGE_CRAFTING_SHAPED);
+                RecipeSerializer.SHAPED_RECIPE, SpongeRecipeSerializers.SPONGE_CRAFTING_SHAPED);
         return new SpongeShapedCraftingRecipeRegistration((ResourceLocation)(Object) key, serializer, this.group, this.aisle, ingredientsMap, resultStack, this.resultFunction, this.remainingItemsFunction);
     }
 

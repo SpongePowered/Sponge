@@ -25,7 +25,6 @@
 package org.spongepowered.common.item.recipe.smithing;
 
 import com.google.gson.JsonObject;
-import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
@@ -42,8 +41,6 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.UpgradeRecipe;
 
 public class SpongeSmithingRecipeSerializer<R extends UpgradeRecipe> implements RecipeSerializer<R> {
-
-    public static RecipeSerializer<?> SPONGE_SMITHING = SpongeRecipeRegistration.register("smithing", new SpongeSmithingRecipeSerializer<>());
 
     @SuppressWarnings("unchecked")
     @Override
