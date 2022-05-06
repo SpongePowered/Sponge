@@ -58,8 +58,8 @@ import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.PlayerDataStorage;
-import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
+import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.entity.living.player.User;
@@ -335,8 +335,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             remap = false
         )
     )
-    private void impl$onInitPlayer_printPlayerWorldInJoinFeedback(final org.slf4j.Logger logger, final String s, final Object[] objects) {
-        net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) objects[1];
+    private void impl$onInitPlayer_printPlayerWorldInJoinFeedback(final org.slf4j.Logger logger, final String s, final Object[] objects,
+            final Connection conn, final net.minecraft.server.level.ServerPlayer player) {
         logger.info("{}[{}] logged in to world '{}' with entity id {} at ({}, {}, {})", player.getName().getString(), player,
                 ((ServerWorld)player.getLevel()).key(), player.getId(), player.getX(), player.getY(), player.getZ());
     }

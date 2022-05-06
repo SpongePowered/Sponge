@@ -28,7 +28,7 @@ import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.util.thread.BlockableEventLoop;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,7 +44,7 @@ public abstract class PacketUtilsMixin_Tracker {
     // @formatter:on
 
     @Redirect(method = "ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/thread/BlockableEventLoop;execute(Ljava/lang/Runnable;)V"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/thread/BlockableEventLoop;executeIfPossible(Ljava/lang/Runnable;)V"))
     private static <T extends PacketListener> void tracker$redirectProcessPacket(BlockableEventLoop threadTaskExecutor, Runnable p_execute_1_,
             Packet<T> p_218797_0_, T p_218797_1_, BlockableEventLoop<?> p_218797_2_) {
         threadTaskExecutor.execute(() -> {

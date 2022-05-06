@@ -31,6 +31,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -76,7 +77,7 @@ public abstract class CombineMapsCodec<A, B> extends MapCodec<A> {
     @Override
     public <T> RecordBuilder<T> encode(final A input, final DynamicOps<T> ops, final RecordBuilder<T> prefix) {
         final RecordBuilder<T> firstResult = this.first.encode(input, ops, prefix);
-        final DataResult<T> secondResult = this.second.encode(this.encodeAction.apply(input), ops, null);
+        final DataResult<T> secondResult = this.second.encode(this.encodeAction.apply(input), ops, (T)new CompoundTag());
 
         // Need an actual result and not a builder:
         firstResult.add(this.mergeKey(), secondResult);

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.client;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -32,6 +33,7 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.level.DataPackConfig;
@@ -70,6 +72,10 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
     @Shadow @Nullable private IntegratedServer singleplayerServer;
     // @formatter:on
 
+    @Shadow public abstract boolean renderOnThread();
+
+    @Shadow public abstract void pauseGame(boolean $$0);
+
     private IntegratedServer impl$temporaryIntegratedServer;
 
     public MinecraftMixin(String param0) {
@@ -105,6 +111,36 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
     private void impl$tickClientScheduler(final Minecraft minecraft) {
         this.scheduler().tick();
         this.runAllTasks();
+    }
+
+    @Redirect(method = "loadLevel",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/WorldStem$WorldDataSupplier;loadFromWorld(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;)Lnet/minecraft/server/WorldStem$WorldDataSupplier;"))
+    private static WorldStem.WorldDataSupplier impl$serializeDelayedDataPackOnLoadAndSetBootstrapProperties1(LevelStorageSource.LevelStorageAccess $$0) {
+        return (rm, dpc) -> {
+            final WorldStem.WorldDataSupplier supplier = WorldStem.WorldDataSupplier.loadFromWorld($$0);
+            SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
+
+            final Pair<WorldData, RegistryAccess.Frozen> pair = supplier.get(rm, dpc);
+            final WorldData saveData = pair.getFirst();
+            BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(),  saveData.getDifficulty(), true, saveData.isHardcore(),
+                    saveData.getAllowCommands(), 10, null);  // TODO registryAccess?
+            return pair;
+        };
+    }
+
+    @Redirect(method = "makeWorldStem(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Z)Lnet/minecraft/server/WorldStem;",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/WorldStem$WorldDataSupplier;loadFromWorld(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;)Lnet/minecraft/server/WorldStem$WorldDataSupplier;"))
+    private static WorldStem.WorldDataSupplier impl$serializeDelayedDataPackOnLoadAndSetBootstrapProperties(LevelStorageSource.LevelStorageAccess $$0) {
+        return (rm, dpc) -> {
+            final WorldStem.WorldDataSupplier supplier = WorldStem.WorldDataSupplier.loadFromWorld($$0);
+            SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
+
+            final Pair<WorldData, RegistryAccess.Frozen> pair = supplier.get(rm, dpc);
+            final WorldData saveData = pair.getFirst();
+            BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(),  saveData.getDifficulty(), true, saveData.isHardcore(),
+                    saveData.getAllowCommands(), 10, null); // TODO registryAccess?
+            return pair;
+        };
     }
 
     @Override

@@ -23,7 +23,6 @@
         "commands.synchronization.ArgumentTypes_EntryAccessor",
         "commands.synchronization.ArgumentTypesAccessor",
         "commands.synchronization.EmptyArgumentSerializerAccessor",
-        "core.RegistryAccessAccessor",
         "entity.passive.AbstractChestedHorseEntityAccessor",
         "network.ConnectionAccessor",
         "network.chat.HoverEvent_ItemStackInfoAccessor",

@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.ipforward.server.dedicated;
 
 import net.minecraft.server.dedicated.DedicatedServer;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,7 +40,7 @@ public class DedicatedServerMixin_IpForward {
 
     @Shadow @Final private static Logger LOGGER;
 
-    @Inject(method = "initServer", at = @At(value = "INVOKE_STRING", remap = false, target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;)V",
+    @Inject(method = "initServer", at = @At(value = "INVOKE_STRING", remap = false, target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;)V",
                                             args = "ldc=**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!"))
     private void ipForward$logEnabled(final CallbackInfoReturnable<Boolean> ci) {
         final IpForwardingCategory.Mode mode = SpongeConfigs.getCommon().get().ipForwarding.mode;

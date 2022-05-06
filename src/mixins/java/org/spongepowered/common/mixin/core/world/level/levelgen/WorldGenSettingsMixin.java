@@ -53,7 +53,7 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
     @Shadow @Final private long seed;
     @Shadow @Final private boolean generateFeatures;
     @Shadow @Final private boolean generateBonusChest;
-    @Shadow @Final private MappedRegistry<LevelStem> dimensions;
+    @Shadow @Final private Registry<LevelStem> dimensions;
     // @formatter:on
 
     @Override

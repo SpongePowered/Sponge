@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.world.level.storage;
 
 import net.minecraft.nbt.NbtIo;
-import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -80,7 +80,7 @@ public abstract class PlayerDataStorageMixin {
     }
 
     @Inject(method = "load",
-            at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V", shift = At.Shift.AFTER),
+            at = @At(value = "INVOKE", target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V", shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILHARD
     )
     private void impl$onFailedLoad(final Player param0, final CallbackInfoReturnable<CompoundTag> cir, final CompoundTag tag, final Exception exception) {
@@ -98,7 +98,7 @@ public abstract class PlayerDataStorageMixin {
     @Inject(
         method = "save",
         at = @At(value = "INVOKE",
-            target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
+            target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
             remap = false),
         locals = LocalCapture.CAPTURE_FAILHARD)
     private void impl$trackExceptionForLogging(final Player player, final CallbackInfo ci, final Exception exception) {
@@ -109,7 +109,7 @@ public abstract class PlayerDataStorageMixin {
         method = "save",
         at = @At(
             value = "INVOKE",
-            target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
+            target = "Lorg/slf4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V",
             remap = false
         )
     )

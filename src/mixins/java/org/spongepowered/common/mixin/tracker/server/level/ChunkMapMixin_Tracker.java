@@ -67,9 +67,9 @@ public abstract class ChunkMapMixin_Tracker {
         return exception;
     }
 
-    @Redirect(method = "lambda$prepareTickingChunk$31",
+    @Redirect(method = "lambda$prepareTickingChunk$36",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;startTickingChunk(Lnet/minecraft/world/level/chunk/LevelChunk;)V"))
-    private void tracker$wrapUnpackTicks(final ServerLevel level, final LevelChunk chunk, final List<ChunkAccess> chunks) {
+    private void tracker$wrapUnpackTicks(final ServerLevel level, final LevelChunk chunk) {
         if (!PhaseTracker.SERVER.onSidedThread()) {
             new PrettyPrinter(60).add("Illegal Async Chunk Unpacking").centre().hr()
                 .addWrapped("Someone is attempting to unpack chunk scheduled updates while off the main thread, this is" +
@@ -96,7 +96,7 @@ public abstract class ChunkMapMixin_Tracker {
 
     }
 
-    @Redirect(method = "lambda$protoChunkToFullChunk$27",
+    @Redirect(method = "lambda$protoChunkToFullChunk$29",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V"),
         slice = @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setFullStatus(Ljava/util/function/Supplier;)V"),
@@ -132,7 +132,7 @@ public abstract class ChunkMapMixin_Tracker {
                 .buildAndSwitch();
     }
 
-    @Inject(method = "lambda$protoChunkToFullChunk$27",
+    @Inject(method = "lambda$protoChunkToFullChunk$29",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V", shift = At.Shift.BY, by = 2),
         slice = @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V")

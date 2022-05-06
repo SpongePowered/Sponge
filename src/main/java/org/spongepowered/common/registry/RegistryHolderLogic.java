@@ -38,8 +38,6 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
-import org.spongepowered.api.tag.Tag;
-import org.spongepowered.common.accessor.core.RegistryAccessAccessor;
 import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 
@@ -83,8 +81,8 @@ public final class RegistryHolderLogic implements RegistryHolder {
 
         final WritableRegistry root = (WritableRegistry) this.roots.get(new ResourceLocation("minecraft", "root"));
         // Add the dynamic registries. These are server-scoped in Vanilla
-        for (final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<?>> entry : RegistryAccessAccessor.accessor$REGISTRIES()
-                .keySet()) {
+
+        for (final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<?>> entry : RegistryAccess.REGISTRIES.keySet()) {
             final net.minecraft.core.Registry<?> registry = dynamicAccess.registryOrThrow((net.minecraft.resources.ResourceKey) (Object) entry);
             root.register(entry, registry, Lifecycle.stable());
         }
