@@ -32,9 +32,9 @@ import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.tag.Tag;
-import org.spongepowered.api.tag.TagType;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -127,12 +127,17 @@ public class StubBlock implements SpongeImmutableDataHolder<BlockType>, BlockTyp
     }
 
     @Override
-    public TagType<BlockType> tagType() {
+    public DefaultedRegistryType<BlockType> registryType() {
         return null;
     }
 
     @Override
     public Collection<Tag<BlockType>> tags() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public boolean is(Tag<BlockType> tag) {
+        return false;
     }
 }

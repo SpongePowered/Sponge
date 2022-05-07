@@ -24,40 +24,21 @@
  */
 package org.spongepowered.common.tag;
 
-import org.spongepowered.api.registry.RegistryType;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.tag.Tag;
-import org.spongepowered.api.tag.TagType;
-import org.spongepowered.api.tag.Taggable;
 
-public final class SpongeTagType<T extends Taggable<T>> implements TagType<T> {
-
-    private final String id;
-    private final RegistryType<T> taggableRegistry;
-    private final RegistryType<Tag<T>> tagRegistry;
-
-    public SpongeTagType(String id, RegistryType<T> taggableRegistry, RegistryType<Tag<T>> tagRegistry) {
-        this.id = id;
-        this.taggableRegistry = taggableRegistry;
-        this.tagRegistry = tagRegistry;
-    }
-
-    /**
-     * The internal id for this tag type.
-     * Used for the directory.
-     *
-     * @return This TagType's id
-     */
-    public String internalId() {
-        return this.id;
-    }
+public class SpongeTagFactory implements Tag.Factory {
 
     @Override
-    public RegistryType<T> taggableRegistry() {
-        return this.taggableRegistry;
-    }
+    @SuppressWarnings("unchecked")
+    public <T> Tag<T> of(DefaultedRegistryType<T> registryType, ResourceKey key) {
 
-    @Override
-    public RegistryType<Tag<T>> tagRegistry() {
-        return this.tagRegistry;
+        final var regKey = ((Registry<T>) registryType.get()).key();
+        // TagKey.create returns interned tag-keys
+        return (Tag<T>) (Object) TagKey.create(regKey, ((ResourceLocation) (Object) key));
     }
 }

@@ -27,7 +27,6 @@ package org.spongepowered.common.datapack;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import io.leangen.geantyref.TypeToken;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.RegistryOps;
@@ -145,7 +144,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                     jsonObject.addProperty("replace", s.replace());
                     return jsonObject;
                 },
-                (i1, i2) -> new TagSerializedObject(i1.key(), i2, i1.tagType()),
+                (i1, i2) -> new TagSerializedObject(i1.key(), i2, i1.registryType()),
                 false
         );
 

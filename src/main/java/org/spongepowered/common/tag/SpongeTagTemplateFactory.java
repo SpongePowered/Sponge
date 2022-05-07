@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.tag;
 
+import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.tag.TagTemplate;
-import org.spongepowered.api.tag.TagType;
 import org.spongepowered.api.tag.Taggable;
 
 import java.util.Objects;
@@ -33,7 +33,7 @@ import java.util.Objects;
 public final class SpongeTagTemplateFactory implements TagTemplate.Factory {
 
     @Override
-    public <T extends Taggable<T>> TagTemplate.Builder<T> builder(final TagType<T> tagType) {
+    public <T extends Taggable<T>> TagTemplate.Builder<T> builder(final DefaultedRegistryType<T> tagType) {
         return new SpongeTagTemplateBuilder<>(Objects.requireNonNull(tagType, "tagType"));
     }
 

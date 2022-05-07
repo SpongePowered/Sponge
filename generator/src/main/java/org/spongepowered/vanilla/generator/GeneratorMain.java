@@ -312,29 +312,30 @@ public final class GeneratorMain {
                 RegistryScope.SERVER
             ),
             new BlockStatePropertiesGenerator(),
+
             new TagGenerator(
-                    "BLOCK_TYPE_TAGS",
+                    "BLOCK_TYPE",
                     Registry.BLOCK_REGISTRY,
                     context.relativeClass("block", "BlockType"),
                     "tag",
                     "BlockTypeTags"
             ),
             new TagGenerator(
-                    "ITEM_TYPE_TAGS",
+                    "ITEM_TYPE",
                     Registry.ITEM_REGISTRY,
                     context.relativeClass("item", "ItemType"),
                     "tag",
                     "ItemTypeTags"
             ),
             new TagGenerator(
-                    "ENTITY_TYPE_TAGS",
+                    "ENTITY_TYPE",
                     Registry.ENTITY_TYPE_REGISTRY,
                     ParameterizedTypeName.get(context.relativeClass("entity", "EntityType"), WildcardTypeName.subtypeOf(Object.class)),
                     "tag",
                     "EntityTypeTags"
             ),
             new TagGenerator(
-                    "FLUID_TYPE_TAGS",
+                    "FLUID_TYPE",
                     Registry.FLUID_REGISTRY,
                     context.relativeClass("fluid", "FluidType"),
                     "tag",

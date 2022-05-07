@@ -25,25 +25,29 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.core.Holder;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.MobCategory;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityCategory;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.tag.Tag;
-import org.spongepowered.api.tag.TagType;
-import org.spongepowered.api.tag.TagTypes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.util.TagUtil;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Mixin(net.minecraft.world.entity.EntityType.class)
 public abstract class EntityTypeMixin_API<T extends Entity> implements EntityType<T> {
 
     // @formatter:off
+    @Shadow @Final private Holder.Reference<net.minecraft.world.entity.EntityType<?>> builtInRegistryHolder;
+
     @Shadow public abstract net.minecraft.network.chat.Component shadow$getDescription();
     @Shadow public abstract boolean shadow$canSpawnFarFromPlayer();
     @Shadow public abstract boolean shadow$canSerialize();
@@ -78,13 +82,18 @@ public abstract class EntityTypeMixin_API<T extends Entity> implements EntityTyp
     }
 
     @Override
-    public TagType<EntityType<?>> tagType() {
-        return TagTypes.ENTITY_TYPE.get();
+    public DefaultedRegistryType<EntityType<?>> registryType() {
+        return RegistryTypes.ENTITY_TYPE;
     }
 
     @Override
     public Collection<Tag<EntityType<?>>> tags() {
-        return TagUtil.getAssociatedTags(this, RegistryTypes.ENTITY_TYPE_TAGS);
+        return this.registryType().get().tags().filter(this::is).collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean is(Tag<EntityType<?>> tag) {
+        return this.builtInRegistryHolder.is((TagKey<net.minecraft.world.entity.EntityType<?>>) (Object) tag);
     }
 
     @SuppressWarnings("ConstantConditions")

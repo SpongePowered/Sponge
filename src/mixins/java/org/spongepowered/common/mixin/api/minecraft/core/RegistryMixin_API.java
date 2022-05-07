@@ -62,6 +62,8 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
 
     @Shadow public abstract net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> key();
 
+    @Shadow public abstract Stream<TagKey<T>> getTagNames();
+
     @Override
     public RegistryType<T> type() {
         return ((RegistryBridge<T>) this).bridge$type();
@@ -103,11 +105,18 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     }
 
     @Override
-    public <V extends T> Set<V> taggedValues(final Tag<T> key) {
-        return this.shadow$getTag((TagKey<T>) (Object) key).stream()
-                .flatMap(s -> s.stream())
+    @SuppressWarnings("unchecked")
+    public <V extends T> Set<V> taggedValues(final Tag<T> tag) {
+        return this.shadow$getTag((TagKey<T>) (Object) tag).stream()
+                .flatMap(HolderSet.ListBacked::stream)
                 .map(h -> (V) h.value())
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <V extends T> Stream<Tag<V>> tags() {
+        return this.getTagNames().map(Tag.class::cast);
     }
 
     @Override

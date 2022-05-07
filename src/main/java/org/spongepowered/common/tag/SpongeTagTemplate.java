@@ -35,8 +35,8 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
+import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.tag.TagTemplate;
-import org.spongepowered.api.tag.TagType;
 import org.spongepowered.common.SpongeCommon;
 
 import java.io.IOException;
@@ -45,18 +45,18 @@ import java.util.Map;
 public final class SpongeTagTemplate implements TagTemplate {
 
     private final ResourceKey key;
-    private final TagType<@NonNull ?> tagType;
+    private final DefaultedRegistryType<@NonNull ?> registryType;
     private final boolean replace;
     private final Map<ResourceKey, Boolean> elements;
     private final Map<ResourceKey, Boolean> subTags;
 
     public SpongeTagTemplate(final ResourceKey key,
-                             final TagType<@NonNull ?> tagType,
+                             final DefaultedRegistryType<@NonNull ?> registryType,
                              final boolean replace,
                              final Map<ResourceKey, Boolean> elements,
                              final Map<ResourceKey, Boolean> subTags) {
         this.key = key;
-        this.tagType = tagType;
+        this.registryType = registryType;
         this.replace = replace;
         this.elements = elements;
         this.subTags = subTags;
@@ -67,8 +67,8 @@ public final class SpongeTagTemplate implements TagTemplate {
         return this.key;
     }
 
-    public TagType<@NonNull ?> tagType() {
-        return this.tagType;
+    public DefaultedRegistryType<@NonNull ?> registryType() {
+        return this.registryType;
     }
 
     public boolean replace() {

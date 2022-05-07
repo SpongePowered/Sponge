@@ -218,6 +218,8 @@ public class BlockStatePropertiesGenerator implements Generator {
         properties.forEach((name, property) -> clazz.addMethod(this.makeMethod(type.valueType, name, property)));
 
         ctx.write("state", clazz.build());
+
+        final var cu = ctx.compilationUnit("state", type.catalogClassName);
     }
 
     private MethodSpec makeMethod(final ClassName className, final String name, final Property<?> property) {

@@ -25,25 +25,29 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.material;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.core.Holder;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.material.Fluid;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.api.tag.Tag;
-import org.spongepowered.api.tag.TagType;
-import org.spongepowered.api.tag.TagTypes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Collection;
 import java.util.Optional;
-import net.minecraft.world.level.material.Fluid;
-import org.spongepowered.common.util.TagUtil;
+import java.util.stream.Collectors;
 
 @Mixin(Fluid.class)
 public abstract class FluidMixin_API implements FluidType {
 
     // @formatter:off
+    @Shadow @Final private Holder.Reference<Fluid> builtInRegistryHolder;
+
     @Shadow public abstract net.minecraft.world.level.block.state.StateDefinition<Fluid, net.minecraft.world.level.material.FluidState> shadow$getStateDefinition();
     @Shadow public abstract net.minecraft.world.level.material.FluidState shadow$defaultFluidState();
     // @formatter:on
@@ -69,12 +73,17 @@ public abstract class FluidMixin_API implements FluidType {
     }
 
     @Override
-    public TagType<FluidType> tagType() {
-        return TagTypes.FLUID_TYPE.get();
+    public DefaultedRegistryType<FluidType> registryType() {
+        return RegistryTypes.FLUID_TYPE;
     }
 
     @Override
     public Collection<Tag<FluidType>> tags() {
-        return TagUtil.getAssociatedTags(this, RegistryTypes.FLUID_TYPE_TAGS);
+        return this.registryType().get().tags().filter(this::is).collect(Collectors.toSet());
+    }
+
+    @Override
+    public boolean is(Tag<FluidType> tag) {
+        return this.builtInRegistryHolder.is((TagKey<Fluid>) (Object) tag);
     }
 }

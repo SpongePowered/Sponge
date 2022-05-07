@@ -69,6 +69,7 @@ import org.spongepowered.api.state.BooleanStateProperty;
 import org.spongepowered.api.state.EnumStateProperty;
 import org.spongepowered.api.state.IntegerStateProperty;
 import org.spongepowered.api.state.StateMatcher;
+import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.MinecraftDayTime;
@@ -136,6 +137,7 @@ import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
 import org.spongepowered.common.service.server.permission.SpongeNodeTree;
 import org.spongepowered.common.state.SpongeStateMatcherFactory;
+import org.spongepowered.common.tag.SpongeTagFactory;
 import org.spongepowered.common.tag.SpongeTagTemplateFactory;
 import org.spongepowered.common.util.SpongeAABB;
 import org.spongepowered.common.util.SpongeDamageSourceFactory;
@@ -268,6 +270,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(Weather.Factory.class, new SpongeWeather.FactoryImpl())
                 .registerFactory(NodeTree.Factory.class, new SpongeNodeTree.FactoryImpl())
                 .registerFactory(TagTemplate.Factory.class, new SpongeTagTemplateFactory())
+                .registerFactory(Tag.Factory.class, new SpongeTagFactory())
                 .registerFactory(EventListenerRegistration.Factory.class, new SpongeEventListenerRegistration.FactoryImpl())
                 .registerFactory(FlatGeneratorConfig.Factory.class, new SpongeFlatGeneratorConfig.FactoryImpl())
                 .registerFactory(CommandResult.Factory.class, new SpongeCommandResultFactory())

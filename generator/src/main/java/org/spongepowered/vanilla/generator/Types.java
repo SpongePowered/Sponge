@@ -53,6 +53,8 @@ final class Types {
 
     public static final ClassName DEFAULTED_REGISTRY_REFERENCE = ClassName.get(Context.BASE_PACKAGE + ".registry", "DefaultedRegistryReference");
 
+    public static final ClassName DEFAULTED_REGISTRY_TYPE = ClassName.get(Context.BASE_PACKAGE + ".registry", "DefaultedRegistryType");
+
     public static final ClassName REGISTRY = ClassName.get(Context.BASE_PACKAGE + ".registry", "Registry");
 
     public static final ClassName REGISTRY_KEY = ClassName.get(Context.BASE_PACKAGE + ".registry", "RegistryKey");

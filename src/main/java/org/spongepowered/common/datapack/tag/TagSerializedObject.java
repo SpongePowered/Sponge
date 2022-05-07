@@ -27,18 +27,18 @@ package org.spongepowered.common.datapack.tag;
 import com.google.gson.JsonObject;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.tag.TagType;
+import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.common.datapack.DataPackSerializedObject;
 
 public final class TagSerializedObject extends DataPackSerializedObject {
-    private final TagType<@NonNull ?> tagType;
+    private final DefaultedRegistryType<@NonNull ?> registryType;
 
-    public TagSerializedObject(final ResourceKey key, final JsonObject object, final TagType<@NonNull ?> tagType) {
+    public TagSerializedObject(final ResourceKey key, final JsonObject object, final DefaultedRegistryType<@NonNull ?> registryType) {
         super(key, object);
-        this.tagType = tagType;
+        this.registryType = registryType;
     }
 
-    public TagType<@NonNull ?> getTagType() {
-        return this.tagType;
+    public DefaultedRegistryType<@NonNull ?> getRegistryType() {
+        return this.registryType;
     }
 }

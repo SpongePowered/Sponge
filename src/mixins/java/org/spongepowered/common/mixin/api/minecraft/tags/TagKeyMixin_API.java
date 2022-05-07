@@ -11,7 +11,9 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(TagKey.class)
 public class TagKeyMixin_API<T> implements Tag<T> {
 
+    // @formatter:off
     @Shadow @Final private ResourceLocation location;
+    // @formatter:on
 
     @Override
     public ResourceKey key() {

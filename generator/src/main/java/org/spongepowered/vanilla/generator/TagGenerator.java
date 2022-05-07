@@ -27,6 +27,7 @@ package org.spongepowered.vanilla.generator;
 import com.github.javaparser.ast.body.TypeDeclaration;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.minecraft.core.Registry;
@@ -36,6 +37,7 @@ import net.minecraft.tags.TagKey;
 
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.Locale;
 
 import javax.lang.model.element.Modifier;
 
@@ -44,20 +46,20 @@ public final class TagGenerator implements Generator {
     private static final RegistryScope SCOPE = RegistryScope.GAME;
 
     private final String registryTypeName;
-    private final ResourceKey<? extends Registry<?>> tagRegistry;
+    private final ResourceKey<? extends Registry<?>> taggedRegistry;
     private final TypeName typeName;
     private final String relativePackageName;
     private final String targetClassSimpleName;
 
     public TagGenerator(
         final String registryTypeName,
-        final ResourceKey<? extends Registry<?>> tagRegistry,
+        final ResourceKey<? extends Registry<?>> taggedRegistry,
         final TypeName typeName,
         final String relativePackageName,
         final String targetClassSimpleName
     ) {
         this.registryTypeName = registryTypeName;
-        this.tagRegistry = tagRegistry;
+        this.taggedRegistry = taggedRegistry;
         this.typeName = typeName;
         this.relativePackageName = relativePackageName;
         this.targetClassSimpleName = targetClassSimpleName;
@@ -65,7 +67,7 @@ public final class TagGenerator implements Generator {
 
     @Override
     public String name() {
-        return "elements of tag registry " + this.tagRegistry;
+        return "elements of tag registry " + this.taggedRegistry;
     }
 
     @Override
@@ -77,19 +79,27 @@ public final class TagGenerator implements Generator {
         clazz.addAnnotation(Types.suppressWarnings("unused"));
         clazz.addAnnotation(TagGenerator.SCOPE.registryScopeAnnotation());
 
+        final var fieldType = ParameterizedTypeName.get(Types.TAG, this.typeName);
+        final ParameterSpec locationParam = ParameterSpec.builder(Types.RESOURCE_KEY, "key", Modifier.FINAL).build();
+        final var factoryMethod = MethodSpec.methodBuilder("key")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .returns(fieldType)
+                .addParameter(locationParam)
+                .addCode(
+                        "return $T.of($T.$L, $N);",
+                        Types.TAG,
+                        Types.REGISTRY_TYPES,
+                        registryTypeName.toUpperCase(Locale.ROOT),
+                        locationParam
+                ).build();
 
-        final var valueType = ParameterizedTypeName.get(Types.TAG, this.typeName);
-        final var fieldType = ParameterizedTypeName.get(Types.DEFAULTED_REGISTRY_REFERENCE, valueType);
-        final var registryMethod = TagGenerator.SCOPE.registryGetter(this.registryTypeName, valueType);
-        final var factoryMethod = TagGenerator.SCOPE.registryReferenceFactory(this.registryTypeName, valueType);
 
-        ctx.registries().registryOrThrow(this.tagRegistry).getTagNames()
+        ctx.registries().registryOrThrow(this.taggedRegistry).getTagNames()
             .<ResourceLocation>map(TagKey::location)
             .sorted(Comparator.naturalOrder())
             .map(v -> this.makeField(this.targetClassSimpleName, fieldType, factoryMethod, v))
             .forEachOrdered(clazz::addField);
 
-        clazz.addMethod(registryMethod);
         clazz.addMethod(factoryMethod);
 
         ctx.write(this.relativePackageName, clazz.build());

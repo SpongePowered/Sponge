@@ -28,10 +28,10 @@ import com.google.common.collect.ImmutableMap;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.tag.TagTemplate;
-import org.spongepowered.api.tag.TagType;
 import org.spongepowered.api.tag.Taggable;
 
 import java.util.Collection;
@@ -40,14 +40,14 @@ import java.util.Map;
 
 public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements TagTemplate.Builder<T> {
 
-    private final TagType<T> tagType;
+    private final DefaultedRegistryType<T> registryType;
     private @Nullable ResourceKey key;
     private boolean replace = false;
     private final Map<ResourceKey, Boolean> values = new HashMap<>();
     private final Map<ResourceKey, Boolean> children = new HashMap<>();
 
-    public SpongeTagTemplateBuilder(final TagType<T> tagType) {
-        this.tagType = tagType;
+    public SpongeTagTemplateBuilder(final DefaultedRegistryType<T> registryType) {
+        this.registryType = registryType;
     }
 
     @Override
@@ -63,15 +63,15 @@ public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements Ta
     }
 
     @Override
-    public TagTemplate.Builder<T> addChild(final RegistryKey<Tag<T>> childTag, final boolean required) {
-        this.children.put(childTag.location(), required);
+    public TagTemplate.Builder<T> addChild(final Tag<T> childTag, final boolean required) {
+        this.children.put(childTag.key(), required);
         return this;
     }
 
     @Override
     public TagTemplate.Builder<T> addChild(final TagTemplate childTag) throws IllegalArgumentException {
         final SpongeTagTemplate spongeTagTemplate = ((SpongeTagTemplate) childTag);
-        if (spongeTagTemplate.tagType() != this.tagType) {
+        if (spongeTagTemplate.registryType() != this.registryType) {
             throw new IllegalArgumentException("TagTemplate given is not compatible with this builder, it is for a different type!");
         }
         // Circular references aren't allow - causes loading failure. So do a basic sanity check,
@@ -85,14 +85,14 @@ public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements Ta
     }
 
     @Override
-    public TagTemplate.Builder<T> addChildren(final Collection<RegistryKey<Tag<T>>> children, final boolean required) {
-        children.stream().map(RegistryKey::location).forEach(key -> this.children.put(key, required));
+    public TagTemplate.Builder<T> addChildren(final Collection<Tag<T>> children, final boolean required) {
+        children.stream().map(Tag::key).forEach(key -> this.children.put(key, required));
         return this;
     }
 
     @Override
-    public TagTemplate.Builder<T> addChildren(final Map<RegistryKey<Tag<T>>, Boolean> childrenMap) {
-        childrenMap.forEach((k, v) -> this.children.put(k.location(), v));
+    public TagTemplate.Builder<T> addChildren(final Map<Tag<T>, Boolean> childrenMap) {
+        childrenMap.forEach((k, v) -> this.children.put(k.key(), v));
         return this;
     }
 
@@ -114,7 +114,7 @@ public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements Ta
             throw new IllegalStateException("Key has not been provided yet!");
         }
         return new SpongeTagTemplate(this.key,
-                this.tagType,
+                this.registryType,
                 this.replace,
                 ImmutableMap.copyOf(this.values),
                 ImmutableMap.copyOf(this.children));
