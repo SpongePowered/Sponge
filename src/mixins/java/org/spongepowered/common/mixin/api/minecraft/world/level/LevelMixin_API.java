@@ -222,7 +222,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public Vector3i max() {
-        return this.api$chunkLayout().spaceMin();
+        return this.api$chunkLayout().spaceMax();
     }
 
     @Override
