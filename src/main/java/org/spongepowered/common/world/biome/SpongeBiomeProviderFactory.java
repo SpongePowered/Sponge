@@ -32,6 +32,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.Climate.Parameter;
+import net.minecraft.world.level.biome.Climate.ParameterList;
+import net.minecraft.world.level.biome.Climate.ParameterPoint;
 import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
@@ -66,20 +70,22 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     @Override
     public <T extends MultiNoiseBiomeConfig> ConfigurableBiomeProvider<T> multiNoise(final T config) {
         final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-        final List<Pair<net.minecraft.world.level.biome.Climate.ParameterPoint, Supplier<Biome>>> climateParams = new ArrayList<>();
+        final List<Pair<ParameterPoint, Holder<Biome>>> climateParams = new ArrayList<>();
         for (final AttributedBiome attributedBiome : config.attributedBiomes()) {
             final BiomeAttributes attr = attributedBiome.attributes();
-            final net.minecraft.world.level.biome.Climate.ParameterPoint point = net.minecraft.world.level.biome.Climate.parameters(
-                    net.minecraft.world.level.biome.Climate.Parameter.span(attr.temperature().min(), attr.temperature().max()),
-                    net.minecraft.world.level.biome.Climate.Parameter.span(attr.humidity().min(), attr.humidity().max()),
-                    net.minecraft.world.level.biome.Climate.Parameter.span(attr.continentalness().min(), attr.continentalness().max()),
-                    net.minecraft.world.level.biome.Climate.Parameter.span(attr.erosion().min(), attr.erosion().max()),
-                    net.minecraft.world.level.biome.Climate.Parameter.span(attr.depth().min(), attr.depth().max()),
-                    net.minecraft.world.level.biome.Climate.Parameter.span(attr.weirdness().min(), attr.weirdness().max()),
+            final ParameterPoint point = Climate.parameters(
+                    Parameter.span(attr.temperature().min(), attr.temperature().max()),
+                    Parameter.span(attr.humidity().min(), attr.humidity().max()),
+                    Parameter.span(attr.continentalness().min(), attr.continentalness().max()),
+                    Parameter.span(attr.erosion().min(), attr.erosion().max()),
+                    Parameter.span(attr.depth().min(), attr.depth().max()),
+                    Parameter.span(attr.weirdness().min(), attr.weirdness().max()),
                     attr.offset());
-            climateParams.add(Pair.of(point, () -> biomeRegistry.get(((ResourceLocation) (Object) attributedBiome.biome().location()))));
+            final Holder<Biome> biome = biomeRegistry.getHolderOrThrow(
+                    ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) attributedBiome.biome().location()));
+            climateParams.add(Pair.of(point, biome));
         }
-        return (ConfigurableBiomeProvider<T>) MultiNoiseBiomeSourceAccessor.invoker$new(new net.minecraft.world.level.biome.Climate.ParameterList<>(climateParams));
+        return (ConfigurableBiomeProvider<T>) MultiNoiseBiomeSourceAccessor.invoker$new(new ParameterList<>(climateParams));
     }
 
     @Override

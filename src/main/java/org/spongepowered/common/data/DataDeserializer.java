@@ -116,6 +116,10 @@ public class DataDeserializer {
         if (keyType == ResourceKey.class) {
             return key -> ResourceKey.resolve(key.toString());
         }
+        if (keyType == Integer.class) {
+            return key -> Integer.valueOf(key.toString());
+        }
+        // TODO other number types?
         throw new UnsupportedOperationException("Unsupported map-key type " + keyType);
     }
 

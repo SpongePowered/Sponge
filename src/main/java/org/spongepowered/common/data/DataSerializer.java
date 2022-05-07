@@ -126,6 +126,9 @@ public class DataSerializer {
         if (value instanceof String) {
             return DataQuery.of(value.toString());
         }
+        if (value instanceof Integer) {
+            return DataQuery.of(value.toString());
+        }
         final Optional<RegistryType<Object>> registryTypeFor = SpongeDataManager.INSTANCE.findRegistryTypeFor(value.getClass());
         if (registryTypeFor.isPresent()) {
             return DataQuery.of(Sponge.game().findRegistry(registryTypeFor.get()).get().valueKey(value).toString());

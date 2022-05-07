@@ -49,6 +49,7 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Shadow public abstract boolean shadow$isAquifersEnabled();
     @Shadow public abstract boolean shadow$oreVeinsEnabled();
     @Shadow @Deprecated protected abstract boolean shadow$disableMobGeneration();
+    @Shadow public abstract boolean shadow$useLegacyRandomSource();
     @Shadow public abstract SurfaceRules.RuleSource shadow$surfaceRule();
     // @formatter:on
 
@@ -80,6 +81,11 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Override
     public boolean oreVeins() {
         return this.shadow$oreVeinsEnabled();
+    }
+
+    @Override
+    public boolean legacyRandomSource() {
+        return this.shadow$useLegacyRandomSource();
     }
 
     @Override

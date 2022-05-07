@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.world.level.biome;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
@@ -41,7 +42,7 @@ public interface MultiNoiseBiomeSourceAccessor {
     Climate.ParameterList<Supplier<Biome>> accessor$parameters();
 
     @Invoker("<init>")
-    static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Supplier<Biome>> $$0) {
+    static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Holder<Biome>> $$0) {
         throw new UntransformedInvokerError();
     }
 }
