@@ -94,6 +94,7 @@ import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -719,7 +720,7 @@ public final class SpongeCommonEventFactory {
 
     public static Optional<MapInfo> fireCreateMapEvent(final Cause cause, final Set<Value<?>> values) {
 
-        final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().defaultWorld();
+        final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get();
         final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getDataStorage()
                 .computeIfAbsent(MapIndex::new, Constants.Map.MAP_INDEX_DATA_NAME);
 
