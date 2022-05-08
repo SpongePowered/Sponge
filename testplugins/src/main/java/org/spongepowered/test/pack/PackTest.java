@@ -25,6 +25,8 @@
 package org.spongepowered.test.pack;
 
 import com.google.inject.Inject;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.apache.logging.log4j.Logger;
@@ -32,20 +34,20 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.Command.Parameterized;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.Parameter.Value;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.resource.Resource;
 import org.spongepowered.api.resource.ResourcePath;
 import org.spongepowered.api.resource.pack.Pack;
+import org.spongepowered.api.resource.pack.PackContents;
 import org.spongepowered.api.resource.pack.PackType;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 @Plugin("packtest")
 public final class PackTest {
@@ -60,17 +62,13 @@ public final class PackTest {
     }
 
     @Listener
-    public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<PluginContainer> pluginContainerParameter = Parameter.plugin().key("plugin").build();
-        final Parameter.Value<String> nameParameter = Parameter.string().key("name").build();
-        final Parameter.Value<String> pathParameter = Parameter.string().key("path").build();
-        event.register(this.plugin,
-                Command.builder()
-                        .addParameter(Parameter.firstOf(
-                                pluginContainerParameter,
-                                nameParameter
-                        ))
-                        .addParameter(pathParameter)
+    public void onRegisterCommand(final RegisterCommandEvent<Parameterized> event) {
+        final Value<PluginContainer> pluginContainerParameter = Parameter.plugin().key("plugin").build();
+        final Value<String> nameParameter = Parameter.string().key("name").build();
+        final Value<String> pathParameter = Parameter.string().key("path").build();
+        final Value<String> namespaceParameter = Parameter.string().key("namespace").build();
+        event.register(this.plugin, Command.builder().addChild(
+                Command.builder().addParameter(Parameter.firstOf(pluginContainerParameter, nameParameter)).addParameter(pathParameter)
                         .executor(exec -> {
                             final Pack pack;
                             final String path = exec.requireOne(pathParameter);
@@ -83,8 +81,7 @@ public final class PackTest {
                                     return CommandResult.error(Component.text("Pack " + packName + " does not exist."));
                                 }
                             }
-                            try (final Resource resource =
-                                    pack.contents().requireResource(PackType.server(), ResourcePath.of(pack.id(), path))) {
+                            try (final Resource resource = pack.contents().requireResource(PackType.server(), ResourcePath.of(pack.id(), path))) {
                                 final BufferedReader reader = new BufferedReader(new InputStreamReader(resource.inputStream()));
                                 reader.lines().map(x -> Component.text(x.substring(0, Math.min(100, x.length()))))
                                         .forEach(x -> exec.sendMessage(Identity.nil(), x));
@@ -93,10 +90,33 @@ public final class PackTest {
                                 return CommandResult.error(Component.text("Could not locate: " + e.getMessage()));
                             }
                             return CommandResult.success();
-                        })
-                        .build(),
-                "packtest"
-        );
+                        }).build(), "one").addChild(
+                Command.builder().addParameter(Parameter.firstOf(pluginContainerParameter, nameParameter)).addParameter(namespaceParameter)
+                        .executor(exec -> {
+                            final Pack pack;
+                            final String namespace = exec.requireOne(namespaceParameter);
+                            if (exec.hasAny(pluginContainerParameter)) {
+                                pack = Sponge.server().packRepository().pack(exec.requireOne(pluginContainerParameter));
+                            } else {
+                                final String packName = exec.requireOne(nameParameter);
+                                pack = Sponge.server().packRepository().pack(packName).orElse(null);
+                                if (pack == null) {
+                                    return CommandResult.error(Component.text("Pack " + packName + " does not exist."));
+                                }
+                            }
+                            PackContents contents = pack.contents();
+                            for (ResourcePath path : contents.paths(PackType.server(), namespace, "", Integer.MAX_VALUE, s -> true)) {
+                                try (final Resource resource = pack.contents().requireResource(PackType.server(), path)) {
+                                    final BufferedReader reader = new BufferedReader(new InputStreamReader(resource.inputStream()));
+                                    reader.lines().map(x -> Component.text(x.substring(0, Math.min(100, x.length()))))
+                                            .forEach(x -> exec.sendMessage(Identity.nil(), x));
+                                } catch (final Exception e) {
+                                    e.printStackTrace();
+                                    return CommandResult.error(Component.text("Could not locate: " + e.getMessage()));
+                                }
+                            }
+                            return CommandResult.success();
+                        }).build(), "all").build(), "packtest");
     }
 
     @Listener
@@ -106,5 +126,4 @@ public final class PackTest {
             this.logger.info(pack.id());
         }
     }
-
 }

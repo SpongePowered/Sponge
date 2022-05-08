@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.inventory.event.server.network;
 
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
@@ -101,7 +102,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
     private void impl$onSpectatorClick(final AbstractContainerMenu menu, final ServerboundContainerClickPacket packet) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        try (EffectTransactor ignored = transactor.logClickContainer(menu, packet.getSlotNum(), packet.getButtonNum(), packet.getClickType(), player)) {
+        try (final EffectTransactor ignored = transactor.logClickContainer(menu, packet.getSlotNum(), packet.getButtonNum(), packet.getClickType(), player)) {
             menu.sendAllDataToRemote();
         }
     }
