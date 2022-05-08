@@ -47,39 +47,6 @@ public final class VanishableData {
                     .create(Keys.IS_INVISIBLE)
                         .get(VanishableBridge::bridge$isInvisible)
                         .set(VanishableBridge::bridge$setInvisible)
-                    .create(Keys.VANISH)
-                        .get(bridge -> bridge.bridge$vanishState().invisible())
-                        .setAnd((h, v) -> {
-                            if (h instanceof Entity && ((Entity) h).level.isClientSide) {
-                                return false;
-                            }
-                            h.bridge$vanishState(v ? VanishState.vanished() : VanishState.unvanished());
-                            return true;
-                        })
-                    .create(Keys.VANISH_IGNORES_COLLISION)
-                        .get(b -> b.bridge$vanishState().ignoresCollisions())
-                        .setAnd((h, v) -> {
-                            if (h instanceof Entity && ((Entity) h).level.isClientSide) {
-                                return false;
-                            }
-                            if (!h.bridge$vanishState().invisible()) {
-                                return false;
-                            }
-                            h.bridge$vanishState(h.bridge$vanishState().ignoreCollisions(v));
-                            return true;
-                        })
-                    .create(Keys.VANISH_PREVENTS_TARGETING)
-                        .get(b -> b.bridge$vanishState().untargetable())
-                        .setAnd((h, v) -> {
-                            if (h instanceof Entity && ((Entity) h).level.isClientSide) {
-                                return false;
-                            }
-                            if (!h.bridge$vanishState().invisible()) {
-                                return false;
-                            }
-                            h.bridge$vanishState(h.bridge$vanishState().untargetable(v));
-                            return true;
-                        })
                     .create(Keys.VANISH_STATE)
                         .get(VanishableBridge::bridge$vanishState)
                         .setAnd((h, v) -> {
@@ -93,8 +60,6 @@ public final class VanishableData {
         registrator.spongeDataStore(dataStoreKey, VanishableBridge.class, Keys.IS_INVISIBLE, Keys.VANISH_STATE);
         SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.IS_INVISIBLE, dataStoreKey, Keys.IS_INVISIBLE);
         SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.IS_VANISHED, dataStoreKey, Keys.VANISH_STATE);
-        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, dataStoreKey, Keys.VANISH_IGNORES_COLLISION);
-        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.VANISH_UNTARGETABLE, dataStoreKey, Keys.VANISH_PREVENTS_TARGETING);
     }
     // @formatter:on
 }

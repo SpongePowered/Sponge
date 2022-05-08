@@ -384,8 +384,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         values.add(this.requireValue(Keys.SCOREBOARD_TAGS).asImmutable());
         values.add(this.requireValue(Keys.TRANSIENT).asImmutable());
         values.add(this.requireValue(Keys.VANISH_STATE).asImmutable());
-        values.add(this.requireValue(Keys.VANISH_IGNORES_COLLISION).asImmutable());
-        values.add(this.requireValue(Keys.VANISH_PREVENTS_TARGETING).asImmutable());
         values.add(this.requireValue(Keys.VELOCITY).asImmutable());
 
         this.getValue(Keys.BASE_VEHICLE).map(Value::asImmutable).ifPresent(values::add);

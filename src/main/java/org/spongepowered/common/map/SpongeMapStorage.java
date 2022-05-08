@@ -31,6 +31,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.map.MapStorage;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -60,7 +61,7 @@ public final class SpongeMapStorage implements MapStorage {
     @Override
     public Collection<MapInfo> allMapInfos() {
         final Set<MapInfo> mapInfos = new HashSet<>();
-        final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().defaultWorld();
+        final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get();
 
         final int highestId = ((MapIdTrackerBridge) defaultWorld.getDataStorage()
                 .computeIfAbsent(MapIndex::load, MapIndex::new, Constants.Map.MAP_INDEX_DATA_NAME)).bridge$getHighestMapId().orElse(-1);
@@ -87,9 +88,8 @@ public final class SpongeMapStorage implements MapStorage {
         if (mapId == null) {
             return Optional.empty();
         }
-        final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().defaultWorld();
-        final MapInfo loadedMapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + mapId);
-        return Optional.ofNullable(loadedMapInfo);
+        return Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT)
+                .map(world -> (MapInfo) ((ServerLevel) world).getMapData(Constants.Map.MAP_PREFIX + mapId));
     }
 
     @Override
@@ -120,7 +120,7 @@ public final class SpongeMapStorage implements MapStorage {
 
     private void ensureHasMapUUIDIndex() {
         if (this.mapIdUUIDIndex == null) {
-            this.mapIdUUIDIndex = ((PrimaryLevelDataBridge) Sponge.server().worldManager().defaultWorld().properties()).bridge$getMapUUIDIndex();
+            this.mapIdUUIDIndex = ((PrimaryLevelDataBridge) Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get().properties()).bridge$getMapUUIDIndex();
         }
     }
 }

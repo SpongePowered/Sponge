@@ -179,15 +179,6 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     @Override
-    public org.spongepowered.api.world.server.ServerWorld defaultWorld() {
-        final ServerLevel world = this.server.overworld();
-        if (world == null) {
-            throw new IllegalStateException("The default world has not been loaded yet! (Did you call this too early in the lifecycle?");
-        }
-        return (org.spongepowered.api.world.server.ServerWorld) world;
-    }
-
-    @Override
     public Optional<org.spongepowered.api.world.server.ServerWorld> world(final ResourceKey key) {
         return Optional.ofNullable((org.spongepowered.api.world.server.ServerWorld) this.worlds.get(SpongeWorldManager.createRegistryKey(Objects
                 .requireNonNull(key, "key"))));

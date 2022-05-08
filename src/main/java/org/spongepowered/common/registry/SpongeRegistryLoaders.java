@@ -167,6 +167,7 @@ import org.spongepowered.api.util.orientation.Orientation;
 import org.spongepowered.api.util.orientation.Orientations;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.ChunkRegenerateFlags;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.LightType;
 import org.spongepowered.api.world.LightTypes;
 import org.spongepowered.api.world.Locatable;
@@ -750,7 +751,7 @@ public final class SpongeRegistryLoaders {
             l.add(PlaceholderParsers.CURRENT_WORLD, k -> new SpongePlaceholderParserBuilder()
                     .parser(placeholderText -> Component.text(placeholderText.associatedObject().filter(x -> x instanceof Locatable)
                             .map(x -> ((Locatable) x).serverLocation().worldKey())
-                            .orElseGet(() -> Sponge.server().worldManager().defaultWorld().key()).toString()))
+                            .orElseGet(() -> Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get().key()).toString()))
                     .build());
             l.add(PlaceholderParsers.NAME, k -> new SpongePlaceholderParserBuilder()
                     .parser(placeholderText -> placeholderText.associatedObject()
