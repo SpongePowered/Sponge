@@ -577,7 +577,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
             frame.pushCause(this.player);
             final Audience audience = (Audience) this.server;
             // Forge's event is accounted for in here.
-            final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(frame.currentCause(), audience, Optional.of(audience), chatFormatter, Optional.of(chatFormatter), initialComponent, currentMessage);
+            final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(frame.currentCause(), audience, Optional.of(audience), chatFormatter, Optional.of(chatFormatter), currentMessage, currentMessage);
             if (SpongeCommon.post(event)) {
                 // We reduce the chatSpamTickCount by 20 to account for the fact we cancelled the event (the method increments by 20).
                 // Otherwise, we need do nothing.
