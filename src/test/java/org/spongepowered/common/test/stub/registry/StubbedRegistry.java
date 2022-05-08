@@ -30,10 +30,12 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.tag.Tag;
 import org.spongepowered.common.registry.SpongeRegistryEntry;
 import org.spongepowered.common.test.stub.StubKey;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -105,6 +107,16 @@ public class StubbedRegistry<T> implements Registry<T> {
     @Override
     public <V extends T> V value(final ResourceKey key) {
         return (V) this.getOrCreate(key);
+    }
+
+    @Override
+    public <V extends T> Set<V> taggedValues(final Tag<T> tag) {
+        return Set.of();
+    }
+
+    @Override
+    public <V extends T> Stream<Tag<V>> tags() {
+        return Stream.empty();
     }
 
     @Override
