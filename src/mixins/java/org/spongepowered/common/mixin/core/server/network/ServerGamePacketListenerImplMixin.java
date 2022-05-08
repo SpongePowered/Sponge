@@ -565,19 +565,21 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
                                                   final UUID uuid) {
         final ServerPlayer player = (ServerPlayer) this.player;
         final PlayerChatFormatter chatFormatter = player.chatFormatter();
-        final Component initialComponent = SpongeAdventure.asAdventure(unfilteredComponent);
-        final Component currentMessage;
-        if (unfilteredComponent instanceof TranslatableComponent && ((TranslatableComponent) unfilteredComponent).getArgs().length == 2 && ((TranslatableComponent) unfilteredComponent).getArgs()[1] instanceof net.minecraft.network.chat.Component) {
-            currentMessage = SpongeAdventure.asAdventure((net.minecraft.network.chat.Component) ((TranslatableComponent) unfilteredComponent).getArgs()[1]);
-        } else {
-            currentMessage = initialComponent;
+        Component currentMessage = SpongeAdventure.asAdventure(unfilteredComponent);
+        if (unfilteredComponent instanceof TranslatableComponent tc && tc.getArgs().length == 2 ) {
+            if (tc.getArgs()[1] instanceof String rawMessage) {
+                currentMessage = Component.text(rawMessage);
+            }
+            else if (tc.getArgs()[1] instanceof net.minecraft.network.chat.Component component) {
+                currentMessage = SpongeAdventure.asAdventure(component);
+            }
         }
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
             frame.pushCause(this.player);
             final Audience audience = (Audience) this.server;
             // Forge's event is accounted for in here.
-            final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(frame.currentCause(), audience, Optional.of(audience), chatFormatter, Optional.of(chatFormatter), initialComponent, currentMessage);
+            final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(frame.currentCause(), audience, Optional.of(audience), chatFormatter, Optional.of(chatFormatter), currentMessage, currentMessage);
             if (SpongeCommon.post(event)) {
                 // We reduce the chatSpamTickCount by 20 to account for the fact we cancelled the event (the method increments by 20).
                 // Otherwise, we need do nothing.
