@@ -30,7 +30,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
-import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
+import org.spongepowered.common.world.server.SpongeDimensionTypes;
 
 import java.nio.file.Path;
 
@@ -51,15 +51,21 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
     }
 
     @Override
-    public DimensionType bridge$decorateData(final SpongeWorldTypeTemplate.SpongeDataSection data) {
-//        this.createDragonFight = data.createDragonFight;
+    public DimensionType bridge$decorateData(final SpongeDimensionTypes.SpongeDataSection data) {
+//        this.createDragonFight = data.createDragonFight();
         // TODO how to dragonfight in 1.19?
         return (DimensionType) (Object) this;
     }
 
     @Override
-    public SpongeWorldTypeTemplate.SpongeDataSection bridge$createData() {
-        return new SpongeWorldTypeTemplate.SpongeDataSection(false);
+    public SpongeDimensionTypes.SpongeDataSection bridge$createData() {
+        return new SpongeDimensionTypes.SpongeDataSection(false);
     }
 
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;comapFlatMap(Ljava/util/function/Function;Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"))
+    private static Codec<Object> impl$captureActualCodecBeforeWrap(final Codec<Object> codec, final Function<? super Object, ? extends DataResult<?
+            extends Object>> to, final Function<? super Object, ? extends Object> from) {
+        SpongeDimensionTypes.internalCodec((Codec<DimensionType>) (Object) codec);
+        return codec.comapFlatMap(to, from);
+    }
 }

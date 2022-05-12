@@ -22,14 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level.dimension;
+package org.spongepowered.common.world.server;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.dimension.DimensionType;
-import org.spongepowered.common.world.server.SpongeDimensionTypes;
+import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
+import org.spongepowered.common.data.fixer.SpongeDataCodec;
 
-public interface DimensionTypeBridge {
+public final class SpongeDimensionTypes {
 
-    DimensionType bridge$decorateData(SpongeDimensionTypes.SpongeDataSection data);
+    // TODO handle empty sponge tag
+    private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
+        .create(r -> r
+            .group(
+                Codec.BOOL.optionalFieldOf("create_dragon_fight", Boolean.FALSE).forGetter(v -> v.createDragonFight)
+            )
+            .apply(r, r.stable(SpongeDataSection::new))
+        );
 
-    SpongeDimensionTypes.SpongeDataSection bridge$createData();
+    public static Codec<DimensionType> DIRECT_CODEC;
+
+
+    public static void internalCodec(final Codec<DimensionType> internalCodec) {
+        SpongeDimensionTypes.DIRECT_CODEC = new MapCodec.MapCodecCodec<DimensionType>(new SpongeDataCodec<>(internalCodec,
+            SpongeDimensionTypes.SPONGE_CODEC,
+                (type, data) -> ((DimensionTypeBridge) type).bridge$decorateData(data),
+                type -> ((DimensionTypeBridge) type).bridge$createData()));
+    }
+
+    public record SpongeDataSection(boolean createDragonFight) {}
 }

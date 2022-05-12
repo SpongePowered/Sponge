@@ -25,9 +25,13 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.dimension;
 
 import net.minecraft.core.Registry;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeTemplate;
@@ -69,9 +73,13 @@ public abstract class DimensionTypeMixin_API implements WorldType {
     @Shadow public abstract boolean shadow$respawnAnchorWorks();
     @Shadow public abstract boolean shadow$hasRaids();
     @Shadow public abstract int shadow$logicalHeight();
+    @Shadow public abstract int shadow$minY();
+    @Shadow public abstract int shadow$height();
+    @Shadow public abstract TagKey<Block> shadow$infiniburn();
     // @formatter:on
 
     @Nullable private Context api$context;
+    @Nullable private WorldTypeEffect api$effect;
 
     @Override
     public Context context() {
@@ -87,11 +95,13 @@ public abstract class DimensionTypeMixin_API implements WorldType {
 
     @Override
     public WorldTypeEffect effect() {
-        @Nullable final WorldTypeEffect effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) this.effectsLocation);
-        if (effect == null) {
-            throw new IllegalStateException(String.format("The effect '%s' has not been registered!", this.effectsLocation));
+        if (this.api$effect == null) {
+            this.api$effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) this.effectsLocation);
+            if (this.api$effect == null) {
+                throw new IllegalStateException(String.format("The effect '%s' has not been registered!", this.effectsLocation));
+            }
         }
-        return effect;
+        return this.api$effect;
     }
 
     @Override
@@ -148,6 +158,11 @@ public abstract class DimensionTypeMixin_API implements WorldType {
         return this.shadow$respawnAnchorWorks();
     }
 
+    @Intrinsic
+    public Tag<BlockType> worldType$infiniburn() {
+        return (Tag<BlockType>) (Object) this.shadow$infiniburn();
+    }
+
     @Override
     public WorldTypeTemplate asTemplate() {
         return new SpongeWorldTypeTemplate((ResourceKey) (Object) Objects.requireNonNull(SpongeCommon.server()
@@ -161,6 +176,16 @@ public abstract class DimensionTypeMixin_API implements WorldType {
     @Intrinsic
     public boolean worldType$hasRaids() {
         return this.shadow$hasRaids();
+    }
+
+    @Intrinsic
+    public int worldType$minY() {
+        return this.shadow$minY();
+    }
+
+    @Intrinsic
+    public int worldType$height() {
+        return this.shadow$height();
     }
 
     @Intrinsic

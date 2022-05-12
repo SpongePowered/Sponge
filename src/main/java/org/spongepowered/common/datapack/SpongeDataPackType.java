@@ -34,7 +34,6 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -49,12 +48,10 @@ import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.datapack.recipe.RecipeSerializedObject;
 import org.spongepowered.common.datapack.tag.TagSerializedObject;
-import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.tag.SpongeTagTemplate;
+import org.spongepowered.common.world.server.SpongeDimensionTypes;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
-import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
-import java.util.OptionalLong;
 import java.util.function.BiFunction;
 
 public final class SpongeDataPackType<T extends DataPackSerializable, U extends DataPackSerializedObject> implements DataPackType<T> {
@@ -114,15 +111,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
 
         private final SpongeDataPackType<@NonNull WorldTypeTemplate, DataPackSerializedObject> worldType = new SpongeDataPackType<>(TypeToken.get(WorldTypeTemplate.class),
                 new DataPackSerializer<>("Dimension Types", "dimension_type"),
-                (s, registryAccess) -> {
-                    final OptionalLong fixedTime = s.fixedTime().isEmpty() ? OptionalLong.empty() : OptionalLong.of(s.fixedTime().get().asTicks().ticks());
-                    final DimensionType.MonsterSettings monsterSettings = new DimensionType.MonsterSettings(s.piglinSafe(), s.hasRaids(), UniformInt.of(0, 7), 0); // TODO monsterlight settings
-                    final DimensionType type = new DimensionType(fixedTime, s.hasSkylight(), s.hasCeiling(), s.scorching(), s.natural(),
-                        s.coordinateMultiplier(), s.bedsUsable(), s.respawnAnchorsUsable(), s.minY(), s.maximumHeight(), s.logicalHeight(),
-                            BlockTags.INFINIBURN_OVERWORLD, (ResourceLocation) (Object) s.effect().key(), s.ambientLighting(), monsterSettings);
-                    final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-                    return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(ops, type).getOrThrow(false, e -> {});
-                },
+                s -> SpongeDimensionTypes.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), (DimensionType) s.worldType()).getOrThrow(false, e -> {}),
                 (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
                 true
         );

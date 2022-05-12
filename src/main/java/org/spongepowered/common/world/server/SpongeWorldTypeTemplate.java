@@ -24,11 +24,14 @@
  */
 package org.spongepowered.common.world.server;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.core.Registry;
-import net.minecraft.tags.BlockTags;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
@@ -36,96 +39,33 @@ import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
+import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.util.MinecraftDayTime;
+import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeEffect;
-import org.spongepowered.api.world.WorldTypeEffects;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
-import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
-import org.spongepowered.common.data.fixer.SpongeDataCodec;
-import org.spongepowered.common.registry.provider.DimensionEffectProvider;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
-import org.spongepowered.common.util.MissingImplementationException;
-import org.spongepowered.common.util.SpongeMinecraftDayTime;
 
+import java.io.IOException;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.OptionalLong;
 
 public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed implements WorldTypeTemplate {
 
-    public final WorldTypeEffect effect;
-    @Nullable public final MinecraftDayTime fixedTime;
-    public final TagKey<Block> infiniburn;
-
-    public final boolean ultraWarm, natural, skylight, ceiling, piglinSafe, bedWorks, respawnAnchorWorks, hasRaids, createDragonFight;
-    public final float ambientLight;
-    public final int minY, logicalHeight, maximumHeight;
-    public final double coordinateScale;
-
-    private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
-        .create(r -> r
-            .group(
-                Codec.BOOL.optionalFieldOf("create_dragon_fight", Boolean.FALSE).forGetter(v -> v.createDragonFight)
-            )
-            .apply(r, r.stable(SpongeDataSection::new))
-        );
-
-    public static Codec<DimensionType> DIRECT_CODEC = new MapCodec.MapCodecCodec<DimensionType>(
-            new SpongeDataCodec<>(DimensionType.DIRECT_CODEC, SpongeWorldTypeTemplate.SPONGE_CODEC,
-                    (type, data) -> ((DimensionTypeBridge) (Object) type).bridge$decorateData(data),
-                    type -> ((DimensionTypeBridge) (Object) type).bridge$createData()));
-
-    protected SpongeWorldTypeTemplate(final BuilderImpl builder) {
-        super(builder.key);
-
-        this.effect = builder.effect;
-        this.fixedTime = builder.fixedTime;
-        this.infiniburn = builder.infiniburn;
-        this.ultraWarm = builder.scorching;
-        this.natural = builder.natural;
-        this.skylight = builder.skylight;
-        this.ceiling = builder.ceiling;
-        this.piglinSafe = builder.piglinSafe;
-        this.bedWorks = builder.bedsUsable;
-        this.respawnAnchorWorks = builder.respawnAnchorsUsable;
-        this.hasRaids = builder.hasRaids;
-        this.ambientLight = builder.ambientLighting;
-        this.minY = builder.minY;
-        this.logicalHeight = builder.logicalHeight;
-        this.maximumHeight = builder.maximumHeight;
-        this.coordinateScale = builder.coordinateMultiplier;
-
-        // Sponge
-        this.createDragonFight = builder.createDragonFight;
-    }
+    private final DimensionType dimensionType;
 
     public SpongeWorldTypeTemplate(final ResourceKey key, final DimensionType dimensionType) {
         super(key);
-
-        final OptionalLong fixedTime = ((DimensionTypeAccessor) (Object) dimensionType).accessor$fixedTime();
-        this.fixedTime = fixedTime.isPresent() ? new SpongeMinecraftDayTime(fixedTime.getAsLong()) : null;
-        this.skylight = dimensionType.hasSkyLight();
-        this.ceiling = dimensionType.hasCeiling();
-        this.ultraWarm = dimensionType.ultraWarm();
-        this.natural = dimensionType.natural();
-        this.coordinateScale = dimensionType.coordinateScale();
-        this.piglinSafe = dimensionType.piglinSafe();
-        this.bedWorks = dimensionType.bedWorks();
-        this.respawnAnchorWorks = dimensionType.respawnAnchorWorks();
-        this.hasRaids = dimensionType.hasRaids();
-        this.minY = dimensionType.minY();
-        this.logicalHeight = dimensionType.logicalHeight();
-        this.maximumHeight = dimensionType.height();
-        this.infiniburn = dimensionType.infiniburn();
-        this.effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) ((DimensionTypeAccessor) (Object) dimensionType).accessor$effectsLocation());
-        this.ambientLight = ((DimensionTypeAccessor) (Object) dimensionType).accessor$ambientLight();
-        this.createDragonFight = false; // TODO dimensionType.createDragonFight();
+        this.dimensionType = dimensionType;
     }
 
     @Override
@@ -140,107 +80,31 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
     @Override
     public DataContainer toContainer() {
-        throw new MissingImplementationException("SpongeWorldTypeTemplate", "toContainer");
-    }
-
-    @Override
-    public WorldTypeEffect effect() {
-        return this.effect;
-    }
-
-    @Override
-    public boolean scorching() {
-        return this.ultraWarm;
-    }
-
-    @Override
-    public boolean natural() {
-        return this.natural;
-    }
-
-    @Override
-    public double coordinateMultiplier() {
-        return this.coordinateScale;
-    }
-
-    @Override
-    public boolean hasSkylight() {
-        return this.skylight;
-    }
-
-    @Override
-    public boolean hasCeiling() {
-        return this.ceiling;
-    }
-
-    @Override
-    public float ambientLighting() {
-        return this.ambientLight;
-    }
-
-    @Override
-    public Optional<MinecraftDayTime> fixedTime() {
-        return Optional.ofNullable(this.fixedTime);
-    }
-
-    @Override
-    public boolean piglinSafe() {
-        return this.piglinSafe;
-    }
-
-    @Override
-    public boolean bedsUsable() {
-        return this.bedWorks;
-    }
-
-    @Override
-    public boolean respawnAnchorsUsable() {
-        return this.respawnAnchorWorks;
-    }
-
-    @Override
-    public boolean hasRaids() {
-        return this.hasRaids;
-    }
-
-    @Override
-    public int minY() {
-        return this.minY;
-    }
-
-    @Override
-    public int logicalHeight() {
-        return this.logicalHeight;
-    }
-
-    @Override
-    public int maximumHeight() {
-        return this.maximumHeight;
-    }
-
-    @Override
-    public boolean createDragonFight() {
-        return this.createDragonFight;
-    }
-
-    public static final class SpongeDataSection {
-        public final boolean createDragonFight;
-
-        public SpongeDataSection(final boolean createDragonFight) {
-            this.createDragonFight = createDragonFight;
+        // TODO content-version?
+        // TODO key
+        final JsonElement serialized = SpongeDimensionTypes.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), this.dimensionType).getOrThrow(false, e -> {});
+        try {
+            return DataFormats.JSON.get().read(serialized.toString());
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not read deserialized DimensionType:\n" + serialized, e);
         }
+    }
+
+    @Override
+    public WorldType worldType() {
+        return (WorldType) this.dimensionType;
     }
 
     public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTypeTemplate, Builder> implements WorldTypeTemplate.Builder {
 
-        @Nullable protected WorldTypeEffect effect;
-        @Nullable protected MinecraftDayTime fixedTime;
-        @Nullable protected TagKey<Block> infiniburn;
+        @Nullable private WorldTypeEffect effect;
+        @Nullable private MinecraftDayTime fixedTime;
+        @Nullable private Tag<BlockType> infiniburn;
 
-        protected boolean scorching, natural, skylight, ceiling, piglinSafe, bedsUsable, respawnAnchorsUsable, hasRaids, createDragonFight;
-        protected float ambientLighting;
-        protected int minY, logicalHeight, maximumHeight;
-        protected double coordinateMultiplier;
+        private boolean scorching, natural, skylight, ceiling, piglinSafe, bedsUsable, respawnAnchorsUsable, hasRaids, createDragonFight;
+        private float ambientLighting;
+        private int minY, logicalHeight, height;
+        private double coordinateMultiplier;
 
         @Override
         public WorldTypeTemplate.Builder effect(final WorldTypeEffect effect) {
@@ -327,8 +191,8 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         }
 
         @Override
-        public Builder maximumHeight(final int maximumHeight) {
-            this.maximumHeight = maximumHeight;
+        public Builder height(final int maximumHeight) {
+            this.height = maximumHeight;
             return this;
         }
 
@@ -341,70 +205,73 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         @Override
         public Builder reset() {
             super.reset();
-            this.effect = WorldTypeEffects.OVERWORLD;
-            this.fixedTime = null;
-            this.infiniburn = BlockTags.INFINIBURN_OVERWORLD;
-            this.scorching = false;
-            this.natural = true;
-            this.skylight = true;
-            this.ceiling = false;
-            this.piglinSafe = false;
-            this.bedsUsable = true;
-            this.respawnAnchorsUsable = false;
-            this.hasRaids = true;
-            this.ambientLighting = 0.5f;
-            this.minY = 16;
-            this.logicalHeight = 256;
-            this.maximumHeight = 256;
-            this.coordinateMultiplier = 1;
-            this.createDragonFight = false;
+            this.from((WorldType) DimensionTypeAccessor.accessor$DEFAULT_OVERWORLD());
+            return this;
+        }
+
+        @Override
+        public Builder from(WorldType type) {
+            this.effect = type.effect();
+            this.fixedTime = type.fixedTime().orElse(null);
+            this.infiniburn = type.infiniburn();
+            this.scorching = type.scorching();
+            this.natural = type.natural();
+            this.skylight = type.hasSkylight();
+            this.ceiling = type.hasCeiling();
+            this.piglinSafe = type.piglinSafe();
+            this.bedsUsable = type.bedsUsable();
+            this.respawnAnchorsUsable = type.respawnAnchorsUsable();
+            this.hasRaids = type.hasRaids();
+            this.ambientLighting = type.ambientLighting();
+            this.minY = type.minY();
+            this.logicalHeight = type.logicalHeight();
+            this.height = type.height();
+            this.coordinateMultiplier = type.coordinateMultiplier();
+            this.createDragonFight = type.createDragonFight();
+            return this;
+        }
+
+        @Override
+        public Builder fromDataPack(DataView pack) throws IOException {
+            // TODO optional key from view?
+            // TODO content-version?
+
+            // TODO maybe accept JsonElement instead?
+            final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
+
+            // TODO catch & rethrow exceptions in CODEC?
+            // TODO probably need to rewrite CODEC to allow reading after registries are frozen
+            final DataResult<Holder<DimensionType>> parsed = DimensionType.CODEC.parse(JsonOps.INSTANCE, json);
+            final DimensionType dimensionType = parsed.getOrThrow(false, e -> {}).value();
+
+            this.from((WorldType) dimensionType);
             return this;
         }
 
         @Override
         public WorldTypeTemplate.Builder from(final WorldTypeTemplate value) {
             Objects.requireNonNull(value, "value");
+            this.from(value.worldType());
+            this.key = value.key();
 
-            this.effect = value.effect();
-            this.fixedTime = value.fixedTime().orElse(null);
-            this.infiniburn = BlockTags.INFINIBURN_OVERWORLD;
-            this.scorching = value.scorching();
-            this.natural = value.natural();
-            this.skylight = value.hasSkylight();
-            this.ceiling = value.hasCeiling();
-            this.piglinSafe = value.piglinSafe();
-            this.bedsUsable = value.bedsUsable();
-            this.respawnAnchorsUsable = value.respawnAnchorsUsable();
-            this.hasRaids = value.hasRaids();
-            this.ambientLighting = value.ambientLighting();
-            this.logicalHeight = value.logicalHeight();
-            this.coordinateMultiplier = value.coordinateMultiplier();
-            this.createDragonFight = value.createDragonFight();
             return this;
         }
 
         @Override
         public @NonNull WorldTypeTemplate build0() {
-            if (this.maximumHeight < 16) {
-                throw new IllegalStateException(String.format("Template '%s' specified a maximum height less than 16!", this.key));
+            try {
+                final DimensionType dimensionType =
+                        DimensionType.create(this.fixedTime == null ? OptionalLong.empty() : OptionalLong.of(this.fixedTime.asTicks().ticks()),
+                                this.skylight, this.ceiling, this.scorching, this.natural, this.coordinateMultiplier,
+                                this.createDragonFight, this.piglinSafe, this.bedsUsable, this.respawnAnchorsUsable, this.hasRaids,
+                                this.minY, this.height, this.logicalHeight,
+                                (TagKey<Block>) (Object) this.infiniburn,
+                                (ResourceLocation) (Object) this.effect.key(),
+                                this.ambientLighting);
+                return new SpongeWorldTypeTemplate(this.key, dimensionType);
+            } catch (IllegalStateException e) { // catch and rethrow minecraft internal exception
+                throw new IllegalStateException(String.format("Template '%s' was not valid!", this.key), e);
             }
-            if (this.minY + this.maximumHeight > DimensionType.MAX_Y + 1) {
-                throw new IllegalStateException(String.format("Template '%s' specified min_y ['%s'] and maximum height ['%s'] combined greater "
-                        + "than ['%s']!", this.key, this.minY, this.maximumHeight, (DimensionType.MIN_Y + 1)));
-            }
-            if (this.logicalHeight > this.maximumHeight) {
-                throw new IllegalStateException(String.format("Template '%s' specified a logical height ['%s'] greater than height ['%s']!",
-                        this.key, this.logicalHeight, this.maximumHeight));
-            }
-            if (this.maximumHeight % 16 != 0) {
-                throw new IllegalStateException(String.format("Template '%s' specified a maximum height ['%s'] that is not a multiple of 16!",
-                        this.key, this.maximumHeight));
-            }
-            if (this.minY % 16 != 0) {
-                throw new IllegalStateException(String.format("Template '%s' specified a min_y ['%s'] that is not a multiple of 16!",
-                        this.key, this.minY));
-            }
-            return new SpongeWorldTypeTemplate(this);
         }
     }
 
@@ -433,5 +300,6 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             var type = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.END);
             return new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_end"), type);
         }
+
     }
 }

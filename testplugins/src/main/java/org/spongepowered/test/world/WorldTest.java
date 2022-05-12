@@ -38,6 +38,8 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
@@ -49,6 +51,7 @@ import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
+import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.Biome;
@@ -59,6 +62,7 @@ import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
+import org.spongepowered.api.world.generation.config.noise.Shaper;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -68,8 +72,10 @@ import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -97,234 +103,200 @@ public final class WorldTest {
         final Parameter.Value<ResourceKey> copyWorldKeyParameter = Parameter.resourceKey().key("copy_world").build();
         final Parameter.Value<ResourceKey> moveWorldKeyParameter = Parameter.resourceKey().key("move_world").build();
 
-        event
-                .register(this.plugin, Command
-                        .builder()
-                        .addParameters(CommonParameters.LOCATION_ONLINE_ONLY, portalTypeParameter)
-                        .permission(this.plugin.metadata().id() + ".command.portal.create")
-                        .executor(context -> {
-                            final ServerLocation location = context.requireOne(CommonParameters.LOCATION_ONLINE_ONLY);
-                            final PortalType portalType = context.requireOne(portalTypeParameter);
-                            portalType.generatePortal(location, Axis.X);
-                            return CommandResult.success();
-                        })
-                        .build()
-                , "cp", "createportal")
-                .register(this.plugin, Command
-                        .builder()
-                        .addParameters(optPlayerParameter, CommonParameters.LOCATION_ONLINE_ONLY, portalTypeParameter)
-                        .permission(this.plugin.metadata().id() + ".command.portal.use")
-                        .executor(context -> {
-                            final ServerPlayer player = context.one(optPlayerParameter).orElse(this.getSourcePlayer(context));
-                            final ServerLocation location = context.requireOne(CommonParameters.LOCATION_ONLINE_ONLY);
-                            final PortalType portalType = context.requireOne(portalTypeParameter);
-                            return portalType.teleport(player, location, true) ? CommandResult.success() : CommandResult.error(Component.text("Could not teleport!"));
-                        })
-                        .build()
-                , "up", "useportal")
-                .register(this.plugin, Command
-                        .builder()
-                        .addParameters(optPlayerParameter, worldTypeParameter)
-                        .permission(this.plugin.metadata().id() + ".command.environment.change")
-                        .executor(context -> {
-                            final ServerPlayer player = context.one(optPlayerParameter).orElse(this.getSourcePlayer(context));
-                            final WorldType worldType = context.requireOne(worldTypeParameter);
-                            player.sendWorldType(worldType);
-                            return CommandResult.success();
-                        })
-                        .build()
-                , "ce", "changeenvironment")
-                .register(this.plugin, Command
-                        .builder()
-                        .addParameters(CommonParameters.WORLD, worldTypeParameter)
-                        .permission(this.plugin.metadata().id() + ".command.worldtype.change")
-                        .executor(context -> {
-                            final ServerWorld world = context.requireOne(CommonParameters.WORLD);
-                            final WorldType worldType = context.requireOne(worldTypeParameter);
-                            world.properties().setWorldType(worldType);
-                            return CommandResult.success();
-                        })
-                        .build()
-                , "cwt", "changeworldtype")
-                .register(this.plugin, Command
-                        .builder()
-                        .addParameters(optPlayerParameter, optWorldParameter, optPositionParameter)
-                        .permission(this.plugin.metadata().id() + ".command.location.change")
-                        .executor(context -> {
-                            final ServerPlayer player = context.one(optPlayerParameter).orElse(this.getSourcePlayer(context));
-                            final ServerWorld world = context.one(optWorldParameter).orElse(player.world());
-                            final Vector3d position = context.one(optPositionParameter).orElse(world.properties().spawnPosition().toDouble());
-                            return player.setLocation(ServerLocation.of(world, position)) ? CommandResult.success() : CommandResult.error(Component.text("Could not teleport!"));
-                        })
-                        .build()
-                , "cl", "changelocation")
-                .register(this.plugin, Command
-                        .builder()
-                        .addParameter(worldKeyParameter)
-                        .permission(this.plugin.metadata().id() + ".command.world.load")
-                        .executor(context -> {
-                            final ResourceKey key = context.requireOne(worldKeyParameter);
-
-                            this.game.server().worldManager().loadWorld(key).whenComplete((r, t) -> {
-                                if (t != null) {
-                                    context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
-                                } else {
-                                    if (r != null) {
-                                        context.cause().audience().sendMessage(Identity.nil(), Component.text("World loaded successfully!"));
-                                    } else {
-                                        context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to load!"));
-                                    }
-                                }
-                            });
-
-                            return CommandResult.success();
-                        })
-                        .build()
-                , "lw", "loadworld")
-                .register(this.plugin, Command
-                        .builder()
-                        .addParameters(worldKeyParameter, worldTypeParameter)
-                        .permission(this.plugin.metadata().id() + ".command.world.create")
-                        .executor(context -> {
-                            final ResourceKey key = context.requireOne(worldKeyParameter);
-                            final ResourceKey worldType = RegistryTypes.WORLD_TYPE.get().valueKey(context.requireOne(worldTypeParameter));
-                            final WorldTemplate template = WorldTemplate.builder()
-                                    .from(WorldTemplate.overworld())
-                                    .key(key)
-                                    .worldType(RegistryKey.of(RegistryTypes.WORLD_TYPE, worldType).asReference())
-                                    .performsSpawnLogic(true)
-                                    .build();
-
-                            this.game.server().worldManager().loadWorld(template).whenComplete((r, t) -> {
-                                if (t != null) {
-                                    context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
-                                } else {
-                                    if (r != null) {
-                                        context.cause().audience().sendMessage(Identity.nil(), Component.text("World created successfully!"));
-                                    } else {
-                                        context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to create!"));
-                                    }
-                                }
-                            });
-
-                            return CommandResult.success();
-                        })
-                        .build()
-                , "cw", "createworld")
-                .register(this.plugin, Command
-                        .builder()
-                        .addParameter(CommonParameters.WORLD)
-                        .executor(context -> {
-                            final ServerWorld world = context.requireOne(CommonParameters.WORLD);
-
-                            this.game.server().worldManager().unloadWorld(world).whenComplete((r, t) -> {
-                                if (t != null) {
-                                    context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
-                                } else {
-                                    if (r) {
-                                        context.cause().audience().sendMessage(Identity.nil(), Component.text("World unloaded successfully!"));
-                                    } else {
-                                        context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to unload!"));
-                                    }
-                                }
-                            });
-
-                            return CommandResult.success();
-                        })
-                        .build()
-                , "uw", "unloadworld")
-                .register(this.plugin, Command
-                        .builder()
-                        .addParameters(worldKeyParameter, copyWorldKeyParameter)
-                        .executor(context -> {
-                            final ResourceKey key = context.requireOne(worldKeyParameter);
-                            final ResourceKey copyWorldKey = context.requireOne(copyWorldKeyParameter);
-
-                            this.game.server().worldManager().copyWorld(key, copyWorldKey).whenComplete((r, t) -> {
-                                if (t != null) {
-                                    context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
-                                } else {
-                                    if (r) {
-                                        context.cause().audience().sendMessage(Identity.nil(), Component.text("World copied successfully!"));
-                                    } else {
-                                        context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to copy!"));
-                                    }
-                                }
-                            });
-
-                            return CommandResult.success();
-                        })
-                        .build()
-                , "cpw", "copyworld")
-                .register(this.plugin, Command
-                        .builder()
-                        .addParameters(worldKeyParameter, moveWorldKeyParameter)
-                        .executor(context -> {
-                            final ResourceKey key = context.requireOne(worldKeyParameter);
-                            final ResourceKey moveWorldKey = context.requireOne(moveWorldKeyParameter);
-
-                            this.game.server().worldManager().moveWorld(key, moveWorldKey).whenComplete((r, t) -> {
-                                if (t != null) {
-                                    context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
-                                } else {
-                                    if (r) {
-                                        context.cause().audience().sendMessage(Identity.nil(), Component.text("World moved successfully!"));
-                                    } else {
-                                        context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to move!"));
-                                    }
-                                }
-                            });
-
-                            return CommandResult.success();
-                        })
-                        .build()
-                , "mw", "moveworld")
-                .register(this.plugin, Command
-                        .builder()
-                        .addParameters(worldKeyParameter)
-                        .executor(context -> {
-                            final ResourceKey key = context.requireOne(worldKeyParameter);
-
-                            this.game.server().worldManager().deleteWorld(key).whenComplete((r, t) -> {
-                                if (t != null) {
-                                    context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
-                                } else {
-                                    if (r) {
-                                        context.cause().audience().sendMessage(Identity.nil(), Component.text("World deleted successfully!"));
-                                    } else {
-                                        context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to delete!"));
-                                    }
-                                }
-                            });
-
-                            return CommandResult.success();
-                        })
-                        .build()
-                , "dw", "deleteworld")
-                .register(this.plugin, Command
-                        .builder()
-                        .addParameter(optPlayerParameter)
-                        .executor(context -> {
-                            final ServerPlayer player = context.one(optPlayerParameter).orElse(this.getSourcePlayer(context));
-
-                            player.sendMessage(Identity.nil(),
-                                    Component.text("You are in World ").append(player.world().properties().displayName().orElseGet(() -> Component.text(player.world().key().toString(),
-                                            NamedTextColor.AQUA)))
-                                            .append(Component.text(" at (" + player.position().floorX() + ", " + player.position().floorY() +
-                                                    ", " + player.position().floorZ() + ")")));
-                            return CommandResult.success();
-                        })
-                        .build()
-                , "wai", "whereami")
-                .register(this.plugin, Command
-                        .builder()
-                        .executor(this::createWorld)
-                        .build()
-                , "createrandomworld", "crw"
-        );
+        event.register(this.plugin, Command.builder().addParameters(CommonParameters.LOCATION_ONLINE_ONLY, portalTypeParameter)
+                     .permission(this.plugin.metadata().id() + ".command.portal.create")
+                     .executor(context -> createPortal(context, portalTypeParameter)).build(), "cp", "createportal")
+             .register(this.plugin, Command.builder().addParameters(optPlayerParameter, CommonParameters.LOCATION_ONLINE_ONLY, portalTypeParameter)
+                     .permission(this.plugin.metadata().id() + ".command.portal.use")
+                     .executor(context -> useportal(context, optPlayerParameter, portalTypeParameter)).build(), "up", "useportal")
+             .register(this.plugin, Command.builder().addParameters(optPlayerParameter, worldTypeParameter)
+                     .permission(this.plugin.metadata().id() + ".command.environment.change")
+                     .executor(context -> changeEnvironement(context, optPlayerParameter, worldTypeParameter)).build(), "ce", "changeenvironment")
+             .register(this.plugin, Command.builder().addParameters(CommonParameters.WORLD, worldTypeParameter)
+                     .permission(this.plugin.metadata().id() + ".command.worldtype.change")
+                     .executor(context -> changeworldType(context, worldTypeParameter)).build(), "cwt", "changeworldtype")
+             .register(this.plugin, Command.builder().addParameters(optPlayerParameter, optWorldParameter, optPositionParameter)
+                     .permission(this.plugin.metadata().id() + ".command.location.change")
+                     .executor(context -> changelocation(context, optPlayerParameter, optWorldParameter, optPositionParameter)).build(), "cl", "changelocation")
+             .register(this.plugin, Command.builder().addParameter(worldKeyParameter)
+                     .permission(this.plugin.metadata().id() + ".command.world.load")
+                     .executor(context -> loadWorld(context, worldKeyParameter)).build(), "lw", "loadworld")
+             .register(this.plugin, Command.builder().addParameters(worldKeyParameter, worldTypeParameter)
+                     .permission(this.plugin.metadata().id() + ".command.world.create")
+                     .executor(context -> createWorld(context, worldKeyParameter, worldTypeParameter)).build(), "cw", "createworld")
+             .register(this.plugin, Command.builder().addParameter(CommonParameters.WORLD)
+                     .executor(this::unloadWorld).build(), "uw", "unloadworld")
+             .register(this.plugin, Command.builder().addParameters(worldKeyParameter, copyWorldKeyParameter)
+                     .executor(context -> copyWorld(context, worldKeyParameter, copyWorldKeyParameter)).build(), "cpw", "copyworld")
+             .register(this.plugin, Command.builder().addParameters(worldKeyParameter, moveWorldKeyParameter)
+                     .executor(context -> moveWorld(context, worldKeyParameter, moveWorldKeyParameter)).build(), "mw", "moveworld")
+             .register(this.plugin, Command.builder().addParameters(worldKeyParameter)
+                     .executor(context -> deleteWorld(context, worldKeyParameter)).build(), "dw", "deleteworld")
+             .register(this.plugin, Command.builder().addParameter(optPlayerParameter)
+                     .executor(context -> whereami(context, optPlayerParameter)) .build(), "wai", "whereami")
+             .register(this.plugin, Command.builder()
+                     .executor(this::createRandomWorld).build(), "createrandomworld", "crw")
+             .register(this.plugin, Command.builder()
+                     .executor(this::worldTypes).build(), "worldtypes")
+        ;
     }
 
-    private CommandResult createWorld(final CommandContext context) {
+    private CommandResult createPortal(final CommandContext context, final Parameter.Value<PortalType> portalTypeParameter) {
+        final ServerLocation location = context.requireOne(CommonParameters.LOCATION_ONLINE_ONLY);
+        final PortalType portalType = context.requireOne(portalTypeParameter);
+        portalType.generatePortal(location, Axis.X);
+        return CommandResult.success();
+    }
+    private CommandResult useportal(final CommandContext context, final Parameter.Value<ServerPlayer> optPlayerParameter, final Parameter.Value<PortalType> portalTypeParameter) {
+        final ServerPlayer player = context.one(optPlayerParameter).orElse(this.getSourcePlayer(context));
+        final ServerLocation location = context.requireOne(CommonParameters.LOCATION_ONLINE_ONLY);
+        final PortalType portalType = context.requireOne(portalTypeParameter);
+        return portalType.teleport(player, location, true) ? CommandResult.success() : CommandResult.error(Component.text("Could not teleport!"));
+    }
+
+    private CommandResult changeEnvironement(final CommandContext context, final Parameter.Value<ServerPlayer> optPlayerParameter, final Parameter.Value<WorldType> worldTypeParameter) {
+        final ServerPlayer player = context.one(optPlayerParameter).orElse(this.getSourcePlayer(context));
+        final WorldType worldType = context.requireOne(worldTypeParameter);
+        player.sendWorldType(worldType);
+        return CommandResult.success();
+    }
+    private CommandResult changeworldType(final CommandContext context, final Parameter.Value<WorldType> worldTypeParameter) {
+        final ServerWorld world = context.requireOne(CommonParameters.WORLD);
+        final WorldType worldType = context.requireOne(worldTypeParameter);
+        world.properties().setWorldType(worldType);
+        return CommandResult.success();
+    }
+
+    private CommandResult changelocation(final CommandContext context, final Parameter.Value<ServerPlayer> optPlayerParameter, final Parameter.Value<ServerWorld> optWorldParameter, final Parameter.Value<Vector3d> optPositionParameter) {
+        final ServerPlayer player = context.one(optPlayerParameter).orElse(this.getSourcePlayer(context));
+        final ServerWorld world = context.one(optWorldParameter).orElse(player.world());
+        final Vector3d position = context.one(optPositionParameter).orElse(world.properties().spawnPosition().toDouble());
+        return player.setLocation(ServerLocation.of(world, position)) ? CommandResult.success() : CommandResult.error(Component.text("Could not teleport!"));
+    }
+
+    private CommandResult loadWorld(final CommandContext context, final Parameter.Value<ResourceKey> worldKeyParameter){
+        final ResourceKey key = context.requireOne(worldKeyParameter);
+
+        this.game.server().worldManager().loadWorld(key).whenComplete((r, t) -> {
+            if (t != null) {
+                context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
+            } else {
+                if (r != null) {
+                    context.cause().audience().sendMessage(Identity.nil(), Component.text("World loaded successfully!"));
+                } else {
+                    context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to load!"));
+                }
+            }
+        });
+
+        return CommandResult.success();
+    }
+
+    private CommandResult createWorld(final CommandContext context,final Parameter.Value<ResourceKey> worldKeyParameter, final Parameter.Value<WorldType> worldTypeParameter) {
+        final ResourceKey key = context.requireOne(worldKeyParameter);
+        final ResourceKey worldType = RegistryTypes.WORLD_TYPE.get().valueKey(context.requireOne(worldTypeParameter));
+        final WorldTemplate template = WorldTemplate.builder()
+                .from(WorldTemplate.overworld())
+                .key(key)
+                .worldType(RegistryKey.of(RegistryTypes.WORLD_TYPE, worldType).asReference())
+                .performsSpawnLogic(true)
+                .build();
+
+        this.game.server().worldManager().loadWorld(template).whenComplete((r, t) -> {
+            if (t != null) {
+                context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
+            } else if (r != null) {
+                context.cause().audience().sendMessage(Identity.nil(), Component.text("World created successfully!"));
+            } else {
+                context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to create!"));
+            }
+        });
+
+        return CommandResult.success();
+    }
+    private CommandResult unloadWorld(final CommandContext context) {
+        final ServerWorld world = context.requireOne(CommonParameters.WORLD);
+
+        this.game.server().worldManager().unloadWorld(world).whenComplete((r, t) -> {
+            if (t != null) {
+                context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
+            } else {
+                if (r) {
+                    context.cause().audience().sendMessage(Identity.nil(), Component.text("World unloaded successfully!"));
+                } else {
+                    context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to unload!"));
+                }
+            }
+        });
+
+        return CommandResult.success();
+    }
+
+    private CommandResult copyWorld(final CommandContext context, final Parameter.Value<ResourceKey> worldKeyParameter, final Parameter.Value<ResourceKey> copyWorldKeyParameter){
+        final ResourceKey key = context.requireOne(worldKeyParameter);
+        final ResourceKey copyWorldKey = context.requireOne(copyWorldKeyParameter);
+
+        this.game.server().worldManager().copyWorld(key, copyWorldKey).whenComplete((r, t) -> {
+            if (t != null) {
+                context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
+            } else {
+                if (r) {
+                    context.cause().audience().sendMessage(Identity.nil(), Component.text("World copied successfully!"));
+                } else {
+                    context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to copy!"));
+                }
+            }
+        });
+
+        return CommandResult.success();
+    }
+
+    private CommandResult moveWorld(final CommandContext context, final Parameter.Value<ResourceKey> worldKeyParameter, final Parameter.Value<ResourceKey> moveWorldKeyParameter) {
+        final ResourceKey key = context.requireOne(worldKeyParameter);
+        final ResourceKey moveWorldKey = context.requireOne(moveWorldKeyParameter);
+
+        this.game.server().worldManager().moveWorld(key, moveWorldKey).whenComplete((r, t) -> {
+            if (t != null) {
+                context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
+            } else {
+                if (r) {
+                    context.cause().audience().sendMessage(Identity.nil(), Component.text("World moved successfully!"));
+                } else {
+                    context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to move!"));
+                }
+            }
+        });
+
+        return CommandResult.success();
+    }
+
+    private CommandResult deleteWorld(final CommandContext context, final Parameter.Value<ResourceKey> worldKeyParameter) {
+        final ResourceKey key = context.requireOne(worldKeyParameter);
+        this.game.server().worldManager().deleteWorld(key).whenComplete((r, t) -> {
+            if (t != null) {
+                context.cause().audience().sendMessage(Identity.nil(), Component.text(t.getMessage()));
+            } else {
+                if (r) {
+                    context.cause().audience().sendMessage(Identity.nil(), Component.text("World deleted successfully!"));
+                } else {
+                    context.cause().audience().sendMessage(Identity.nil(), Component.text("World failed to delete!"));
+                }
+            }
+        });
+        return CommandResult.success();
+    }
+
+    private CommandResult whereami(final CommandContext context, final Parameter.Value<ServerPlayer> optPlayerParameter) {
+        final ServerPlayer player = context.one(optPlayerParameter).orElse(this.getSourcePlayer(context));
+        player.sendMessage(Identity.nil(),
+                Component.text("You are in World ").append(player.world().properties().displayName().orElseGet(() -> Component.text(player.world().key().toString(),
+                                NamedTextColor.AQUA)))
+                        .append(Component.text(" at (" + player.position().floorX() + ", " + player.position().floorY() +
+                                ", " + player.position().floorZ() + ")")));
+        return CommandResult.success();
+    }
+
+    private CommandResult createRandomWorld(final CommandContext context) {
         final WorldManager wm = Sponge.server().worldManager();
         final ServerPlayer player = (ServerPlayer) context.cause().root();
         final String owner = player.name();
@@ -385,6 +357,25 @@ public final class WorldTest {
                 }
         );
 
+
+        return CommandResult.success();
+    }
+
+    private CommandResult worldTypes(CommandContext commandContext) {
+        final Optional<ServerPlayer> optPlayer = commandContext.cause().first(ServerPlayer.class);
+        for (WorldType wt : WorldTypes.registry().stream().toList()) {
+            final WorldTypeTemplate template = wt.asTemplate();
+            final DataContainer dataContainer = template.toContainer();
+            optPlayer.ifPresent(player -> player.sendMessage(Component.text(template.key().toString())));
+            System.out.println(template.key());
+            try {
+                System.out.println(DataFormats.JSON.get().write(dataContainer));
+                final WorldTypeTemplate rebuiltTemplate = WorldTypeTemplate.builder().fromDataPack(dataContainer)
+                        .key(ResourceKey.of(this.plugin.metadata().id(), "custom" + template.key().value())).build();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         return CommandResult.success();
     }
 

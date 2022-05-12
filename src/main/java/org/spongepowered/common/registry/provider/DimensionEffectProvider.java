@@ -25,15 +25,27 @@
 package org.spongepowered.common.registry.provider;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldTypeEffect;
+import org.spongepowered.common.world.SpongeWorldTypeEffect;
 
 import java.util.Map;
 
 public final class DimensionEffectProvider {
 
     public static DimensionEffectProvider INSTANCE = new DimensionEffectProvider();
+
+    private static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.OVERWORLD_EFFECTS);
+    private static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.NETHER_EFFECTS);
+    private static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.END_EFFECTS);
+
+    static {
+        DimensionEffectProvider.INSTANCE.register(OVERWORLD.key(), OVERWORLD);
+        DimensionEffectProvider.INSTANCE.register(NETHER.key(), NETHER);
+        DimensionEffectProvider.INSTANCE.register(END.key(), END);
+    }
 
     private final Map<ResourceKey, WorldTypeEffect> mappings;
 
@@ -45,7 +57,7 @@ public final class DimensionEffectProvider {
         return this.mappings.get(key);
     }
 
-    public void put(final ResourceKey key, final WorldTypeEffect effect) {
+    public void register(final ResourceKey key, final WorldTypeEffect effect) {
         this.mappings.put(key, effect);
     }
 }

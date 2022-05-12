@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.world.generation;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -36,6 +38,8 @@ import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.generation.ChunkGenerator;
@@ -45,7 +49,9 @@ import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.SeedUtil;
+import org.spongepowered.common.world.server.SpongeWorldTemplate;
 
+import java.io.IOException;
 import java.util.Objects;
 
 @SuppressWarnings("unchecked")
@@ -117,5 +123,12 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
         var biomeSource = new TheEndBiomeSource(biomeRegistry); // TODO no more custom seed?
 
         return this.noiseBasedChunkGenerator(seed, biomeSource, noiseGeneratorSettingsRegistry.getHolderOrThrow(NoiseGeneratorSettings.END));
+    }
+
+    @Override
+    public ChunkGenerator fromDataPack(DataView pack) throws IOException {
+        // TODO maybe accept JsonElement instead?
+        final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
+        return new SpongeWorldTemplate(json).generator();
     }
 }

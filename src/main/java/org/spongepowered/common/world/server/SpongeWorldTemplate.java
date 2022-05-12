@@ -24,12 +24,15 @@
  */
 package org.spongepowered.common.world.server;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -41,6 +44,8 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -71,6 +76,7 @@ import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -88,6 +94,11 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     @Nullable public final Boolean hardcore, pvp, commands;
 
     public final boolean loadOnStartup, performsSpawnLogic;
+
+    public static final Codec<LevelStem> CODEC = RecordCodecBuilder.create(
+            ($$0) -> $$0.group(DimensionType.CODEC.fieldOf("type").forGetter(LevelStem::typeHolder),
+                            net.minecraft.world.level.chunk.ChunkGenerator.CODEC.fieldOf("generator").forGetter(LevelStem::generator))
+                    .apply($$0, $$0.stable(LevelStem::new)));
 
     private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
             .create(r -> r
@@ -174,6 +185,16 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         this.pvp = templateBridge.bridge$pvp().orElse(null);
     }
 
+    public SpongeWorldTemplate(JsonElement pack) {
+        this(viewToStem(pack));
+    }
+
+    private static LevelStem viewToStem(JsonElement pack) {
+        // TODO catch & rethrow exceptions in CODEC?
+        final DataResult<LevelStem> parsed = LevelStem.CODEC.parse(JsonOps.INSTANCE, pack);
+        return parsed.getOrThrow(false, e -> {});
+    }
+
     @Override
     public DataPackType<WorldTemplate> type() {
         return DataPackTypes.WORLD;
@@ -256,6 +277,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
     @Override
     public DataContainer toContainer() {
+        // TODO use CODEC to convert to JSON then parse JSON into DataContainer?
         throw new MissingImplementationException("SpongeWorldTemplate", "toContainer");
     }
 
@@ -497,5 +519,13 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                     .generator(ChunkGenerator.theEnd())
                     .build();
         }
+
+        @Override
+        public WorldTemplate fromDataPack(DataView pack) throws IOException {
+            // TODO maybe accept JsonElement instead?
+            final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
+            return new SpongeWorldTemplate(json);
+        }
     }
+
 }

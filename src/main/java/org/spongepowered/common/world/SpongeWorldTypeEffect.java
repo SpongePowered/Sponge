@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world;
 
-import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldTypeEffect;
@@ -36,8 +35,6 @@ public final class SpongeWorldTypeEffect extends AbstractResourceKeyed implement
 
     public SpongeWorldTypeEffect(final ResourceKey key) {
         super(key);
-
-        DimensionEffectProvider.INSTANCE.put(key, this);
     }
 
     public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTypeEffect, WorldTypeEffect.Builder> implements WorldTypeEffect.Builder {
@@ -50,29 +47,19 @@ public final class SpongeWorldTypeEffect extends AbstractResourceKeyed implement
 
     public static final class FactoryImpl implements WorldTypeEffect.Factory {
 
-        private static final class Holder {
-
-            private static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.OVERWORLD_EFFECTS);
-
-            private static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.NETHER_EFFECTS);
-
-            private static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.END_EFFECTS);
-
-        }
-
         @Override
         public WorldTypeEffect overworld() {
-            return FactoryImpl.Holder.OVERWORLD;
+            return DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) DimensionType.OVERWORLD_EFFECTS);
         }
 
         @Override
         public WorldTypeEffect nether() {
-            return FactoryImpl.Holder.NETHER;
+            return DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) DimensionType.NETHER_EFFECTS);
         }
 
         @Override
         public WorldTypeEffect end() {
-            return FactoryImpl.Holder.END;
+            return DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) DimensionType.END_EFFECTS);
         }
     }
 }
