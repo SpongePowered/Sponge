@@ -208,9 +208,16 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     }
 
     @Override
-    public boolean save() throws IOException {
+    public boolean save() {
         ((ServerLevelBridge) this).bridge$setManualSave(true);
-        this.shadow$save(null, false, true);
+        this.shadow$save(null, false, false);
+        return true;
+    }
+
+    @Override
+    public boolean saveAndFlush() {
+        ((ServerLevelBridge) this).bridge$setManualSave(true);
+        this.shadow$save(null, true, false);
         return true;
     }
 
