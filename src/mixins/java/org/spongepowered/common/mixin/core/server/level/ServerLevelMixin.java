@@ -441,6 +441,15 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         this.impl$recentTickTimes[this.shadow$getServer().getTickCount() % 100] = postTickTime - this.impl$preTickTime;
     }
 
+    @Inject(method = "tick", at = @At("RETURN"))
+    private void impl$unloadBlockEntities(final BooleanSupplier param0, final CallbackInfo ci) {
+        if (!this.blockEntitiesToUnload.isEmpty()) {
+            this.tickableBlockEntities.removeAll(this.blockEntitiesToUnload);
+            this.blockEntityList.removeAll(this.blockEntitiesToUnload);
+            this.blockEntitiesToUnload.clear();
+        }
+    }
+
     private void impl$setWorldOnBorder() {
         ((WorldBorderBridge) this.shadow$getWorldBorder()).bridge$setAssociatedWorld(this.bridge$getKey());
     }
