@@ -128,6 +128,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     // @formatter:off
     @Shadow @Final private ServerLevelData serverLevelData;
+    @Shadow private int emptyTime;
 
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow protected abstract void shadow$saveLevelData();
@@ -443,7 +444,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Inject(method = "tick", at = @At("RETURN"))
     private void impl$unloadBlockEntities(final BooleanSupplier param0, final CallbackInfo ci) {
-        if (!this.blockEntitiesToUnload.isEmpty()) {
+        if (this.emptyTime >= 300 && !this.blockEntitiesToUnload.isEmpty()) {
             this.tickableBlockEntities.removeAll(this.blockEntitiesToUnload);
             this.blockEntityList.removeAll(this.blockEntitiesToUnload);
             this.blockEntitiesToUnload.clear();
