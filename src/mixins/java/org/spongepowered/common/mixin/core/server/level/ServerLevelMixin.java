@@ -55,6 +55,7 @@ import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -442,8 +443,18 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         this.impl$recentTickTimes[this.shadow$getServer().getTickCount() % 100] = postTickTime - this.impl$preTickTime;
     }
 
-    @Inject(method = "tick", at = @At("RETURN"))
+    @Inject(
+        method = "tick",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/level/ServerLevel;emptyTime:I",
+            opcode = Opcodes.PUTFIELD,
+            shift = At.Shift.AFTER
+        )
+    )
     private void impl$unloadBlockEntities(final BooleanSupplier param0, final CallbackInfo ci) {
+        // This code fixes block entity memory leak
+        // https://github.com/SpongePowered/Sponge/pull/3689
         if (this.emptyTime >= 300 && !this.blockEntitiesToUnload.isEmpty()) {
             this.tickableBlockEntities.removeAll(this.blockEntitiesToUnload);
             this.blockEntityList.removeAll(this.blockEntitiesToUnload);
