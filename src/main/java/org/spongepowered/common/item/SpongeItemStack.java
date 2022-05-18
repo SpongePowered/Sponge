@@ -50,7 +50,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.hooks.PlatformHooks;
-import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.LinkedHashMap;
@@ -231,19 +230,10 @@ public final class SpongeItemStack  {
             checkNotNull(blockSnapshot, "The snapshot was null!");
             this.reset();
             final BlockType blockType = blockSnapshot.state().type();
-            try {
-                // First attempt to get clone ItemStack
-                final net.minecraft.world.item.ItemStack stack = ((Block) blockType).getCloneItemStack(null, null, (net.minecraft.world.level.block.state.BlockState) blockSnapshot.state());
-                this.from(ItemStackUtil.fromNative(stack));
-
-            } catch (NullPointerException e) {
-                // In case the clone requires BlockGetter/BlockPos this would cause a NPE - fallback to getting item via Block
-                final ResourceLocation blockTypeKey = Registry.BLOCK.getKey((Block) blockType);
-                final Optional<ItemType> itemType = blockType.item();
-                this.itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockTypeKey)));
-            }
+            final ResourceLocation blockTypeKey = Registry.BLOCK.getKey((Block) blockType);
+            final Optional<ItemType> itemType = blockType.item();
+            this.itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockTypeKey)));
             this.quantity(1);
-            // Adding NBT data
             if (blockSnapshot instanceof SpongeBlockSnapshot) {
                 final Optional<CompoundTag> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
                 if (compound.isPresent()) {

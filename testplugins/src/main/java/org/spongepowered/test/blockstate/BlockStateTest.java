@@ -37,7 +37,6 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.filter.cause.First;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.state.BooleanStateProperties;
 import org.spongepowered.api.state.BooleanStateProperty;
@@ -78,8 +77,6 @@ public class BlockStateTest implements LoadableModule {
                         event.block().location().get().setBlock(state.withStateProperty(BooleanStateProperties.GRASS_BLOCK_SNOWY, !(Boolean) entry.getValue()).get());
                     }
                 }
-                final ItemStack pickBlockStack = ItemStack.builder().fromBlockSnapshot(event.block()).build();
-                player.sendMessage(Component.text("Interacted picked block is ").append(pickBlockStack.asComponent()));
             }
         }
 
