@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
-import org.spongepowered.api.world.biome.Biome;
+import net.minecraft.world.level.biome.Biome;
+import org.spongepowered.api.world.biome.climate.Precipitation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.holder.SpongeDataHolder;
 
-@Mixin(net.minecraft.world.level.biome.Biome.class)
-public abstract class BiomeMixin_API implements Biome, SpongeDataHolder {
+@Mixin(Biome.Precipitation.class)
+public abstract class Biome_PrecipitationMixin_API implements Precipitation {
 
 }

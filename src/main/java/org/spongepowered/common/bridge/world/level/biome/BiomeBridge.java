@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.bridge.world.level.biome;
 
-import org.spongepowered.api.ResourceKey;
+import net.minecraft.world.level.biome.Biome;
 
 public interface BiomeBridge {
 
-    ResourceKey bridge$getKey();
-
-    void bridge$setKey(ResourceKey key);
+    Biome.TemperatureModifier bridge$temperatureModifier();
 }

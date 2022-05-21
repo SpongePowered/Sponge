@@ -22,13 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
+package org.spongepowered.common.bridge.world.level.biome;
 
-import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.holder.SpongeDataHolder;
+import net.minecraft.world.level.biome.Biome;
 
-@Mixin(net.minecraft.world.level.biome.Biome.class)
-public abstract class BiomeMixin_API implements Biome, SpongeDataHolder {
+public interface BiomeClimateSettingsBridge {
 
+   Biome.TemperatureModifier bridge$modifier();
 }

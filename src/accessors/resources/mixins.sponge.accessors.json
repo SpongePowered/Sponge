@@ -194,8 +194,10 @@
         "world.scores.ObjectiveAccessor",
         "world.scores.PlayerTeamAccessor",
         "world.scores.ScoreAccessor",
-        "world.scores.ScoreboardAccessor",
         "world.entity.decoration.PaintingAccessor"
+        "world.scores.ScoreboardAccessor",
+        "world.level.biome.MobSpawnSettingsAccessor",
+        "world.level.biome.BiomeAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"

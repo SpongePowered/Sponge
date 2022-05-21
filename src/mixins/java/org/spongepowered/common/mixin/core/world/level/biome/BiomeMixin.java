@@ -25,22 +25,21 @@
 package org.spongepowered.common.mixin.core.world.level.biome;
 
 import net.minecraft.world.level.biome.Biome;
-import org.spongepowered.api.ResourceKey;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.level.biome.BiomeBridge;
+import org.spongepowered.common.bridge.world.level.biome.BiomeClimateSettingsBridge;
 
 @Mixin(Biome.class)
 public abstract class BiomeMixin implements BiomeBridge {
 
-    private ResourceKey impl$key;
+    //@formatter:off
+    @Shadow @Final private BiomeClimateSettingsBridge climateSettings;
+    //@formatter:on
 
     @Override
-    public ResourceKey bridge$getKey() {
-        return this.impl$key;
-    }
-
-    @Override
-    public void bridge$setKey(ResourceKey key) {
-        this.impl$key = key;
+    public Biome.TemperatureModifier bridge$temperatureModifier() {
+        return this.climateSettings.bridge$modifier();
     }
 }

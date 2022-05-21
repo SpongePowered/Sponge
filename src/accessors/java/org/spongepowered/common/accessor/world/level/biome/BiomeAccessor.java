@@ -22,13 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
+package org.spongepowered.common.accessor.world.level.biome;
 
-import org.spongepowered.api.world.biome.Biome;
+import net.minecraft.world.level.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.holder.SpongeDataHolder;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(net.minecraft.world.level.biome.Biome.class)
-public abstract class BiomeMixin_API implements Biome, SpongeDataHolder {
+@Mixin(Biome.class)
+public interface BiomeAccessor {
+
+    @Accessor("biomeCategory") Biome.BiomeCategory accessor$biomeCategory();
 
 }
