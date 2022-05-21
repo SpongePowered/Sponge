@@ -30,7 +30,7 @@ import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.key.SpongeKey;
-import org.spongepowered.common.data.provider.biome.BiomeDataProviders;
+import org.spongepowered.common.data.provider.world.biome.BiomeDataProviders;
 import org.spongepowered.common.data.provider.block.entity.BlockEntityDataProviders;
 import org.spongepowered.common.data.provider.block.location.LocationDataProviders;
 import org.spongepowered.common.data.provider.block.state.BlockStateDataProviders;
@@ -41,6 +41,7 @@ import org.spongepowered.common.data.provider.item.ItemDataProviders;
 import org.spongepowered.common.data.provider.item.stack.ItemStackDataProviders;
 import org.spongepowered.common.data.provider.map.MapInfoDataProviders;
 import org.spongepowered.common.data.provider.nbt.NBTDataProviders;
+import org.spongepowered.common.data.provider.world.WorldTypeDataProviders;
 
 import java.util.Collection;
 import java.util.List;
@@ -218,7 +219,8 @@ public final class DataProviderRegistry {
                 new InventoryDataProviders(),
                 new EntityDataProviders(),
                 new MapInfoDataProviders(),
-                new BiomeDataProviders()
+                new BiomeDataProviders(),
+                new WorldTypeDataProviders()
         );
     }
 

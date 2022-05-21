@@ -22,5 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
-package org.spongepowered.common.data.provider.biome;
+package org.spongepowered.common.data.provider.world.biome;
+
+import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
+
+public final class BiomeDataProviders extends DataProviderRegistratorBuilder {
+
+    @Override
+    public void registerProviders() {
+        BiomeData.register(this.registrator);
+    }
+}

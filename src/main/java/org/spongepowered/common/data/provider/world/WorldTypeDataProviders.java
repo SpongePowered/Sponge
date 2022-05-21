@@ -22,14 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.biome;
+package org.spongepowered.common.data.provider.world;
 
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
 
-public final class BiomeDataProviders extends DataProviderRegistratorBuilder {
+public final class WorldTypeDataProviders extends DataProviderRegistratorBuilder {
 
     @Override
     public void registerProviders() {
-        BiomeData.register(this.registrator);
+        WorldTypeData.register(this.registrator);
     }
 }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.biome;
+package org.spongepowered.common.data.provider.world.biome;
 
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.MobCategory;

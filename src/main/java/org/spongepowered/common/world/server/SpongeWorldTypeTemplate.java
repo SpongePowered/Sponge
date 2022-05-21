@@ -223,7 +223,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             this.respawnAnchorsUsable = type.respawnAnchorsUsable();
             this.hasRaids = type.hasRaids();
             this.ambientLighting = type.ambientLighting();
-            this.minY = type.minY();
+            this.minY = type.floor();
             this.logicalHeight = type.logicalHeight();
             this.height = type.height();
             this.coordinateMultiplier = type.coordinateMultiplier();
