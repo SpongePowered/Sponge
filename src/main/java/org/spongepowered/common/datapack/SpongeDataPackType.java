@@ -26,9 +26,7 @@ package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.serialization.JsonOps;
 import io.leangen.geantyref.TypeToken;
-import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
@@ -43,14 +41,15 @@ import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.world.WorldTypeTemplate;
+import org.spongepowered.api.world.generation.biome.BiomeTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
-import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.datapack.recipe.RecipeSerializedObject;
 import org.spongepowered.common.datapack.tag.TagSerializedObject;
 import org.spongepowered.common.tag.SpongeTagTemplate;
-import org.spongepowered.common.world.server.SpongeDimensionTypes;
+import org.spongepowered.common.world.biome.SpongeBiomeTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
+import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
 import java.util.function.BiFunction;
 
@@ -62,8 +61,9 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
     private final BiFunction<T, JsonObject, U> objectFunction;
     private final boolean persistent;
 
-    public SpongeDataPackType(final TypeToken<T> token, final DataPackSerializer<U> packSerializer, final DataPackSerializableSerializer<T>
-            objectSerializer, final BiFunction<T, JsonObject, U> objectFunction, final boolean persistent) {
+    public SpongeDataPackType(final TypeToken<T> token, final DataPackSerializer<U> packSerializer,
+            final DataPackSerializableSerializer<T> objectSerializer, final BiFunction<T, JsonObject, U> objectFunction,
+            final boolean persistent) {
         this.token = token;
         this.packSerializer = packSerializer;
         this.objectSerializer = objectSerializer;
@@ -111,22 +111,14 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
 
         private final SpongeDataPackType<@NonNull WorldTypeTemplate, DataPackSerializedObject> worldType = new SpongeDataPackType<>(TypeToken.get(WorldTypeTemplate.class),
                 new DataPackSerializer<>("Dimension Types", "dimension_type"),
-                s -> SpongeDimensionTypes.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), (DimensionType) s.worldType()).getOrThrow(false, e -> {}),
+                SpongeWorldTypeTemplate::serialize,
                 (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
                 true
         );
 
         private final SpongeDataPackType<@NonNull WorldTemplate, DataPackSerializedObject> world = new SpongeDataPackType<>(TypeToken.get(WorldTemplate.class),
                 new DataPackSerializer<>("Dimensions", "dimension"),
-                (s, registryAccess) -> {
-                    final Registry<DimensionType> dimensionTypeRegistry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-                    final ResourceKey<DimensionType> key = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, (ResourceLocation) (Object) s.worldType().location());
-                    final LevelStem template = new LevelStem(dimensionTypeRegistry.getHolderOrThrow(key), (ChunkGenerator) s.generator());
-                    ((LevelStemBridge) (Object) template).bridge$setFromSettings(false);
-                    ((LevelStemBridge) (Object) template).bridge$populateFromTemplate((SpongeWorldTemplate) s);
-                    final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-                    return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(ops, template).getOrThrow(false, e -> {});
-                },
+                SpongeWorldTemplate::serialize,
                 (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
                 true
         );
@@ -136,6 +128,13 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                 (spongeTagTemplate, registryAccess) -> spongeTagTemplate.toJson(),
                 (i1, i2) -> new TagSerializedObject(i1.key(), i2, i1.registryType()),
                 false
+        );
+
+        private final SpongeDataPackType<@NonNull BiomeTemplate, DataPackSerializedObject> biome = new SpongeDataPackType<@NonNull BiomeTemplate, DataPackSerializedObject>(TypeToken.get(BiomeTemplate.class),
+                new DataPackSerializer<>("Biome", "worldgen/biome"), // TODO correct?
+                SpongeBiomeTemplate::serialize,
+                (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
+                true
         );
 
         @Override
@@ -161,6 +160,11 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         @Override
         public DataPackType tag() {
             return this.tag;
+        }
+
+        @Override
+        public DataPackType<BiomeTemplate> biome() {
+            return this.biome;
         }
     }
 }

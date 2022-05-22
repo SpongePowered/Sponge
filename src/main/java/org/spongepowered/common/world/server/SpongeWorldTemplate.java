@@ -35,6 +35,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -46,6 +47,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -73,7 +75,6 @@ import org.spongepowered.common.serialization.EnumCodec;
 import org.spongepowered.common.serialization.MathCodecs;
 import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
-import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
@@ -277,8 +278,14 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
     @Override
     public DataContainer toContainer() {
-        // TODO use CODEC to convert to JSON then parse JSON into DataContainer?
-        throw new MissingImplementationException("SpongeWorldTemplate", "toContainer");
+        final JsonElement serialized = SpongeWorldTemplate.serialize(this);
+        try {
+            final DataContainer container = DataFormats.JSON.get().read(serialized.toString());
+            container.set(Queries.CONTENT_VERSION, this.contentVersion());
+            return container;
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not read deserialized LevelStem:\n" + serialized, e);
+        }
     }
 
     public LevelStem asLevelStem() {
@@ -291,6 +298,16 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         ((LevelStemBridge) (Object) scratch).bridge$populateFromTemplate(this);
         return scratch;
     }
+
+    public static JsonElement serialize(WorldTemplate s) {
+        final Registry<DimensionType> dimensionTypeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+        final net.minecraft.resources.ResourceKey<DimensionType> key = net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, (ResourceLocation) (Object) s.worldType().location());
+        final LevelStem template = new LevelStem(dimensionTypeRegistry.getHolderOrThrow(key), (net.minecraft.world.level.chunk.ChunkGenerator) s.generator());
+        ((LevelStemBridge) (Object) template).bridge$setFromSettings(false);
+        ((LevelStemBridge) (Object) template).bridge$populateFromTemplate((SpongeWorldTemplate) s);
+        return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), template).getOrThrow(false, e -> {});
+    }
+
 
     public static final class SpongeDataSection {
 

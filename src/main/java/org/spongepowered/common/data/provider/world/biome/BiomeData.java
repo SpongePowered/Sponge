@@ -45,8 +45,8 @@ import org.spongepowered.api.world.biome.BiomeCategory;
 import org.spongepowered.api.world.generation.biome.ConfiguredCarver;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
 import org.spongepowered.common.accessor.world.level.biome.BiomeAccessor;
+import org.spongepowered.common.accessor.world.level.biome.Biome_ClimateSettingsAccessor;
 import org.spongepowered.common.accessor.world.level.biome.MobSpawnSettingsAccessor;
-import org.spongepowered.common.bridge.world.level.biome.BiomeBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.Arrays;
@@ -86,6 +86,8 @@ public final class BiomeData {
                         .get(h -> Color.ofRgb(h.getSpecialEffects().getWaterColor()))
                     .create(Keys.WATER_FOG_COLOR)
                         .get(h -> Color.ofRgb(h.getSpecialEffects().getWaterFogColor()))
+                    .create(Keys.SKY_COLOR)
+                        .get(h -> Color.ofRgb(h.getSpecialEffects().getSkyColor()))
                     .create(Keys.FOLIAGE_COLOR)
                         .get(h -> h.getSpecialEffects().getFoliageColorOverride().map(Color::ofRgb).orElse(null))
                     .create(Keys.GRASS_COLOR)
@@ -93,9 +95,8 @@ public final class BiomeData {
                 .asImmutable(BiomeAccessor.class)
                     .create(Keys.BIOME_CATEGORY)
                         .get(h -> (BiomeCategory) (Object) h.accessor$biomeCategory())
-                .asImmutable(BiomeBridge.class)
                     .create(Keys.TEMPERATURE_MODIFIER)
-                        .get(h -> (TemperatureModifier) h.bridge$temperatureModifier())
+                        .get(h -> (TemperatureModifier) (Object) ((Biome_ClimateSettingsAccessor)h.accessor$climateSettings()).accessor$temperatureModifier())
         ;
 
     }

@@ -22,11 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level.biome;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.placement;
 
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import org.spongepowered.api.world.generation.feature.ConfiguredFeature;
+import org.spongepowered.api.world.generation.feature.PlacementModifier;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public interface BiomeBridge {
+import java.util.List;
 
-    Biome.TemperatureModifier bridge$temperatureModifier();
+@Mixin(PlacedFeature.class)
+public abstract class PlacedFeatureMixin_API implements org.spongepowered.api.world.generation.feature.PlacedFeature {
+
+    // @formatter:off
+    @Shadow @Final private Holder<net.minecraft.world.level.levelgen.feature.ConfiguredFeature<?, ?>> feature;
+    @Shadow @Final private List<net.minecraft.world.level.levelgen.placement.PlacementModifier> placement;
+    // @formatter:on
+
+    @Override
+    public ConfiguredFeature feature() {
+        // TODO
+        return null;
+//        return this.feature.value();
+    }
+
+    @Override
+    public List<PlacementModifier> placementModifiers() {
+        // TODO
+        return null;
+        //return this.placement;
+    }
 }

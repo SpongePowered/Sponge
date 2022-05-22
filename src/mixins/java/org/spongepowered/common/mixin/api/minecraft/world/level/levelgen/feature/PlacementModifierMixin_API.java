@@ -22,13 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.levelgen;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.feature;
 
-import net.minecraft.world.level.levelgen.GenerationStep;
-import org.spongepowered.api.world.generation.biome.DecorationStep;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(GenerationStep.Decoration.class)
-public abstract class GenerationStep_DecorationMixin_API implements DecorationStep {
+@Mixin(PlacementModifier.class)
+public abstract class PlacementModifierMixin_API implements org.spongepowered.api.world.generation.feature.PlacementModifier {
 
 }

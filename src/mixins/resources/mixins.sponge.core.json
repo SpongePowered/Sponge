@@ -187,7 +187,6 @@
         "world.level.NaturalSpawner_SpawnStateMixin",
         "world.level.NaturalSpawnerMixin",
         "world.level.SavedDataMixin",
-        "world.level.biome.BiomeMixin",
         "world.level.biome.BiomeSourceMixin",
         "world.level.block.BaseFireBlockMixin",
         "world.level.block.CactusBlockMixin",
@@ -238,8 +237,7 @@
         "world.scores.ScoreboardMixin",
         "world.scores.ScoreMixin",
         "world.ticks.LevelTicksMixin",
-        "world.ticks.ScheduledTickMixin",
-        "world.level.biome.Biome_ClimateSettingsMixin"
+        "world.ticks.ScheduledTickMixin"
     ],
     "client": [
         "client.MinecraftMixin",

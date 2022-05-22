@@ -21,3 +21,4 @@ accessible class net/minecraft/server/level/ServerLevel$EntityCallbacks
 accessible class net/minecraft/network/protocol/game/ServerboundInteractPacket$Action
 accessible class net/minecraft/network/protocol/game/ServerboundInteractPacket$ActionType
 accessible class net/minecraft/world/entity/monster/SpellcasterIllager$IllagerSpell
+accessible class net/minecraft/world/level/biome/Biome$ClimateSettings

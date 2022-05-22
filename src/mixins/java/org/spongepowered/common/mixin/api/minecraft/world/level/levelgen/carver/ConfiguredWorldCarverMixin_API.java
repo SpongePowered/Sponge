@@ -22,18 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.carver;
 
-import net.minecraft.world.entity.animal.CatVariant;
-import org.spongepowered.api.data.type.CatType;
+import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
+import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
+import net.minecraft.world.level.levelgen.carver.WorldCarver;
+import org.spongepowered.api.world.generation.biome.Carver;
+import org.spongepowered.api.world.generation.biome.CarverConfig;
+import org.spongepowered.api.world.generation.biome.ConfiguredCarver;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-<<<<<<<< HEAD:src/mixins/java/org/spongepowered/common/mixin/api/minecraft/world/entity/animal/CatVariantMixin_API.java
-@Mixin(CatVariant.class)
-public abstract class CatVariantMixin_API implements CatType {
-========
-@Mixin(TerrainShaper.class)
-public abstract class TerrainShaperMixin_API implements Shaper {
->>>>>>>> 1f04691c7 (make it compile):src/mixins/java/org/spongepowered/common/mixin/api/minecraft/world/level/biome/TerrainShaperMixin_API.java
+@Mixin(ConfiguredWorldCarver.class)
+public abstract class ConfiguredWorldCarverMixin_API<WC extends CarverConfiguration, C extends Carver<CC>, CC extends CarverConfig> implements ConfiguredCarver<C, CC> {
 
+    // @formatter:off
+    @Shadow @Final private WorldCarver<WC> worldCarver;
+    @Shadow @Final private WC config;
+    // @formatter:on
+
+    @Override
+    public C carver() {
+        return (C) this.worldCarver;
+    }
+
+    @Override
+    public CC config() {
+        return (CC) this.config;
+    }
 }

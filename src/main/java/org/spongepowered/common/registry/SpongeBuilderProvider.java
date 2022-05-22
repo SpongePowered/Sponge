@@ -116,6 +116,7 @@ import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.generation.biome.BiomeTemplate;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
@@ -206,6 +207,7 @@ import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
 import org.spongepowered.common.util.transformation.SpongeTransformationBuilder;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldTypeEffect;
+import org.spongepowered.common.world.biome.SpongeBiomeTemplate;
 import org.spongepowered.common.world.biome.provider.SpongeCheckerboardBiomeConfig;
 import org.spongepowered.common.world.biome.provider.SpongeEndStyleBiomeConfig;
 import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
@@ -359,6 +361,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(MapDecoration.Builder.class, SpongeMapDecorationBuilder::new)
                 .register(MapCanvas.Builder.class, SpongeMapCanvasBuilder::new)
                 .register(Transformation.Builder.class, SpongeTransformationBuilder::new)
+                .register(BiomeTemplate.Builder.class, SpongeBiomeTemplate.BuilderImpl::new)
         ;
     }
 }

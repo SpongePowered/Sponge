@@ -22,24 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level.biome;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
-import net.minecraft.world.level.biome.Biome;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.level.levelgen.GenerationStep;
+import org.spongepowered.api.world.generation.biome.CarvingStep;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.level.biome.BiomeBridge;
-import org.spongepowered.common.bridge.world.level.biome.BiomeClimateSettingsBridge;
 
-@Mixin(Biome.class)
-public abstract class BiomeMixin implements BiomeBridge {
+@Mixin(GenerationStep.Carving.class)
+public abstract class GenerationStep_CarvingMixin_API implements CarvingStep {
 
-    //@formatter:off
-    @Shadow @Final private BiomeClimateSettingsBridge climateSettings;
-    //@formatter:on
-
-    @Override
-    public Biome.TemperatureModifier bridge$temperatureModifier() {
-        return this.climateSettings.bridge$modifier();
-    }
 }

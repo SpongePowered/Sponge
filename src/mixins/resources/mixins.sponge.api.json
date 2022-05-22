@@ -389,6 +389,8 @@
         "world.LocatableBlockMixin_API",
         "minecraft.world.level.biome.Climate_ParameterPointMixin_API",
         "minecraft.world.level.biome.Climate_ParameterMixin_API",
+        "minecraft.world.level.levelgen.NoiseSliderMixin_API",
+        "minecraft.world.level.biome.TerrainShaperMixin_API",
         "minecraft.world.level.levelgen.SurfaceRules_RulesSourceMixin_API",
         "minecraft.world.level.biome.MultiNoiseBiomeSourceMixin_API",
         "minecraft.world.level.biome.CheckerboardColumnBiomeSourceMixin_API",
@@ -409,8 +411,16 @@
         "minecraft.world.level.biome.Biome_BiomeCategoryMixin_API",
         "minecraft.world.level.biome.Biome_TemperatureModifierMixin_API",
         "minecraft.world.level.biome.BiomeSpecialEffects_GrassColorModifierMixin_API",
-        "minecraft.world.levelgen.GenerationStep_DecorationMixin_API",
-        "minecraft.world.levelgen.GenerationStep_CarvingMixin_API"
+        "minecraft.world.level.levelgen.GenerationStep_DecorationMixin_API",
+        "minecraft.world.level.levelgen.GenerationStep_CarvingMixin_API",
+        "minecraft.world.level.levelgen.placement.PlacedFeatureMixin_API",
+        "minecraft.world.level.levelgen.feature.PlacementModifierMixin_API",
+        "minecraft.world.level.levelgen.feature.ConfiguredFeatureMixin_API",
+        "minecraft.world.level.biome.MobSpawnSettings_SpawnerDataMixin_API",
+        "minecraft.world.level.levelgen.carver.ConfiguredWorldCarverMixin_API",
+        "minecraft.world.level.levelgen.carver.WorldCarverMixin_API",
+        "minecraft.world.level.levelgen.feature.configuration.FeatureConfigurationMixin_API",
+        "minecraft.world.level.levelgen.carver.CarverConfigurationMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

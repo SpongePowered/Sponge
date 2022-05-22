@@ -60,6 +60,7 @@ import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
+import org.spongepowered.api.world.generation.biome.BiomeTemplate;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.Shaper;
@@ -138,6 +139,8 @@ public final class WorldTest {
                      .executor(this::createRandomWorld).build(), "createrandomworld", "crw")
              .register(this.plugin, Command.builder()
                      .executor(this::worldTypes).build(), "worldtypes")
+             .register(this.plugin, Command.builder()
+                    .executor(this::biomes).build(), "biomes")
         ;
     }
 
@@ -364,7 +367,7 @@ public final class WorldTest {
     private CommandResult worldTypes(CommandContext commandContext) {
         final Optional<ServerPlayer> optPlayer = commandContext.cause().first(ServerPlayer.class);
         for (WorldType wt : WorldTypes.registry().stream().toList()) {
-            final WorldTypeTemplate template = wt.asTemplate();
+            final WorldTypeTemplate template = wt.asTemplate().get();
             final DataContainer dataContainer = template.toContainer();
             optPlayer.ifPresent(player -> player.sendMessage(Component.text(template.key().toString())));
             System.out.println(template.key());
@@ -378,6 +381,18 @@ public final class WorldTest {
         }
         return CommandResult.success();
     }
+
+    private CommandResult biomes(CommandContext commandContext) {
+        final BiomeTemplate customTemplate =
+                BiomeTemplate.builder().from(Biomes.PLAINS.get(Sponge.server())).key(ResourceKey.of(this.plugin, "custom_plains")).build();
+        try {
+            System.out.println(DataFormats.JSON.get().write(customTemplate.toContainer()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return CommandResult.success();
+    }
+
 
     private void transportToWorld(final ServerPlayer player, final ServerWorld world) {
         player.sendMessage(Identity.nil(), Component.text("Teleporting..."));

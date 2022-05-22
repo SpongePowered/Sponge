@@ -197,7 +197,8 @@
         "world.entity.decoration.PaintingAccessor"
         "world.scores.ScoreboardAccessor",
         "world.level.biome.MobSpawnSettingsAccessor",
-        "world.level.biome.BiomeAccessor"
+        "world.level.biome.BiomeAccessor",
+        "world.level.biome.Biome_ClimateSettingsAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"

@@ -22,11 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level.biome;
+package org.spongepowered.common.accessor.world.level.biome;
 
 import net.minecraft.world.level.biome.Biome;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface BiomeClimateSettingsBridge {
+@Mixin(Biome.ClimateSettings.class)
+public interface Biome_ClimateSettingsAccessor {
 
-   Biome.TemperatureModifier bridge$modifier();
+    @Accessor("temperatureModifier") Biome.TemperatureModifier accessor$temperatureModifier();
+
 }

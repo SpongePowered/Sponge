@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.levelgen;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.carver;
 
-import net.minecraft.world.level.levelgen.GenerationStep;
-import org.spongepowered.api.world.generation.biome.CarvingStep;
+import net.minecraft.world.level.levelgen.carver.WorldCarver;
+import org.spongepowered.api.world.generation.biome.Carver;
+import org.spongepowered.api.world.generation.biome.CarverConfig;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(GenerationStep.Carving.class)
-public abstract class GenerationStep_CarvingMixin_API implements CarvingStep {
+@Mixin(WorldCarver.class)
+public abstract class WorldCarverMixin_API<CC extends CarverConfig> implements Carver<CC> {
 
 }

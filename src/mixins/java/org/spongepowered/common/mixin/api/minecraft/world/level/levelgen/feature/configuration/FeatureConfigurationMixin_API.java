@@ -22,18 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.feature.configuration;
 
-import net.minecraft.world.entity.animal.CatVariant;
-import org.spongepowered.api.data.type.CatType;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import org.spongepowered.api.world.generation.feature.FeatureConfig;
 import org.spongepowered.asm.mixin.Mixin;
 
-<<<<<<<< HEAD:src/mixins/java/org/spongepowered/common/mixin/api/minecraft/world/entity/animal/CatVariantMixin_API.java
-@Mixin(CatVariant.class)
-public abstract class CatVariantMixin_API implements CatType {
-========
-@Mixin(TerrainShaper.class)
-public abstract class TerrainShaperMixin_API implements Shaper {
->>>>>>>> 1f04691c7 (make it compile):src/mixins/java/org/spongepowered/common/mixin/api/minecraft/world/level/biome/TerrainShaperMixin_API.java
+@Mixin(FeatureConfiguration.class)
+public interface FeatureConfigurationMixin_API extends FeatureConfig {
 
 }
