@@ -91,7 +91,7 @@ public interface PrimaryLevelDataBridge {
 
     void bridge$configAdapter(InheritableConfigHandle<WorldConfig> adapter);
 
-    void bridge$populateFromDimension(LevelStem dimension);
+    void bridge$populateFromLevelStem(LevelStem dimension);
 
     void bridge$setMapUUIDIndex(BiMap<Integer, UUID> index);
 

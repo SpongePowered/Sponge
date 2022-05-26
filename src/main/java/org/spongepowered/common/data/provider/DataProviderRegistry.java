@@ -41,7 +41,7 @@ import org.spongepowered.common.data.provider.item.ItemDataProviders;
 import org.spongepowered.common.data.provider.item.stack.ItemStackDataProviders;
 import org.spongepowered.common.data.provider.map.MapInfoDataProviders;
 import org.spongepowered.common.data.provider.nbt.NBTDataProviders;
-import org.spongepowered.common.data.provider.world.WorldTypeDataProviders;
+import org.spongepowered.common.data.provider.world.WorldDataProviders;
 
 import java.util.Collection;
 import java.util.List;
@@ -220,7 +220,7 @@ public final class DataProviderRegistry {
                 new EntityDataProviders(),
                 new MapInfoDataProviders(),
                 new BiomeDataProviders(),
-                new WorldTypeDataProviders()
+                new WorldDataProviders()
         );
     }
 

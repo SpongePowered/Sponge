@@ -26,10 +26,12 @@ package org.spongepowered.common.data.provider.world;
 
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
 
-public final class WorldTypeDataProviders extends DataProviderRegistratorBuilder {
+public final class WorldDataProviders extends DataProviderRegistratorBuilder {
 
     @Override
     public void registerProviders() {
         WorldTypeData.register(this.registrator);
+        LevelStemData.register(this.registrator);
+        WorldTemplateData.register(this.registrator);
     }
 }

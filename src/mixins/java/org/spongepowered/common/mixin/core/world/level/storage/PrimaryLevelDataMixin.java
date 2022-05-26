@@ -43,6 +43,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
@@ -278,29 +279,35 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     }
 
     @Override
-    public void bridge$populateFromDimension(final LevelStem dimension) {
+    public void bridge$populateFromLevelStem(final LevelStem dimension) {
         final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) dimension;
         this.impl$key = ((ResourceKeyBridge) (Object) dimension).bridge$getKey();
         this.impl$dimensionType = dimension.typeHolder().value();
-        this.impl$displayName = levelStemBridge.bridge$displayName().orElse(null);
-        levelStemBridge.bridge$difficulty().ifPresent(v -> {
-            ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(RegistryTypes.DIFFICULTY.get().value((ResourceKey) (Object) v));
+        this.impl$displayName = levelStemBridge.bridge$displayName();
+        final ResourceLocation difficulty = levelStemBridge.bridge$difficulty();
+        if (difficulty != null) {
+            ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(RegistryTypes.DIFFICULTY.get().value((ResourceKey) (Object) difficulty));
             this.impl$customDifficulty = true;
-        });
-        levelStemBridge.bridge$gameMode().ifPresent(v -> {
-            ((LevelSettingsAccessor) (Object) this.settings).accessor$gameType(RegistryTypes.GAME_MODE.get().value((ResourceKey) (Object) v));
+        }
+        final ResourceLocation gameMode = levelStemBridge.bridge$gameMode();
+        if (gameMode != null) {
+            ((LevelSettingsAccessor) (Object) this.settings).accessor$gameType(RegistryTypes.GAME_MODE.get().value((ResourceKey) (Object) gameMode));
             this.impl$customGameType = true;
-        });
-        levelStemBridge.bridge$spawnPosition().ifPresent(v -> {
-            this.shadow$setSpawn(VecHelper.toBlockPos(v), this.spawnAngle);
+        }
+        final Vector3i spawnPos = levelStemBridge.bridge$spawnPosition();
+        if (spawnPos != null) {
+            this.shadow$setSpawn(VecHelper.toBlockPos(spawnPos), this.spawnAngle);
             this.impl$customSpawnPosition = true;
-        });
-        levelStemBridge.bridge$hardcore().ifPresent(v -> ((LevelSettingsAccessor) (Object) this.settings).accessor$hardcode(v));
-        this.impl$serializationBehavior = levelStemBridge.bridge$serializationBehavior().orElse(null);
-        this.impl$pvp = levelStemBridge.bridge$pvp().orElse(null);
+        };
+        final Boolean isHardcore = levelStemBridge.bridge$hardcore();
+        if (isHardcore != null) {
+            ((LevelSettingsAccessor) (Object) this.settings).accessor$hardcode(isHardcore);
+        }
+        this.impl$serializationBehavior = levelStemBridge.bridge$serializationBehavior();
+        this.impl$pvp = levelStemBridge.bridge$pvp();
         this.impl$loadOnStartup = levelStemBridge.bridge$loadOnStartup();
         this.impl$performsSpawnLogic = levelStemBridge.bridge$performsSpawnLogic();
-        this.impl$viewDistance = levelStemBridge.bridge$viewDistance().orElse(null);
+        this.impl$viewDistance = levelStemBridge.bridge$viewDistance();
     }
 
     @Override

@@ -130,6 +130,8 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             @org.jetbrains.annotations.Nullable Predicate<? super T> param2);
     // @formatter:on
 
+    @Shadow public abstract ResourceKey<Level> dimension();
+
     private Context api$context;
     private RegistryHolderLogic api$registryHolder;
     protected @MonotonicNonNull SpongeChunkLayout api$chunkLayout;

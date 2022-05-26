@@ -22,44 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level.dimension;
+package org.spongepowered.common.data.provider.world;
 
-import net.kyori.adventure.text.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.dimension.LevelStem;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.DataManipulator;
-import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
-import org.spongepowered.math.vector.Vector3i;
 
-public interface LevelStemBridge {
+public final class WorldTemplateData {
 
-    @Nullable Component bridge$displayName();
+    private WorldTemplateData() {
+    }
 
-    @Nullable ResourceLocation bridge$gameMode();
+    // @formatter:off
+    public static void register(final DataProviderRegistrator registrator) {
+        registrator
+                .asImmutable(SpongeWorldTemplate.class)
+                    .create(Keys.WORLD_GEN_CONFIG)
+                        .get(SpongeWorldTemplate::getGenerationConfig)
+        ;
+    }
+    // @formatter:on
 
-    @Nullable ResourceLocation bridge$difficulty();
 
-    SerializationBehavior bridge$serializationBehavior();
-
-    Integer bridge$viewDistance();
-
-    @Nullable Vector3i bridge$spawnPosition();
-
-    boolean bridge$loadOnStartup();
-
-    boolean bridge$performsSpawnLogic();
-
-    @Nullable Boolean bridge$hardcore();
-
-    @Nullable Boolean bridge$commands();
-
-    @Nullable Boolean bridge$pvp();
-
-    LevelStem bridge$decorateData(SpongeWorldTemplate.SpongeDataSection data);
-
-    LevelStem bridge$decorateData(DataManipulator data);
-
-    SpongeWorldTemplate.SpongeDataSection bridge$createData();
 }

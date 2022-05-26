@@ -129,6 +129,6 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
     public ChunkGenerator fromDataPack(DataView pack) throws IOException {
         // TODO maybe accept JsonElement instead?
         final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
-        return new SpongeWorldTemplate(json).generator();
+        return (ChunkGenerator) SpongeWorldTemplate.viewToStem(json).generator();
     }
 }

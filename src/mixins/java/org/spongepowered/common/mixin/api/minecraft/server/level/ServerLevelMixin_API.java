@@ -174,7 +174,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public WorldTemplate asTemplate() {
-        return new SpongeWorldTemplate((ServerLevel) (Object) this);
+        return WorldTemplate.builder().from(this).build();
     }
 
     @Override

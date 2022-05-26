@@ -38,6 +38,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -141,6 +142,8 @@ public final class WorldTest {
                      .executor(this::worldTypes).build(), "worldtypes")
              .register(this.plugin, Command.builder()
                     .executor(this::biomes).build(), "biomes")
+            .register(this.plugin, Command.builder()
+                    .executor(this::worldTemplates).build(), "worldtemplates")
         ;
     }
 
@@ -201,8 +204,8 @@ public final class WorldTest {
         final WorldTemplate template = WorldTemplate.builder()
                 .from(WorldTemplate.overworld())
                 .key(key)
-                .worldType(RegistryKey.of(RegistryTypes.WORLD_TYPE, worldType).asReference())
-                .performsSpawnLogic(true)
+                .add(Keys.WORLD_TYPE, RegistryKey.of(RegistryTypes.WORLD_TYPE, worldType).asReference())
+                .add(Keys.PERFORM_SPAWN_LOGIC, true)
                 .build();
 
         this.game.server().worldManager().loadWorld(template).whenComplete((r, t) -> {
@@ -340,12 +343,12 @@ public final class WorldTest {
         final WorldTemplate customTemplate = WorldTemplate.builder()
                 .from(WorldTemplate.overworld())
                 .key(worldKey)
-                .worldType(WorldTypes.OVERWORLD)
-                .serializationBehavior(SerializationBehavior.NONE)
-                .loadOnStartup(false)
-                .performsSpawnLogic(true)
-                .displayName(Component.text("Custom world by " + owner))
-                .generator(ChunkGenerator.noise(BiomeProvider.multiNoise(biomeCfg), noiseGenConfig))
+                .add(Keys.WORLD_TYPE, WorldTypes.OVERWORLD)
+                .add(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.NONE)
+                .add(Keys.IS_LOAD_ON_STARTUP, false)
+                .add(Keys.PERFORM_SPAWN_LOGIC, true)
+                .add(Keys.DISPLAY_NAME, Component.text("Custom world by " + owner))
+                .add(Keys.CHUNK_GENERATOR, ChunkGenerator.noise(BiomeProvider.multiNoise(biomeCfg), noiseGenConfig))
                 .build();
 
         if (player.world().key().equals(worldKey)) {
@@ -389,6 +392,26 @@ public final class WorldTest {
             System.out.println(DataFormats.JSON.get().write(customTemplate.toContainer()));
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        return CommandResult.success();
+    }
+
+    private CommandResult worldTemplates(CommandContext commandContext) {
+        final WorldManager wm = Sponge.server().worldManager();
+        final List<ResourceKey> templates = wm.templateKeys();
+        for (ResourceKey key : templates) {
+
+            try {
+                final Optional<WorldTemplate> template = wm.loadTemplate(key).join();
+                if (template.isPresent()) {
+                    System.out.println(key + DataFormats.JSON.get().write(template.get().toContainer()));
+                } else {
+                    System.out.println(key + " (no template)");
+                }
+            } catch (Exception e) {
+                System.err.println(key + " " + e.getMessage());
+            }
+
         }
         return CommandResult.success();
     }
