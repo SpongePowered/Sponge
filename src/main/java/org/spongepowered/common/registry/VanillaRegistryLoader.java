@@ -207,7 +207,7 @@ final class VanillaRegistryLoader {
         this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), b -> ((BannerPatternAccessor) (Object) b).accessor$filename());
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());
         this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
-        this.knownName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values(), MobCategory::getName);
+        this.knownName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values(), VanillaRegistryLoader.sanitizedName(MobCategory::getName));
     }
 
     private static RegistryLoader<Criterion> criterion() {
@@ -293,7 +293,7 @@ final class VanillaRegistryLoader {
 
     @SuppressWarnings("UnusedReturnValue")
     private <A, I extends Enum<I>> Registry<A> automaticName(final RegistryType<A> type, final I[] values) {
-        return this.naming(type, values, value -> value.name().toLowerCase(Locale.ROOT));
+        return this.naming(type, values, VanillaRegistryLoader.sanitizedName(Enum::name));
     }
 
     @SuppressWarnings("UnusedReturnValue")
@@ -362,5 +362,9 @@ final class VanillaRegistryLoader {
     @SuppressWarnings("unused")
     private interface Manual<A, I> {
         void put(final I value, final String key);
+    }
+
+    private static <I> Function<I, String> sanitizedName(final Function<I, String> original) {
+        return original.andThen(s -> s.toLowerCase(Locale.ROOT));
     }
 }
