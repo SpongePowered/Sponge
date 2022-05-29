@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
-import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
 import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
@@ -34,6 +33,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
@@ -61,6 +61,8 @@ import org.spongepowered.common.network.channel.SpongeChannelManager;
 import java.io.IOException;
 import java.util.concurrent.CompletionException;
 
+import javax.annotation.Nullable;
+
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginPacketListenerImplBridge, ConnectionHolderBridge {
 
@@ -71,9 +73,10 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     @Shadow private ServerPlayer delayedAcceptPlayer;
 
     @Shadow protected abstract com.mojang.authlib.GameProfile shadow$createFakeProfile(com.mojang.authlib.GameProfile profile);
-    @Shadow public abstract void shadow$disconnect(net.minecraft.network.chat.Component reason);
+    @Shadow public abstract void shadow$disconnect(Component reason);
     @Shadow protected abstract void shadow$placeNewPlayer(final ServerPlayer param0);
 
+    @Shadow @Nullable private ProfilePublicKey playerProfilePublicKey;
     private boolean impl$accepted = false;
 
     @Override
@@ -106,7 +109,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                 .handle((componentOpt, throwable) -> {
                     if (throwable != null) {
                         // An error occurred during login checks so we ask to abort.
-                        ((ConnectionBridge) this.connection).bridge$setKickReason(new TextComponent("An error occurred checking ban/whitelist status."));
+                        ((ConnectionBridge) this.connection).bridge$setKickReason(Component.literal("An error occurred checking ban/whitelist status."));
                         SpongeCommon.logger().error("An error occurred when checking the ban/whitelist status of {}.", this.gameProfile.getId().toString());
                         SpongeCommon.logger().error(throwable);
                     } else if (componentOpt != null) {
@@ -140,7 +143,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                     final ServerPlayer var1 = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
                     if (var1 != null) {
                         this.state = ServerLoginPacketListenerImpl.State.DELAY_ACCEPT;
-                        this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile);
+                        this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, this.playerProfilePublicKey);
                     } else {
                         // Sponge start - Also send the channel registrations using the minecraft channel, for compatibility
                         final ServerSideConnection connection = (ServerSideConnection) this;
@@ -149,7 +152,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
 
                         try {
                             this.server.getPlayerList()
-                                    .placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile));
+                                    .placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile, this.playerProfilePublicKey));
                             // invalidate just to be sure there is no user cached for the online player anymore
                             Sponge.server().userManager().removeFromCache(this.gameProfile.getId());
                         } catch (final Exception e) {
@@ -180,7 +183,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
 
     private void impl$disconnectError(final Throwable throwable, final boolean gameDisconnect) {
         SpongeCommon.logger().error("Forcibly disconnecting user {} due to an error during login.", this.gameProfile, throwable);
-        final net.minecraft.network.chat.Component message = new TextComponent("Internal Server Error: unable to complete login.");
+        final Component message = Component.literal("Internal Server Error: unable to complete login.");
         // At this point, the client might be in the GAME state, so we need to send the right packet.
         if (gameDisconnect) {
             this.connection.send(new ClientboundDisconnectPacket(message), (param1) -> this.connection.disconnect(message));
@@ -189,14 +192,14 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         }
     }
 
-    private void impl$disconnectClient(final Component disconnectMessage) {
-        final net.minecraft.network.chat.Component reason = SpongeAdventure.asVanilla(disconnectMessage);
+    private void impl$disconnectClient(final net.kyori.adventure.text.Component disconnectMessage) {
+        final Component reason = SpongeAdventure.asVanilla(disconnectMessage);
         this.shadow$disconnect(reason);
     }
 
     @Override
     public boolean bridge$fireAuthEvent() {
-        final Component disconnectMessage = Component.text("You are not allowed to log in to this server.");
+        final net.kyori.adventure.text.Component disconnectMessage = net.kyori.adventure.text.Component.text("You are not allowed to log in to this server.");
         final Cause cause = Cause.of(EventContext.empty(), this);
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
                 cause, disconnectMessage, disconnectMessage, (ServerSideConnection) this);

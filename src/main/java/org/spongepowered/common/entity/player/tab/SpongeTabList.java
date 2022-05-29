@@ -31,9 +31,9 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundTabListPacket;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.level.GameType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -53,7 +53,7 @@ import java.util.UUID;
 
 public final class SpongeTabList implements TabList {
 
-    private static final net.minecraft.network.chat.Component EMPTY_COMPONENT = new TextComponent("");
+    private static final net.minecraft.network.chat.Component EMPTY_COMPONENT = net.minecraft.network.chat.Component.literal(""); // TODO use empty?
     private final net.minecraft.server.level.ServerPlayer player;
     private @Nullable Component header;
     private @Nullable Component footer;
@@ -188,7 +188,7 @@ public final class SpongeTabList implements TabList {
         final ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket(action, new ArrayList<>());
         final ClientboundPlayerInfoPacket.PlayerUpdate data = new ClientboundPlayerInfoPacket.PlayerUpdate(SpongeGameProfile.toMcProfile(entry.profile()),
             entry.latency(), (GameType) (Object) entry.gameMode(),
-            entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null);
+            entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null, null);
         packet.getEntries().add(data);
         this.player.connection.send(packet);
     }

@@ -30,8 +30,8 @@ import net.minecraft.world.Nameable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
-import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.inventory.custom.CustomInventory;
 import org.spongepowered.common.inventory.util.InventoryUtil;
@@ -70,11 +70,11 @@ public final class InventoryData {
         }
         if (inventory instanceof Nameable) {
             final net.minecraft.network.chat.Component displayName = ((Nameable) inventory).getDisplayName();
-            return ((BaseComponentBridge) displayName).bridge$asAdventureComponent();
+            return SpongeAdventure.asAdventure(displayName);
         }
         if (inventory instanceof MenuProvider) {
             final net.minecraft.network.chat.Component displayName = ((MenuProvider) inventory).getDisplayName();
-            return ((BaseComponentBridge) displayName).bridge$asAdventureComponent();
+            return SpongeAdventure.asAdventure(displayName);
         }
         return null;
     }

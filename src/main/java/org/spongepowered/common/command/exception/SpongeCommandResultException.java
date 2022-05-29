@@ -26,7 +26,7 @@ package org.spongepowered.common.command.exception;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.api.command.CommandResult;
 
 /**
@@ -35,7 +35,7 @@ import org.spongepowered.api.command.CommandResult;
  */
 public final class SpongeCommandResultException extends CommandSyntaxException {
 
-    private final static net.minecraft.network.chat.Component EMPTY = new TextComponent("");
+    private final static net.minecraft.network.chat.Component EMPTY = Component.literal(""); // TODO use empty instead?
     private final CommandResult result;
 
     public SpongeCommandResultException(final CommandResult result) {

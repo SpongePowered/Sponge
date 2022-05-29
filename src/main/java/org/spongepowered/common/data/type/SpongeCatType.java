@@ -24,7 +24,12 @@
  */
 package org.spongepowered.common.data.type;
 
+import net.minecraft.world.entity.animal.CatVariant;
 import org.spongepowered.api.data.type.CatType;
 
+// TODO move to Mixin
 public final class SpongeCatType implements CatType {
+    static {
+        CatVariant.ALL_BLACK.texture();
+    }
 }

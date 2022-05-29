@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world;
 
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldTypeEffect;
@@ -51,11 +52,11 @@ public final class SpongeWorldTypeEffect extends AbstractResourceKeyed implement
 
         private static final class Holder {
 
-            private static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.OVERWORLD_EFFECTS);
+            private static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.OVERWORLD_EFFECTS);
 
-            private static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.NETHER_EFFECTS);
+            private static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.NETHER_EFFECTS);
 
-            private static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.END_EFFECTS);
+            private static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.END_EFFECTS);
 
         }
 

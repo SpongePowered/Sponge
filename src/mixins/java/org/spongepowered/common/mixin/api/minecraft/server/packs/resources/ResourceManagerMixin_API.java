@@ -38,7 +38,10 @@ import org.spongepowered.common.resource.SpongeResourcePath;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,24 +50,31 @@ import java.util.stream.Stream;
 public interface ResourceManagerMixin_API extends org.spongepowered.api.resource.ResourceManager {
 
     // @formatter:off
-    @Shadow List<net.minecraft.server.packs.resources.Resource> getResources(ResourceLocation var1) throws IOException;
-    @Shadow Collection<ResourceLocation> listResources(String var1, Predicate<String> var2);
+    @Shadow List<net.minecraft.server.packs.resources.Resource> shadow$getResourceStack(ResourceLocation var1);
+    @Shadow Map<ResourceLocation, net.minecraft.server.packs.resources.Resource> shadow$listResources(String var1, Predicate<ResourceLocation> var2);
     // @formatter:on
 
     @Override
     default Resource load(final ResourcePath path) throws IOException {
-        return new SpongeResource(((ResourceProvider) this).getResource((ResourceLocation) (Object) Objects.requireNonNull(path, "path").key()), path);
+        final ResourceLocation loc = (ResourceLocation) (Object) Objects.requireNonNull(path, "path").key();
+        final Optional<net.minecraft.server.packs.resources.Resource> resource = ((ResourceProvider) this).getResource(loc);
+        // TODO pass optional up to API?
+        return new SpongeResource(resource.orElseThrow(), path);
     }
 
     @Override
-    default Stream<Resource> streamAll(final ResourcePath path) throws IOException {
-        return (Stream<Resource>) (Object) this.getResources((ResourceLocation) (Object) Objects.requireNonNull(path, "path").key()).stream();
+    default Stream<Resource> streamAll(final ResourcePath path) {
+        final ResourceLocation loc = (ResourceLocation) (Object) Objects.requireNonNull(path, "path").key();
+        return (Stream<Resource>) (Object) this.shadow$getResourceStack(loc).stream();
     }
 
     @Override
     default Collection<ResourcePath> find(final String pathPrefix, final Predicate<String> pathFilter) {
-        return this.listResources(Objects.requireNonNull(pathPrefix, "pathPrefix"), Objects.requireNonNull(pathFilter, "pathFilter"))
-            .stream()
+        Objects.requireNonNull(pathPrefix, "pathPrefix");
+        Objects.requireNonNull(pathFilter, "pathFilter");
+
+        final Set<ResourceLocation> mapped = this.shadow$listResources(pathPrefix, loc -> pathFilter.test(loc.getPath())).keySet(); // TODO check filter
+        return mapped.stream()
             .map(r -> new SpongeResourcePath((ResourceKey) (Object) r))
             .collect(Collectors.toList());
     }

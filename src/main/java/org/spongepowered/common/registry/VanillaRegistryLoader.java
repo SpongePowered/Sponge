@@ -136,6 +136,7 @@ final class VanillaRegistryLoader {
             map.put(EnderDragonPhase.HOVERING, "hover");
         });
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape());
+        // TODO trigger registry
         this.holder.createRegistry(RegistryTypes.TRIGGER, VanillaRegistryLoader.trigger(), true,
                 (k, trigger) -> CriteriaTriggersAccessor.invoker$register((CriterionTrigger<?>) trigger));
         this.knownName(RegistryTypes.GAME_RULE, GameRulesAccessor.accessor$GAME_RULE_TYPES().keySet(), rule -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, rule.getId()));
@@ -217,7 +218,7 @@ final class VanillaRegistryLoader {
         });
         this.automaticSerializedName(RegistryTypes.WIRE_ATTACHMENT_TYPE, RedstoneSide.values());
         this.knownName(RegistryTypes.ADVANCEMENT_TYPE, FrameType.values(), FrameType::getName);
-        this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), b -> ((BannerPatternAccessor) (Object) b).accessor$filename());
+        // TODO banner patterns are in registry now this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), b -> ((BannerPatternAccessor) (Object) b).accessor$filename());
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());
         this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
         this.knownName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values(), MobCategory::getName);
@@ -273,7 +274,7 @@ final class VanillaRegistryLoader {
             l.add(Triggers.IMPOSSIBLE, k -> (Trigger) CriteriaTriggers.IMPOSSIBLE);
             l.add(Triggers.INVENTORY_CHANGED, k -> (Trigger) CriteriaTriggers.INVENTORY_CHANGED);
             l.add(Triggers.ITEM_DURABILITY_CHANGED, k -> (Trigger) CriteriaTriggers.ITEM_DURABILITY_CHANGED);
-            l.add(Triggers.ITEM_PICKED_UP_BY_ENTITY, k -> (Trigger) CriteriaTriggers.ITEM_PICKED_UP_BY_ENTITY);
+// TODO            l.add(Triggers.ITEM_PICKED_UP_BY_ENTITY, k -> (Trigger) CriteriaTriggers.ITEM_PICKED_UP_BY_ENTITY);
             l.add(Triggers.ITEM_USED_ON_BLOCK, k -> (Trigger) CriteriaTriggers.ITEM_USED_ON_BLOCK);
             l.add(Triggers.KILLED_BY_CROSSBOW, k -> (Trigger) CriteriaTriggers.KILLED_BY_CROSSBOW);
             l.add(Triggers.LEVITATION, k -> (Trigger) CriteriaTriggers.LEVITATION);

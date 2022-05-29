@@ -43,6 +43,7 @@ import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 
 public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge {
@@ -93,8 +94,8 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
 
     default void bridge$sendChangeDimension(final Holder<DimensionType> dimensionType, final ResourceKey<Level> key, final long hashedSeed,
             final GameType gameType, final GameType previousGameType, final boolean isDebug, final boolean isFlat, final boolean keepPlayerData) {
-        ((ServerPlayer) this).connection.send(new ClientboundRespawnPacket(dimensionType, key, hashedSeed, gameType, previousGameType, isDebug,
-                isFlat, keepPlayerData));
+        ((ServerPlayer) this).connection.send(new ClientboundRespawnPacket(dimensionType.unwrapKey().get(), key, hashedSeed, gameType, previousGameType, isDebug,
+                isFlat, keepPlayerData, ((ServerPlayer) this).getLastDeathLocation()));
     }
 
     default void bridge$sendViewerEnvironment(final DimensionType dimensionType) {

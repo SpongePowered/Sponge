@@ -77,8 +77,8 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
     public static void internalCodec(final Codec<DimensionType> internalCodec) {
         SpongeWorldTypeTemplate.DIRECT_CODEC = new MapCodec.MapCodecCodec<DimensionType>(new SpongeDataCodec<>(internalCodec,
-            SpongeWorldTypeTemplate.SPONGE_CODEC, (type, data) -> ((DimensionTypeBridge) type).bridge$decorateData(data), type -> ((DimensionTypeBridge)
-            type).bridge$createData()));
+            SpongeWorldTypeTemplate.SPONGE_CODEC, (type, data) -> ((DimensionTypeBridge) (Object) type).bridge$decorateData(data),
+                                                          type -> ((DimensionTypeBridge) (Object) type).bridge$createData()));
     }
 
     protected SpongeWorldTypeTemplate(final BuilderImpl builder) {
@@ -108,7 +108,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     public SpongeWorldTypeTemplate(final ResourceKey key, final DimensionType dimensionType) {
         super(key);
 
-        final OptionalLong fixedTime = ((DimensionTypeAccessor) dimensionType).accessor$fixedTime();
+        final OptionalLong fixedTime = ((DimensionTypeAccessor) (Object) dimensionType).accessor$fixedTime();
         this.fixedTime = fixedTime.isPresent() ? new SpongeMinecraftDayTime(fixedTime.getAsLong()) : null;
         this.skylight = dimensionType.hasSkyLight();
         this.ceiling = dimensionType.hasCeiling();
@@ -123,9 +123,9 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         this.logicalHeight = dimensionType.logicalHeight();
         this.maximumHeight = dimensionType.height();
         this.infiniburn = dimensionType.infiniburn();
-        this.effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) ((DimensionTypeAccessor) dimensionType).accessor$effectsLocation());
-        this.ambientLight = ((DimensionTypeAccessor) dimensionType).accessor$ambientLight();
-        this.createDragonFight = dimensionType.createDragonFight();
+        this.effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) ((DimensionTypeAccessor) (Object) dimensionType).accessor$effectsLocation());
+        this.ambientLight = ((DimensionTypeAccessor) (Object) dimensionType).accessor$ambientLight();
+        this.createDragonFight = false; // TODO dimensionType.createDragonFight();
     }
 
     @Override

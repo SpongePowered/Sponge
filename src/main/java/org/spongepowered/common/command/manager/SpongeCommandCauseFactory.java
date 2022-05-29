@@ -27,7 +27,6 @@ package org.spongepowered.common.command.manager;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
@@ -70,11 +69,11 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
                 final Component displayName;
                 if (iCommandSource instanceof Entity) {
                     displayName = ((Entity) iCommandSource).get(Keys.DISPLAY_NAME).map(SpongeAdventure::asVanilla)
-                            .orElseGet(() -> new TextComponent(
+                            .orElseGet(() -> Component.literal(
                                     iCommandSource instanceof Nameable ? ((Nameable) iCommandSource).name() :
                                             iCommandSource.getClass().getSimpleName()));
                 } else {
-                    displayName = new TextComponent(
+                    displayName = Component.literal(
                             iCommandSource instanceof Nameable ? ((Nameable) iCommandSource).name() :
                                     iCommandSource.getClass().getSimpleName());
                 }

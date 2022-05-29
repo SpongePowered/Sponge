@@ -22,35 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.generation.config.noise;
+package org.spongepowered.common.accessor.world.entity.decoration;
 
-import net.minecraft.data.worldgen.TerrainProvider;
-import org.spongepowered.api.world.generation.config.noise.Shaper;
+import net.minecraft.core.Holder;
+import net.minecraft.world.entity.decoration.Painting;
+import net.minecraft.world.entity.decoration.PaintingVariant;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-public final class SpongeTerrainShaperFactory implements Shaper.Factory {
+@Mixin(Painting.class)
+public interface PaintingAccessor {
 
-    @Override
-    public Shaper overworld(final boolean ampflied) {
-        return (Shaper) (Object) TerrainProvider.overworld(ampflied);
-    }
+    @Invoker("setVariant") void invoker$setVariant(final Holder<PaintingVariant> direction);
 
-    @Override
-    public Shaper caves() {
-        return (Shaper) (Object) TerrainProvider.caves();
-    }
-
-    @Override
-    public Shaper floatingIslands() {
-        return (Shaper) (Object) TerrainProvider.floatingIslands();
-    }
-
-    @Override
-    public Shaper nether() {
-        return (Shaper) (Object) TerrainProvider.nether();
-    }
-
-    @Override
-    public Shaper end() {
-        return (Shaper) (Object) TerrainProvider.end();
-    }
 }

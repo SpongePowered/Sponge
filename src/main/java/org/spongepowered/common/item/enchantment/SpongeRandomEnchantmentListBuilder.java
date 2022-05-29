@@ -27,6 +27,7 @@ package org.spongepowered.common.item.enchantment;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
+import net.minecraft.util.RandomSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
@@ -49,6 +50,8 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
     private boolean treasure;
     private @Nullable List<Enchantment> pool;
     private @Nullable ItemStack item;
+
+    private final RandomSource randomSource = RandomSource.create();
 
     @Override
     public Enchantment.RandomListBuilder seed(int seed) {
@@ -94,12 +97,14 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
         List<EnchantmentInstance> enchantments;
         if (this.pool == null || this.pool.isEmpty()) {
             checkNotNull(this.item, "The item cannot be null");
-            enchantments = EnchantmentHelper.selectEnchantment(new Random(this.seed + this.option),
+            this.randomSource.setSeed(this.seed + this.option);
+            enchantments = EnchantmentHelper.selectEnchantment(randomSource,
                                         ItemStackUtil.toNative(this.item), this.level, this.treasure);
 
 
         } else {
-            enchantments = this.basedOfFixedPool(new Random(this.seed + this.option), this.pool);
+            this.randomSource.setSeed(this.seed + this.option);
+            enchantments = this.basedOfFixedPool(this.randomSource, this.pool);
         }
 
         return SpongeRandomEnchantmentListBuilder.fromNative(enchantments);
@@ -108,7 +113,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
     /**
      * See {@link EnchantmentHelper#selectEnchantment}
      */
-    private List<EnchantmentInstance> basedOfFixedPool(Random randomIn, List<Enchantment> pool) {
+    private List<EnchantmentInstance> basedOfFixedPool(RandomSource randomIn, List<Enchantment> pool) {
         final List<EnchantmentInstance> list = Lists.<EnchantmentInstance>newArrayList();
 
         final List<EnchantmentInstance> list1 = SpongeRandomEnchantmentListBuilder.toNative(pool);

@@ -60,8 +60,9 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
     private <T extends NoiseGeneratorConfig> ConfigurableChunkGenerator<T> noiseBasedChunkGenerator(final long seed, final BiomeSource biomeSource, final Holder<NoiseGeneratorSettings> noiseGeneratorSettings) {
         var noiseRegistry = BootstrapProperties.registries.registryOrThrow(Registry.NOISE_REGISTRY);
         var structureRegistry = BootstrapProperties.registries.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
+        // TODO no more custom seed?
         return (ConfigurableChunkGenerator<T>) (Object)
-                new NoiseBasedChunkGenerator(structureRegistry, noiseRegistry, biomeSource, seed, noiseGeneratorSettings);
+                new NoiseBasedChunkGenerator(structureRegistry, noiseRegistry, biomeSource, noiseGeneratorSettings);
     }
 
     @Override
@@ -87,8 +88,9 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
     @Override
     public ConfigurableChunkGenerator<NoiseGeneratorConfig> overworld() {
         var seed = BootstrapProperties.worldGenSettings.seed();
-        return (ConfigurableChunkGenerator<NoiseGeneratorConfig>) (Object)
-                WorldGenSettings.makeDefaultOverworld(BootstrapProperties.registries, seed);
+        // TODO default overworld config?
+        return null;
+        // return (ConfigurableChunkGenerator<NoiseGeneratorConfig>) (Object) WorldGenSettings.makeDefaultOverworld(BootstrapProperties.registries, seed);
     }
 
     @Override
@@ -108,7 +110,7 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
         var noiseGeneratorSettingsRegistry = BootstrapProperties.registries.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
 
         var seed = BootstrapProperties.worldGenSettings.seed();
-        var biomeSource = new TheEndBiomeSource(biomeRegistry, seed);
+        var biomeSource = new TheEndBiomeSource(biomeRegistry); // TODO no more custom seed?
 
         return this.noiseBasedChunkGenerator(seed, biomeSource, noiseGeneratorSettingsRegistry.getHolderOrThrow(NoiseGeneratorSettings.END));
     }

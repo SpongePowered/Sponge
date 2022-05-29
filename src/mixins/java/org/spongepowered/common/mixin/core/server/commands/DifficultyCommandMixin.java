@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.server.commands;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.server.commands.DifficultyCommand;
 import net.minecraft.world.Difficulty;
@@ -61,7 +61,7 @@ public abstract class DifficultyCommandMixin {
             source.getLevel().setSpawnSettings(((MinecraftServerAccessor) SpongeCommon.server()).invoker$isSpawningMonsters(), SpongeCommon.server().isSpawningAnimals());
             source.getLevel().getPlayers(p -> true).forEach(p -> p.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(),
                     levelData.isDifficultyLocked())));
-            source.sendSuccess(new TranslatableComponent("commands.difficulty.success", difficulty.getDisplayName()), true);
+            source.sendSuccess(Component.translatable("commands.difficulty.success", difficulty.getDisplayName()), true);
             return 0;
         }
     }

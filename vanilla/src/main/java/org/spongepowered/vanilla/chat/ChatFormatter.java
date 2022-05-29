@@ -33,8 +33,7 @@ import javax.annotation.Nullable;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 
 public final class ChatFormatter {
 
@@ -53,14 +52,14 @@ public final class ChatFormatter {
     private ChatFormatter() {
     }
 
-    public static void formatChatComponent(final TranslatableComponent component) {
-        final String message = (String) component.getArgs()[1];
+    public static void formatChatComponent(final TranslatableContents contents) {
+        final String message = (String) contents.getArgs()[1];
         final Component formatted = ChatFormatter.format(message);
         if (formatted == null) {
             return;
         }
 
-        component.getArgs()[1] = formatted;
+        contents.getArgs()[1] = formatted;
     }
 
     @Nullable
@@ -90,7 +89,7 @@ public final class ChatFormatter {
 
             if (pos < start) {
                 if (result == null) {
-                    result = new TextComponent(s.substring(pos, start));
+                    result = Component.literal(s.substring(pos, start));
                 } else {
                     result.append(s.substring(pos, start));
                 }
@@ -98,11 +97,11 @@ public final class ChatFormatter {
 
             pos = end;
 
-            final MutableComponent link = new TextComponent(displayUrl);
+            final MutableComponent link = Component.literal(displayUrl);
             link.setStyle(link.getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url)));
 
             if (result == null) {
-                result = new TextComponent("");
+                result = Component.literal("");
             }
 
             result.append(link);
@@ -112,7 +111,7 @@ public final class ChatFormatter {
         // If there is something left, append the rest
         if (pos < s.length()) {
             if (result == null) {
-                result = new TextComponent(s.substring(pos));
+                result = Component.literal(s.substring(pos));
             } else {
                 result.append(s.substring(pos));
             }

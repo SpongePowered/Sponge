@@ -24,12 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.network.chat;
 
-import net.kyori.adventure.text.format.TextDecoration;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.accessor.network.chat.StyleAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.chat.StyleBridge;
 
@@ -38,34 +34,9 @@ public class StyleMixin implements StyleBridge {
     private net.kyori.adventure.text.format.Style bridge$adventure;
 
     @Override
-    @SuppressWarnings("ConstantConditions")
     public net.kyori.adventure.text.format.Style bridge$asAdventure() {
         if (this.bridge$adventure == null) {
-            final net.kyori.adventure.text.format.Style.Builder builder = net.kyori.adventure.text.format.Style.style();
-            final Style $this = (Style) (Object) this;
-            final StyleAccessor $access = (StyleAccessor) this;
-            // font
-            builder.font(SpongeAdventure.asAdventure($access.accessor$font()));
-            // color
-            builder.color(SpongeAdventure.asAdventure($this.getColor()));
-            // decorations
-            builder.decoration(TextDecoration.OBFUSCATED, TextDecoration.State.byBoolean($access.accessor$obfuscated()));
-            builder.decoration(TextDecoration.BOLD, TextDecoration.State.byBoolean($access.accessor$bold()));
-            builder.decoration(TextDecoration.STRIKETHROUGH, TextDecoration.State.byBoolean($access.accessor$strikethrough()));
-            builder.decoration(TextDecoration.UNDERLINED, TextDecoration.State.byBoolean($access.accessor$underlined()));
-            builder.decoration(TextDecoration.ITALIC, TextDecoration.State.byBoolean($access.accessor$italic()));
-            // events
-            final HoverEvent hoverEvent = $this.getHoverEvent();
-            if (hoverEvent != null) {
-                builder.hoverEvent(SpongeAdventure.asAdventure(hoverEvent));
-            }
-            final ClickEvent clickEvent = $this.getClickEvent();
-            if (clickEvent != null) {
-                builder.clickEvent(net.kyori.adventure.text.event.ClickEvent.clickEvent(SpongeAdventure.asAdventure(clickEvent.getAction()), clickEvent.getValue()));
-            }
-            // insertion
-            builder.insertion($this.getInsertion());
-            this.bridge$adventure = builder.build();
+            this.bridge$adventure = SpongeAdventure.asAdventure((Style) (Object) this);
         }
         return this.bridge$adventure;
     }

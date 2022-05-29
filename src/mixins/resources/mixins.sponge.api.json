@@ -165,7 +165,7 @@
         "minecraft.world.entity.decoration.HangingEntityMixin_API",
         "minecraft.world.entity.decoration.ItemFrameMixin_API",
         "minecraft.world.entity.decoration.LeashFenceKnotEntityMixin_API",
-        "minecraft.world.entity.decoration.MotiveMixin_API",
+        "minecraft.world.entity.decoration.PaintingVariantMixin_API",
         "minecraft.world.entity.decoration.PaintingMixin_API",
         "minecraft.world.entity.item.FallingBlockEntityMixin_API",
         "minecraft.world.entity.item.ItemEntityMixin_API",

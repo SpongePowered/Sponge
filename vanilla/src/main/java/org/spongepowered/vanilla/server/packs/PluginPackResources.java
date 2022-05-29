@@ -24,7 +24,8 @@
  */
 package org.spongepowered.vanilla.server.packs;
 
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.PackType;
@@ -61,7 +62,7 @@ public final class PluginPackResources extends AbstractPackResources {
         super(new File("sponge_plugin_pack"));
         this.name = name;
         this.container = container;
-        this.metadata = new PackMetadataSection(new TextComponent("Plugin Resources"), 6);
+        this.metadata = new PackMetadataSection(Component.literal("Plugin Resources"), 6);
         this.fileSystem = fileSystem;
     }
 
@@ -84,22 +85,36 @@ public final class PluginPackResources extends AbstractPackResources {
         }
     }
 
-    @Override
-    public Collection<ResourceLocation> getResources(final PackType type, final String namespace, final String path, final int depth,
-            final Predicate<String> fileNameValidator) {
+    @Override 
+    public Collection<ResourceLocation> getResources(PackType type, String namespace, String path, Predicate<ResourceLocation> fileNameValidator) {
+
         try {
             final Path root = this.typeRoot(type);
             final Path namespaceDir = root.resolve(namespace);
-            return Files.walk(namespaceDir, depth)
+            return Files.walk(namespaceDir)
                     .filter(Files::isRegularFile)
                     .filter(s -> !s.getFileName().toString().endsWith(".mcmeta"))
                     .map(namespaceDir::relativize)
                     .map(Object::toString)
-                    .filter(fileNameValidator)
+                    .filter(p -> filterValidPath(namespace, p, fileNameValidator))
                     .map(s -> new ResourceLocation(namespace, s))
                     .collect(Collectors.toList());
         } catch (final IOException e) {
             return Collections.emptyList();
+        }
+    }
+
+    private boolean filterValidPath(final String namespace, final String path, final Predicate<ResourceLocation> fileNameValidator) {
+        try {
+            final ResourceLocation loc = ResourceLocation.tryBuild(namespace, path);
+            if (loc == null) {
+                // LOGGER.warn("Invalid path in datapack: {}:{}, ignoring", $$1, $$7);
+                return false;
+            }
+            return fileNameValidator.test(loc);
+        } catch (ResourceLocationException e) {
+            // LOGGER.error(var13.getMessage());
+            return false;
         }
     }
 

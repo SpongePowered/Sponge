@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.core.Registry;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
@@ -50,9 +51,7 @@ public final class ShieldItemStackData {
     private static final Map<String, BannerPatternShape> SHAPE_BY_HASHNAME = new HashMap<>();
 
     static {
-        for (final BannerPattern pattern : BannerPattern.values()) {
-            ShieldItemStackData.SHAPE_BY_HASHNAME.put(pattern.getHashname(), (BannerPatternShape) (Object) pattern);
-        }
+        Registry.BANNER_PATTERN.stream().forEach(pattern -> ShieldItemStackData.SHAPE_BY_HASHNAME.put(pattern.getHashname(), (BannerPatternShape) (Object) pattern));
     }
 
     private ShieldItemStackData() {

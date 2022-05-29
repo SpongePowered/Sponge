@@ -37,7 +37,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.client.gui.screen.PluginScreen;
 import org.spongepowered.vanilla.util.Bounds;
@@ -56,8 +55,7 @@ import java.util.stream.Collectors;
 
 public final class MetadataPanel extends ScrollPanel implements NarratableEntry {
 
-    private static final Component NO_RESULTS = new TextComponent("No data...")
-            .withStyle(ChatFormatting.GRAY);
+    private static final Component NO_RESULTS = Component.literal("No data...").withStyle(ChatFormatting.GRAY);
 
     static final Pattern URL_PATTERN = Pattern.compile(
         //         schema                          ipv4            OR        namespace                 port     path         ends
@@ -324,21 +322,21 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
             final String part = string.substring(lastEnd, start);
             if (part.length() > 0) {
                 if (ichat == null) {
-                    ichat = new TextComponent(part);
+                    ichat = Component.literal(part);
                 } else {
                     ichat.append(part);
                 }
             }
             lastEnd = end;
             String url = string.substring(start, end);
-            final MutableComponent link = new TextComponent(url);
+            final MutableComponent link = Component.literal(url);
 
             try {
                 // Add schema so client doesn't crash.
                 if ((new URI(url)).getScheme() == null) {
                     if (!allowMissingHeader) {
                         if (ichat == null) {
-                            ichat = new TextComponent(url);
+                            ichat = Component.literal(url);
                         } else {
                             ichat.append(url);
                         }
@@ -349,7 +347,7 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
             } catch (final URISyntaxException e) {
                 // Bad syntax bail out!
                 if (ichat == null) {
-                    ichat = new TextComponent(url);
+                    ichat = Component.literal(url);
                 } else {
                     ichat.append(url);
                 }
@@ -367,7 +365,7 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
         // Append the rest of the message.
         final String end = string.substring(lastEnd);
         if (ichat == null) {
-            ichat = new TextComponent(end);
+            ichat = Component.literal(end);
         } else if (end.length() > 0) {
             ichat.append(string.substring(lastEnd));
         }
@@ -393,7 +391,7 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
         private final List<Entry> entries = new ArrayList<>();
 
         public Category(final String name) {
-            this.name = new TextComponent(name)
+            this.name = Component.literal(name)
                     .withStyle(s -> s.withBold(true).withUnderlined(true));
             this.rawName = name;
         }
@@ -443,12 +441,12 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
 
         public Entry(@Nullable final String key, @Nullable final String value, final int level, @Nullable final String originalValue) {
             if (key != null) {
-                this.key = new TextComponent(key);
+                this.key = Component.literal(key);
             }
             this.rawKey = key;
 
             if (value != null) {
-                final MutableComponent newValue = new TextComponent(value).withStyle(ChatFormatting.GRAY);
+                final MutableComponent newValue = Component.literal(value).withStyle(ChatFormatting.GRAY);
 
                 // Account for text components that were split to new lines
                 if (originalValue != null) {

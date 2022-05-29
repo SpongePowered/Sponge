@@ -35,8 +35,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
@@ -183,7 +181,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public net.minecraft.network.chat.@Nullable Component bridge$getConnectionMessageToSend() {
         if (this.impl$connectionMessage == null) {
-            return new TextComponent("");
+            return net.minecraft.network.chat.Component.literal("");
         }
         return this.impl$connectionMessage;
     }
@@ -489,9 +487,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     protected final void impl$prepareForPortalTeleport(final ServerLevel currentWorld, final ServerLevel targetWorld) {
         final LevelData levelData = targetWorld.getLevelData();
-        this.connection.send(new ClientboundRespawnPacket(targetWorld.dimensionTypeRegistration(), targetWorld.dimension(),
+        this.connection.send(new ClientboundRespawnPacket(targetWorld.dimensionTypeId(), targetWorld.dimension(),
                 BiomeManager.obfuscateSeed(targetWorld.getSeed()), this.gameMode.getGameModeForPlayer(),
-                this.gameMode.getPreviousGameModeForPlayer(), targetWorld.isDebug(), targetWorld.isFlat(), true));
+                this.gameMode.getPreviousGameModeForPlayer(), targetWorld.isDebug(), targetWorld.isFlat(), true, this.shadow$getLastDeathLocation()));
         this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         final PlayerList playerlist = this.server.getPlayerList();
         playerlist.sendPlayerPermissionLevel((net.minecraft.server.level.ServerPlayer) (Object) this);
@@ -617,9 +615,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                 if (!p_212356_2_.isSuccess()) {
                     final int i = 256;
                     final String s = component.getString(256);
-                    final net.minecraft.network.chat.Component itextcomponent1 = new TranslatableComponent("death.attack.message_too_long", (new TextComponent(s)).withStyle(ChatFormatting.YELLOW));
-                    final net.minecraft.network.chat.Component itextcomponent2 = new TranslatableComponent("death.attack.even_more_magic", this.shadow$getDisplayName())
-                                    .withStyle((p_212357_1_) -> p_212357_1_.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, itextcomponent1)));
+                    final net.minecraft.network.chat.Component itextcomponent1 = net.minecraft.network.chat.Component.translatable("death.attack.message_too_long", net.minecraft.network.chat.Component.literal(s).withStyle(ChatFormatting.YELLOW));
+                    final net.minecraft.network.chat.Component itextcomponent2 = net.minecraft.network.chat.Component.translatable("death.attack.even_more_magic", this.shadow$getDisplayName())
+                            .withStyle((p_212357_1_) -> p_212357_1_.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, itextcomponent1)));
                     this.connection.send(new ClientboundPlayerCombatKillPacket(this.shadow$getCombatTracker(), itextcomponent2));
                 }
 

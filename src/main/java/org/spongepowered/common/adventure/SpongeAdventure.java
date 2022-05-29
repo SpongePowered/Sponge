@@ -38,7 +38,18 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerializer;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.BlockNBTComponent;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentBuilder;
+import net.kyori.adventure.text.EntityNBTComponent;
+import net.kyori.adventure.text.KeybindComponent;
+import net.kyori.adventure.text.NBTComponent;
+import net.kyori.adventure.text.NBTComponentBuilder;
+import net.kyori.adventure.text.ScoreComponent;
+import net.kyori.adventure.text.SelectorComponent;
+import net.kyori.adventure.text.StorageNBTComponent;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
@@ -57,6 +68,18 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.BlockDataSource;
+import net.minecraft.network.chat.contents.EntityDataSource;
+import net.minecraft.network.chat.contents.KeybindContents;
+import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.contents.NbtContents;
+import net.minecraft.network.chat.contents.ScoreContents;
+import net.minecraft.network.chat.contents.SelectorContents;
+import net.minecraft.network.chat.contents.StorageDataSource;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.sounds.SoundSource;
@@ -70,15 +93,16 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.accessor.network.chat.HoverEvent_ItemStackInfoAccessor;
+import org.spongepowered.common.accessor.network.chat.StyleAccessor;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.adventure.ComponentBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
-import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
 import org.spongepowered.common.launch.Launch;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -174,12 +198,142 @@ public final class SpongeAdventure {
         return component == null ? Optional.empty() : Optional.of(((ComponentBridge) component).bridge$asVanillaComponent());
     }
 
+    // no caching
+    public static MutableComponent asVanillaMutable(final Component component) {
+        final MutableComponent vanilla = SpongeAdventure.asVanillaMutable0(component);
+        for (final Component child : component.children()) {
+            vanilla.append(((ComponentBridge) child).bridge$asVanillaComponent());
+        }
+        vanilla.setStyle(((StyleBridge) component.style()).bridge$asVanilla());
+        return vanilla;
+    }
+
+    private static MutableComponent asVanillaMutable0(final Component component) {
+        if (component instanceof TextComponent) {
+            return net.minecraft.network.chat.Component.literal(((TextComponent) component).content());
+        }
+        if (component instanceof final TranslatableComponent $this) {
+            final List<net.minecraft.network.chat.Component> with = new ArrayList<>($this.args().size());
+            for (final Component arg : $this.args()) {
+                with.add(((ComponentBridge) arg).bridge$asVanillaComponent());
+            }
+            return net.minecraft.network.chat.Component.translatable($this.key(), with.toArray(new Object[0]));
+        }
+        if (component instanceof KeybindComponent) {
+            return net.minecraft.network.chat.Component.keybind(((KeybindComponent) component).keybind());
+        }
+        if (component instanceof final ScoreComponent $this) {
+            return net.minecraft.network.chat.Component.score($this.name(), $this.objective());
+        }
+        if (component instanceof SelectorComponent $this) {
+            return net.minecraft.network.chat.Component.selector($this.pattern(), SpongeAdventure.asVanillaOpt($this.separator()));
+        }
+        if (component instanceof NBTComponent<?, ?>) {
+            if (component instanceof BlockNBTComponent $this) {
+                return net.minecraft.network.chat.Component.nbt($this.nbtPath(), $this.interpret(),
+                        SpongeAdventure.asVanillaOpt($this.separator()),
+                        new BlockDataSource($this.pos().asString()));
+            }
+            if (component instanceof EntityNBTComponent $this) {
+                return net.minecraft.network.chat.Component.nbt($this.nbtPath(), $this.interpret(),
+                        SpongeAdventure.asVanillaOpt($this.separator()),
+                        new EntityDataSource($this.selector()));
+            }
+            if (component instanceof StorageNBTComponent $this) {
+                return net.minecraft.network.chat.Component.nbt($this.nbtPath(), $this.interpret(),
+                        SpongeAdventure.asVanillaOpt($this.separator()),
+                        new StorageDataSource(SpongeAdventure.asVanilla($this.storage())));
+            }
+        }
+        throw new UnsupportedOperationException("Cannot convert Component of type " + component.getClass());
+    }
+
+    // no caching
     public static Component asAdventure(final net.minecraft.network.chat.Component component) {
-        return ((BaseComponentBridge) component).bridge$asAdventureComponent();
+        if (component instanceof AdventureTextComponent ac) {
+            return ac.wrapped();
+        }
+
+        final ComponentBuilder<?, ?> builder = SpongeAdventure.asAdventureBuilder(component.getContents());
+
+        for (final net.minecraft.network.chat.Component child : component.getSiblings()) {
+            builder.append(SpongeAdventure.asAdventure(child));
+        }
+
+        builder.style(((org.spongepowered.common.bridge.network.chat.StyleBridge) component.getStyle()).bridge$asAdventure());
+
+        return builder.build();
+    }
+
+    private static ComponentBuilder<?, ?> asAdventureBuilder(ComponentContents contents) {
+        if (contents instanceof LiteralContents<?> lc) {
+            return Component.text().content(lc.text());
+        }
+        if (contents instanceof TranslatableContents tc) {
+            final List<Component> argList = Arrays.stream(tc.getArgs())
+                    .map(arg -> arg instanceof net.minecraft.network.chat.Component argComponent ?
+                                    SpongeAdventure.asAdventure(argComponent) : Component.text(arg.toString())).toList();
+            return Component.translatable().key(tc.getKey()).args(argList);
+        }
+        if (contents instanceof KeybindContents kc) {
+            return Component.keybind().keybind(kc.getName());
+        }
+        if (contents instanceof ScoreContents sc) {
+            return Component.score().name(sc.getName()).objective(sc.getObjective());
+        }
+        if (contents instanceof SelectorContents sc) {
+            return Component.selector().pattern(sc.getPattern())
+                                              .separator(SpongeAdventure.asAdventure(sc.getSeparator()));
+        }
+        if (contents instanceof NbtContents nc) {
+            NBTComponentBuilder<?, ?> nbtBuilder;
+            if (nc.getDataSource() instanceof BlockDataSource ds) {
+                nbtBuilder = Component.blockNBT().pos(BlockNBTComponent.Pos.fromString(ds.posPattern()));
+            } else if (nc.getDataSource() instanceof EntityDataSource ds) {
+                nbtBuilder = Component.entityNBT().selector(ds.selectorPattern());
+            } else if (nc.getDataSource() instanceof StorageDataSource ds) {
+                nbtBuilder = Component.storageNBT().storage(SpongeAdventure.asAdventure(ds.id()));
+            } else {
+                throw new UnsupportedOperationException("Cannot convert NBTContents with DataSource " + nc.getDataSource().getClass());
+            }
+            return nbtBuilder.nbtPath(nc.getNbtPath())
+                                    .interpret(nc.isInterpreting())
+                                    .separator(SpongeAdventure.asAdventure(nc.getSeparator()));
+        }
+        if (contents == ComponentContents.EMPTY) {
+            return Component.empty().toBuilder();
+        }
+        throw new UnsupportedOperationException("Cannot convert ComponentContents of type " + contents.getClass());
     }
 
     public static @Nullable Component asAdventure(final Optional<net.minecraft.network.chat.Component> component) {
-        return component.isPresent() ? SpongeAdventure.asAdventure(component.get()) : null;
+        return component.map(SpongeAdventure::asAdventure).orElse(null);
+    }
+
+    // no caching
+    public static Style asAdventure(final net.minecraft.network.chat.Style mcStyle) {
+        final net.kyori.adventure.text.format.Style.Builder builder = net.kyori.adventure.text.format.Style.style();
+        final StyleAccessor $access = (StyleAccessor) mcStyle;
+
+        builder.font(SpongeAdventure.asAdventure($access.accessor$font())); // font
+        builder.color(SpongeAdventure.asAdventure(mcStyle.getColor())); // color
+        // decorations
+        builder.decoration(TextDecoration.OBFUSCATED, TextDecoration.State.byBoolean($access.accessor$obfuscated()));
+        builder.decoration(TextDecoration.BOLD, TextDecoration.State.byBoolean($access.accessor$bold()));
+        builder.decoration(TextDecoration.STRIKETHROUGH, TextDecoration.State.byBoolean($access.accessor$strikethrough()));
+        builder.decoration(TextDecoration.UNDERLINED, TextDecoration.State.byBoolean($access.accessor$underlined()));
+        builder.decoration(TextDecoration.ITALIC, TextDecoration.State.byBoolean($access.accessor$italic()));
+        // events
+        final net.minecraft.network.chat.HoverEvent hoverEvent = mcStyle.getHoverEvent();
+        if (hoverEvent != null) {
+            builder.hoverEvent(SpongeAdventure.asAdventure(hoverEvent));
+        }
+        final net.minecraft.network.chat.ClickEvent clickEvent = mcStyle.getClickEvent();
+        if (clickEvent != null) {
+            builder.clickEvent(ClickEvent.clickEvent(SpongeAdventure.asAdventure(clickEvent.getAction()), clickEvent.getValue()));
+        }
+        builder.insertion(mcStyle.getInsertion()); // insertion
+        return builder.build();
     }
 
     public static Component asAdventure(final Message message) {
@@ -304,7 +458,7 @@ public final class SpongeAdventure {
         return null;
     }
 
-    public static ChatType asVanilla(final MessageType type) {
+    public static ResourceKey<ChatType> asVanilla(final MessageType type) {
         if (type == MessageType.SYSTEM) {
             return ChatType.SYSTEM;
         } else if (type == MessageType.CHAT) {

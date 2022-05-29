@@ -25,7 +25,6 @@
 package org.spongepowered.common.inventory.custom;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -95,6 +94,6 @@ public class ViewableCustomInventory extends CustomInventory implements MenuProv
 
     @Override
     public Component getDisplayName() {
-        return new TextComponent("ViewableCustomInventory");
+        return Component.literal("ViewableCustomInventory");
     }
 }

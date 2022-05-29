@@ -33,6 +33,8 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.valueproviders.ConstantInt;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -114,9 +116,10 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                 new DataPackSerializer<>("Dimension Types", "dimension_type"),
                 s -> {
                     final OptionalLong fixedTime = s.fixedTime().isEmpty() ? OptionalLong.empty() : OptionalLong.of(s.fixedTime().get().asTicks().ticks());
-                    final DimensionType type = DimensionType.create(fixedTime, s.hasSkylight(), s.hasCeiling(), s.scorching(), s.natural(),
-                        s.coordinateMultiplier(), s.createDragonFight(), s.piglinSafe(), s.bedsUsable(), s.respawnAnchorsUsable(), s.hasRaids(),
-                        s.minY(), s.logicalHeight(), s.maximumHeight(), BlockTags.INFINIBURN_OVERWORLD, (ResourceLocation) (Object) s.effect().key(), s.ambientLighting());
+                    final DimensionType.MonsterSettings monsterSettings = new DimensionType.MonsterSettings(s.piglinSafe(), s.hasRaids(), UniformInt.of(0, 7), 0); // TODO monsterlight settings
+                    final DimensionType type = new DimensionType(fixedTime, s.hasSkylight(), s.hasCeiling(), s.scorching(), s.natural(),
+                        s.coordinateMultiplier(), s.bedsUsable(), s.respawnAnchorsUsable(), s.minY(), s.maximumHeight(), s.logicalHeight(),
+                            BlockTags.INFINIBURN_OVERWORLD, (ResourceLocation) (Object) s.effect().key(), s.ambientLighting(), monsterSettings);
                     return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), type).getOrThrow(false, e -> {});
                 },
                 (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
@@ -139,11 +142,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
 
         private final SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject> tag = new SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject>(TypeToken.get(SpongeTagTemplate.class),
                 new TagDataPackSerializer("Tag", "tags"),
-                s -> {
-                    final JsonObject jsonObject = s.toJson();
-                    jsonObject.addProperty("replace", s.replace());
-                    return jsonObject;
-                },
+                SpongeTagTemplate::toJson,
                 (i1, i2) -> new TagSerializedObject(i1.key(), i2, i1.registryType()),
                 false
         );

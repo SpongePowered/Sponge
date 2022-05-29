@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world.damagesource;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.Entity;
@@ -85,7 +84,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     private void beforeGetDeathMessageReturn(final LivingEntity livingEntity, final CallbackInfoReturnable<Component> cir) {
         // This prevents untranslated keys from appearing in death messages, switching out those that are untranslated with the generic message.
         if (cir.getReturnValue().getString().equals("death.attack." + this.msgId)) {
-            cir.setReturnValue(new TranslatableComponent("death.attack.generic", livingEntity.getDisplayName()));
+            cir.setReturnValue(Component.translatable("death.attack.generic", livingEntity.getDisplayName()));
         }
     }
 

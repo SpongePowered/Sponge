@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.adventure;
 
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.renderer.ComponentRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.bridge.adventure.ComponentBridge;
-import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
 import org.spongepowered.common.util.LocaleCache;
 
 import java.util.List;
@@ -44,7 +44,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-public class AdventureTextComponent implements net.minecraft.network.chat.Component, BaseComponentBridge {
+public class AdventureTextComponent implements net.minecraft.network.chat.Component {
     private net.minecraft.network.chat.@MonotonicNonNull Component converted;
     private @Nullable Locale deepConvertedLocalized;
     private final net.kyori.adventure.text.Component wrapped;
@@ -113,9 +113,9 @@ public class AdventureTextComponent implements net.minecraft.network.chat.Compon
     }
 
     @Override
-    public String getContents() {
-        if (this.wrapped instanceof TextComponent) {
-            return ((TextComponent) this.wrapped).content();
+    public ComponentContents getContents() {
+        if (this.wrapped instanceof TextComponent tc) {
+            return new LiteralContents<>(tc.content());
         } else {
             return this.deepConverted().getContents();
         }
@@ -153,13 +153,4 @@ public class AdventureTextComponent implements net.minecraft.network.chat.Compon
         return this.deepConverted().visit(visitor);
     }
 
-    @Override
-    public Component bridge$asAdventureComponent() {
-        return this.wrapped;
-    }
-
-    @Override
-    public @Nullable Component bridge$adventureComponentIfPresent() {
-        return this.bridge$asAdventureComponent();
-    }
 }

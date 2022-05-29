@@ -25,6 +25,8 @@
 package org.spongepowered.common.world.generation.config;
 
 import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.OverworldBiomeBuilder;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
@@ -32,6 +34,7 @@ import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 
+import java.util.List;
 import java.util.Objects;
 
 public final class SpongeNoiseGeneratorConfig {
@@ -130,12 +133,15 @@ public final class SpongeNoiseGeneratorConfig {
 
         @Override
         public NoiseGeneratorConfig build() {
+            final List<Climate.ParameterPoint> spawnTargets = List.of(); // TODO spawntargets
+            final List<Climate.ParameterPoint> overworldTarget = new OverworldBiomeBuilder().spawnTarget();
             final NoiseGeneratorSettings settings = new NoiseGeneratorSettings(
                     (net.minecraft.world.level.levelgen.NoiseSettings) (Object) this.noiseConfig,
                     (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
                     (net.minecraft.world.level.block.state.BlockState) this.defaultFluid,
                     BuiltinRegistries.NOISE_GENERATOR_SETTINGS.get(NoiseGeneratorSettings.OVERWORLD).noiseRouter(),
                     (net.minecraft.world.level.levelgen.SurfaceRules.RuleSource)this.surfaceRule,
+                    spawnTargets,
                     this.seaLevel,
                     this.disableMobGeneration,
                     this.aquifers,

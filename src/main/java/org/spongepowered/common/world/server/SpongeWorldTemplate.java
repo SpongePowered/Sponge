@@ -138,7 +138,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         final PrimaryLevelDataBridge levelBridge = (PrimaryLevelDataBridge) world.getLevelData();
 
         this.displayName = levelBridge.bridge$displayName().orElse(null);
-        this.worldType = ((WorldType) world.dimensionType()).asDefaultedReference(RegistryTypes.WORLD_TYPE);
+        this.worldType = ((WorldType) (Object) world.dimensionType()).asDefaultedReference(RegistryTypes.WORLD_TYPE);
         this.generator = (ChunkGenerator) world.getChunkSource().getGenerator();
         this.generationConfig = WorldGenerationConfig.Mutable.builder().from(levelData.worldGenerationConfig()).build();
         this.gameMode = levelBridge.bridge$customGameType() ? levelData.gameMode().asDefaultedReference(RegistryTypes.GAME_MODE) : null;
@@ -404,7 +404,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.generator = ChunkGenerator.overworld();
             final WorldGenSettings generationSettings = BootstrapProperties.worldGenSettings;
             this.generationConfig = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$new(generationSettings.seed(),
-                    generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
+                    generationSettings.generateStructures(), generationSettings.generateBonusChest(),
                     new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), null),
                     ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$legacyCustomOptions());
             this.gameMode = null;
@@ -428,7 +428,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.generator = template.generator();
             final WorldGenSettings generationSettings = (WorldGenSettings) template.generationConfig();
             this.generationConfig = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$new(generationSettings.seed(),
-                    generationSettings.generateFeatures(), generationSettings.generateBonusChest(),
+                    generationSettings.generateStructures(), generationSettings.generateBonusChest(),
                     new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), null),
                     ((DimensionGeneratorSettingsAccessor) generationSettings).accessor$legacyCustomOptions());
             this.gameMode = template.gameMode().orElse(null);

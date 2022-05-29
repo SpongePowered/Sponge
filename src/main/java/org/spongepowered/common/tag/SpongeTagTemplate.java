@@ -25,9 +25,13 @@
 package org.spongepowered.common.tag;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagBuilder;
+import net.minecraft.tags.TagEntry;
+import net.minecraft.tags.TagFile;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -40,6 +44,7 @@ import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.common.SpongeCommon;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public final class SpongeTagTemplate implements TagTemplate {
@@ -102,25 +107,25 @@ public final class SpongeTagTemplate implements TagTemplate {
     }
 
     public JsonObject toJson() {
-        final Tag.Builder builder = new Tag.Builder();
+        final TagBuilder builder = TagBuilder.create();
         this.elements.forEach((k, v) -> {
             final ResourceLocation location = (ResourceLocation) (Object) k;
             // "N/A" is supposed to be the source, but we don't know it, and we're serializing it so it isn't used anyway. (Gone when we serializeToJson)
             if (v) {
-                builder.addElement(location, "N/A");
+                builder.addElement(location);
             } else {
-                builder.addOptionalElement(location, "N/A");
+                builder.addOptionalElement(location);
             }
         });
         this.subTags.forEach((k, v) -> {
             final ResourceLocation location = (ResourceLocation) (Object) k;
             if (v) {
-                builder.addElement(location, "N/A");
+                builder.addElement(location);
             } else {
-                builder.addOptionalElement(location, "N/A");
+                builder.addOptionalElement(location);
             }
         });
-        return builder.serializeToJson();
+        return TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(builder.build(), this.replace)).getOrThrow(false, e -> {}).getAsJsonObject();
     }
 
     @Override

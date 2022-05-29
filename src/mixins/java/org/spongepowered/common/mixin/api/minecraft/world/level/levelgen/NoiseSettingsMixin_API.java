@@ -24,15 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
-import net.minecraft.world.level.biome.TerrainShaper;
-import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
 import net.minecraft.world.level.levelgen.NoiseSettings;
-import net.minecraft.world.level.levelgen.NoiseSlider;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
-import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
-import org.spongepowered.api.world.generation.config.noise.Shaper;
-import org.spongepowered.api.world.generation.config.noise.SlideConfig;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
@@ -46,32 +39,13 @@ public abstract class NoiseSettingsMixin_API implements NoiseConfig {
 
     // @formatter:off
     @Shadow public abstract int shadow$height();
-    @Shadow public abstract NoiseSamplingSettings shadow$noiseSamplingSettings();
-    @Shadow public abstract NoiseSlider shadow$topSlideSettings();
-    @Shadow public abstract NoiseSlider shadow$bottomSlideSettings();
     @Shadow public abstract int shadow$noiseSizeHorizontal();
     @Shadow public abstract int shadow$noiseSizeVertical();
-    @Shadow @Final public abstract TerrainShaper shadow$terrainShaper();
     // @formatter:on
 
     @Intrinsic
     public int noiseConfig$height() {
         return this.shadow$height();
-    }
-
-    @Override
-    public SamplingConfig samplingConfig() {
-        return (SamplingConfig) (Object) this.shadow$noiseSamplingSettings();
-    }
-
-    @Override
-    public SlideConfig topConfig() {
-        return (SlideConfig) (Object) this.shadow$topSlideSettings();
-    }
-
-    @Override
-    public SlideConfig bottomConfig() {
-        return (SlideConfig) (Object) this.shadow$bottomSlideSettings();
     }
 
     @Override
@@ -82,11 +56,6 @@ public abstract class NoiseSettingsMixin_API implements NoiseConfig {
     @Override
     public int verticalSize() {
         return this.shadow$noiseSizeVertical();
-    }
-
-    @Override
-    public Shaper terrainShaper() {
-        return (Shaper) (Object) this.shadow$terrainShaper();
     }
 
 }

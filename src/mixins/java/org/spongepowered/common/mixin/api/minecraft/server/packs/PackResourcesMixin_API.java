@@ -55,8 +55,7 @@ public interface PackResourcesMixin_API extends PackContents {
     @Shadow String shadow$getName();
     @Shadow InputStream shadow$getResource(net.minecraft.server.packs.PackType var1, ResourceLocation var2) throws IOException;
     @Shadow boolean shadow$hasResource(net.minecraft.server.packs.PackType var1, ResourceLocation var2);
-    @Shadow Collection<ResourceLocation> shadow$getResources(net.minecraft.server.packs.PackType var1, String var2, String var3, int var4,
-        Predicate<String> var5);
+    @Shadow Collection<ResourceLocation> shadow$getResources(net.minecraft.server.packs.PackType var1, String var2, String var3, Predicate<ResourceLocation> var4);
     @Shadow Set<String> shadow$getNamespaces(net.minecraft.server.packs.PackType var1);
     // @formatter:on
 
@@ -79,7 +78,8 @@ public interface PackResourcesMixin_API extends PackContents {
         return resource;
     }
 
-    default @Nullable Resource api$createResource(final PackType root, final ResourcePath path) throws IOException {
+    @Nullable
+    default Resource api$createResource(final PackType root, final ResourcePath path) throws IOException {
         return new SpongeResource(Objects.requireNonNull(path, "path"),
                 this.shadow$getResource((net.minecraft.server.packs.PackType) (Object) Objects.requireNonNull(root, "root"),
                     (ResourceLocation) (Object) path.key()));
@@ -87,12 +87,15 @@ public interface PackResourcesMixin_API extends PackContents {
 
     @Override
     default Collection<ResourcePath> paths(final PackType root, final String namespace, final String prefix, final int depth, final Predicate<String> filter) {
-        final Collection<ResourceLocation> resources =
-            this.shadow$getResources((net.minecraft.server.packs.PackType) (Object) Objects.requireNonNull(root, "root"), Objects.requireNonNull(namespace,
-                "namespace"), Objects.requireNonNull(prefix, "prefix"), depth, Objects.requireNonNull(filter, "filter"));
+        Objects.requireNonNull(filter, "filter");
+        // TODO depth is now unused?
+        final net.minecraft.server.packs.PackType packType = (net.minecraft.server.packs.PackType) (Object) Objects.requireNonNull(root, "root");
+        final Collection<ResourceLocation> resources = this.shadow$getResources(packType,
+                                                       Objects.requireNonNull(namespace, "namespace"),
+                                                       Objects.requireNonNull(prefix, "prefix"),
+                                                       loc -> filter.test(loc.getPath())); // TODO check filter
 
-        return resources
-            .stream()
+        return resources.stream()
             .map(r -> new SpongeResourcePath((ResourceKey) (Object) r))
             .collect(Collectors.toList());
     }

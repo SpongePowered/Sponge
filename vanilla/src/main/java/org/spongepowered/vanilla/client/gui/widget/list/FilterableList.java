@@ -41,7 +41,6 @@ import net.minecraft.client.gui.narration.NarrationSupplier;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.accessor.client.gui.components.AbstractSelectionListAccessor;
 import org.spongepowered.vanilla.util.Bounds;
@@ -57,7 +56,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unchecked")
 public class FilterableList<P extends FilterableList<P, E>, E extends FilterableList.Entry<P, E>> extends AbstractSelectionList<E> {
 
-    private static final Component USAGE_NARRATION = new TranslatableComponent("narration.selection.usage");
+    private static final Component USAGE_NARRATION = Component.translatable("narration.selection.usage");
 
     private final Screen screen;
     private Supplier<List<E>> filterSupplier;

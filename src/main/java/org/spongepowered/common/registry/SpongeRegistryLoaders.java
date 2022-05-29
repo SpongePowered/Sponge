@@ -49,12 +49,15 @@ import net.minecraft.commands.arguments.coordinates.Vec2Argument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.commands.synchronization.SuggestionProviders;
-import net.minecraft.commands.synchronization.brigadier.DoubleArgumentSerializer;
-import net.minecraft.commands.synchronization.brigadier.FloatArgumentSerializer;
-import net.minecraft.commands.synchronization.brigadier.IntegerArgumentSerializer;
-import net.minecraft.commands.synchronization.brigadier.LongArgumentSerializer;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.commands.synchronization.brigadier.DoubleArgumentInfo;
+import net.minecraft.commands.synchronization.brigadier.FloatArgumentInfo;
+import net.minecraft.commands.synchronization.brigadier.IntegerArgumentInfo;
+import net.minecraft.commands.synchronization.brigadier.LongArgumentInfo;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.material.MaterialColor;
@@ -182,8 +185,6 @@ import org.spongepowered.api.world.teleport.TeleportHelperFilters;
 import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.common.accessor.commands.arguments.DimensionArgumentAccessor;
-import org.spongepowered.common.accessor.commands.synchronization.ArgumentTypesAccessor;
-import org.spongepowered.common.accessor.commands.synchronization.EmptyArgumentSerializerAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.adventure.SpongeResolveOperation;
 import org.spongepowered.common.ban.SpongeBanType;
@@ -401,8 +402,16 @@ public final class SpongeRegistryLoaders {
         )));
     }
 
+    private static ArgumentType<?> argumentTypeFromKey(ResourceKey key) {
+        final ArgumentTypeInfo<?,?> argumentTypeInfo = Registry.COMMAND_ARGUMENT_TYPE.get((ResourceLocation) (Object) key);
+        if (argumentTypeInfo instanceof SingletonArgumentInfo<?> s) {
+            return s.unpack(null).instantiate(null);
+        }
+        throw new IllegalArgumentException(key.asString());
+    }
+
     public static RegistryLoader<CommandTreeNodeType<?>> clientCompletionKey() {
-        final Function<ResourceKey, ArgumentType<?>> fn = key -> ((EmptyArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(key).accessor$serializer()).accessor$constructor().get();
+        final Function<ResourceKey, ArgumentType<?>> fn = SpongeRegistryLoaders::argumentTypeFromKey;
         return RegistryLoader.of(l -> {
             l.add(CommandTreeNodeTypes.ANGLE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.BLOCK_POS, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
@@ -413,21 +422,21 @@ public final class SpongeRegistryLoaders {
             l.add(CommandTreeNodeTypes.COLUMN_POS, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.COMPONENT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.DIMENSION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.DOUBLE, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new DoubleArgumentSerializer()));
+            l.add(CommandTreeNodeTypes.DOUBLE, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new DoubleArgumentInfo()));
             l.add(CommandTreeNodeTypes.ENTITY, SpongeEntityCommandTreeNodeType::new);
             l.add(CommandTreeNodeTypes.ENTITY_ANCHOR, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.ENTITY_SUMMON, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.FLOAT, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new FloatArgumentSerializer()));
+            l.add(CommandTreeNodeTypes.FLOAT, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new FloatArgumentInfo()));
             l.add(CommandTreeNodeTypes.FLOAT_RANGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.FUNCTION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.GAME_PROFILE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.INTEGER, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new IntegerArgumentSerializer()));
+            l.add(CommandTreeNodeTypes.INTEGER, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new IntegerArgumentInfo()));
             l.add(CommandTreeNodeTypes.INT_RANGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.ITEM_ENCHANTMENT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.ITEM_PREDICATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.ITEM_SLOT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.ITEM_STACK, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.LONG, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new LongArgumentSerializer()));
+            l.add(CommandTreeNodeTypes.LONG, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new LongArgumentInfo()));
             l.add(CommandTreeNodeTypes.MESSAGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.MOB_EFFECT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.NBT_COMPOUND_TAG, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
@@ -903,7 +912,7 @@ public final class SpongeRegistryLoaders {
         return RegistryLoader.of(l -> {
             l.add(ResourceKeyedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
             l.add(ResourceKeyedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);
-            l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> ClientNativeArgumentParser.createConverter(k, BlockStateArgument.block(),
+            l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> ClientNativeArgumentParser.createConverter(k, BlockStateArgument.block(null), // TODO
                     (reader, cause, state) -> (BlockState) state.getState()));
             l.add(ResourceKeyedValueParameters.BOOLEAN, k -> ClientNativeArgumentParser.createIdentity(k, BoolArgumentType.bool()));
             l.add(ResourceKeyedValueParameters.COLOR, SpongeColorValueParameter::new);
@@ -915,7 +924,7 @@ public final class SpongeRegistryLoaders {
             l.add(ResourceKeyedValueParameters.GAME_PROFILE, SpongeGameProfileValueParameter::new);
             l.add(ResourceKeyedValueParameters.INTEGER, k -> ClientNativeArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
             l.add(ResourceKeyedValueParameters.IP, SpongeIPAddressValueParameter::new);
-            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
+            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(null), /* TODO */ (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
             l.add(ResourceKeyedValueParameters.LOCATION, SpongeServerLocationValueParameter::new);
             l.add(ResourceKeyedValueParameters.LONG, k -> ClientNativeArgumentParser.createIdentity(k, LongArgumentType.longArg()));
             l.add(ResourceKeyedValueParameters.MANY_ENTITIES, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities((CommandSourceStack) cause).stream().map(x -> (Entity) x).collect(Collectors.toList())));
@@ -944,7 +953,7 @@ public final class SpongeRegistryLoaders {
                         try {
                             return new URL(input);
                         } catch (final MalformedURLException ex) {
-                            throw new SimpleCommandExceptionType(new TextComponent("Could not parse " + input + " as a URL"))
+                            throw new SimpleCommandExceptionType(net.minecraft.network.chat.Component.literal("Could not parse " + input + " as a URL"))
                                     .createWithContext(reader);
                         }
                     })

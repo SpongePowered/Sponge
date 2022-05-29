@@ -28,7 +28,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerChunkCache;
@@ -49,6 +49,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.material.Fluid;
@@ -147,12 +148,11 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     private long impl$preTickTime = 0L;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void impl$cacheLevelSave(final MinecraftServer p_i241885_1_, final Executor p_i241885_2_, final LevelStorageSource.LevelStorageAccess p_i241885_3_,
-                                     final ServerLevelData p_i241885_4_, final net.minecraft.resources.ResourceKey<Level> p_i241885_5_, final Holder<DimensionType> p_i241885_6_, final ChunkProgressListener p_i241885_7_,
-                                     final ChunkGenerator p_i241885_8_, final boolean p_i241885_9_, final long p_i241885_10_, final List<CustomSpawner> p_i241885_12_, final boolean p_i241885_13_,
-                                     final CallbackInfo ci) {
-        this.impl$levelSave = p_i241885_3_;
-        this.impl$chunkStatusListener = p_i241885_7_;
+    private void impl$cacheLevelSave(final MinecraftServer $$0, final Executor $$1, final LevelStorageSource.LevelStorageAccess $$2, final ServerLevelData $$3,
+            final net.minecraft.resources.ResourceKey $$4, final LevelStem $$5, final ChunkProgressListener $$6, final boolean $$7, final long $$8,
+            final List $$9, final boolean $$10, final CallbackInfo ci) {
+        this.impl$levelSave = $$2;
+        this.impl$chunkStatusListener = $$6;
         this.impl$rotationUpdates = new Object2ObjectOpenHashMap<>();
         this.impl$prevWeather = ((ServerWorld) this).weather();
         ((LevelTicksBridge<?>) this.blockTicks).bridge$setGameTimeSupplier(this.levelData::getGameTime);
@@ -343,7 +343,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             final SerializationBehavior behavior = ((PrimaryLevelDataBridge) levelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
 
             if (progress != null) {
-                progress.progressStartNoAbort(new TranslatableComponent("menu.savingLevel"));
+                progress.progressStartNoAbort(Component.translatable("menu.savingLevel"));
             }
 
             // We always save the metadata unless it is NONE
@@ -364,7 +364,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                 // Sponge End
             }
             if (progress != null) {
-                progress.progressStage(new TranslatableComponent("menu.savingChunks"));
+                progress.progressStage(Component.translatable("menu.savingChunks"));
             }
 
             final boolean canAutomaticallySave = !this.impl$isManualSave && behavior == SerializationBehavior.AUTOMATIC;

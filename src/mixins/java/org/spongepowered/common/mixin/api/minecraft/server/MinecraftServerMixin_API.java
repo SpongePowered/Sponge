@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.api.minecraft.server;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
@@ -37,11 +35,11 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
+import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -141,9 +139,8 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     private SpongeUserManager api$userManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void api$initializeSpongeFieldsfinal (Thread $$0, final LevelStorageSource.LevelStorageAccess $$1, final PackRepository $$2,
-            final WorldStem $$3, final Proxy $$4, final DataFixer $$5, final MinecraftSessionService $$6, final GameProfileRepository $$7,
-            final GameProfileCache $$8, final ChunkProgressListenerFactory $$9, final CallbackInfo ci) {
+    public void api$initializeSpongeFieldsfinal(final Thread $$0, final LevelStorageSource.LevelStorageAccess $$1, final PackRepository $$2, final WorldStem $$3, final Proxy $$4,
+            final DataFixer $$5, final Services $$6, final ChunkProgressListenerFactory $$7, final CallbackInfo ci) {
         this.api$scheduler = new ServerScheduler();
         this.api$playerDataHandler = new SpongePlayerDataManager(this);
         this.api$teleportHelper = new SpongeTeleportHelper();
@@ -430,7 +427,8 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
     @Override
     public void sendMessage(final Identity identity, final Component message, final MessageType type) {
-        this.shadow$getPlayerList().broadcastMessage(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type), identity.uuid());
+        this.shadow$getPlayerList().broadcastSystemMessage(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type));
+        // TODO identity this.shadow$getPlayerList().broadcastMessage(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type), identity.uuid());
     }
 
     @Override

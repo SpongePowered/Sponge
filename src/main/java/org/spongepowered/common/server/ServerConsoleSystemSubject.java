@@ -29,7 +29,6 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -43,7 +42,6 @@ import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.service.server.permission.SpongeSystemSubject;
 
 import java.util.Locale;
-import java.util.UUID;
 
 public final class ServerConsoleSystemSubject extends SpongeSystemSubject implements CommandSourceProviderBridge, CommandSource, CommandSourceBridge {
 
@@ -54,7 +52,7 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
 
     @Override
     public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
-        SpongeCommon.server().sendMessage(SpongeAdventure.asVanilla(message), identity.uuid());
+        SpongeCommon.server().sendSystemMessage(SpongeAdventure.asVanilla(message));
     }
 
     @Override
@@ -65,14 +63,14 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
                 SpongeCommon.server().getLevel(Level.OVERWORLD),
                 4,
                 "System Subject",
-                new TextComponent("System Subject"),
+                net.minecraft.network.chat.Component.literal("System Subject"),
                 SpongeCommon.server(),
                 null);
     }
 
     @Override
-    public void sendMessage(final net.minecraft.network.chat.Component component, final UUID identity) {
-        SpongeCommon.logger().info(component.getString());
+    public void sendSystemMessage(net.minecraft.network.chat.Component var1) {
+        SpongeCommon.logger().info(var1.getString());
     }
 
     @Override

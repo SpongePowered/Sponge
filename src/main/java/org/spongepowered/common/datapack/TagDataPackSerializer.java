@@ -27,7 +27,9 @@ package org.spongepowered.common.datapack;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.minecraft.tags.Tag;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.tags.TagFile;
 import org.apache.commons.io.FileUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.datapack.tag.TagSerializedObject;
@@ -64,16 +66,20 @@ public final class TagDataPackSerializer extends DataPackSerializer<TagSerialize
 
 
             JsonObject toWrite = object.getObject();
-            if (Files.exists(objectFile) && !object.getObject().getAsJsonPrimitive("replace").getAsBoolean()) {
+            /* TODO support merging
+            if (Files.exists(objectFile) && !toWrite.getAsJsonPrimitive("replace").getAsBoolean()) {
                 // Merge, baby merge.
 
                 final JsonObject jsonObject;
                 try (BufferedReader bufferedReader = Files.newBufferedReader(objectFile)) {
-                    final JsonElement jsonElement = new JsonParser().parse(bufferedReader);
+                    final JsonElement jsonElement = JsonParser.parseReader(bufferedReader);
                     jsonObject = jsonElement.getAsJsonObject();
                 }
-                toWrite = Tag.Builder.tag().addFromJson(jsonObject, filename).addFromJson(object.getObject(), filename).serializeToJson();
+
+                toWrite = Tag.Builder.tag().addFromJson(jsonObject, filename).addFromJson(toWrite, filename).serializeToJson();
+                // TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(builder.build(), this.replace)).getOrThrow(false, e -> {}).getAsJsonObject();
             }
+            */
             DataPackSerializer.writeFile(objectFile, toWrite);
 
             this.serializeAdditional(namespacedDataDirectory, object);

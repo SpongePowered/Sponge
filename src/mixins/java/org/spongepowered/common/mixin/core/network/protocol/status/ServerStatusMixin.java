@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.network.protocol.status;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.status.ServerStatus;
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.asm.mixin.Mixin;
@@ -69,7 +68,7 @@ public abstract class ServerStatusMixin implements ServerStatusBridge {
             this.description = motd;
             this.impl$descriptionText = SpongeAdventure.asAdventure(motd);
         } else {
-            this.description = new TextComponent("");
+            this.description = net.minecraft.network.chat.Component.literal("");
             this.impl$descriptionText = Component.empty();
         }
     }

@@ -47,6 +47,6 @@ public interface DimensionHooks {
      * @return True to generate spawn on load as a default
      */
     default boolean doesGenerateSpawnOnLoad(final DimensionType dimensionType) {
-        return WorldTypes.OVERWORLD.get(Sponge.server()) == dimensionType;
+        return WorldTypes.OVERWORLD.get(Sponge.server()) == (Object) dimensionType;
     }
 }

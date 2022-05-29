@@ -67,6 +67,7 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.PatrolSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.CommandStorage;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -371,7 +372,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final ResourceKey worldKey = ((ResourceKeyBridge) templateBridge).bridge$getKey();
 
         final Holder<DimensionType> dimensionTypeHolder = template.typeHolder();
-        final WorldType worldType = (WorldType) dimensionTypeHolder.value();
+        final WorldType worldType = (WorldType) (Object) dimensionTypeHolder.value();
         final ResourceKey worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey(worldType);
 
         MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey);
@@ -399,7 +400,7 @@ public abstract class SpongeWorldManager implements WorldManager {
 
             if (this.server.isDemo()) {
                 levelSettings = MinecraftServer.DEMO_SETTINGS;
-                generationSettings = WorldGenSettings.demoSettings(BootstrapProperties.registries);
+                generationSettings = WorldPresets.demoSettings(BootstrapProperties.registries);
             } else {
                 levelSettings = new LevelSettings(directoryName, (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.game()),
                         templateBridge.bridge$hardcore().orElse(BootstrapProperties.hardcore), (Difficulty) (Object) BootstrapProperties.difficulty
@@ -423,7 +424,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
 
         final ServerLevel world = new ServerLevel(this.server, ((MinecraftServerAccessor) this.server).accessor$executor(), storageSource, levelData,
-                registryKey, dimensionTypeHolder, chunkStatusListener, template.generator(), isDebugGeneration, seed, ImmutableList.of(), true);
+                registryKey, template, chunkStatusListener, isDebugGeneration, seed, ImmutableList.of(), true);
         this.worlds.put(registryKey, world);
 
         return SpongeCommon.asyncScheduler().submit(() -> this.prepareWorld(world, isDebugGeneration)).thenApply(w -> {
@@ -875,7 +876,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             throw new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location()));
         }
 
-        SpongeCommon.logger().info("Unloading world '{}' ({})", registryKey.location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) world.dimensionType()));
+        SpongeCommon.logger().info("Unloading world '{}' ({})", registryKey.location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) (Object) world.dimensionType()));
 
         final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerWorld) world);
         SpongeCommon.post(unloadWorldEvent);
@@ -922,7 +923,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             }
 
             final Holder<DimensionType> dimensionTypeHolder = template.typeHolder();
-            final WorldType worldType = (WorldType) dimensionTypeHolder.value();
+            final WorldType worldType = (WorldType) (Object) dimensionTypeHolder.value();
             final ResourceKey worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey(worldType);
 
             MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey);
@@ -964,7 +965,7 @@ public abstract class SpongeWorldManager implements WorldManager {
 
                     if (this.server.isDemo()) {
                         levelSettings = MinecraftServer.DEMO_SETTINGS;
-                        generationSettings = WorldGenSettings.demoSettings(BootstrapProperties.registries);
+                        generationSettings = WorldPresets.demoSettings(BootstrapProperties.registries);
                     } else {
                         levelSettings = new LevelSettings(directoryName,
                                 (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.game()),
@@ -1003,7 +1004,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             }
 
             final ServerLevel world = new ServerLevel(this.server, ((MinecraftServerAccessor) this.server).accessor$executor(), storageSource, levelData,
-                    registryKey, dimensionTypeHolder, chunkStatusListener, template.generator(), isDebugGeneration, seed, spawners, true);
+                    registryKey, template, chunkStatusListener, isDebugGeneration, seed, spawners, true);
             // Ensure that the world border is registered.
             world.getWorldBorder().applySettings(levelData.getWorldBorder());
 
@@ -1094,7 +1095,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final boolean isDefaultWorld = this.isDefaultWorld((ResourceKey) (Object) world.dimension().location());
         if (isDefaultWorld || levelBridge.bridge$performsSpawnLogic()) {
             MinecraftServerAccessor.accessor$LOGGER().info("Preparing start region for world '{}' ({})", world.dimension().location(),
-                    RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) world.dimensionType()));
+                    RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) (Object) world.dimensionType()));
             if (blocking) {
                 this.loadSpawnChunks(world);
                 return CompletableFuture.completedFuture(world); // Chunk are generated
@@ -1126,7 +1127,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                                 // Notify the future that we are done
                                 task.cancel(); // And cancel this task
                                 MinecraftServerAccessor.accessor$LOGGER().info("Done preparing start region for world '{}' ({})", world
-                                        .dimension().location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) world.dimensionType()));
+                                        .dimension().location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) (Object) world.dimensionType()));
                             }
                         })
                         .interval(10, TimeUnit.MILLISECONDS)
@@ -1191,7 +1192,7 @@ public abstract class SpongeWorldManager implements WorldManager {
     private LevelStem loadTemplate0(final net.minecraft.resources.ResourceKey<Level> registryKey, final Path file) throws IOException {
         try (final InputStream stream = Files.newInputStream(file); final InputStreamReader reader = new InputStreamReader(stream)) {
             final JsonElement element = JsonParser.parseReader(reader);
-            final SingleTemplateAccess singleTemplateAccess = new SingleTemplateAccess(registryKey, element);
+//            final SingleTemplateAccess singleTemplateAccess = new SingleTemplateAccess(registryKey, element);
             // TODO load template
 //            final RegistryOps<JsonElement> settingsAdapter = RegistryOps.createAndLoad(JsonOps.INSTANCE, BootstrapProperties.registries, singleTemplateAccess);
             final MappedRegistry<LevelStem> registry = new MappedRegistry<>(net.minecraft.core.Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), null);
@@ -1240,30 +1241,4 @@ public abstract class SpongeWorldManager implements WorldManager {
         return this.getDimensionDataPackDirectory().resolve(key.namespace()).resolve("dimension").resolve(key.value() + ".json");
     }
 
-    private static final class SingleTemplateAccess implements RegistryResourceAccess {
-
-        private final net.minecraft.resources.ResourceKey<?> key;
-        private final JsonElement element;
-
-        public SingleTemplateAccess(final net.minecraft.resources.ResourceKey<?> key, final JsonElement element) {
-            this.key = key;
-            this.element = element;
-        }
-
-        @Override
-        public <E> Collection<net.minecraft.resources.ResourceKey<E>> listResources(final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<E>> registryKey) {
-            if (this.key.isFor(registryKey)) {
-                return Collections.singletonList(net.minecraft.resources.ResourceKey.create(registryKey, new ResourceLocation(this.key.location().getNamespace(),
-                        registryKey.location().getPath() + "/" + this.key.location().getPath() + ".json")));
-            }
-            return Collections.emptyList();
-        }
-
-        @Override
-        public <E> Optional<DataResult<RegistryResourceAccess.ParsedEntry<E>>> parseElement(final DynamicOps<JsonElement> ops,
-                final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<E>> registryKey, final net.minecraft.resources.ResourceKey<E> elementKey, final Decoder<E> decoder) {
-            final DataResult<E> result = decoder.parse(ops, this.element);
-            return Optional.of(result.map(t -> new ParsedEntry<>(t, OptionalInt.empty())));
-        }
-    }
 }

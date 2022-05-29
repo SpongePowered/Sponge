@@ -22,18 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.commands.synchronization;
+package org.spongepowered.common.mixin.core.network.chat;
 
-import net.minecraft.commands.synchronization.ArgumentSerializer;
+import net.kyori.adventure.text.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
-// It's a bit of a hack as the field is actually public, but this is being used
-// because the target type is non-public - this is in the absence of shadow
-// classes.
-@Mixin(targets = "net.minecraft.commands.synchronization.ArgumentTypes$Entry")
-public interface ArgumentTypes_EntryAccessor {
+@Mixin(TranslatableContents.class)
+public class TranslatableContentsMixin {
+    @Shadow @Final private Object[] args;
 
-    @Accessor("serializer") ArgumentSerializer<?> accessor$serializer();
-
+    @Inject(method = "<init>(Ljava/lang/String;[Ljava/lang/Object;)V", at = @At("TAIL"))
+    private void sponge$convertAdventureToVanilla(final String key, final Object[] args, final CallbackInfo ci) {
+        for (int i = 0, length = this.args.length; i < length; i++) {
+            final Object object = this.args[i];
+            if (object instanceof Component) {
+                this.args[i] = SpongeAdventure.asVanilla((Component) object);
+            }
+        }
+    }
 }

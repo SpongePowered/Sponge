@@ -45,7 +45,6 @@ import org.spongepowered.common.bridge.network.ConnectionBridge_IpForward;
 import java.net.InetSocketAddress;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.server.network.ServerHandshakePacketListenerImpl;
 
@@ -75,7 +74,7 @@ public abstract class ServerHandshakePacketListenerImplMixin_IpForward {
                 }
             } else {
                 this.connection.setProtocol(ConnectionProtocol.LOGIN);
-                final Component error = new TextComponent("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!")
+                final Component error = Component.literal("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!")
                             .withStyle(ChatFormatting.RED);
                 this.connection.send(new ClientboundLoginDisconnectPacket(error));
                 this.connection.disconnect(error);

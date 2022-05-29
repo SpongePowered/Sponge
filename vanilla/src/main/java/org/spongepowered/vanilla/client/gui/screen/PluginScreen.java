@@ -29,18 +29,15 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.client.gui.widget.MetadataPanel;
 import org.spongepowered.vanilla.client.gui.widget.list.PluginSelectionList;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -55,7 +52,7 @@ public final class PluginScreen extends Screen {
     private EditBox searchField;
 
     public PluginScreen(final Screen previousScreen) {
-        super(new TextComponent("Plugins"));
+        super(Component.literal("Plugins"));
         this.previousScreen = previousScreen;
         this.metadata = new ObjectArrayList<>();
         final Collection<PluginContainer> plugins = Launch.instance().pluginManager().plugins();
@@ -77,7 +74,7 @@ public final class PluginScreen extends Screen {
             Launch.instance().pluginManager().plugins().stream().map(PluginContainer::metadata).collect(Collectors.toList()));
 
         // Add search text field
-        this.searchField = new EditBox(this.font, this.width / 2 - 100, 22, 200, 20, new TranslatableComponent(I18n.get("itemGroup.search")));
+        this.searchField = new EditBox(this.font, this.width / 2 - 100, 22, 200, 20, Component.translatable(I18n.get("itemGroup.search")));
         this.searchField.setResponder(value -> {
             this.selectionList.setFilterSupplier(() -> {
                 // Filter based on ID/Name
@@ -101,7 +98,7 @@ public final class PluginScreen extends Screen {
         this.addRenderableWidget(this.searchField);
 
         // Add the 'Done' button
-        this.addRenderableWidget(new Button(this.width / 2 - 50, this.height - 40, 100, 20, new TranslatableComponent(I18n.get("gui.done")),
+        this.addRenderableWidget(new Button(this.width / 2 - 50, this.height - 40, 100, 20, Component.translatable(I18n.get("gui.done")),
             (p_214323_1_) -> Minecraft.getInstance().setScreen(this.previousScreen)));
     }
 

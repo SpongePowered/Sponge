@@ -35,8 +35,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
@@ -187,9 +185,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         return Sponge.server().serviceProvider().banService().find(profile).thenCompose(profileBanOpt -> {
             if (profileBanOpt.isPresent()) {
                 final Ban.Profile var0 = profileBanOpt.get();
-                final MutableComponent var1 = new TranslatableComponent("multiplayer.disconnect.banned.reason", var0.reason().orElse(Component.empty()));
+                final MutableComponent var1 = net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.banned.reason", var0.reason().orElse(Component.empty()));
                 if (var0.expirationDate().isPresent()) {
-                    var1.append(new TranslatableComponent("multiplayer.disconnect.banned.expiration", BAN_DATE_FORMAT.format(var0.expirationDate().get())));
+                    var1.append(net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.banned.expiration", BAN_DATE_FORMAT.format(var0.expirationDate().get())));
                 }
                 return CompletableFuture.completedFuture(var1);
             }
@@ -202,14 +200,14 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             try {
                 address = InetAddress.getByName(NetworkUtil.getHostString(param0));
             } catch (final UnknownHostException ex) {
-                return CompletableFuture.completedFuture(new TextComponent(ex.getMessage())); // no
+                return CompletableFuture.completedFuture(net.minecraft.network.chat.Component.literal(ex.getMessage())); // no
             }
             return Sponge.server().serviceProvider().banService().find(address).thenCompose(ipBanOpt -> {
                 if (ipBanOpt.isPresent()) {
                     final Ban.IP var2 = ipBanOpt.get();
-                    final MutableComponent var3 = new TranslatableComponent("multiplayer.disconnect.banned_ip.reason", var2.reason().orElse(Component.empty()));
+                    final MutableComponent var3 = net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.banned_ip.reason", var2.reason().orElse(Component.empty()));
                     if (var2.expirationDate().isPresent()) {
-                        var3.append(new TranslatableComponent("multiplayer.disconnect.banned_ip.expiration", BAN_DATE_FORMAT.format(var2.expirationDate().get())));
+                        var3.append(net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.banned_ip.expiration", BAN_DATE_FORMAT.format(var2.expirationDate().get())));
                     }
                     return CompletableFuture.completedFuture(var3);
                 }
@@ -230,7 +228,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                     }
                     return Sponge.server().serviceProvider().whitelistService().isWhitelisted(profile).<net.minecraft.network.chat.Component>thenApply(whitelisted -> {
                         if (!whitelisted) {
-                            return new TranslatableComponent("multiplayer.disconnect.not_whitelisted");
+                            return net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.not_whitelisted");
                         }
                         return null;
                     });
@@ -241,7 +239,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                 return component;
             }
             if (this.players.size() >= this.maxPlayers && !this.shadow$canBypassPlayerLimit(param1)) {
-                return new TranslatableComponent("multiplayer.disconnect.server_full");
+                return net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.server_full");
             }
             return null;
         }, SpongeCommon.server());

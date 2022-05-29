@@ -68,7 +68,7 @@ public final class SpongeWorldGenerationConfigMutableBuilder implements WorldGen
     public WorldGenerationConfig.Mutable.Builder reset() {
         final WorldGenSettings defaultSettings = BootstrapProperties.worldGenSettings;
         this.seed = defaultSettings.seed();
-        this.generateFeatures = defaultSettings.generateFeatures();
+        this.generateFeatures = defaultSettings.generateStructures();
         this.generateBonusChest = defaultSettings.generateBonusChest();
         return this;
     }

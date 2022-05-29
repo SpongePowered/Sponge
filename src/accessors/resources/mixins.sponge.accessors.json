@@ -200,7 +200,8 @@
         "world.scores.ObjectiveAccessor",
         "world.scores.PlayerTeamAccessor",
         "world.scores.ScoreAccessor",
-        "world.scores.ScoreboardAccessor"
+        "world.scores.ScoreboardAccessor",
+        "world.entity.decoration.PaintingAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"

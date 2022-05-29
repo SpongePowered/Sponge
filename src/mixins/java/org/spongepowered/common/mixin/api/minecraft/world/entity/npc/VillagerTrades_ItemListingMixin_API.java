@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.npc;
 
+import net.minecraft.util.RandomSource;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,12 +40,13 @@ import java.util.Random;
 public interface VillagerTrades_ItemListingMixin_API extends TradeOfferGenerator {
 
     // @formatter:off
-    @Shadow @Nullable MerchantOffer shadow$getOffer(Entity entity, Random random);
+    @Shadow @Nullable MerchantOffer shadow$getOffer(Entity entity, RandomSource random);
     // @formatter:on
 
     @Override
     default TradeOffer apply(final org.spongepowered.api.entity.Entity merchant, final Random random) {
-        return (TradeOffer) this.shadow$getOffer((Entity) merchant, random);
+        final RandomSource randomSource = RandomSource.create(); // TODO randomsource in API
+        return (TradeOffer) this.shadow$getOffer((Entity) merchant, randomSource);
     }
 
 }

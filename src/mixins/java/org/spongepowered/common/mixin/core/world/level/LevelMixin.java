@@ -25,13 +25,13 @@
 package org.spongepowered.common.mixin.core.world.level;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.HangingEntity;
-import net.minecraft.world.entity.decoration.Motive;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -73,7 +73,8 @@ import java.util.function.Predicate;
 public abstract class LevelMixin implements LevelBridge, LevelAccessor {
 
     // @formatter: off
-    @Mutable @Shadow @Final private DimensionType dimensionType;
+    @Mutable @Shadow @Final private net.minecraft.resources.ResourceKey<DimensionType> dimensionTypeId;
+    @Mutable @Shadow @Final private Holder<DimensionType> dimensionTypeRegistration;
     @Shadow protected float oRainLevel;
     @Shadow protected float rainLevel;
     @Shadow protected float oThunderLevel;
@@ -101,7 +102,8 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
 
     @Override
     public void bridge$adjustDimensionLogic(final DimensionType dimensionType) {
-        this.dimensionType = dimensionType;
+        this.dimensionTypeRegistration = Holder.direct(dimensionType);
+        this.dimensionTypeId = dimensionTypeRegistration.unwrapKey().orElseThrow(() -> new IllegalArgumentException("Dimension must be registered, got " + dimensionTypeRegistration));
 
         // TODO Minecraft 1.16.4 - Re-create the WorldBorder due to new coordinate scale, send that updated packet to players
     }
@@ -225,7 +227,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         if (entity instanceof Painting) {
             // This is default when art is null when reading from NBT, could
             // choose a random art instead?
-            ((Painting) entity).motive = Motive.KEBAB;
+            // TODO ? ((Painting) entity).motive = Motive.KEBAB;
         }
 
         return (E) entity;

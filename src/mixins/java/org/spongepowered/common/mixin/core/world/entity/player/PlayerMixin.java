@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.entity.player;
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -89,6 +90,7 @@ import org.spongepowered.common.util.ExperienceHolderUtil;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Mixin(net.minecraft.world.entity.player.Player.class)
 public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBridge, GameProfileHolderBridge {
@@ -121,7 +123,9 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
         return null; // Shadowed
     }
     @Shadow protected abstract void shadow$playShoulderEntityAmbientSound(CompoundTag p_192028_1_);
+    @Shadow public abstract Optional<GlobalPos> shadow$getLastDeathLocation();
     // @formatter: on
+
 
 
     private boolean impl$affectsSpawning = true;

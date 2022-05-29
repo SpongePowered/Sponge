@@ -92,9 +92,6 @@ import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
-import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
-import org.spongepowered.api.world.generation.config.noise.Shaper;
-import org.spongepowered.api.world.generation.config.noise.SlideConfig;
 import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerLocationCreator;
@@ -158,10 +155,7 @@ import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfi
 import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
 import org.spongepowered.common.world.generation.config.flat.SpongeLayerConfigFactory;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
-import org.spongepowered.common.world.generation.config.noise.SpongeSamplingConfigFactory;
-import org.spongepowered.common.world.generation.config.noise.SpongeSlideConfigFactory;
 import org.spongepowered.common.world.generation.config.noise.SpongeSurfaceRulesFactory;
-import org.spongepowered.common.world.generation.config.noise.SpongeTerrainShaperFactory;
 import org.spongepowered.common.world.schematic.SpongePaletteReferenceFactory;
 import org.spongepowered.common.world.server.SpongeServerLocation;
 import org.spongepowered.common.world.server.SpongeServerLocationCreatorFactory;
@@ -257,9 +251,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(WorldTemplate.Factory.class, new SpongeWorldTemplate.FactoryImpl())
                 .registerFactory(LayerConfig.Factory.class, new SpongeLayerConfigFactory())
                 .registerFactory(NoiseConfig.Factory.class, new SpongeNoiseConfig.FactoryImpl())
-                .registerFactory(SamplingConfig.Factory.class, new SpongeSamplingConfigFactory())
-                .registerFactory(SlideConfig.Factory.class, new SpongeSlideConfigFactory())
-                .registerFactory(Shaper.Factory.class, new SpongeTerrainShaperFactory())
                 .registerFactory(SurfaceRule.Factory.class, new SpongeSurfaceRulesFactory())
                 .registerFactory(NoiseGeneratorConfig.Factory.class, new SpongeNoiseGeneratorConfig.FactoryImpl())
                 .registerFactory(ChunkGenerator.Factory.class, new SpongeChunkGeneratorFactory())

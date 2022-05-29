@@ -24,16 +24,9 @@
  */
 package org.spongepowered.common.world.generation.config.noise;
 
-import net.minecraft.data.worldgen.TerrainProvider;
-import net.minecraft.world.level.biome.TerrainShaper;
-import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
 import net.minecraft.world.level.levelgen.NoiseSettings;
-import net.minecraft.world.level.levelgen.NoiseSlider;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
-import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
-import org.spongepowered.api.world.generation.config.noise.Shaper;
-import org.spongepowered.api.world.generation.config.noise.SlideConfig;
 
 import java.util.Objects;
 
@@ -44,12 +37,7 @@ public final class SpongeNoiseConfig {
 
     public static final class BuilderImpl implements NoiseConfig.Builder {
 
-        public SamplingConfig sampling;
-        public SlideConfig top, bottom;
-
         public int minY, height, horizontalSize, verticalSize;
-
-        private Shaper terrainShaper;
 
         public BuilderImpl() {
             this.reset();
@@ -68,24 +56,6 @@ public final class SpongeNoiseConfig {
         }
 
         @Override
-        public NoiseConfig.Builder sampling(final SamplingConfig sampling) {
-            this.sampling = Objects.requireNonNull(sampling, "sampling");
-            return this;
-        }
-
-        @Override
-        public NoiseConfig.Builder top(final SlideConfig top) {
-            this.top = Objects.requireNonNull(top, "top");
-            return this;
-        }
-
-        @Override
-        public NoiseConfig.Builder bottom(final SlideConfig bottom) {
-            this.bottom = Objects.requireNonNull(bottom, "bottom");
-            return this;
-        }
-
-        @Override
         public NoiseConfig.Builder horizontalSize(final int horizontal) {
             this.horizontalSize = horizontal;
             return this;
@@ -97,11 +67,6 @@ public final class SpongeNoiseConfig {
             return this;
         }
 
-        @Override
-        public NoiseConfig.Builder terrainShaper(final Shaper terrainShaper) {
-            this.terrainShaper = terrainShaper;
-            return this;
-        }
 
         @Override
         public NoiseConfig.Builder reset() {
@@ -109,12 +74,8 @@ public final class SpongeNoiseConfig {
             // defaults like overworld
             this.minY = -64;
             this.height = 384;
-            this.sampling = SamplingConfig.of(1D, 80.0D,1D, 160.0D);
-            this.top = SlideConfig.of(-0.078125D, 2, 8);
-            this.bottom = SlideConfig.of(0.1171875D, 3, 0);
             this.horizontalSize = 1;
             this.verticalSize = 2;
-            this.terrainShaper = Shaper.overworld();
             return this;
         }
 
@@ -123,24 +84,14 @@ public final class SpongeNoiseConfig {
             Objects.requireNonNull(value, "value");
             this.minY = value.minY();
             this.height = value.height();
-            this.sampling = value.samplingConfig();
-            this.top = value.topConfig();
-            this.bottom = value.bottomConfig();
             this.horizontalSize = value.horizontalSize();
             this.verticalSize = value.verticalSize();
-            this.terrainShaper = value.terrainShaper();
             return this;
         }
 
         @Override
         public @NonNull NoiseConfig build() {
-            Objects.requireNonNull(this.sampling, "sampling");
-            Objects.requireNonNull(this.top, "top");
-            Objects.requireNonNull(this.bottom, "bottom");
-
-            return (NoiseConfig) (Object) NoiseSettings.create(this.minY, this.height, (NoiseSamplingSettings) (Object) this.sampling,
-                    (NoiseSlider) (Object) this.top, (NoiseSlider) (Object) this.bottom,
-                    this.horizontalSize, this.verticalSize, (TerrainShaper) (Object) this.terrainShaper);
+            return (NoiseConfig) (Object) NoiseSettings.create(this.minY, this.height, this.horizontalSize, this.verticalSize);
         }
     }
 
@@ -149,17 +100,11 @@ public final class SpongeNoiseConfig {
         private static final class Holder {
 
             // See NoiseGeneratorSettings#overworld
-            private static final NoiseConfig OVERWORLD = (NoiseConfig) (Object) NoiseSettings.create(-64, 384,
-                    new NoiseSamplingSettings(1.0D, 1.0D, 80.0D, 160.0D), new NoiseSlider(-0.078125D, 2, 8),
-                    new NoiseSlider(0.1171875D, 3, 0), 1, 2, TerrainProvider.overworld(false));
+            private static final NoiseConfig OVERWORLD = (NoiseConfig) (Object) NoiseSettings.create(-64, 384, 1, 2);
             // See NoiseGeneratorSettings#nether
-            private static final NoiseConfig NETHER = (NoiseConfig) (Object) NoiseSettings.create(0, 128,
-                    new NoiseSamplingSettings(1.0D, 3.0D, 80.0D, 60.0D), new NoiseSlider(0.9375D, 3, 0),
-                    new NoiseSlider(2.5D, 4, -1), 1, 2, TerrainProvider.nether());
+            private static final NoiseConfig NETHER = (NoiseConfig) (Object) NoiseSettings.create(0, 128, 1, 2);
             // See NoiseGeneratorSettings#end
-            private static final NoiseConfig END = (NoiseConfig) (Object) NoiseSettings.create(0, 128,
-                    new NoiseSamplingSettings(2.0D, 1.0D, 80.0D, 160.0D), new NoiseSlider(-23.4375D, 64, -46),
-                    new NoiseSlider(-0.234375D, 7, 1), 2, 1, TerrainProvider.end());
+            private static final NoiseConfig END = (NoiseConfig) (Object) NoiseSettings.create(0, 128, 2, 1);
         }
 
         @Override

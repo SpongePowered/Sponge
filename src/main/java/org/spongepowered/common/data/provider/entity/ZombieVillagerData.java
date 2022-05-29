@@ -44,8 +44,8 @@ public final class ZombieVillagerData {
                         .get(h -> h.getVillagerData().getLevel())
                         .set((h, v) -> h.setVillagerData(h.getVillagerData().setLevel(v)))
                     .create(Keys.PROFESSION_TYPE)
-                        .get(h -> (ProfessionType) h.getVillagerData().getProfession())
-                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setProfession((VillagerProfession) v)))
+                        .get(h -> (ProfessionType) (Object) h.getVillagerData().getProfession())
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setProfession((VillagerProfession) (Object) v)))
                     .create(Keys.VILLAGER_TYPE)
                         .get(h -> (VillagerType) (Object) h.getVillagerData().getType())
                         .set((h, v) -> h.setVillagerData(h.getVillagerData().setType((net.minecraft.world.entity.npc.VillagerType) (Object) v)));

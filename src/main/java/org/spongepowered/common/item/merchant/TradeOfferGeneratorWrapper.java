@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.merchant;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.util.RandomSource;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 
@@ -44,8 +44,9 @@ public final class TradeOfferGeneratorWrapper implements VillagerTrades.ItemList
     }
 
     @Override
-    public @Nullable MerchantOffer getOffer(final Entity trader, final Random rand) {
-        return (MerchantOffer) this.generator.apply((org.spongepowered.api.entity.Entity) trader, rand);
+    public MerchantOffer getOffer(Entity trader, RandomSource rand) {
+        // TODO use
+        return (MerchantOffer) this.generator.apply((org.spongepowered.api.entity.Entity) trader, new Random());
     }
 
     @Override

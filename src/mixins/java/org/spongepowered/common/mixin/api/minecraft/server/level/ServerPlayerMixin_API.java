@@ -38,7 +38,9 @@ import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
@@ -52,12 +54,17 @@ import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.advancement.Advancement;
@@ -132,7 +139,8 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Shadow public ServerGamePacketListenerImpl connection;
 
     @Shadow public abstract net.minecraft.server.level.ServerLevel shadow$getLevel();
-    @Shadow public abstract void shadow$sendMessage(net.minecraft.network.chat.Component param0, ChatType param1, UUID param2);
+    @Shadow public abstract void shadow$sendChatMessage(PlayerChatMessage $$0, ChatSender $$1, ResourceKey<ChatType> $$2);
+    @Shadow public abstract void shadow$sendSystemMessage(net.minecraft.network.chat.Component $$0, ResourceKey<ChatType> $$1);
     // @formatter:on
 
     private volatile Pointers api$pointers;
@@ -190,8 +198,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        ((ServerPlayerBridge) this).bridge$sendViewerEnvironment((net.minecraft.world.level.dimension.DimensionType) Objects.requireNonNull(worldType,
-                "worldType"));
+        ((ServerPlayerBridge) this).bridge$sendViewerEnvironment((DimensionType) (Object) Objects.requireNonNull(worldType, "worldType"));
     }
 
     @Override
@@ -451,8 +458,12 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        this.shadow$sendMessage(SpongeAdventure.asVanilla(Objects.requireNonNull(message, "message")),
-            SpongeAdventure.asVanilla(Objects.requireNonNull(type, "type")), Objects.requireNonNull(identity, "identity").uuid());
+        final net.minecraft.network.chat.Component mcMessage = SpongeAdventure.asVanilla(Objects.requireNonNull(message, "message"));
+        final ResourceKey<ChatType> mcType = SpongeAdventure.asVanilla(Objects.requireNonNull(type, "type"));
+        final UUID mcIdentity = Objects.requireNonNull(identity, "identity").uuid();
+        this.shadow$sendSystemMessage(mcMessage, mcType);
+        // TODO chatMessage
+        // this.shadow$sendChatMessage(PlayerChatMessage.unsigned(mcMessage), new ChatSender(mcIdentity, name, teamName));
     }
 
     @Override
@@ -569,7 +580,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             } else {
                 throw new IllegalArgumentException("Specified emitter '" + emitter + "' is not a Sponge Entity or Emitter.self(), was of type '" + emitter.getClass() + "'");
             }
-            this.connection.send(new ClientboundSoundEntityPacket(event.get(), SpongeAdventure.asVanilla(sound.source()), tracked, sound.volume(), sound.pitch()));
+            this.connection.send(new ClientboundSoundEntityPacket(event.get(), SpongeAdventure.asVanilla(sound.source()), tracked, sound.volume(), sound.pitch(), tracked.level.getRandom().nextLong()));
         }
     }
 
@@ -578,14 +589,15 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        final Optional<SoundEvent> event = Registry.SOUND_EVENT.getOptional(SpongeAdventure.asVanilla(Objects.requireNonNull(sound, "sound").name()));
-        if (event.isPresent()) {
-            // Check if the event is registered
-            this.connection.send(new ClientboundSoundPacket(event.get(), SpongeAdventure.asVanilla(sound.source()), x, y, z, sound.volume(), sound.pitch()));
-        } else {
-            // Otherwise send it as a custom sound
-            this.connection.send(new ClientboundCustomSoundPacket(SpongeAdventure.asVanilla(sound.name()), SpongeAdventure.asVanilla(sound.source()),
-                    new net.minecraft.world.phys.Vec3(x, y, z), sound.volume(), sound.pitch()));
+        final ResourceLocation soundLoc = SpongeAdventure.asVanilla(Objects.requireNonNull(sound, "sound").name());
+        final Optional<SoundEvent> event = Registry.SOUND_EVENT.getOptional(soundLoc);
+        final SoundSource source = SpongeAdventure.asVanilla(sound.source());
+        final long random = this.shadow$getLevel().getRandom().nextLong();
+        if (event.isPresent()) { // Check if the event is registered
+            this.connection.send(new ClientboundSoundPacket(event.get(), source, x, y, z, sound.volume(), sound.pitch(), random));
+        } else { // Otherwise send it as a custom sound
+            final Vec3 vec = new Vec3(x, y, z);
+            this.connection.send(new ClientboundCustomSoundPacket(soundLoc, source, vec, sound.volume(), sound.pitch(), random));
         }
     }
 

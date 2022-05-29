@@ -30,11 +30,9 @@ import net.kyori.adventure.translation.TranslationRegistry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.adventure.NativeComponentRenderer.SiblingConsumer;
 import java.text.AttributedCharacterIterator;
 import java.text.MessageFormat;
 import java.util.List;
@@ -54,7 +52,7 @@ public abstract class NativeComponentRenderer<C> {
     static final NativeComponentRenderer<Locale> INSTANCE = new NativeComponentRenderer<Locale>() {
         @Override
         public MessageFormat translate(final @NonNull String key, final @NonNull Locale locale) {
-            return GlobalTranslator.get().translate(key, locale);
+            return GlobalTranslator.translator().translate(key, locale);
         }
     };
 
@@ -86,8 +84,8 @@ public abstract class NativeComponentRenderer<C> {
     protected abstract @Nullable MessageFormat translate(final @NonNull String key, final @NonNull C context);
 
     public Component render(@NonNull MutableComponent component, final @NonNull C context) {
-        if (component instanceof TranslatableComponent) {
-            component = this.renderTranslatable((TranslatableComponent) component, context);
+        if (component.getContents() instanceof TranslatableContents contents) {
+            component = this.renderTranslatable(component, contents, context);
         } else {
             this.renderSiblings(component, context);
         }
@@ -116,12 +114,12 @@ public abstract class NativeComponentRenderer<C> {
         return input;
     }
 
-    protected @NonNull MutableComponent renderTranslatable(final @NonNull TranslatableComponent component, final @NonNull C context) {
-        final /* @Nullable */ MessageFormat format = this.translate(component.getKey(), context);
+    protected @NonNull MutableComponent renderTranslatable(final MutableComponent component, final @NonNull TranslatableContents contents, final @NonNull C context) {
+        final /* @Nullable */ MessageFormat format = this.translate(contents.getKey(), context);
         if (format == null) {
             // we don't have a translation for this component, but the arguments or children
             // of this component might need additional rendering
-            final Object[] args = component.getArgs();
+            final Object[] args = contents.getArgs();
             if (args.length > 0) {
                 for (int i = 0, size = args.length; i < size; i++) {
                     if (args[i] instanceof Component) {
@@ -133,13 +131,13 @@ public abstract class NativeComponentRenderer<C> {
             return component;
         }
 
-        final Object[] args = component.getArgs();
-        final TextComponent result;
+        final Object[] args = contents.getArgs();
+        final MutableComponent result;
         // no arguments makes this render very simple
         if(args.length == 0) {
-            result = new TextComponent(format.format(null, new StringBuffer(), null).toString());
+            result = Component.literal(format.format(null, new StringBuffer(), null).toString());
         } else {
-            result = new TextComponent("");
+            result = Component.literal("");
 
             final Object[] nulls = new Object[args.length];
             final StringBuffer sb = format.format(nulls, new StringBuffer(), null);
@@ -151,7 +149,7 @@ public abstract class NativeComponentRenderer<C> {
                 if (index != null && args[index] instanceof Component) {
                     result.append(this.render(((Component) args[index]).copy(), context));
                 } else {
-                    result.append(new TextComponent(sb.substring(it.getIndex(), end)));
+                    result.append(Component.literal(sb.substring(it.getIndex(), end)));
                 }
                 it.setIndex(end);
             }

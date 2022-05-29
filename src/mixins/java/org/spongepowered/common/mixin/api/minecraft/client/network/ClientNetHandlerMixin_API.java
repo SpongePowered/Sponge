@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.minecraft.client.network;
 import net.kyori.adventure.text.Component;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -42,7 +41,7 @@ public abstract class ClientNetHandlerMixin_API implements ClientSideConnection 
     @Override
     public void close() {
         ((ConnectionHolderBridge) this).bridge$getConnection().disconnect(
-                new TranslatableComponent("disconnect.disconnected"));
+                net.minecraft.network.chat.Component.translatable("disconnect.disconnected"));
     }
 
     @Override

@@ -28,7 +28,6 @@ import static java.util.Objects.requireNonNull;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -57,7 +56,7 @@ public abstract class ServerLoginPacketListenerImplMixin_API implements ServerSi
 
     @Override
     public void close() {
-        this.shadow$disconnect(new TranslatableComponent("disconnect.disconnected"));
+        this.shadow$disconnect(net.minecraft.network.chat.Component.translatable("disconnect.disconnected"));
     }
 
     @Override
