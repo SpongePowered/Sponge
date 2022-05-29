@@ -4,7 +4,7 @@
     "package": "org.spongepowered.forge.mixin.tracker",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
-    "priority": 1302,
+    "priority": 952,
     "mixins": [
         "server.level.ServerPlayerGameModeMixin_Forge_Tracker"
     ]

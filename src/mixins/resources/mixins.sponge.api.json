@@ -2,7 +2,7 @@
     "required": true,
     "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.mixin.api",
-    "mixinPriority": 1100,
+    "mixinPriority": 900,
     "mixins": [
         "common.entity.living.HumanEntityMixin_API",
         "common.util.MinecraftBlockDamageSourceMixin_API",

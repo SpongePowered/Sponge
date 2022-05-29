@@ -2,7 +2,7 @@
     "required": true,
     "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.mixin.core",
-    "mixinPriority": 1101,
+    "mixinPriority": 901,
     "mixins": [
         "advancements.Advancement_BuilderMixin",
         "advancements.AdvancementMixin",

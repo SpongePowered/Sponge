@@ -5,7 +5,7 @@
     "plugin": "org.spongepowered.forge.mixin.plugin.ForgeCorePlugin",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
-    "priority": 1301,
+    "priority": 951,
     "mixins": [
         "api.event.EventMixin_Forge",
         "api.event.block.ChangeBlockEvent_AllMixin_Forge",

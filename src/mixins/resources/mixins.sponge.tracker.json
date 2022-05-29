@@ -2,7 +2,7 @@
     "required": true,
     "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.mixin.tracker",
-    "mixinPriority": 1102,
+    "mixinPriority": 902,
     "mixins": [
         "CreatorTrackedMixin_Tracker",
         "CreatorTrackedPlayerMixin_Tracker",

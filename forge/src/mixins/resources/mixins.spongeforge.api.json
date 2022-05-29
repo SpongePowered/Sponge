@@ -4,7 +4,7 @@
     "package": "org.spongepowered.forge.mixin.api",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
-    "priority": 1300,
+    "priority": 900,
     "mixins": [
         "minecraft.server.MinecraftServerMixin_Forge_API"
     ],
