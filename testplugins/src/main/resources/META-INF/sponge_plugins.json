@@ -80,6 +80,12 @@
             "description": "Testing data"
         },
         {
+            "id": "dataformattest",
+            "name": "Data Format Test",
+            "entrypoint": "org.spongepowered.test.data.DataFormatTest",
+            "description": "Testing data formats"
+        },
+        {
             "id": "entitytest",
             "name": "Entity Test",
             "entrypoint": "org.spongepowered.test.entity.EntityTest",
