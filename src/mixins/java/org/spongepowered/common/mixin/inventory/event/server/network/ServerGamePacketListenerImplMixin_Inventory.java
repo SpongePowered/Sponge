@@ -34,6 +34,7 @@ import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.HasCustomInventoryScreen;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -122,11 +123,11 @@ public class ServerGamePacketListenerImplMixin_Inventory {
     }
 
     @Redirect(method = "handlePlayerCommand",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/horse/AbstractHorse;openInventory(Lnet/minecraft/world/entity/player/Player;)V"))
-    private void impl$onHandlePlayerCommandOpenInventory(final AbstractHorse abstractHorse, final Player player) {
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/HasCustomInventoryScreen;openCustomInventoryScreen(Lnet/minecraft/world/entity/player/Player;)V"))
+    private void impl$onHandlePlayerCommandOpenInventory(final HasCustomInventoryScreen customInventoryScreenHaver, final Player player) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         try (final EffectTransactor ignored = context.getTransactor().logOpenInventory(player)) {
-            abstractHorse.openInventory(player);
+            customInventoryScreenHaver.openCustomInventoryScreen(player);
             context.getTransactor().logContainerSet(player);
         }
     }

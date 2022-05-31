@@ -24,26 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.client;
 
-import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DynamicOps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.server.WorldStem;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
-import net.minecraft.world.level.DataPackConfig;
-import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
-import net.minecraft.world.level.storage.LevelResource;
-import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.WorldData;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -54,13 +40,9 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.client.SpongeClient;
-import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
-import org.spongepowered.common.server.BootstrapProperties;
-
-import java.nio.file.Path;
 
 import javax.annotation.Nullable;
 
@@ -113,36 +95,6 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         this.runAllTasks();
     }
 
-    @Redirect(method = "loadLevel",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/WorldStem$WorldDataSupplier;loadFromWorld(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;)Lnet/minecraft/server/WorldStem$WorldDataSupplier;"))
-    private static WorldStem.WorldDataSupplier impl$serializeDelayedDataPackOnLoadAndSetBootstrapProperties1(LevelStorageSource.LevelStorageAccess $$0) {
-        return (rm, dpc) -> {
-            final WorldStem.WorldDataSupplier supplier = WorldStem.WorldDataSupplier.loadFromWorld($$0);
-            SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
-
-            final Pair<WorldData, RegistryAccess.Frozen> pair = supplier.get(rm, dpc);
-            final WorldData saveData = pair.getFirst();
-            BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(),  saveData.getDifficulty(), true, saveData.isHardcore(),
-                    saveData.getAllowCommands(), 10, null);  // TODO registryAccess?
-            return pair;
-        };
-    }
-
-    @Redirect(method = "makeWorldStem(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Z)Lnet/minecraft/server/WorldStem;",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/WorldStem$WorldDataSupplier;loadFromWorld(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;)Lnet/minecraft/server/WorldStem$WorldDataSupplier;"))
-    private static WorldStem.WorldDataSupplier impl$serializeDelayedDataPackOnLoadAndSetBootstrapProperties(LevelStorageSource.LevelStorageAccess $$0) {
-        return (rm, dpc) -> {
-            final WorldStem.WorldDataSupplier supplier = WorldStem.WorldDataSupplier.loadFromWorld($$0);
-            SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
-
-            final Pair<WorldData, RegistryAccess.Frozen> pair = supplier.get(rm, dpc);
-            final WorldData saveData = pair.getFirst();
-            BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(),  saveData.getDifficulty(), true, saveData.isHardcore(),
-                    saveData.getAllowCommands(), 10, null); // TODO registryAccess?
-            return pair;
-        };
-    }
-
     @Override
     public IntegratedServer bridge$getTemporaryIntegratedServer() {
         return this.impl$temporaryIntegratedServer;
@@ -179,27 +131,4 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         Launch.instance().lifecycle().callStoppedGameEvent();
     }
 
-    @Redirect(method = "lambda$createLevel$33", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess$Writable;Lnet/minecraft/server/packs/resources/ResourceManager;)Lnet/minecraft/resources/RegistryOps;"))
-    private static <T> RegistryOps<T> impl$setWorldSettingsAdapter(final DynamicOps<T> $$0, final RegistryAccess.Writable $$1, final ResourceManager $$2) {
-        final RegistryOps<T> worldSettingsAdapter = RegistryOps.createAndLoad($$0, $$1, $$2);
-        BootstrapProperties.worldSettingsAdapter(worldSettingsAdapter);
-        return worldSettingsAdapter;
-    }
-
-    @Inject(method = "createLevel", at = @At("HEAD"))
-    private void impl$setBootstrapProperties(final String levelName, final LevelSettings settings,
-                                             final RegistryAccess registries,
-                                             final WorldGenSettings dimensionGeneratorSettings,
-                                             final CallbackInfo ci) {
-        BootstrapProperties.init(dimensionGeneratorSettings, settings.gameType(), settings.difficulty(), true, settings.hardcore(),
-            settings.allowCommands(), 10, registries);
-        BootstrapProperties.setIsNewLevel(true);
-    }
-
-    @Redirect(method = "createPackRepository ", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
-    private static Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
-        final Path datapackDir = levelSave.getLevelPath(folderName);
-        Launch.instance().lifecycle().callRegisterDataPackValueEvent(datapackDir);
-        return datapackDir;
-    }
 }

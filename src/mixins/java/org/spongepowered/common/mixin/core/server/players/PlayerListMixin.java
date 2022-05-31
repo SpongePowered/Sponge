@@ -54,7 +54,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
@@ -366,29 +365,24 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Redirect(method = "placeNewPlayer",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"
+            target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/resources/ResourceKey;)V"
         )
     )
-    private void impl$onInitPlayer_delaySendMessage(
-        final PlayerList playerList,
-        final net.minecraft.network.chat.Component message,
-        final ChatType p_232641_2_,
-        final UUID p_232641_3_,
-        final Connection manager,
-        final net.minecraft.server.level.ServerPlayer playerIn
+    private void impl$onInitPlayer_delaySendMessage(final PlayerList instance, final net.minecraft.network.chat.Component message,
+            final ResourceKey<ChatType> $$1, final Connection manager, final net.minecraft.server.level.ServerPlayer playerIn
     ) {
         // Don't send here, will be done later. We cache the expected message.
         ((ServerPlayerBridge) playerIn).bridge$setConnectionMessageToSend(message);
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundLoginPacket"))
-    private ClientboundLoginPacket impl$usePerWorldViewDistance(final int $$0, final boolean $$1, final GameType $$2, final GameType $$3, final Set<ResourceKey<Level>> $$4,
-        final RegistryAccess.Frozen $$5, final Holder<DimensionType> $$6, final ResourceKey<Level> $$7, final long $$8, final int $$9, final int $$10, final int $$11, final boolean $$12, final boolean $$13,
-        final boolean $$14, final boolean $$15, final Connection conn, final net.minecraft.server.level.ServerPlayer player) {
+    private ClientboundLoginPacket impl$usePerWorldViewDistance(final int $$0, final boolean $$1, final GameType $$2, final GameType $$3, final Set $$4, final RegistryAccess.Frozen $$5,
+            final ResourceKey $$6, final ResourceKey $$7, final long $$8, final int $$9, final int $$10, final int $$11, final boolean $$12, final boolean $$13, final boolean $$14, final boolean $$15,
+            final Optional $$16, final Connection conn, final net.minecraft.server.level.ServerPlayer player) {
 
+        final Integer viewDistance = ((PrimaryLevelDataBridge) player.getLevel().getLevelData()).bridge$viewDistance().orElse($$10);
         return new ClientboundLoginPacket($$0, $$1, $$2, $$3, $$4, $$5, $$6, $$7,
-            $$8, $$9, ((PrimaryLevelDataBridge) player.getLevel().getLevelData()).bridge$viewDistance().orElse($$10),
-                $$11, $$12, $$13, $$14, $$15);
+            $$8, $$9, viewDistance, $$11, $$12, $$13, $$14, $$15, $$16);
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))

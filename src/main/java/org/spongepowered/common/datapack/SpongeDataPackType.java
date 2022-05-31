@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.datapack;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import io.leangen.geantyref.TypeToken;
@@ -33,7 +34,6 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -100,27 +100,28 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
 
         private final SpongeDataPackType<@NonNull Advancement, DataPackSerializedObject> advancement = new SpongeDataPackType<>(TypeToken.get(Advancement.class),
                 new DataPackSerializer<>("Advancements", "advancements"),
-                s -> ((net.minecraft.advancements.Advancement) s).deconstruct().serializeToJson(),
+                (s, registryAccess) -> ((net.minecraft.advancements.Advancement) s).deconstruct().serializeToJson(),
                 (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
                 false
         );
 
         private final SpongeDataPackType<@NonNull RecipeRegistration, RecipeSerializedObject> recipe = new SpongeDataPackType<>(TypeToken.get(RecipeRegistration.class),
                 new RecipeDataPackSerializer(),
-                s -> ((FinishedRecipe) s).serializeRecipe(),
+                (s, registryAccess) -> ((FinishedRecipe) s).serializeRecipe(),
                 (i1, i2) -> new RecipeSerializedObject(i1.key(), i2, new DataPackSerializedObject(i1.key(), ((FinishedRecipe) i1).serializeAdvancement())),
                 false
         );
 
         private final SpongeDataPackType<@NonNull WorldTypeTemplate, DataPackSerializedObject> worldType = new SpongeDataPackType<>(TypeToken.get(WorldTypeTemplate.class),
                 new DataPackSerializer<>("Dimension Types", "dimension_type"),
-                s -> {
+                (s, registryAccess) -> {
                     final OptionalLong fixedTime = s.fixedTime().isEmpty() ? OptionalLong.empty() : OptionalLong.of(s.fixedTime().get().asTicks().ticks());
                     final DimensionType.MonsterSettings monsterSettings = new DimensionType.MonsterSettings(s.piglinSafe(), s.hasRaids(), UniformInt.of(0, 7), 0); // TODO monsterlight settings
                     final DimensionType type = new DimensionType(fixedTime, s.hasSkylight(), s.hasCeiling(), s.scorching(), s.natural(),
                         s.coordinateMultiplier(), s.bedsUsable(), s.respawnAnchorsUsable(), s.minY(), s.maximumHeight(), s.logicalHeight(),
                             BlockTags.INFINIBURN_OVERWORLD, (ResourceLocation) (Object) s.effect().key(), s.ambientLighting(), monsterSettings);
-                    return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), type).getOrThrow(false, e -> {});
+                    final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+                    return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(ops, type).getOrThrow(false, e -> {});
                 },
                 (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
                 true
@@ -128,13 +129,14 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
 
         private final SpongeDataPackType<@NonNull WorldTemplate, DataPackSerializedObject> world = new SpongeDataPackType<>(TypeToken.get(WorldTemplate.class),
                 new DataPackSerializer<>("Dimensions", "dimension"),
-                s -> {
-                    final Registry<DimensionType> dimensionTypeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+                (s, registryAccess) -> {
+                    final Registry<DimensionType> dimensionTypeRegistry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
                     final ResourceKey<DimensionType> key = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, (ResourceLocation) (Object) s.worldType().location());
                     final LevelStem template = new LevelStem(dimensionTypeRegistry.getHolderOrThrow(key), (ChunkGenerator) s.generator());
                     ((LevelStemBridge) (Object) template).bridge$setFromSettings(false);
                     ((LevelStemBridge) (Object) template).bridge$populateFromTemplate((SpongeWorldTemplate) s);
-                    return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), template).getOrThrow(false, e -> {});
+                    final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+                    return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(ops, template).getOrThrow(false, e -> {});
                 },
                 (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
                 true
@@ -142,7 +144,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
 
         private final SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject> tag = new SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject>(TypeToken.get(SpongeTagTemplate.class),
                 new TagDataPackSerializer("Tag", "tags"),
-                SpongeTagTemplate::toJson,
+                (spongeTagTemplate, registryAccess) -> spongeTagTemplate.toJson(),
                 (i1, i2) -> new TagSerializedObject(i1.key(), i2, i1.registryType()),
                 false
         );

@@ -40,7 +40,9 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.RegistryResourceAccess;
@@ -58,7 +60,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -346,8 +347,8 @@ public abstract class SpongeWorldManager implements WorldManager {
         return this.loadTemplate(key).thenCompose(r -> {
             WorldTemplate loadedTemplate = r.orElse(null);
             if (loadedTemplate == null) {
-                final LevelStem scratch = BootstrapProperties.worldGenSettings.dimensions().get(net.minecraft.resources.ResourceKey.create(
-                    net.minecraft.core.Registry.LEVEL_STEM_REGISTRY, (ResourceLocation) (Object) key));
+                final net.minecraft.resources.ResourceKey<LevelStem> rKey = net.minecraft.resources.ResourceKey.create(net.minecraft.core.Registry.LEVEL_STEM_REGISTRY, (ResourceLocation) (Object) key);
+                final LevelStem scratch = this.server.getWorldData().worldGenSettings().dimensions().get(rKey);
                 if (scratch != null) {
                     ((ResourceKeyBridge) (Object) scratch).bridge$setKey(key);
                     loadedTemplate = new SpongeWorldTemplate(scratch);
@@ -393,19 +394,24 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         PrimaryLevelData levelData;
 
-        levelData = (PrimaryLevelData) storageSource.getDataTag((DynamicOps<Tag>) BootstrapProperties.worldSettingsAdapter, defaultLevelSettings.getDataPackConfig(), Lifecycle.stable());
+        final RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, this.server.registryAccess());
+        levelData = (PrimaryLevelData) storageSource.getDataTag(ops, defaultLevelSettings.getDataPackConfig(), Lifecycle.stable());
         if (levelData == null) {
             final LevelSettings levelSettings;
             final WorldGenSettings generationSettings;
 
             if (this.server.isDemo()) {
                 levelSettings = MinecraftServer.DEMO_SETTINGS;
-                generationSettings = WorldPresets.demoSettings(BootstrapProperties.registries);
+                final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
+                generationSettings = WorldPresets.demoSettings(registryAccess);
             } else {
-                levelSettings = new LevelSettings(directoryName, (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.game()),
-                        templateBridge.bridge$hardcore().orElse(BootstrapProperties.hardcore), (Difficulty) (Object) BootstrapProperties.difficulty
-                        .get(Sponge.game()), templateBridge.bridge$commands().orElse(BootstrapProperties.commands), new GameRules(),
-                    defaultLevelData.getDataPackConfig());
+                levelSettings = new LevelSettings(directoryName,
+                        defaultLevelData.getGameType(), // TODO bridge
+                        templateBridge.bridge$hardcore().orElse(defaultLevelData.isHardcore()),
+                        defaultLevelData.getDifficulty(), // TODO bridge
+                        templateBridge.bridge$commands().orElse(defaultLevelData.getAllowCommands()),
+                        new GameRules(),
+                        defaultLevelData.getDataPackConfig());
                 generationSettings = generatorSettings;
             }
 
@@ -497,7 +503,8 @@ public abstract class SpongeWorldManager implements WorldManager {
     public CompletableFuture<Boolean> saveTemplate(final WorldTemplate template) {
         final LevelStem scratch = ((SpongeWorldTemplate) Objects.requireNonNull(template, "template")).asLevelStem();
         try {
-            final JsonElement element = SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), scratch).getOrThrow(true, s -> { });
+            final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
+            final JsonElement element = SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registryAccess), scratch).getOrThrow(true, s -> { });
             final Path dataPackFile = this.getDataPackFile(template.key());
             Files.createDirectories(dataPackFile.getParent());
             DataPackSerializer.writeFile(dataPackFile, element);
@@ -541,7 +548,8 @@ public abstract class SpongeWorldManager implements WorldManager {
             final LevelSettings defaultLevelSettings = ((PrimaryLevelDataAccessor) defaultLevelData).accessor$settings();
 
             try {
-                levelData = storageSource.getDataTag((DynamicOps<Tag>) BootstrapProperties.worldSettingsAdapter, defaultLevelSettings.getDataPackConfig(), Lifecycle.stable());
+                final RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, this.server.registryAccess());
+                levelData = storageSource.getDataTag(ops, defaultLevelSettings.getDataPackConfig(), Lifecycle.stable());
             } catch (final Exception ex) {
                 return FutureUtil.completedWithException(ex);
             }
@@ -590,7 +598,8 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         try {
             try {
-                storageSource.saveDataTag(BootstrapProperties.registries, (WorldData) properties, null);
+                final RegistryAccess registryAccess = this.server.registryAccess();
+                storageSource.saveDataTag(registryAccess, (WorldData) properties, null);
             } catch (final Exception ex) {
                 return FutureUtil.completedWithException(ex);
             }
@@ -957,21 +966,23 @@ public abstract class SpongeWorldManager implements WorldManager {
                 levelData = defaultLevelData;
                 isDebugGeneration = defaultGenerationSettings.isDebug();
             } else {
-                levelData = (PrimaryLevelData) storageSource
-                        .getDataTag((DynamicOps<Tag>) BootstrapProperties.worldSettingsAdapter, defaultLevelSettings.getDataPackConfig(), Lifecycle.stable());
+                final RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, this.server.registryAccess());
+                levelData = (PrimaryLevelData) storageSource.getDataTag(ops, defaultLevelSettings.getDataPackConfig(), Lifecycle.stable());
                 if (levelData == null) {
                     final LevelSettings levelSettings;
                     final WorldGenSettings generationSettings;
 
                     if (this.server.isDemo()) {
                         levelSettings = MinecraftServer.DEMO_SETTINGS;
-                        generationSettings = WorldPresets.demoSettings(BootstrapProperties.registries);
+                        generationSettings = WorldPresets.demoSettings(this.server.registryAccess());
                     } else {
                         levelSettings = new LevelSettings(directoryName,
-                                (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.game()),
-                                templateBridge.bridge$hardcore().orElse(BootstrapProperties.hardcore),
-                                (Difficulty) (Object) BootstrapProperties.difficulty.get(Sponge.game()),
-                                templateBridge.bridge$commands().orElse(BootstrapProperties.commands), new GameRules(), defaultLevelData.getDataPackConfig());
+                                defaultLevelData.getGameType(), // TODO templateBridge
+                                templateBridge.bridge$hardcore().orElse(defaultLevelData.isHardcore()),
+                                defaultLevelData.getDifficulty(), // TODO templateBridge
+                                templateBridge.bridge$commands().orElse(defaultLevelData.getAllowCommands()),
+                                new GameRules(),
+                                defaultLevelData.getDataPackConfig());
                         generationSettings = ((WorldGenSettingsBridge) defaultLevelData.worldGenSettings()).bridge$copy();
                     }
 

@@ -43,6 +43,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
@@ -149,7 +150,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public int invulnerableTime;
     @Shadow public float walkDistO;
     @Shadow public float walkDist;
-    @Shadow @Final protected Random random;
+    @Shadow @Final protected RandomSource random;
     @Shadow @Final protected SynchedEntityData entityData;
     @Shadow public float yRotO;
     @Shadow protected int portalTime;
@@ -1197,23 +1198,17 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Redirect(
-        method = "gameEvent(Lnet/minecraft/world/level/gameevent/GameEvent;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;)V",
+        method = "gameEvent(Lnet/minecraft/world/level/gameevent/GameEvent;Lnet/minecraft/world/entity/Entity;)V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;gameEvent(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/gameevent/GameEvent;Lnet/minecraft/core/BlockPos;)V"
+            target = "Lnet/minecraft/world/level/Level;gameEvent(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/gameevent/GameEvent;Lnet/minecraft/world/phys/Vec3;)V"
         )
     )
-    private void impl$ignoreGameEventIfVanished(
-        final Level instance,
-        final Entity entity,
-        final GameEvent gameEvent,
-        final BlockPos blockPos
-    ) {
+    private void impl$ignoreGameEventIfVanished(final Level instance, final Entity entity, final GameEvent gameEvent, final Vec3 vec) {
         if (entity instanceof VanishableBridge && ((VanishableBridge) entity).bridge$vanishState().triggerVibrations()) {
-            instance.gameEvent(entity, gameEvent, blockPos);
+            instance.gameEvent(entity, gameEvent, vec);
         }
     }
-
 
     @Redirect(method = "getEncodeId", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/EntityType;canSerialize()Z"))
     private boolean impl$respectTransientFlag(final EntityType entityType) {

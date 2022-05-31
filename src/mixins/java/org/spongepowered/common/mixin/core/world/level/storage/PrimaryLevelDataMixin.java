@@ -36,7 +36,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.core.SerializableUUID;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
@@ -44,6 +44,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.Level;
@@ -258,7 +259,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
 
         final ServerLevel world = this.bridge$world();
         if (world != null) {
-            final int actual = viewDistance == null ? BootstrapProperties.viewDistance: viewDistance;
+            final int actual = viewDistance == null ? ((DedicatedServer) SpongeCommon.server()).getProperties().viewDistance : viewDistance;
             world.getChunkSource().setViewDistance(actual);
             final ClientboundSetChunkCacheRadiusPacket packet = new ClientboundSetChunkCacheRadiusPacket(actual);
 
@@ -383,9 +384,9 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
             return;
         }
 
-        this.bridge$setUniqueId(dynamic.get(Constants.Sponge.World.UNIQUE_ID).read(SerializableUUID.CODEC).result().orElse(UUID.randomUUID()));
+        this.bridge$setUniqueId(dynamic.get(Constants.Sponge.World.UNIQUE_ID).read(UUIDUtil.CODEC).result().orElse(UUID.randomUUID()));
 
-        final List<Pair<String, UUID>> mapIndexList = dynamic.get(Constants.Map.MAP_UUID_INDEX).readMap(Codec.STRING, SerializableUUID.CODEC).result().orElse(Collections.emptyList());
+        final List<Pair<String, UUID>> mapIndexList = dynamic.get(Constants.Map.MAP_UUID_INDEX).readMap(Codec.STRING, UUIDUtil.CODEC).result().orElse(Collections.emptyList());
         final BiMap<Integer, UUID> mapIndex = HashBiMap.create();
         for (final Pair<String, UUID> pair : mapIndexList) {
             final int id = Integer.parseInt(pair.getFirst());
@@ -395,7 +396,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
 
         // TODO Move this to Schema
         dynamic.get(Constants.Sponge.LEGACY_SPONGE_PLAYER_UUID_TABLE).readList(LegacyUUIDCodec.CODEC).result().orElseGet(() ->
-            dynamic.get(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE).readList(SerializableUUID.CODEC).result().orElse(Collections.emptyList())
+            dynamic.get(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE).readList(UUIDUtil.CODEC).result().orElse(Collections.emptyList())
         ).forEach(uuid -> {
             final Integer playerIndex = this.impl$playerUniqueIdMap.inverse().get(uuid);
             if (playerIndex == null) {
@@ -416,7 +417,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
 
         final ListTag playerIdList = new ListTag();
         data.put(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, playerIdList);
-        this.impl$pendingUniqueIds.forEach(uuid -> playerIdList.add(new IntArrayTag(SerializableUUID.uuidToIntArray(uuid))));
+        this.impl$pendingUniqueIds.forEach(uuid -> playerIdList.add(new IntArrayTag(UUIDUtil.uuidToIntArray(uuid))));
         this.impl$pendingUniqueIds.clear();
 
         return data;

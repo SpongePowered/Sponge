@@ -29,6 +29,7 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.SeedUtil;
@@ -66,7 +67,7 @@ public final class SpongeWorldGenerationConfigMutableBuilder implements WorldGen
 
     @Override
     public WorldGenerationConfig.Mutable.Builder reset() {
-        final WorldGenSettings defaultSettings = BootstrapProperties.worldGenSettings;
+        final WorldGenSettings defaultSettings = SpongeCommon.server().getWorldData().worldGenSettings();
         this.seed = defaultSettings.seed();
         this.generateFeatures = defaultSettings.generateStructures();
         this.generateBonusChest = defaultSettings.generateBonusChest();

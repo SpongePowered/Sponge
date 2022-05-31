@@ -40,4 +40,6 @@ public abstract class ChunkGeneratorMixin_API implements org.spongepowered.api.w
     public BiomeProvider biomeProvider() {
         return (BiomeProvider) this.shadow$getBiomeSource();
     }
+
+
 }

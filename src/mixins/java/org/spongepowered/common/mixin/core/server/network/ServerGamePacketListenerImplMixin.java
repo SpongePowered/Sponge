@@ -40,7 +40,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
@@ -425,24 +428,25 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     }
 
     @Redirect(method = "handlePlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayerGameMode;handleBlockBreakAction(Lnet/minecraft/core/BlockPos;Lnet/minecraft/network/protocol/game/ServerboundPlayerActionPacket$Action;Lnet/minecraft/core/Direction;II)V"))
-    public void impl$callInteractBlockPrimaryEvent(final ServerPlayerGameMode playerInteractionManager, final BlockPos p_225416_1_,
-            final ServerboundPlayerActionPacket.Action p_225416_2_, final Direction p_225416_3_, final int p_225416_4_) {
+    public void impl$callInteractBlockPrimaryEvent(final ServerPlayerGameMode playerInteractionManager, final BlockPos pos,
+            final ServerboundPlayerActionPacket.Action act, final Direction dir, final int maxBuildHeight, final int sequence) {
         final ServerLevel level = ((ServerPlayerGameModeAccessor) playerInteractionManager).accessor$level();
         final BlockSnapshot snapshot = ((org.spongepowered.api.world.server.ServerWorld) level)
-            .createSnapshot(VecHelper.toVector3i(p_225416_1_));
-        final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(p_225416_2_, this.player, this.player.getItemInHand(
-                InteractionHand.MAIN_HAND), snapshot, InteractionHand.MAIN_HAND, p_225416_3_);
+            .createSnapshot(VecHelper.toVector3i(pos));
+        final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(act, this.player, this.player.getItemInHand(
+                InteractionHand.MAIN_HAND), snapshot, InteractionHand.MAIN_HAND, dir);
         if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
-            this.player.connection.send(new ClientboundBlockBreakAckPacket(p_225416_1_, level.getBlockState(p_225416_1_), p_225416_2_, false, "block action restricted"));
+            this.player.connection.send(new ClientboundBlockUpdatePacket(pos, level.getBlockState(pos)));
+            this.player.connection.ackBlockChangesUpTo(sequence);
             this.impl$ignorePackets++;
         } else {
-            if (p_225416_2_ == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK) {
-                if (!Objects.equals(((ServerPlayerGameModeAccessor) playerInteractionManager).accessor$destroyPos(), p_225416_1_)) {
+            if (act == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK) {
+                if (!Objects.equals(((ServerPlayerGameModeAccessor) playerInteractionManager).accessor$destroyPos(), pos)) {
                     return; // prevents Mismatch in destroy block pos warning
                 }
             }
-            playerInteractionManager.handleBlockBreakAction(p_225416_1_, p_225416_2_, p_225416_3_, p_225416_4_);
-            if (p_225416_2_ == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
+            playerInteractionManager.handleBlockBreakAction(pos, act, dir, maxBuildHeight, sequence);
+            if (act == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
                 this.impl$ignorePackets++;
             }
         }
@@ -482,8 +486,8 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     }
 
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"))
-    public void impl$handlePlayerDisconnect(final PlayerList playerList, final net.minecraft.network.chat.Component component, final ChatType chatType, final UUID uuid) {
+            target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/resources/ResourceKey;)V"))
+    public void impl$handlePlayerDisconnect(final PlayerList instance, final net.minecraft.network.chat.Component $$0, final ResourceKey<ChatType> $$1) {
         // If this happens, the connection has not been fully established yet so we've kicked them during ClientConnectionEvent.Login,
         // but FML has created this handler earlier to send their handshake. No message should be sent, no disconnection event should
         // be fired either.
@@ -494,7 +498,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this.player);
-            final Component message = SpongeAdventure.asAdventure(component);
+            final Component message = SpongeAdventure.asAdventure($$0);
             final Audience audience = Sponge.server().broadcastAudience();
             final ServerSideConnectionEvent.Disconnect event = SpongeEventFactory.createServerSideConnectionEventDisconnect(
                     PhaseTracker.getCauseStackManager().currentCause(), audience, Optional.of(audience), message, message,
@@ -549,19 +553,18 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         this.shadow$resetPosition();
     }
 
-    @Redirect(method = "handleChat(Lnet/minecraft/server/network/TextFilter$FilteredText;)V",
+    @Redirect(method = "broadcastChatMessage",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Ljava/util/function/Function;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V") )
-    private void impl$postChatMessageEventAndSend(final PlayerList playerList,
-                                                  final net.minecraft.network.chat.Component unfilteredComponent,
-                                                  final Function<ServerPlayer, Component> filterFunction, // TODO: what to do about this?
-                                                  final ChatType chatType,
-                                                  final UUID uuid) {
+                    target = "Lnet/minecraft/server/players/PlayerList;broadcastChatMessage(Lnet/minecraft/server/network/FilteredText;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/resources/ResourceKey;)V") )
+    private void impl$postChatMessageEventAndSend(final PlayerList instance, final FilteredText<PlayerChatMessage> $$0,
+            final net.minecraft.server.level.ServerPlayer $$1, final ResourceKey<ChatType> $$2) {
         final ServerPlayer player = (ServerPlayer) this.player;
         final PlayerChatFormatter chatFormatter = player.chatFormatter();
+        // TODO check new PlayerChatMessage
+        final net.minecraft.network.chat.Component unfilteredComponent = $$0.raw().serverContent();
         Component currentMessage = SpongeAdventure.asAdventure(unfilteredComponent);
-        if (unfilteredComponent instanceof TranslatableComponent tc && tc.getArgs().length == 2 ) {
+        if (unfilteredComponent.getContents() instanceof TranslatableContents tc && tc.getArgs().length == 2 ) {
             if (tc.getArgs()[1] instanceof String rawMessage) {
                 currentMessage = Component.text(rawMessage);
             }

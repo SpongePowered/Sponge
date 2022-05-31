@@ -32,6 +32,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -56,6 +57,7 @@ import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.AbstractResourceKeyed;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
@@ -159,7 +161,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         this.displayName = templateBridge.bridge$displayName().orElse(null);
         this.worldType = ((WorldType) template.typeHolder()).asDefaultedReference(RegistryTypes.WORLD_TYPE);
         this.generator = (ChunkGenerator) template.generator();
-        this.generationConfig = WorldGenerationConfig.Mutable.builder().from((WorldGenerationConfig.Mutable) BootstrapProperties.worldGenSettings).build();
+        this.generationConfig = WorldGenerationConfig.Mutable.builder().from((WorldGenerationConfig.Mutable) SpongeCommon.server().getWorldData().worldGenSettings()).build();
         this.gameMode = templateBridge.bridge$gameMode().isPresent() ? RegistryTypes.GAME_MODE.referenced((ResourceKey) (Object) templateBridge.bridge$gameMode().get()) : null;
         this.difficulty = templateBridge.bridge$difficulty().isPresent() ? RegistryTypes.DIFFICULTY.referenced((ResourceKey) (Object) templateBridge.bridge$difficulty().get()) : null;
         this.serializationBehavior = templateBridge.bridge$serializationBehavior().orElse(null);
@@ -258,7 +260,8 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     }
 
     public LevelStem asLevelStem() {
-        final Registry<DimensionType> dimensionTypeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+        final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
+        final Registry<DimensionType> dimensionTypeRegistry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
         final net.minecraft.resources.ResourceKey<DimensionType> key =
                 net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, (ResourceLocation) (Object) this.worldType.location());
         final LevelStem scratch = new LevelStem(dimensionTypeRegistry.getHolderOrThrow(key), (net.minecraft.world.level.chunk.ChunkGenerator) this.generator);
@@ -402,7 +405,8 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.displayName = null;
             this.worldType = WorldTypes.OVERWORLD;
             this.generator = ChunkGenerator.overworld();
-            final WorldGenSettings generationSettings = BootstrapProperties.worldGenSettings;
+
+            final WorldGenSettings generationSettings = SpongeCommon.server().getWorldData().worldGenSettings();
             this.generationConfig = (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$new(generationSettings.seed(),
                     generationSettings.generateStructures(), generationSettings.generateBonusChest(),
                     new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), null),

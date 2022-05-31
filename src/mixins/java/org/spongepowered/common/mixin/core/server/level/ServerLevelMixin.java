@@ -57,6 +57,7 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.ticks.LevelTicks;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -489,29 +490,20 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
     }
 
-    @Redirect(
-        method = "gameEvent",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/server/level/ServerLevel;postGameEventInRadius(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/gameevent/GameEvent;Lnet/minecraft/core/BlockPos;I)V"
-        )
-    )
-    private void impl$ignoreGameEventsForVanishedEntities(
-        final ServerLevel instance, final Entity entity, final GameEvent gameEvent, final BlockPos blockPos,
-        final int radius
-    ) {
-        if (!(entity instanceof VanishableBridge) || ((VanishableBridge) entity).bridge$vanishState().triggerVibrations()) {
-            this.shadow$postGameEventInRadius(entity, gameEvent, blockPos, radius);
+    @Inject(method = "gameEvent", at = @At("HEAD"), cancellable = true)
+    private void impl$ignoreGameEventsForVanishedEntities(final GameEvent $$0, final Vec3 $$1, final GameEvent.Context $$2, final CallbackInfo ci) {
+        if ($$2.sourceEntity() instanceof VanishableBridge bridge && !bridge.bridge$vanishState().triggerVibrations()) {
+            ci.cancel();
         }
     }
 
     @Redirect(method = "lambda$onBlockStateChange$15",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;add(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/ai/village/poi/PoiType;)V"
+            target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;add(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Holder;)V"
         )
     )
-    private void impl$avoidAddingPoiUpdatesOnUnloadedWorld(final PoiManager manager, final BlockPos pos, final PoiType type) {
+    private void impl$avoidAddingPoiUpdatesOnUnloadedWorld(final PoiManager manager, final BlockPos pos, final Holder<PoiType> type) {
         // Unloaded worlds should not notify PoiManager of changes
         if (!SpongeCommon.server().levelKeys().contains(this.shadow$dimension())) {
             return;
@@ -523,7 +515,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     public String toString() {
         return new StringJoiner(",", ServerLevel.class.getSimpleName() + "[", "]")
                 .add("key=" + this.shadow$dimension())
-                .add("worldType=" + ((WorldType) this.shadow$dimensionType()).key(RegistryTypes.WORLD_TYPE))
+                .add("worldType=" + ((WorldType) (Object) this.shadow$dimensionType()).key(RegistryTypes.WORLD_TYPE))
                 .toString();
     }
 }

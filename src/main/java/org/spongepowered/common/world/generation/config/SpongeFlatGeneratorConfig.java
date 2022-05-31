@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.generation.config;
 
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -35,6 +36,7 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.levelgen.flat.FlatLevelGeneratorSettingsAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 
@@ -126,14 +128,15 @@ public final class SpongeFlatGeneratorConfig {
                 throw new IllegalStateException("Flat generation requires at least 1 Layer!");
             }
             final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-            final Optional<HolderSet<StructureSet>> defaultStructures =FlatLevelGeneratorSettings.getDefault(
-                    BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY),
-                    BootstrapProperties.registries.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY)
+            final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
+            final Optional<HolderSet<StructureSet>> defaultStructures = FlatLevelGeneratorSettings.getDefault(
+                    registryAccess.registryOrThrow(Registry.BIOME_REGISTRY),
+                    registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY)
             ).structureOverrides();
             return (FlatGeneratorConfig) FlatLevelGeneratorSettingsAccessor.invoker$new(
                     biomeRegistry,
                     defaultStructures, (List<FlatLayerInfo>) (Object) this.layers, this.populateLakes,
-                    this.performDecoration, Optional.of(() -> BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY)
+                    this.performDecoration, Optional.of(() -> registryAccess.registryOrThrow(Registry.BIOME_REGISTRY)
                     .get((ResourceLocation) (Object) this.biome.location())));
         }
     }
@@ -143,7 +146,8 @@ public final class SpongeFlatGeneratorConfig {
         @Override
         public FlatGeneratorConfig standard() {
             final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-            final Registry<StructureSet> structureRegistry = BootstrapProperties.registries.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
+            final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
+            final Registry<StructureSet> structureRegistry = registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
             return (FlatGeneratorConfig) FlatLevelGeneratorSettings.getDefault(biomeRegistry, structureRegistry);
         }
     }

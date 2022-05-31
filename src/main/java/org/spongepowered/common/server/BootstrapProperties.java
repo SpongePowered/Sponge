@@ -25,50 +25,9 @@
 package org.spongepowered.common.server;
 
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.registry.RegistryKey;
-import org.spongepowered.api.registry.RegistryReference;
-import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.difficulty.Difficulty;
 
 public final class BootstrapProperties {
 
-    public static WorldGenSettings worldGenSettings;
-    public static RegistryReference<GameMode> gameMode;
-    public static RegistryReference<Difficulty> difficulty;
-    public static SerializationBehavior serializationBehavior;
-    public static boolean pvp;
-    public static boolean hardcore;
-    public static boolean commands;
-    public static int viewDistance = 10;
     public static RegistryAccess registries;
-    public static RegistryOps<?> worldSettingsAdapter;
-    public static boolean isNewLevel = false;
 
-    public static void init(final WorldGenSettings worldGenSettings, final GameType gameType, final net.minecraft.world.Difficulty difficulty,
-            final boolean pvp, final boolean hardcore, final boolean commands, final int viewDistance, final RegistryAccess registries) {
-        BootstrapProperties.worldGenSettings = worldGenSettings;
-        BootstrapProperties.gameMode = RegistryKey.of(RegistryTypes.GAME_MODE, ResourceKey.sponge(gameType.getName())).asDefaultedReference(Sponge::game);
-        BootstrapProperties.difficulty = RegistryKey.of(RegistryTypes.DIFFICULTY, ResourceKey.sponge(difficulty.getKey())).asDefaultedReference(Sponge::game);
-        BootstrapProperties.pvp = pvp;
-        BootstrapProperties.hardcore = hardcore;
-        BootstrapProperties.commands = commands;
-        BootstrapProperties.viewDistance = viewDistance;
-        BootstrapProperties.registries = registries;
-        BootstrapProperties.serializationBehavior = SerializationBehavior.AUTOMATIC;
-    }
-
-    public static <T> void worldSettingsAdapter(final RegistryOps<T> worldSettingsAdapter) {
-        BootstrapProperties.worldSettingsAdapter = worldSettingsAdapter;
-    }
-
-    public static void setIsNewLevel(final boolean isNewLevel) {
-        BootstrapProperties.isNewLevel = isNewLevel;
-    }
 }

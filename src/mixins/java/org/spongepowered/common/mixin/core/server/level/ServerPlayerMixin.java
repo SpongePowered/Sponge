@@ -33,8 +33,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
@@ -44,6 +46,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayerGameMode;
@@ -625,10 +628,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             final Team team = this.shadow$getTeam();
             if (team != null && team.getDeathMessageVisibility() != Team.Visibility.ALWAYS) {
                 if (team.getDeathMessageVisibility() == Team.Visibility.HIDE_FOR_OTHER_TEAMS) {
-                    this.server.getPlayerList().broadcastToTeam(
+                    this.server.getPlayerList().broadcastSystemToTeam(
                             (net.minecraft.server.level.ServerPlayer) (Object) this, component);
                 } else if (team.getDeathMessageVisibility() == Team.Visibility.HIDE_FOR_OWN_TEAM) {
-                    this.server.getPlayerList().broadcastToAllExceptTeam(
+                    this.server.getPlayerList().broadcastSystemToAllExceptTeam(
                             (net.minecraft.server.level.ServerPlayer) (Object) this, component);
                 }
             } else {
@@ -642,7 +645,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             }
         } else {
             this.connection.send(
-                    new ClientboundPlayerCombatKillPacket(this.shadow$getCombatTracker(), TextComponent.EMPTY));
+                    new ClientboundPlayerCombatKillPacket(this.shadow$getCombatTracker(), net.minecraft.network.chat.Component.empty()));
         }
 
         this.shadow$removeEntitiesOnShoulder();
@@ -752,10 +755,17 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         return this.impl$borderListener;
     }
 
-    @Inject(method = "sendMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V",
-            cancellable = true,
-            at = @At("HEAD"))
-    public void sendMessage(final net.minecraft.network.chat.Component p_241151_1_, final ChatType p_241151_2_, final UUID p_241151_3_, final CallbackInfo ci) {
+    @Inject(method = "sendSystemMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/resources/ResourceKey;)V",
+            cancellable = true, at = @At("HEAD"))
+    public void sendMessage(final net.minecraft.network.chat.Component $$0, final ResourceKey<ChatType> $$1, final CallbackInfo ci) {
+        if (this.impl$isFake) {
+            // Don't bother sending messages to fake players
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "sendChatMessage", cancellable = true, at = @At("HEAD"))
+    public void sendMessage(final PlayerChatMessage $$0, final ChatSender $$1, final ResourceKey<ChatType> $$2, final CallbackInfo ci) {
         if (this.impl$isFake) {
             // Don't bother sending messages to fake players
             ci.cancel();

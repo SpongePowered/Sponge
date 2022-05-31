@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracker.world.item;
 
+import net.minecraft.util.RandomSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -65,14 +66,14 @@ public abstract class BoneMealItemMixin_Tracker {
         method = "growCrop",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/BonemealableBlock;performBonemeal(Lnet/minecraft/server/level/ServerLevel;Ljava/util/Random;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"
+            target = "Lnet/minecraft/world/level/block/BonemealableBlock;performBonemeal(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/util/RandomSource;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"
         ),
         require = 0, // Will be removed once the above github issue is resolved with a proper solution
         // Even though we're in a group, expecting this to succeed in forge environments will not work since there is a different mixin
         expect = 0
     )
     private static void tracker$wrapGrowWithPhaseEntry(
-        final BonemealableBlock iGrowable, final ServerLevel worldIn, final Random rand, final BlockPos pos,
+        final BonemealableBlock iGrowable, final ServerLevel worldIn, final RandomSource rand, final BlockPos pos,
         final BlockState state, final ItemStack stack
     ) {
         if (((LevelBridge) worldIn).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_ALL) {

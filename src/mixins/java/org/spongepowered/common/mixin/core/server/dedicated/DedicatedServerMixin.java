@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.server.dedicated;
 
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
+import net.kyori.adventure.text.Component;
+import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
@@ -43,17 +43,25 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
+import org.spongepowered.common.resourcepack.SpongeResourcePack;
+
+import java.net.URISyntaxException;
 
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin extends MinecraftServerMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void impl$setServerOnGame(final Thread $$0, final LevelStorageSource.LevelStorageAccess $$1, final PackRepository $$2,
-        final WorldStem $$3, final DedicatedServerSettings $$4, final DataFixer $$5, final MinecraftSessionService $$6,
-        final GameProfileRepository $$7, final GameProfileCache $$8, final ChunkProgressListenerFactory $$9, final CallbackInfo ci) {
-
+    private void impl$setServerOnGame(Thread $$0, LevelStorageSource.LevelStorageAccess $$1, PackRepository $$2, WorldStem $$3,
+            DedicatedServerSettings $$4, DataFixer $$5, Services $$6, ChunkProgressListenerFactory $$7, CallbackInfo ci) {
+        $$4.getProperties().serverResourcePackInfo.ifPresent(packInfo -> {
+            try {
+                this.impl$resourcePack = SpongeResourcePack.create(packInfo.url(), packInfo.hash(), Component.empty());
+            } catch (final URISyntaxException e) {
+                e.printStackTrace();
+            }
+        });
         SpongeCommon.game().setServer(this);
-        $$8.load();
+        $$6.profileCache().load();
     }
 
     @Override

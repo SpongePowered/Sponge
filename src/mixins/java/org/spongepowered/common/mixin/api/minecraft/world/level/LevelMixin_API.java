@@ -311,7 +311,8 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             // Otherwise send it as a custom sound
             final float volume = sound.volume();
             final double radius = volume > 1.0f ? (16.0f * volume) : 16.0d;
-            final ClientboundCustomSoundPacket packet = new ClientboundCustomSoundPacket(soundKey, soundCategory, new net.minecraft.world.phys.Vec3(x, y, z), volume, sound.pitch());
+            final long random = this.random.nextLong();
+            final ClientboundCustomSoundPacket packet = new ClientboundCustomSoundPacket(soundKey, soundCategory, new net.minecraft.world.phys.Vec3(x, y, z), volume, sound.pitch(), random);
             this.shadow$getServer().getPlayerList().broadcast(null, x, y, z, radius, this.shadow$dimension(), packet);
         }
     }

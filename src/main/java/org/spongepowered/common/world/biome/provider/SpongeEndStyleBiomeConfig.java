@@ -30,6 +30,7 @@ import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.Objects;
@@ -133,7 +134,7 @@ public final class SpongeEndStyleBiomeConfig extends AbstractBiomeProviderConfig
 
         @Override
         public Builder reset() {
-            this.seed = BootstrapProperties.worldGenSettings.seed();
+            this.seed = SpongeCommon.server().getWorldData().worldGenSettings().seed(); // TODO no more custom seed?
             this.endBiome = Biomes.THE_END;
             this.highlandsBiome = Biomes.END_HIGHLANDS;
             this.midlandsBiome = Biomes.END_MIDLANDS;

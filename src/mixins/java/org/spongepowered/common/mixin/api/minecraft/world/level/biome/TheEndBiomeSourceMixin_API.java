@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import org.spongepowered.api.ResourceKey;
@@ -35,6 +36,7 @@ import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import javax.annotation.Nullable;
@@ -57,7 +59,8 @@ public abstract class TheEndBiomeSourceMixin_API extends BiomeSourceMixin_API im
     public EndStyleBiomeConfig config() {
         if (this.api$config == null) {
 
-            var biomeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY);
+            final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
+            var biomeRegistry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
             this.api$config = EndStyleBiomeConfig.builder()
                     .endBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.end.value())))
                     .highlandsBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.highlands.value())))

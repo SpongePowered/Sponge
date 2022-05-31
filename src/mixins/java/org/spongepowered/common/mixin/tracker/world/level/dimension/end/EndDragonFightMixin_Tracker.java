@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.tracker.world.level.dimension.end;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.level.WorldGenLevel;
@@ -53,10 +54,9 @@ public abstract class EndDragonFightMixin_Tracker {
     @Shadow protected abstract EnderDragon shadow$createNewDragon();
     // @formatter:on
 
-    @Redirect(method = "spawnNewGateway(Lnet/minecraft/core/BlockPos;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/feature/ConfiguredFeature;place(Lnet/minecraft/world/level/WorldGenLevel;Lnet/minecraft/world/level/chunk/ChunkGenerator;Ljava/util/Random;Lnet/minecraft/core/BlockPos;)Z"))
+    @Redirect(method = "spawnNewGateway(Lnet/minecraft/core/BlockPos;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/feature/ConfiguredFeature;place(Lnet/minecraft/world/level/WorldGenLevel;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/util/RandomSource;Lnet/minecraft/core/BlockPos;)Z"))
     private boolean tracker$switchToFeatureState(final ConfiguredFeature configuredFeature, final WorldGenLevel worldIn, final ChunkGenerator generator,
-        final Random rand,
-        final BlockPos pos
+        final RandomSource rand, final BlockPos pos
     ) {
 
         try (final FeaturePhaseContext context = GenerationPhase.State.FEATURE_PLACEMENT.createPhaseContext(PhaseTracker.SERVER)) {

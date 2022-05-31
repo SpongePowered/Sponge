@@ -25,8 +25,9 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.google.inject.Injector;
-import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.Component;
 import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -97,7 +98,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     // @formatter:off
     @Shadow @Final private Map<ResourceKey<Level>, ServerLevel> levels;
-    @Shadow @Final private GameProfileCache profileCache;
     @Shadow @Final private static Logger LOGGER;
     @Shadow private int tickCount;
     @Shadow @Final protected LevelStorageSource.LevelStorageAccess storageSource;
@@ -109,12 +109,16 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract PackRepository shadow$getPackRepository();
     @Shadow protected abstract void shadow$detectBundledResources();
+    @Shadow public abstract RegistryAccess.Frozen shadow$registryAccess();
+    @Shadow public abstract GameProfileCache shadow$getProfileCache();
 
-    @Shadow protected abstract void loadLevel();
+    @Shadow protected abstract void loadLevel(); // has overrides!
     // @formatter:on
 
+
+
     private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
-    private @Nullable ResourcePack impl$resourcePack;
+    protected @Nullable ResourcePack impl$resourcePack;
 
     @Override
     public Subject subject() {
@@ -130,19 +134,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             PhaseTracker.SERVER.setThread(thread);
         } catch (final IllegalAccessException e) {
             throw new RuntimeException("Could not initialize the server PhaseTracker!");
-        }
-    }
-
-    @Inject(method = "setResourcePack(Ljava/lang/String;Ljava/lang/String;)V", at = @At("HEAD") )
-    private void impl$createSpongeResourcePackWrapper(final String url, final String hash, final CallbackInfo ci) {
-        if (url.length() == 0) {
-            this.impl$resourcePack = null;
-        } else {
-            try {
-                this.impl$resourcePack = SpongeResourcePack.create(url, hash, Component.empty());
-            } catch (final URISyntaxException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -209,8 +200,8 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
      *
      * @param input original component
      */
-    @Inject(method = "sendMessage", at = @At("HEAD"), cancellable = true)
-    private void impl$useTranslatingLogger(final net.minecraft.network.chat.Component input, final UUID sender, final CallbackInfo ci) {
+    @Inject(method = "sendSystemMessage", at = @At("HEAD"), cancellable = true)
+    private void impl$useTranslatingLogger(final Component input, final CallbackInfo ci) {
         MinecraftServerMixin.LOGGER.info(input.getString());
         ci.cancel();
     }
@@ -299,9 +290,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         // Save the usercache.json file every 10 minutes or if forced to
         if (isForced || this.tickCount % 6000 == 0) {
             // We want to save the username cache json, as we normally bypass it.
-            ((GameProfileCacheBridge) this.profileCache).bridge$setCanSave(true);
-            this.profileCache.save();
-            ((GameProfileCacheBridge) this.profileCache).bridge$setCanSave(false);
+            final GameProfileCache profileCache = this.shadow$getProfileCache();
+            ((GameProfileCacheBridge) profileCache).bridge$setCanSave(true);
+            profileCache.save();
+            ((GameProfileCacheBridge) profileCache).bridge$setCanSave(false);
         }
         // Sponge end
 
@@ -356,9 +348,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "reloadResources", at = @At(value = "RETURN"))
     public void impl$serializeDelayedDataPack(final Collection<String> datapacksToLoad, final CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        cir.getReturnValue().thenAccept(v -> {
-            SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
-        });
+        cir.getReturnValue().thenAccept(v -> SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD, this.shadow$registryAccess()));
     }
 
     @Override

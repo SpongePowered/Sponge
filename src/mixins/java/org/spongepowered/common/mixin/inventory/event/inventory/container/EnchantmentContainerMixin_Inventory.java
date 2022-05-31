@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.inventory.event.inventory.container;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -64,9 +65,9 @@ public abstract class EnchantmentContainerMixin_Inventory {
     private ItemStackSnapshot prevLapis;
 
     // onCraftMatrixChanged lambda
-    @Redirect(method = "lambda$slotsChanged$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getEnchantmentCost(Ljava/util/Random;IILnet/minecraft/world/item/ItemStack;)I"), require = 1)
+    @Redirect(method = "lambda$slotsChanged$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getEnchantmentCost(Lnet/minecraft/util/RandomSource;IILnet/minecraft/world/item/ItemStack;)I"), require = 1)
     private int impl$onCalcItemStackEnchantability(
-        final Random random, final int option, final int power, final ItemStack itemStack) {
+        final RandomSource random, final int option, final int power, final ItemStack itemStack) {
         int levelRequirement = EnchantmentHelper.getEnchantmentCost(random, option, power, itemStack);
         levelRequirement = InventoryEventFactory.callEnchantEventLevelRequirement((EnchantmentMenu)(Object) this, this.enchantmentSeed.get(), option, power, itemStack, levelRequirement);
         return levelRequirement;

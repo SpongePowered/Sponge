@@ -24,82 +24,27 @@
  */
 package org.spongepowered.common.mixin.core.world.level.levelgen;
 
-import static net.minecraft.world.level.levelgen.WorldGenSettings.makeDefaultOverworld;
-
-import net.minecraft.core.Holder;
-import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBridge;
-import org.spongepowered.common.server.BootstrapProperties;
-
-import java.util.Random;
 
 @Mixin(WorldGenSettings.class)
 public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
 
     // @formatter:off
     @Shadow @Final private long seed;
-    @Shadow @Final private boolean generateFeatures;
+    @Shadow @Final private boolean generateStructures;
     @Shadow @Final private boolean generateBonusChest;
     @Shadow @Final private Registry<LevelStem> dimensions;
     // @formatter:on
 
     @Override
     public WorldGenSettings bridge$copy() {
-        return new WorldGenSettings(this.seed, this.generateFeatures, this.generateBonusChest, this.dimensions);
+        return new WorldGenSettings(this.seed, this.generateStructures, this.generateBonusChest, this.dimensions);
     }
 
-    @Redirect(method = "guardExperimental", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Registry;get(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"))
-    private Object impl$useBootstrapDimensionRegistryForGuard(Registry<LevelStem> registry, ResourceKey<LevelStem> registryKey) {
-        if (BootstrapProperties.worldGenSettings == null) {
-            BootstrapProperties.worldGenSettings = (WorldGenSettings) (Object) this;
-        }
-
-        if (BootstrapProperties.worldGenSettings == (Object) this) {
-            return registry.get(registryKey);
-        }
-
-        return BootstrapProperties.worldGenSettings.dimensions().get(registryKey);
-    }
-
-    @Redirect(method = "overworld", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/Registry;get(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"))
-    private Object impl$useBootstrapDimensionRegistryForGenerator(Registry<LevelStem> registry, ResourceKey<LevelStem> registryKey) {
-        if (BootstrapProperties.worldGenSettings == null) {
-            BootstrapProperties.worldGenSettings = (WorldGenSettings) (Object) this;
-        }
-        
-        if (BootstrapProperties.worldGenSettings == (Object) this) {
-            return registry.get(registryKey);
-        }
-
-        return BootstrapProperties.worldGenSettings.dimensions().get(registryKey);
-    }
-
-    /**
-     * @author zidane
-     * @reason Cache the default generator settings as early as possible if a defaulted one
-     */
-    @Overwrite
-    public static WorldGenSettings makeDefault(RegistryAccess $$0) {
-        long $$1 = (new Random()).nextLong();
-        // Sponge Start - Cache the world gen settings as early as possible
-        final WorldGenSettings worldGenSettings = new WorldGenSettings($$1, true, false,
-                WorldGenSettings.withOverworld($$0.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY), DimensionType.defaultDimensions($$0, $$1),
-                        makeDefaultOverworld($$0, $$1)));
-        BootstrapProperties.worldGenSettings = worldGenSettings;
-        // Sponge End
-        return worldGenSettings;
-    }
 }

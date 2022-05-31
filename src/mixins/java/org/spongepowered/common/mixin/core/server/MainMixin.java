@@ -25,43 +25,28 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.Main;
-import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
 
 @Mixin(Main.class)
 public abstract class MainMixin {
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/dedicated/DedicatedServerProperties;getWorldGenSettings(Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/world/level/levelgen/WorldGenSettings;", ordinal = 0))
-    private static WorldGenSettings impl$redirectInitSettings(DedicatedServerProperties instance, RegistryAccess $$02) {
-        var worldGenSettings = instance.getWorldGenSettings($$02);
-        BootstrapProperties.init(worldGenSettings, instance.gamemode, instance.difficulty, instance.pvp, instance.hardcore, true, instance.viewDistance, $$02);
-        return worldGenSettings;
-    }
-
-    @Redirect(method = "lambda$main$1", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess$Writable;Lnet/minecraft/server/packs/resources/ResourceManager;)Lnet/minecraft/resources/RegistryOps;"))
-    private static <T> RegistryOps<T> impl$cacheWorldSettingsAdapter(final DynamicOps<T> ops, final RegistryAccess.Writable registryAccess, final ResourceManager resourceAccess) {
-        final RegistryOps<T> worldSettingsAdapter = RegistryOps.createAndLoad(ops, registryAccess, resourceAccess);
-        BootstrapProperties.worldSettingsAdapter(worldSettingsAdapter);
-        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
-        return worldSettingsAdapter;
+    @Redirect(method = "lambda$main$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess$Writable;Lnet/minecraft/server/packs/resources/ResourceManager;)Lnet/minecraft/resources/RegistryOps;"))
+    private static <T> RegistryOps<T> impl$serializePacksBeforeLoad(DynamicOps<T> $$0, RegistryAccess.Writable $$1, ResourceManager $$2) {
+        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD, $$1);
+        return RegistryOps.createAndLoad($$0, $$1, $$2);
     }
 
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
@@ -75,9 +60,4 @@ public abstract class MainMixin {
         return datapackDir;
     }
 
-    @Redirect(method = "lambda$main$1", at = @At(value = "NEW", target = "net/minecraft/world/level/storage/PrimaryLevelData"))
-    private static PrimaryLevelData impl$setIsNewLevel(final LevelSettings settings, final WorldGenSettings generationSettings, final Lifecycle lifecycle) {
-        BootstrapProperties.setIsNewLevel(true);
-        return new PrimaryLevelData(settings, generationSettings, lifecycle);
-    }
 }

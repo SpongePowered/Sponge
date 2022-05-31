@@ -49,6 +49,7 @@ import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
 import org.spongepowered.api.world.biome.provider.ConfigurableBiomeProvider;
 import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.biome.MultiNoiseBiomeSourceAccessor;
 import org.spongepowered.common.accessor.world.level.biome.TheEndBiomeSourceAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
@@ -109,7 +110,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     @Override
     public ConfigurableBiomeProvider<EndStyleBiomeConfig> end() {
         final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-        final long seed = BootstrapProperties.worldGenSettings.seed(); // TODO no more custom seed?
+        final long seed = SpongeCommon.server().getWorldData().worldGenSettings().seed(); // TODO no more custom seed?
         return (ConfigurableBiomeProvider<EndStyleBiomeConfig>) new TheEndBiomeSource(biomeRegistry);
     }
 

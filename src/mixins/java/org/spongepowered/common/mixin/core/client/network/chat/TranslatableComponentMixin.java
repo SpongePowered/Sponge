@@ -29,7 +29,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,14 +43,14 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-@Mixin(TranslatableComponent.class)
+@Mixin(TranslatableContents.class)
 public abstract class TranslatableComponentMixin {
 
     @Shadow @Final private String key;
     private String impl$lastLocale;
     private Component impl$translated = (Component) this;
 
-    @Inject(method = "visitSelf(Lnet/minecraft/network/chat/FormattedText$StyledContentConsumer;Lnet/minecraft/network/chat/Style;)Ljava/util/Optional;", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "visit(Lnet/minecraft/network/chat/FormattedText$StyledContentConsumer;Lnet/minecraft/network/chat/Style;)Ljava/util/Optional;", at = @At("HEAD"), cancellable = true)
     private <T> void impl$translateForRendering(final FormattedText.StyledContentConsumer<T> visitor, final Style style, final CallbackInfoReturnable<Optional<T>> ci) {
         final String currentLocale = Minecraft.getInstance().options.languageCode;
         if (!Objects.equals(currentLocale, this.impl$lastLocale)) { // retranslate
@@ -58,7 +58,7 @@ public abstract class TranslatableComponentMixin {
             final Locale actualLocale = Locales.of(currentLocale);
 
             // Only do a deep copy if actually necessary
-            if (GlobalTranslator.get().translate(this.key, actualLocale) != null) {
+            if (GlobalTranslator.translator().translate(this.key, actualLocale) != null) {
                 this.impl$translated = NativeComponentRenderer.apply((Component) this, Locales.of(currentLocale));
             } else {
                 this.impl$translated = (Component) this;
@@ -66,8 +66,8 @@ public abstract class TranslatableComponentMixin {
         }
 
         // If the result is a non-translated component, then Adventure found a translation that we should use
-        if (!(this.impl$translated instanceof TranslatableComponent)) {
-            ci.setReturnValue(this.impl$translated.visitSelf(visitor, style));
+        if (!(this.impl$translated.getContents() instanceof TranslatableContents)) {
+            ci.setReturnValue(this.impl$translated.getContents().visit(visitor, style));
         }
     }
 }

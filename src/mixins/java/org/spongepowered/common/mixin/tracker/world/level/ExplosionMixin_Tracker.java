@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.Util;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -64,7 +66,7 @@ public abstract class ExplosionMixin_Tracker {
     @Shadow @Final private double z;
     @Shadow @Final private Explosion.BlockInteraction blockInteraction;
     @Shadow @Final private float radius;
-    @Shadow @Final private List<BlockPos> toBlow;
+    @Shadow @Final private ObjectArrayList<BlockPos> toBlow;
 
     @Shadow @Final private boolean fire;
     @Shadow @Final private Random random;
@@ -116,7 +118,7 @@ public abstract class ExplosionMixin_Tracker {
             // Sponge Start - Forward changes through a WorldPipeline to associate side effects
             // Vanilla - uses a list of itemstacks to do a bunch of pre-merging
             // ObjectArrayList<Pair<ItemStack, BlockPos>> objectarraylist = new ObjectArrayList<>();
-            Collections.shuffle(this.toBlow, this.level.random);
+            Util.shuffle(this.toBlow, this.level.random);
 
             for (final BlockPos blockpos : this.toBlow) {
                 final BlockState blockstate = this.level.getBlockState(blockpos);

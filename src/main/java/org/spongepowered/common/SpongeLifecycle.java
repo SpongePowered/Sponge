@@ -134,6 +134,7 @@ public final class SpongeLifecycle implements Lifecycle {
 
     @Override
     public void callRegisterDataPackValueEvent(final Path dataPacksDirectory) {
+        // TODO call from WorldOpenFlow#createPackRepository for Client?
         SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents(dataPacksDirectory);
     }
 

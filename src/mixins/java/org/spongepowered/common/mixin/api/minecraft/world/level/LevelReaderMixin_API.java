@@ -77,7 +77,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default WorldType worldType() {
-        return (WorldType) this.shadow$dimensionType();
+        return (WorldType) (Object) this.shadow$dimensionType();
     }
 
     @Override

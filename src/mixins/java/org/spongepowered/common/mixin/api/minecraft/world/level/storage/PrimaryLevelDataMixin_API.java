@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.storage;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -40,6 +41,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -89,12 +91,12 @@ public abstract class PrimaryLevelDataMixin_API implements WorldData, ServerWorl
 
     @Override
     public WorldType worldType() {
-        return (WorldType) ((PrimaryLevelDataBridge) this).bridge$dimensionType();
+        return (WorldType) (Object) ((PrimaryLevelDataBridge) this).bridge$dimensionType();
     }
 
     @Override
     public void setWorldType(final WorldType worldType) {
-        ((PrimaryLevelDataBridge) this).bridge$dimensionType((DimensionType) Objects.requireNonNull(worldType, "worldType"), true);
+        ((PrimaryLevelDataBridge) this).bridge$dimensionType((DimensionType) (Object) Objects.requireNonNull(worldType, "worldType"), true);
     }
 
     @Override
@@ -114,7 +116,7 @@ public abstract class PrimaryLevelDataMixin_API implements WorldData, ServerWorl
 
     @Override
     public boolean pvp() {
-        return ((PrimaryLevelDataBridge) this).bridge$pvp().orElse(BootstrapProperties.pvp);
+        return ((PrimaryLevelDataBridge) this).bridge$pvp().orElseGet(() -> ((DedicatedServer) SpongeCommon.server()).getProperties().pvp);
     }
 
     @Override
@@ -154,7 +156,7 @@ public abstract class PrimaryLevelDataMixin_API implements WorldData, ServerWorl
 
     @Override
     public int viewDistance() {
-        return ((PrimaryLevelDataBridge) this).bridge$viewDistance().orElse(BootstrapProperties.viewDistance);
+        return ((PrimaryLevelDataBridge) this).bridge$viewDistance().orElseGet(() -> ((DedicatedServer) SpongeCommon.server()).getProperties().viewDistance);
     }
 
     @Override

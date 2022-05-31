@@ -53,9 +53,10 @@ public abstract class BiomeSourceMixin_API implements org.spongepowered.api.worl
         return (List<Biome>) (Object) this.shadow$possibleBiomes();
     }
 
-    @Override
+    /* TODO sampler is not available here?
     public Set<Biome> within(final int x, final int y, final int z, final int size) {
         final Climate.Sampler sampler = ((BiomeSourceBridge) (Object) this).bridge$chunkGenerator().climateSampler();
         return (Set<Biome>) (Object) this.shadow$getBiomesWithin(x, y, z, size, sampler);
     }
+    */
 }
