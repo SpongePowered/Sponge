@@ -111,7 +111,6 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Shadow public abstract void shadow$save(@Nullable ProgressListener p_217445_1_, boolean p_217445_2_, boolean p_217445_3_);
     @Shadow public abstract void shadow$unload(LevelChunk p_217466_1_);
-    @Shadow public abstract void shadow$playSound(@Nullable Player p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundSource p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow public abstract ServerChunkCache shadow$getChunkSource();
     @Nonnull @Shadow public abstract MinecraftServer shadow$getServer();
     @Nullable @Shadow public abstract Entity shadow$getEntity(UUID p_217461_1_);

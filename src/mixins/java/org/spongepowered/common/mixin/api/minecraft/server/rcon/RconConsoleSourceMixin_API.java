@@ -51,7 +51,7 @@ public abstract class RconConsoleSourceMixin_API implements RconConsoleSourceBri
         .build();
 
     // @formatter:off
-    @Shadow public abstract void shadow$sendMessage(net.minecraft.network.chat.Component param0, UUID param1);
+    @Shadow public abstract void shadow$sendSystemMessage(final net.minecraft.network.chat.Component $$0);
     // @formatter:on
 
     @Override
@@ -89,7 +89,7 @@ public abstract class RconConsoleSourceMixin_API implements RconConsoleSourceBri
 
     @Override
     public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
-        this.shadow$sendMessage(SpongeAdventure.asVanilla(message), identity.uuid());
+        this.shadow$sendSystemMessage(SpongeAdventure.asVanilla(message));
     }
 
     @Override

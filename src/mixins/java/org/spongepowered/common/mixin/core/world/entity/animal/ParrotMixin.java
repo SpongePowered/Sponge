@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.animal;
 
+import net.minecraft.util.RandomSource;
 import org.spongepowered.api.entity.living.animal.Parrot;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -33,7 +34,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.AgableMobMixin;
-import java.util.Random;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -42,8 +42,8 @@ import net.minecraft.world.item.ItemStack;
 public abstract class ParrotMixin extends AgableMobMixin {
 
     @Redirect(method = "mobInteract",
-        at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
-    private int impl$TameEntityAndGetRandom(Random rand, int bound, Player player, InteractionHand hand) {
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I"))
+    private int impl$TameEntityAndGetRandom(final RandomSource rand, final int bound, final Player player, final InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         int random = rand.nextInt(bound);
         if (random == 0) {

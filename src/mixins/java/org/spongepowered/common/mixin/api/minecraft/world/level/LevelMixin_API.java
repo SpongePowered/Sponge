@@ -36,10 +36,10 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -49,7 +49,6 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.storage.LevelData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -87,7 +86,6 @@ import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.level.chunk.SpongeEmptyChunk;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -103,7 +101,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -112,7 +109,7 @@ import java.util.stream.Stream;
 public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W, L>> implements World<W, L>, SpongeRegistryHolder, AutoCloseable {
 
     // @formatter:off
-    @Shadow public @Final Random random;
+    @Shadow public @Final RandomSource random;
     @Shadow @Final protected List<TickingBlockEntity> blockEntityTickers;
 
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();

@@ -35,20 +35,19 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.SeedUtil;
 
-import java.util.Objects;
-
 @Mixin(WorldGenSettings.class)
 @Implements(@Interface(iface = WorldGenerationConfig.class, prefix = "worldGenerationConfig$", remap = Remap.NONE))
 public abstract class WorldGenSettingsMixin_API implements WorldGenerationConfig.Mutable {
 
     // @formatter:off
     @org.spongepowered.asm.mixin.Mutable @Shadow @Final private long seed;
-    @org.spongepowered.asm.mixin.Mutable @Shadow @Final private boolean generateFeatures;
+    @org.spongepowered.asm.mixin.Mutable @Shadow @Final private boolean generateStructures;
     @org.spongepowered.asm.mixin.Mutable @Shadow @Final private boolean generateBonusChest;
 
     @Shadow public abstract long shadow$seed();
-    @Shadow public abstract boolean shadow$generateFeatures();
     @Shadow public abstract boolean shadow$generateBonusChest();
+    @Shadow public abstract boolean shadow$generateStructures();
+
     // @formatter:on
 
     @Intrinsic
@@ -68,12 +67,12 @@ public abstract class WorldGenSettingsMixin_API implements WorldGenerationConfig
 
     @Intrinsic
     public boolean worldGenerationConfig$generateFeatures() {
-        return this.shadow$generateFeatures();
+        return this.shadow$generateStructures();
     }
 
     @Override
     public void setGenerateFeatures(final boolean generateFeatures) {
-        this.generateFeatures = generateFeatures;
+        this.generateStructures = generateFeatures;
     }
 
     @Intrinsic

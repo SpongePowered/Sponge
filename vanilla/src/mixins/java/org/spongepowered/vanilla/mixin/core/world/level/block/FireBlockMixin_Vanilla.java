@@ -25,6 +25,7 @@
 package org.spongepowered.vanilla.mixin.core.world.level.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.FireBlock;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,7 +48,7 @@ public class FireBlockMixin_Vanilla {
             expect = 0,
             cancellable = true)
     private void impl$onCatchFirePreCheck(
-        final Level world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
+        final Level world, final BlockPos pos, final int chance, final RandomSource random, final int age, final CallbackInfo callbackInfo) {
         if (!world.isClientSide) {
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
@@ -63,7 +64,7 @@ public class FireBlockMixin_Vanilla {
             expect = 0,
             cancellable = true)
     private void impl$onCatchFirePreCheckOther(
-        final Level world, final BlockPos pos, final int chance, final Random random, final int age, final CallbackInfo callbackInfo) {
+        final Level world, final BlockPos pos, final int chance, final RandomSource random, final int age, final CallbackInfo callbackInfo) {
         if (!world.isClientSide) {
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();

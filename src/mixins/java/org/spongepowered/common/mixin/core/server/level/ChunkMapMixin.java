@@ -168,7 +168,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         }
     }
 
-    @Redirect(method = "lambda$protoChunkToFullChunk$29",
+    @Redirect(method = "lambda$protoChunkToFullChunk$32",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V"),
             slice = @Slice(
                     from = @At(value = "INVOKE", remap = false, target = "Lit/unimi/dsi/fastutil/longs/LongSet;add(J)Z"),

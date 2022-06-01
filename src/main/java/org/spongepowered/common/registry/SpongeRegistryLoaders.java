@@ -415,8 +415,8 @@ public final class SpongeRegistryLoaders {
         return RegistryLoader.of(l -> {
             l.add(CommandTreeNodeTypes.ANGLE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.BLOCK_POS, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.BLOCK_PREDICATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.BLOCK_STATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            // TODO NPE in fn l.add(CommandTreeNodeTypes.BLOCK_PREDICATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            // TODO NPE in fn l.add(CommandTreeNodeTypes.BLOCK_STATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.BOOL, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.COLOR, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.COLUMN_POS, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
@@ -433,9 +433,9 @@ public final class SpongeRegistryLoaders {
             l.add(CommandTreeNodeTypes.INTEGER, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new IntegerArgumentInfo()));
             l.add(CommandTreeNodeTypes.INT_RANGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.ITEM_ENCHANTMENT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.ITEM_PREDICATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            // TODO NPE in fn l.add(CommandTreeNodeTypes.ITEM_PREDICATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.ITEM_SLOT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.ITEM_STACK, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            // TODO NPE in fn l.add(CommandTreeNodeTypes.ITEM_STACK, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.LONG, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new LongArgumentInfo()));
             l.add(CommandTreeNodeTypes.MESSAGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.MOB_EFFECT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
@@ -912,8 +912,7 @@ public final class SpongeRegistryLoaders {
         return RegistryLoader.of(l -> {
             l.add(ResourceKeyedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
             l.add(ResourceKeyedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);
-            l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> ClientNativeArgumentParser.createConverter(k, BlockStateArgument.block(null), // TODO
-                    (reader, cause, state) -> (BlockState) state.getState()));
+            //l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> ClientNativeArgumentParser.createConverter(k, BlockStateArgument.block(null), /* TODO */ (reader, cause, state) -> (BlockState) state.getState()));
             l.add(ResourceKeyedValueParameters.BOOLEAN, k -> ClientNativeArgumentParser.createIdentity(k, BoolArgumentType.bool()));
             l.add(ResourceKeyedValueParameters.COLOR, SpongeColorValueParameter::new);
             l.add(ResourceKeyedValueParameters.DATA_CONTAINER, SpongeDataContainerValueParameter::new);
@@ -924,7 +923,7 @@ public final class SpongeRegistryLoaders {
             l.add(ResourceKeyedValueParameters.GAME_PROFILE, SpongeGameProfileValueParameter::new);
             l.add(ResourceKeyedValueParameters.INTEGER, k -> ClientNativeArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
             l.add(ResourceKeyedValueParameters.IP, SpongeIPAddressValueParameter::new);
-            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(null), /* TODO */ (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
+            //l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(null), /* TODO */ (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
             l.add(ResourceKeyedValueParameters.LOCATION, SpongeServerLocationValueParameter::new);
             l.add(ResourceKeyedValueParameters.LONG, k -> ClientNativeArgumentParser.createIdentity(k, LongArgumentType.longArg()));
             l.add(ResourceKeyedValueParameters.MANY_ENTITIES, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities((CommandSourceStack) cause).stream().map(x -> (Entity) x).collect(Collectors.toList())));

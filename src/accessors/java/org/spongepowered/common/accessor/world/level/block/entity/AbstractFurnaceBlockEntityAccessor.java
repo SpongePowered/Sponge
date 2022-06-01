@@ -25,10 +25,11 @@
 package org.spongepowered.common.accessor.world.level.block.entity;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -56,7 +57,7 @@ public interface AbstractFurnaceBlockEntityAccessor {
 
     @Accessor("cookingTotalTime") void accessor$cookingTotalTime(final int cookingTotalTime);
 
-    @Accessor("recipeType") RecipeType<? extends AbstractCookingRecipe> accessor$recipeType();
+    @Accessor("quickCheck")  RecipeManager.CachedCheck<Container, ? extends AbstractCookingRecipe> accessor$quickCheck();
 
     @Invoker("canBurn")
     static boolean invoker$canBurn(@Nullable final Recipe<?> var0, final NonNullList<ItemStack> var1, final int var2) {

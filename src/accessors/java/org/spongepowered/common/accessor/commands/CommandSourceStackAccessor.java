@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.commands;
 
 import com.mojang.brigadier.ResultConsumer;
+import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -38,13 +39,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
+import javax.annotation.Nullable;
+
 @Mixin(CommandSourceStack.class)
 public interface CommandSourceStackAccessor {
 
     @Invoker("<init>")
-    static CommandSourceStack invoker$new(final CommandSource source, final Vec3 worldPosition, final Vec2 rotation, final ServerLevel level,
-            final int permissionLevel, final String textName, final Component displayName, final MinecraftServer server, final Entity entity,
-            final boolean silent, final ResultConsumer<CommandSourceStack> consumer, final EntityAnchorArgument.Anchor anchor) {
+    static CommandSourceStack invoker$new(CommandSource $$0, Vec3 $$1, Vec2 $$2, ServerLevel $$3, int $$4, String $$5, Component $$6, MinecraftServer $$7, @Nullable
+            Entity $$8, boolean $$9, @Nullable ResultConsumer<CommandSourceStack> $$10, EntityAnchorArgument.Anchor $$11, CommandSigningContext $$12) {
         throw new UntransformedInvokerError();
     }
 

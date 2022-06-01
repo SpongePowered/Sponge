@@ -50,7 +50,7 @@ public abstract class LevelStorageSourceMixin_Vanilla {
 
     @SuppressWarnings("deprecation")
     @Redirect(
-            method = "lambda$getLevelData$1",
+            method = "lambda$getLevelData$5",
             slice = @Slice(
                     from = @At(
                             value = "INVOKE",
@@ -73,7 +73,7 @@ public abstract class LevelStorageSourceMixin_Vanilla {
     }
 
     @Redirect(
-            method = "lambda$getLevelData$1",
+            method = "lambda$getLevelData$5",
             slice = @Slice(
                     from = @At(
                             value = "INVOKE",

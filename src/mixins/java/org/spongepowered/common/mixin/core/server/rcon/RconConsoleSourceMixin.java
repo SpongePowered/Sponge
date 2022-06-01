@@ -72,8 +72,8 @@ public abstract class RconConsoleSourceMixin implements CommandSourceProviderBri
      * Add newlines between output lines for a command
      * @param component text coming in
      */
-    @Inject(method = "sendMessage", at = @At("RETURN"))
-    private void impl$addNewlines(final net.minecraft.network.chat.Component component, final UUID uuid, final CallbackInfo ci) {
+    @Inject(method = "sendSystemMessage", at = @At("RETURN"))
+    private void impl$addNewlines(final net.minecraft.network.chat.Component component, final CallbackInfo ci) {
         this.buffer.append('\n');
     }
 

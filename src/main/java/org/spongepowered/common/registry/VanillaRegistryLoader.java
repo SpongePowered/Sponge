@@ -96,7 +96,6 @@ import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.MushroomCow_MushroomTypeAccessor;
 import org.spongepowered.common.accessor.world.item.ArmorMaterialsAccessor;
 import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
-import org.spongepowered.common.accessor.world.level.block.entity.BannerPatternAccessor;
 import org.spongepowered.common.advancement.criterion.SpongeDummyTrigger;
 import org.spongepowered.common.advancement.criterion.SpongeScoreTrigger;
 

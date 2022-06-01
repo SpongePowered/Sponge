@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.commands;
 
 import com.mojang.brigadier.ResultConsumer;
+import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -66,11 +67,6 @@ import java.util.function.Supplier;
 @Mixin(CommandSourceStack.class)
 public abstract class CommandSourceStackMixin implements CommandSourceStackBridge {
 
-    private static final String PROTECTED_CTOR = "(Lnet/minecraft/commands/CommandSource;Lnet/minecraft/world/phys/Vec3;"
-            + "Lnet/minecraft/world/phys/Vec2;Lnet/minecraft/server/level/ServerLevel;ILjava/lang/String;Lnet/minecraft/network/chat/Component;"
-            + "Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/entity/Entity;ZLcom/mojang/brigadier/ResultConsumer;"
-            + "Lnet/minecraft/commands/arguments/EntityAnchorArgument$Anchor;)";
-    private static final String PROTECTED_CTOR_METHOD = "<init>" + CommandSourceStackMixin.PROTECTED_CTOR + "V";
 
     @Shadow @Final private CommandSource source;
     @Shadow @Final @Mutable private Vec3 worldPosition;
@@ -86,24 +82,17 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     @Shadow @Final private boolean silent;
     @Shadow @Final private ResultConsumer<CommandSourceStack> consumer;
     @Shadow @Final private EntityAnchorArgument.Anchor anchor;
+    @Shadow @Final private CommandSigningContext signingContext;
+
     private Cause impl$cause;
     @Nullable private Supplier<String> impl$potentialPermissionNode = null;
 
-    @Inject(method = CommandSourceStackMixin.PROTECTED_CTOR_METHOD, at = @At("RETURN"))
+    @Inject(method = "<init>(Lnet/minecraft/commands/CommandSource;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec2;Lnet/minecraft/server/level/ServerLevel;ILjava/lang/String;Lnet/minecraft/network/chat/Component;Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/entity/Entity;ZLcom/mojang/brigadier/ResultConsumer;Lnet/minecraft/commands/arguments/EntityAnchorArgument$Anchor;Lnet/minecraft/commands/CommandSigningContext;)V",
+            at = @At("RETURN"))
     private void impl$setCauseOnConstruction(
-            final CommandSource p_i49553_1_,
-            final Vec3 p_i49553_2_,
-            final Vec2 p_i49553_3_,
-            final ServerLevel p_i49553_4_,
-            final int p_i49553_5_,
-            final String p_i49553_6_,
-            final Component p_i49553_7_,
-            final MinecraftServer p_i49553_8_,
-            @Nullable final Entity p_i49553_9_,
-            final boolean p_i49553_10_,
-            final ResultConsumer<CommandSourceStack> p_i49553_11_,
-            final EntityAnchorArgument.Anchor p_i49553_12_,
-            final CallbackInfo ci
+            final CommandSource $$0, final Vec3 $$1, final Vec2 $$2, final ServerLevel $$3, final int $$4, final String $$5,
+            final Component $$6, final MinecraftServer $$7, final Entity $$8, final boolean $$9, final ResultConsumer $$10,
+            final EntityAnchorArgument.Anchor $$11, final CommandSigningContext $$12, final CallbackInfo ci
     ) {
         this.impl$cause = PhaseTracker.getCauseStackManager().currentCause();
         final EventContext context = this.impl$cause.context();
@@ -151,7 +140,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     public CommandCause bridge$withCurrentCause() {
         // Cause is set in ctor.
         return (CommandCause) CommandSourceStackAccessor.invoker$new(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel,
-                this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor);
+                this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor, this.signingContext);
     }
 
     /*

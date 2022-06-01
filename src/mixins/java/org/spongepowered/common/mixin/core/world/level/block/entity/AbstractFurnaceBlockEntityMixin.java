@@ -27,9 +27,11 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
@@ -69,9 +71,10 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     @Shadow protected NonNullList<ItemStack> items;
     @Shadow int cookingProgress;
     @Shadow int cookingTotalTime;
-    @Shadow @Final private RecipeType<? extends AbstractCookingRecipe> recipeType;
 
     // @Formatter:on
+
+    @Shadow @Final private RecipeManager.CachedCheck<Container, ? extends AbstractCookingRecipe> quickCheck;
 
     // Shrink Fuel
     @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
@@ -103,8 +106,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     }
 
     private AbstractCookingRecipe impl$getCurrentRecipe() {
-        return this.level.getRecipeManager().getRecipeFor((RecipeType<AbstractCookingRecipe>) this.recipeType,
-                (AbstractFurnaceBlockEntity) (Object) this, this.level).orElse(null);
+        return this.quickCheck.getRecipeFor((AbstractFurnaceBlockEntity) (Object) this, this.level).orElse(null);
     }
 
     // Tick up and Start
@@ -160,7 +162,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         method = "setItem",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;getTotalCookTime(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/Container;)I"
+            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;getTotalCookTime(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;)I"
         )
     )
     private void impl$interruptSmelt(final CallbackInfo ci) {

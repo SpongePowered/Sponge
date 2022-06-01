@@ -159,7 +159,6 @@
         "world.level.block.EnderChestBlockAccessor",
         "world.level.block.JukeboxBlockAccessor",
         "world.level.block.entity.AbstractFurnaceBlockEntityAccessor",
-        "world.level.block.entity.BannerPatternAccessor",
         "world.level.block.entity.BaseContainerBlockEntityAccessor",
         "world.level.block.entity.BeaconBlockEntityAccessor",
         "world.level.block.entity.BlockEntityAccessor",

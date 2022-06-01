@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.animal;
 
+import net.minecraft.util.RandomSource;
 import org.spongepowered.api.entity.living.animal.Wolf;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -59,8 +60,8 @@ public abstract class WolfMixin extends AgableMobMixin implements AggressiveEnti
     }
 
     @Redirect(method = "mobInteract",
-        at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
-    private int impl$ChangeRandomForTameEvent(Random rand, int bound, Player player, InteractionHand hand) {
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I"))
+    private int impl$ChangeRandomForTameEvent(final RandomSource rand, final int bound, final Player player, final InteractionHand hand) {
         int random = rand.nextInt(bound);
         ItemStack stack = player.getItemInHand(hand);
         if (random == 0) {

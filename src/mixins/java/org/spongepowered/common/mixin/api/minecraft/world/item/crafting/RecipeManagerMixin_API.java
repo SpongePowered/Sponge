@@ -102,9 +102,10 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
     public Optional<Recipe> findMatchingRecipe(final Inventory inventory, final ServerWorld world) {
         Preconditions.checkNotNull(inventory);
         Preconditions.checkNotNull(world);
-        if (inventory instanceof AbstractFurnaceBlockEntity) {
-            final net.minecraft.world.item.crafting.RecipeType<? extends AbstractCookingRecipe> type = ((AbstractFurnaceBlockEntityAccessor) inventory).accessor$recipeType();
-            return this.<Container, AbstractCookingRecipe>shadow$getRecipeFor((net.minecraft.world.item.crafting.RecipeType<AbstractCookingRecipe>) type, (Container) inventory, (net.minecraft.world.level.Level) world).map(Recipe.class::cast);
+        if (inventory instanceof AbstractFurnaceBlockEntity furnace) {
+
+            final Optional<? extends AbstractCookingRecipe> recipeFor = ((AbstractFurnaceBlockEntityAccessor) inventory).accessor$quickCheck().getRecipeFor(furnace, furnace.getLevel());
+            return recipeFor.map(Recipe.class::cast);
         }
         if (inventory instanceof CampfireBlockEntity) {
             return this.shadow$getRecipeFor(net.minecraft.world.item.crafting.RecipeType.CAMPFIRE_COOKING, (Container) inventory, (net.minecraft.world.level.Level) world).map(Recipe.class::cast);

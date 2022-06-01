@@ -68,8 +68,8 @@ public abstract class ServerPlayerGameModeMixin implements ServerPlayerGameModeB
      * manager's processes.
     */
     @Inject(method = "handleBlockBreakAction", at = @At("HEAD"), cancellable = true)
-    private void impl$cancelIfInteractBlockPrimaryCancelled(final BlockPos pos, final ServerboundPlayerActionPacket.Action action,
-                                                            final Direction direction, final int maxY, final CallbackInfo ci) {
+    private void impl$cancelIfInteractBlockPrimaryCancelled(final BlockPos $$0, final ServerboundPlayerActionPacket.Action $$1, final Direction $$2,
+            final int $$3, final int $$4, final CallbackInfo ci) {
         if (this.impl$interactBlockLeftClickEventCancelled) {
             this.impl$interactBlockLeftClickEventCancelled = false;
             ci.cancel();

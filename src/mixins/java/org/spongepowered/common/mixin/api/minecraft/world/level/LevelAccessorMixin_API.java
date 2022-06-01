@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -65,7 +66,7 @@ public interface LevelAccessorMixin_API<P extends WorldLike<P>> extends WorldLik
 
     //@formatter:off
     @Shadow boolean shadow$hasChunk(int p_217354_1_, int p_217354_2_);
-    @Shadow Random shadow$getRandom();
+    @Shadow RandomSource shadow$getRandom();
     @Shadow LevelData shadow$getLevelData();
     //@formatter:on
 
@@ -122,7 +123,9 @@ public interface LevelAccessorMixin_API<P extends WorldLike<P>> extends WorldLik
 
     @Intrinsic
     default Random worldLike$random() {
-        return this.shadow$getRandom();
+        // TODO randomsource
+        final RandomSource randomSource = this.shadow$getRandom();
+        return null;
     }
 
     // WorldLike

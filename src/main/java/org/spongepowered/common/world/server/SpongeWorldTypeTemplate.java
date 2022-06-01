@@ -36,7 +36,6 @@ import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
@@ -77,13 +76,10 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             .apply(r, r.stable(SpongeDataSection::new))
         );
 
-    public static Codec<DimensionType> DIRECT_CODEC;
-
-    public static void internalCodec(final Codec<DimensionType> internalCodec) {
-        SpongeWorldTypeTemplate.DIRECT_CODEC = new MapCodec.MapCodecCodec<DimensionType>(new SpongeDataCodec<>(internalCodec,
-            SpongeWorldTypeTemplate.SPONGE_CODEC, (type, data) -> ((DimensionTypeBridge) (Object) type).bridge$decorateData(data),
-                                                          type -> ((DimensionTypeBridge) (Object) type).bridge$createData()));
-    }
+    public static Codec<DimensionType> DIRECT_CODEC = new MapCodec.MapCodecCodec<DimensionType>(
+            new SpongeDataCodec<>(DimensionType.DIRECT_CODEC, SpongeWorldTypeTemplate.SPONGE_CODEC,
+                    (type, data) -> ((DimensionTypeBridge) (Object) type).bridge$decorateData(data),
+                    type -> ((DimensionTypeBridge) (Object) type).bridge$createData()));
 
     protected SpongeWorldTypeTemplate(final BuilderImpl builder) {
         super(builder.key);
