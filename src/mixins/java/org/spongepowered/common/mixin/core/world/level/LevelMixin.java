@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.level;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.Mob;
@@ -79,6 +80,8 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
     @Shadow protected float rainLevel;
     @Shadow protected float oThunderLevel;
     @Shadow protected float thunderLevel;
+    @Shadow @Final public RandomSource random;
+    @Shadow @Final protected WritableLevelData levelData;
 
     @Shadow public abstract LevelData shadow$getLevelData();
     @Shadow public abstract void shadow$updateSkyBrightness();
@@ -89,10 +92,10 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
     @Shadow public abstract boolean shadow$isRaining();
     @Shadow @javax.annotation.Nullable public abstract net.minecraft.world.level.block.entity.BlockEntity shadow$getBlockEntity(BlockPos p_175625_1_);
     @Shadow public abstract WorldBorder shadow$getWorldBorder();
-    @Shadow protected abstract void shadow$postGameEventInRadius(@javax.annotation.Nullable net.minecraft.world.entity.Entity $$0, GameEvent $$1, BlockPos $$2, int $$3);
+    //@Shadow protected abstract void shadow$postGameEventInRadius(@javax.annotation.Nullable net.minecraft.world.entity.Entity $$0, GameEvent $$1, BlockPos $$2, int $$3);
     // @formatter on
 
-    @Shadow @Final protected WritableLevelData levelData;
+
 
 
     @Override
@@ -221,7 +224,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         if (naturally && entity instanceof Mob) {
             // Adding the default equipment
             final DifficultyInstance difficulty = this.shadow$getCurrentDifficultyAt(new BlockPos(x, y, z));
-            ((MobAccessor)entity).invoker$populateDefaultEquipmentSlots(difficulty);
+            ((MobAccessor)entity).invoker$populateDefaultEquipmentSlots(this.random, difficulty);
         }
 
         if (entity instanceof Painting) {

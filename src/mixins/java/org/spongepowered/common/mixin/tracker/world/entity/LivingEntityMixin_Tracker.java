@@ -59,7 +59,6 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
     @Shadow protected int lastHurtByPlayerTime;
 
     @Shadow protected abstract void shadow$tickDeath();
-    @Shadow protected abstract int shadow$getExperienceReward(Player player);
     @Shadow protected abstract boolean shadow$shouldDropExperience();
     @Shadow protected abstract void shadow$dropFromLootTable(DamageSource damageSourceIn, boolean p_213354_2_);
     @Shadow protected abstract void shadow$dropEquipment();
@@ -72,7 +71,6 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
     @Shadow public abstract void shadow$swing(InteractionHand p_184609_1_);
     @Shadow protected abstract void shadow$pushEntities();
     @Shadow public abstract float shadow$getHealth();
-    @Shadow public abstract Random shadow$getRandom();
     @Shadow public int deathTime;
     // @formatter:on
 

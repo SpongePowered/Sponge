@@ -27,13 +27,16 @@ package org.spongepowered.common.world.server;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Registry;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
@@ -42,6 +45,7 @@ import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeEffects;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.common.AbstractResourceKeyed;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.data.fixer.SpongeDataCodec;
@@ -412,22 +416,26 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
         @Override
         public WorldTypeTemplate overworld() {
-            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld"), DimensionTypeAccessor.accessor$DEFAULT_OVERWORLD());
+            var type = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.OVERWORLD);
+            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld"), type);
         }
 
         @Override
         public WorldTypeTemplate overworldCaves() {
-            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld_caves"), DimensionTypeAccessor.accessor$DEFAULT_OVERWORLD_CAVES());
+            var type = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.OVERWORLD_CAVES);
+            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld_caves"), type);
         }
 
         @Override
         public WorldTypeTemplate theNether() {
-            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_nether"), DimensionTypeAccessor.accessor$DEFAULT_NETHER());
+            var type = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.NETHER);
+            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_nether"), type);
         }
 
         @Override
         public WorldTypeTemplate theEnd() {
-            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_end"), DimensionTypeAccessor.accessor$DEFAULT_END());
+            var type = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.END);
+            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_end"), type);
         }
     }
 }

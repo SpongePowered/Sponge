@@ -38,7 +38,7 @@ public abstract class IntegratedServerMixin extends MinecraftServerMixin {
 
     @Override
     public void loadLevel() {
-        this.shadow$detectBundledResources();
+        // TODO replacement? this.shadow$detectBundledResources();
         this.worldManager().loadLevel();
     }
 

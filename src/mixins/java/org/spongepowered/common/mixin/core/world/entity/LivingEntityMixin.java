@@ -304,9 +304,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Redirect(method = "dropExperience()V",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/LivingEntity;getExperienceReward(Lnet/minecraft/world/entity/player/Player;)I"))
-    protected int impl$exposeGetExperienceForDeath(final LivingEntity entity, final Player attackingPlayer) {
-        return this.bridge$getExperiencePointsOnDeath(entity, attackingPlayer);
+                    target = "Lnet/minecraft/world/entity/LivingEntity;getExperienceReward()I"))
+    protected int impl$exposeGetExperienceForDeath(final LivingEntity entity) {
+        return this.bridge$getExperiencePointsOnDeath(entity);
     }
 
     /**

@@ -69,7 +69,6 @@ public abstract class DimensionTypeMixin_API implements WorldType {
     @Shadow public abstract boolean shadow$respawnAnchorWorks();
     @Shadow public abstract boolean shadow$hasRaids();
     @Shadow public abstract int shadow$logicalHeight();
-    @Shadow public abstract boolean shadow$createDragonFight();
     // @formatter:on
 
     @Nullable private Context api$context;
@@ -169,8 +168,4 @@ public abstract class DimensionTypeMixin_API implements WorldType {
         return this.shadow$logicalHeight();
     }
 
-    @Intrinsic
-    public boolean worldType$createDragonFight() {
-        return this.shadow$createDragonFight();
-    }
 }

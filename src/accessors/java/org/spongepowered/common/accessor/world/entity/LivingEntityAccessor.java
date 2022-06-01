@@ -88,8 +88,6 @@ public interface LivingEntityAccessor {
 
     @Accessor("useItem") void accessor$useItem(final ItemStack useItem);
 
-    @Invoker("getExperienceReward") int invoker$getExperienceReward(final Player player);
-
     @Invoker("isDamageSourceBlocked") boolean invoker$isDamageSourceBlocked(final DamageSource source);
 
 }

@@ -31,6 +31,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.Vec3;
@@ -80,7 +81,7 @@ public interface EntityAccessor {
 
     @Accessor("remainingFireTicks") void accessor$remainingFireTicks(final int remainingFireTicks);
 
-    @Accessor("random") Random accessor$random();
+    @Accessor("random") RandomSource accessor$random();
 
     @Accessor("isInsidePortal") void accessor$isInsidePortal(final boolean isInsidePortal);
 

@@ -106,10 +106,9 @@ public abstract class ServerPlayerMixin_Tracker extends PlayerMixin_Tracker {
                 itemEntity.setThrower(this.shadow$getUUID());
             }
 
-            final Random random = this.shadow$getRandom();
             if (dropAround) {
-                final float f = random.nextFloat() * 0.5F;
-                final float f1 = random.nextFloat() * ((float) Math.PI * 2F);
+                final float f = this.random.nextFloat() * 0.5F;
+                final float f1 = this.random.nextFloat() * ((float) Math.PI * 2F);
                 itemEntity.setDeltaMovement(-Mth.sin(f1) * f, 0.2F, Mth.cos(f1) * f);
             } else {
                 final float f8 = Mth.sin(this.shadow$getXRot() * ((float) Math.PI / 180F));

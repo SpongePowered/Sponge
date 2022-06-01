@@ -25,12 +25,11 @@
 package org.spongepowered.vanilla.mixin.core.server.network;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.server.network.TextFilter;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.Recipe;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -46,14 +45,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
-import org.spongepowered.vanilla.chat.ChatFormatter;
 
 @Mixin(value = ServerGamePacketListenerImpl.class, priority = 999)
 public abstract class ServerGamePacketListenerImplMixin_Vanilla implements ServerGamePacketListener {
@@ -72,16 +69,13 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
         this.server.execute(() -> channelRegistry.handlePlayPayload((EngineConnection) this, packet));
     }
 
-    @Inject(method = "handleChat(Lnet/minecraft/server/network/TextFilter$FilteredText;)V",
+    @Redirect(method = "handleChat(Lnet/minecraft/network/protocol/game/ServerboundChatPacket;Lnet/minecraft/server/network/FilteredText;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Ljava/util/function/Function;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"),
-            locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vanilla$onProcessChatMessage(final TextFilter.FilteredText $$0x, final CallbackInfo ci, final String $$1x, final String $$2x, final Component $$3, final Component $$4) {
-        if ($$3 != null) {
-            ChatFormatter.formatChatComponent((TranslatableComponent) $$3);
-        }
-        ChatFormatter.formatChatComponent((TranslatableComponent) $$4);
+                    target = "Lnet/minecraft/network/chat/Component;literal(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;"))
+    private static MutableComponent vanilla$onProcessChatMessage(final String message) {
+        return Component.literal(message);
+        // TODO is this still possible? ChatFormatter.formatChatComponent((TranslatableComponent) $$4);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

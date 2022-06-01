@@ -50,7 +50,6 @@ public abstract class TheEndBiomeSourceMixin_API extends BiomeSourceMixin_API im
     @Shadow @Final private Holder<Biome> midlands;
     @Shadow @Final private Holder<Biome> islands;
     @Shadow @Final private Holder<Biome> barrens;
-    @Shadow @Final private long seed;
     // @formatter:on
 
     @Nullable private EndStyleBiomeConfig api$config;
@@ -67,7 +66,8 @@ public abstract class TheEndBiomeSourceMixin_API extends BiomeSourceMixin_API im
                     .midlandsBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.midlands.value())))
                     .islandsBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.islands.value())))
                     .barrensBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.barrens.value())))
-                    .seed(this.seed).build();
+                    // TODO no more custom seeds? .seed(this.seed)
+                    .build();
         }
         return this.api$config;
     }

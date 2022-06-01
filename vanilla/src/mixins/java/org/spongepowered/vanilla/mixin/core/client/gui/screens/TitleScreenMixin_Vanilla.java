@@ -36,8 +36,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenMixin_Vanilla extends Screen {
@@ -49,7 +47,7 @@ public abstract class TitleScreenMixin_Vanilla extends Screen {
     @Inject(method = "init", at = @At("TAIL"))
     private void vanilla$addPluginsButton(final CallbackInfo ci) {
         final Optional<AbstractWidget> realmsButton = this.children().stream()
-            .filter(b ->  b instanceof AbstractWidget && ((AbstractWidget) b).getMessage().equals(new TranslatableComponent("menu.online")))
+            .filter(b ->  b instanceof AbstractWidget && ((AbstractWidget) b).getMessage().equals(Component.translatable("menu.online")))
             .map(b -> (AbstractWidget) b)
             .findFirst();
         realmsButton.ifPresent(b -> {
@@ -58,7 +56,7 @@ public abstract class TitleScreenMixin_Vanilla extends Screen {
         });
 
         // Plugins Button
-        this.addRenderableWidget(new Button(this.width / 2 - 100, realmsButton.map(b -> b.y).orElse(0), 98, 20, new TextComponent("Plugins"),
+        this.addRenderableWidget(new Button(this.width / 2 - 100, realmsButton.map(b -> b.y).orElse(0), 98, 20, Component.literal("Plugins"),
             b -> this.minecraft.setScreen(new PluginScreen(this))));
     }
 }

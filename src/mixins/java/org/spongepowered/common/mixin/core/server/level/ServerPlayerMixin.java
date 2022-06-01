@@ -137,7 +137,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 // See also: SubjectMixin_API and SubjectMixin
 @SuppressWarnings("ConstantConditions")
@@ -316,11 +315,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    public int bridge$getExperiencePointsOnDeath(final LivingEntity entity, final Player attackingPlayer) {
+    public int bridge$getExperiencePointsOnDeath(final LivingEntity entity) {
         if (this.impl$keepInventory != null && this.impl$keepInventory) {
             return 0;
         }
-        return super.bridge$getExperiencePointsOnDeath(entity, attackingPlayer);
+        return super.bridge$getExperiencePointsOnDeath(entity);
     }
 
     @Override

@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.world.entity;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Mob;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,7 +43,7 @@ public interface MobAccessor {
 
     @Accessor("persistenceRequired") void accessor$persistenceRequired(final boolean persistingRequired);
 
-    @Invoker("populateDefaultEquipmentSlots") void invoker$populateDefaultEquipmentSlots(final DifficultyInstance difficulty);
+    @Invoker("populateDefaultEquipmentSlots") void invoker$populateDefaultEquipmentSlots(final RandomSource randomSource, final DifficultyInstance difficulty);
 
     @Invoker("isNoAi") boolean invoker$isNoAi();
 

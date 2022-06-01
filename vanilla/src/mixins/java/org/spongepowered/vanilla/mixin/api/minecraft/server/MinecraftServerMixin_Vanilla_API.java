@@ -24,14 +24,12 @@
  */
 package org.spongepowered.vanilla.mixin.api.minecraft.server;
 
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,8 +48,8 @@ public abstract class MinecraftServerMixin_Vanilla_API implements VanillaServer 
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void vanillaAPI$setupSpongeFields(final Thread $$0, final LevelStorageSource.LevelStorageAccess $$1, final PackRepository $$2,
-            final WorldStem $$3, final Proxy $$4, final DataFixer $$5, final MinecraftSessionService $$6, final GameProfileRepository $$7,
-            final GameProfileCache $$8, final ChunkProgressListenerFactory $$9, final CallbackInfo ci) {
+            final WorldStem $$3, final Proxy $$4, final DataFixer $$5, final Services $$6, final ChunkProgressListenerFactory $$7,
+            final CallbackInfo ci) {
 
         this.vanillaAPI$worldManager = new VanillaWorldManager((MinecraftServer) (Object) this);
     }

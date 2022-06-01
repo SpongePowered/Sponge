@@ -66,7 +66,7 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
 
     @Override
     protected void loadLevel() {
-        this.shadow$detectBundledResources();
+        // TODO replacement? this.shadow$detectBundledResources();
         this.worldManager().loadLevel();
     }
 

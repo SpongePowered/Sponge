@@ -46,7 +46,6 @@ import java.util.function.Function;
 public abstract class DimensionTypeMixin implements DimensionTypeBridge {
 
     // @formatter:off
-    @Shadow @Final @Mutable private boolean createDragonFight;
     // @formatter:on
 
     /**
@@ -61,13 +60,14 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
 
     @Override
     public DimensionType bridge$decorateData(final SpongeWorldTypeTemplate.SpongeDataSection data) {
-        this.createDragonFight = data.createDragonFight;
+//        this.createDragonFight = data.createDragonFight;
+        // TODO how to dragonfight in 1.19?
         return (DimensionType) (Object) this;
     }
 
     @Override
     public SpongeWorldTypeTemplate.SpongeDataSection bridge$createData() {
-        return new SpongeWorldTypeTemplate.SpongeDataSection(this.createDragonFight);
+        return new SpongeWorldTypeTemplate.SpongeDataSection(false);
     }
 
     @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;comapFlatMap(Ljava/util/function/Function;Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"))

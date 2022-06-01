@@ -34,7 +34,7 @@ import org.spongepowered.common.UntransformedInvokerError;
 @Mixin(TheEndBiomeSource.class)
 public interface TheEndBiomeSourceAccessor {
 
-    @Invoker("<init>") static TheEndBiomeSource invoker$new(final long seed, final Holder<Biome> endBiome, final Holder<Biome> highlandsBiome,
+    @Invoker("<init>") static TheEndBiomeSource invoker$new(final Holder<Biome> endBiome, final Holder<Biome> highlandsBiome,
             final Holder<Biome> midlandsBiome, final Holder<Biome> islandsBiome, final Holder<Biome> barrenBiome) {
         throw new UntransformedInvokerError();
     }

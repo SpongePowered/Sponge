@@ -26,14 +26,12 @@ package org.spongepowered.common.bridge.world.entity;
 
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 
 public interface LivingEntityBridge {
 
     boolean bridge$damageEntity(DamageSource damageSource, float damage);
 
-    default int bridge$getExperiencePointsOnDeath(LivingEntity entity, Player attackingPlayer) {
-        return ((LivingEntityAccessor) entity).invoker$getExperienceReward(attackingPlayer);
+    default int bridge$getExperiencePointsOnDeath(LivingEntity entity) {
+        return entity.getExperienceReward();
     }
 }

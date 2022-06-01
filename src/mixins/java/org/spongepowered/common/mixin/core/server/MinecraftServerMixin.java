@@ -108,7 +108,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract boolean shadow$isRunning();
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract PackRepository shadow$getPackRepository();
-    @Shadow protected abstract void shadow$detectBundledResources();
     @Shadow public abstract RegistryAccess.Frozen shadow$registryAccess();
     @Shadow public abstract GameProfileCache shadow$getProfileCache();
 

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.tracker.world.entity;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -69,7 +70,7 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     // @formatter:off
     @Shadow @Final private EntityType<?> type;
     @Shadow public Level level;
-    @Shadow @Final protected Random random;
+    @Shadow @Final protected RandomSource random;
 
     @Shadow @Nullable public abstract Team getTeam();
     @Shadow public abstract UUID shadow$getUUID();

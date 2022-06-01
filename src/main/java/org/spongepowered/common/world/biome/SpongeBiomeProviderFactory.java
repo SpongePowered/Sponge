@@ -98,7 +98,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     @Override
     public <T extends EndStyleBiomeConfig> ConfigurableBiomeProvider<T> endStyle(final T config) {
         final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-        return (ConfigurableBiomeProvider<T>) TheEndBiomeSourceAccessor.invoker$new(config.seed(),
+        return (ConfigurableBiomeProvider<T>) TheEndBiomeSourceAccessor.invoker$new(
                 biomeRegistry.getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) config.endBiome().location())),
                 biomeRegistry.getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) config.highlandsBiome().location())),
                 biomeRegistry.getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) config.midlandsBiome().location())),

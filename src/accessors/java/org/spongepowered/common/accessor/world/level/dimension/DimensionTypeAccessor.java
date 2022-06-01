@@ -25,42 +25,14 @@
 package org.spongepowered.common.accessor.world.level.dimension;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedAccessorError;
-import org.spongepowered.common.UntransformedInvokerError;
 
 import java.util.OptionalLong;
 
 @Mixin(DimensionType.class)
 public interface DimensionTypeAccessor {
-
-    @Invoker("<init>")
-    static DimensionType invoker$new(final OptionalLong $$0, final boolean $$1, final boolean $$2, final boolean $$3, final boolean $$4,
-            final double $$5, final boolean $$6, final boolean $$7, final boolean $$8, final boolean $$9, final int $$10, final int $$11,
-            final int $$12, final TagKey<Block> $$13, final ResourceLocation $$14, final float $$15) {
-        throw new UntransformedInvokerError();
-    }
-
-    @Accessor("DEFAULT_OVERWORLD") static DimensionType accessor$DEFAULT_OVERWORLD() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("DEFAULT_OVERWORLD_CAVES") static DimensionType accessor$DEFAULT_OVERWORLD_CAVES() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("DEFAULT_NETHER") static DimensionType accessor$DEFAULT_NETHER() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("DEFAULT_END") static DimensionType accessor$DEFAULT_END() {
-        throw new UntransformedAccessorError();
-    }
 
     @Accessor("fixedTime") OptionalLong accessor$fixedTime();
 
