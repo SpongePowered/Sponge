@@ -178,7 +178,7 @@ public final class VolumeStreamUtils {
         final int maskedX = x & 3;
         final int maskedY = y & 3;
         final int maskedZ = z & 3;
-        section.getBiomes().set(maskedX, maskedY, maskedZ, Holder.direct((Biome) (Object) biome));
+        // TODO section.getBiomes().set(maskedX, maskedY, maskedZ, Holder.direct((Biome) (Object) biome));
 
         finalizer.run();
         return true;
@@ -329,12 +329,11 @@ public final class VolumeStreamUtils {
         if (section == null) {
             return false;
         }
-        final PalettedContainer<Holder<Biome>> biomes = section.getBiomes();
 
         final int maskedX = x & 3;
         final int maskedY = y & 3;
         final int maskedZ = z & 3;
-        biomes.set(maskedX, maskedY, maskedZ, Holder.direct((Biome) (Object) biome));
+        // TODO section.getBiomes().set(maskedX, maskedY, maskedZ, Holder.direct((Biome) (Object) biome));
 
         return true;
     }
