@@ -100,6 +100,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -230,12 +231,11 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     /**
      * Specifically hooks the reach distance to use the forge hook.
      */
-    @ModifyConstant(
+    @Redirect(
             method = "handleInteract",
-            constant = @Constant(doubleValue = 36.0D)
-    )
-    private double impl$getPlatformReach(final double thirtySix, final ServerboundInteractPacket p_147340_1_) {
-        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, p_147340_1_.getTarget(this.player.getLevel()));
+            at = @At( value = "FIELD",target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;MAX_INTERACTION_DISTANCE:D"))
+    private double impl$getPlatformReach(final ServerboundInteractPacket packet) {
+        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, packet.getTarget(this.player.getLevel()));
     }
 
     /**

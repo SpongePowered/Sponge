@@ -32,6 +32,7 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.players.PlayerList;
 import org.spongepowered.api.Sponge;
@@ -58,12 +59,12 @@ import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 @Mixin(PlayerAdvancements.class)
 public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {
@@ -156,9 +157,9 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
     @Redirect(method = "award",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"))
-    private void impl$updateTextOnGranting(final PlayerList playerList, final net.minecraft.network.chat.Component component, final ChatType p_232641_2_, final UUID p_232641_3_) {
-        this.impl$message = SpongeAdventure.asAdventure(component);
+                    target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/resources/ResourceKey;)V"))
+    private void impl$updateTextOnGranting(final PlayerList instance, final net.minecraft.network.chat.Component $$0, final ResourceKey<ChatType> $$1) {
+        this.impl$message = SpongeAdventure.asAdventure($$0);
         this.impl$wasSuccess = true;
     }
 

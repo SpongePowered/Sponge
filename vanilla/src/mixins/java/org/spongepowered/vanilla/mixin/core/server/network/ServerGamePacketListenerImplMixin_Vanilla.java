@@ -29,6 +29,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.Recipe;
@@ -51,6 +52,9 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.vanilla.chat.ChatFormatter;
+
+import java.util.function.Function;
 
 @Mixin(value = ServerGamePacketListenerImpl.class, priority = 999)
 public abstract class ServerGamePacketListenerImplMixin_Vanilla implements ServerGamePacketListener {
@@ -70,16 +74,15 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
     }
 
     @Redirect(method = "handleChat(Lnet/minecraft/network/protocol/game/ServerboundChatPacket;Lnet/minecraft/server/network/FilteredText;)V",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/network/chat/Component;literal(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;"))
-    private static MutableComponent vanilla$onProcessChatMessage(final String message) {
-        return Component.literal(message);
-        // TODO is this still possible? ChatFormatter.formatChatComponent((TranslatableComponent) $$4);
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/server/network/FilteredText;map(Ljava/util/function/Function;)Lnet/minecraft/server/network/FilteredText;"))
+    private FilteredText<Component> vanilla$onProcessChatMessage(final FilteredText<String> instance, final Function<String, MutableComponent> $$0) {
+        // vanilla: return instance.map(s -> $$0.apply(s));
+        return instance.map(ChatFormatter::format); // TODO does this work?
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Redirect(method = "lambda$handlePlaceRecipe$9",
+    @Redirect(method = "lambda$handlePlaceRecipe$13",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
     private void vanilla$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final net.minecraft.server.level.ServerPlayer player) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
