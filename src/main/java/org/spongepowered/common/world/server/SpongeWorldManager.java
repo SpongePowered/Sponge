@@ -561,11 +561,17 @@ public abstract class SpongeWorldManager implements WorldManager {
             }
         }
 
-        return this.loadTemplate(key).thenCompose(r -> {
-            r.ifPresent(template -> {
-                final LevelStem scratch = ((SpongeWorldTemplate) template).asDimension();
+        if (levelData == null) {
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
+
+        return this.loadTemplate(key).thenCompose(template -> {
+            if (template.isPresent()) {
+                final LevelStem scratch = ((SpongeWorldTemplate) template.get()).asDimension();
                 ((PrimaryLevelDataBridge) levelData).bridge$populateFromDimension(scratch);
-            });
+            } else {
+                ((ResourceKeyBridge) levelData).bridge$setKey(key);
+            }
 
             return CompletableFuture.completedFuture(Optional.of((ServerWorldProperties) levelData));
         });
