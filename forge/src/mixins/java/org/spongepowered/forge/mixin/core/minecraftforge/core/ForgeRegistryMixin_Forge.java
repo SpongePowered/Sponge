@@ -24,6 +24,7 @@
  */
 package org.spongepowered.forge.mixin.core.minecraftforge.core;
 
+import com.google.common.collect.Maps;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistry;
@@ -34,35 +35,52 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.core.RegistryBridge;
 import org.spongepowered.common.registry.SpongeRegistryEntry;
 import org.spongepowered.common.registry.SpongeRegistryType;
-import org.spongepowered.forge.bridge.minecraftforge.fml.RegistryDelegate;
+import org.spongepowered.forge.bridge.minecraftforge.fml.ForgeRegistryBridge;
 
 import java.util.Map;
+import java.util.StringJoiner;
 
 @Mixin(ForgeRegistry.class)
-public abstract class ForgeRegistryMixin<V extends IForgeRegistryEntry<V>> implements RegistryDelegate<V> {
+public abstract class ForgeRegistryMixin_Forge<V extends IForgeRegistryEntry<V>> implements ForgeRegistryBridge<V> {
 
+    // @formatter:off
     @Shadow @Final Map<ResourceLocation, ?> slaves;
     @Shadow @Final private net.minecraft.resources.ResourceKey<Registry<V>> key;
-    private Parent<V> parent;
+    // @formatter:on
+
+    private final Map<ResourceKey, RegistryBridge<V>> forge$parents = Maps.newHashMap();
+    private boolean forge$warnedIfNoParent;
 
     @Inject(method = "add(ILnet/minecraftforge/registries/IForgeRegistryEntry;Ljava/lang/String;)I", at = @At("TAIL"))
-    public void sponge$writeToParent(int id, V value, String owner, CallbackInfoReturnable<Integer> cir) {
-        if(this.parent == null) {
-            this.parent = this.slaves.entrySet()
-                    .stream()
-                    .filter(key -> key.getValue() instanceof RegistryDelegate.Parent)
-                    .findFirst()
-                    .map(entry -> (RegistryDelegate.Parent) entry.getValue())
-                    .orElse(null);
-        }
-
+    public void forge$writeToParent(final int id, final V value, final String owner, final CallbackInfoReturnable<Integer> cir) {
         final ResourceKey root = (ResourceKey) (Object) this.key.getRegistryName();
         final ResourceKey location = (ResourceKey) (Object) this.key.location();
-        this.parent.bridge$register(new SpongeRegistryEntry<>(new SpongeRegistryType<>(root, location),
-                (ResourceKey) (Object) value.getRegistryName(), value));
+
+        if(!this.forge$warnedIfNoParent && this.forge$parents.isEmpty()) {
+            SpongeCommon.logger().error(String.format(
+                    "No parent registry found for %s, things might not work correctly!",
+                    new StringJoiner("/").add(root.formatted()).add(location.formatted())
+            ));
+            this.forge$warnedIfNoParent = true;
+        }
+
+        SpongeRegistryEntry<V> entry = new SpongeRegistryEntry<>(new SpongeRegistryType<>(root, location),
+                (ResourceKey) (Object) value.getRegistryName(), value);
+
+        this.forge$parents.values().forEach(registry -> registry.bridge$register(entry));
+    }
+
+    @Inject(method = "setSlaveMap", at = @At("TAIL"))
+    public void forge$establishParent(final ResourceLocation name, final Object obj, final CallbackInfo ci) {
+        if(obj instanceof RegistryBridge) {
+            this.forge$parents.put((ResourceKey) (Object) name, (RegistryBridge<V>) obj);
+        }
     }
 
 }

@@ -26,10 +26,8 @@ package org.spongepowered.forge.bridge.minecraftforge.fml;
 
 import org.spongepowered.common.bridge.core.RegistryBridge;
 
-public interface RegistryDelegate<T> {
+public interface ForgeRegistryBridge<T> {
 
-    RegistryBridge<T> sponge$parent();
-
-    interface Parent<V> extends RegistryBridge<V> {}
+    RegistryBridge<T> bridge$parent();
 
 }

@@ -27,7 +27,6 @@ package org.spongepowered.forge.mixin.core.minecraftforge.core;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.core.WritableRegistryMixin;
-import org.spongepowered.forge.bridge.minecraftforge.fml.RegistryDelegate;
 
 @Mixin(targets = {"net.minecraftforge.registries.NamespacedWrapper", "net.minecraftforge.registries.NamespacedDefaultedWrapper"})
-public abstract class NamespacedWrapperMixin<T extends IForgeRegistryEntry<T>> extends WritableRegistryMixin<T> implements RegistryDelegate.Parent<T> {}
+public abstract class NamespacedWrapperMixin<T extends IForgeRegistryEntry<T>> extends WritableRegistryMixin<T> {}
