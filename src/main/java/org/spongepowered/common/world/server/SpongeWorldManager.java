@@ -720,6 +720,16 @@ public abstract class SpongeWorldManager implements WorldManager {
             loadedWorld.noSave = disableLevelSaving;
         }
 
+        final Path configFile = this.getConfigFile(key);
+        final Path copiedConfigFile = this.getConfigFile(copyKey);
+
+        try {
+            Files.createDirectories(copiedConfigFile.getParent());
+            Files.copy(configFile, copiedConfigFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
+
         final Path dimensionTemplate = this.getDataPackFile(key);
         final Path copiedDimensionTemplate = this.getDataPackFile(copyKey);
 
@@ -789,7 +799,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final String moveDirectoryName = this.getDirectoryName(movedKey);
 
         final Path moveDirectory = isVanillaMoveWorld ? this.defaultWorldDirectory
-                .resolve(moveDirectoryName) : this.customWorldsDirectory.resolve(key.namespace()).resolve(key.value());
+                .resolve(moveDirectoryName) : this.customWorldsDirectory.resolve(movedKey.namespace()).resolve(movedKey.value());
 
         try {
             Files.createDirectories(moveDirectory);
@@ -798,25 +808,22 @@ public abstract class SpongeWorldManager implements WorldManager {
             return FutureUtil.completedWithException(e);
         }
 
-        final Path configFile = SpongeCommon.spongeConfigDirectory().resolve(Launch.instance().id()).resolve("worlds").resolve(key
-                .namespace()).resolve(key.value() + ".conf");
-
-        final Path copiedConfigFile = SpongeCommon.spongeConfigDirectory().resolve(Launch.instance().id()).resolve("worlds")
-                .resolve(movedKey.namespace()).resolve(movedKey.value() + ".conf");
+        final Path configFile = this.getConfigFile(key);
+        final Path movedConfigFile = this.getConfigFile(movedKey);
 
         try {
-            Files.createDirectories(copiedConfigFile.getParent());
-            Files.move(configFile, copiedConfigFile, StandardCopyOption.REPLACE_EXISTING);
+            Files.createDirectories(movedConfigFile.getParent());
+            Files.move(configFile, movedConfigFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(e);
         }
 
         final Path dimensionTemplate = this.getDataPackFile(key);
-        final Path copiedDimensionTemplate = this.getDataPackFile(movedKey);
+        final Path movedDimensionTemplate = this.getDataPackFile(movedKey);
 
         try {
-            Files.createDirectories(copiedDimensionTemplate.getParent());
-            Files.move(dimensionTemplate, copiedDimensionTemplate, StandardCopyOption.REPLACE_EXISTING);
+            Files.createDirectories(movedDimensionTemplate.getParent());
+            Files.move(dimensionTemplate, movedDimensionTemplate, StandardCopyOption.REPLACE_EXISTING);
         } catch (final IOException e) {
             FutureUtil.completedWithException(e);
         }
@@ -863,8 +870,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             }
         }
 
-        final Path configFile = SpongeCommon.spongeConfigDirectory().resolve(Launch.instance().id()).resolve("worlds").resolve(key.namespace())
-            .resolve(key.value() + ".conf");
+        final Path configFile = getConfigFile(key);
 
         try {
             Files.deleteIfExists(configFile);
@@ -1255,6 +1261,11 @@ public abstract class SpongeWorldManager implements WorldManager {
 
     Path getDataPackFile(final ResourceKey key) {
         return this.getDimensionDataPackDirectory().resolve(key.namespace()).resolve("dimension").resolve(key.value() + ".json");
+    }
+
+    Path getConfigFile(final ResourceKey key) {
+        return SpongeCommon.spongeConfigDirectory().resolve(Launch.instance().id()).resolve("worlds").resolve(key.namespace())
+                .resolve(key.value() + ".conf");
     }
 
     private static final class SingleTemplateAccess implements RegistryReadOps.ResourceAccess {
