@@ -113,7 +113,7 @@ import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.FutureUtil;
 
-import java.io.BufferedWriter;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -733,15 +733,8 @@ public abstract class SpongeWorldManager implements WorldManager {
         final Path dimensionTemplate = this.getDataPackFile(key);
         final Path copiedDimensionTemplate = this.getDataPackFile(copyKey);
 
-        try {
-            Files.createDirectories(copiedDimensionTemplate.getParent());
-            Files.copy(dimensionTemplate, copiedDimensionTemplate);
-        } catch (final IOException e) {
-            FutureUtil.completedWithException(e);
-        }
-
         final JsonObject fixedObject;
-        try (final InputStream stream = Files.newInputStream(copiedDimensionTemplate); final InputStreamReader reader = new InputStreamReader(stream)) {
+        try (final BufferedReader reader = Files.newBufferedReader(dimensionTemplate)) {
             final JsonParser parser = new JsonParser();
             final JsonElement element = parser.parse(reader);
 
@@ -753,12 +746,11 @@ public abstract class SpongeWorldManager implements WorldManager {
             return FutureUtil.completedWithException(e);
         }
 
-        if (fixedObject != null) {
-            try (final BufferedWriter writer = Files.newBufferedWriter(copiedDimensionTemplate)) {
-                writer.write(fixedObject.toString());
-            } catch (final IOException e) {
-                FutureUtil.completedWithException(e);
-            }
+        try {
+            Files.createDirectories(copiedDimensionTemplate.getParent());
+            DataPackSerializer.writeFile(copiedDimensionTemplate, fixedObject);
+        } catch (final IOException e) {
+            FutureUtil.completedWithException(e);
         }
 
         return CompletableFuture.completedFuture(true);
