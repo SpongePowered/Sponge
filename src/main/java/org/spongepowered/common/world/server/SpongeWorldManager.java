@@ -435,11 +435,10 @@ public abstract class SpongeWorldManager implements WorldManager {
                 registryKey, (DimensionType) worldType, chunkStatusListener, template.generator(), isDebugGeneration, seed, ImmutableList.of(), true);
         this.worlds.put(registryKey, world);
 
-        return SpongeCommon.asyncScheduler().submit(() -> this.prepareWorld(world, isDebugGeneration)).thenApply(w -> {
-            ((MinecraftServerAccessor) this.server).invoker$forceDifficulty();
-            return w;
-        }).thenCompose(w -> this.postWorldLoad(w, false))
-          .thenApply(w -> (org.spongepowered.api.world.server.ServerWorld) w);
+        this.prepareWorld(world, isDebugGeneration);
+        ((MinecraftServerAccessor) this.server).invoker$forceDifficulty();
+        this.postWorldLoad(world, false);
+        return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
     }
 
     @Override
@@ -1039,7 +1038,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().load();
     }
 
-    private ServerLevel prepareWorld(final ServerLevel world, final boolean isDebugGeneration) {
+    private void prepareWorld(final ServerLevel world, final boolean isDebugGeneration) {
         final boolean isDefaultWorld = Level.OVERWORLD.equals(world.dimension());
         final PrimaryLevelData levelData = (PrimaryLevelData) world.getLevelData();
 
@@ -1097,8 +1096,6 @@ public abstract class SpongeWorldManager implements WorldManager {
         if (levelData.getCustomBossEvents() != null) {
             ((ServerLevelBridge) world).bridge$getBossBarManager().load(levelData.getCustomBossEvents());
         }
-
-        return world;
     }
 
     private CompletableFuture<ServerLevel> postWorldLoad(final ServerLevel world, final boolean blocking) {
