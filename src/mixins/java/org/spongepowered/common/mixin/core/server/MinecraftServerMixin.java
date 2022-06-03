@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.server;
 import com.google.inject.Injector;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.Component;
 import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.resources.ResourceKey;
@@ -70,6 +71,7 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.commands.CommandSourceBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.network.chat.SpongeChatDecorator;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
@@ -78,14 +80,11 @@ import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -353,5 +352,14 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Override
     public String toString() {
         return this.getClass().getSimpleName();
+    }
+
+    private final ChatDecorator impl$spongeDecorator = new SpongeChatDecorator();
+
+    @Inject(method = "getChatDecorator", at = @At("RETURN"), cancellable = true)
+    private void impl$redirectChatDecorator(final CallbackInfoReturnable<ChatDecorator> cir) {
+        if (cir.getReturnValue() == ChatDecorator.PLAIN) {
+            cir.setReturnValue(this.impl$spongeDecorator);
+        }
     }
 }

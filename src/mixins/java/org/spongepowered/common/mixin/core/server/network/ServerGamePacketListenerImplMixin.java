@@ -40,12 +40,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.PlayerChatMessage;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
@@ -77,7 +76,6 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.entity.living.Humanoid;
-import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -547,47 +545,17 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         this.shadow$resetPosition();
     }
 
-    @Redirect(method = "broadcastChatMessage",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/server/players/PlayerList;broadcastChatMessage(Lnet/minecraft/server/network/FilteredText;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/resources/ResourceKey;)V") )
-    private void impl$postChatMessageEventAndSend(final PlayerList instance, final FilteredText<PlayerChatMessage> $$0,
-            final net.minecraft.server.level.ServerPlayer $$1, final ResourceKey<ChatType> $$2) {
-        final ServerPlayer player = (ServerPlayer) this.player;
-        final PlayerChatFormatter chatFormatter = player.chatFormatter();
-        // TODO check new PlayerChatMessage
-        final net.minecraft.network.chat.Component unfilteredComponent = $$0.raw().serverContent();
-        Component currentMessage = SpongeAdventure.asAdventure(unfilteredComponent);
-        if (unfilteredComponent.getContents() instanceof TranslatableContents tc && tc.getArgs().length == 2 ) {
-            if (tc.getArgs()[1] instanceof String rawMessage) {
-                currentMessage = Component.text(rawMessage);
-            }
-            else if (tc.getArgs()[1] instanceof net.minecraft.network.chat.Component component) {
-                currentMessage = SpongeAdventure.asAdventure(component);
-            }
-        }
 
+    @Inject(method = "handleChat(Lnet/minecraft/network/protocol/game/ServerboundChatPacket;Lnet/minecraft/server/network/FilteredText;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundChatPacket;getSignature(Ljava/util/UUID;)Lnet/minecraft/network/chat/MessageSignature;"),
+            cancellable = true)
+    private void impl$onHandleChat(final ServerboundChatPacket $$0, final FilteredText<String> $$1, final CallbackInfo ci) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
-            frame.pushCause(this.player);
-            final Audience audience = (Audience) this.server;
-            // Forge's event is accounted for in here.
-            final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(frame.currentCause(), audience, Optional.of(audience), chatFormatter, Optional.of(chatFormatter), currentMessage, currentMessage);
+            final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(frame.currentCause(), Component.text($$1.raw()));
             if (SpongeCommon.post(event)) {
-                // We reduce the chatSpamTickCount by 20 to account for the fact we cancelled the event (the method increments by 20).
-                // Otherwise, we need do nothing.
-                this.chatSpamTickCount -= 20;
-            } else {
-                event.chatFormatter().ifPresent(formatter ->
-                        event.audience().map(SpongeAdventure::unpackAudiences).ifPresent(targets -> {
-                            for (final Audience target : targets) {
-                                formatter.format(player, target, event.message(), event.originalMessage()).ifPresent(formattedMessage ->
-                                        target.sendMessage(player, formattedMessage));
-                            }
-                        })
-                );
+                ci.cancel();
             }
         }
     }
-
 
 }

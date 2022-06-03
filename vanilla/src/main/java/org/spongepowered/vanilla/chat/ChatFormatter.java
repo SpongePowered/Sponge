@@ -24,16 +24,18 @@
  */
 package org.spongepowered.vanilla.chat;
 
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import org.spongepowered.common.adventure.SpongeAdventure;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.contents.TranslatableContents;
 
 public final class ChatFormatter {
 
@@ -52,22 +54,16 @@ public final class ChatFormatter {
     private ChatFormatter() {
     }
 
-    public static void formatChatComponent(final TranslatableContents contents) {
-        final String message = (String) contents.getArgs()[1];
-        final Component formatted = ChatFormatter.format(message);
-        if (formatted == null) {
-            return;
-        }
-
-        contents.getArgs()[1] = formatted;
-    }
-
     @Nullable
-    public static Component format(final String s) {
+    public static MutableComponent format(final String s) {
         final Matcher matcher = ChatFormatter.URL_PATTERN.matcher(s);
         if (!matcher.find()) {
-            return null;
+            final LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.legacyAmpersand();
+            return SpongeAdventure.asVanillaMutable(legacyComponentSerializer.deserialize(s));
+//            return Component.literal(s);
+
         }
+
 
         MutableComponent result = null;
 

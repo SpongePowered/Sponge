@@ -28,13 +28,16 @@ import io.netty.channel.local.LocalAddress;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
+import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
@@ -45,6 +48,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.PlayerList;
@@ -59,12 +63,15 @@ import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
+import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
+import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -89,6 +96,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.client.server.IntegratedPlayerListBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
+import org.spongepowered.common.bridge.network.chat.NoOpPlayerChatFormatter;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
@@ -123,6 +131,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -148,6 +157,12 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow @Final private PlayerDataStorage playerIo;
 
     @Shadow public abstract void placeNewPlayer(Connection $$0, net.minecraft.server.level.ServerPlayer $$1);
+
+    @Shadow @Nullable public abstract net.minecraft.server.level.ServerPlayer getPlayer(final UUID $$0);
+
+    @Shadow public abstract void broadcastChatMessage(final PlayerChatMessage $$0,
+            final Function<net.minecraft.server.level.ServerPlayer, PlayerChatMessage> $$1, final ChatSender $$2,
+            final ResourceKey<ChatType> $$3);
 
     private boolean impl$isGameMechanicRespawn = false;
     ResourceKey<Level> impl$newDestination = null;
@@ -589,6 +604,56 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Inject(method = "saveAll()V", at = @At("RETURN"))
     private void impl$saveDirtyUsersOnSaveAll(final CallbackInfo ci) {
         ((SpongeServer) SpongeCommon.server()).userManager().saveDirtyUsers();
+    }
+
+    // chat via commands
+    @Inject(method = "broadcastChatMessage(Lnet/minecraft/server/network/FilteredText;Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/resources/ResourceKey;)V",
+            at = @At("HEAD"), cancellable = true)
+    private void impl$onBroadcastChatMessage(final FilteredText<PlayerChatMessage> $$0, final CommandSourceStack $$1, final ResourceKey<ChatType> $$2,
+            final CallbackInfo ci) {
+        // TODO chat via commands
+    }
+
+    // normal chat
+    @Redirect(method = "broadcastChatMessage(Lnet/minecraft/server/network/FilteredText;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/resources/ResourceKey;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Function;Lnet/minecraft/network/chat/ChatSender;Lnet/minecraft/resources/ResourceKey;)V"))
+    private void impl$onBroadcastChatMessage(final PlayerList instance, final PlayerChatMessage rawMsg,
+            final Function<net.minecraft.server.level.ServerPlayer, PlayerChatMessage> filterFunc, final ChatSender sender,
+            final ResourceKey<ChatType> chatType, final FilteredText<PlayerChatMessage> filteredMsg,
+            final net.minecraft.server.level.ServerPlayer senderPlayer) {
+        final var content = SpongeAdventure.asAdventure(rawMsg.serverContent());
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
+            frame.pushCause(senderPlayer);
+            final PlayerChatFormatter chatFormatter = ((ServerPlayer) senderPlayer).chatFormatter();
+
+            final Audience originalAudience = (Audience) this.server;
+            final PlayerChatEvent.Receive event = SpongeEventFactory.createPlayerChatEventReceive(frame.currentCause(), originalAudience, Optional.of(originalAudience), chatFormatter, Optional.of(chatFormatter), content, content);
+            if (SpongeCommon.post(event)) {
+                // We reduce the chatSpamTickCount by 20 to account for the fact we cancelled the event (the method increments by 20).
+                // Otherwise, we need do nothing.
+                // TODO $$1.connection.chatSpamTickCount -= 20;
+                return;
+            }
+
+            // TODO can we do this in the passed in filter method instead?
+            final PlayerChatFormatter formatter = event.chatFormatter().orElse(event.originalChatFormatter());
+            event.audience().ifPresent(audience -> {
+                if (audience == originalAudience && formatter == NoOpPlayerChatFormatter.INSTANCE) {
+                    Function<net.minecraft.server.level.ServerPlayer, PlayerChatMessage> filter = p -> {
+                        final PlayerChatMessage filtered = filterFunc.apply(p);
+                        final Optional<Component> formatted = formatter.format((ServerPlayer) senderPlayer, (ServerPlayer) p, SpongeAdventure.asAdventure(filtered.serverContent()), content);
+                        return formatted.map(SpongeAdventure::asVanilla).map(PlayerChatMessage::unsigned).orElse(null);
+                    };
+                    instance.broadcastChatMessage(rawMsg, filter, sender, chatType);
+                } else { // custom audience
+                    for (final Audience target : SpongeAdventure.unpackAudiences(audience)) {
+                        final Optional<Component> formatted = formatter.format((ServerPlayer) senderPlayer, target, event.message(), event.originalMessage());
+                        // TODO chat format? <Player>: message
+                        formatted.ifPresent(formattedMessage -> target.sendMessage((ServerPlayer) senderPlayer, formattedMessage));
+                    }
+                }
+            });
+        }
     }
 
 }

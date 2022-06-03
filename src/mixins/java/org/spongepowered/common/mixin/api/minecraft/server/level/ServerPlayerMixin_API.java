@@ -38,8 +38,10 @@ import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
@@ -54,12 +56,15 @@ import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
+import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.network.TextFilter;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -99,6 +104,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.network.chat.NoOpPlayerChatFormatter;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
@@ -127,6 +133,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
@@ -142,6 +149,10 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Shadow public abstract void shadow$sendChatMessage(PlayerChatMessage $$0, ChatSender $$1, ResourceKey<ChatType> $$2);
     @Shadow public abstract void shadow$sendSystemMessage(net.minecraft.network.chat.Component $$0, ResourceKey<ChatType> $$1);
     // @formatter:on
+
+    @Shadow public abstract TextFilter getTextFilter();
+
+    @Shadow protected abstract int resolveChatTypeId(final ResourceKey<ChatType> $$0);
 
     private volatile Pointers api$pointers;
 
@@ -312,8 +323,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Override
     public PlayerChatFormatter chatFormatter() {
         if (this.api$chatRouter == null) {
-            this.api$chatRouter = (player, audience, message, originalMessage) ->
-                    Optional.of(Component.translatable("chat.type.text", SpongeAdventure.asAdventure(this.shadow$getDisplayName()), message));
+            this.api$chatRouter = NoOpPlayerChatFormatter.INSTANCE;
         }
         return this.api$chatRouter;
     }
@@ -327,19 +337,12 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     public PlayerChatEvent simulateChat(final Component message, final Cause cause) {
         Objects.requireNonNull(message, "message");
         Objects.requireNonNull(cause, "cause");
-
-        final PlayerChatFormatter originalRouter = this.chatFormatter();
-        final Audience audience = (Audience) this.server;
-        final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(cause, audience, Optional.of(audience), originalRouter, Optional.of(originalRouter), message, message);
+        final var thisPlayer = (net.minecraft.server.level.ServerPlayer) (Object) this;
+        final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(cause, message);
         if (!SpongeCommon.post(event)) {
-            event.chatFormatter().ifPresent(formatter ->
-                event.audience().map(SpongeAdventure::unpackAudiences).ifPresent(targets -> {
-                    for (final Audience target : targets) {
-                        formatter.format(this, target, event.message(), event.originalMessage()).ifPresent(formattedMessage ->
-                            target.sendMessage(this, formattedMessage));
-                    }
-                })
-            );
+            final var filtered = FilteredText.passThrough(SpongeAdventure.asVanilla(message));
+            final var decorated = this.server.getChatDecorator().decorateChat(thisPlayer, filtered, MessageSignature.unsigned(), false).join();
+            this.server.getPlayerList().broadcastChatMessage(decorated, thisPlayer, ChatType.CHAT);
         }
         return event;
     }

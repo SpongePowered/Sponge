@@ -24,12 +24,9 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.network;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.Recipe;
@@ -52,9 +49,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
-import org.spongepowered.vanilla.chat.ChatFormatter;
-
-import java.util.function.Function;
 
 @Mixin(value = ServerGamePacketListenerImpl.class, priority = 999)
 public abstract class ServerGamePacketListenerImplMixin_Vanilla implements ServerGamePacketListener {
@@ -71,14 +65,6 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
 
         final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
         this.server.execute(() -> channelRegistry.handlePlayPayload((EngineConnection) this, packet));
-    }
-
-    @Redirect(method = "handleChat(Lnet/minecraft/network/protocol/game/ServerboundChatPacket;Lnet/minecraft/server/network/FilteredText;)V",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/server/network/FilteredText;map(Ljava/util/function/Function;)Lnet/minecraft/server/network/FilteredText;"))
-    private FilteredText<Component> vanilla$onProcessChatMessage(final FilteredText<String> instance, final Function<String, MutableComponent> $$0) {
-        // vanilla: return instance.map(s -> $$0.apply(s));
-        return instance.map(ChatFormatter::format); // TODO does this work?
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
