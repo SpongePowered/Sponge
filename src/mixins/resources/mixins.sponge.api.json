@@ -397,7 +397,8 @@
         "minecraft.world.level.block.state.properties.BambooLeavesMixin_API",
         "minecraft.world.level.block.state.properties.WallSideMixin_API",
         "minecraft.world.level.block.state.properties.BellAttachTypeMixin_API",
-        "minecraft.world.level.block.state.properties.FrontAndTopMixin_API"
+        "minecraft.world.level.block.state.properties.FrontAndTopMixin_API",
+        "minecraft.world.entity.animal.CatVariantMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

@@ -22,14 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
 import net.minecraft.world.entity.animal.CatVariant;
 import org.spongepowered.api.data.type.CatType;
+import org.spongepowered.asm.mixin.Mixin;
 
-// TODO move to Mixin
-public final class SpongeCatType implements CatType {
-    static {
-        CatVariant.ALL_BLACK.texture();
-    }
+@Mixin(CatVariant.class)
+public abstract class CatVariantMixin_API implements CatType {
+
 }

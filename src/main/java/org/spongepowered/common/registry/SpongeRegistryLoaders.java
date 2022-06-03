@@ -233,7 +233,6 @@ import org.spongepowered.common.data.persistence.HoconDataFormat;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.persistence.NBTDataFormat;
 import org.spongepowered.common.data.type.SpongeBodyPart;
-import org.spongepowered.common.data.type.SpongeCatType;
 import org.spongepowered.common.data.type.SpongeHorseColor;
 import org.spongepowered.common.data.type.SpongeHorseStyle;
 import org.spongepowered.common.data.type.SpongeLlamaType;
@@ -353,23 +352,6 @@ public final class SpongeRegistryLoaders {
                 BodyParts.RIGHT_ARM,
                 BodyParts.RIGHT_LEG
         )));
-    }
-
-
-    public static RegistryLoader<CatType> catType() {
-        return RegistryLoader.of(l -> {
-            l.add(10, CatTypes.ALL_BLACK, SpongeCatType::new);
-            l.add(1, CatTypes.BLACK, SpongeCatType::new);
-            l.add(4, CatTypes.BRITISH_SHORTHAIR, SpongeCatType::new);
-            l.add(5, CatTypes.CALICO, SpongeCatType::new);
-            l.add(9, CatTypes.JELLIE, SpongeCatType::new);
-            l.add(6, CatTypes.PERSIAN, SpongeCatType::new);
-            l.add(7, CatTypes.RAGDOLL, SpongeCatType::new);
-            l.add(2, CatTypes.RED, SpongeCatType::new);
-            l.add(3, CatTypes.SIAMESE, SpongeCatType::new);
-            l.add(0, CatTypes.TABBY, SpongeCatType::new);
-            l.add(8, CatTypes.WHITE, SpongeCatType::new);
-        });
     }
 
     public static RegistryLoader<ChunkRegenerateFlag> chunkRegenerateFlag() {

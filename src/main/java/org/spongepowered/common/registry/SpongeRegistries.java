@@ -39,7 +39,6 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.BODY_PART, SpongeRegistryLoaders.bodyPart());
         holder.createRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, SpongeRegistryLoaders.valueParameter());
         holder.createRegistry(RegistryTypes.CLICK_TYPE, SpongeRegistryLoaders.clickType());
-        holder.createRegistry(RegistryTypes.CAT_TYPE, SpongeRegistryLoaders.catType());
         holder.createRegistry(RegistryTypes.CHUNK_REGENERATE_FLAG, SpongeRegistryLoaders.chunkRegenerateFlag());
         holder.createRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, SpongeRegistryLoaders.clientCompletionKey());
         holder.createRegistry(RegistryTypes.CLIENT_COMPLETION_TYPE, SpongeRegistryLoaders.clientCompletionType());
