@@ -83,16 +83,16 @@ public final class SNBTDataFormat implements StringDataFormat {
 
     @Override
     public String write(final DataView data) throws IOException {
-        return NBTTranslator.INSTANCE.translate(data).getPrettyDisplay().getString();
+        return NBTTranslator.INSTANCE.translate(data).toString();
     }
 
     @Override
     public void writeTo(final Writer output, final DataView data) throws IOException {
-        output.write(NBTTranslator.INSTANCE.translate(data).getPrettyDisplay().getString());
+        output.write(NBTTranslator.INSTANCE.translate(data).toString());
     }
 
     @Override
     public void writeTo(final OutputStream output, final DataView data) throws IOException {
-        output.write(NBTTranslator.INSTANCE.translate(data).getPrettyDisplay().getString().getBytes(StandardCharsets.UTF_8));
+        output.write(NBTTranslator.INSTANCE.translate(data).toString().getBytes(StandardCharsets.UTF_8));
     }
 }
