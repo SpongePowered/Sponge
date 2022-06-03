@@ -170,7 +170,7 @@ public final class GeneratorMain {
                 "ArtTypes",
                 "ART_TYPE",
                 context.relativeClass("data.type", "ArtType"),
-                Registry.MOTIVE_REGISTRY
+                Registry.PAINTING_VARIANT_REGISTRY
             ),
             new RegistryEntriesGenerator<>(
                 "entity.attribute.type",
@@ -293,7 +293,7 @@ public final class GeneratorMain {
                 "Structures",
                 "STRUCTURE",
                 context.relativeClass("world.generation.structure", "Structure"),
-                Registry.STRUCTURE_FEATURE_REGISTRY
+                Registry.STRUCTURE_REGISTRY
             ),
             new RegistryEntriesGenerator<>(
                 "data.type",
