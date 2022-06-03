@@ -1069,7 +1069,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                     } else if (Level.END.equals(world.dimension())) {
                         ((PrimaryLevelData) world.getLevelData()).setSpawn(ServerLevel.END_SPAWN_POINT, 0);
                     }
-                } else {
+                } else if (levelData.worldGenSettings().generateBonusChest()) {
                     Features.BONUS_CHEST.place(world, world.getChunkSource().getGenerator(), world.random, new BlockPos(levelData.getXSpawn(),
                             levelData.getYSpawn(),levelData.getZSpawn()));
                 }
