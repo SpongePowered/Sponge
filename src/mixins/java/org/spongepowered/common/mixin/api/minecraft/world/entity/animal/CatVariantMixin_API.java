@@ -28,12 +28,7 @@ import net.minecraft.world.entity.animal.CatVariant;
 import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.asm.mixin.Mixin;
 
-<<<<<<<< HEAD:src/mixins/java/org/spongepowered/common/mixin/api/minecraft/world/entity/animal/CatVariantMixin_API.java
 @Mixin(CatVariant.class)
 public abstract class CatVariantMixin_API implements CatType {
-========
-@Mixin(TerrainShaper.class)
-public abstract class TerrainShaperMixin_API implements Shaper {
->>>>>>>> 1f04691c7 (make it compile):src/mixins/java/org/spongepowered/common/mixin/api/minecraft/world/level/biome/TerrainShaperMixin_API.java
 
 }

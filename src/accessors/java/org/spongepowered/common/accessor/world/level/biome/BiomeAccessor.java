@@ -31,7 +31,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(Biome.class)
 public interface BiomeAccessor {
 
-    @Accessor("biomeCategory") Biome.BiomeCategory accessor$biomeCategory();
     @Accessor("climateSettings") Biome.ClimateSettings accessor$climateSettings();
 
 }

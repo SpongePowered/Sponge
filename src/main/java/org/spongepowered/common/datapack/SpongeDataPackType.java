@@ -24,17 +24,9 @@
  */
 package org.spongepowered.common.datapack;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.datapack.DataPackSerializable;
@@ -62,7 +54,8 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
     private final boolean persistent;
 
     public SpongeDataPackType(final TypeToken<T> token, final DataPackSerializer<U> packSerializer,
-            final DataPackSerializableSerializer<T> objectSerializer, final BiFunction<T, JsonObject, U> objectFunction,
+            final DataPackSerializableSerializer<T> objectSerializer,
+            final BiFunction<T, JsonObject, U> objectFunction,
             final boolean persistent) {
         this.token = token;
         this.packSerializer = packSerializer;
@@ -98,7 +91,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         private final SpongeDataPackType<@NonNull Advancement, DataPackSerializedObject> advancement = new SpongeDataPackType<>(TypeToken.get(Advancement.class),
                 new DataPackSerializer<>("Advancements", "advancements"),
                 (s, registryAccess) -> ((net.minecraft.advancements.Advancement) s).deconstruct().serializeToJson(),
-                (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
+                DataPackSerializedObject::keyAndJsonBased,
                 false
         );
 
@@ -112,14 +105,13 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         private final SpongeDataPackType<@NonNull WorldTypeTemplate, DataPackSerializedObject> worldType = new SpongeDataPackType<>(TypeToken.get(WorldTypeTemplate.class),
                 new DataPackSerializer<>("Dimension Types", "dimension_type"),
                 SpongeWorldTypeTemplate::serialize,
-                (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
+                DataPackSerializedObject::keyAndJsonBased,
                 true
         );
 
         private final SpongeDataPackType<@NonNull WorldTemplate, DataPackSerializedObject> world = new SpongeDataPackType<>(TypeToken.get(WorldTemplate.class),
                 new DataPackSerializer<>("Dimensions", "dimension"),
-                SpongeWorldTemplate::serialize,
-                (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
+                SpongeWorldTemplate::serialize, DataPackSerializedObject::keyAndJsonBased,
                 true
         );
 
@@ -132,8 +124,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
 
         private final SpongeDataPackType<@NonNull BiomeTemplate, DataPackSerializedObject> biome = new SpongeDataPackType<@NonNull BiomeTemplate, DataPackSerializedObject>(TypeToken.get(BiomeTemplate.class),
                 new DataPackSerializer<>("Biome", "worldgen/biome"), // TODO correct?
-                SpongeBiomeTemplate::serialize,
-                (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
+                SpongeBiomeTemplate::serialize, DataPackSerializedObject::keyAndJsonBased,
                 true
         );
 

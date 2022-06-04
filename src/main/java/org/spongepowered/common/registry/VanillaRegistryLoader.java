@@ -227,7 +227,6 @@ final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.GRASS_COLOR_MODIFIER, BiomeSpecialEffects.GrassColorModifier.values());
         this.automaticName(RegistryTypes.PRECIPITATION, Biome.Precipitation.values());
         this.automaticName(RegistryTypes.TEMPERATURE_MODIFIER, Biome.TemperatureModifier.values());
-        this.automaticName(RegistryTypes.BIOME_CATEGORY, Biome.BiomeCategory.values());
         this.automaticName(RegistryTypes.CARVING_STEP, GenerationStep.Carving.values());
         this.automaticName(RegistryTypes.DECORATION_STEP, GenerationStep.Decoration.values());
     }

@@ -79,7 +79,6 @@ import org.spongepowered.common.data.holder.SpongeDataHolder;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.serialization.EnumCodec;
 import org.spongepowered.common.serialization.MathCodecs;
-import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -154,7 +153,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
     @Override
     public DataContainer toContainer() {
-        final JsonElement serialized = SpongeWorldTemplate.serialize(this);
+        final JsonElement serialized = SpongeWorldTemplate.serialize(this, SpongeCommon.server().registryAccess());
         try {
             final DataContainer container = DataFormats.JSON.get().read(serialized.toString());
             container.set(Queries.CONTENT_VERSION, this.contentVersion());
@@ -168,9 +167,10 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         return this.levelStem;
     }
 
-    public static JsonElement serialize(WorldTemplate s) {
+    public static JsonElement serialize(final WorldTemplate s, final RegistryAccess registryAccess) {
         if (s instanceof SpongeWorldTemplate t) {
-            return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), t.levelStem).getOrThrow(false, e -> {});
+            final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+            return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(ops, t.levelStem).getOrThrow(false, e -> {});
         }
         throw new IllegalArgumentException("WorldTemplate is not a SpongeWorldTemplate");
     }
@@ -239,7 +239,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.data = DataManipulator.mutableOf();
             this.data.set(Keys.WORLD_TYPE, WorldTypes.OVERWORLD);
             this.data.set(Keys.CHUNK_GENERATOR, ChunkGenerator.overworld());
-            this.data.set(Keys.WORLD_GEN_CONFIG, (WorldGenerationConfig) BootstrapProperties.worldGenSettings);
+            this.data.set(Keys.WORLD_GEN_CONFIG, (WorldGenerationConfig) SpongeCommon.server().getWorldData().worldGenSettings());
             return this;
         }
 
@@ -303,13 +303,13 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             final Holder<DimensionType> dimensionType = BuilderImpl.dimensionType(this.data.require(Keys.WORLD_TYPE));
             final LevelStem levelStem = new LevelStem(dimensionType, (net.minecraft.world.level.chunk.ChunkGenerator) chunkGenerator);
             ((LevelStemBridge) (Object) levelStem).bridge$decorateData(this.data);
-            final WorldGenerationConfig generationConfig = this.data.getOrElse(Keys.WORLD_GEN_CONFIG, ((WorldGenerationConfig) BootstrapProperties.worldGenSettings));
+            final WorldGenerationConfig generationConfig = this.data.getOrElse(Keys.WORLD_GEN_CONFIG, (WorldGenerationConfig) SpongeCommon.server().getWorldData().worldGenSettings());
             return new SpongeWorldTemplate(this.key, levelStem, generationConfig);
         }
 
         @NotNull
         private static Holder<DimensionType> dimensionType(final RegistryReference<WorldType> worldType) {
-            final Registry<DimensionType> dimensionTypeRegistry = BootstrapProperties.registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+            final Registry<DimensionType> dimensionTypeRegistry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
             final net.minecraft.resources.ResourceKey<DimensionType> key = net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, (ResourceLocation) (Object) worldType.location());
             return dimensionTypeRegistry.getHolderOrThrow(key);
         }

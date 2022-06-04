@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world;
 
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldTypeEffect;
@@ -49,17 +50,17 @@ public final class SpongeWorldTypeEffect extends AbstractResourceKeyed implement
 
         @Override
         public WorldTypeEffect overworld() {
-            return DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) DimensionType.OVERWORLD_EFFECTS);
+            return DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) BuiltinDimensionTypes.OVERWORLD_EFFECTS);
         }
 
         @Override
         public WorldTypeEffect nether() {
-            return DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) DimensionType.NETHER_EFFECTS);
+            return DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) BuiltinDimensionTypes.NETHER_EFFECTS);
         }
 
         @Override
         public WorldTypeEffect end() {
-            return DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) DimensionType.END_EFFECTS);
+            return DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) BuiltinDimensionTypes.END_EFFECTS);
         }
     }
 }

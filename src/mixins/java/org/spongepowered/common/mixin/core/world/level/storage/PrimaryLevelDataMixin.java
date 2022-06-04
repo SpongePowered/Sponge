@@ -43,11 +43,11 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -60,7 +60,6 @@ import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -77,7 +76,6 @@ import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridg
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.data.fixer.LegacyUUIDCodec;
-import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -284,14 +282,14 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         this.impl$key = ((ResourceKeyBridge) (Object) dimension).bridge$getKey();
         this.impl$dimensionType = dimension.typeHolder().value();
         this.impl$displayName = levelStemBridge.bridge$displayName();
-        final ResourceLocation difficulty = levelStemBridge.bridge$difficulty();
+        final Difficulty difficulty = levelStemBridge.bridge$difficulty();
         if (difficulty != null) {
-            ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(RegistryTypes.DIFFICULTY.get().value((ResourceKey) (Object) difficulty));
+            ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(difficulty);
             this.impl$customDifficulty = true;
         }
-        final ResourceLocation gameMode = levelStemBridge.bridge$gameMode();
+        final GameType gameMode = levelStemBridge.bridge$gameMode();
         if (gameMode != null) {
-            ((LevelSettingsAccessor) (Object) this.settings).accessor$gameType(RegistryTypes.GAME_MODE.get().value((ResourceKey) (Object) gameMode));
+            ((LevelSettingsAccessor) (Object) this.settings).accessor$gameType(gameMode);
             this.impl$customGameType = true;
         }
         final Vector3i spawnPos = levelStemBridge.bridge$spawnPosition();

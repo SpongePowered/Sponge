@@ -42,15 +42,10 @@ public final class SpongeDimensionTypes {
             .apply(r, r.stable(SpongeDataSection::new))
         );
 
-    public static Codec<DimensionType> DIRECT_CODEC;
-
-
-    public static void internalCodec(final Codec<DimensionType> internalCodec) {
-        SpongeDimensionTypes.DIRECT_CODEC = new MapCodec.MapCodecCodec<DimensionType>(new SpongeDataCodec<>(internalCodec,
-            SpongeDimensionTypes.SPONGE_CODEC,
-                (type, data) -> ((DimensionTypeBridge) type).bridge$decorateData(data),
-                type -> ((DimensionTypeBridge) type).bridge$createData()));
-    }
+    public static Codec<DimensionType> DIRECT_CODEC =
+            new MapCodec.MapCodecCodec<>(new SpongeDataCodec<>(DimensionType.DIRECT_CODEC, SpongeDimensionTypes.SPONGE_CODEC,
+                    (type, data) -> ((DimensionTypeBridge) (Object) type).bridge$decorateData(data),
+                    type -> ((DimensionTypeBridge) (Object) type).bridge$createData()));
 
     public record SpongeDataSection(boolean createDragonFight) {}
 }

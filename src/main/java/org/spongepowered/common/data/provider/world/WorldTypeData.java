@@ -78,8 +78,6 @@ public final class WorldTypeData {
                         .get(DimensionType::height)
                     .create(Keys.WORLD_LOGICAL_HEIGHT)
                         .get(DimensionType::logicalHeight)
-                    .create(Keys.CREATE_DRAGON_FIGHT)
-                        .get(DimensionType::createDragonFight)
                 .asImmutable(DimensionTypeAccessor.class)
                     .create(Keys.AMBIENT_LIGHTING)
                         .get(DimensionTypeAccessor::accessor$ambientLight)

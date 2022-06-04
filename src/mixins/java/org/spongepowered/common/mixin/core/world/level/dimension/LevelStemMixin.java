@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.core.world.level.dimension;
 import com.mojang.serialization.Codec;
 import net.kyori.adventure.text.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -86,13 +88,19 @@ public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBrid
     }
 
     @Override
-    public ResourceLocation bridge$gameMode() {
-        return this.impl$gameMode;
+    public GameType bridge$gameMode() {
+        if (this.impl$gameMode == null) {
+            return null;
+        }
+        return GameType.valueOf(this.impl$gameMode.getPath().toUpperCase()); // TODO actually use the enum value - no need for resourcekey
     }
 
     @Override
-    public ResourceLocation bridge$difficulty() {
-        return this.impl$difficulty;
+    public Difficulty bridge$difficulty() {
+        if (this.impl$difficulty == null) {
+            return null;
+        }
+        return Difficulty.valueOf(this.impl$difficulty.getPath().toUpperCase()); // TODO actually use the enum value - no need for resourcekey
     }
 
     @Override
@@ -162,7 +170,7 @@ public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBrid
     @Override
     public SpongeWorldTemplate.SpongeDataSection bridge$createData() {
         return new SpongeWorldTemplate.SpongeDataSection(this.bridge$displayName(),
-            this.bridge$gameMode(), this.bridge$difficulty(),
+            this.impl$gameMode, this.impl$difficulty,
             this.bridge$serializationBehavior(),
             this.bridge$viewDistance(), this.bridge$spawnPosition(),
             this.bridge$loadOnStartup(), this.bridge$performsSpawnLogic(),

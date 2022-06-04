@@ -49,6 +49,7 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.ai.village.VillageSiege;
 import net.minecraft.world.entity.npc.CatSpawner;
 import net.minecraft.world.entity.npc.WanderingTraderSpawner;
@@ -56,6 +57,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -71,6 +73,7 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.builder.Diff;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -346,7 +349,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                 final LevelStem scratch = this.server.getWorldData().worldGenSettings().dimensions().get(rKey);
                 if (scratch != null) {
                     ((ResourceKeyBridge) (Object) scratch).bridge$setKey(key);
-                    loadedTemplate = new SpongeWorldTemplate(key, scratch, (WorldGenerationConfig) BootstrapProperties.worldGenSettings);
+                    loadedTemplate = new SpongeWorldTemplate(key, scratch, (WorldGenerationConfig) this.server.getWorldData().worldGenSettings());
                 }
 
                 if (loadedTemplate == null) {
@@ -415,7 +418,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
 
         final ServerLevel world = new ServerLevel(this.server, ((MinecraftServerAccessor) this.server).accessor$executor(), storageSource, levelData,
-                registryKey, template, chunkStatusListener, isDebugGeneration, seed, ImmutableList.of(), true);
+                registryKey, levelStem, chunkStatusListener, isDebugGeneration, seed, ImmutableList.of(), true);
         this.worlds.put(registryKey, world);
 
         return SpongeCommon.asyncScheduler().submit(() -> this.prepareWorld(world, isDebugGeneration)).thenApply(w -> {
@@ -435,15 +438,17 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     private LevelSettings createLevelSettings(final PrimaryLevelData defaultLevelData, final LevelStemBridge levelStemBridge, final String directoryName) {
-        final GameType gameType = (GameType) (Object) BootstrapProperties.gameMode.get(Sponge.game());
-        // TODO templateBridge
+        final GameType gameType = levelStemBridge.bridge$gameMode();
         final Boolean hardcore = levelStemBridge.bridge$hardcore();
-        final Difficulty difficulty = (Difficulty) (Object) BootstrapProperties.difficulty.get(Sponge.game());
+        final Difficulty difficulty = levelStemBridge.bridge$difficulty();
         final Boolean commands = levelStemBridge.bridge$commands();
-        return new LevelSettings(directoryName, gameType,
-                hardcore == null ? BootstrapProperties.hardcore : hardcore,
-                difficulty,
-                commands == null ? BootstrapProperties.commands : commands,
+        final RegistryAccess.Frozen access = this.server.registryAccess();
+
+        return new LevelSettings(directoryName,
+                gameType == null ? defaultLevelData.getGameType() : gameType,
+                hardcore == null ? defaultLevelData.isHardcore() : hardcore,
+                difficulty == null ? defaultLevelData.getDifficulty() : difficulty,
+                commands == null ? defaultLevelData.getAllowCommands() : commands,
                 new GameRules(),
                 defaultLevelData.getDataPackConfig());
     }
@@ -497,7 +502,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         if (Files.exists(dataPackFile)) {
             try {
                 final LevelStem levelStem = this.loadLevelStemFromFile(dataPackFile);
-                final SpongeWorldTemplate template = new SpongeWorldTemplate(key, levelStem, (WorldGenerationConfig) BootstrapProperties.worldGenSettings);
+                final SpongeWorldTemplate template = new SpongeWorldTemplate(key, levelStem, (WorldGenerationConfig) this.server.getWorldData().worldGenSettings());
                 return CompletableFuture.completedFuture(Optional.of(template));
             } catch (final IOException e) {
                 e.printStackTrace();
@@ -601,7 +606,7 @@ public abstract class SpongeWorldManager implements WorldManager {
     private void saveLevelDat(final WorldData properties, final ResourceKey key) throws IOException {
         final boolean isVanillaWorld = this.isVanillaWorld(key);
         try (var storageSource = this.getLevelStorageAccess(key, isVanillaWorld)) {
-            storageSource.saveDataTag(BootstrapProperties.registries, properties, null);
+            storageSource.saveDataTag(this.server.registryAccess(), properties, null);
         }
     }
 
@@ -1174,7 +1179,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         try (final InputStream stream = Files.newInputStream(file); final InputStreamReader reader = new InputStreamReader(stream)) {
             final JsonElement element = JsonParser.parseReader(reader);
             this.fixDimensionDatapack(element, file);
-            final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries);
+            final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, this.server.registryAccess());
             return LevelStem.CODEC.parse(ops, element).getOrThrow(false, s -> {});
         }
     }

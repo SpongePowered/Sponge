@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.feature;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -51,7 +52,7 @@ public abstract class ConfiguredFeatureMixin_API<
     // @formatter:off
     @Shadow @Final private F feature;
     @Shadow @Final private FC config;
-    @Shadow public abstract boolean shadow$place(WorldGenLevel $$0, ChunkGenerator $$1, Random $$2, BlockPos $$3);
+    @Shadow public abstract boolean shadow$place(final WorldGenLevel $$0, final ChunkGenerator $$1, final RandomSource $$2, final BlockPos $$3);
     // @formatter:on
 
     @Override

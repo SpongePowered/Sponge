@@ -29,6 +29,7 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
@@ -70,9 +71,9 @@ import org.spongepowered.api.world.generation.biome.ConfiguredCarver;
 import org.spongepowered.api.world.generation.biome.DecorationStep;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
 import org.spongepowered.common.AbstractResourceKeyed;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
-import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.io.IOException;
@@ -96,7 +97,7 @@ public class SpongeBiomeTemplate extends AbstractResourceKeyed implements BiomeT
 
     @Override
     public DataContainer toContainer() {
-        final JsonElement serialized = SpongeBiomeTemplate.serialize(this);
+        final JsonElement serialized = SpongeBiomeTemplate.serialize(this, SpongeCommon.server().registryAccess());
         try {
             final DataContainer container = DataFormats.JSON.get().read(serialized.toString());
             container.set(Queries.CONTENT_VERSION, this.contentVersion());
@@ -116,8 +117,9 @@ public class SpongeBiomeTemplate extends AbstractResourceKeyed implements BiomeT
         return (org.spongepowered.api.world.biome.Biome) (Object) this.biome;
     }
 
-    public static JsonElement serialize(final BiomeTemplate template) {
-        return Biome.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), (Biome) (Object) template.biome()).getOrThrow(false, e -> {});
+    public static JsonElement serialize(final BiomeTemplate template, final RegistryAccess registryAccess) {
+        final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+        return Biome.DIRECT_CODEC.encodeStart(ops, (Biome) (Object) template.biome()).getOrThrow(false, e -> {});
     }
 
     public static class BuilderImpl extends AbstractResourceKeyedBuilder<BiomeTemplate, BiomeTemplate.Builder> implements BiomeTemplate.Builder {
@@ -165,7 +167,6 @@ public class SpongeBiomeTemplate extends AbstractResourceKeyed implements BiomeT
         @Override
         protected BiomeTemplate build0() {
             final var precipitation = this.manipulator.require(Keys.PRECIPITATION);
-            final var category = this.manipulator.require(Keys.BIOME_CATEGORY);
             final Double temperature = this.manipulator.require(Keys.BIOME_TEMPERATURE);
             final Double downfall = this.manipulator.require(Keys.HUMIDITY);
             final var temperatureModifier = this.manipulator.getOrElse(Keys.TEMPERATURE_MODIFIER, TemperatureModifiers.NONE.get());
@@ -221,7 +222,6 @@ public class SpongeBiomeTemplate extends AbstractResourceKeyed implements BiomeT
 
             final Biome.BiomeBuilder vanillaBuilder = new Biome.BiomeBuilder()
                 .precipitation((Biome.Precipitation) (Object) precipitation)
-                .biomeCategory((Biome.BiomeCategory) (Object) category)
                 .temperature(temperature.floatValue())
                 .downfall(downfall.floatValue())
                 .temperatureAdjustment((Biome.TemperatureModifier) (Object) temperatureModifier)

@@ -25,7 +25,7 @@
 package org.spongepowered.common.registry.provider;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldTypeEffect;
@@ -37,9 +37,9 @@ public final class DimensionEffectProvider {
 
     public static DimensionEffectProvider INSTANCE = new DimensionEffectProvider();
 
-    private static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.OVERWORLD_EFFECTS);
-    private static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.NETHER_EFFECTS);
-    private static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.END_EFFECTS);
+    private static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.OVERWORLD_EFFECTS);
+    private static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.NETHER_EFFECTS);
+    private static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) BuiltinDimensionTypes.END_EFFECTS);
 
     static {
         DimensionEffectProvider.INSTANCE.register(OVERWORLD.key(), OVERWORLD);

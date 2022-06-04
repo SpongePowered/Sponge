@@ -41,7 +41,6 @@ import org.spongepowered.api.world.biome.spawner.NaturalSpawnCost;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
 import org.spongepowered.api.world.biome.climate.Precipitation;
 import org.spongepowered.api.world.biome.climate.TemperatureModifier;
-import org.spongepowered.api.world.biome.BiomeCategory;
 import org.spongepowered.api.world.generation.biome.ConfiguredCarver;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
 import org.spongepowered.common.accessor.world.level.biome.BiomeAccessor;
@@ -93,10 +92,8 @@ public final class BiomeData {
                     .create(Keys.GRASS_COLOR)
                         .get(h -> h.getSpecialEffects().getGrassColorOverride().map(Color::ofRgb).orElse(null))
                 .asImmutable(BiomeAccessor.class)
-                    .create(Keys.BIOME_CATEGORY)
-                        .get(h -> (BiomeCategory) (Object) h.accessor$biomeCategory())
                     .create(Keys.TEMPERATURE_MODIFIER)
-                        .get(h -> (TemperatureModifier) (Object) ((Biome_ClimateSettingsAccessor)h.accessor$climateSettings()).accessor$temperatureModifier())
+                        .get(h -> (TemperatureModifier) (Object) ((Biome_ClimateSettingsAccessor) (Object) h.accessor$climateSettings()).accessor$temperatureModifier())
         ;
 
     }

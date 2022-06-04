@@ -64,7 +64,6 @@ import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.biome.BiomeTemplate;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
-import org.spongepowered.api.world.generation.config.noise.Shaper;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;

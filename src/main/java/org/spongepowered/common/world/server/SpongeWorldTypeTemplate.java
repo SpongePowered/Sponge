@@ -30,9 +30,11 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
@@ -61,7 +63,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
-import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.io.IOException;
@@ -89,7 +90,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
     @Override
     public DataContainer toContainer() {
-        final JsonElement serialized = SpongeWorldTypeTemplate.serialize(this);
+        final JsonElement serialized = SpongeWorldTypeTemplate.serialize(this, SpongeCommon.server().registryAccess());
         try {
             final DataContainer container = DataFormats.JSON.get().read(serialized.toString());
             container.set(Queries.CONTENT_VERSION, this.contentVersion());
@@ -101,11 +102,12 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
     @Override
     public WorldType worldType() {
-        return (WorldType) this.dimensionType;
+        return (WorldType) (Object) this.dimensionType;
     }
 
-    public static JsonElement serialize(WorldTypeTemplate s) {
-        return SpongeDimensionTypes.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), (DimensionType) s.worldType()).getOrThrow(false, e -> {});
+    public static JsonElement serialize(final WorldTypeTemplate s, final RegistryAccess registryAccess) {
+        final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+        return SpongeDimensionTypes.DIRECT_CODEC.encodeStart(ops, (DimensionType) (Object) s.worldType()).getOrThrow(false, e -> {});
     }
 
     public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTypeTemplate, Builder> implements WorldTypeTemplate.Builder {
@@ -127,7 +129,8 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         public Builder reset() {
             this.manipulator = DataManipulator.mutableOf();
             this.key = null;
-            this.from((WorldType) DimensionTypeAccessor.accessor$DEFAULT_OVERWORLD());
+            final DimensionType defaultOverworld = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.OVERWORLD);
+            this.from((WorldType) (Object) defaultOverworld);
             return this;
         }
 
@@ -152,7 +155,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             final DataResult<Holder<DimensionType>> parsed = DimensionType.CODEC.parse(JsonOps.INSTANCE, json);
             final DimensionType dimensionType = parsed.getOrThrow(false, e -> {}).value();
 
-            this.from((WorldType) dimensionType);
+            this.from((WorldType) (Object) dimensionType);
             return this;
         }
 
@@ -166,25 +169,29 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             final boolean hasCeiling = this.manipulator.require(Keys.HAS_CEILING);
             final float ambientLighting = this.manipulator.require(Keys.AMBIENT_LIGHTING);
             @Nullable final MinecraftDayTime fixedTime = this.manipulator.getOrNull(Keys.FIXED_TIME);
-            final boolean piglinSafe = this.manipulator.require(Keys.PIGLIN_SAFE);
             final boolean bedsUsable = this.manipulator.require(Keys.BEDS_USABLE);
             final boolean respawnAnchorsUsable = this.manipulator.require(Keys.RESPAWN_ANCHOR_USABLE);
-            final boolean hasRaids = this.manipulator.require(Keys.HAS_RAIDS);
             final int floor = this.manipulator.require(Keys.WORLD_FLOOR);
             final int height = this.manipulator.require(Keys.WORLD_HEIGHT);
             final int logicalHeight = this.manipulator.require(Keys.WORLD_LOGICAL_HEIGHT);
             @Nullable final Tag<BlockType> infiniburn = this.manipulator.getOrNull(Keys.INFINIBURN);
-            final boolean createDragonFight = this.manipulator.require(Keys.CREATE_DRAGON_FIGHT);
 
+            // TODO monstersettings
+            final boolean piglinSafe = this.manipulator.require(Keys.PIGLIN_SAFE);
+            final boolean hasRaids = this.manipulator.require(Keys.HAS_RAIDS);
+            final UniformInt monsterSpawnLightTest = UniformInt.of(0, 7);
+            final int monsterSpawnBlockLightLimit = 0;
+
+            // final boolean createDragonFight = this.manipulator.require(Keys.CREATE_DRAGON_FIGHT);
             try {
-                final DimensionType dimensionType =
-                        DimensionType.create(fixedTime == null ? OptionalLong.empty() : OptionalLong.of(fixedTime.asTicks().ticks()),
-                                hasSkylight, hasCeiling, scorching, natural, coordinateMultiplier,
-                                createDragonFight, piglinSafe, bedsUsable, respawnAnchorsUsable, hasRaids,
-                                floor, height, logicalHeight,
-                                (TagKey<Block>) (Object) infiniburn,
-                                (ResourceLocation) (Object) effect.key(),
-                                ambientLighting);
+
+                final DimensionType dimensionType = new DimensionType(fixedTime == null ? OptionalLong.empty() : OptionalLong.of(fixedTime.asTicks().ticks()),
+                        hasSkylight, hasCeiling, scorching, natural, coordinateMultiplier,
+                        bedsUsable, respawnAnchorsUsable,
+                        floor, height, logicalHeight,
+                        (TagKey<Block>) (Object) infiniburn,
+                        (ResourceLocation) (Object) effect.key(),
+                        ambientLighting, new DimensionType.MonsterSettings(piglinSafe, hasRaids, monsterSpawnLightTest, monsterSpawnBlockLightLimit));
                 return new SpongeWorldTypeTemplate(this.key, dimensionType);
             } catch (IllegalStateException e) { // catch and rethrow minecraft internal exception
                 throw new IllegalStateException(String.format("Template '%s' was not valid!", this.key), e);

@@ -26,6 +26,8 @@ package org.spongepowered.common.bridge.world.level.dimension;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataManipulator;
@@ -37,9 +39,9 @@ public interface LevelStemBridge {
 
     @Nullable Component bridge$displayName();
 
-    @Nullable ResourceLocation bridge$gameMode();
+    @Nullable GameType bridge$gameMode();
 
-    @Nullable ResourceLocation bridge$difficulty();
+    @Nullable Difficulty bridge$difficulty();
 
     SerializationBehavior bridge$serializationBehavior();
 
