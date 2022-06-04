@@ -212,7 +212,7 @@ import org.spongepowered.common.world.biome.provider.SpongeCheckerboardBiomeConf
 import org.spongepowered.common.world.biome.provider.SpongeEndStyleBiomeConfig;
 import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
-import org.spongepowered.common.world.generation.SpongeWorldGenerationConfigMutableBuilder;
+import org.spongepowered.common.world.generation.SpongeWorldGenerationConfigBuilder;
 import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfig;
 import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
@@ -347,7 +347,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(PaletteType.Builder.class, SpongePaletteTypeBuilder::new)
                 .register(StreamOptions.Builder.class, SpongeStreamOptionsBuilder::new)
                 .register(FluidState.Builder.class, SpongeFluidStateBuilder::new)
-                .register(WorldGenerationConfig.Mutable.Builder.class, SpongeWorldGenerationConfigMutableBuilder::new)
+                .register(WorldGenerationConfig.Builder.class, SpongeWorldGenerationConfigBuilder::new)
                 .register(WorldTypeEffect.Builder.class, SpongeWorldTypeEffect.BuilderImpl::new)
                 .register(WorldTypeTemplate.Builder.class, SpongeWorldTypeTemplate.BuilderImpl::new)
                 .register(WorldTemplate.Builder.class, SpongeWorldTemplate.BuilderImpl::new)

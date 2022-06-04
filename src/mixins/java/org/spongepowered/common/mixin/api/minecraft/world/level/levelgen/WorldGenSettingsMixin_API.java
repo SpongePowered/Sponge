@@ -26,28 +26,21 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.SeedUtil;
 
 @Mixin(WorldGenSettings.class)
 @Implements(@Interface(iface = WorldGenerationConfig.class, prefix = "worldGenerationConfig$", remap = Remap.NONE))
-public abstract class WorldGenSettingsMixin_API implements WorldGenerationConfig.Mutable {
+public abstract class WorldGenSettingsMixin_API implements WorldGenerationConfig {
 
     // @formatter:off
-    @org.spongepowered.asm.mixin.Mutable @Shadow @Final private long seed;
-    @org.spongepowered.asm.mixin.Mutable @Shadow @Final private boolean generateStructures;
-    @org.spongepowered.asm.mixin.Mutable @Shadow @Final private boolean generateBonusChest;
-
     @Shadow public abstract long shadow$seed();
     @Shadow public abstract boolean shadow$generateBonusChest();
     @Shadow public abstract boolean shadow$generateStructures();
-
     // @formatter:on
 
     @Intrinsic
@@ -55,24 +48,9 @@ public abstract class WorldGenSettingsMixin_API implements WorldGenerationConfig
         return this.shadow$seed();
     }
 
-    @Override
-    public void setSeed(final long seed) {
-        this.seed = seed;
-    }
-
-    @Override
-    public void setSeed(final String seed) {
-        this.seed = SeedUtil.compute(seed);
-    }
-
     @Intrinsic
-    public boolean worldGenerationConfig$generateFeatures() {
+    public boolean worldGenerationConfig$generateStructures() {
         return this.shadow$generateStructures();
-    }
-
-    @Override
-    public void setGenerateFeatures(final boolean generateFeatures) {
-        this.generateStructures = generateFeatures;
     }
 
     @Intrinsic
@@ -80,8 +58,4 @@ public abstract class WorldGenSettingsMixin_API implements WorldGenerationConfig
         return this.shadow$generateBonusChest();
     }
 
-    @Override
-    public void setGenerateBonusChest(final boolean generateBonusChest) {
-        this.generateBonusChest = generateBonusChest;
-    }
 }

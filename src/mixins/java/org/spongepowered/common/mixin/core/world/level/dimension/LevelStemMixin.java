@@ -33,6 +33,9 @@ import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -161,9 +164,17 @@ public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBrid
 
     @Override
     public LevelStem bridge$decorateData(final DataManipulator data) {
-        // TODO decorate
-        // TODO worldgensettings copy?
-
+        this.impl$gameMode = (ResourceLocation) (Object) data.require(Keys.GAME_MODE).key(RegistryTypes.GAME_MODE);
+        this.impl$difficulty = (ResourceLocation) (Object) data.get(Keys.WORLD_DIFFICULTY).map(RegistryKey::location).orElse(null);
+        this.impl$serializationBehavior = data.require(Keys.SERIALIZATION_BEHAVIOR);
+        this.impl$displayName = data.getOrNull(Keys.DISPLAY_NAME);
+        this.impl$viewDistance = data.getOrNull(Keys.VIEW_DISTANCE);
+        this.impl$spawnPosition = data.getOrNull(Keys.SPAWN_POSITION);
+        this.impl$loadOnStartup = data.require(Keys.IS_LOAD_ON_STARTUP);
+        this.impl$performsSpawnLogic = data.require(Keys.PERFORM_SPAWN_LOGIC);
+        this.impl$hardcore = data.getOrNull(Keys.HARDCORE);
+        this.impl$commands = data.getOrNull(Keys.COMMANDS);
+        this.impl$pvp = data.getOrNull(Keys.PVP);
         return (LevelStem) (Object) this;
     }
 

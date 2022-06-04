@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.storage;
 
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.ServerLevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.trader.WanderingTrader;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Ticks;
@@ -36,10 +34,6 @@ import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.api.world.weather.WeatherTypes;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Interface.Remap;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
@@ -48,11 +42,11 @@ import org.spongepowered.common.world.weather.SpongeWeather;
 import org.spongepowered.common.world.weather.SpongeWeatherType;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(ServerLevelData.class)
-@Implements(@Interface(iface = ServerWorldProperties.class, prefix = "serverWorldProperties$", remap = Remap.NONE))
 public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 
     // @formatter:off
@@ -68,11 +62,9 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
     @Shadow int shadow$getWanderingTraderSpawnChance();
     @Shadow void shadow$setWanderingTraderSpawnChance(int p_230397_1_);
     @Shadow void shadow$setWanderingTraderId(UUID p_230394_1_);
-    @Shadow GameType shadow$getGameType();
+    @Shadow @javax.annotation.Nullable UUID shadow$getWanderingTraderId();
     @Shadow net.minecraft.world.level.border.WorldBorder.Settings shadow$getWorldBorder();
     @Shadow boolean shadow$isInitialized();
-    @Shadow boolean shadow$getAllowCommands();
-    @Shadow void shadow$setGameType(GameType p_230392_1_);
     @Shadow void shadow$setDayTime(long p_76068_1_);
     // @formatter:on
 
@@ -82,22 +74,7 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
     }
 
     @Override
-    default GameMode gameMode() {
-        return (GameMode) (Object) this.shadow$getGameType();
-    }
-
-    @Override
-    default void setGameMode(final GameMode gamemode) {
-        this.shadow$setGameType((GameType) (Object) gamemode);
-    }
-
-    @Override
-    default boolean commands() {
-        return this.shadow$getAllowCommands();
-    }
-
-    @Intrinsic
-    default boolean serverWorldProperties$initialized() {
+    default boolean initialized() {
         return this.shadow$isInitialized();
     }
 
@@ -124,6 +101,11 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
     @Override
     default void setWanderingTrader(@Nullable final WanderingTrader trader) {
         this.shadow$setWanderingTraderId(trader == null ? null : trader.uniqueId());
+    }
+
+    @Override
+    default Optional<UUID> wanderTraderUniqueId() {
+        return Optional.ofNullable(this.shadow$getWanderingTraderId());
     }
 
     @Override

@@ -177,7 +177,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
 
     public static WorldGenerationConfig cloneGenerationConfig(WorldGenerationConfig cfg) {
         return (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$new(cfg.seed(),
-                cfg.generateFeatures(), cfg.generateBonusChest(),
+                cfg.generateStructures(), cfg.generateBonusChest(),
                 new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), null),
                 ((DimensionGeneratorSettingsAccessor) cfg).accessor$legacyCustomOptions());
     }

@@ -31,19 +31,18 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
-import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.SeedUtil;
 
 import java.util.Objects;
 import java.util.Optional;
 
-public final class SpongeWorldGenerationConfigMutableBuilder implements WorldGenerationConfig.Mutable.Builder {
+public final class SpongeWorldGenerationConfigBuilder implements WorldGenerationConfig.Builder {
 
     private long seed;
     private boolean generateFeatures, generateBonusChest;
 
     @Override
-    public WorldGenerationConfig.Mutable.Builder seed(final long seed) {
+    public WorldGenerationConfig.Builder seed(final long seed) {
         this.seed = seed;
         return this;
     }
@@ -54,19 +53,19 @@ public final class SpongeWorldGenerationConfigMutableBuilder implements WorldGen
     }
 
     @Override
-    public WorldGenerationConfig.Mutable.Builder generateFeatures(final boolean generateFeatures) {
+    public WorldGenerationConfig.Builder generateFeatures(final boolean generateFeatures) {
         this.generateFeatures = generateFeatures;
         return this;
     }
 
     @Override
-    public WorldGenerationConfig.Mutable.Builder generateBonusChest(final boolean generateBonusChest) {
+    public WorldGenerationConfig.Builder generateBonusChest(final boolean generateBonusChest) {
         this.generateBonusChest = generateBonusChest;
         return this;
     }
 
     @Override
-    public WorldGenerationConfig.Mutable.Builder reset() {
+    public WorldGenerationConfig.Builder reset() {
         final WorldGenSettings defaultSettings = SpongeCommon.server().getWorldData().worldGenSettings();
         this.seed = defaultSettings.seed();
         this.generateFeatures = defaultSettings.generateStructures();
@@ -75,16 +74,16 @@ public final class SpongeWorldGenerationConfigMutableBuilder implements WorldGen
     }
 
     @Override
-    public WorldGenerationConfig.Mutable.Builder from(final WorldGenerationConfig value) {
+    public WorldGenerationConfig.Builder from(final WorldGenerationConfig value) {
         this.seed = Objects.requireNonNull(value, "value").seed();
-        this.generateFeatures = value.generateFeatures();
+        this.generateFeatures = value.generateStructures();
         this.generateBonusChest = value.generateBonusChest();
         return this;
     }
 
     @Override
-    public WorldGenerationConfig.Mutable build() {
-        return (WorldGenerationConfig.Mutable) DimensionGeneratorSettingsAccessor.invoker$new(this.seed, this.generateFeatures,
+    public WorldGenerationConfig build() {
+        return (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$new(this.seed, this.generateFeatures,
             this.generateBonusChest, new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), null), Optional.empty());
     }
 }

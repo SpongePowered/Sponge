@@ -104,4 +104,8 @@ public interface PrimaryLevelDataBridge {
     void bridge$readSpongeLevelData(Dynamic<Tag> impl$spongeLevelData);
 
     CompoundTag bridge$writeSpongeLevelData();
+
+    void bridge$hardcore(boolean hardcore);
+
+    void bridge$allowCommands(boolean commands);
 }

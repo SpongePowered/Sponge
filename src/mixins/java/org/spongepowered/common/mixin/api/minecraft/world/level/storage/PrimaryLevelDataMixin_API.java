@@ -24,30 +24,16 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.storage;
 
-import net.kyori.adventure.text.Component;
-import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.WorldType;
-import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
-import org.spongepowered.common.server.BootstrapProperties;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -56,12 +42,7 @@ import java.util.UUID;
 public abstract class PrimaryLevelDataMixin_API implements WorldData, ServerWorldProperties {
 
     // @formatter:off
-    @Shadow private UUID wanderingTraderId;
-    @Shadow private LevelSettings settings;
-
-    @Shadow public abstract void shadow$setDifficulty(Difficulty difficulty);
     @Shadow public abstract boolean shadow$isInitialized();
-    @Shadow public abstract WorldGenSettings shadow$worldGenSettings();
     // @formatter:on
 
     @Override
@@ -80,48 +61,8 @@ public abstract class PrimaryLevelDataMixin_API implements WorldData, ServerWorl
     }
 
     @Override
-    public Optional<Component> displayName() {
-        return ((PrimaryLevelDataBridge) this).bridge$displayName();
-    }
-
-    @Override
-    public void setDisplayName(final Component displayName) {
-        ((PrimaryLevelDataBridge) this).bridge$setDisplayName(Objects.requireNonNull(displayName, "displayName"));
-    }
-
-    @Override
-    public WorldType worldType() {
-        return (WorldType) (Object) ((PrimaryLevelDataBridge) this).bridge$dimensionType();
-    }
-
-    @Override
-    public void setWorldType(final WorldType worldType) {
-        ((PrimaryLevelDataBridge) this).bridge$dimensionType((DimensionType) (Object) Objects.requireNonNull(worldType, "worldType"), true);
-    }
-
-    @Override
     public boolean initialized() {
         return this.shadow$isInitialized();
-    }
-
-    @Override
-    public WorldGenerationConfig.Mutable worldGenerationConfig() {
-        return (WorldGenerationConfig.Mutable) this.shadow$worldGenSettings();
-    }
-
-    @Override
-    public void setHardcore(final boolean hardcore) {
-        ((LevelSettingsAccessor) (Object) this.settings).accessor$hardcode(hardcore);
-    }
-
-    @Override
-    public boolean pvp() {
-        return ((PrimaryLevelDataBridge) this).bridge$pvp().orElseGet(() -> ((DedicatedServer) SpongeCommon.server()).getProperties().pvp);
-    }
-
-    @Override
-    public void setPvp(final boolean pvp) {
-        ((PrimaryLevelDataBridge) this).bridge$setPvp(pvp);
     }
 
     @Override
@@ -129,58 +70,4 @@ public abstract class PrimaryLevelDataMixin_API implements WorldData, ServerWorl
         return ((PrimaryLevelDataBridge) this).bridge$uniqueId();
     }
 
-    @Override
-    public boolean loadOnStartup() {
-        return ((PrimaryLevelDataBridge) this).bridge$loadOnStartup();
-    }
-
-    @Override
-    public void setLoadOnStartup(final boolean loadOnStartup) {
-        ((PrimaryLevelDataBridge) this).bridge$setLoadOnStartup(loadOnStartup);
-    }
-
-    @Override
-    public boolean performsSpawnLogic() {
-        return ((PrimaryLevelDataBridge) this).bridge$performsSpawnLogic();
-    }
-
-    @Override
-    public void setPerformsSpawnLogic(final boolean keepLoaded) {
-        ((PrimaryLevelDataBridge) this).bridge$setPerformsSpawnLogic(keepLoaded);
-    }
-
-    @Override
-    public void setCommands(final boolean commands) {
-        ((LevelSettingsAccessor) (Object) this.settings).accessor$allowCommands(commands);
-    }
-
-    @Override
-    public int viewDistance() {
-        return ((PrimaryLevelDataBridge) this).bridge$viewDistance().orElseGet(() -> ((DedicatedServer) SpongeCommon.server()).getProperties().viewDistance);
-    }
-
-    @Override
-    public void setViewDistance(@Nullable Integer viewDistance) {
-        ((PrimaryLevelDataBridge) this).bridge$setViewDistance(viewDistance);
-    }
-
-    @Override
-    public void setDifficulty(final org.spongepowered.api.world.difficulty.Difficulty difficulty) {
-        this.shadow$setDifficulty((Difficulty) (Object) difficulty);
-    }
-
-    @Override
-    public SerializationBehavior serializationBehavior() {
-        return ((PrimaryLevelDataBridge) this).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
-    }
-
-    @Override
-    public void setSerializationBehavior(final SerializationBehavior behavior) {
-        ((PrimaryLevelDataBridge) this).bridge$setSerializationBehavior(behavior);
-    }
-
-    @Override
-    public Optional<UUID> wanderTraderUniqueId() {
-        return Optional.ofNullable(this.wanderingTraderId);
-    }
 }

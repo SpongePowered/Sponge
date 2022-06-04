@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.storage;
 
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.storage.LevelData;
 import org.spongepowered.api.util.MinecraftDayTime;
@@ -33,13 +32,11 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.accessor.world.level.GameRules_ValueAccessor;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
-import org.spongepowered.math.vector.Vector3i;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,43 +47,23 @@ import java.util.Objects;
 public interface LevelDataMixin_API extends WorldProperties {
 
     // @formatter:off
-    @Shadow int shadow$getXSpawn();
-    @Shadow int shadow$getYSpawn();
-    @Shadow int shadow$getZSpawn();
     @Shadow long shadow$getGameTime();
     @Shadow long shadow$getDayTime();
-    @Shadow boolean shadow$isHardcore();
     @Shadow GameRules shadow$getGameRules();
-    @Shadow Difficulty shadow$getDifficulty();
     // @formatter:on
 
     @Override
-    default Vector3i spawnPosition() {
-        return new Vector3i(this.shadow$getXSpawn(), this.shadow$getYSpawn(), this.shadow$getZSpawn());
-    }
-
-    @Intrinsic
-    default MinecraftDayTime worldProperties$gameTime() {
+    default MinecraftDayTime gameTime() {
         return new SpongeMinecraftDayTime(this.shadow$getGameTime());
     }
 
-    @Intrinsic
-    default MinecraftDayTime worldProperties$dayTime() {
+    @Override
+    default MinecraftDayTime dayTime() {
         return new SpongeMinecraftDayTime(this.shadow$getDayTime());
     }
 
-    @Intrinsic
-    default boolean worldProperties$hardcore() {
-        return this.shadow$isHardcore();
-    }
-
-    @Intrinsic
-    default org.spongepowered.api.world.difficulty.Difficulty worldProperties$difficulty() {
-        return (org.spongepowered.api.world.difficulty.Difficulty) (Object) this.shadow$getDifficulty();
-    }
-
     @Override
-    default  <V> V gameRule(final GameRule<V> gameRule) {
+    default <V> V gameRule(final GameRule<V> gameRule) {
         final GameRules.Value<?> value = this.shadow$getGameRules().getRule((GameRules.Key<?>) (Object) Objects.requireNonNull(gameRule,
                 "gameRule"));
         if (value instanceof GameRules.BooleanValue) {
@@ -98,7 +75,7 @@ public interface LevelDataMixin_API extends WorldProperties {
     }
 
     @Override
-    default  <V> void setGameRule(final GameRule<V> gameRule, final V value) {
+    default <V> void setGameRule(final GameRule<V> gameRule, final V value) {
         Objects.requireNonNull(gameRule, "gameRule");
         Objects.requireNonNull(value, "value");
 

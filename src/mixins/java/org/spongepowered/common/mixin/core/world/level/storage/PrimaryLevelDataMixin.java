@@ -193,7 +193,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public void bridge$forceSetDifficulty(final Difficulty difficulty) {
         this.impl$customDifficulty = true;
-        ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(difficulty);
+        this.settings = this.settings.withDifficulty(difficulty);
         this.impl$updateWorldForDifficultyChange(this.bridge$world(), this.shadow$isDifficultyLocked());
     }
 
@@ -283,24 +283,28 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         this.impl$dimensionType = dimension.typeHolder().value();
         this.impl$displayName = levelStemBridge.bridge$displayName();
         final Difficulty difficulty = levelStemBridge.bridge$difficulty();
+        final GameType gameType = levelStemBridge.bridge$gameMode();
+        final Boolean isHardcore = levelStemBridge.bridge$hardcore();
         if (difficulty != null) {
-            ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(difficulty);
             this.impl$customDifficulty = true;
         }
-        final GameType gameMode = levelStemBridge.bridge$gameMode();
-        if (gameMode != null) {
-            ((LevelSettingsAccessor) (Object) this.settings).accessor$gameType(gameMode);
+        if (gameType != null) {
             this.impl$customGameType = true;
         }
+        this.settings = new LevelSettings(this.settings.levelName(),
+                gameType == null ? this.settings.gameType() : gameType,
+                this.settings.allowCommands(),
+                difficulty == null ? this.settings.difficulty() : difficulty,
+                isHardcore == null ? this.settings.hardcore() : isHardcore,
+                this.settings.gameRules(),
+                this.settings.getDataPackConfig());
+
         final Vector3i spawnPos = levelStemBridge.bridge$spawnPosition();
         if (spawnPos != null) {
             this.shadow$setSpawn(VecHelper.toBlockPos(spawnPos), this.spawnAngle);
             this.impl$customSpawnPosition = true;
-        };
-        final Boolean isHardcore = levelStemBridge.bridge$hardcore();
-        if (isHardcore != null) {
-            ((LevelSettingsAccessor) (Object) this.settings).accessor$hardcode(isHardcore);
         }
+
         this.impl$serializationBehavior = levelStemBridge.bridge$serializationBehavior();
         this.impl$pvp = levelStemBridge.bridge$pvp();
         this.impl$loadOnStartup = levelStemBridge.bridge$loadOnStartup();
@@ -426,6 +430,16 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         this.impl$pendingUniqueIds.clear();
 
         return data;
+    }
+
+    @Override
+    public void bridge$hardcore(final boolean hardcore) {
+        this.settings = new LevelSettings(this.settings.levelName(), this.settings.gameType(), hardcore, this.settings.difficulty(), this.settings.allowCommands(), this.settings.gameRules(), this.settings.getDataPackConfig());
+    }
+
+    @Override
+    public void bridge$allowCommands(final boolean commands) {
+        this.settings = new LevelSettings(this.settings.levelName(), this.settings.gameType(), this.settings.allowCommands(), this.settings.difficulty(), commands, this.settings.gameRules(), this.settings.getDataPackConfig());
     }
 
     @Override
