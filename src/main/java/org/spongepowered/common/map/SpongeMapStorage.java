@@ -88,8 +88,9 @@ public final class SpongeMapStorage implements MapStorage {
         if (mapId == null) {
             return Optional.empty();
         }
-        return Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT)
-                .map(world -> (MapInfo) ((ServerLevel) world).getMapData(Constants.Map.MAP_PREFIX + mapId));
+        final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get();
+        final MapInfo loadedMapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + mapId);
+        return Optional.ofNullable(loadedMapInfo);
     }
 
     @Override

@@ -53,9 +53,9 @@ public final class MapInfoItemStackData {
 							if (itemStack.getTag() == null) {
 								return null;
 							}
-							return (MapInfo) (Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).map(x ->
-									((Level) x).getMapData(Constants.Map.MAP_PREFIX + itemStack.getTag().getInt(Constants.Map.MAP_ID)))
-										.orElse(null));
+
+							return (MapInfo) ((Level)Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get())
+									.getMapData(Constants.Map.MAP_PREFIX + itemStack.getTag().getInt(Constants.Map.MAP_ID));
 						}) // Nullable
 						.set((itemStack, mapInfo) -> {
 							@Nullable CompoundTag nbt = itemStack.getTag();

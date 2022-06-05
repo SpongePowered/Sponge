@@ -231,6 +231,7 @@ import org.spongepowered.common.data.nbt.validation.ValidationTypes;
 import org.spongepowered.common.data.persistence.HoconDataFormat;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.persistence.NBTDataFormat;
+import org.spongepowered.common.data.persistence.SNBTDataFormat;
 import org.spongepowered.common.data.type.SpongeBodyPart;
 import org.spongepowered.common.data.type.SpongeCatType;
 import org.spongepowered.common.data.type.SpongeHorseColor;
@@ -751,7 +752,7 @@ public final class SpongeRegistryLoaders {
             l.add(PlaceholderParsers.CURRENT_WORLD, k -> new SpongePlaceholderParserBuilder()
                     .parser(placeholderText -> Component.text(placeholderText.associatedObject().filter(x -> x instanceof Locatable)
                             .map(x -> ((Locatable) x).serverLocation().worldKey())
-                            .orElseGet(() -> Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get().key()).toString()))
+                            .orElseGet(() -> DefaultWorldKeys.DEFAULT).toString()))
                     .build());
             l.add(PlaceholderParsers.NAME, k -> new SpongePlaceholderParserBuilder()
                     .parser(placeholderText -> placeholderText.associatedObject()
@@ -979,6 +980,7 @@ public final class SpongeRegistryLoaders {
         return RegistryLoader.of(l -> {
             l.add(DataFormats.JSON, k -> new JsonDataFormat());
             l.add(DataFormats.HOCON, k -> new HoconDataFormat());
+            l.add(DataFormats.SNBT, k -> new SNBTDataFormat());
             l.add(DataFormats.NBT, k -> new NBTDataFormat());
         });
     }
