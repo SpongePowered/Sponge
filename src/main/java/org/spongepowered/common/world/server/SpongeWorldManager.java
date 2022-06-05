@@ -931,7 +931,16 @@ public abstract class SpongeWorldManager implements WorldManager {
             }
 
             final WorldType worldType = (WorldType) template.type();
-            final ResourceKey worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) template.type());
+            final ResourceKey worldTypeKey;
+
+            try {
+                worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) template.type());
+            } catch (final Exception ex) {
+                SpongeCommon.logger().error("Failed to find a registry key for the world type specified for " +
+                        "world '{}'! This is a serious issue as a mod or plugin has not registered it at the " +
+                        "appropriate point beforehand, Aborting...", worldKey);
+                throw new RuntimeException(ex);
+            }
 
             MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey);
             if (!isDefaultWorld && !templateBridge.bridge$loadOnStartup()) {
