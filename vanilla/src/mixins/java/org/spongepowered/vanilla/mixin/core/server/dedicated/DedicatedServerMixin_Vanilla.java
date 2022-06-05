@@ -25,6 +25,7 @@
 package org.spongepowered.vanilla.mixin.core.server.dedicated;
 
 import net.minecraft.server.dedicated.DedicatedServer;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,6 +34,8 @@ import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.vanilla.mixin.core.server.MinecraftServerMixin_Vanilla;
+
+import java.lang.reflect.InvocationTargetException;
 
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_Vanilla {
@@ -49,6 +52,8 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_
 
         lifecycle.establishServerRegistries(this);
         lifecycle.callStartingEngineEvent(this);
+
+        this.vanilla$forceSlf4Jreinit();
     }
 
     @Inject(method = "initServer", at = @At("RETURN"))
@@ -57,5 +62,18 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_
         lifecycle.callStartedEngineEvent(this);
 
         lifecycle.callLoadedGameEvent();
+    }
+
+    private void vanilla$forceSlf4Jreinit() {
+        // https://github.com/SpongePowered/Sponge/issues/3696
+        // Force slf4j to re-find the Log4j service provider, as sometimes it's not been found by this point
+        try {
+            final var method = LoggerFactory.class.getDeclaredMethod("performInitialization");
+            method.setAccessible(true);
+            method.invoke(null);
+            method.setAccessible(false);
+        } catch (final NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            LoggerFactory.getLogger(this.getClass()).error("Unable to replace logger", e);
+        }
     }
 }
