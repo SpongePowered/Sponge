@@ -112,6 +112,9 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
             net.minecraft.world.phys.AABB param1,
             List<net.minecraft.world.entity.Entity> param2,
             @org.jetbrains.annotations.Nullable Predicate<? super net.minecraft.world.entity.Entity> param3);
+    @Shadow public abstract Map<BlockPos, net.minecraft.world.level.block.entity.BlockEntity> shadow$getBlockEntities();
+    @Shadow public abstract void shadow$setBlockEntity(BlockPos param0, net.minecraft.world.level.block.entity.BlockEntity param1);
+    @Shadow public abstract void shadow$removeBlockEntity(BlockPos param0);
     //@formatter:on
 
     private @Nullable Vector3i api$blockMin;
@@ -240,6 +243,11 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
     }
 
     @Override
+    public Collection<? extends BlockEntity> blockEntities() {
+        return (Collection) Collections.unmodifiableCollection(this.shadow$getBlockEntities().values());
+    }
+
+    @Override
     public VolumeStream<WorldChunk, BlockEntity> blockEntityStream(
         final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
@@ -279,6 +287,16 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
 
     private Stream<Map.Entry<BlockPos, net.minecraft.world.level.block.entity.BlockEntity>> impl$getBlockEntitiesStream(final ChunkAccess chunk) {
         return chunk instanceof LevelChunk ? ((LevelChunk) chunk).getBlockEntities().entrySet().stream() : Stream.empty();
+    }
+
+    @Override
+    public void addBlockEntity(int x, int y, int z, BlockEntity blockEntity) {
+        this.world().addBlockEntity(x, y, z, blockEntity);
+    }
+
+    @Override
+    public void removeBlockEntity(int x, int y, int z) {
+        this.world().removeBlockEntity(x, y, z);
     }
 
     @Override

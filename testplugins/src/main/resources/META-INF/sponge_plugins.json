@@ -255,6 +255,12 @@
             "name": "Key Listener Test",
             "entrypoint": "org.spongepowered.test.keys.KeyTest",
             "description": "Key Listener Testing"
+        },
+        {
+            "id": "blockentityvolumetest",
+            "name": "Block Entity Volume Test",
+            "entrypoint": "org.spongepowered.test.blockentity.BlockEntityVolumeTest",
+            "description": "Block Entity Volume testing for chunks."
         }
     ]
 }
