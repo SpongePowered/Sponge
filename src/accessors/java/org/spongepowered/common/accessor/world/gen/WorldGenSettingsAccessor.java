@@ -22,15 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.storage;
+package org.spongepowered.common.accessor.world.gen;
 
-import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.core.Registry;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
-@Mixin(PrimaryLevelData.class)
-public interface PrimaryLevelDataAccessor {
+import java.util.Optional;
 
-    @Accessor("settings") LevelSettings accessor$settings();
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
+
+@Mixin(WorldGenSettings.class)
+public interface WorldGenSettingsAccessor {
+
+    @Invoker("<init>") static WorldGenSettings invoker$new(final long seed, final boolean generateFeatures, final boolean generateBonusChest,
+            final Registry<LevelStem> dimensionRegistry, final Optional<String> legacyCustomOptions) {
+        throw new UntransformedInvokerError();
+    }
+
+    @Accessor("dimensions") @Mutable void accessor$dimensions(Registry<LevelStem> dimensions);
 }

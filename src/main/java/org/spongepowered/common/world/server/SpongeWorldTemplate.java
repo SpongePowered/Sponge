@@ -29,12 +29,10 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.Holder;
-import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.core.RegistryAccess;
@@ -63,13 +61,11 @@ import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
-import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -90,7 +86,6 @@ import java.util.Optional;
 public final class SpongeWorldTemplate extends AbstractResourceKeyed implements WorldTemplate, SpongeDataHolder {
 
     private final LevelStem levelStem;
-    private final WorldGenerationConfig generationConfig;
 
     public static final Codec<LevelStem> CODEC = RecordCodecBuilder.create(
             ($$0) -> $$0.group(DimensionType.CODEC.fieldOf("type").forGetter(LevelStem::typeHolder),
@@ -124,10 +119,9 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         SpongeWorldTemplate.SPONGE_CODEC, (type, data) -> ((LevelStemBridge) (Object) type).bridge$decorateData(data),
         type -> ((LevelStemBridge) (Object) type).bridge$createData()));
 
-    public SpongeWorldTemplate(final ResourceKey key, final LevelStem levelStem, final WorldGenerationConfig generationConfig) {
+    public SpongeWorldTemplate(final ResourceKey key, final LevelStem levelStem) {
         super(key);
         this.levelStem = levelStem;
-        this.generationConfig = SpongeWorldTemplate.cloneGenerationConfig(generationConfig);
     }
 
     @Override
@@ -175,17 +169,6 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         throw new IllegalArgumentException("WorldTemplate is not a SpongeWorldTemplate");
     }
 
-    public static WorldGenerationConfig cloneGenerationConfig(WorldGenerationConfig cfg) {
-        return (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$new(cfg.seed(),
-                cfg.generateStructures(), cfg.generateBonusChest(),
-                new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), null),
-                ((DimensionGeneratorSettingsAccessor) cfg).accessor$legacyCustomOptions());
-    }
-
-    public WorldGenerationConfig getGenerationConfig() {
-        return this.generationConfig;
-    }
-
     public static final class SpongeDataSection {
         @Nullable public final Component displayName;
         @Nullable public final ResourceLocation gameMode;
@@ -220,7 +203,6 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTemplate, WorldTemplate.Builder> implements WorldTemplate.Builder {
 
         private static DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(LevelStem.class);
-        private static DataProviderLookup PROVIDER_LOOKUP_TEMPLATE = SpongeDataManager.getProviderRegistry().getProviderLookup(WorldTemplate.class);
 
         private DataManipulator.Mutable data = DataManipulator.mutableOf();
 
@@ -239,7 +221,6 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.data = DataManipulator.mutableOf();
             this.data.set(Keys.WORLD_TYPE, WorldTypes.OVERWORLD);
             this.data.set(Keys.CHUNK_GENERATOR, ChunkGenerator.overworld());
-            this.data.set(Keys.WORLD_GEN_CONFIG, (WorldGenerationConfig) SpongeCommon.server().getWorldData().worldGenSettings());
             return this;
         }
 
@@ -272,7 +253,6 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.key = properties.key();
             properties.displayName().ifPresent(name -> this.data.set(Keys.DISPLAY_NAME, name));
             this.data.set(Keys.WORLD_TYPE, properties.worldType().asDefaultedReference(RegistryTypes.WORLD_TYPE));
-            this.data.set(Keys.WORLD_GEN_CONFIG, properties.worldGenerationConfig());
             if (bridge.bridge$customGameType()) {
                 this.data.set(Keys.GAME_MODE_REFERENCE, properties.gameMode().asDefaultedReference(RegistryTypes.GAME_MODE));
             }
@@ -303,8 +283,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             final Holder<DimensionType> dimensionType = BuilderImpl.dimensionType(this.data.require(Keys.WORLD_TYPE));
             final LevelStem levelStem = new LevelStem(dimensionType, (net.minecraft.world.level.chunk.ChunkGenerator) chunkGenerator);
             ((LevelStemBridge) (Object) levelStem).bridge$decorateData(this.data);
-            final WorldGenerationConfig generationConfig = this.data.getOrElse(Keys.WORLD_GEN_CONFIG, (WorldGenerationConfig) SpongeCommon.server().getWorldData().worldGenSettings());
-            return new SpongeWorldTemplate(this.key, levelStem, generationConfig);
+            return new SpongeWorldTemplate(this.key, levelStem);
         }
 
         @NotNull

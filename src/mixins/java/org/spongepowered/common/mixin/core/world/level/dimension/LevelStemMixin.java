@@ -31,7 +31,6 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.registry.RegistryKey;
@@ -43,22 +42,18 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.data.holder.SpongeDataHolder;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3i;
 
 @Mixin(LevelStem.class)
-public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBridge, SpongeDataHolder {
+public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolder {
 
     // @formatter:off
-
     @Shadow @Final @org.spongepowered.asm.mixin.Mutable public static Codec<LevelStem> CODEC;
-
     // @formatter:on
 
-    private ResourceKey impl$key;
     private ResourceLocation impl$gameMode;
     @Nullable private ResourceLocation impl$difficulty;
     private SerializationBehavior impl$serializationBehavior = null;
@@ -73,16 +68,6 @@ public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBrid
     @Inject(method = "<clinit>", at = @At("RETURN"))
     private static void impl$useTemplateCodec(final CallbackInfo ci) {
         LevelStemMixin.CODEC = SpongeWorldTemplate.DIRECT_CODEC;
-    }
-
-    @Override
-    public ResourceKey bridge$getKey() {
-        return this.impl$key;
-    }
-
-    @Override
-    public void bridge$setKey(final ResourceKey key) {
-        this.impl$key = key;
     }
 
     @Override
@@ -182,10 +167,10 @@ public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBrid
     public SpongeWorldTemplate.SpongeDataSection bridge$createData() {
         return new SpongeWorldTemplate.SpongeDataSection(this.bridge$displayName(),
             this.impl$gameMode, this.impl$difficulty,
-            this.bridge$serializationBehavior(),
-            this.bridge$viewDistance(), this.bridge$spawnPosition(),
-            this.bridge$loadOnStartup(), this.bridge$performsSpawnLogic(),
-            this.bridge$hardcore(), this.bridge$commands(),
-            this.bridge$pvp());
+            this.impl$serializationBehavior,
+            this.impl$viewDistance, this.impl$spawnPosition,
+            this.impl$loadOnStartup, this.impl$performsSpawnLogic,
+            this.impl$hardcore, this.impl$commands,
+            this.impl$pvp);
     }
 }

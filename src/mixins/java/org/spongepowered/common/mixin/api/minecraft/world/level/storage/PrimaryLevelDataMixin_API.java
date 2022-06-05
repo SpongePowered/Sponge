@@ -30,7 +30,6 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 
@@ -40,10 +39,6 @@ import java.util.UUID;
 @SuppressWarnings("ConstantConditions")
 @Mixin(PrimaryLevelData.class)
 public abstract class PrimaryLevelDataMixin_API implements WorldData, ServerWorldProperties {
-
-    // @formatter:off
-    @Shadow public abstract boolean shadow$isInitialized();
-    // @formatter:on
 
     @Override
     public ResourceKey key() {
@@ -58,11 +53,6 @@ public abstract class PrimaryLevelDataMixin_API implements WorldData, ServerWorl
     @Override
     public String name() {
         return this.getLevelName();
-    }
-
-    @Override
-    public boolean initialized() {
-        return this.shadow$isInitialized();
     }
 
     @Override

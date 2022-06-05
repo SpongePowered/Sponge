@@ -60,6 +60,7 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.asm.mixin.Final;
@@ -124,7 +125,9 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     @Shadow public abstract Commands shadow$getCommands();
     @Shadow public abstract PackRepository shadow$getPackRepository();
     @Shadow public abstract net.minecraft.server.packs.resources.ResourceManager shadow$getResourceManager();
+    @Shadow public abstract WorldData shadow$getWorldData();
     // @formatter:on
+
 
     private Iterable<? extends Audience> audiences;
     private ServerScheduler api$scheduler;
@@ -244,6 +247,11 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     @Override
     public boolean isMultiWorldEnabled() {
         return this.shadow$isNetherEnabled();
+    }
+
+    @Override
+    public WorldGenerationConfig worldGenerationConfig() {
+        return (WorldGenerationConfig) this.shadow$getWorldData().worldGenSettings();
     }
 
     @Override

@@ -32,7 +32,6 @@ public final class WorldDataProviders extends DataProviderRegistratorBuilder {
     public void registerProviders() {
         WorldTypeData.register(this.registrator);
         LevelStemData.register(this.registrator);
-        WorldTemplateData.register(this.registrator);
         WorldPropertiesData.register(this.registrator);
     }
 }

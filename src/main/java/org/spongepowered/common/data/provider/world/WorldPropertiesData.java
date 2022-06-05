@@ -38,12 +38,14 @@ import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
+import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.weather.SpongeWeather;
 import org.spongepowered.math.vector.Vector3i;
 
 public final class WorldPropertiesData {
@@ -71,6 +73,13 @@ public final class WorldPropertiesData {
                         .set((h, v) -> h.setGameType((GameType) (Object) v))
                     .create(Keys.COMMANDS)
                         .get(ServerLevelData::getAllowCommands)
+                    .create(Keys.INITIALIZED)
+                        .get(ServerLevelData::isInitialized)
+                    .create(Keys.WORLD_BORDER)
+                        .get(h -> (WorldBorder) h.getWorldBorder())
+                    .create(Keys.WEATHER)
+                        .get(SpongeWeather::of)
+                        .set(SpongeWeather::apply)
                 .asMutable(PrimaryLevelData.class)
                     .create(Keys.WORLD_DIFFICULTY)
                         .set((h, v) -> h.setDifficulty((net.minecraft.world.Difficulty) (Object) v.get(Sponge.game())))

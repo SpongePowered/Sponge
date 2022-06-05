@@ -30,7 +30,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
+import org.spongepowered.common.accessor.world.gen.WorldGenSettingsAccessor;
 import org.spongepowered.common.util.SeedUtil;
 
 import java.util.Objects;
@@ -53,8 +53,8 @@ public final class SpongeWorldGenerationConfigBuilder implements WorldGeneration
     }
 
     @Override
-    public WorldGenerationConfig.Builder generateFeatures(final boolean generateFeatures) {
-        this.generateFeatures = generateFeatures;
+    public WorldGenerationConfig.Builder generateStructures(final boolean generateStructures) {
+        this.generateFeatures = generateStructures;
         return this;
     }
 
@@ -83,7 +83,7 @@ public final class SpongeWorldGenerationConfigBuilder implements WorldGeneration
 
     @Override
     public WorldGenerationConfig build() {
-        return (WorldGenerationConfig) DimensionGeneratorSettingsAccessor.invoker$new(this.seed, this.generateFeatures,
+        return (WorldGenerationConfig) WorldGenSettingsAccessor.invoker$new(this.seed, this.generateFeatures,
             this.generateBonusChest, new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), null), Optional.empty());
     }
 }

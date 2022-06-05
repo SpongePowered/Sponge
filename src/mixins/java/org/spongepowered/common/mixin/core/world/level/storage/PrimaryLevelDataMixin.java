@@ -67,8 +67,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
-import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
-import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
+import org.spongepowered.common.accessor.world.gen.WorldGenSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBridge;
@@ -116,8 +115,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     private final List<UUID> impl$pendingUniqueIds = new ArrayList<>();
     private int impl$trackedUniqueIdCount = 0;
 
-    private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$loadOnStartup,
-            impl$performsSpawnLogic;
+    private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$loadOnStartup, impl$performsSpawnLogic;
 
     private BiMap<Integer, UUID> impl$mapUUIDIndex = HashBiMap.create();
 
@@ -279,7 +277,6 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public void bridge$populateFromLevelStem(final LevelStem dimension) {
         final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) dimension;
-        this.impl$key = ((ResourceKeyBridge) (Object) dimension).bridge$getKey();
         this.impl$dimensionType = dimension.typeHolder().value();
         this.impl$displayName = levelStemBridge.bridge$displayName();
         final Difficulty difficulty = levelStemBridge.bridge$difficulty();
@@ -362,7 +359,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
                 ((org.spongepowered.api.registry.Registry<LevelStem>) (Object) registry).register(entry.key(), entry.value());
             }
         });
-        ((DimensionGeneratorSettingsAccessor) dimensionGeneratorSettings).accessor$dimensions(registry);
+        ((WorldGenSettingsAccessor) dimensionGeneratorSettings).accessor$dimensions(registry);
         return codec.encodeStart(ops, dimensionGeneratorSettings);
     }
 

@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.Objects;
 
 @Mixin(LevelData.class)
-@Implements(@Interface(iface = WorldProperties.class, prefix = "worldProperties$", remap = Remap.NONE))
 public interface LevelDataMixin_API extends WorldProperties {
 
     // @formatter:off

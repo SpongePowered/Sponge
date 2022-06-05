@@ -31,11 +31,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
 import net.minecraft.world.level.CollisionGetter;
@@ -54,12 +51,9 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.fluid.FluidType;
-import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.generation.ChunkGenerator;
@@ -68,7 +62,6 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.storage.ChunkLayout;
-import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -78,15 +71,11 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.data.holder.SpongeLocationBaseDataHolder;
 import org.spongepowered.common.mixin.api.minecraft.world.level.LevelMixin_API;
-import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -97,6 +86,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerLevel.class)
@@ -291,18 +283,13 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     // WeatherUniverse
 
     @Override
-    public Weather weather() {
-        return ((ServerWorldProperties) this.shadow$getLevelData()).weather();
-    }
-
-    @Override
     public void setWeather(final WeatherType type) {
-        ((ServerWorldProperties) this.shadow$getLevelData()).setWeather(Objects.requireNonNull(type, "type"));
+        this.properties().setWeather(Objects.requireNonNull(type, "type"));
     }
 
     @Override
     public void setWeather(final WeatherType type, final Ticks ticks) {
-        ((ServerWorldProperties) this.shadow$getLevelData()).setWeather(Objects.requireNonNull(type, "type"), Objects.requireNonNull(ticks, "ticks"));
+        this.properties().setWeather(Objects.requireNonNull(type, "type"), Objects.requireNonNull(ticks, "ticks"));
     }
 
     @Override
