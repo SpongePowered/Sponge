@@ -41,6 +41,7 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
@@ -137,14 +138,15 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                 true
         );
 
-        private final SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject> tag = new SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject>(TypeToken.get(SpongeTagTemplate.class),
+        private final SpongeDataPackType<@NonNull TagTemplate, TagSerializedObject> tag = new SpongeDataPackType<>(TypeToken.get(TagTemplate.class),
                 new TagDataPackSerializer("Tag", "tags"),
-                s -> {
+                tagTemplate -> {
+                    final SpongeTagTemplate s = (SpongeTagTemplate) tagTemplate;
                     final JsonObject jsonObject = s.toJson();
                     jsonObject.addProperty("replace", s.replace());
                     return jsonObject;
                 },
-                (i1, i2) -> new TagSerializedObject(i1.key(), i2, i1.registryType()),
+                (i1, i2) -> new TagSerializedObject(i1.key(), i2, ((SpongeTagTemplate) i1).registryType()),
                 false
         );
 
@@ -169,7 +171,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         }
 
         @Override
-        public DataPackType tag() {
+        public DataPackType<TagTemplate> tag() {
             return this.tag;
         }
     }
