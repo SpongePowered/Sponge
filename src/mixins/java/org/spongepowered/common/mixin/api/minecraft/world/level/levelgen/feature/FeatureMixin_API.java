@@ -28,46 +28,25 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.FeatureConfig;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.Random;
+@Mixin(net.minecraft.world.level.levelgen.feature.Feature.class)
+public abstract class FeatureMixin_API<FC extends FeatureConfiguration, SFC extends FeatureConfig> implements Feature<SFC> {
 
-@Mixin(ConfiguredFeature.class)
-public abstract class ConfiguredFeatureMixin_API<
-        F extends Feature<FC>,
-        FC extends FeatureConfiguration,
-        APIF extends org.spongepowered.api.world.generation.feature.Feature<APIFC>,
-        APIFC extends FeatureConfig>
-        implements org.spongepowered.api.world.generation.feature.ConfiguredFeature<APIF, APIFC> {
-
-    // @formatter:off
-    @Shadow @Final private F feature;
-    @Shadow @Final private FC config;
-    @Shadow public abstract boolean shadow$place(final WorldGenLevel $$0, final ChunkGenerator $$1, final RandomSource $$2, final BlockPos $$3);
-    // @formatter:on
+    @Shadow public abstract boolean shadow$place(final FC $$0, final WorldGenLevel $$1, final ChunkGenerator $$2,
+            final RandomSource $$3, final BlockPos $$4);
 
     @Override
-    public APIF feature() {
-        return (APIF) this.feature;
+    public boolean place(final ServerWorld world, final Vector3i pos, final SFC config) {
+        return this.shadow$place((FC) config, ((WorldGenLevel) world), (ChunkGenerator) world.generator(), ((WorldGenLevel) world).getRandom(), VecHelper.toBlockPos(pos));
     }
 
-    @Override
-    public APIFC config() {
-        return (APIFC) this.config;
-    }
 
-    @Override
-    public boolean place(ServerWorld world, Vector3i pos) {
-        return this.shadow$place(((WorldGenLevel) world), (ChunkGenerator) world.generator(), ((WorldGenLevel) world).getRandom(), VecHelper.toBlockPos(pos));
-    }
 }

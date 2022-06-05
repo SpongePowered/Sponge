@@ -64,6 +64,9 @@ import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.biome.BiomeTemplate;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
+import org.spongepowered.api.world.generation.feature.ConfiguredFeature;
+import org.spongepowered.api.world.generation.feature.Feature;
+import org.spongepowered.api.world.generation.feature.FeatureConfig;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -385,10 +388,29 @@ public final class WorldTest {
     }
 
     private CommandResult biomes(CommandContext commandContext) {
+        final Biome plainsBiome = Biomes.PLAINS.get(Sponge.server());
         final BiomeTemplate customTemplate =
-                BiomeTemplate.builder().from(Biomes.PLAINS.get(Sponge.server())).key(ResourceKey.of(this.plugin, "custom_plains")).build();
+                BiomeTemplate.builder().from(plainsBiome).key(ResourceKey.of(this.plugin, "custom_plains")).build();
         try {
             System.out.println(DataFormats.JSON.get().write(customTemplate.toContainer()));
+            System.out.println("Plains Biome Features:");
+            plainsBiome.features().forEach((step, list) -> {
+                System.out.println("Step: " + step);
+                list.forEach(placedFeature -> {
+                    final var configurableFeature = placedFeature.feature();
+                    final Feature<FeatureConfig> feature = configurableFeature.feature();
+                    System.out.println(" - " + feature.getClass().getSimpleName() + " /w " + configurableFeature.config().getClass().getSimpleName() + " @ " + placedFeature.placementModifiers().stream().map(mod -> mod.getClass().getSimpleName()).toList());
+                });
+            });
+            System.out.println("Plains Biome Carvers:");
+            plainsBiome.carvers().forEach((step, list) -> {
+                System.out.println("Step: " + step);
+                list.forEach(configuredCarver -> {
+                    System.out.println(" - " + configuredCarver.carver().getClass().getSimpleName() + " /w " + configuredCarver.config().getClass().getSimpleName());
+                });
+            });
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }

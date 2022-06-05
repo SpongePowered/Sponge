@@ -49,6 +49,7 @@ class RegistryEntriesGenerator<V> implements Generator {
     private final Predicate<V> filter;
     private final TypeName valueType;
     private final RegistryScope scopeOverride;
+    private final TypeName registryValueType;
 
     RegistryEntriesGenerator(
         final String targetRelativePackage,
@@ -80,13 +81,25 @@ class RegistryEntriesGenerator<V> implements Generator {
         final Predicate<V> filter,
         final RegistryScope scopeOverride
     ) {
-        this.relativePackageName = targetRelativePackage;
+        this(targetRelativePackage, targetClassSimpleName, registryTypeName, valueType, registry, filter, scopeOverride, valueType);
+    }
+
+    public RegistryEntriesGenerator(final String relativePackageName,
+            final String targetClassSimpleName,
+            final String registryTypeName,
+            final TypeName valueType,
+            final ResourceKey<? extends Registry<V>> registry,
+            final Predicate<V> filter,
+            final RegistryScope scopeOverride,
+            final TypeName registryValueType) {
+        this.relativePackageName = relativePackageName;
         this.targetClassSimpleName = targetClassSimpleName;
-        this.valueType = valueType;
         this.registryTypeName = registryTypeName;
         this.registry = registry;
         this.filter = filter;
+        this.valueType = valueType;
         this.scopeOverride = scopeOverride;
+        this.registryValueType = registryValueType;
     }
 
     @Override
@@ -117,7 +130,7 @@ class RegistryEntriesGenerator<V> implements Generator {
 
         clazz.addAnnotation(scopeType.registryScopeAnnotation());
         final var fieldType = ParameterizedTypeName.get(scopeType.registryReferenceType(), this.valueType);
-        final var registryMethod = scopeType.registryGetter(this.registryTypeName, this.valueType);
+        final var registryMethod = scopeType.registryGetter(this.registryTypeName, this.registryValueType);
         final var factoryMethod = scopeType.registryReferenceFactory(this.registryTypeName, this.valueType);
 
         final Registry<V> finalRegistry = registry;

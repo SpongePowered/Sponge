@@ -24,13 +24,23 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.placement;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import org.spongepowered.api.world.generation.feature.ConfiguredFeature;
+import org.spongepowered.api.world.generation.feature.Feature;
+import org.spongepowered.api.world.generation.feature.FeatureConfig;
 import org.spongepowered.api.world.generation.feature.PlacementModifier;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.api.minecraft.server.level.ServerLevelMixin_API;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
 
@@ -40,19 +50,21 @@ public abstract class PlacedFeatureMixin_API implements org.spongepowered.api.wo
     // @formatter:off
     @Shadow @Final private Holder<net.minecraft.world.level.levelgen.feature.ConfiguredFeature<?, ?>> feature;
     @Shadow @Final private List<net.minecraft.world.level.levelgen.placement.PlacementModifier> placement;
+    @Shadow public abstract boolean shadow$place(final WorldGenLevel $$0, final ChunkGenerator $$1, final RandomSource $$2, final BlockPos $$3);
     // @formatter:on
 
     @Override
-    public ConfiguredFeature feature() {
-        // TODO
-        return null;
-//        return this.feature.value();
+    public <F extends Feature<FC>, FC extends FeatureConfig> ConfiguredFeature<F, FC> feature() {
+        return (ConfiguredFeature<F, FC>) (Object) this.feature.value();
     }
 
     @Override
     public List<PlacementModifier> placementModifiers() {
-        // TODO
-        return null;
-        //return this.placement;
+        return (List) this.placement;
+    }
+
+    @Override
+    public boolean place(final ServerWorld world, final Vector3i pos) {
+        return this.shadow$place(((WorldGenLevel) world), (ChunkGenerator) world.generator(), ((WorldGenLevel) world).getRandom(), VecHelper.toBlockPos(pos));
     }
 }

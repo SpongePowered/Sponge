@@ -177,7 +177,9 @@ public final class GeneratorMain {
                 "AttributeTypes",
                 "ATTRIBUTE_TYPE",
                 context.relativeClass("entity.attribute.type", "RangedAttributeType"),
-                Registry.ATTRIBUTE_REGISTRY
+                Registry.ATTRIBUTE_REGISTRY,
+                a -> true, null,
+                context.relativeClass("entity.attribute.type", "AttributeType")
             ),
             new RegistryEntriesGenerator<>(
                 "world.biome",
@@ -312,6 +314,28 @@ public final class GeneratorMain {
                 RegistryScope.SERVER
             ),
             new BlockStatePropertiesGenerator(),
+            new RegistryEntriesGenerator<>(
+                    "world.generation.feature",
+                    "PlacedFeatures",
+                    "PLACED_FEATURE",
+                    context.relativeClass("world.generation.feature", "PlacedFeature"),
+                    Registry.PLACED_FEATURE_REGISTRY
+            ),
+            new RegistryEntriesGenerator<>(
+                    "world.generation.feature",
+                    "ConfiguredFeatures",
+                    "CONFIGURED_FEATURE",
+                    ParameterizedTypeName.get(context.relativeClass("world.generation.feature", "ConfiguredFeature"), Types.WILDCARD, Types.WILDCARD),
+                    Registry.PLACED_FEATURE_REGISTRY
+            ),
+
+            new RegistryEntriesGenerator<>(
+                    "world.generation.feature",
+                    "Features",
+                    "FEATURE",
+                    ParameterizedTypeName.get(context.relativeClass("world.generation.feature", "Feature"), Types.WILDCARD),
+                    Registry.PLACED_FEATURE_REGISTRY
+            ),
 
             new TagGenerator(
                     "BLOCK_TYPE",
