@@ -319,14 +319,16 @@ public final class GeneratorMain {
                     "PlacedFeatures",
                     "PLACED_FEATURE",
                     context.relativeClass("world.generation.feature", "PlacedFeature"),
-                    Registry.PLACED_FEATURE_REGISTRY
+                    Registry.PLACED_FEATURE_REGISTRY,
+                    $ -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
                     "world.generation.feature",
                     "ConfiguredFeatures",
                     "CONFIGURED_FEATURE",
                     ParameterizedTypeName.get(context.relativeClass("world.generation.feature", "ConfiguredFeature"), Types.WILDCARD, Types.WILDCARD),
-                    Registry.PLACED_FEATURE_REGISTRY
+                    Registry.PLACED_FEATURE_REGISTRY,
+                    $ -> true, RegistryScope.SERVER
             ),
 
             new RegistryEntriesGenerator<>(
@@ -334,7 +336,8 @@ public final class GeneratorMain {
                     "Features",
                     "FEATURE",
                     ParameterizedTypeName.get(context.relativeClass("world.generation.feature", "Feature"), Types.WILDCARD),
-                    Registry.PLACED_FEATURE_REGISTRY
+                    Registry.PLACED_FEATURE_REGISTRY,
+                    $ -> true, RegistryScope.SERVER
             ),
 
             new TagGenerator(

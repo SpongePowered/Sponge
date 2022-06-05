@@ -33,6 +33,7 @@ import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,11 +42,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
+import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin extends MinecraftServerMixin {

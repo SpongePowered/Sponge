@@ -72,7 +72,7 @@ public final class SpongeDataPackManager {
         this.serialize(DataPackTypes.ADVANCEMENT, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.ADVANCEMENT));
         this.serialize(DataPackTypes.RECIPE, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.RECIPE));
         this.serialize(DataPackTypes.TAG, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.TAG));
-
+        this.serializeDelayed(DataPackTypes.BIOME, dataPacksDirectory, this.callRegisterDataPackValueEvent(DataPackTypes.BIOME));
         this.serializeDelayed(DataPackTypes.WORLD_TYPE, dataPacksDirectory, this.callRegisterDataPackValueEvent(DataPackTypes.WORLD_TYPE));
         this.serializeDelayed(DataPackTypes.WORLD, dataPacksDirectory, this.callRegisterDataPackValueEvent(DataPackTypes.WORLD));
     }

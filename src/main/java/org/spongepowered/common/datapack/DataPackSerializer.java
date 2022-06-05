@@ -97,6 +97,6 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
     }
 
     public String getPackName() {
-        return "plugin_" + this.typeDirectoryName;
+        return "plugin_" + this.typeDirectoryName.replace("/", "_");
     }
 }

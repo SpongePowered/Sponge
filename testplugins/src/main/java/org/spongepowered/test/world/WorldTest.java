@@ -62,11 +62,12 @@ import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.biome.BiomeTemplate;
+import org.spongepowered.api.world.generation.biome.DecorationSteps;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
-import org.spongepowered.api.world.generation.feature.ConfiguredFeature;
 import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.FeatureConfig;
+import org.spongepowered.api.world.generation.feature.PlacedFeatures;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -78,6 +79,7 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
@@ -142,8 +144,6 @@ public final class WorldTest {
                      .executor(this::createRandomWorld).build(), "createrandomworld", "crw")
              .register(this.plugin, Command.builder()
                      .executor(this::worldTypes).build(), "worldtypes")
-             .register(this.plugin, Command.builder()
-                    .executor(this::biomes).build(), "biomes")
             .register(this.plugin, Command.builder()
                     .executor(this::worldTemplates).build(), "worldtemplates")
         ;
@@ -383,36 +383,6 @@ public final class WorldTest {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        return CommandResult.success();
-    }
-
-    private CommandResult biomes(CommandContext commandContext) {
-        final Biome plainsBiome = Biomes.PLAINS.get(Sponge.server());
-        final BiomeTemplate customTemplate =
-                BiomeTemplate.builder().from(plainsBiome).key(ResourceKey.of(this.plugin, "custom_plains")).build();
-        try {
-            System.out.println(DataFormats.JSON.get().write(customTemplate.toContainer()));
-            System.out.println("Plains Biome Features:");
-            plainsBiome.features().forEach((step, list) -> {
-                System.out.println("Step: " + step);
-                list.forEach(placedFeature -> {
-                    final var configurableFeature = placedFeature.feature();
-                    final Feature<FeatureConfig> feature = configurableFeature.feature();
-                    System.out.println(" - " + feature.getClass().getSimpleName() + " /w " + configurableFeature.config().getClass().getSimpleName() + " @ " + placedFeature.placementModifiers().stream().map(mod -> mod.getClass().getSimpleName()).toList());
-                });
-            });
-            System.out.println("Plains Biome Carvers:");
-            plainsBiome.carvers().forEach((step, list) -> {
-                System.out.println("Step: " + step);
-                list.forEach(configuredCarver -> {
-                    System.out.println(" - " + configuredCarver.carver().getClass().getSimpleName() + " /w " + configuredCarver.config().getClass().getSimpleName());
-                });
-            });
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return CommandResult.success();
     }

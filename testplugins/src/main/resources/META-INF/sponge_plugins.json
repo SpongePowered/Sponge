@@ -50,6 +50,12 @@
             "description": "Testing world changes"
         },
         {
+            "id": "biometest",
+            "name": "Biome Test",
+            "entrypoint": "org.spongepowered.test.world.BiomeTest",
+            "description": "Testing biomes"
+        },
+        {
             "id": "commandtest",
             "name": "Command Test",
             "entrypoint": "org.spongepowered.test.command.CommandTest",
