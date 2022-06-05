@@ -79,7 +79,7 @@ public abstract class ServerGamePacketListenerImplMixin_MovementCheck {
                 ordinal = 0),
             to  = @At(
                 value = "INVOKE",
-                target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V",
+                target = "Lnet/minecraft/world/entity/Entity;absMoveTo(DDDFF)V",
                 ordinal = 0,
                 remap = false)
     ))
