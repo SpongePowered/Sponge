@@ -42,6 +42,7 @@ import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -61,6 +62,7 @@ import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
+import org.spongepowered.api.world.server.DataPackManager;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.asm.mixin.Final;
@@ -78,6 +80,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.map.SpongeMapStorage;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
@@ -129,6 +132,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     // @formatter:on
 
 
+    @Shadow @Final protected LevelStorageSource.LevelStorageAccess storageSource;
     private Iterable<? extends Audience> audiences;
     private ServerScheduler api$scheduler;
     private SpongeTeleportHelper api$teleportHelper;
@@ -140,6 +144,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     private MapStorage api$mapStorage;
     private RegistryHolderLogic api$registryHolder;
     private SpongeUserManager api$userManager;
+    private SpongeDataPackManager api$dataPackManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void api$initializeSpongeFieldsfinal(final Thread $$0, final LevelStorageSource.LevelStorageAccess $$1, final PackRepository $$2, final WorldStem $$3, final Proxy $$4,
@@ -150,11 +155,18 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
         this.api$mapStorage = new SpongeMapStorage();
         this.api$registryHolder = new RegistryHolderLogic($$3.registryAccess());
         this.api$userManager = new SpongeUserManager((MinecraftServer) (Object) this);
+
+        this.api$dataPackManager = new SpongeDataPackManager((MinecraftServer) (Object) this, this.storageSource.getLevelPath(LevelResource.DATAPACK_DIR));
     }
 
     @Override
     public RecipeManager recipeManager() {
         return (RecipeManager) this.shadow$getRecipeManager();
+    }
+
+    @Override
+    public DataPackManager dataPackManager() {
+        return this.api$dataPackManager;
     }
 
     @Override

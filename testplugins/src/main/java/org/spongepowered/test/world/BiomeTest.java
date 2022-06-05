@@ -28,40 +28,49 @@ import com.google.inject.Inject;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.EntityCategories;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
+import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.DefaultWorldKeys;
+import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.api.world.biome.BiomeAttributes;
 import org.spongepowered.api.world.biome.Biomes;
+import org.spongepowered.api.world.biome.provider.BiomeProvider;
+import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
+import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.biome.BiomeTemplate;
 import org.spongepowered.api.world.generation.biome.DecorationSteps;
 import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.FeatureConfig;
 import org.spongepowered.api.world.generation.feature.PlacedFeatures;
+import org.spongepowered.api.world.server.WorldManager;
+import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 
 @Plugin("biometest")
 public final class BiomeTest {
 
     public static final String CUSTOM_PLAINS = "custom_plains";
+    public static final String CUSTOM_FOREST = "custom_forest";
     private final PluginContainer plugin;
 
     @Inject
@@ -70,18 +79,25 @@ public final class BiomeTest {
     }
 
     @Listener
+    private void onLoad(StartedEngineEvent<Server> event) {
+        this.registry().streamEntries().filter(e -> !e.key().namespace().equals("minecraft")).forEach(biome ->
+            System.err.println(biome.key())
+        );
+    }
+
+    @Listener
     private void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(this.plugin, Command.builder()
                         .addChild(Command.builder().executor(this::listBiomes).build(), "list")
                         .addChild(Command.builder().executor(this::listFeatures).build(), "features")
+                        .addChild(Command.builder().executor(this::registerBiome).build(), "register")
+                        .addChild(Command.builder().executor(this::world).build(), "world")
                         .build(), "biometest")
         ;
     }
 
-    @SuppressWarnings("unchecked")
-    @Listener
-    private void onRegisterDataPack(final RegisterDataPackValueEvent<BiomeTemplate> event) {
-        final Biome defaultBiome = Biomes.PLAINS.get(Sponge.server()); // TODO server is not available yet - how to get the registry? - provide in event?
+    private CommandResult registerBiome(CommandContext commandContext) {
+        final Biome defaultBiome = Biomes.PLAINS.get(Sponge.server());
         final List<NaturalSpawner> naturalSpawners = defaultBiome.spawners().get(EntityCategories.MONSTER.get()).get(new Random());
         final WeightedTable<NaturalSpawner> spawner = new WeightedTable<>();
         naturalSpawners.forEach(s -> spawner.add(s, 1));
@@ -91,16 +107,40 @@ public final class BiomeTest {
                 .add(Keys.CARVERS, Map.of())
                 .add(Keys.NATURAL_SPAWNERS, Map.of(EntityCategories.MONSTER.get(), spawner))
                 .key(ResourceKey.of(this.plugin, CUSTOM_PLAINS)).build();
-        event.register(template);
-        try {
-            System.out.println(DataFormats.JSON.get().write(template.toContainer()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Sponge.server().dataPackManager().save(template);
 
+        naturalSpawners.forEach(s -> spawner.add(s, 1));
+        final Biome defaultBiome2 = Biomes.FLOWER_FOREST.get(Sponge.server());
+        final BiomeTemplate template2 = BiomeTemplate.builder().from(defaultBiome2)
+                .add(Keys.NATURAL_SPAWNERS, Map.of(EntityCategories.MONSTER.get(), spawner))
+                .key(ResourceKey.of(this.plugin, CUSTOM_FOREST)).build();
+        Sponge.server().dataPackManager().save(template2);
+
+        return CommandResult.success();
     }
+
+    private CommandResult world(CommandContext commandContext) {
+        final WorldManager wm = Sponge.server().worldManager();
+        final ResourceKey worldKey = ResourceKey.of(this.plugin, CUSTOM_PLAINS);
+        final Optional<Biome> customBiome = this.registry().findValue(ResourceKey.of(this.plugin, CUSTOM_PLAINS));
+        final Optional<Biome> customBiome2 = this.registry().findValue(ResourceKey.of(this.plugin, CUSTOM_FOREST));
+        if (customBiome.isPresent()) {
+            final RegistryReference<Biome> ref = RegistryReference.referenced(Sponge.server(), RegistryTypes.BIOME, customBiome.get());
+            final RegistryReference<Biome> ref2 = RegistryReference.referenced(Sponge.server(), RegistryTypes.BIOME, customBiome2.get());
+            final MultiNoiseBiomeConfig cfg = MultiNoiseBiomeConfig.builder()
+                    .addBiome(AttributedBiome.of(ref, BiomeAttributes.of(0.1f, -0.6f, 0.1f, -0.5f, 0f, -1f, 0.0f)))
+                    .addBiome(AttributedBiome.of(ref2, BiomeAttributes.of(0.4f, -1f, 0.5f, -0.2f, 0f, -0.95f, 0.0f)))
+                    .build();
+            final var chunkGen = ChunkGenerator.noise(BiomeProvider.multiNoise(cfg), ChunkGenerator.overworld().config());
+            final WorldTemplate template = WorldTemplate.builder().add(Keys.CHUNK_GENERATOR, chunkGen).key(worldKey).build();
+            final Optional<ServerPlayer> optPlayer = commandContext.cause().first(ServerPlayer.class);
+            wm.loadWorld(template).thenAccept(w -> optPlayer.ifPresent(player -> WorldTest.transportToWorld(player, w)));
+        }
+        return CommandResult.success();
+    }
+
     private CommandResult listBiomes(CommandContext commandContext) {
-        final Registry<Biome> registry = Biomes.registry(Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get());
+        final Registry<Biome> registry = this.registry();
         registry.streamEntries().filter(e -> !e.key().namespace().equals("minecraft")).forEach(biome ->
             commandContext.sendMessage(Identity.nil(), Component.text(biome.key().toString()))
         );
@@ -111,7 +151,7 @@ public final class BiomeTest {
     }
 
     private CommandResult listFeatures(CommandContext commandContext) {
-        final Biome plainsBiome = Sponge.server().registry(RegistryTypes.BIOME).findValue(ResourceKey.of(this.plugin, CUSTOM_PLAINS)).orElse(Biomes.PLAINS.get(Sponge.server()));
+        final Biome plainsBiome = this.registry().findValue(ResourceKey.of(this.plugin, CUSTOM_PLAINS)).orElse(Biomes.PLAINS.get(Sponge.server()));
         System.out.println("Plains Biome Features:");
         plainsBiome.features().forEach((step, list) -> {
             System.out.println("Step: " + step);
@@ -131,5 +171,8 @@ public final class BiomeTest {
         return CommandResult.success();
     }
 
+    private Registry<Biome> registry() {
+        return Sponge.server().registry(RegistryTypes.BIOME);
+    }
 
 }

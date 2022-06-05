@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.level;
 
 import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
@@ -70,7 +71,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
     // @formatter:off
     @Shadow @Final private ExplosionDamageCalculator damageCalculator;
-    @Shadow @Final private List<BlockPos> toBlow;
+    @Shadow @Final private ObjectArrayList<BlockPos> toBlow;
     @Shadow @Final private Map<Player, Vec3> hitPlayers;
     @Shadow @Final private boolean fire;
     @Shadow @Final private net.minecraft.world.level.Level level;

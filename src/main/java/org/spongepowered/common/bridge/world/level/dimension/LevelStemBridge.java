@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.world.level.dimension;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -43,7 +42,7 @@ public interface LevelStemBridge {
 
     @Nullable Difficulty bridge$difficulty();
 
-    SerializationBehavior bridge$serializationBehavior();
+    @Nullable SerializationBehavior bridge$serializationBehavior();
 
     Integer bridge$viewDistance();
 

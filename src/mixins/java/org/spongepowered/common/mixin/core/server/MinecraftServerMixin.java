@@ -39,7 +39,6 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
@@ -341,7 +340,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "reloadResources", at = @At(value = "HEAD"))
     public void impl$reloadResources(final Collection<String> datapacksToLoad, final CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        final List<String> reloadablePacks = SpongeDataPackManager.registerPacks(this.storageSource.getLevelPath(LevelResource.DATAPACK_DIR), true);
+        final List<String> reloadablePacks = ((SpongeDataPackManager) this.dataPackManager()).registerPacks(true);
         datapacksToLoad.addAll(reloadablePacks);
         this.shadow$getPackRepository().reload();
     }

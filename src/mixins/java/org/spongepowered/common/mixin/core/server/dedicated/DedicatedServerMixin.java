@@ -33,7 +33,6 @@ import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
-import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,9 +47,6 @@ import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
 import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin extends MinecraftServerMixin {
@@ -68,22 +64,10 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
         SpongeCommon.game().setServer(this);
         $$6.profileCache().load();
 
-        final Path packDir = this.storageSource.getLevelPath(LevelResource.DATAPACK_DIR);
-        List<String> reloadablePacks = SpongeDataPackManager.registerPacks(packDir, false);
-        if (!reloadablePacks.isEmpty()) {
-            SpongeCommon.logger().info("Reloading for plugin data packs... " + reloadablePacks.size());
-            // see ReloadCommand#discoverNewPacks
-            final PackRepository packRepo = this.shadow$getPackRepository();
-            final List<String> toReload = new ArrayList<>(packRepo.getSelectedIds());
-            packRepo.reload();
-            final List<String> disabled = this.shadow$getWorldData().getDataPackConfig().getDisabled();
-            for (final String available : packRepo.getAvailableIds()) {
-                if (!disabled.contains(available) && !toReload.contains(available)) {
-                    toReload.add(available);
-                }
-            }
-            this.shadow$reloadResources(toReload);
-        }
+        this.dataPackManager().reload();
+
+        ((SpongeDataPackManager) this.dataPackManager()).init();
+
     }
 
     @Override

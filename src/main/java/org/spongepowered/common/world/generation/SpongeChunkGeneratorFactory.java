@@ -47,7 +47,6 @@ import org.spongepowered.api.world.generation.ConfigurableChunkGenerator;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.SeedUtil;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 
@@ -95,10 +94,11 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
 
     @Override
     public ConfigurableChunkGenerator<NoiseGeneratorConfig> overworld() {
+        final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
+        var biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
         var seed = SpongeCommon.server().getWorldData().worldGenSettings().seed(); // TODO no more custom seed?
-        // TODO default overworld config?
-        return null;
-        // return (ConfigurableChunkGenerator<NoiseGeneratorConfig>) (Object) WorldGenSettings.makeDefaultOverworld(BootstrapProperties.registries, seed);
+        var noiseGeneratorSettingsRegistry = registryAccess.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+        return this.noiseBasedChunkGenerator(seed, MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(biomeRegistry), noiseGeneratorSettingsRegistry.getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD));
     }
 
     @Override

@@ -39,9 +39,7 @@ import net.minecraft.world.level.biome.Climate.ParameterPoint;
 import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryReference;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
@@ -56,19 +54,18 @@ import org.spongepowered.common.accessor.world.level.biome.TheEndBiomeSourceAcce
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public ConfigurableBiomeProvider<MultiNoiseBiomeConfig> overworld() {
-        final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(biomeRegistry);
+        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(this.registry());
     }
 
     @Override
     public <T extends MultiNoiseBiomeConfig> ConfigurableBiomeProvider<T> multiNoise(final T config) {
-        final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
         final List<Pair<ParameterPoint, Holder<Biome>>> climateParams = new ArrayList<>();
         for (final AttributedBiome attributedBiome : config.attributedBiomes()) {
             final BiomeAttributes attr = attributedBiome.attributes();
@@ -80,54 +77,49 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
                     Parameter.span(attr.depth().min(), attr.depth().max()),
                     Parameter.span(attr.weirdness().min(), attr.weirdness().max()),
                     attr.offset());
-            final Holder<Biome> biome = biomeRegistry.getHolderOrThrow(
-                    ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) attributedBiome.biome().location()));
-            climateParams.add(Pair.of(point, biome));
+            climateParams.add(Pair.of(point, this.biomeHolder(attributedBiome.biome())));
         }
         return (ConfigurableBiomeProvider<T>) MultiNoiseBiomeSourceAccessor.invoker$new(new ParameterList<>(climateParams));
     }
 
     @Override
     public ConfigurableBiomeProvider<MultiNoiseBiomeConfig> nether() {
-        final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomeRegistry);
+        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.Preset.NETHER.biomeSource(this.registry());
     }
 
     @Override
     public <T extends EndStyleBiomeConfig> ConfigurableBiomeProvider<T> endStyle(final T config) {
-        final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
         return (ConfigurableBiomeProvider<T>) TheEndBiomeSourceAccessor.invoker$new(
-                biomeRegistry.getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) config.endBiome().location())),
-                biomeRegistry.getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) config.highlandsBiome().location())),
-                biomeRegistry.getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) config.midlandsBiome().location())),
-                biomeRegistry.getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) config.islandsBiome().location())),
-                biomeRegistry.getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) config.barrensBiome().location()))
+                this.biomeHolder(config.endBiome()),
+                this.biomeHolder(config.highlandsBiome()),
+                this.biomeHolder(config.midlandsBiome()),
+                this.biomeHolder(config.islandsBiome()),
+                this.biomeHolder(config.barrensBiome())
         );
     }
 
     @Override
     public ConfigurableBiomeProvider<EndStyleBiomeConfig> end() {
-        final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-        final long seed = SpongeCommon.server().getWorldData().worldGenSettings().seed(); // TODO no more custom seed?
-        return (ConfigurableBiomeProvider<EndStyleBiomeConfig>) new TheEndBiomeSource(biomeRegistry);
+        return (ConfigurableBiomeProvider<EndStyleBiomeConfig>) new TheEndBiomeSource(this.registry());
     }
 
     @Override
     public <T extends CheckerboardBiomeConfig> ConfigurableBiomeProvider<T> checkerboard(final T config) {
-        final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-        final List<Holder<Biome>> biomes = new ArrayList<>();
-        for (final RegistryReference<org.spongepowered.api.world.biome.Biome> biome : config.biomes()) {
-            final ResourceKey<Biome> key = ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) biome.location());
-            biomes.add(biomeRegistry.getHolderOrThrow(key));
-        }
-
+        final List<Holder<Biome>> biomes = config.biomes().stream().map(this::biomeHolder).collect(Collectors.toList());
         return (ConfigurableBiomeProvider<T>) new CheckerboardColumnBiomeSource(HolderSet.direct(biomes), config.scale());
     }
 
     @Override
     public BiomeProvider fixed(final RegistryReference<org.spongepowered.api.world.biome.Biome> biome) {
         Objects.requireNonNull(biome, "biome");
+        return (BiomeProvider) new FixedBiomeSource(this.biomeHolder(biome));
+    }
 
-        return (BiomeProvider) new FixedBiomeSource((Holder<Biome>) (Object) biome);
+    private Registry<Biome> registry() {
+        return SpongeCommon.server().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+    }
+
+    private Holder<Biome> biomeHolder(RegistryReference<org.spongepowered.api.world.biome.Biome> biome) {
+        return this.registry().getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) biome.location()));
     }
 }

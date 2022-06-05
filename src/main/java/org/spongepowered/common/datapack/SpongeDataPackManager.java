@@ -24,13 +24,16 @@
  */
 package org.spongepowered.common.datapack;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.core.RegistryAccess;
-import org.spongepowered.api.datapack.DataPackSerializable;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.packs.repository.PackRepository;
+import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.world.server.DataPackManager;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.lifecycle.RegisterDataPackValueEventImpl;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
@@ -42,63 +45,90 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public final class SpongeDataPackManager {
+public final class SpongeDataPackManager implements DataPackManager {
 
-    private static boolean ignoreNext;
+    private final MinecraftServer server;
+    private final Path packDir;
+    private boolean ignoreNext;
+
+    public SpongeDataPackManager(final MinecraftServer server, final Path packDir) {
+        this.server = server;
+        this.packDir = packDir;
+    }
+
+    public void init() {
+        final List<String> reloadablePacks = this.registerPacks(false);
+        if (!reloadablePacks.isEmpty()) {
+            SpongeCommon.logger().info("Reloading for plugin data packs... " + reloadablePacks.size());
+            // see ReloadCommand#discoverNewPacks
+            final PackRepository packRepo = this.server.getPackRepository();
+            final List<String> toReload = new ArrayList<>(packRepo.getSelectedIds());
+            packRepo.reload();
+            final List<String> disabled = this.server.getWorldData().getDataPackConfig().getDisabled();
+            for (final String available : packRepo.getAvailableIds()) {
+                if (!disabled.contains(available) && !toReload.contains(available)) {
+                    toReload.add(available);
+                }
+            }
+            this.server.reloadResources(toReload);
+        }
+    }
+
+    @Override
+    public void reload() {
+        this.ignoreNext = false;
+        this.registerPacks(true);
+    }
 
     // TODO IntegratedServer call?
-    public static List<String> registerPacks(final Path packDir, final boolean isReload) {
+    public List<String> registerPacks(final boolean isReload) {
         // Ignore reload immediately after first call
-        if (isReload && SpongeDataPackManager.ignoreNext) {
-            SpongeDataPackManager.ignoreNext = false;
+        if (isReload && this.ignoreNext) {
+            this.ignoreNext = false;
             return List.of();
         }
         if (!isReload) {
-            SpongeDataPackManager.ignoreNext = true;
+            this.ignoreNext = true;
         }
 
         SpongeIngredient.clearCache();
         IngredientResultUtil.clearCache();
 
         final List<String> reloadablePacks = new ArrayList<>();
-        SpongeDataPackManager.serialize(DataPackTypes.ADVANCEMENT, packDir, reloadablePacks);
-        SpongeDataPackManager.serialize(DataPackTypes.RECIPE, packDir, reloadablePacks);
-        SpongeDataPackManager.serialize(DataPackTypes.TAG, packDir, reloadablePacks);
-        SpongeDataPackManager.serialize(DataPackTypes.BIOME, packDir, reloadablePacks);
-        SpongeDataPackManager.serialize(DataPackTypes.WORLD_TYPE, packDir, reloadablePacks);
-        SpongeDataPackManager.serialize(DataPackTypes.WORLD, packDir, reloadablePacks);
+        this.serialize(DataPackTypes.ADVANCEMENT, reloadablePacks);
+        this.serialize(DataPackTypes.RECIPE, reloadablePacks);
+        this.serialize(DataPackTypes.TAG, reloadablePacks);
         return reloadablePacks;
     }
 
-    private static <T extends DataPackSerializable> List<T> callRegisterDataPackValueEvent(final DataPackType<T> type) {
+    private <T extends DataPack.Reloadable> List<T> callRegisterDataPackValueEvent(final DataPackType<T> type) {
         final RegisterDataPackValueEventImpl<T> event = new RegisterDataPackValueEventImpl<>(Cause.of(EventContext.empty(), SpongeCommon.game()), SpongeCommon.game(), type);
         SpongeCommon.post(event);
         return event.serializables();
     }
 
     @SuppressWarnings("unchecked")
-    private static <T extends DataPackSerializable> void serialize(final DataPackType<T> type, final Path packDir, final Collection<String> reloadablePacks) {
-        final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
-        final List<T> serializables = SpongeDataPackManager.callRegisterDataPackValueEvent(type);
+    private <T extends DataPack.Reloadable> void serialize(final DataPackType<T> type, final Collection<String> reloadablePacks) {
+        final SpongeDataPackType implType = (SpongeDataPackType) type;
+        final List<T> serializables = this.callRegisterDataPackValueEvent(type);
         if (serializables.isEmpty()) {
             return;
         }
 
-        final SpongeDataPackType implType = (SpongeDataPackType) type;
         final List<DataPackSerializedObject> serialized = new ArrayList<>();
-        for (final DataPackSerializable serializable : serializables) {
-            final JsonObject o = (JsonObject) implType.getObjectSerializer().serialize(serializable, registryAccess);
+        for (final DataPack serializable : serializables) {
+            final JsonObject o = (JsonObject) implType.getObjectSerializer().serialize(serializable, this.server.registryAccess());
             serialized.add((DataPackSerializedObject) implType.getObjectFunction().apply(serializable, o));
         }
 
         // Serialize the pack itself now - objects later
-        SpongeDataPackManager.serializePack(implType, packDir, reloadablePacks, serialized, serializables.size());
+        this.serializePack(implType, reloadablePacks, serialized, serializables.size());
     }
 
-    private static void serializePack(final SpongeDataPackType implType, final Path packDir, final Collection<String> reloadablePacks,
+    private void serializePack(final SpongeDataPackType implType, final Collection<String> reloadablePacks,
             final List<DataPackSerializedObject> serialized, final int count) {
         try {
-            final boolean success = implType.getPackSerializer().serialize(implType, packDir, serialized, count);
+            final boolean success = implType.getPackSerializer().serialize(implType, this.packDir, serialized, count);
             if (success && implType.reloadable()) {
                 reloadablePacks.add("file/" + implType.getPackSerializer().getPackName());
             } else {
@@ -108,5 +138,13 @@ public final class SpongeDataPackManager {
             reloadablePacks.remove("file/" + implType.getPackSerializer().getPackName());
             SpongeCommon.logger().error(e);
         }
+    }
+
+    @Override
+    public void save(final DataPack.Persistent pack) {
+        final SpongeDataPackType implType = (SpongeDataPackType) pack.type();
+        final JsonElement json = implType.getObjectSerializer().serialize(pack, this.server.registryAccess());
+        final DataPackSerializedObject obj = (DataPackSerializedObject) implType.getObjectFunction().apply(pack, json);
+        this.serializePack(implType, new ArrayList<>(), List.of(obj), 1);
     }
 }

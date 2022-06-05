@@ -358,7 +358,7 @@ public final class WorldTest {
             player.setLocation(ServerLocation.of(world, world.properties().spawnPosition()));
         }
         context.sendMessage(Identity.nil(), Component.text("Generating your world..."));
-        wm.deleteWorld(worldKey).thenCompose(b -> wm.loadWorld(customTemplate)).thenAccept(w -> this.transportToWorld(player, w)).exceptionally(e -> {
+        wm.deleteWorld(worldKey).thenCompose(b -> wm.loadWorld(customTemplate)).thenAccept(w -> WorldTest.transportToWorld(player, w)).exceptionally(e -> {
                     context.sendMessage(Identity.nil(), Component.text("Failed to teleport!", NamedTextColor.DARK_RED));
                     e.printStackTrace();
                     return null;
@@ -408,7 +408,7 @@ public final class WorldTest {
     }
 
 
-    private void transportToWorld(final ServerPlayer player, final ServerWorld world) {
+    public static void transportToWorld(final ServerPlayer player, final ServerWorld world) {
         player.sendMessage(Identity.nil(), Component.text("Teleporting..."));
         final ServerLocation spawn = world.location(world.properties().spawnPosition());
         player.setLocation(Sponge.server().teleportHelper().findSafeLocation(spawn).orElse(spawn));

@@ -44,7 +44,7 @@ import java.nio.file.Path;
 public abstract class MainMixin {
 
     @Redirect(method = "lambda$main$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess$Writable;Lnet/minecraft/server/packs/resources/ResourceManager;)Lnet/minecraft/resources/RegistryOps;"))
-    private static RegistryOps<Tag> impl$serializePacksBeforeLoad(DynamicOps<Tag> $$0, RegistryAccess.Writable $$1, ResourceManager $$2) {
+    private static RegistryOps<Tag> impl$captureBootstrapOps(DynamicOps<Tag> $$0, RegistryAccess.Writable $$1, ResourceManager $$2) {
         final RegistryOps<Tag> ops = RegistryOps.createAndLoad($$0, $$1, $$2);
         SpongeWorldManager.bootstrapOps = ops;
         return ops;

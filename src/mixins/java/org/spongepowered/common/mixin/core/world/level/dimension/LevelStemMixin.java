@@ -54,9 +54,9 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
     @Shadow @Final @org.spongepowered.asm.mixin.Mutable public static Codec<LevelStem> CODEC;
     // @formatter:on
 
-    private ResourceLocation impl$gameMode;
+    @Nullable private ResourceLocation impl$gameMode;
     @Nullable private ResourceLocation impl$difficulty;
-    private SerializationBehavior impl$serializationBehavior = null;
+    @Nullable private SerializationBehavior impl$serializationBehavior = null;
     @Nullable private Component impl$displayName = null;
     private Integer impl$viewDistance = null;
     @Nullable private Vector3i impl$spawnPosition;
@@ -149,14 +149,14 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
 
     @Override
     public LevelStem bridge$decorateData(final DataManipulator data) {
-        this.impl$gameMode = (ResourceLocation) (Object) data.require(Keys.GAME_MODE).key(RegistryTypes.GAME_MODE);
+        this.impl$gameMode = (ResourceLocation) (Object) data.get(Keys.GAME_MODE_REFERENCE).map(RegistryKey::location).orElse(null);
         this.impl$difficulty = (ResourceLocation) (Object) data.get(Keys.WORLD_DIFFICULTY).map(RegistryKey::location).orElse(null);
-        this.impl$serializationBehavior = data.require(Keys.SERIALIZATION_BEHAVIOR);
+        this.impl$serializationBehavior = data.getOrElse(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.AUTOMATIC);
         this.impl$displayName = data.getOrNull(Keys.DISPLAY_NAME);
         this.impl$viewDistance = data.getOrNull(Keys.VIEW_DISTANCE);
         this.impl$spawnPosition = data.getOrNull(Keys.SPAWN_POSITION);
-        this.impl$loadOnStartup = data.require(Keys.IS_LOAD_ON_STARTUP);
-        this.impl$performsSpawnLogic = data.require(Keys.PERFORM_SPAWN_LOGIC);
+        this.impl$loadOnStartup = data.getOrElse(Keys.IS_LOAD_ON_STARTUP, true);
+        this.impl$performsSpawnLogic = data.getOrElse(Keys.PERFORM_SPAWN_LOGIC, false);
         this.impl$hardcore = data.getOrNull(Keys.HARDCORE);
         this.impl$commands = data.getOrNull(Keys.COMMANDS);
         this.impl$pvp = data.getOrNull(Keys.PVP);
