@@ -31,7 +31,6 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataFormats;
@@ -53,22 +52,17 @@ import org.spongepowered.api.world.generation.feature.FeatureConfig;
 import org.spongepowered.api.world.generation.feature.PlacedFeatures;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
-import org.spongepowered.test.LoadableModule;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 @Plugin("biometest")
-public final class BiomeTest implements LoadableModule {
+public final class BiomeTest {
 
     public static final String CUSTOM_PLAINS = "custom_plains";
     private final PluginContainer plugin;
-    private boolean enabled = false;
-
-    private List<BiomeTemplate> customBiomes = new ArrayList<>();
 
     @Inject
     public BiomeTest(final PluginContainer plugin) {
@@ -84,33 +78,9 @@ public final class BiomeTest implements LoadableModule {
         ;
     }
 
-    @Override
-    public void enable(final CommandContext ctx) {
-        this.enabled = true;
-        try {
-            Sponge.server().commandManager().process("reload");
-        } catch (final CommandException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void disable(final CommandContext ctx) {
-        this.enabled = false;
-        try {
-            Sponge.server().commandManager().process("reload");
-        } catch (final CommandException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     @SuppressWarnings("unchecked")
     @Listener
     private void onRegisterDataPack(final RegisterDataPackValueEvent<BiomeTemplate> event) {
-        if (!this.enabled) {
-            return;
-        }
         final Biome defaultBiome = Biomes.PLAINS.get(Sponge.server()); // TODO server is not available yet - how to get the registry? - provide in event?
         final List<NaturalSpawner> naturalSpawners = defaultBiome.spawners().get(EntityCategories.MONSTER.get()).get(new Random());
         final WeightedTable<NaturalSpawner> spawner = new WeightedTable<>();
@@ -121,7 +91,6 @@ public final class BiomeTest implements LoadableModule {
                 .add(Keys.CARVERS, Map.of())
                 .add(Keys.NATURAL_SPAWNERS, Map.of(EntityCategories.MONSTER.get(), spawner))
                 .key(ResourceKey.of(this.plugin, CUSTOM_PLAINS)).build();
-        this.customBiomes.add(template);
         event.register(template);
         try {
             System.out.println(DataFormats.JSON.get().write(template.toContainer()));

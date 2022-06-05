@@ -54,8 +54,6 @@ public interface Lifecycle {
 
     void establishDataKeyListeners();
 
-    void callRegisterDataPackValueEvent(Path datapackDir);
-
     void callRegisterChannelEvent();
 
     void establishGameServices();

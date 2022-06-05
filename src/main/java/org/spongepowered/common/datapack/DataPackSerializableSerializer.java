@@ -26,11 +26,10 @@ package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonElement;
 import net.minecraft.core.RegistryAccess;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.datapack.DataPackSerializable;
 
 interface DataPackSerializableSerializer<T extends DataPackSerializable> {
 
-    JsonElement serialize(T serializable, @Nullable RegistryAccess registryAccess);
+    JsonElement serialize(T serializable, RegistryAccess registryAccess);
 
 }

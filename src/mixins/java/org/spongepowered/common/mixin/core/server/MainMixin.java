@@ -32,11 +32,9 @@ import net.minecraft.server.Main;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
@@ -47,9 +45,6 @@ public abstract class MainMixin {
 
     @Redirect(method = "lambda$main$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess$Writable;Lnet/minecraft/server/packs/resources/ResourceManager;)Lnet/minecraft/resources/RegistryOps;"))
     private static RegistryOps<Tag> impl$serializePacksBeforeLoad(DynamicOps<Tag> $$0, RegistryAccess.Writable $$1, ResourceManager $$2) {
-        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.BIOME, $$1);
-        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD_TYPE, $$1);
-        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD, $$1);
         final RegistryOps<Tag> ops = RegistryOps.createAndLoad($$0, $$1, $$2);
         SpongeWorldManager.bootstrapOps = ops;
         return ops;
@@ -62,7 +57,6 @@ public abstract class MainMixin {
         lifecycle.establishGlobalRegistries();
         lifecycle.establishDataProviders();
         lifecycle.callRegisterDataEvent();
-        lifecycle.callRegisterDataPackValueEvent(datapackDir);
         return datapackDir;
     }
 

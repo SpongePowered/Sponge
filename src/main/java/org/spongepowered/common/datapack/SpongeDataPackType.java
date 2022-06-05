@@ -52,16 +52,23 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
     private final DataPackSerializableSerializer<T> objectSerializer;
     private final BiFunction<T, JsonObject, U> objectFunction;
     private final boolean persistent;
+    private final boolean reloadable;
 
     public SpongeDataPackType(final TypeToken<T> token, final DataPackSerializer<U> packSerializer,
             final DataPackSerializableSerializer<T> objectSerializer,
             final BiFunction<T, JsonObject, U> objectFunction,
-            final boolean persistent) {
+            final boolean persistent,
+            final boolean reloadable) {
         this.token = token;
         this.packSerializer = packSerializer;
         this.objectSerializer = objectSerializer;
         this.objectFunction = objectFunction;
         this.persistent = persistent;
+        this.reloadable = reloadable;
+    }
+
+    public boolean reloadable() {
+        return this.reloadable;
     }
 
     @Override
@@ -92,40 +99,40 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                 new DataPackSerializer<>("Advancements", "advancements"),
                 (s, registryAccess) -> ((net.minecraft.advancements.Advancement) s).deconstruct().serializeToJson(),
                 DataPackSerializedObject::keyAndJsonBased,
-                false
+                false, true
         );
 
         private final SpongeDataPackType<@NonNull RecipeRegistration, RecipeSerializedObject> recipe = new SpongeDataPackType<>(TypeToken.get(RecipeRegistration.class),
                 new RecipeDataPackSerializer(),
                 (s, registryAccess) -> ((FinishedRecipe) s).serializeRecipe(),
                 (i1, i2) -> new RecipeSerializedObject(i1.key(), i2, new DataPackSerializedObject(i1.key(), ((FinishedRecipe) i1).serializeAdvancement())),
-                false
+                false, true
         );
 
         private final SpongeDataPackType<@NonNull WorldTypeTemplate, DataPackSerializedObject> worldType = new SpongeDataPackType<>(TypeToken.get(WorldTypeTemplate.class),
                 new DataPackSerializer<>("Dimension Types", "dimension_type"),
                 SpongeWorldTypeTemplate::serialize,
                 DataPackSerializedObject::keyAndJsonBased,
-                true
+                true, false
         );
 
         private final SpongeDataPackType<@NonNull WorldTemplate, DataPackSerializedObject> world = new SpongeDataPackType<>(TypeToken.get(WorldTemplate.class),
                 new DataPackSerializer<>("Dimensions", "dimension"),
                 SpongeWorldTemplate::serialize, DataPackSerializedObject::keyAndJsonBased,
-                true
+                true, false
         );
 
         private final SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject> tag = new SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject>(TypeToken.get(SpongeTagTemplate.class),
                 new TagDataPackSerializer("Tag", "tags"),
                 (spongeTagTemplate, registryAccess) -> spongeTagTemplate.toJson(),
                 (i1, i2) -> new TagSerializedObject(i1.key(), i2, i1.registryType()),
-                false
+                false, true
         );
 
         private final SpongeDataPackType<@NonNull BiomeTemplate, DataPackSerializedObject> biome = new SpongeDataPackType<@NonNull BiomeTemplate, DataPackSerializedObject>(TypeToken.get(BiomeTemplate.class),
                 new DataPackSerializer<>("Biome", "worldgen/biome"), // TODO correct?
                 SpongeBiomeTemplate::serialize, DataPackSerializedObject::keyAndJsonBased,
-                true
+                true, false
         );
 
         @Override
