@@ -22,42 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.lifecycle;
+package org.spongepowered.common.advancement;
 
-import org.spongepowered.api.Game;
-import org.spongepowered.api.datapack.DataPackEntry;
+import com.google.gson.JsonElement;
+import net.minecraft.core.RegistryAccess;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.api.advancement.AdvancementTemplate;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.datapack.DataPack;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
-import org.spongepowered.common.datapack.SpongeDataPack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+public record SpongeAdvancementTemplate(ResourceKey key,
+                                        net.minecraft.advancements.Advancement representedAdvancement,
+                                        DataPack<AdvancementTemplate> pack
+                                        ) implements AdvancementTemplate {
 
-public final class RegisterDataPackValueEventImpl<T extends DataPackEntry<T>> extends AbstractLifecycleEvent.GenericImpl<T> implements RegisterDataPackValueEvent<T> {
-
-    private final DataPack<T> type;
-    private final List<T> serializables;
-
-    public RegisterDataPackValueEventImpl(final Cause cause, final Game game, final SpongeDataPack<T> type) {
-        super(cause, game, type.entryType());
-        this.type = type;
-        this.serializables = new ArrayList<>();
+    @Override
+    public Advancement advancement() {
+        return (Advancement) this.representedAdvancement;
     }
 
     @Override
-    public DataPack<T> type() {
-        return this.type;
+    public int contentVersion() {
+        return 0;
     }
 
     @Override
-    public RegisterDataPackValueEvent<T> register(final T serializable) {
-        this.serializables.add(Objects.requireNonNull(serializable, "serializable"));
-        return this;
+    public DataContainer toContainer() {
+        return this.advancement().toContainer();
     }
 
-    public List<T> serializables() {
-        return this.serializables;
+    public static JsonElement encode(final net.minecraft.advancements.Advancement advancement) {
+        return advancement.deconstruct().serializeToJson();
     }
+
+    public static JsonElement encode(final AdvancementTemplate template, final RegistryAccess registryAccess) {
+        return SpongeAdvancementTemplate.encode((net.minecraft.advancements.Advancement) template.advancement());
+    }
+
 }

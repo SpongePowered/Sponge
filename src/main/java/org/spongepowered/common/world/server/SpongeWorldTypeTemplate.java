@@ -51,8 +51,8 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.datapack.DataPackType;
-import org.spongepowered.api.datapack.DataPackTypes;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.world.WorldType;
@@ -67,12 +67,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.OptionalLong;
 
-public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionType) implements WorldTypeTemplate {
-
-    @Override
-    public DataPackType<WorldTypeTemplate> type() {
-        return DataPackTypes.WORLD_TYPE;
-    }
+public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionType, DataPack<WorldTypeTemplate> pack) implements WorldTypeTemplate {
 
     @Override
     public int contentVersion() {
@@ -98,8 +93,7 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
 
     public static JsonElement encode(final WorldTypeTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return SpongeDimensionTypes.DIRECT_CODEC.encodeStart(ops, (DimensionType) (Object) template.worldType()).getOrThrow(false, e -> {
-        });
+        return SpongeDimensionTypes.DIRECT_CODEC.encodeStart(ops, (DimensionType) (Object) template.worldType()).getOrThrow(false, e -> {});
     }
 
     public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTypeTemplate, Builder> implements WorldTypeTemplate.Builder {
@@ -107,6 +101,7 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
         private static DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(WorldType.class);
 
         private DataManipulator.Mutable manipulator = DataManipulator.mutableOf();
+        private DataPack<WorldTypeTemplate> pack = DataPacks.WORLD_TYPE;
 
         @Override
         public <V> WorldTypeTemplate.Builder add(final Key<? extends Value<V>> key, final V value) {
@@ -121,6 +116,7 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
         public Builder reset() {
             this.manipulator = DataManipulator.mutableOf();
             this.key = null;
+            this.pack = DataPacks.WORLD_TYPE;
             final DimensionType defaultOverworld =
                     SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.OVERWORLD);
             this.from((WorldType) (Object) defaultOverworld);
@@ -136,7 +132,12 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
         @Override
         public WorldTypeTemplate.Builder from(final WorldTypeTemplate value) {
             Objects.requireNonNull(value, "value");
-            this.from(value.worldType()).key(value.key());
+            return this.from(value.worldType()).key(value.key()).pack(value.pack());
+        }
+
+        @Override
+        public Builder pack(final DataPack<WorldTypeTemplate> pack) {
+            this.pack = pack;
             return this;
         }
 
@@ -188,39 +189,10 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
                                 (ResourceLocation) (Object) effect.key(),
                                 ambientLighting,
                                 new DimensionType.MonsterSettings(piglinSafe, hasRaids, monsterSpawnLightTest, monsterSpawnBlockLightLimit));
-                return new SpongeWorldTypeTemplate(this.key, dimensionType);
+                return new SpongeWorldTypeTemplate(this.key, dimensionType, this.pack);
             } catch (IllegalStateException e) { // catch and rethrow minecraft internal exception
                 throw new IllegalStateException(String.format("Template '%s' was not valid!", this.key), e);
             }
         }
-    }
-
-    public static final class FactoryImpl implements WorldTypeTemplate.Factory {
-
-        @Override
-        public WorldTypeTemplate overworld() {
-            var type = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.OVERWORLD);
-            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld"), type);
-        }
-
-        @Override
-        public WorldTypeTemplate overworldCaves() {
-            var type = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY)
-                    .get(BuiltinDimensionTypes.OVERWORLD_CAVES);
-            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld_caves"), type);
-        }
-
-        @Override
-        public WorldTypeTemplate theNether() {
-            var type = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.NETHER);
-            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_nether"), type);
-        }
-
-        @Override
-        public WorldTypeTemplate theEnd() {
-            var type = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.END);
-            return new SpongeWorldTypeTemplate(ResourceKey.minecraft("the_end"), type);
-        }
-
     }
 }

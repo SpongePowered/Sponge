@@ -33,8 +33,11 @@ import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.api.advancement.AdvancementTemplate;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
@@ -44,60 +47,62 @@ import org.spongepowered.common.util.SpongeCriterionUtil;
 
 import java.util.Map;
 
-public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder<Advancement, Advancement.Builder> implements Advancement.Builder.RootStep {
+public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder<AdvancementTemplate, AdvancementTemplate.Builder> implements AdvancementTemplate.Builder.RootStep {
 
     private @Nullable Advancement parent;
     private AdvancementCriterion criterion;
     private @Nullable DisplayInfo displayInfo;
     private @Nullable ResourceLocation backgroundPath;
+    private DataPack<AdvancementTemplate> pack = DataPacks.ADVANCEMENT;
 
     public SpongeAdvancementBuilder() {
         this.reset();
     }
 
     @Override
-    public Advancement.Builder parent(@Nullable Advancement parent) {
+    public AdvancementTemplate.Builder parent(@Nullable Advancement parent) {
         this.parent = parent;
         this.backgroundPath = null;
         return this;
     }
 
     @Override
-    public Advancement.Builder.RootStep root() {
+    public AdvancementTemplate.Builder.RootStep root() {
         this.parent = null;
         return this;
     }
 
     @Override
-    public Advancement.Builder background(ResourceKey backgroundPath) {
+    public AdvancementTemplate.Builder background(ResourceKey backgroundPath) {
         this.backgroundPath = (ResourceLocation) (Object) backgroundPath;
         return this;
     }
 
     @Override
-    public Advancement.Builder criterion(AdvancementCriterion criterion) {
+    public AdvancementTemplate.Builder criterion(AdvancementCriterion criterion) {
         checkNotNull(criterion, "criterion");
         this.criterion = criterion;
         return this;
     }
 
     @Override
-    public Advancement.Builder displayInfo(@Nullable DisplayInfo displayInfo) {
+    public AdvancementTemplate.Builder displayInfo(@Nullable DisplayInfo displayInfo) {
         this.displayInfo = displayInfo;
         return this;
     }
 
     @Override
-    public Advancement.Builder reset() {
+    public AdvancementTemplate.Builder reset() {
         this.criterion = AdvancementCriterion.empty();
         this.displayInfo = null;
         this.parent = null;
         this.backgroundPath = null;
+        this.pack = DataPacks.ADVANCEMENT;
         return this;
     }
 
     @Override
-    public Advancement build0() {
+    public AdvancementTemplate build0() {
         final Tuple<Map<String, Criterion>, String[][]> result = SpongeCriterionUtil.toVanillaCriteriaData(this.criterion);
         final AdvancementRewards rewards = AdvancementRewards.EMPTY;
         final ResourceLocation resourceLocation = (ResourceLocation) (Object) key;
@@ -112,9 +117,9 @@ public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder
                 this.displayInfo.doesAnnounceToChat(),
                 this.displayInfo.isHidden());
         final net.minecraft.advancements.Advancement parent = (net.minecraft.advancements.Advancement) this.parent;
-        final Advancement advancement = (Advancement) new net.minecraft.advancements.Advancement(
+        final var advancement = new net.minecraft.advancements.Advancement(
                 resourceLocation, parent, displayInfo, rewards, result.first(), result.second());
         ((AdvancementBridge) advancement).bridge$setCriterion(this.criterion);
-        return advancement;
+        return new SpongeAdvancementTemplate(this.key, advancement, this.pack);
     }
 }

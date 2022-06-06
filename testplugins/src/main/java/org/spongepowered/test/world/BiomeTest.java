@@ -27,6 +27,7 @@ package org.spongepowered.test.world;
 import com.google.inject.Inject;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -34,6 +35,7 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.entity.EntityCategories;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -56,6 +58,7 @@ import org.spongepowered.api.world.generation.biome.DecorationSteps;
 import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.FeatureConfig;
 import org.spongepowered.api.world.generation.feature.PlacedFeatures;
+import org.spongepowered.api.world.server.DataPackManager;
 import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.plugin.PluginContainer;
@@ -80,6 +83,7 @@ public final class BiomeTest {
 
     @Listener
     private void onLoad(StartedEngineEvent<Server> event) {
+        // TODO remove when done testing
         this.registry().streamEntries().filter(e -> !e.key().namespace().equals("minecraft")).forEach(biome ->
             System.err.println(biome.key())
         );
@@ -140,13 +144,21 @@ public final class BiomeTest {
     }
 
     private CommandResult listBiomes(CommandContext commandContext) {
+        commandContext.sendMessage(Identity.nil(), Component.text("non Vanilla Biomes in Registry: ", NamedTextColor.DARK_AQUA));
         final Registry<Biome> registry = this.registry();
         registry.streamEntries().filter(e -> !e.key().namespace().equals("minecraft")).forEach(biome ->
-            commandContext.sendMessage(Identity.nil(), Component.text(biome.key().toString()))
+            commandContext.sendMessage(Identity.nil(), Component.text(" - " + biome.key(), NamedTextColor.GRAY))
         );
-        if (registry.findValue(ResourceKey.of(this.plugin, CUSTOM_PLAINS)).isPresent()) {
-            commandContext.sendMessage(Identity.nil(), Component.text("custom_plains found"));
-        }
+        commandContext.sendMessage(Identity.nil(), Component.text("BiomeTemplates in plugin_worldgen_biomes:", NamedTextColor.DARK_AQUA));
+        final DataPackManager dpm = Sponge.server().dataPackManager();
+        dpm.list(DataPacks.BIOME).forEach(key -> commandContext.sendMessage(Identity.nil(), Component.text(" - " + key, NamedTextColor.GRAY)));
+
+        commandContext.sendMessage(Identity.nil(), Component.text("BiomeTemplates in test:", NamedTextColor.DARK_AQUA));
+        dpm.list(DataPacks.BIOME.with("test", "")).forEach(key -> commandContext.sendMessage(Identity.nil(), Component.text(" - " + key, NamedTextColor.GRAY)));
+
+        dpm.load(DataPacks.BIOME, ResourceKey.of(this.plugin, CUSTOM_PLAINS)).join().ifPresent(template -> {
+            commandContext.sendMessage(Identity.nil(), Component.text("BiomeTemplate loaded from disk is present " + template.key(), NamedTextColor.DARK_AQUA));
+        });
         return CommandResult.success();
     }
 

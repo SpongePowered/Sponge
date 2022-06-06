@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.registry.DefaultedRegistryType;
+import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.tag.TagTemplate;
@@ -40,14 +40,14 @@ import java.util.Map;
 
 public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements TagTemplate.Builder<T> {
 
-    private final DefaultedRegistryType<T> registryType;
     private @Nullable ResourceKey key;
     private boolean replace = false;
     private final Map<ResourceKey, Boolean> values = new HashMap<>();
     private final Map<ResourceKey, Boolean> children = new HashMap<>();
+    private final DataPack<TagTemplate<T>> pack;
 
-    public SpongeTagTemplateBuilder(final DefaultedRegistryType<T> registryType) {
-        this.registryType = registryType;
+    public SpongeTagTemplateBuilder(final DataPack<TagTemplate<T>> pack) {
+        this.pack = pack;
     }
 
     @Override
@@ -69,11 +69,8 @@ public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements Ta
     }
 
     @Override
-    public TagTemplate.Builder<T> addChild(final TagTemplate childTag) throws IllegalArgumentException {
-        final SpongeTagTemplate spongeTagTemplate = ((SpongeTagTemplate) childTag);
-        if (spongeTagTemplate.registryType() != this.registryType) {
-            throw new IllegalArgumentException("TagTemplate given is not compatible with this builder, it is for a different type!");
-        }
+    public TagTemplate.Builder<T> addChild(final TagTemplate<T> childTag) throws IllegalArgumentException {
+        final SpongeTagTemplate<T> spongeTagTemplate = ((SpongeTagTemplate<T>) childTag);
         // Circular references aren't allow - causes loading failure. So do a basic sanity check,
         // we can't ensure theres no circular references until everything is resolved, but we can check
         // 1 level down if we're given a tagtemplate.
@@ -109,15 +106,15 @@ public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements Ta
     }
 
     @Override
-    public @NonNull SpongeTagTemplate build() {
+    public @NonNull SpongeTagTemplate<T> build() {
         if (this.key == null) {
             throw new IllegalStateException("Key has not been provided yet!");
         }
-        return new SpongeTagTemplate(this.key,
-                this.registryType,
+        return new SpongeTagTemplate<>(this.key,
                 this.replace,
                 ImmutableMap.copyOf(this.values),
-                ImmutableMap.copyOf(this.children));
+                ImmutableMap.copyOf(this.children),
+                this.pack);
     }
 
     @Override

@@ -25,24 +25,20 @@
 package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import net.minecraft.nbt.Tag;
-import org.spongepowered.api.datapack.DataPackEntry;
-import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.tag.TagTemplate;
-import org.spongepowered.common.tag.SpongeTagTemplate;
+import org.spongepowered.api.tag.Taggable;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
-public final class TagDataPackSerializer extends DataPackSerializer<TagTemplate> {
+public final class TagDataPackSerializer<T extends Taggable<T>> extends DataPackSerializer<TagTemplate<T>> {
+
+    public TagDataPackSerializer(final DataPackEncoder<TagTemplate<T>> encoder, final DataPackDecoder<TagTemplate<T>> decoder) {
+        super(encoder, decoder);
+    }
 
     @Override
-    protected JsonElement transformSerialized(final Path file, final TagTemplate entry, final JsonElement serialized) throws IOException{
+    protected JsonElement transformSerialized(final Path file, final TagTemplate<T> entry, final JsonElement serialized) throws IOException{
         JsonElement toWrite = serialized;
         /* TODO support merging
         if (Files.exists(file) && !((SpongeTagTemplate) entry).replace()) {
@@ -59,13 +55,4 @@ public final class TagDataPackSerializer extends DataPackSerializer<TagTemplate>
         return toWrite;
     }
 
-    @Override
-    public Path packEntryFile(final SpongeDataPackType<TagTemplate> type, final TagTemplate packEntry, final Path packDir) {
-        final DefaultedRegistryType<?> registryType = ((SpongeTagTemplate) packEntry).registryType();
-        return packDir.resolve("data")
-                .resolve(packEntry.key().namespace())
-                .resolve(type.dir())
-                .resolve(registryType.location().toString())
-                .resolve(packEntry.key().value() + ".json");
-    }
 }

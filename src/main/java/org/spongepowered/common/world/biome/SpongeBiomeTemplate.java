@@ -51,8 +51,8 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.datapack.DataPackType;
-import org.spongepowered.api.datapack.DataPackTypes;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.EntityCategory;
 import org.spongepowered.api.entity.EntityType;
@@ -80,7 +80,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome) implements BiomeTemplate {
+public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataPack<BiomeTemplate> pack) implements BiomeTemplate {
 
     @Override
     public int contentVersion() {
@@ -100,11 +100,6 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome) imple
     }
 
     @Override
-    public DataPackType type() {
-        return DataPackTypes.BIOME;
-    }
-
-    @Override
     public org.spongepowered.api.world.biome.Biome biome() {
         return (org.spongepowered.api.world.biome.Biome) (Object) this.representedBiome;
     }
@@ -114,10 +109,10 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome) imple
         return Biome.DIRECT_CODEC.encodeStart(ops, (Biome) (Object) template.biome()).getOrThrow(false, e -> {});
     }
 
-    public static BiomeTemplate decode(final ResourceKey key, JsonElement packEntry, final RegistryAccess registryAccess) {
+    public static BiomeTemplate decode(final DataPack<BiomeTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
         final Biome parsed = Biome.DIRECT_CODEC.parse(ops, packEntry).getOrThrow(false, e -> {});
-        return new SpongeBiomeTemplate(key, parsed);
+        return new SpongeBiomeTemplate(key, parsed, pack);
     }
 
     public static class BuilderImpl extends AbstractResourceKeyedBuilder<BiomeTemplate, BiomeTemplate.Builder> implements BiomeTemplate.Builder {
@@ -125,6 +120,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome) imple
         private static DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(Biome.class);
 
         private DataManipulator.Mutable manipulator = DataManipulator.mutableOf();
+        private DataPack<BiomeTemplate> pack = DataPacks.BIOME;
 
         @Override
         public <V> Builder add(final Key<? extends Value<V>> key, final V value) {
@@ -139,6 +135,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome) imple
         public Builder reset() {
             this.manipulator = DataManipulator.mutableOf();
             this.key = null;
+            this.pack = DataPacks.BIOME;
             return this;
         }
 
@@ -150,7 +147,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome) imple
 
         @Override
         public Builder from(final BiomeTemplate value) {
-            return this.from(value.biome()).key(value.key());
+            return this.from(value.biome()).key(value.key()).pack(value.pack());
         }
 
         @Override
@@ -160,6 +157,12 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome) imple
             final Biome biome = parsed.getOrThrow(false, e -> {
             });
             this.from((org.spongepowered.api.world.biome.Biome) (Object) biome);
+            return this;
+        }
+
+        @Override
+        public Builder pack(final DataPack<BiomeTemplate> pack) {
+            this.pack = pack;
             return this;
         }
 
@@ -230,7 +233,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome) imple
                     .specialEffects(effectsBuilder.build())
                     .mobSpawnSettings(spawnerBuilder.build())
                     .generationSettings(generationBuilder.build());
-            return new SpongeBiomeTemplate(this.key, vanillaBuilder.build());
+            return new SpongeBiomeTemplate(this.key, vanillaBuilder.build(), this.pack);
         }
     }
 }

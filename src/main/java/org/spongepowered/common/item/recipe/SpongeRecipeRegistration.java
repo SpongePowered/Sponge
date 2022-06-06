@@ -41,8 +41,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.datapack.DataPackType;
-import org.spongepowered.api.datapack.DataPackTypes;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
@@ -147,8 +147,8 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
     }
 
     @Override
-    public DataPackType type() {
-        return DataPackTypes.RECIPE;
+    public DataPack pack() {
+        return DataPacks.RECIPE;
     }
 
     public static JsonObject encode(RecipeRegistration template, RegistryAccess access) {

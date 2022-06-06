@@ -41,8 +41,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.datapack.DataPackType;
-import org.spongepowered.api.datapack.DataPackTypes;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
@@ -63,13 +62,8 @@ import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
-import org.spongepowered.api.world.generation.biome.BiomeTemplate;
-import org.spongepowered.api.world.generation.biome.DecorationSteps;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
-import org.spongepowered.api.world.generation.feature.Feature;
-import org.spongepowered.api.world.generation.feature.FeatureConfig;
-import org.spongepowered.api.world.generation.feature.PlacedFeatures;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.server.DataPackManager;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -82,7 +76,6 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
@@ -375,14 +368,14 @@ public final class WorldTest {
     private CommandResult worldTypes(CommandContext commandContext) {
         final Optional<ServerPlayer> optPlayer = commandContext.cause().first(ServerPlayer.class);
         for (WorldType wt : WorldTypes.registry().stream().toList()) {
-            final WorldTypeTemplate template = wt.asTemplate().get();
+            final WorldTypeTemplate template = WorldTypeTemplate.builder().from(wt).key(ResourceKey.of(this.plugin, "test")).build();
             final DataContainer dataContainer = template.toContainer();
             optPlayer.ifPresent(player -> player.sendMessage(Component.text(template.key().toString())));
             System.out.println(template.key());
             try {
                 System.out.println(DataFormats.JSON.get().write(dataContainer));
                 final WorldTypeTemplate rebuiltTemplate = WorldTypeTemplate.builder().fromDataPack(dataContainer)
-                        .key(ResourceKey.of(this.plugin.metadata().id(), "custom" + template.key().value())).build();
+                        .key(ResourceKey.of(this.plugin, "custom" + template.key().value())).build();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -392,11 +385,11 @@ public final class WorldTest {
 
     private CommandResult worldTemplates(CommandContext commandContext) {
         final DataPackManager dm = Sponge.server().dataPackManager();
-        final List<ResourceKey> templates = dm.list(DataPackTypes.WORLD);
+        final List<ResourceKey> templates = dm.list(DataPacks.WORLD);
         for (ResourceKey key : templates) {
 
             try {
-                final Optional<WorldTemplate> template = dm.load(DataPackTypes.WORLD, key).join();
+                final Optional<WorldTemplate> template = dm.load(DataPacks.WORLD, key).join();
                 if (template.isPresent()) {
                     System.out.println(key + DataFormats.JSON.get().write(template.get().toContainer()));
                 } else {

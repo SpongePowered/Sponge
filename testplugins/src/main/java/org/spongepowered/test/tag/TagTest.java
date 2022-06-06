@@ -32,7 +32,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.Command;
@@ -43,6 +42,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -86,38 +86,38 @@ public final class TagTest {
     private static final TypeToken<Tag<FluidType>> FLUID_TYPE_TAG_TOKEN = new TypeToken<Tag<FluidType>>() {};
 
     @Listener
-    private void registerTags(final RegisterDataPackValueEvent<@NonNull TagTemplate> event) {
+    private void registerTags(final RegisterDataPackValueEvent<@NonNull TagTemplate<?>> event) {
         this.logger.info("Adding tags.");
 
-        final TagTemplate tagRegistration = TagTemplate.builder(RegistryTypes.BLOCK_TYPE)
+        final TagTemplate<BlockType> tagRegistration = TagTemplate.builder(DataPacks.BLOCK_TAG)
                 .key(ResourceKey.of(this.pluginContainer, "wool"))
                 .addValue(BlockTypes.GRASS)
                 .build();
 
         event.register(tagRegistration);
 
-        final TagTemplate woolLog = TagTemplate.builder(RegistryTypes.BLOCK_TYPE)
+        final TagTemplate<BlockType> woolLog = TagTemplate.builder(DataPacks.BLOCK_TAG)
                 .key(BlockTypeTags.WOOL.key())
                 .addValue(BlockTypes.OAK_LOG)
                 .build();
 
         event.register(woolLog);
 
-        final TagTemplate woolGrass = TagTemplate.builder(RegistryTypes.BLOCK_TYPE)
+        final TagTemplate<BlockType> woolGrass = TagTemplate.builder(DataPacks.BLOCK_TAG)
                 .key(ResourceKey.minecraft("wool"))
                 .addValue(BlockTypes.GRASS_BLOCK)
                 .build();
 
         event.register(woolGrass);
 
-        final TagTemplate underwaterDiamond = TagTemplate.builder(RegistryTypes.BLOCK_TYPE)
+        final TagTemplate<BlockType> underwaterDiamond = TagTemplate.builder(DataPacks.BLOCK_TAG)
                 .key(BlockTypeTags.UNDERWATER_BONEMEALS.key())
                 .addValue(BlockTypes.DIAMOND_BLOCK)
                 .build();
 
         event.register(underwaterDiamond);
 
-        final TagTemplate ores = TagTemplate.builder(RegistryTypes.BLOCK_TYPE)
+        final TagTemplate<BlockType> ores = TagTemplate.builder(DataPacks.BLOCK_TAG)
                 .key(ResourceKey.of(this.pluginContainer, "ores"))
                 .addValue(BlockTypes.COAL_ORE)
                 .addValue(BlockTypes.IRON_ORE)
@@ -131,7 +131,7 @@ public final class TagTest {
 
         event.register(ores);
 
-        final TagTemplate oresAndBlocks = TagTemplate.builder(RegistryTypes.BLOCK_TYPE)
+        final TagTemplate<BlockType> oresAndBlocks = TagTemplate.builder(DataPacks.BLOCK_TAG)
                 .key(ResourceKey.of(this.pluginContainer, "oresandblocks"))
                 .addValue(BlockTypes.COAL_BLOCK)
                 .addValue(BlockTypes.IRON_BLOCK)
@@ -147,21 +147,21 @@ public final class TagTest {
         event.register(oresAndBlocks);
 
         final ResourceKey nonExistentKey = ResourceKey.of("notrealnamespace", "notrealvalue");
-        final TagTemplate brokenChildTag = TagTemplate.builder(RegistryTypes.ITEM_TYPE)
+        final TagTemplate<ItemType> brokenChildTag = TagTemplate.builder(DataPacks.ITEM_TAG)
                 .key(ResourceKey.of(this.pluginContainer, "brokenchildtag"))
                 .addChild(Tag.of(RegistryTypes.ITEM_TYPE, nonExistentKey), true)
                 .build();
 
         event.register(brokenChildTag);
 
-        final TagTemplate brokenValueTag = TagTemplate.builder(RegistryTypes.ITEM_TYPE)
+        final TagTemplate<ItemType> brokenValueTag = TagTemplate.builder(DataPacks.ITEM_TAG)
                 .key(ResourceKey.of(this.pluginContainer, "brokenvaluetag"))
                 .addValue(RegistryKey.of(RegistryTypes.ITEM_TYPE, nonExistentKey))
                 .build();
 
         event.register(brokenValueTag);
 
-        final TagTemplate stillWorkingTag = TagTemplate.builder(RegistryTypes.ITEM_TYPE)
+        final TagTemplate<ItemType> stillWorkingTag = TagTemplate.builder(DataPacks.ITEM_TAG)
                 .key(ResourceKey.of(this.pluginContainer, "stillworkingtag"))
                 .addValue(RegistryKey.of(RegistryTypes.ITEM_TYPE, nonExistentKey), false)
                 .addChild(Tag.of(RegistryTypes.ITEM_TYPE, nonExistentKey), false)

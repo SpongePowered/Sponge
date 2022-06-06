@@ -52,8 +52,8 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.datapack.DataPackType;
-import org.spongepowered.api.datapack.DataPackTypes;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -80,14 +80,11 @@ import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class SpongeWorldTemplate extends AbstractResourceKeyed implements WorldTemplate, SpongeDataHolder {
-
-    private final LevelStem levelStem;
+public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack<WorldTemplate> pack) implements WorldTemplate, SpongeDataHolder {
 
     public static final Codec<LevelStem> CODEC = RecordCodecBuilder.create(
             ($$0) -> $$0.group(DimensionType.CODEC.fieldOf("type").forGetter(LevelStem::typeHolder),
@@ -100,7 +97,8 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                             SpongeAdventure.STRING_CODEC.optionalFieldOf("display_name").forGetter(v -> Optional.ofNullable(v.displayName)),
                             ResourceLocation.CODEC.optionalFieldOf("game_mode").forGetter(v -> Optional.ofNullable(v.gameMode)),
                             ResourceLocation.CODEC.optionalFieldOf("difficulty").forGetter(v -> Optional.ofNullable(v.difficulty)),
-                            EnumCodec.create(SerializationBehavior.class).optionalFieldOf("serialization_behavior").forGetter(v -> Optional.ofNullable(v.serializationBehavior)),
+                            EnumCodec.create(SerializationBehavior.class).optionalFieldOf("serialization_behavior")
+                                    .forGetter(v -> Optional.ofNullable(v.serializationBehavior)),
                             Codec.INT.optionalFieldOf("view_distance").forGetter(v -> Optional.ofNullable(v.viewDistance)),
                             MathCodecs.VECTOR_3i.optionalFieldOf("spawn_position").forGetter(v -> Optional.ofNullable(v.spawnPosition)),
                             Codec.BOOL.optionalFieldOf("load_on_startup").forGetter(v -> Optional.ofNullable(v.loadOnStartup)),
@@ -118,13 +116,8 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             );
 
     public static final Codec<LevelStem> DIRECT_CODEC = new MapCodec.MapCodecCodec<LevelStem>(new SpongeDataCodec<>(LevelStem.CODEC,
-        SpongeWorldTemplate.SPONGE_CODEC, (type, data) -> ((LevelStemBridge) (Object) type).bridge$decorateData(data),
-        type -> ((LevelStemBridge) (Object) type).bridge$createData()));
-
-    public SpongeWorldTemplate(final ResourceKey key, final LevelStem levelStem) {
-        super(key);
-        this.levelStem = levelStem;
-    }
+            SpongeWorldTemplate.SPONGE_CODEC, (type, data) -> ((LevelStemBridge) (Object) type).bridge$decorateData(data),
+            type -> ((LevelStemBridge) (Object) type).bridge$createData()));
 
     @Override
     public List<DataHolder> impl$delegateDataHolder() {
@@ -134,12 +127,13 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     public static LevelStem decodeStem(JsonElement pack) {
         final DataResult<LevelStem> parsed = LevelStem.CODEC.parse(JsonOps.INSTANCE, pack);
         SpongeWorldTemplate.fixDimensionDatapack(pack);
-        return parsed.getOrThrow(false, e -> {});
+        return parsed.getOrThrow(false, e -> {
+        });
     }
 
-    public static WorldTemplate decode(ResourceKey key, JsonElement packEntry, RegistryAccess registryAccess) {
+    public static WorldTemplate decode(DataPack<WorldTemplate> pack, ResourceKey key, JsonElement packEntry, RegistryAccess registryAccess) {
         final LevelStem stem = SpongeWorldTemplate.decodeStem(packEntry);
-        return new SpongeWorldTemplate(key, stem);
+        return new SpongeWorldTemplate(key, stem, pack);
     }
 
     // TODO datafixer?
@@ -156,8 +150,8 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     }
 
     @Override
-    public DataPackType<WorldTemplate> type() {
-        return DataPackTypes.WORLD;
+    public DataPack<WorldTemplate> pack() {
+        return DataPacks.WORLD;
     }
 
     @Override
@@ -177,19 +171,17 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         }
     }
 
-    public LevelStem levelStem() {
-        return this.levelStem;
-    }
-
     public static JsonElement serialize(final WorldTemplate s, final RegistryAccess registryAccess) {
         if (s instanceof SpongeWorldTemplate t) {
             final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-            return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(ops, t.levelStem).getOrThrow(false, e -> {});
+            return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(ops, t.levelStem).getOrThrow(false, e -> {
+            });
         }
         throw new IllegalArgumentException("WorldTemplate is not a SpongeWorldTemplate");
     }
 
     public static final class SpongeDataSection {
+
         @Nullable public final Component displayName;
         @Nullable public final ResourceLocation gameMode;
         @Nullable public final ResourceLocation difficulty;
@@ -198,12 +190,12 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         @Nullable public final Vector3i spawnPosition;
 
         @Nullable public final Boolean loadOnStartup, performsSpawnLogic, hardcore, commands, pvp;
+
         public SpongeDataSection(final @Nullable Component displayName, final @Nullable ResourceLocation gameMode,
-            final @Nullable ResourceLocation difficulty, final @Nullable SerializationBehavior serializationBehavior,
-            final @Nullable Integer viewDistance, final @Nullable Vector3i spawnPosition, final @Nullable Boolean loadOnStartup,
-            final @Nullable Boolean performsSpawnLogic, final @Nullable Boolean hardcore, final @Nullable Boolean commands,
-            final @Nullable Boolean pvp)
-        {
+                final @Nullable ResourceLocation difficulty, final @Nullable SerializationBehavior serializationBehavior,
+                final @Nullable Integer viewDistance, final @Nullable Vector3i spawnPosition, final @Nullable Boolean loadOnStartup,
+                final @Nullable Boolean performsSpawnLogic, final @Nullable Boolean hardcore, final @Nullable Boolean commands,
+                final @Nullable Boolean pvp) {
             this.displayName = displayName;
             this.gameMode = gameMode;
             this.difficulty = difficulty;
@@ -220,11 +212,13 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     }
 
 
-    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTemplate, WorldTemplate.Builder> implements WorldTemplate.Builder {
+    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTemplate, WorldTemplate.Builder>
+            implements WorldTemplate.Builder {
 
         private static DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(LevelStem.class);
 
         private DataManipulator.Mutable data = DataManipulator.mutableOf();
+        private DataPack<WorldTemplate> pack = DataPacks.WORLD;
 
         @Override
         public <V> Builder add(final Key<? extends Value<V>> key, final V value) {
@@ -241,6 +235,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             this.data = DataManipulator.mutableOf();
             this.data.set(Keys.WORLD_TYPE, WorldTypes.OVERWORLD);
             this.data.set(Keys.CHUNK_GENERATOR, ChunkGenerator.overworld());
+            this.pack = DataPacks.WORLD;
             return this;
         }
 
@@ -248,6 +243,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         public Builder from(final WorldTemplate template) {
             this.key = Objects.requireNonNull(template, "template").key();
             this.data = DataManipulator.mutableOf(template.getValues());
+            this.pack = template.pack();
             return this;
         }
 
@@ -264,6 +260,12 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         public Builder from(ServerWorld world) {
             this.from(world.properties());
             this.data.set(Keys.CHUNK_GENERATOR, world.generator());
+            return this;
+        }
+
+        @Override
+        public Builder pack(final DataPack<WorldTemplate> pack) {
+            this.pack = pack;
             return this;
         }
 
@@ -303,13 +305,15 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
             final Holder<DimensionType> dimensionType = BuilderImpl.dimensionType(this.data.require(Keys.WORLD_TYPE));
             final LevelStem levelStem = new LevelStem(dimensionType, (net.minecraft.world.level.chunk.ChunkGenerator) chunkGenerator);
             ((LevelStemBridge) (Object) levelStem).bridge$decorateData(this.data);
-            return new SpongeWorldTemplate(this.key, levelStem);
+            return new SpongeWorldTemplate(this.key, levelStem, this.pack);
         }
 
         @NotNull
         private static Holder<DimensionType> dimensionType(final RegistryReference<WorldType> worldType) {
-            final Registry<DimensionType> dimensionTypeRegistry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-            final net.minecraft.resources.ResourceKey<DimensionType> key = net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, (ResourceLocation) (Object) worldType.location());
+            final Registry<DimensionType> dimensionTypeRegistry =
+                    SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+            final net.minecraft.resources.ResourceKey<DimensionType> key =
+                    net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, (ResourceLocation) (Object) worldType.location());
             return dimensionTypeRegistry.getHolderOrThrow(key);
         }
 

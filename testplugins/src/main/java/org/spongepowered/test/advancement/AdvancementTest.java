@@ -31,6 +31,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
+import org.spongepowered.api.advancement.AdvancementTemplate;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.AdvancementTypes;
 import org.spongepowered.api.advancement.DisplayInfo;
@@ -154,13 +155,13 @@ public final class AdvancementTest implements LoadableModule {
 
 
     @Listener
-    private void onAdvancementRegistry(final RegisterDataPackValueEvent<Advancement> event) {
+    private void onAdvancementRegistry(final RegisterDataPackValueEvent<AdvancementTemplate> event) {
 
         if (!this.enabled) {
             return;
         }
 
-        this.rootAdvancement = Advancement.builder()
+        AdvancementTemplate rootAdvancement = AdvancementTemplate.builder()
                 .criterion(AdvancementCriterion.dummy())
                 .displayInfo(DisplayInfo.builder()
                                 .icon(ItemTypes.COMMAND_BLOCK)
@@ -170,7 +171,8 @@ public final class AdvancementTest implements LoadableModule {
                 .root().background(ResourceKey.minecraft("textures/gui/advancements/backgrounds/stone.png"))
                 .key(ResourceKey.of(this.plugin, "root"))
                 .build();
-        event.register(this.rootAdvancement);
+        event.register(rootAdvancement);
+        this.rootAdvancement = rootAdvancement.advancement();
 
         final AdvancementCriterion someDirtCriterion = AdvancementCriterion.builder().trigger(
                 FilteredTrigger.builder()
@@ -179,7 +181,7 @@ public final class AdvancementTest implements LoadableModule {
                         .build()
         ).name("some_dirt").build();
 
-        final Advancement someDirt = Advancement.builder()
+        final AdvancementTemplate someDirt = AdvancementTemplate.builder()
                 .criterion(someDirtCriterion)
                 .displayInfo(DisplayInfo.builder()
                         .icon(ItemTypes.DIRT)
@@ -198,14 +200,14 @@ public final class AdvancementTest implements LoadableModule {
                         .build()
         ).name("lots_of_dirt").build();
 
-        final Advancement lotsOfDirt = Advancement.builder()
+        final AdvancementTemplate lotsOfDirt = AdvancementTemplate.builder()
                 .criterion(lotsOfDirtCriterion)
                 .displayInfo(DisplayInfo.builder()
                         .icon(ItemTypes.DIRT)
                         .title(Component.text("Got more dirt!"))
                         .type(AdvancementTypes.GOAL)
                         .build())
-                .parent(someDirt)
+                .parent(someDirt.advancement())
                 .key(ResourceKey.of(this.plugin, "lots_of_dirt"))
                 .build();
         event.register(lotsOfDirt);
@@ -217,7 +219,7 @@ public final class AdvancementTest implements LoadableModule {
                         .build()
         ).name("tons_of_dirt").build();
 
-        final Advancement tonsOfDirt = Advancement.builder()
+        final AdvancementTemplate tonsOfDirt = AdvancementTemplate.builder()
                 .criterion(tonsOfDirtCriterion)
                 .displayInfo(DisplayInfo.builder()
                         .icon(ItemTypes.DIRT)
@@ -225,14 +227,14 @@ public final class AdvancementTest implements LoadableModule {
                         .type(AdvancementTypes.CHALLENGE)
                         .hidden(true)
                         .build())
-                .parent(lotsOfDirt)
+                .parent(lotsOfDirt.advancement())
                 .key(ResourceKey.of(this.plugin, "tons_of_dirt"))
                 .build();
         event.register(tonsOfDirt);
 
         this.counter1 = ScoreAdvancementCriterion.builder().goal(10).name("counter").build();
         this.counter1Bypass = AdvancementCriterion.dummy();
-        this.counterAdvancement1 = Advancement.builder()
+        AdvancementTemplate counterAdvancement1 = AdvancementTemplate.builder()
                 .criterion(OrCriterion.of(this.counter1, this.counter1Bypass))
                 .displayInfo(DisplayInfo.builder()
                         .icon(ItemTypes.CHEST)
@@ -242,10 +244,11 @@ public final class AdvancementTest implements LoadableModule {
                 .parent(this.rootAdvancement)
                 .key(ResourceKey.of(this.plugin, "counting"))
                 .build();
-        event.register(this.counterAdvancement1);
+        event.register(counterAdvancement1);
+        this.counterAdvancement1 = counterAdvancement1.advancement();
 
         this.counter2 = ScoreAdvancementCriterion.builder().goal(20).name("counter").build();
-        this.counterAdvancement2 = Advancement.builder()
+        AdvancementTemplate counterAdvancement2 = AdvancementTemplate.builder()
                 .criterion(this.counter2)
                 .displayInfo(DisplayInfo.builder()
                         .icon(ItemTypes.CHEST)
@@ -255,7 +258,8 @@ public final class AdvancementTest implements LoadableModule {
                 .parent(this.counterAdvancement1)
                 .key(ResourceKey.of(this.plugin, "counting_more"))
                 .build();
-        event.register(this.counterAdvancement2);
+        event.register(counterAdvancement2);
+        this.counterAdvancement2 = counterAdvancement2.advancement();
 
         final AdvancementCriterion a = AdvancementCriterion.builder().name("A").build();
         final AdvancementCriterion b = AdvancementCriterion.builder().name("B").build();
@@ -264,7 +268,7 @@ public final class AdvancementTest implements LoadableModule {
         final AdvancementCriterion e = AdvancementCriterion.builder().name("E").build();
         final AdvancementCriterion f = AdvancementCriterion.builder().name("F").build();
         final AdvancementCriterion combinationCriterion = OrCriterion.of(a, AndCriterion.of(b, OrCriterion.of(c, d)), AndCriterion.of(e, f));
-        final Advancement combinationAdvancement = Advancement.builder()
+        final AdvancementTemplate combinationAdvancement = AdvancementTemplate.builder()
                 .criterion(combinationCriterion)
                 .displayInfo(DisplayInfo.builder()
                         .icon(ItemTypes.CHEST)

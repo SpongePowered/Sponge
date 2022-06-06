@@ -27,10 +27,11 @@ package org.spongepowered.common.datapack;
 import com.google.gson.JsonElement;
 import net.minecraft.core.RegistryAccess;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPackEntry;
 
-interface DataPackDecoder<T extends DataPackEntry<T>> {
+public interface DataPackDecoder<T extends DataPackEntry<T>> {
 
-    T decode(ResourceKey key, JsonElement json, RegistryAccess registryAccess);
+    T decode(DataPack<T> pack, ResourceKey key, JsonElement json, RegistryAccess registryAccess);
 
 }

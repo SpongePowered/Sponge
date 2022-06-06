@@ -42,7 +42,7 @@ import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.effect.VanishState;
 import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -116,7 +116,7 @@ import org.spongepowered.common.command.selector.SpongeSelectorFactory;
 import org.spongepowered.common.data.manipulator.ImmutableDataManipulatorFactory;
 import org.spongepowered.common.data.manipulator.MutableDataManipulatorFactory;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.datapack.SpongeDataPackType;
+import org.spongepowered.common.datapack.SpongeDataPack;
 import org.spongepowered.common.entity.effect.SpongeVanishState;
 import org.spongepowered.common.event.SpongeEventListenerRegistration;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
@@ -235,7 +235,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(RegistryKey.Factory.class, new SpongeRegistryKey.FactoryImpl())
                 .registerFactory(RegistryType.Factory.class, new SpongeRegistryType.FactoryImpl())
                 .registerFactory(RegistryReference.Factory.class, new SpongeRegistryReference.FactoryImpl())
-                .registerFactory(DataPackType.Factory.class, new SpongeDataPackType.FactoryImpl())
+                .registerFactory(DataPack.Factory.class, new SpongeDataPack.FactoryImpl())
                 .registerFactory(BlockVolumeFactory.class, new SpongeBlockVolumeFactory())
                 .registerFactory(DamageSource.Factory.class, new SpongeDamageSourceFactory())
                 .registerFactory(PaletteReference.Factory.class, new SpongePaletteReferenceFactory())
@@ -247,7 +247,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(BiomeAttributes.Factory.class, new SpongeBiomeAttributesFactory())
                 .registerFactory(BiomeProvider.Factory.class, new SpongeBiomeProviderFactory())
                 .registerFactory(WorldTypeEffect.Factory.class, new SpongeWorldTypeEffect.FactoryImpl())
-                .registerFactory(WorldTypeTemplate.Factory.class, new SpongeWorldTypeTemplate.FactoryImpl())
                 .registerFactory(WorldTemplate.Factory.class, new SpongeWorldTemplate.FactoryImpl())
                 .registerFactory(LayerConfig.Factory.class, new SpongeLayerConfigFactory())
                 .registerFactory(NoiseConfig.Factory.class, new SpongeNoiseConfig.FactoryImpl())

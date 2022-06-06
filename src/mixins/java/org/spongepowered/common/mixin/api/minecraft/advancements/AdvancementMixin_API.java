@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.advancements;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonElement;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.DisplayInfo;
@@ -32,14 +33,19 @@ import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.api.datapack.DataPackType;
-import org.spongepowered.api.datapack.DataPackTypes;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.advancement.SpongeAdvancementTemplate;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -112,7 +118,19 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
     }
 
     @Override
-    public DataPackType type() {
-        return DataPackTypes.ADVANCEMENT;
+    public int contentVersion() {
+        return 0;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        final JsonElement json = SpongeAdvancementTemplate.encode((Advancement) (Object) this);
+        try {
+            final DataContainer container = DataFormats.JSON.get().read(json.toString());
+            container.set(Queries.CONTENT_VERSION, this.contentVersion());
+            return container;
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not read deserialized Advancement:\n" + json, e);
+        }
     }
 }

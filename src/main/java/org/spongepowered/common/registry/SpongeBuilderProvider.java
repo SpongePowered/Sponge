@@ -27,7 +27,7 @@ package org.spongepowered.common.registry;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.api.advancement.AdvancementTemplate;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
@@ -320,7 +320,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(Enchantment.Builder.class, SpongeEnchantmentBuilder::new)
                 .register(Enchantment.RandomListBuilder.class, SpongeRandomEnchantmentListBuilder::new)
                 .register(Key.Builder.class, SpongeKeyBuilder::new)
-                .register(Advancement.Builder.class, SpongeAdvancementBuilder::new)
+                .register(AdvancementTemplate.Builder.class, SpongeAdvancementBuilder::new)
                 .register(DisplayInfo.Builder.class, SpongeDisplayInfoBuilder::new)
                 .register(AdvancementCriterion.Builder.class, SpongeCriterionBuilder::new)
                 .register(ScoreAdvancementCriterion.Builder.class, SpongeScoreCriterionBuilder::new)

@@ -34,18 +34,18 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataQuery;
-import org.spongepowered.api.datapack.DataPackType;
-import org.spongepowered.api.datapack.DataPackTypes;
-import org.spongepowered.api.registry.DefaultedRegistryType;
+import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.tag.TagTemplate;
+import org.spongepowered.api.tag.Taggable;
 import org.spongepowered.common.SpongeCommon;
 
 import java.io.IOException;
 import java.util.Map;
 
-public record SpongeTagTemplate(ResourceKey key, DefaultedRegistryType<?> registryType,
-                                boolean replace, Map<ResourceKey, Boolean> elements,
-                                Map<ResourceKey, Boolean> subTags) implements TagTemplate {
+public record SpongeTagTemplate<T extends Taggable<T>>(
+        ResourceKey key, boolean replace, Map<ResourceKey, Boolean> elements,
+        Map<ResourceKey, Boolean> subTags,
+        DataPack<TagTemplate<T>> pack) implements TagTemplate<T> {
 
     @Override
     public int contentVersion() {
@@ -65,9 +65,9 @@ public record SpongeTagTemplate(ResourceKey key, DefaultedRegistryType<?> regist
         }
     }
 
-    public static JsonObject encode(TagTemplate template, RegistryAccess registryAccess) {
+    public static <T extends Taggable<T>> JsonObject encode(TagTemplate<T> template, RegistryAccess registryAccess) {
         final TagBuilder builder = TagBuilder.create();
-        final SpongeTagTemplate spongeTemplate = (SpongeTagTemplate) template;
+        final SpongeTagTemplate<T> spongeTemplate = (SpongeTagTemplate<T>) template;
         spongeTemplate.elements.forEach((k, v) -> {
             final ResourceLocation location = (ResourceLocation) (Object) k;
             // "N/A" is supposed to be the source, but we don't know it, and we're serializing it so it isn't used anyway. (Gone when we serializeToJson)
@@ -89,8 +89,4 @@ public record SpongeTagTemplate(ResourceKey key, DefaultedRegistryType<?> regist
         }).getAsJsonObject();
     }
 
-    @Override
-    public DataPackType type() {
-        return DataPackTypes.TAG;
-    }
 }

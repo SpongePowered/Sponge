@@ -25,8 +25,6 @@
 package org.spongepowered.common.world.server;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.CrashReport;
@@ -63,7 +61,6 @@ import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.CommandStorage;
-import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
@@ -71,7 +68,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.datapack.DataPackTypes;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.event.world.UnloadWorldEvent;
@@ -292,7 +289,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                 final net.minecraft.resources.ResourceKey<LevelStem> rKey = net.minecraft.resources.ResourceKey.create(Registry.LEVEL_STEM_REGISTRY, (ResourceLocation) (Object) key);
                 final LevelStem scratch = this.server.getWorldData().worldGenSettings().dimensions().get(rKey);
                 if (scratch != null) {
-                    loadedTemplate = new SpongeWorldTemplate(key, scratch);
+                    loadedTemplate = new SpongeWorldTemplate(key, scratch, DataPacks.WORLD); // TODO we do not know in which datapack the template is
                 }
 
                 if (loadedTemplate == null) {
@@ -562,7 +559,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         try {
-            this.server().dataPackManager().copy(DataPackTypes.WORLD, key, copyKey);
+            this.server().dataPackManager().copy(DataPacks.WORLD, key, copyKey);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(e);
         }
@@ -628,7 +625,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         try {
-            this.server().dataPackManager().move(DataPackTypes.WORLD, key, movedKey);
+            this.server().dataPackManager().move(DataPacks.WORLD, key, movedKey);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(e);
         }
@@ -685,7 +682,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         try {
-            this.server().dataPackManager().delete(DataPackTypes.WORLD, key);
+            this.server().dataPackManager().delete(DataPacks.WORLD, key);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(e);
         }
@@ -1010,8 +1007,8 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     private CompletableFuture<Optional<WorldTemplate>> loadTemplate(final ResourceKey key) {
-        if (this.server().dataPackManager().exists(DataPackTypes.WORLD, key)) {
-            return this.server().dataPackManager().load(DataPackTypes.WORLD, key).exceptionally(e -> {
+        if (this.server().dataPackManager().exists(DataPacks.WORLD, key)) {
+            return this.server().dataPackManager().load(DataPacks.WORLD, key).exceptionally(e -> {
                 e.printStackTrace();
                 return Optional.empty();
             });

@@ -165,11 +165,6 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     }
 
     @Override
-    public WorldTemplate asTemplate() {
-        return WorldTemplate.builder().from(this).build();
-    }
-
-    @Override
     public ResourceKey key() {
         return (ResourceKey) (Object) this.shadow$dimension().location();
     }

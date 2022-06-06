@@ -55,15 +55,6 @@ public abstract class DimensionTypeMixin_API implements WorldType, SpongeDataHol
         return this.api$context;
     }
 
-    @Override
-    public Optional<WorldTypeTemplate> asTemplate() {
-        @Nullable final ResourceLocation location = this.api$location();
-        if (location == null) {
-            return Optional.empty();
-        }
-        return Optional.of(new SpongeWorldTypeTemplate((ResourceKey) (Object) location,  (DimensionType) (Object) this));
-    }
-
     @Nullable
     private ResourceLocation api$location() {
         final Registry<DimensionType> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
