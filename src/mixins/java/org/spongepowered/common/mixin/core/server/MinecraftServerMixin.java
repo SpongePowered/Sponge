@@ -340,7 +340,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "reloadResources", at = @At(value = "HEAD"))
     public void impl$reloadResources(final Collection<String> datapacksToLoad, final CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        final List<String> reloadablePacks = ((SpongeDataPackManager) this.dataPackManager()).registerPacks(true);
+        final List<String> reloadablePacks = ((SpongeDataPackManager) this.dataPackManager()).registerPacks();
         datapacksToLoad.addAll(reloadablePacks);
         this.shadow$getPackRepository().reload();
     }

@@ -26,7 +26,7 @@ package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonObject;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPackEntry;
 
 public class DataPackSerializedObject {
 
@@ -46,7 +46,7 @@ public class DataPackSerializedObject {
         return object;
     }
 
-    public static <T extends DataPack> DataPackSerializedObject keyAndJsonBased(T serializable, JsonObject serialized) {
+    public static <T extends DataPackEntry> DataPackSerializedObject keyAndJsonBased(T serializable, JsonObject serialized) {
         return new DataPackSerializedObject(serializable.key(), serialized);
     }
 }

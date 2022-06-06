@@ -28,7 +28,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.repository.PackRepository;
-import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPackEntry;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
@@ -44,6 +44,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public final class SpongeDataPackManager implements DataPackManager {
 
@@ -56,39 +57,42 @@ public final class SpongeDataPackManager implements DataPackManager {
         this.packDir = packDir;
     }
 
+    // TODO IntegratedServer call?
     public void init() {
-        final List<String> reloadablePacks = this.registerPacks(false);
+        this.ignoreNext = false;
+        final List<String> reloadablePacks = this.registerPacks();
         if (!reloadablePacks.isEmpty()) {
             SpongeCommon.logger().info("Reloading for plugin data packs... " + reloadablePacks.size());
-            // see ReloadCommand#discoverNewPacks
-            final PackRepository packRepo = this.server.getPackRepository();
-            final List<String> toReload = new ArrayList<>(packRepo.getSelectedIds());
-            packRepo.reload();
-            final List<String> disabled = this.server.getWorldData().getDataPackConfig().getDisabled();
-            for (final String available : packRepo.getAvailableIds()) {
-                if (!disabled.contains(available) && !toReload.contains(available)) {
-                    toReload.add(available);
-                }
-            }
-            this.server.reloadResources(toReload);
+            this.ignoreNext = true;
+            this.server.reloadResources(this.discoverNewPacks());
         }
+    }
+
+    // see ReloadCommand#discoverNewPacks
+    private List<String> discoverNewPacks() {
+        final PackRepository packRepo = this.server.getPackRepository();
+        final List<String> toReload = new ArrayList<>(packRepo.getSelectedIds());
+        packRepo.reload();
+        final List<String> disabled = this.server.getWorldData().getDataPackConfig().getDisabled();
+        for (final String available : packRepo.getAvailableIds()) {
+            if (!disabled.contains(available) && !toReload.contains(available)) {
+                toReload.add(available);
+            }
+        }
+        return toReload;
     }
 
     @Override
-    public void reload() {
+    public CompletableFuture<Void> reload() {
         this.ignoreNext = false;
-        this.registerPacks(true);
+        return this.server.reloadResources(this.discoverNewPacks());
     }
 
-    // TODO IntegratedServer call?
-    public List<String> registerPacks(final boolean isReload) {
+    public List<String> registerPacks() {
         // Ignore reload immediately after first call
-        if (isReload && this.ignoreNext) {
+        if (this.ignoreNext) {
             this.ignoreNext = false;
             return List.of();
-        }
-        if (!isReload) {
-            this.ignoreNext = true;
         }
 
         SpongeIngredient.clearCache();
@@ -101,14 +105,14 @@ public final class SpongeDataPackManager implements DataPackManager {
         return reloadablePacks;
     }
 
-    private <T extends DataPack.Reloadable> List<T> callRegisterDataPackValueEvent(final DataPackType<T> type) {
+    private <T extends DataPackEntry> List<T> callRegisterDataPackValueEvent(final DataPackType<T> type) {
         final RegisterDataPackValueEventImpl<T> event = new RegisterDataPackValueEventImpl<>(Cause.of(EventContext.empty(), SpongeCommon.game()), SpongeCommon.game(), type);
         SpongeCommon.post(event);
         return event.serializables();
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends DataPack.Reloadable> void serialize(final DataPackType<T> type, final Collection<String> reloadablePacks) {
+    private <T extends DataPackEntry> void serialize(final DataPackType<T> type, final Collection<String> reloadablePacks) {
         final SpongeDataPackType implType = (SpongeDataPackType) type;
         final List<T> serializables = this.callRegisterDataPackValueEvent(type);
         if (serializables.isEmpty()) {
@@ -116,7 +120,7 @@ public final class SpongeDataPackManager implements DataPackManager {
         }
 
         final List<DataPackSerializedObject> serialized = new ArrayList<>();
-        for (final DataPack serializable : serializables) {
+        for (final DataPackEntry serializable : serializables) {
             final JsonObject o = (JsonObject) implType.getObjectSerializer().serialize(serializable, this.server.registryAccess());
             serialized.add((DataPackSerializedObject) implType.getObjectFunction().apply(serializable, o));
         }
@@ -141,10 +145,11 @@ public final class SpongeDataPackManager implements DataPackManager {
     }
 
     @Override
-    public void save(final DataPack.Persistent pack) {
-        final SpongeDataPackType implType = (SpongeDataPackType) pack.type();
-        final JsonElement json = implType.getObjectSerializer().serialize(pack, this.server.registryAccess());
-        final DataPackSerializedObject obj = (DataPackSerializedObject) implType.getObjectFunction().apply(pack, json);
+    public CompletableFuture<Boolean> save(final DataPackEntry entry) {
+        final SpongeDataPackType implType = (SpongeDataPackType) entry.type();
+        final JsonElement json = implType.getObjectSerializer().serialize(entry, this.server.registryAccess());
+        final DataPackSerializedObject obj = (DataPackSerializedObject) implType.getObjectFunction().apply(entry, json);
         this.serializePack(implType, new ArrayList<>(), List.of(obj), 1);
+        return CompletableFuture.completedFuture(implType.reloadable());
     }
 }

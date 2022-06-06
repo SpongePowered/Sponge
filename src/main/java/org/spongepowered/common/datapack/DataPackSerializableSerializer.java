@@ -26,9 +26,9 @@ package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonElement;
 import net.minecraft.core.RegistryAccess;
-import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPackEntry;
 
-interface DataPackSerializableSerializer<T extends DataPack> {
+interface DataPackSerializableSerializer<T extends DataPackEntry> {
 
     JsonElement serialize(T serializable, RegistryAccess registryAccess);
 

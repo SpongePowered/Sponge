@@ -29,7 +29,7 @@ import io.leangen.geantyref.TypeToken;
 import net.minecraft.data.recipes.FinishedRecipe;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.advancement.Advancement;
-import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPackEntry;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.world.WorldTypeTemplate;
@@ -45,7 +45,7 @@ import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
 import java.util.function.BiFunction;
 
-public final class SpongeDataPackType<T extends DataPack, U extends DataPackSerializedObject> implements DataPackType<T> {
+public final class SpongeDataPackType<T extends DataPackEntry, U extends DataPackSerializedObject> implements DataPackType<T> {
 
     private final TypeToken<T> token;
     private final DataPackSerializer<U> packSerializer;
