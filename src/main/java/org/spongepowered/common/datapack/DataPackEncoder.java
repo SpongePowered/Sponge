@@ -24,29 +24,12 @@
  */
 package org.spongepowered.common.datapack;
 
-import com.google.gson.JsonObject;
-import org.spongepowered.api.ResourceKey;
+import com.google.gson.JsonElement;
+import net.minecraft.core.RegistryAccess;
 import org.spongepowered.api.datapack.DataPackEntry;
 
-public class DataPackSerializedObject {
+interface DataPackEncoder<T extends DataPackEntry<T>> {
 
-    private final ResourceKey key;
-    private final JsonObject object;
+    JsonElement encode(T serializable, RegistryAccess registryAccess);
 
-    public DataPackSerializedObject(final ResourceKey key, final JsonObject object) {
-        this.key = key;
-        this.object = object;
-    }
-
-    public ResourceKey getKey() {
-        return key;
-    }
-
-    public JsonObject getObject() {
-        return object;
-    }
-
-    public static <T extends DataPackEntry> DataPackSerializedObject keyAndJsonBased(T serializable, JsonObject serialized) {
-        return new DataPackSerializedObject(serializable.key(), serialized);
-    }
 }

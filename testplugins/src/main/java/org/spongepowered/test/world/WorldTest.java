@@ -41,6 +41,8 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
@@ -69,6 +71,7 @@ import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.FeatureConfig;
 import org.spongepowered.api.world.generation.feature.PlacedFeatures;
 import org.spongepowered.api.world.portal.PortalType;
+import org.spongepowered.api.world.server.DataPackManager;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldManager;
@@ -388,12 +391,12 @@ public final class WorldTest {
     }
 
     private CommandResult worldTemplates(CommandContext commandContext) {
-        final WorldManager wm = Sponge.server().worldManager();
-        final List<ResourceKey> templates = wm.templateKeys();
+        final DataPackManager dm = Sponge.server().dataPackManager();
+        final List<ResourceKey> templates = dm.list(DataPackTypes.WORLD);
         for (ResourceKey key : templates) {
 
             try {
-                final Optional<WorldTemplate> template = wm.loadTemplate(key).join();
+                final Optional<WorldTemplate> template = dm.load(DataPackTypes.WORLD, key).join();
                 if (template.isPresent()) {
                     System.out.println(key + DataFormats.JSON.get().write(template.get().toContainer()));
                 } else {

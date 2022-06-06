@@ -24,15 +24,12 @@
  */
 package org.spongepowered.common.tag;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagBuilder;
-import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagFile;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
@@ -44,49 +41,11 @@ import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.common.SpongeCommon;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
-public final class SpongeTagTemplate implements TagTemplate {
-
-    private final ResourceKey key;
-    private final DefaultedRegistryType<@NonNull ?> registryType;
-    private final boolean replace;
-    private final Map<ResourceKey, Boolean> elements;
-    private final Map<ResourceKey, Boolean> subTags;
-
-    public SpongeTagTemplate(final ResourceKey key,
-                             final DefaultedRegistryType<@NonNull ?> registryType,
-                             final boolean replace,
-                             final Map<ResourceKey, Boolean> elements,
-                             final Map<ResourceKey, Boolean> subTags) {
-        this.key = key;
-        this.registryType = registryType;
-        this.replace = replace;
-        this.elements = elements;
-        this.subTags = subTags;
-    }
-
-    @Override
-    public ResourceKey key() {
-        return this.key;
-    }
-
-    public DefaultedRegistryType<@NonNull ?> registryType() {
-        return this.registryType;
-    }
-
-    public boolean replace() {
-        return this.replace;
-    }
-
-    public Map<ResourceKey, Boolean> elements() {
-        return ImmutableMap.copyOf(this.elements);
-    }
-
-    public Map<ResourceKey, Boolean> subTags() {
-        return ImmutableMap.copyOf(this.subTags);
-    }
+public record SpongeTagTemplate(ResourceKey key, DefaultedRegistryType<?> registryType,
+                                boolean replace, Map<ResourceKey, Boolean> elements,
+                                Map<ResourceKey, Boolean> subTags) implements TagTemplate {
 
     @Override
     public int contentVersion() {
@@ -95,7 +54,7 @@ public final class SpongeTagTemplate implements TagTemplate {
 
     @Override
     public DataContainer toContainer() {
-        final JsonObject jsonObject = this.toJson();
+        final JsonObject jsonObject = SpongeTagTemplate.encode(this, SpongeCommon.server().registryAccess());
         try {
             final DataContainer container = DataFormats.JSON.get().read(jsonObject.getAsString());
             container.set(DataQuery.of("replace"), this.replace);
@@ -106,9 +65,10 @@ public final class SpongeTagTemplate implements TagTemplate {
         }
     }
 
-    public JsonObject toJson() {
+    public static JsonObject encode(TagTemplate template, RegistryAccess registryAccess) {
         final TagBuilder builder = TagBuilder.create();
-        this.elements.forEach((k, v) -> {
+        final SpongeTagTemplate spongeTemplate = (SpongeTagTemplate) template;
+        spongeTemplate.elements.forEach((k, v) -> {
             final ResourceLocation location = (ResourceLocation) (Object) k;
             // "N/A" is supposed to be the source, but we don't know it, and we're serializing it so it isn't used anyway. (Gone when we serializeToJson)
             if (v) {
@@ -117,7 +77,7 @@ public final class SpongeTagTemplate implements TagTemplate {
                 builder.addOptionalElement(location);
             }
         });
-        this.subTags.forEach((k, v) -> {
+        spongeTemplate.subTags.forEach((k, v) -> {
             final ResourceLocation location = (ResourceLocation) (Object) k;
             if (v) {
                 builder.addElement(location);
@@ -125,7 +85,8 @@ public final class SpongeTagTemplate implements TagTemplate {
                 builder.addOptionalElement(location);
             }
         });
-        return TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(builder.build(), this.replace)).getOrThrow(false, e -> {}).getAsJsonObject();
+        return TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(builder.build(), spongeTemplate.replace)).getOrThrow(false, e -> {
+        }).getAsJsonObject();
     }
 
     @Override

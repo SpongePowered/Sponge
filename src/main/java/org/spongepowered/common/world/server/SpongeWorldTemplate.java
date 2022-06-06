@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.server;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -79,6 +80,7 @@ import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -129,10 +131,28 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         return List.of((DataHolder) (Object) this.levelStem, this);
     }
 
-    public static LevelStem viewToStem(JsonElement pack) {
-        // TODO catch & rethrow exceptions in CODEC?
+    public static LevelStem decodeStem(JsonElement pack) {
         final DataResult<LevelStem> parsed = LevelStem.CODEC.parse(JsonOps.INSTANCE, pack);
+        SpongeWorldTemplate.fixDimensionDatapack(pack);
         return parsed.getOrThrow(false, e -> {});
+    }
+
+    public static WorldTemplate decode(ResourceKey key, JsonElement packEntry, RegistryAccess registryAccess) {
+        final LevelStem stem = SpongeWorldTemplate.decodeStem(packEntry);
+        return new SpongeWorldTemplate(key, stem);
+    }
+
+    // TODO datafixer?
+    // TODO make it automatically work when loading API8 created worlds
+    private static void fixDimensionDatapack(final JsonElement element) {
+        try {
+            final JsonObject biomeSource = element.getAsJsonObject().getAsJsonObject("generator").getAsJsonObject("biome_source");
+            if ("minecraft:vanilla_layered".equals(biomeSource.get("type").getAsString())) {
+                biomeSource.addProperty("type", "minecraft:multi_noise");
+                biomeSource.addProperty("preset", "minecraft:overworld");
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     @Override
@@ -235,7 +255,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         public Builder fromDataPack(DataView pack) throws IOException {
             // TODO maybe accept JsonElement instead?
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
-            final LevelStem levelStem = SpongeWorldTemplate.viewToStem(json);
+            final LevelStem levelStem = SpongeWorldTemplate.decodeStem(json);
             return this.from(levelStem);
 
         }

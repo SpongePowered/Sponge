@@ -29,6 +29,7 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -148,5 +149,9 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
     @Override
     public DataPackType type() {
         return DataPackTypes.RECIPE;
+    }
+
+    public static JsonObject encode(RecipeRegistration template, RegistryAccess access) {
+        return ((FinishedRecipe) template).serializeRecipe();
     }
 }

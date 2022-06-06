@@ -66,8 +66,7 @@ public final class SpongePlayerDataManager {
 
     public void load() {
         try {
-            this.playersDirectory = ((SpongeWorldManager) this.server.worldManager()).getDefaultWorldDirectory().resolve("data").resolve(
-                SpongePlayerDataManager.SPONGE_DATA);
+            this.playersDirectory = ((SpongeWorldManager) this.server.worldManager()).getDefaultWorldDirectory().resolve("data").resolve(SpongePlayerDataManager.SPONGE_DATA);
             Files.createDirectories(this.playersDirectory);
 
             final List<Path> playerFiles = new ArrayList<>();

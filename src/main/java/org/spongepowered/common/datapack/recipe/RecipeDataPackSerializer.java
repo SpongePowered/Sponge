@@ -24,24 +24,30 @@
  */
 package org.spongepowered.common.datapack.recipe;
 
+import com.google.gson.JsonObject;
+import net.minecraft.data.recipes.FinishedRecipe;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.common.datapack.DataPackSerializer;
+import org.spongepowered.common.datapack.SpongeDataPackType;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public final class RecipeDataPackSerializer extends DataPackSerializer<RecipeSerializedObject> {
-
-    public RecipeDataPackSerializer() {
-        super("Recipes", "recipes");
-    }
+public final class RecipeDataPackSerializer extends DataPackSerializer<RecipeRegistration> {
 
     @Override
-    protected void serializeAdditional(final Path dataDirectory, final RecipeSerializedObject object) throws IOException {
-        if (object.getAdvancementObject() != null) {
-            final Path advancementFile = dataDirectory.resolve("advancements").resolve(object.getAdvancementObject().getKey().value() + ".json");
-            Files.createDirectories(advancementFile.getParent());
-            this.writeFile(advancementFile, object.getAdvancementObject().getObject());
+    protected void serializeAdditional(
+            final SpongeDataPackType<RecipeRegistration> type, final Path packDir,
+            final RecipeRegistration entry) throws IOException {
+        final JsonObject advancement = ((FinishedRecipe) entry).serializeAdvancement();
+        if (advancement != null) {
+            final Path file = packDir.resolve("data")
+                    .resolve(entry.key().namespace())
+                    .resolve("advancements")
+                    .resolve(entry.key().value() + ".json");
+            Files.createDirectories(file.getParent());
+            DataPackSerializer.writeFile(file, advancement);
         }
     }
 }

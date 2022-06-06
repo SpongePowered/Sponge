@@ -70,7 +70,6 @@ import org.spongepowered.api.world.generation.biome.CarvingStep;
 import org.spongepowered.api.world.generation.biome.ConfiguredCarver;
 import org.spongepowered.api.world.generation.biome.DecorationStep;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
-import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
@@ -81,14 +80,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class SpongeBiomeTemplate extends AbstractResourceKeyed implements BiomeTemplate {
-
-    private final Biome biome;
-
-    public SpongeBiomeTemplate(final ResourceKey key, final Biome biome) {
-        super(key);
-        this.biome = biome;
-    }
+public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome) implements BiomeTemplate {
 
     @Override
     public int contentVersion() {
@@ -97,7 +89,7 @@ public class SpongeBiomeTemplate extends AbstractResourceKeyed implements BiomeT
 
     @Override
     public DataContainer toContainer() {
-        final JsonElement serialized = SpongeBiomeTemplate.serialize(this, SpongeCommon.server().registryAccess());
+        final JsonElement serialized = SpongeBiomeTemplate.encode(this, SpongeCommon.server().registryAccess());
         try {
             final DataContainer container = DataFormats.JSON.get().read(serialized.toString());
             container.set(Queries.CONTENT_VERSION, this.contentVersion());
@@ -114,12 +106,18 @@ public class SpongeBiomeTemplate extends AbstractResourceKeyed implements BiomeT
 
     @Override
     public org.spongepowered.api.world.biome.Biome biome() {
-        return (org.spongepowered.api.world.biome.Biome) (Object) this.biome;
+        return (org.spongepowered.api.world.biome.Biome) (Object) this.representedBiome;
     }
 
-    public static JsonElement serialize(final BiomeTemplate template, final RegistryAccess registryAccess) {
+    public static JsonElement encode(final BiomeTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
         return Biome.DIRECT_CODEC.encodeStart(ops, (Biome) (Object) template.biome()).getOrThrow(false, e -> {});
+    }
+
+    public static BiomeTemplate decode(final ResourceKey key, JsonElement packEntry, final RegistryAccess registryAccess) {
+        final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+        final Biome parsed = Biome.DIRECT_CODEC.parse(ops, packEntry).getOrThrow(false, e -> {});
+        return new SpongeBiomeTemplate(key, parsed);
     }
 
     public static class BuilderImpl extends AbstractResourceKeyedBuilder<BiomeTemplate, BiomeTemplate.Builder> implements BiomeTemplate.Builder {
@@ -159,7 +157,8 @@ public class SpongeBiomeTemplate extends AbstractResourceKeyed implements BiomeT
         public Builder fromDataPack(final DataView pack) throws IOException {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
             final DataResult<Biome> parsed = Biome.DIRECT_CODEC.parse(JsonOps.INSTANCE, json);
-            final Biome biome = parsed.getOrThrow(false, e -> {});
+            final Biome biome = parsed.getOrThrow(false, e -> {
+            });
             this.from((org.spongepowered.api.world.biome.Biome) (Object) biome);
             return this;
         }
@@ -214,20 +213,23 @@ public class SpongeBiomeTemplate extends AbstractResourceKeyed implements BiomeT
                     throw new IllegalArgumentException("WeightedTable for NATURAL_SPAWNERS must consist of WeightedObjects");
                 }
             }));
-            spawnerCosts.forEach((type, cost) -> spawnerBuilder.addMobCharge((net.minecraft.world.entity.EntityType<?>) (Object) type, cost.budget(), cost.charge()));
+            spawnerCosts.forEach((type, cost) -> spawnerBuilder.addMobCharge((net.minecraft.world.entity.EntityType<?>) (Object) type, cost.budget(),
+                    cost.charge()));
 
             final BiomeGenerationSettings.Builder generationBuilder = new BiomeGenerationSettings.Builder();
-            features.forEach((step, list) -> list.forEach(feature -> generationBuilder.addFeature((GenerationStep.Decoration) (Object) step, Holder.direct((net.minecraft.world.level.levelgen.placement.PlacedFeature) (Object) feature))));
-            carvers.forEach((step, list) -> list.forEach(carver -> generationBuilder.addCarver((GenerationStep.Carving) (Object) step, Holder.direct((ConfiguredWorldCarver<?>) (Object) carver))));
+            features.forEach((step, list) -> list.forEach(feature -> generationBuilder.addFeature((GenerationStep.Decoration) (Object) step,
+                    Holder.direct((net.minecraft.world.level.levelgen.placement.PlacedFeature) (Object) feature))));
+            carvers.forEach((step, list) -> list.forEach(carver -> generationBuilder.addCarver((GenerationStep.Carving) (Object) step,
+                    Holder.direct((ConfiguredWorldCarver<?>) (Object) carver))));
 
             final Biome.BiomeBuilder vanillaBuilder = new Biome.BiomeBuilder()
-                .precipitation((Biome.Precipitation) (Object) precipitation)
-                .temperature(temperature.floatValue())
-                .downfall(downfall.floatValue())
-                .temperatureAdjustment((Biome.TemperatureModifier) (Object) temperatureModifier)
-                .specialEffects(effectsBuilder.build())
-                .mobSpawnSettings(spawnerBuilder.build())
-                .generationSettings(generationBuilder.build());
+                    .precipitation((Biome.Precipitation) (Object) precipitation)
+                    .temperature(temperature.floatValue())
+                    .downfall(downfall.floatValue())
+                    .temperatureAdjustment((Biome.TemperatureModifier) (Object) temperatureModifier)
+                    .specialEffects(effectsBuilder.build())
+                    .mobSpawnSettings(spawnerBuilder.build())
+                    .generationSettings(generationBuilder.build());
             return new SpongeBiomeTemplate(this.key, vanillaBuilder.build());
         }
     }

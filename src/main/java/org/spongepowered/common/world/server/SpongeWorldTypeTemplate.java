@@ -58,7 +58,6 @@ import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
-import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
@@ -68,14 +67,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.OptionalLong;
 
-public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed implements WorldTypeTemplate {
-
-    private final DimensionType dimensionType;
-
-    public SpongeWorldTypeTemplate(final ResourceKey key, final DimensionType dimensionType) {
-        super(key);
-        this.dimensionType = dimensionType;
-    }
+public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionType) implements WorldTypeTemplate {
 
     @Override
     public DataPackType<WorldTypeTemplate> type() {
@@ -89,7 +81,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
     @Override
     public DataContainer toContainer() {
-        final JsonElement serialized = SpongeWorldTypeTemplate.serialize(this, SpongeCommon.server().registryAccess());
+        final JsonElement serialized = SpongeWorldTypeTemplate.encode(this, SpongeCommon.server().registryAccess());
         try {
             final DataContainer container = DataFormats.JSON.get().read(serialized.toString());
             container.set(Queries.CONTENT_VERSION, this.contentVersion());
@@ -104,9 +96,10 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         return (WorldType) (Object) this.dimensionType;
     }
 
-    public static JsonElement serialize(final WorldTypeTemplate s, final RegistryAccess registryAccess) {
+    public static JsonElement encode(final WorldTypeTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return SpongeDimensionTypes.DIRECT_CODEC.encodeStart(ops, (DimensionType) (Object) s.worldType()).getOrThrow(false, e -> {});
+        return SpongeDimensionTypes.DIRECT_CODEC.encodeStart(ops, (DimensionType) (Object) template.worldType()).getOrThrow(false, e -> {
+        });
     }
 
     public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTypeTemplate, Builder> implements WorldTypeTemplate.Builder {
@@ -128,7 +121,8 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         public Builder reset() {
             this.manipulator = DataManipulator.mutableOf();
             this.key = null;
-            final DimensionType defaultOverworld = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.OVERWORLD);
+            final DimensionType defaultOverworld =
+                    SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.OVERWORLD);
             this.from((WorldType) (Object) defaultOverworld);
             return this;
         }
@@ -152,7 +146,8 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             // TODO catch & rethrow exceptions in CODEC?
             // TODO probably need to rewrite CODEC to allow reading after registries are frozen
             final DataResult<Holder<DimensionType>> parsed = DimensionType.CODEC.parse(JsonOps.INSTANCE, json);
-            final DimensionType dimensionType = parsed.getOrThrow(false, e -> {}).value();
+            final DimensionType dimensionType = parsed.getOrThrow(false, e -> {
+            }).value();
 
             this.from((WorldType) (Object) dimensionType);
             return this;
@@ -184,13 +179,15 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             // final boolean createDragonFight = this.manipulator.require(Keys.CREATE_DRAGON_FIGHT);
             try {
 
-                final DimensionType dimensionType = new DimensionType(fixedTime == null ? OptionalLong.empty() : OptionalLong.of(fixedTime.asTicks().ticks()),
-                        hasSkylight, hasCeiling, scorching, natural, coordinateMultiplier,
-                        bedsUsable, respawnAnchorsUsable,
-                        floor, height, logicalHeight,
-                        (TagKey<Block>) (Object) infiniburn,
-                        (ResourceLocation) (Object) effect.key(),
-                        ambientLighting, new DimensionType.MonsterSettings(piglinSafe, hasRaids, monsterSpawnLightTest, monsterSpawnBlockLightLimit));
+                final DimensionType dimensionType =
+                        new DimensionType(fixedTime == null ? OptionalLong.empty() : OptionalLong.of(fixedTime.asTicks().ticks()),
+                                hasSkylight, hasCeiling, scorching, natural, coordinateMultiplier,
+                                bedsUsable, respawnAnchorsUsable,
+                                floor, height, logicalHeight,
+                                (TagKey<Block>) (Object) infiniburn,
+                                (ResourceLocation) (Object) effect.key(),
+                                ambientLighting,
+                                new DimensionType.MonsterSettings(piglinSafe, hasRaids, monsterSpawnLightTest, monsterSpawnBlockLightLimit));
                 return new SpongeWorldTypeTemplate(this.key, dimensionType);
             } catch (IllegalStateException e) { // catch and rethrow minecraft internal exception
                 throw new IllegalStateException(String.format("Template '%s' was not valid!", this.key), e);
@@ -208,7 +205,8 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
         @Override
         public WorldTypeTemplate overworldCaves() {
-            var type = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.OVERWORLD_CAVES);
+            var type = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY)
+                    .get(BuiltinDimensionTypes.OVERWORLD_CAVES);
             return new SpongeWorldTypeTemplate(ResourceKey.minecraft("overworld_caves"), type);
         }
 

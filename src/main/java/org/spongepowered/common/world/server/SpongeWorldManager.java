@@ -27,8 +27,6 @@ package org.spongepowered.common.world.server;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.CrashReport;
@@ -36,7 +34,6 @@ import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
@@ -70,18 +67,17 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
-import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.event.world.UnloadWorldEvent;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.WorldType;
-import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.server.WorldTemplate;
@@ -97,7 +93,6 @@ import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridg
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
-import org.spongepowered.common.datapack.DataPackSerializer;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.launch.Launch;
@@ -105,11 +100,8 @@ import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.FutureUtil;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -126,29 +118,23 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class SpongeWorldManager implements WorldManager {
 
     public static RegistryOps<Tag> bootstrapOps;
 
     private final MinecraftServer server;
-    private final Path dimensionsDataPackDirectory, defaultWorldDirectory, customWorldsDirectory;
+    private final Path defaultWorldDirectory, customWorldsDirectory;
     private final Map<net.minecraft.resources.ResourceKey<Level>, ServerLevel> worlds;
 
     private static final TicketType<ResourceLocation> SPAWN_CHUNKS = TicketType.create("spawn_chunks", (i, o) -> i.compareTo(o));
 
     public SpongeWorldManager(final MinecraftServer server) {
         this.server = server;
-        this.dimensionsDataPackDirectory = ((MinecraftServerAccessor) server).accessor$storageSource().getLevelPath(LevelResource.DATAPACK_DIR).resolve("plugin_dimension").resolve("data");
-        try {
-            Files.createDirectories(this.dimensionsDataPackDirectory);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
         this.defaultWorldDirectory = ((LevelStorageSource_LevelStorageAccessAccessor) ((MinecraftServerAccessor) this.server).accessor$storageSource()).accessor$levelDirectory().path();
         this.customWorldsDirectory = this.defaultWorldDirectory.resolve("dimensions");
         try {
@@ -166,10 +152,6 @@ public abstract class SpongeWorldManager implements WorldManager {
 
     public Path getDefaultWorldDirectory() {
         return this.defaultWorldDirectory;
-    }
-
-    public Path getDimensionDataPackDirectory() {
-        return this.dimensionsDataPackDirectory;
     }
 
     @Override
@@ -235,38 +217,6 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         return Collections.unmodifiableList(worldKeys);
-    }
-
-    @Override
-    public List<ResourceKey> templateKeys() {
-        final List<ResourceKey> templateKeys = new ArrayList<>();
-        // Treat Vanilla ones as template keys
-        templateKeys.add(WorldTypes.OVERWORLD.location());
-        templateKeys.add(WorldTypes.THE_NETHER.location());
-        templateKeys.add(WorldTypes.THE_END.location());
-
-        try (final Stream<Path> pluginDirectories = Files.walk(this.getDimensionDataPackDirectory(), 1)) {
-            pluginDirectories
-                    .filter(Files::isDirectory)
-                    .forEach(pluginDirectory -> {
-                                final Path dimensionPath = pluginDirectory.resolve("dimension");
-                                if (Files.isDirectory(dimensionPath)) {
-                                    try (final Stream<Path> pluginTemplates = Files.walk(dimensionPath, 1)) {
-                                        pluginTemplates
-                                                .filter(template -> template.toString().endsWith(".json"))
-                                                .forEach(template -> templateKeys.add((ResourceKey) (Object) new ResourceLocation(pluginDirectory.getFileName().toString(),
-                                                        FilenameUtils.removeExtension(template.getFileName().toString()))));
-                                    } catch (final IOException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }
-                            }
-                    );
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return templateKeys;
     }
 
     @Override
@@ -442,43 +392,6 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     @Override
-    public boolean templateExists(final ResourceKey key) {
-        return Files.exists(this.getDataPackFile(Objects.requireNonNull(key, "key")));
-    }
-
-    @Override
-    public CompletableFuture<Optional<WorldTemplate>> loadTemplate(final ResourceKey key) {
-        final Path dataPackFile = this.getDataPackFile(Objects.requireNonNull(key, "key"));
-        if (Files.exists(dataPackFile)) {
-            try {
-                final LevelStem levelStem = this.loadLevelStemFromFile(dataPackFile);
-                final SpongeWorldTemplate template = new SpongeWorldTemplate(key, levelStem);
-                return CompletableFuture.completedFuture(Optional.of(template));
-            } catch (final IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return CompletableFuture.completedFuture(Optional.empty());
-    }
-
-    @Override
-    public CompletableFuture<Boolean> saveTemplate(final WorldTemplate template) {
-        final LevelStem scratch = ((SpongeWorldTemplate) Objects.requireNonNull(template, "template")).levelStem();
-        try {
-            final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
-            final JsonElement element = SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registryAccess), scratch).getOrThrow(true, s -> { });
-            final Path dataPackFile = this.getDataPackFile(template.key());
-            Files.createDirectories(dataPackFile.getParent());
-            DataPackSerializer.writeFile(dataPackFile, element);
-            DataPackSerializer.writePackMetadata("World", this.dimensionsDataPackDirectory.getParent());
-        } catch (final Exception ex) {
-            FutureUtil.completedWithException(ex);
-        }
-        return CompletableFuture.completedFuture(true);
-    }
-
-    @Override
     public CompletableFuture<Optional<ServerWorldProperties>> loadProperties(final ResourceKey key) {
         final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
 
@@ -549,6 +462,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             return CompletableFuture.completedFuture(true);
         });
     }
+
 
     private void saveLevelDat(final WorldData properties, final ResourceKey key) throws IOException {
         final boolean isVanillaWorld = this.isVanillaWorld(key);
@@ -647,35 +561,10 @@ public abstract class SpongeWorldManager implements WorldManager {
             loadedWorld.noSave = disableLevelSaving;
         }
 
-        final Path dimensionTemplate = this.getDataPackFile(key);
-        final Path copiedDimensionTemplate = this.getDataPackFile(copyKey);
-
         try {
-            Files.createDirectories(copiedDimensionTemplate.getParent());
-            Files.copy(dimensionTemplate, copiedDimensionTemplate);
-        } catch (final IOException e) {
-            FutureUtil.completedWithException(e);
-        }
-
-        final JsonObject fixedObject;
-        try (final InputStream stream = Files.newInputStream(copiedDimensionTemplate); final InputStreamReader reader = new InputStreamReader(stream)) {
-            final JsonParser parser = new JsonParser();
-            final JsonElement element = parser.parse(reader);
-
-            final JsonObject root = element.getAsJsonObject();
-            final JsonObject spongeData = root.getAsJsonObject("#sponge");
-            spongeData.remove("unique_id");
-            fixedObject = root;
+            this.server().dataPackManager().copy(DataPackTypes.WORLD, key, copyKey);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(e);
-        }
-
-        if (fixedObject != null) {
-            try (final BufferedWriter writer = Files.newBufferedWriter(copiedDimensionTemplate)) {
-                writer.write(fixedObject.toString());
-            } catch (final IOException e) {
-                FutureUtil.completedWithException(e);
-            }
         }
 
         return CompletableFuture.completedFuture(true);
@@ -738,14 +627,10 @@ public abstract class SpongeWorldManager implements WorldManager {
             return FutureUtil.completedWithException(e);
         }
 
-        final Path dimensionTemplate = this.getDataPackFile(key);
-        final Path copiedDimensionTemplate = this.getDataPackFile(movedKey);
-
         try {
-            Files.createDirectories(copiedDimensionTemplate.getParent());
-            Files.move(dimensionTemplate, copiedDimensionTemplate, StandardCopyOption.REPLACE_EXISTING);
+            this.server().dataPackManager().move(DataPackTypes.WORLD, key, movedKey);
         } catch (final IOException e) {
-            FutureUtil.completedWithException(e);
+            return FutureUtil.completedWithException(e);
         }
 
         return CompletableFuture.completedFuture(true);
@@ -799,12 +684,10 @@ public abstract class SpongeWorldManager implements WorldManager {
             return FutureUtil.completedWithException(e);
         }
 
-        final Path dimensionTemplate = this.getDataPackFile(key);
-
         try {
-            Files.deleteIfExists(dimensionTemplate);
+            this.server().dataPackManager().delete(DataPackTypes.WORLD, key);
         } catch (final IOException e) {
-            FutureUtil.completedWithException(e);
+            return FutureUtil.completedWithException(e);
         }
 
         return CompletableFuture.completedFuture(true);
@@ -1122,27 +1005,18 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
     }
 
-    private LevelStem loadLevelStemFromFile(final Path file) throws IOException {
-        try (final InputStream stream = Files.newInputStream(file); final InputStreamReader reader = new InputStreamReader(stream)) {
-            final JsonElement element = JsonParser.parseReader(reader);
-            this.fixDimensionDatapack(element, file);
-            final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, this.server.registryAccess());
-            return LevelStem.CODEC.parse(ops, element).getOrThrow(false, s -> {});
-        }
+    private CompletionStage<Boolean> saveTemplate(final WorldTemplate template) {
+        return this.server().dataPackManager().save(template).thenApply(b -> true);
     }
 
-    // TODO datafixer?
-    // TODO make it automatically work when loading API8 created worlds
-    private void fixDimensionDatapack(final JsonElement element, final Path file) {
-        try {
-            final JsonObject biomeSource = element.getAsJsonObject().getAsJsonObject("generator").getAsJsonObject("biome_source");
-            if ("minecraft:vanilla_layered".equals(biomeSource.get("type").getAsString())) {
-                biomeSource.addProperty("type", "minecraft:multi_noise");
-                biomeSource.addProperty("preset", "minecraft:overworld");
-                SpongeCommon.logger().warn("Fixed vanilla_layered->multi_noise biome source in Dimension DataPack {}", file);
-            }
-        } catch (Exception ignored) {
+    private CompletableFuture<Optional<WorldTemplate>> loadTemplate(final ResourceKey key) {
+        if (this.server().dataPackManager().exists(DataPackTypes.WORLD, key)) {
+            return this.server().dataPackManager().load(DataPackTypes.WORLD, key).exceptionally(e -> {
+                e.printStackTrace();
+                return Optional.empty();
+            });
         }
+        return CompletableFuture.completedFuture(Optional.empty());
     }
 
     public static net.minecraft.resources.ResourceKey<Level> createRegistryKey(final ResourceKey key) {
@@ -1175,10 +1049,6 @@ public abstract class SpongeWorldManager implements WorldManager {
     boolean isDefaultWorld(final ResourceKey key) {
         final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(key);
         return Level.OVERWORLD.equals(registryKey);
-    }
-
-    Path getDataPackFile(final ResourceKey key) {
-        return this.getDimensionDataPackDirectory().resolve(key.namespace()).resolve("dimension").resolve(key.value() + ".json");
     }
 
 }

@@ -22,23 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.datapack.tag;
+package org.spongepowered.common.datapack;
 
-import com.google.gson.JsonObject;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import com.google.gson.JsonElement;
+import net.minecraft.core.RegistryAccess;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.registry.DefaultedRegistryType;
-import org.spongepowered.common.datapack.DataPackSerializedObject;
+import org.spongepowered.api.datapack.DataPackEntry;
 
-public final class TagSerializedObject extends DataPackSerializedObject {
-    private final DefaultedRegistryType<@NonNull ?> registryType;
+interface DataPackDecoder<T extends DataPackEntry<T>> {
 
-    public TagSerializedObject(final ResourceKey key, final JsonObject object, final DefaultedRegistryType<@NonNull ?> registryType) {
-        super(key, object);
-        this.registryType = registryType;
-    }
+    T decode(ResourceKey key, JsonElement json, RegistryAccess registryAccess);
 
-    public DefaultedRegistryType<@NonNull ?> getRegistryType() {
-        return this.registryType;
-    }
 }

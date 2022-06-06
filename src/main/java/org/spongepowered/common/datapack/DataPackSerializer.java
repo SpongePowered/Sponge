@@ -27,7 +27,6 @@ package org.spongepowered.common.datapack;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.commons.io.FileUtils;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -35,44 +34,50 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import net.minecraft.SharedConstants;
+import org.spongepowered.api.datapack.DataPackEntry;
+import org.spongepowered.common.SpongeCommon;
 
-public class DataPackSerializer<T extends DataPackSerializedObject> {
+public class DataPackSerializer<T extends DataPackEntry<T>> {
 
-    protected final String name;
-    protected final String typeDirectoryName;
-
-    public DataPackSerializer(final String token, final String typeDirectoryName) {
-        this.name = token;
-        this.typeDirectoryName = typeDirectoryName;
-    }
-
-    protected boolean serialize(final SpongeDataPackType<@NonNull ?, T> type, final Path datapacksDir, final List<T> objects, int count) throws IOException {
-        final Path datapackDir = datapacksDir.resolve(this.getPackName());
-
-        if (!type.persistent()) {
-            FileUtils.deleteDirectory(datapackDir.toFile());
+    protected boolean serialize(final SpongeDataPackType<T> type, final Path packDir, final List<T> packEntries) throws IOException {
+        if (!type.persistent()) { // TODO persistence - reloadable types can now be saved at any time - which would delete all others...
+            FileUtils.deleteDirectory(packDir.toFile());
         }
 
-        if (count == 0) {
+        if (packEntries.isEmpty()) {
             return false;
         }
 
         // Write our objects
-        for (final T object : objects) {
-            final Path namespacedDataDirectory = datapackDir.resolve("data").resolve(object.getKey().namespace());
-            final Path objectFile = namespacedDataDirectory.resolve(this.typeDirectoryName).resolve(object.getKey().value() + ".json");
-            Files.createDirectories(objectFile.getParent());
-
-            DataPackSerializer.writeFile(objectFile, object.getObject());
-
-            this.serializeAdditional(namespacedDataDirectory, object);
+        for (final T packEntry : packEntries) {
+            this.serializeObject(type, packDir, packEntry);
+            this.serializeAdditional(type, packDir, packEntry);
         }
 
-        DataPackSerializer.writePackMetadata(this.name, datapackDir);
+        DataPackSerializer.writePackMetadata(type.name(), packDir);
         return true;
     }
 
-    protected void serializeAdditional(Path dataDirectory, T object) throws IOException {
+    public Path packEntryFile(final SpongeDataPackType<T> type, final T packEntry, final Path packDir) {
+        return packDir.resolve("data")
+                .resolve(packEntry.key().namespace())
+                .resolve(type.dir())
+                .resolve(packEntry.key().value() + ".json");
+    }
+
+    protected void serializeObject(final SpongeDataPackType<T> type, final Path packDir, final T packEntry) throws IOException {
+        final JsonElement serialized = type.encoder().encode(packEntry, SpongeCommon.server().registryAccess());
+        final Path file = this.packEntryFile(type, packEntry, packDir);
+        final JsonElement finalJson = this.transformSerialized(file, packEntry, serialized);
+        Files.createDirectories(file.getParent());
+        DataPackSerializer.writeFile(file, finalJson);
+    }
+
+    protected JsonElement transformSerialized(final Path file, final T entry, final JsonElement serialized) throws IOException {
+        return serialized;
+    }
+
+    protected void serializeAdditional(final SpongeDataPackType<T> type, Path packDir, T entry) throws IOException {
     }
 
     public static void writePackMetadata(final String token, final Path directory) throws IOException {
@@ -96,7 +101,4 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
         }
     }
 
-    public String getPackName() {
-        return "plugin_" + this.typeDirectoryName.replace("/", "_");
-    }
 }

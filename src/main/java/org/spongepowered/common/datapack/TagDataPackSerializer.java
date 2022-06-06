@@ -27,12 +27,11 @@ package org.spongepowered.common.datapack;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.serialization.Dynamic;
-import com.mojang.serialization.JsonOps;
-import net.minecraft.tags.TagFile;
-import org.apache.commons.io.FileUtils;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.common.datapack.tag.TagSerializedObject;
+import net.minecraft.nbt.Tag;
+import org.spongepowered.api.datapack.DataPackEntry;
+import org.spongepowered.api.registry.DefaultedRegistryType;
+import org.spongepowered.api.tag.TagTemplate;
+import org.spongepowered.common.tag.SpongeTagTemplate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,52 +39,33 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public final class TagDataPackSerializer extends DataPackSerializer<TagSerializedObject> {
-    public TagDataPackSerializer(String token, String typeDirectoryName) {
-        super(token, typeDirectoryName);
+public final class TagDataPackSerializer extends DataPackSerializer<TagTemplate> {
+
+    @Override
+    protected JsonElement transformSerialized(final Path file, final TagTemplate entry, final JsonElement serialized) throws IOException{
+        JsonElement toWrite = serialized;
+        /* TODO support merging
+        if (Files.exists(file) && !((SpongeTagTemplate) entry).replace()) {
+            final JsonObject jsonObject;
+            try (BufferedReader bufferedReader = Files.newBufferedReader(file)) {
+                final JsonElement jsonElement = JsonParser.parseReader(bufferedReader);
+                jsonObject = jsonElement.getAsJsonObject();
+            }
+
+            toWrite = Tag.Builder.tag().addFromJson(jsonObject, filename).addFromJson(toWrite, filename).serializeToJson();
+            // TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(builder.build(), this.replace)).getOrThrow(false, e -> {}).getAsJsonObject();
+        }
+        //*/
+        return toWrite;
     }
 
     @Override
-    protected boolean serialize(final SpongeDataPackType<@NonNull ?, TagSerializedObject> type, final Path datapacksDir, final List<TagSerializedObject> objects, int count) throws IOException {
-        final Path datapackDir = datapacksDir.resolve(this.getPackName());
-
-        if (!type.persistent()) {
-            FileUtils.deleteDirectory(datapackDir.toFile());
-        }
-
-        if (objects.isEmpty()) {
-            return false;
-        }
-
-        // Write our objects
-        for (final TagSerializedObject object : objects) {
-            final Path namespacedDataDirectory = datapackDir.resolve("data").resolve(object.getKey().namespace());
-            final String filename = object.getKey().value() + ".json";
-            final Path objectFile = namespacedDataDirectory.resolve(this.typeDirectoryName).resolve(object.getRegistryType().location().toString()).resolve(filename);
-            Files.createDirectories(objectFile.getParent());
-
-
-            JsonObject toWrite = object.getObject();
-            /* TODO support merging
-            if (Files.exists(objectFile) && !toWrite.getAsJsonPrimitive("replace").getAsBoolean()) {
-                // Merge, baby merge.
-
-                final JsonObject jsonObject;
-                try (BufferedReader bufferedReader = Files.newBufferedReader(objectFile)) {
-                    final JsonElement jsonElement = JsonParser.parseReader(bufferedReader);
-                    jsonObject = jsonElement.getAsJsonObject();
-                }
-
-                toWrite = Tag.Builder.tag().addFromJson(jsonObject, filename).addFromJson(toWrite, filename).serializeToJson();
-                // TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(builder.build(), this.replace)).getOrThrow(false, e -> {}).getAsJsonObject();
-            }
-            */
-            DataPackSerializer.writeFile(objectFile, toWrite);
-
-            this.serializeAdditional(namespacedDataDirectory, object);
-        }
-
-        DataPackSerializer.writePackMetadata(this.name, datapackDir);
-        return true;
+    public Path packEntryFile(final SpongeDataPackType<TagTemplate> type, final TagTemplate packEntry, final Path packDir) {
+        final DefaultedRegistryType<?> registryType = ((SpongeTagTemplate) packEntry).registryType();
+        return packDir.resolve("data")
+                .resolve(packEntry.key().namespace())
+                .resolve(type.dir())
+                .resolve(registryType.location().toString())
+                .resolve(packEntry.key().value() + ".json");
     }
 }
