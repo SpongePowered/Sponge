@@ -34,8 +34,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.entity.EntityCategories;
@@ -46,7 +47,10 @@ import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
@@ -57,10 +61,12 @@ import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.biome.BiomeTemplate;
 import org.spongepowered.api.world.generation.biome.DecorationSteps;
+import org.spongepowered.api.world.generation.feature.ConfiguredFeature;
+import org.spongepowered.api.world.generation.feature.ConfiguredFeatures;
 import org.spongepowered.api.world.generation.feature.Feature;
-import org.spongepowered.api.world.generation.feature.FeatureConfig;
 import org.spongepowered.api.world.generation.feature.PlacedFeatures;
 import org.spongepowered.api.world.server.DataPackManager;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.plugin.PluginContainer;
@@ -93,10 +99,12 @@ public final class BiomeTest {
 
     @Listener
     private void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+        final Parameter.Value<ResourceKey> resourceKey = Parameter.resourceKey().key("key").optional().build();
         event.register(this.plugin, Command.builder()
                         .addChild(Command.builder().executor(this::listBiomes).build(), "list")
                         .addChild(Command.builder().executor(this::listFeatures).build(), "features")
                         .addChild(Command.builder().executor(this::registerBiome).build(), "register")
+                        .addChild(Command.builder().addParameter(resourceKey).executor(e -> this.place(e, resourceKey)).build(), "place")
                         .addChild(Command.builder().executor(this::world).build(), "world")
                         .build(), "biometest")
         ;
@@ -164,6 +172,29 @@ public final class BiomeTest {
         return CommandResult.success();
     }
 
+    // TODO move to feature test?
+    private CommandResult place(final CommandContext commandContext, final Parameter.Value<ResourceKey> resourceKey) {
+        final ResourceKey keyToPlace = commandContext.one(resourceKey).orElse(ConfiguredFeatures.TREES_PLAINS.location());
+        final Optional<ServerPlayer> player = commandContext.cause().first(ServerPlayer.class);
+        final Optional<ConfiguredFeature<?>> feature = ConfiguredFeatures.registry().findValue(keyToPlace);
+        if (feature.isPresent()) {
+            if (player.isEmpty()) {
+                commandContext.sendMessage(Identity.nil(), Component.text("Run as player to place the feature"));
+            } else {
+                final RayTrace<LocatableBlock> ray = RayTrace.block().select(RayTrace.nonAir()).limit(100).sourceEyePosition(player.get()).direction(player.get());
+                final ServerLocation location = ray.execute().orElseThrow().selectedObject().serverLocation().relativeTo(Direction.UP);
+                if (feature.get().place(location)) {
+                    commandContext.sendMessage(Identity.nil(), Component.text("Placed: " + keyToPlace));
+                } else {
+                    commandContext.sendMessage(Identity.nil(), Component.text("Not Placed: " + keyToPlace));
+                }
+            }
+        } else {
+            commandContext.sendMessage(Identity.nil(), Component.text("Feature not found: " + keyToPlace));
+        }
+        return CommandResult.success();
+    }
+
     private CommandResult listFeatures(CommandContext commandContext) {
         final Biome plainsBiome = this.registry().findValue(ResourceKey.of(this.plugin, CUSTOM_PLAINS)).orElse(Biomes.PLAINS.get(Sponge.server()));
         System.out.println("Plains Biome Features:");
@@ -171,8 +202,8 @@ public final class BiomeTest {
             System.out.println("Step: " + step);
             list.forEach(placedFeature -> {
                 final var configurableFeature = placedFeature.feature();
-                final Feature<FeatureConfig> feature = configurableFeature.feature();
-                System.out.println(" - " + feature.getClass().getSimpleName() + " /w " + configurableFeature.config().getClass().getSimpleName() + " @ " + placedFeature.placementModifiers().stream().map(mod -> mod.getClass().getSimpleName()).toList());
+                final Feature feature = configurableFeature.feature();
+                System.out.println(" - " + feature.getClass().getSimpleName() + " /w " + configurableFeature.toContainer().getClass().getSimpleName() + " @ " + placedFeature.placementModifiers().stream().map(mod -> mod.getClass().getSimpleName()).toList());
             });
         });
         System.out.println("Plains Biome Carvers:");

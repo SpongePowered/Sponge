@@ -24,31 +24,35 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.feature;
 
+import com.google.gson.JsonElement;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import org.spongepowered.api.world.generation.feature.FeatureConfig;
+import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.MissingImplementationException;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.Random;
+import java.io.IOException;
 
 @Mixin(ConfiguredFeature.class)
 public abstract class ConfiguredFeatureMixin_API<
         F extends Feature<FC>,
         FC extends FeatureConfiguration,
-        APIF extends org.spongepowered.api.world.generation.feature.Feature<APIFC>,
-        APIFC extends FeatureConfig>
-        implements org.spongepowered.api.world.generation.feature.ConfiguredFeature<APIF, APIFC> {
+        APIF extends org.spongepowered.api.world.generation.feature.Feature>
+        implements org.spongepowered.api.world.generation.feature.ConfiguredFeature<APIF> {
 
     // @formatter:off
     @Shadow @Final private F feature;
@@ -62,12 +66,23 @@ public abstract class ConfiguredFeatureMixin_API<
     }
 
     @Override
-    public APIFC config() {
-        return (APIFC) this.config;
+    public DataView toContainer() {
+        final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
+        final JsonElement serialized = this.feature.configuredCodec().encodeStart(ops, (ConfiguredFeature<FC, Feature<FC>>) (Object) this).getOrThrow(false, e -> {});
+        try {
+            return DataFormats.JSON.get().read(serialized.toString());
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not read deserialized Configured Feature: " + serialized, e);
+        }
     }
 
     @Override
     public boolean place(ServerWorld world, Vector3i pos) {
         return this.shadow$place(((WorldGenLevel) world), (ChunkGenerator) world.generator(), ((WorldGenLevel) world).getRandom(), VecHelper.toBlockPos(pos));
+    }
+
+    @Override
+    public boolean place(final ServerLocation location) {
+        return this.place(location.world(), location.blockPosition());
     }
 }

@@ -109,9 +109,13 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
         return Biome.DIRECT_CODEC.encodeStart(ops, (Biome) (Object) template.biome()).getOrThrow(false, e -> {});
     }
 
-    public static BiomeTemplate decode(final DataPack<BiomeTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
+    public static Biome decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        final Biome parsed = Biome.DIRECT_CODEC.parse(ops, packEntry).getOrThrow(false, e -> {});
+        return Biome.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+    }
+
+    public static BiomeTemplate decode(final DataPack<BiomeTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
+        final Biome parsed = SpongeBiomeTemplate.decode(packEntry, registryAccess);
         return new SpongeBiomeTemplate(key, parsed, pack);
     }
 
@@ -153,9 +157,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
         @Override
         public Builder fromDataPack(final DataView pack) throws IOException {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
-            final DataResult<Biome> parsed = Biome.DIRECT_CODEC.parse(JsonOps.INSTANCE, json);
-            final Biome biome = parsed.getOrThrow(false, e -> {
-            });
+            final Biome biome = SpongeBiomeTemplate.decode(json, SpongeCommon.server().registryAccess());
             this.from((org.spongepowered.api.world.biome.Biome) (Object) biome);
             return this;
         }

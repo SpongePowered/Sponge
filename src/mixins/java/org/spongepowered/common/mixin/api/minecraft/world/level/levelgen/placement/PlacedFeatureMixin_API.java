@@ -32,13 +32,11 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import org.spongepowered.api.world.generation.feature.ConfiguredFeature;
 import org.spongepowered.api.world.generation.feature.Feature;
-import org.spongepowered.api.world.generation.feature.FeatureConfig;
 import org.spongepowered.api.world.generation.feature.PlacementModifier;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.api.minecraft.server.level.ServerLevelMixin_API;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -54,8 +52,8 @@ public abstract class PlacedFeatureMixin_API implements org.spongepowered.api.wo
     // @formatter:on
 
     @Override
-    public <F extends Feature<FC>, FC extends FeatureConfig> ConfiguredFeature<F, FC> feature() {
-        return (ConfiguredFeature<F, FC>) (Object) this.feature.value();
+    public <F extends Feature> ConfiguredFeature<F> feature() {
+        return (ConfiguredFeature<F>) (Object) this.feature.value();
     }
 
     @Override

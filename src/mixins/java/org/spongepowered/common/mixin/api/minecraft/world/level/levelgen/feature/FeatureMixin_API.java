@@ -24,28 +24,41 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.feature;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.chunk.ChunkGenerator;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.world.generation.feature.Feature;
-import org.spongepowered.api.world.generation.feature.FeatureConfig;
-import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.math.vector.Vector3i;
+import org.spongepowered.common.SpongeCommon;
+
+import java.io.IOException;
 
 @Mixin(net.minecraft.world.level.levelgen.feature.Feature.class)
-public abstract class FeatureMixin_API<FC extends FeatureConfiguration, SFC extends FeatureConfig> implements Feature<SFC> {
+public abstract class FeatureMixin_API<FC extends FeatureConfiguration> implements Feature {
 
-    @Shadow public abstract boolean shadow$place(final FC $$0, final WorldGenLevel $$1, final ChunkGenerator $$2,
-            final RandomSource $$3, final BlockPos $$4);
+    //@formatter:off
+    @Shadow @Final private Codec<ConfiguredFeature<FC, net.minecraft.world.level.levelgen.feature.Feature<FC>>> configuredCodec;
+    //@formatter:on
 
     @Override
-    public boolean place(final ServerWorld world, final Vector3i pos, final SFC config) {
-        return this.shadow$place((FC) config, ((WorldGenLevel) world), (ChunkGenerator) world.generator(), ((WorldGenLevel) world).getRandom(), VecHelper.toBlockPos(pos));
+    public org.spongepowered.api.world.generation.feature.ConfiguredFeature<Feature> configure(final DataView config) {
+        try {
+            final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(config));
+            final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
+            return (org.spongepowered.api.world.generation.feature.ConfiguredFeature<Feature>) (Object)
+                this.configuredCodec.parse(ops, json).getOrThrow(false, e -> {});
+
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not read configuration: " + config, e);
+        }
     }
 
 

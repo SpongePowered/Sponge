@@ -415,7 +415,6 @@
         "minecraft.world.level.biome.MobSpawnSettings_SpawnerDataMixin_API",
         "minecraft.world.level.levelgen.carver.ConfiguredWorldCarverMixin_API",
         "minecraft.world.level.levelgen.carver.WorldCarverMixin_API",
-        "minecraft.world.level.levelgen.feature.configuration.FeatureConfigurationMixin_API",
         "minecraft.world.level.levelgen.carver.CarverConfigurationMixin_API",
         "minecraft.world.level.levelgen.feature.FeatureMixin_API"
     ],

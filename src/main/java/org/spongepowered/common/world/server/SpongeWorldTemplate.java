@@ -37,6 +37,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -53,8 +55,6 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
-import org.spongepowered.api.registry.RegistryReference;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypes;
@@ -93,8 +93,8 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
             .create(r -> r
                     .group(
                             SpongeAdventure.STRING_CODEC.optionalFieldOf("display_name").forGetter(v -> Optional.ofNullable(v.displayName)),
-                            ResourceLocation.CODEC.optionalFieldOf("game_mode").forGetter(v -> Optional.ofNullable(v.gameMode)),
-                            ResourceLocation.CODEC.optionalFieldOf("difficulty").forGetter(v -> Optional.ofNullable(v.difficulty)),
+                            ResourceLocation.CODEC.optionalFieldOf("game_mode").forGetter(v -> Optional.ofNullable(v.gameMode).map(t -> new ResourceLocation("sponge", t.getName()))),
+                            ResourceLocation.CODEC.optionalFieldOf("difficulty").forGetter(v -> Optional.ofNullable(v.difficulty).map(t -> new ResourceLocation("sponge", t.getKey()))),
                             EnumCodec.create(SerializationBehavior.class).optionalFieldOf("serialization_behavior")
                                     .forGetter(v -> Optional.ofNullable(v.serializationBehavior)),
                             Codec.INT.optionalFieldOf("view_distance").forGetter(v -> Optional.ofNullable(v.viewDistance)),
@@ -107,8 +107,11 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
                     )
                     // *Chuckles* I continue to be in danger...
                     .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11) ->
-                            new SpongeDataSection(f1.orElse(null), f2.orElse(null), f3.orElse(null), f4.orElse(null),
-                                    f5.orElse(null), f6.orElse(null), f7.orElse(null), f8.orElse(null), f9.orElse(null),
+                            new SpongeDataSection(f1.orElse(null),
+                                    f2.map(l -> GameType.byName(l.getPath())).orElse(null),
+                                    f3.map(l -> Difficulty.byName(l.getPath())).orElse(null),
+                                    f4.orElse(null), f5.orElse(null), f6.orElse(null),
+                                    f7.orElse(null), f8.orElse(null), f9.orElse(null),
                                     f10.orElse(null), f11.orElse(null))
                     )
             );
@@ -175,16 +178,16 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
     public static final class SpongeDataSection {
 
         @Nullable public final Component displayName;
-        @Nullable public final ResourceLocation gameMode;
-        @Nullable public final ResourceLocation difficulty;
+        @Nullable public final GameType gameMode;
+        @Nullable public final Difficulty difficulty;
         @Nullable public final SerializationBehavior serializationBehavior;
         @Nullable public final Integer viewDistance;
         @Nullable public final Vector3i spawnPosition;
 
         @Nullable public final Boolean loadOnStartup, performsSpawnLogic, hardcore, commands, pvp;
 
-        public SpongeDataSection(final @Nullable Component displayName, final @Nullable ResourceLocation gameMode,
-                final @Nullable ResourceLocation difficulty, final @Nullable SerializationBehavior serializationBehavior,
+        public SpongeDataSection(final @Nullable Component displayName, final @Nullable GameType gameMode,
+                final @Nullable Difficulty difficulty, final @Nullable SerializationBehavior serializationBehavior,
                 final @Nullable Integer viewDistance, final @Nullable Vector3i spawnPosition, final @Nullable Boolean loadOnStartup,
                 final @Nullable Boolean performsSpawnLogic, final @Nullable Boolean hardcore, final @Nullable Boolean commands,
                 final @Nullable Boolean pvp) {
@@ -225,7 +228,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         public Builder reset() {
             super.reset();
             this.data = DataManipulator.mutableOf();
-            this.data.set(Keys.WORLD_TYPE, WorldTypes.OVERWORLD);
+            this.data.set(Keys.WORLD_TYPE, WorldTypes.OVERWORLD.get());
             this.data.set(Keys.CHUNK_GENERATOR, ChunkGenerator.overworld());
             this.pack = DataPacks.WORLD;
             return this;
@@ -266,12 +269,12 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
             PrimaryLevelDataBridge bridge = (PrimaryLevelDataBridge) properties;
             this.key = properties.key();
             properties.displayName().ifPresent(name -> this.data.set(Keys.DISPLAY_NAME, name));
-            this.data.set(Keys.WORLD_TYPE, properties.worldType().asDefaultedReference(RegistryTypes.WORLD_TYPE));
+            this.data.set(Keys.WORLD_TYPE, properties.worldType());
             if (bridge.bridge$customGameType()) {
-                this.data.set(Keys.GAME_MODE_REFERENCE, properties.gameMode().asDefaultedReference(RegistryTypes.GAME_MODE));
+                this.data.set(Keys.GAME_MODE, properties.gameMode());
             }
             if (bridge.bridge$customDifficulty()) {
-                this.data.set(Keys.WORLD_DIFFICULTY, properties.difficulty().asDefaultedReference(RegistryTypes.DIFFICULTY));
+                this.data.set(Keys.WORLD_DIFFICULTY, properties.difficulty());
             }
             bridge.bridge$serializationBehavior().ifPresent(s -> this.data.set(Keys.SERIALIZATION_BEHAVIOR, s));
             bridge.bridge$viewDistance().ifPresent(v -> this.data.set(Keys.VIEW_DISTANCE, v));
@@ -294,19 +297,20 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         @Override
         protected WorldTemplate build0() {
             final ChunkGenerator chunkGenerator = this.data.require(Keys.CHUNK_GENERATOR);
-            final Holder<DimensionType> dimensionType = BuilderImpl.dimensionType(this.data.require(Keys.WORLD_TYPE));
+            final Holder<DimensionType> dimensionType = BuilderImpl.dimensionTypeHolder(this.data.require(Keys.WORLD_TYPE));
             final LevelStem levelStem = new LevelStem(dimensionType, (net.minecraft.world.level.chunk.ChunkGenerator) chunkGenerator);
             ((LevelStemBridge) (Object) levelStem).bridge$decorateData(this.data);
             return new SpongeWorldTemplate(this.key, levelStem, this.pack);
         }
 
         @NotNull
-        private static Holder<DimensionType> dimensionType(final RegistryReference<WorldType> worldType) {
-            final Registry<DimensionType> dimensionTypeRegistry =
-                    SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-            final net.minecraft.resources.ResourceKey<DimensionType> key =
-                    net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, (ResourceLocation) (Object) worldType.location());
-            return dimensionTypeRegistry.getHolderOrThrow(key);
+        private static Holder<DimensionType> dimensionTypeHolder(final WorldType worldType) {
+            final Registry<DimensionType> dimensionTypeRegistry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+            final ResourceLocation key = dimensionTypeRegistry.getKey((DimensionType) (Object) worldType);
+            if (key == null) {
+                return Holder.direct((DimensionType) (Object) worldType);
+            }
+            return dimensionTypeRegistry.getHolderOrThrow(net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, key));
         }
 
     }
@@ -318,7 +322,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
             return new BuilderImpl()
                     .reset()
                     .key(ResourceKey.minecraft("overworld"))
-                    .add(Keys.WORLD_TYPE, WorldTypes.OVERWORLD)
+                    .add(Keys.WORLD_TYPE, WorldTypes.OVERWORLD.get())
                     .add(Keys.CHUNK_GENERATOR, ChunkGenerator.overworld())
                     .add(Keys.PERFORM_SPAWN_LOGIC, true)
                     .build();
@@ -329,7 +333,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
             return new BuilderImpl()
                     .reset()
                     .key(ResourceKey.minecraft("overworld_caves"))
-                    .add(Keys.WORLD_TYPE, WorldTypes.OVERWORLD)
+                    .add(Keys.WORLD_TYPE, WorldTypes.OVERWORLD.get())
                     .add(Keys.CHUNK_GENERATOR, ChunkGenerator.noise(BiomeProvider.overworld(), NoiseGeneratorConfig.caves()))
                     .add(Keys.PERFORM_SPAWN_LOGIC, true)
                     .build();
@@ -340,7 +344,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
             return new BuilderImpl()
                     .reset()
                     .key(ResourceKey.minecraft("the_nether"))
-                    .add(Keys.WORLD_TYPE, WorldTypes.THE_NETHER)
+                    .add(Keys.WORLD_TYPE, WorldTypes.THE_NETHER.get())
                     .add(Keys.CHUNK_GENERATOR, ChunkGenerator.theNether())
                     .build();
         }
@@ -350,7 +354,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
             return new BuilderImpl()
                     .reset()
                     .key(ResourceKey.minecraft("the_end"))
-                    .add(Keys.WORLD_TYPE, WorldTypes.THE_END)
+                    .add(Keys.WORLD_TYPE, WorldTypes.THE_END.get())
                     .add(Keys.CHUNK_GENERATOR, ChunkGenerator.theEnd())
                     .build();
         }

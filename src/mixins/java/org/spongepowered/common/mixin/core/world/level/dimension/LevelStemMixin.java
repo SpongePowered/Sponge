@@ -54,8 +54,8 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
     @Shadow @Final @org.spongepowered.asm.mixin.Mutable public static Codec<LevelStem> CODEC;
     // @formatter:on
 
-    @Nullable private ResourceLocation impl$gameMode;
-    @Nullable private ResourceLocation impl$difficulty;
+    @Nullable private GameType impl$gameMode;
+    @Nullable private Difficulty impl$difficulty;
     @Nullable private SerializationBehavior impl$serializationBehavior = null;
     @Nullable private Component impl$displayName = null;
     private Integer impl$viewDistance = null;
@@ -77,18 +77,12 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
 
     @Override
     public GameType bridge$gameMode() {
-        if (this.impl$gameMode == null) {
-            return null;
-        }
-        return GameType.valueOf(this.impl$gameMode.getPath().toUpperCase()); // TODO actually use the enum value - no need for resourcekey
+        return this.impl$gameMode;
     }
 
     @Override
     public Difficulty bridge$difficulty() {
-        if (this.impl$difficulty == null) {
-            return null;
-        }
-        return Difficulty.valueOf(this.impl$difficulty.getPath().toUpperCase()); // TODO actually use the enum value - no need for resourcekey
+        return this.impl$difficulty;
     }
 
     @Override
@@ -149,8 +143,8 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
 
     @Override
     public LevelStem bridge$decorateData(final DataManipulator data) {
-        this.impl$gameMode = (ResourceLocation) (Object) data.get(Keys.GAME_MODE_REFERENCE).map(RegistryKey::location).orElse(null);
-        this.impl$difficulty = (ResourceLocation) (Object) data.get(Keys.WORLD_DIFFICULTY).map(RegistryKey::location).orElse(null);
+        this.impl$gameMode = (GameType) (Object) data.get(Keys.GAME_MODE).orElse(null);
+        this.impl$difficulty = (Difficulty) (Object) data.get(Keys.WORLD_DIFFICULTY).orElse(null);
         this.impl$serializationBehavior = data.getOrElse(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.AUTOMATIC);
         this.impl$displayName = data.getOrNull(Keys.DISPLAY_NAME);
         this.impl$viewDistance = data.getOrNull(Keys.VIEW_DISTANCE);
@@ -166,7 +160,8 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
     @Override
     public SpongeWorldTemplate.SpongeDataSection bridge$createData() {
         return new SpongeWorldTemplate.SpongeDataSection(this.bridge$displayName(),
-            this.impl$gameMode, this.impl$difficulty,
+            this.impl$gameMode,
+            this.impl$difficulty,
             this.impl$serializationBehavior,
             this.impl$viewDistance, this.impl$spawnPosition,
             this.impl$loadOnStartup, this.impl$performsSpawnLogic,

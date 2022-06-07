@@ -74,7 +74,6 @@ import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.event.world.UnloadWorldEvent;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -307,13 +306,13 @@ public abstract class SpongeWorldManager implements WorldManager {
             final LevelStem levelStem) {
         final ResourceKey worldKey = (ResourceKey) (Object) registryKey.location();
         final DimensionType dimensionType = levelStem.typeHolder().value();
-        final var worldTypeKey = (ResourceKey) (Object) this.server.registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getKey(dimensionType);
+        final Optional<ResourceKey> worldTypeKey = this.worldTypeKey(dimensionType);
 
-        MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey);
+        MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey.map(ResourceKey::toString).orElse("inline"));
 
         final ServerLevel world;
         try {
-            world = this.createLevel(registryKey, levelStem, worldKey, worldTypeKey);
+            world = this.createLevel(registryKey, levelStem, worldKey, worldTypeKey.orElse(null));
         } catch (final IOException e) {
             e.printStackTrace();
             return FutureUtil.completedWithException(new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e));
@@ -703,7 +702,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             throw new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location()));
         }
 
-        SpongeCommon.logger().info("Unloading world '{}' ({})", registryKey.location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) (Object) world.dimensionType()));
+        SpongeCommon.logger().info("Unloading world '{}' ({})", registryKey.location(), this.worldTypeKey(world.dimensionType()).map(ResourceKey::toString).orElse("inline"));
 
         final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerWorld) world);
         SpongeCommon.post(unloadWorldEvent);
@@ -743,27 +742,27 @@ public abstract class SpongeWorldManager implements WorldManager {
             final LevelStem template = entry.getValue();
             final LevelStemBridge templateBridge = (LevelStemBridge) (Object) template;
             final DimensionType dimensionType = template.typeHolder().value();
-            final var worldTypeKey = (ResourceKey) (Object) this.server.registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getKey(dimensionType);
+            final Optional<ResourceKey> worldTypeKey = this.worldTypeKey(dimensionType);
 
             if (!isDefaultWorld && !templateBridge.bridge$loadOnStartup()) {
                 SpongeCommon.logger().warn("World '{}' has been disabled from loading at startup. Skipping...", worldKey);
                 continue;
             }
-            MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey);
+            MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey.map(ResourceKey::toString).orElse("inline"));
             final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(worldKey);
             if (isDefaultWorld) {
                 final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) this.server).accessor$storageSource();
                 final PrimaryLevelData levelData = (PrimaryLevelData) this.server.getWorldData();
                 final List<CustomSpawner> spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(levelData));
 
-                final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey, storageSource, levelData, spawners);
+                final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), storageSource, levelData, spawners);
 
                 // Ensure that the world border is registered.
                 world.getWorldBorder().applySettings(levelData.getWorldBorder());
                 this.prepareWorld(world);
             } else {
                 try {
-                    final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey);
+                    final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey.orElse(null));
                     // Ensure that the world border is registered.
                     world.getWorldBorder().applySettings(((PrimaryLevelData)world.getLevelData()).getWorldBorder());
                     this.prepareWorld(world);
@@ -812,7 +811,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             final net.minecraft.resources.ResourceKey<Level> registryKey,
             final LevelStem levelStem,
             final ResourceKey worldKey,
-            final ResourceKey worldTypeKey) throws IOException {
+            @Nullable final ResourceKey worldTypeKey) throws IOException {
         final String directoryName = this.getDirectoryName(worldKey);
         final LevelStorageSource.LevelStorageAccess storageSource = this.getLevelStorageAccess(worldKey, this.isVanillaSubWorld(directoryName));
         final PrimaryLevelData levelData = this.getOrCreateLevelData(storageSource, levelStem, directoryName);
@@ -823,7 +822,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             final net.minecraft.resources.ResourceKey<Level> registryKey,
             final LevelStem levelStem,
             final ResourceKey worldKey,
-            final ResourceKey worldTypeKey,
+            @Nullable final ResourceKey worldTypeKey,
             final LevelStorageSource.LevelStorageAccess storageSource,
             final PrimaryLevelData levelData,
             final List<CustomSpawner> spawners) {
@@ -915,7 +914,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final boolean isDefaultWorld = this.isDefaultWorld((ResourceKey) (Object) world.dimension().location());
         if (isDefaultWorld || levelBridge.bridge$performsSpawnLogic()) {
             MinecraftServerAccessor.accessor$LOGGER().info("Preparing start region for world '{}' ({})", world.dimension().location(),
-                    RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) (Object) world.dimensionType()));
+                    this.worldTypeKey(world.dimensionType()).map(ResourceKey::toString).orElse("inline"));
             if (blocking) {
                 this.loadSpawnChunks(world);
                 return CompletableFuture.completedFuture(world); // Chunk are generated
@@ -924,6 +923,10 @@ public abstract class SpongeWorldManager implements WorldManager {
             }
         }
         return CompletableFuture.completedFuture(world); // Chunks are NOT generated AND will not generate unless prompted
+    }
+
+    private Optional<ResourceKey> worldTypeKey(final DimensionType type) {
+        return Optional.ofNullable(this.server.registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getKey(type)).map(ResourceKey.class::cast);
     }
 
     private CompletableFuture<ServerLevel> loadSpawnChunksAsync(final ServerLevel world) {
@@ -946,8 +949,8 @@ public abstract class SpongeWorldManager implements WorldManager {
                                 Sponge.server().scheduler().submit(Task.builder().plugin(Launch.instance().platformPlugin()).execute(() -> generationFuture.complete(world)).build());
                                 // Notify the future that we are done
                                 task.cancel(); // And cancel this task
-                                MinecraftServerAccessor.accessor$LOGGER().info("Done preparing start region for world '{}' ({})", world
-                                        .dimension().location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) (Object) world.dimensionType()));
+                                MinecraftServerAccessor.accessor$LOGGER().info("Done preparing start region for world '{}' ({})", world.dimension().location(),
+                                        this.worldTypeKey(world.dimensionType()).map(ResourceKey::toString).orElse("inline"));
                             }
                         })
                         .interval(10, TimeUnit.MILLISECONDS)

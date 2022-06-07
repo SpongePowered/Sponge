@@ -326,8 +326,8 @@ public final class GeneratorMain {
                     "world.generation.feature",
                     "ConfiguredFeatures",
                     "CONFIGURED_FEATURE",
-                    ParameterizedTypeName.get(context.relativeClass("world.generation.feature", "ConfiguredFeature"), Types.WILDCARD, Types.WILDCARD),
-                    Registry.PLACED_FEATURE_REGISTRY,
+                    ParameterizedTypeName.get(context.relativeClass("world.generation.feature", "ConfiguredFeature"), Types.WILDCARD),
+                    Registry.CONFIGURED_FEATURE_REGISTRY,
                     $ -> true, RegistryScope.SERVER
             ),
 
@@ -335,8 +335,8 @@ public final class GeneratorMain {
                     "world.generation.feature",
                     "Features",
                     "FEATURE",
-                    ParameterizedTypeName.get(context.relativeClass("world.generation.feature", "Feature"), Types.WILDCARD),
-                    Registry.PLACED_FEATURE_REGISTRY,
+                    context.relativeClass("world.generation.feature", "Feature"),
+                    Registry.FEATURE_REGISTRY,
                     $ -> true, RegistryScope.SERVER
             ),
 

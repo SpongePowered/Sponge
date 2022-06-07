@@ -198,11 +198,11 @@ public final class WorldTest {
 
     private CommandResult createWorld(final CommandContext context,final Parameter.Value<ResourceKey> worldKeyParameter, final Parameter.Value<WorldType> worldTypeParameter) {
         final ResourceKey key = context.requireOne(worldKeyParameter);
-        final ResourceKey worldType = RegistryTypes.WORLD_TYPE.get().valueKey(context.requireOne(worldTypeParameter));
+        final WorldType worldType = context.requireOne(worldTypeParameter);
         final WorldTemplate template = WorldTemplate.builder()
                 .from(WorldTemplate.overworld())
                 .key(key)
-                .add(Keys.WORLD_TYPE, RegistryKey.of(RegistryTypes.WORLD_TYPE, worldType).asReference())
+                .add(Keys.WORLD_TYPE, worldType)
                 .add(Keys.PERFORM_SPAWN_LOGIC, true)
                 .build();
 
@@ -341,7 +341,7 @@ public final class WorldTest {
         final WorldTemplate customTemplate = WorldTemplate.builder()
                 .from(WorldTemplate.overworld())
                 .key(worldKey)
-                .add(Keys.WORLD_TYPE, WorldTypes.OVERWORLD)
+                .add(Keys.WORLD_TYPE, WorldTypes.OVERWORLD.get())
                 .add(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.NONE)
                 .add(Keys.IS_LOAD_ON_STARTUP, false)
                 .add(Keys.PERFORM_SPAWN_LOGIC, true)
