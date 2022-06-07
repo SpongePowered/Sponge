@@ -68,6 +68,8 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.LoadWorldEvent;
@@ -117,6 +119,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -283,23 +286,20 @@ public abstract class SpongeWorldManager implements WorldManager {
             return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
         }
 
-        return this.loadTemplate(key).thenCompose(r -> {
-            WorldTemplate loadedTemplate = r.orElse(null);
-            if (loadedTemplate == null) {
-                final net.minecraft.resources.ResourceKey<LevelStem> rKey = net.minecraft.resources.ResourceKey.create(Registry.LEVEL_STEM_REGISTRY, (ResourceLocation) (Object) key);
-                final LevelStem scratch = this.server.getWorldData().worldGenSettings().dimensions().get(rKey);
-                if (scratch != null) {
-                    loadedTemplate = new SpongeWorldTemplate(key, scratch, DataPacks.WORLD); // TODO we do not know in which datapack the template is
-                }
+        // First find a loaded level-stem / To load based on a datapack load using the WorldTemplate instead
+        final net.minecraft.resources.ResourceKey<LevelStem> rKey = net.minecraft.resources.ResourceKey.create(Registry.LEVEL_STEM_REGISTRY, (ResourceLocation) (Object) key);
+        final LevelStem levelStem = this.server.getWorldData().worldGenSettings().dimensions().get(rKey);
+        if (levelStem != null) {
+            return this.loadWorld0(registryKey, levelStem);
+        }
 
-                if (loadedTemplate == null) {
-                    return FutureUtil.completedWithException(new IOException(String.format("Failed to load a template for '%s'!", key)));
-                }
-
-                this.saveTemplate(loadedTemplate);
+        // Then attempt to load from data pack
+        final DataPack<WorldTemplate> pack = this.findPack(key);
+        return this.loadTemplate(pack, key).thenCompose(template -> {
+            if (template.isEmpty()) {
+                return FutureUtil.completedWithException(new IOException(String.format("Failed to load a template for '%s'!", key)));
             }
-
-            return this.loadWorld0(registryKey, ((SpongeWorldTemplate) loadedTemplate).levelStem());
+            return this.loadWorld0(registryKey, ((SpongeWorldTemplate) template.get()).levelStem());
         });
     }
 
@@ -425,7 +425,8 @@ public abstract class SpongeWorldManager implements WorldManager {
             }
         }
 
-        return this.loadTemplate(key).thenCompose(r -> {
+        final DataPack<WorldTemplate> pack = this.findPack(key);
+        return this.loadTemplate(pack, key).thenCompose(r -> {
             r.ifPresent(template -> {
                 final LevelStem scratch = ((SpongeWorldTemplate) template).levelStem();
                 ((PrimaryLevelDataBridge) levelData).bridge$populateFromLevelStem(scratch);
@@ -450,7 +451,8 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         // Properties doesn't have everything we need...namely the generator, load the template and set values we actually got
-        return this.loadTemplate(properties.key()).thenCompose(r -> {
+        final DataPack<WorldTemplate> pack = this.findPack(properties.key());
+        return this.loadTemplate(pack, properties.key()).thenCompose(r -> {
             final WorldTemplate template = r.orElse(null);
             if (template != null) {
                 return this.saveTemplate(WorldTemplate.builder().from(template).from(properties).build());
@@ -559,7 +561,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         try {
-            this.server().dataPackManager().copy(DataPacks.WORLD, key, copyKey);
+            this.server().dataPackManager().copy(this.findPack(key), key, copyKey);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(e);
         }
@@ -625,7 +627,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         try {
-            this.server().dataPackManager().move(DataPacks.WORLD, key, movedKey);
+            this.server().dataPackManager().move(this.findPack(key), key, movedKey);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(e);
         }
@@ -682,12 +684,16 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         try {
-            this.server().dataPackManager().delete(DataPacks.WORLD, key);
+            this.server().dataPackManager().delete(this.findPack(key), key);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(e);
         }
 
         return CompletableFuture.completedFuture(true);
+    }
+
+    private DataPack<WorldTemplate> findPack(ResourceKey key) {
+        return this.server().dataPackManager().findPack(DataPackTypes.WORLD, key).orElse(DataPacks.WORLD);
     }
 
     private void unloadWorld0(final ServerLevel world) throws IOException {
@@ -793,7 +799,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         final LevelSettings levelSettings = this.createLevelSettings(defaultLevelData, levelStem, directoryName);
-        final WorldGenSettings generationSettings = ((WorldGenSettingsBridge) defaultLevelData.worldGenSettings()).bridge$copy();
+        final WorldGenSettings generationSettings = ((WorldGenSettingsBridge) defaultLevelData.worldGenSettings()).bridge$copy(); // TODO seed
         return new PrimaryLevelData(levelSettings, generationSettings, Lifecycle.stable());
     }
 
@@ -831,7 +837,8 @@ public abstract class SpongeWorldManager implements WorldManager {
         final long seed = BiomeManager.obfuscateSeed(levelData.worldGenSettings().seed());
 
         final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
-        final ServerLevel world = new ServerLevel(this.server, ((MinecraftServerAccessor) this.server).accessor$executor(), storageSource, levelData,
+        final Executor executor = ((MinecraftServerAccessor) this.server).accessor$executor();
+        final ServerLevel world = new ServerLevel(this.server, executor, storageSource, levelData,
                 registryKey, levelStem, chunkStatusListener, levelData.worldGenSettings().isDebug(), seed, spawners, true);
 
         this.worlds.put(registryKey, world);
@@ -1006,9 +1013,9 @@ public abstract class SpongeWorldManager implements WorldManager {
         return this.server().dataPackManager().save(template).thenApply(b -> true);
     }
 
-    private CompletableFuture<Optional<WorldTemplate>> loadTemplate(final ResourceKey key) {
-        if (this.server().dataPackManager().exists(DataPacks.WORLD, key)) {
-            return this.server().dataPackManager().load(DataPacks.WORLD, key).exceptionally(e -> {
+    private CompletableFuture<Optional<WorldTemplate>> loadTemplate(final DataPack<WorldTemplate> pack, final ResourceKey key) {
+        if (this.server().dataPackManager().exists(pack, key)) {
+            return this.server().dataPackManager().load(pack, key).exceptionally(e -> {
                 e.printStackTrace();
                 return Optional.empty();
             });

@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -59,6 +61,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
     private Function<net.minecraft.world.inventory.CraftingContainer, NonNullList<net.minecraft.world.item.ItemStack>> remainingItemsFunction;
     private final NonNullList<Ingredient> ingredients = NonNullList.create();
     private String group;
+    private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
     @Override
     public ResultStep addIngredients(ItemType... ingredients) {
@@ -124,13 +127,19 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
     }
 
     @Override
+    public EndStep pack(final DataPack<RecipeRegistration> pack) {
+        this.pack = pack;
+        return this;
+    }
+
+    @Override
     public RecipeRegistration build0() {
         checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
 
         final ItemStack resultStack = ItemStackUtil.toNative(this.result);
         final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(resultStack, this.resultFunction, this.remainingItemsFunction,
                 this.ingredients, RecipeSerializer.SHAPELESS_RECIPE, SpongeRecipeSerializers.SPONGE_CRAFTING_SHAPELESS);
-        return new SpongeShapelessCraftingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredients, resultStack, this.resultFunction, this.remainingItemsFunction);
+        return new SpongeShapelessCraftingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredients, resultStack, this.resultFunction, this.remainingItemsFunction, this.pack);
     }
 
     @Override
@@ -141,6 +150,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
         this.ingredients.clear();
         this.group = null;
         this.remainingItemsFunction = null;
+        this.pack = DataPacks.RECIPE;
         return this;
     }
 }

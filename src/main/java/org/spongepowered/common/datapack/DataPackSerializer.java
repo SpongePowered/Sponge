@@ -52,8 +52,8 @@ public class DataPackSerializer<T extends DataPackEntry<T>> {
     }
 
     public boolean serialize(final SpongeDataPack<T> pack, final Path packDir, final List<T> packEntries) throws IOException {
-        if (!pack.persistent()) { // TODO persistence - reloadable types can now be saved at any time - which would delete all others...
-            FileUtils.deleteDirectory(packDir.toFile());
+        if (!pack.type().persistent()) { // TODO persistence - reloadable types can now be saved at any time - which would delete all others...
+//            FileUtils.deleteDirectory(packDir.toFile());
         }
 
         if (packEntries.isEmpty()) {
@@ -71,7 +71,7 @@ public class DataPackSerializer<T extends DataPackEntry<T>> {
     public Path packEntryFile(final SpongeDataPack<T> pack, final ResourceKey key, final Path packDir) {
         return packDir.resolve("data")
                 .resolve(key.namespace())
-                .resolve(pack.dir())
+                .resolve(pack.type().dir())
                 .resolve(key.value() + ".json");
     }
 

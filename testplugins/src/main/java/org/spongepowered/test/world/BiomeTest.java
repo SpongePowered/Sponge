@@ -35,6 +35,8 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.entity.EntityCategories;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -149,12 +151,12 @@ public final class BiomeTest {
         registry.streamEntries().filter(e -> !e.key().namespace().equals("minecraft")).forEach(biome ->
             commandContext.sendMessage(Identity.nil(), Component.text(" - " + biome.key(), NamedTextColor.GRAY))
         );
-        commandContext.sendMessage(Identity.nil(), Component.text("BiomeTemplates in plugin_worldgen_biomes:", NamedTextColor.DARK_AQUA));
-        final DataPackManager dpm = Sponge.server().dataPackManager();
-        dpm.list(DataPacks.BIOME).forEach(key -> commandContext.sendMessage(Identity.nil(), Component.text(" - " + key, NamedTextColor.GRAY)));
 
-        commandContext.sendMessage(Identity.nil(), Component.text("BiomeTemplates in test:", NamedTextColor.DARK_AQUA));
-        dpm.list(DataPacks.BIOME.with("test", "")).forEach(key -> commandContext.sendMessage(Identity.nil(), Component.text(" - " + key, NamedTextColor.GRAY)));
+        final DataPackManager dpm = Sponge.server().dataPackManager();
+        dpm.find(DataPackTypes.BIOME).forEach((pack, keys) -> {
+            commandContext.sendMessage(Identity.nil(), Component.text(pack.name() + ": " + pack.description() , NamedTextColor.DARK_AQUA));
+            keys.forEach(key -> commandContext.sendMessage(Identity.nil(), Component.text(" - " + key, NamedTextColor.GRAY)));
+        });
 
         dpm.load(DataPacks.BIOME, ResourceKey.of(this.plugin, CUSTOM_PLAINS)).join().ifPresent(template -> {
             commandContext.sendMessage(Identity.nil(), Component.text("BiomeTemplate loaded from disk is present " + template.key(), NamedTextColor.DARK_AQUA));

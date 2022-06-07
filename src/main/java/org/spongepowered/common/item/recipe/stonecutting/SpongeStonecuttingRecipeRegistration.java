@@ -25,6 +25,8 @@
 package org.spongepowered.common.item.recipe.stonecutting;
 
 import com.google.gson.JsonObject;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
@@ -50,8 +52,9 @@ public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistrati
     private Function<Container, ItemStack> resultFunction;
 
     public SpongeStonecuttingRecipeRegistration(ResourceLocation key, RecipeSerializer<?> serializer, String group, Ingredient ingredient,
-            ItemStack spongeResult, Function<Container, ItemStack> resultFunction) {
-        super(key, serializer, spongeResult.getItem(), group);
+            ItemStack spongeResult, Function<Container, ItemStack> resultFunction,
+            DataPack<RecipeRegistration> pack) {
+        super(key, serializer, spongeResult.getItem(), group, pack);
         this.ingredient = ingredient;
         this.result = spongeResult.getItem();
         this.count = spongeResult.getCount();

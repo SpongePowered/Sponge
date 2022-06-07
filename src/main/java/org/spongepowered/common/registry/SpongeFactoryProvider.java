@@ -42,7 +42,7 @@ import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.effect.VanishState;
 import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
@@ -80,7 +80,6 @@ import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.WorldTypeEffect;
-import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
@@ -117,6 +116,7 @@ import org.spongepowered.common.data.manipulator.ImmutableDataManipulatorFactory
 import org.spongepowered.common.data.manipulator.MutableDataManipulatorFactory;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.datapack.SpongeDataPack;
+import org.spongepowered.common.datapack.SpongeDataPackType;
 import org.spongepowered.common.entity.effect.SpongeVanishState;
 import org.spongepowered.common.event.SpongeEventListenerRegistration;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
@@ -160,7 +160,6 @@ import org.spongepowered.common.world.schematic.SpongePaletteReferenceFactory;
 import org.spongepowered.common.world.server.SpongeServerLocation;
 import org.spongepowered.common.world.server.SpongeServerLocationCreatorFactory;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
-import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 import org.spongepowered.common.world.volume.archetype.entity.SpongeEntityArchetypeEntryFactory;
 import org.spongepowered.common.world.volume.block.SpongeBlockVolumeFactory;
 import org.spongepowered.common.world.weather.SpongeWeather;
@@ -235,7 +234,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(RegistryKey.Factory.class, new SpongeRegistryKey.FactoryImpl())
                 .registerFactory(RegistryType.Factory.class, new SpongeRegistryType.FactoryImpl())
                 .registerFactory(RegistryReference.Factory.class, new SpongeRegistryReference.FactoryImpl())
-                .registerFactory(DataPack.Factory.class, new SpongeDataPack.FactoryImpl())
+                .registerFactory(DataPackType.Factory.class, new SpongeDataPackType.FactoryImpl())
                 .registerFactory(BlockVolumeFactory.class, new SpongeBlockVolumeFactory())
                 .registerFactory(DamageSource.Factory.class, new SpongeDamageSourceFactory())
                 .registerFactory(PaletteReference.Factory.class, new SpongePaletteReferenceFactory())

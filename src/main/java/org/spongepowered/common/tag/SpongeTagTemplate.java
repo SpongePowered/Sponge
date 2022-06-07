@@ -80,9 +80,9 @@ public record SpongeTagTemplate<T extends Taggable<T>>(
         spongeTemplate.subTags.forEach((k, v) -> {
             final ResourceLocation location = (ResourceLocation) (Object) k;
             if (v) {
-                builder.addElement(location);
+                builder.addTag(location);
             } else {
-                builder.addOptionalElement(location);
+                builder.addOptionalTag(location);
             }
         });
         return TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(builder.build(), spongeTemplate.replace)).getOrThrow(false, e -> {

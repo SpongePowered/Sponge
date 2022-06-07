@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.item.recipe.crafting.custom;
 
+import net.minecraft.resources.ResourceLocation;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
@@ -34,7 +37,6 @@ import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
-import net.minecraft.resources.ResourceLocation;
 
 public final class SpongeSpecialCraftingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, SpecialCraftingRecipe.Builder>
         implements SpecialCraftingRecipe.Builder, SpecialCraftingRecipe.Builder.ResultStep, SpecialCraftingRecipe.Builder.EndStep {
@@ -42,6 +44,7 @@ public final class SpongeSpecialCraftingRecipeBuilder extends AbstractResourceKe
     private BiPredicate<CraftingGridInventory, ServerWorld> biPredicate;
     private Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction;
     private Function<CraftingGridInventory, ItemStack> resultFunction;
+    private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
     @Override
     public ResultStep matching(BiPredicate<CraftingGridInventory, ServerWorld> biPredicate) {
@@ -69,9 +72,15 @@ public final class SpongeSpecialCraftingRecipeBuilder extends AbstractResourceKe
     }
 
     @Override
+    public EndStep pack(final DataPack<RecipeRegistration> pack) {
+        this.pack = pack;
+        return this;
+    }
+
+    @Override
     public RecipeRegistration build0() {
         final ResourceLocation resourceLocation = (ResourceLocation) (Object) this.key;
-        return new SpongeSpecialCraftingRecipeRegistration(resourceLocation, this.biPredicate, this.remainingItemsFunction, this.resultFunction);
+        return new SpongeSpecialCraftingRecipeRegistration(resourceLocation, this.biPredicate, this.remainingItemsFunction, this.resultFunction, this.pack);
     }
 
     @Override
@@ -80,6 +89,7 @@ public final class SpongeSpecialCraftingRecipeBuilder extends AbstractResourceKe
         this.biPredicate = null;
         this.remainingItemsFunction = null;
         this.resultFunction = null;
+        this.pack = DataPacks.RECIPE;
         return this;
     }
 

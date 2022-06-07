@@ -26,10 +26,10 @@ package org.spongepowered.common.event.lifecycle;
 
 import org.spongepowered.api.Game;
 import org.spongepowered.api.datapack.DataPackEntry;
-import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
-import org.spongepowered.common.datapack.SpongeDataPack;
+import org.spongepowered.common.datapack.SpongeDataPackType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,17 +37,17 @@ import java.util.Objects;
 
 public final class RegisterDataPackValueEventImpl<T extends DataPackEntry<T>> extends AbstractLifecycleEvent.GenericImpl<T> implements RegisterDataPackValueEvent<T> {
 
-    private final DataPack<T> type;
+    private final DataPackType<T> type;
     private final List<T> serializables;
 
-    public RegisterDataPackValueEventImpl(final Cause cause, final Game game, final SpongeDataPack<T> type) {
+    public RegisterDataPackValueEventImpl(final Cause cause, final Game game, final SpongeDataPackType<T> type) {
         super(cause, game, type.entryType());
         this.type = type;
         this.serializables = new ArrayList<>();
     }
 
     @Override
-    public DataPack<T> type() {
+    public DataPackType<T> type() {
         return this.type;
     }
 

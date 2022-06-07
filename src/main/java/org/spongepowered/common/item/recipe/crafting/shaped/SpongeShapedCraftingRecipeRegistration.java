@@ -26,6 +26,8 @@ package org.spongepowered.common.item.recipe.crafting.shaped;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
@@ -57,8 +59,9 @@ public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistra
 
     public SpongeShapedCraftingRecipeRegistration(ResourceLocation key, RecipeSerializer<?> serializer, String group, List<String> pattern,
             Map<Character, Ingredient> ingredients, ItemStack spongeResult, Function<CraftingContainer, ItemStack> resultFunction,
-            Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction) {
-        super(key, serializer, spongeResult.getItem(), group);
+            Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
+            DataPack<RecipeRegistration> pack) {
+        super(key, serializer, spongeResult.getItem(), group, pack);
         this.result = spongeResult.getItem();
         this.count = spongeResult.getCount();
         this.pattern = pattern;

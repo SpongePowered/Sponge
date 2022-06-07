@@ -24,13 +24,20 @@
  */
 package org.spongepowered.common.datapack;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 import org.apache.commons.io.FilenameUtils;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.datapack.DataPackEntry;
 import org.spongepowered.api.datapack.DataPack;
-import org.spongepowered.api.datapack.DataPacks;
+import org.spongepowered.api.datapack.DataPackEntry;
+import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.world.server.DataPackManager;
@@ -46,13 +53,18 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public final class SpongeDataPackManager implements DataPackManager {
+
+    private static final String PATH_SUFFIX = ".json";
+    private static final int PATH_SUFFIX_LENGTH = ".json".length();
 
     private final MinecraftServer server;
     private final Path packsDir;
@@ -72,6 +84,8 @@ public final class SpongeDataPackManager implements DataPackManager {
             this.ignoreNext = true;
             this.server.reloadResources(this.discoverNewPacks());
         }
+
+        this.findPack(DataPackTypes.BIOME, ResourceKey.of("biometest", "override"));
     }
 
     // see ReloadCommand#discoverNewPacks
@@ -105,51 +119,53 @@ public final class SpongeDataPackManager implements DataPackManager {
         IngredientResultUtil.clearCache();
 
         final List<String> reloadablePacks = new ArrayList<>();
-        this.registerAndSerializePack(DataPacks.ADVANCEMENT, reloadablePacks);
-        this.registerAndSerializePack(DataPacks.RECIPE, reloadablePacks);
-        this.registerAndSerializePack(DataPacks.BLOCK_TAG, reloadablePacks);
+        this.registerAndSerializePack(DataPackTypes.ADVANCEMENT, reloadablePacks);
+        this.registerAndSerializePack(DataPackTypes.RECIPE, reloadablePacks);
+        this.registerAndSerializePack(DataPackTypes.BLOCK_TAG, reloadablePacks);
         return reloadablePacks;
     }
 
-    private <T extends DataPackEntry<T>> List<T> callRegisterDataPackValueEvent(final SpongeDataPack<T> type) {
+    private <T extends DataPackEntry<T>> List<T> callRegisterDataPackValueEvent(final SpongeDataPackType<T> type) {
         final RegisterDataPackValueEventImpl<T> event = new RegisterDataPackValueEventImpl<>(Cause.of(EventContext.empty(), SpongeCommon.game()), SpongeCommon.game(), type);
         SpongeCommon.post(event);
         return event.serializables();
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends DataPackEntry<T>> void registerAndSerializePack(final DataPack<T> type, final Collection<String> reloadablePacks) {
-        final SpongeDataPack<T> implType = (SpongeDataPack<T>) type;
-        final List<T> packEntries = this.callRegisterDataPackValueEvent(implType);
+    private <T extends DataPackEntry<T>> void registerAndSerializePack(final DataPackType<T> type, final Collection<String> reloadablePacks) {
+        final List<T> packEntries = this.callRegisterDataPackValueEvent((SpongeDataPackType<T>) type);
         if (packEntries.isEmpty()) {
             return;
         }
-        this.serializePack(implType, reloadablePacks, packEntries);
+        this.serializePack(reloadablePacks, packEntries);
     }
 
-    private <T extends DataPackEntry<T>> void serializePack(final SpongeDataPack<T> implType, final Collection<String> reloadablePacks, final List<T> packEntries) {
-        final String fullPackName = "file/" + implType.name();
-        try {
-            final boolean success = implType.packSerializer().serialize(implType, this.packDir(implType), packEntries);
-            DataPackSerializer.writePackMetadata(implType, this.packDir(implType), false);
-            if (success && implType.reloadable()) {
-                reloadablePacks.add(fullPackName);
-            } else {
+    private <T extends DataPackEntry<T>> void serializePack(final Collection<String> reloadablePacks, final List<T> packEntries) {
+        for (final T packEntry : packEntries) {
+            final SpongeDataPack<T> implPack = (SpongeDataPack<T>) packEntry.pack();
+            final String fullPackName = "file/" + implPack.name();
+            try {
+                final boolean success = implPack.type().packSerializer().serialize(implPack, this.packDir(implPack), packEntries);
+                DataPackSerializer.writePackMetadata(implPack, this.packDir(implPack), false);
+                if (success && implPack.type().reloadable()) {
+                    reloadablePacks.add(fullPackName);
+                } else {
+                    reloadablePacks.remove(fullPackName);
+                }
+            } catch (final IOException e) {
                 reloadablePacks.remove(fullPackName);
+                SpongeCommon.logger().error(e);
             }
-        } catch (final IOException e) {
-            reloadablePacks.remove(fullPackName);
-            SpongeCommon.logger().error(e);
         }
+
     }
 
 
     @Override
     public <T extends DataPackEntry<T>> CompletableFuture<Boolean> save(final T entry) {
-        final SpongeDataPack<T> implType = (SpongeDataPack<T>) entry.pack();
         // TODO this is actually blocking
-        this.serializePack(implType, new ArrayList<>(), List.of(entry));
-        return CompletableFuture.completedFuture(implType.reloadable());
+        this.serializePack(new ArrayList<>(), List.of(entry));
+        return CompletableFuture.completedFuture(((SpongeDataPackType)entry.pack().type()).reloadable());
     }
 
     @Override
@@ -160,7 +176,7 @@ public final class SpongeDataPackManager implements DataPackManager {
         if (Files.exists(file)) {
             try {
                 // TODO this is actually blocking
-                final T deserialized = implPack.packSerializer().deserialize(implPack, file, key);
+                final T deserialized = implPack.type().packSerializer().deserialize(implPack, file, key);
                 return CompletableFuture.completedFuture(Optional.ofNullable(deserialized));
             } catch (IOException ex) {
                 return FutureUtil.completedWithException(ex);
@@ -208,12 +224,12 @@ public final class SpongeDataPackManager implements DataPackManager {
         }
         try (final Stream<Path> namespaces = Files.walk(packDir.resolve("data"), 1)) {
             namespaces.filter(Files::isDirectory).forEach(namespaceDir -> {
-                final Path typeDir = namespaceDir.resolve(((SpongeDataPack<?>) pack).dir());
+                final Path typeDir = namespaceDir.resolve(((SpongeDataPack<?>) pack).type().dir());
                 if (Files.isDirectory(typeDir)) {
                     try (final Stream<Path> pluginTemplates = Files.walk(typeDir, 1)) {
                         pluginTemplates.filter(file -> file.toString().endsWith(".json"))
-                                       .map(file -> SpongeDataPackManager.keyFor(namespaceDir, file))
-                                       .forEach(packEntries::add);
+                                .map(file -> SpongeDataPackManager.keyFor(namespaceDir, file))
+                                .forEach(packEntries::add);
                     } catch (final IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -223,6 +239,51 @@ public final class SpongeDataPackManager implements DataPackManager {
             throw new RuntimeException(e);
         }
         return packEntries;
+    }
+
+    @Override
+    public <T extends DataPackEntry<T>> Map<DataPack<T>, Collection<ResourceKey>> find(final DataPackType<T> packType) {
+        final ResourceManager manager = this.server.getResourceManager();
+        Map<String, List<ResourceLocation>> resources = new HashMap<>();
+        Map<String, String> descriptions = new HashMap<>();
+        final SpongeDataPackType<T> typeImpl = (SpongeDataPackType<T>) packType;
+        manager.listPacks().forEach(pack -> {
+            final String packName = pack.getName();
+            descriptions.computeIfAbsent(packName, k -> this.packDescription(pack));
+            for (final String namespace : pack.getNamespaces(PackType.SERVER_DATA)) {
+                final Collection<ResourceLocation> locs = pack.getResources(PackType.SERVER_DATA, namespace, typeImpl.dir(), loc -> true);
+                if (!locs.isEmpty()) {
+                    resources.computeIfAbsent(packName, k -> new ArrayList<>()).addAll(locs);
+                }
+            }
+        });
+
+        final Map<DataPack<T>, Collection<ResourceKey>> map = new HashMap<>();
+        for (final Map.Entry<String, List<ResourceLocation>> entry : resources.entrySet()) {
+            map.put(packType.pack(entry.getKey(), descriptions.get(entry.getKey())), entry.getValue().stream().map(loc -> {
+                final String path = loc.getPath();
+                final String value = path.substring(typeImpl.dir().length(), path.length() - PATH_SUFFIX_LENGTH);
+                return ResourceKey.of(loc.getNamespace(), value);
+            }).toList());
+        }
+        return map;
+    }
+
+    @Override
+    public <T extends DataPackEntry<T>> Optional<DataPack<T>> findPack(final DataPackType<T> packType, final ResourceKey key) {
+        final ResourceKey compareKey = ResourceKey.of(key.namespace(), ((SpongeDataPackType<T>) packType).dir() + "/" + key.value() + PATH_SUFFIX);
+        for (final Resource resource : this.server.getResourceManager().listResources(((SpongeDataPackType) packType).dir(), loc -> loc.equals(compareKey)).values()) {
+            return Optional.of(packType.pack(resource.sourcePackId(), "N/A"));
+        }
+        return Optional.empty();
+    }
+
+    private String packDescription(final PackResources pack) {
+        try {
+            return pack.getMetadataSection(PackMetadataSection.SERIALIZER).getDescription().getString();
+        } catch (IOException e) {
+            return "N/A";
+        }
     }
 
     private static ResourceKey keyFor(Path namespaceDir, Path file) {
@@ -237,7 +298,7 @@ public final class SpongeDataPackManager implements DataPackManager {
         return this.packDir(pack)
                 .resolve("data")
                 .resolve(key.namespace())
-                .resolve(pack.dir())
+                .resolve(pack.type().dir())
                 .resolve(key.value() + ".json");
     }
 

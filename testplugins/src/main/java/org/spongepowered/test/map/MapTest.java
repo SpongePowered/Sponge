@@ -69,6 +69,7 @@ import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.util.blockray.RayTraceResult;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector2i;
@@ -505,10 +506,9 @@ public class MapTest implements LoadableModule {
         if (map.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
-        final ResourceKey netherKey = ResourceKey.minecraft("the_nether");
-        final Optional<ServerWorld> nether = Sponge.server().worldManager().world(netherKey);
+        final Optional<ServerWorld> nether = Sponge.server().worldManager().world(DefaultWorldKeys.THE_NETHER);
         if (!nether.isPresent()) {
-            final CompletableFuture<ServerWorld> loadedNether = Sponge.server().worldManager().loadWorld(netherKey);
+            final CompletableFuture<ServerWorld> loadedNether = Sponge.server().worldManager().loadWorld(DefaultWorldKeys.THE_NETHER);
             loadedNether.whenComplete((v, e) -> {
                 if (e != null) {
                     audience.sendMessage(Component.text("Failed to load nether world!", NamedTextColor.GREEN));

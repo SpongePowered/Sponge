@@ -28,15 +28,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -65,7 +64,6 @@ import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
-import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
@@ -124,15 +122,14 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         return List.of((DataHolder) (Object) this.levelStem, this);
     }
 
-    public static LevelStem decodeStem(JsonElement pack) {
-        final DataResult<LevelStem> parsed = LevelStem.CODEC.parse(JsonOps.INSTANCE, pack);
+    public static LevelStem decodeStem(final JsonElement pack, final RegistryAccess registryAccess) {
+        final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
         SpongeWorldTemplate.fixDimensionDatapack(pack);
-        return parsed.getOrThrow(false, e -> {
-        });
+        return LevelStem.CODEC.parse(ops, pack).getOrThrow(false, e -> {});
     }
 
-    public static WorldTemplate decode(DataPack<WorldTemplate> pack, ResourceKey key, JsonElement packEntry, RegistryAccess registryAccess) {
-        final LevelStem stem = SpongeWorldTemplate.decodeStem(packEntry);
+    public static WorldTemplate decode(final DataPack<WorldTemplate> pack, ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
+        final LevelStem stem = SpongeWorldTemplate.decodeStem(packEntry, registryAccess);
         return new SpongeWorldTemplate(key, stem, pack);
     }
 
@@ -147,11 +144,6 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
             }
         } catch (Exception ignored) {
         }
-    }
-
-    @Override
-    public DataPack<WorldTemplate> pack() {
-        return DataPacks.WORLD;
     }
 
     @Override
@@ -251,7 +243,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         public Builder fromDataPack(DataView pack) throws IOException {
             // TODO maybe accept JsonElement instead?
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
-            final LevelStem levelStem = SpongeWorldTemplate.decodeStem(json);
+            final LevelStem levelStem = SpongeWorldTemplate.decodeStem(json, SpongeCommon.server().registryAccess());
             return this.from(levelStem);
 
         }

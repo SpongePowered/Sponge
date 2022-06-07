@@ -64,10 +64,7 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
         SpongeCommon.game().setServer(this);
         $$6.profileCache().load();
 
-        this.dataPackManager().reload();
-
         ((SpongeDataPackManager) this.dataPackManager()).init();
-
     }
 
     @Override
