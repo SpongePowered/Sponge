@@ -84,8 +84,6 @@ public final class SpongeDataPackManager implements DataPackManager {
             this.ignoreNext = true;
             this.server.reloadResources(this.discoverNewPacks());
         }
-
-        this.findPack(DataPackTypes.BIOME, ResourceKey.of("biometest", "override"));
     }
 
     // see ReloadCommand#discoverNewPacks
