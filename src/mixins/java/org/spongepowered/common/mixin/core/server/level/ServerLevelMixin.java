@@ -531,9 +531,10 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Override
     public String toString() {
+        final Optional<ResourceKey> worldTypeKey = RegistryTypes.WORLD_TYPE.get().findValueKey((WorldType) this.shadow$dimensionType());
         return new StringJoiner(",", ServerLevel.class.getSimpleName() + "[", "]")
                 .add("key=" + this.shadow$dimension())
-                .add("worldType=" + ((WorldType) this.shadow$dimensionType()).key(RegistryTypes.WORLD_TYPE))
+                .add("worldType=" + worldTypeKey.map (ResourceKey::toString).orElse("inline"))
                 .toString();
     }
 }

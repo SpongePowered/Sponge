@@ -381,9 +381,9 @@ public abstract class SpongeWorldManager implements WorldManager {
         final ResourceKey worldKey = ((ResourceKeyBridge) templateBridge).bridge$getKey();
 
         final WorldType worldType = (WorldType) template.type();
-        final ResourceKey worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) template.type());
+        final Optional<ResourceKey> worldTypeKey = RegistryTypes.WORLD_TYPE.get().findValueKey((WorldType) template.type());
 
-        MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey);
+        MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey.map(ResourceKey::toString).orElse("inline"));
         final String directoryName = this.getDirectoryName(worldKey);
         final boolean isVanillaSubLevel = this.isVanillaSubWorld(directoryName);
         final LevelStorageSource.LevelStorageAccess storageSource;
@@ -422,7 +422,7 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         ((PrimaryLevelDataBridge) levelData).bridge$populateFromDimension(template);
 
-        final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(worldTypeKey, worldKey);
+        final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(worldTypeKey.orElse(null), worldKey);
         ((PrimaryLevelDataBridge) levelData).bridge$configAdapter(configAdapter);
 
         levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().isPresent());
@@ -884,7 +884,8 @@ public abstract class SpongeWorldManager implements WorldManager {
             throw new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location()));
         }
 
-        SpongeCommon.logger().info("Unloading world '{}' ({})", registryKey.location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) world.dimensionType()));
+        final Optional<ResourceKey> worldTypeKey = RegistryTypes.WORLD_TYPE.get().findValueKey((WorldType) world.dimensionType());
+        SpongeCommon.logger().info("Unloading world '{}' ({})", registryKey.location(), worldTypeKey.map(ResourceKey::toString).orElse("inline"));
 
         final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerWorld) world);
         SpongeCommon.post(unloadWorldEvent);
@@ -931,19 +932,9 @@ public abstract class SpongeWorldManager implements WorldManager {
             }
 
             final WorldType worldType = (WorldType) template.type();
-            final ResourceKey worldTypeKey;
+            final Optional<ResourceKey> worldTypeKey = RegistryTypes.WORLD_TYPE.get().findValueKey((WorldType) template.type());
 
-            try {
-                worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) template.type());
-            } catch (final Exception ex) {
-                final String errorMessage = String.format("Failed to find a registry key for the world type specified for " +
-                        "world '%s'! This is a serious issue as a mod or plugin has not registered it at the " +
-                        "appropriate point beforehand, Aborting...", worldKey);
-                SpongeCommon.logger().error(errorMessage);
-                throw new RuntimeException(errorMessage, ex);
-            }
-
-            MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey);
+            MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey.map(ResourceKey::toString).orElse("inline"));
             if (!isDefaultWorld && !templateBridge.bridge$loadOnStartup()) {
                 SpongeCommon.logger().warn("World '{}' has been disabled from loading at startup. Skipping...", worldKey);
                 continue;
@@ -1005,7 +996,7 @@ public abstract class SpongeWorldManager implements WorldManager {
 
             ((PrimaryLevelDataBridge) levelData).bridge$populateFromDimension(template);
 
-            final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(worldTypeKey, worldKey);
+            final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.createWorld(worldTypeKey.orElse(null), worldKey);
             ((PrimaryLevelDataBridge) levelData).bridge$configAdapter(configAdapter);
 
             levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().isPresent());
@@ -1111,8 +1102,9 @@ public abstract class SpongeWorldManager implements WorldManager {
         final PrimaryLevelDataBridge levelBridge = (PrimaryLevelDataBridge) levelData;
         final boolean isDefaultWorld = this.isDefaultWorld((ResourceKey) (Object) world.dimension().location());
         if (isDefaultWorld || levelBridge.bridge$performsSpawnLogic()) {
+            final Optional<ResourceKey> worldTypeKey = RegistryTypes.WORLD_TYPE.get().findValueKey((WorldType) world.dimensionType());
             MinecraftServerAccessor.accessor$LOGGER().info("Preparing start region for world '{}' ({})", world.dimension().location(),
-                    RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) world.dimensionType()));
+                    worldTypeKey.map(ResourceKey::toString).orElse("inline"));
             if (blocking) {
                 this.loadSpawnChunks(world);
                 return CompletableFuture.completedFuture(world); // Chunk are generated
@@ -1143,8 +1135,9 @@ public abstract class SpongeWorldManager implements WorldManager {
                                 Sponge.server().scheduler().submit(Task.builder().plugin(Launch.instance().platformPlugin()).execute(() -> generationFuture.complete(world)).build());
                                 // Notify the future that we are done
                                 task.cancel(); // And cancel this task
+                                final Optional<ResourceKey> worldTypeKey = RegistryTypes.WORLD_TYPE.get().findValueKey((WorldType) world.dimensionType());
                                 MinecraftServerAccessor.accessor$LOGGER().info("Done preparing start region for world '{}' ({})", world
-                                        .dimension().location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) world.dimensionType()));
+                                        .dimension().location(), worldTypeKey.map(ResourceKey::toString).orElse("inline"));
                             }
                         })
                         .interval(10, TimeUnit.MILLISECONDS)
