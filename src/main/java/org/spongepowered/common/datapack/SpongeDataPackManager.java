@@ -262,7 +262,7 @@ public final class SpongeDataPackManager implements DataPackManager {
         for (final Map.Entry<String, List<ResourceLocation>> entry : resources.entrySet()) {
             map.put(packType.pack(entry.getKey(), descriptions.get(entry.getKey())), entry.getValue().stream().map(loc -> {
                 final String path = loc.getPath();
-                final String value = path.substring(typeImpl.dir().length(), path.length() - PATH_SUFFIX_LENGTH);
+                final String value = path.substring(typeImpl.dir().length() + 1, path.length() - PATH_SUFFIX_LENGTH);
                 return ResourceKey.of(loc.getNamespace(), value);
             }).toList());
         }
