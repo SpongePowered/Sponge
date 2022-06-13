@@ -53,7 +53,7 @@ public final class SpongeCommandExecutorWrapper implements Command<CommandSource
             final CommandResult result = Objects.requireNonNull(this.executor.execute(spongeCommandContext),
                     "A CommandResult was expected, but the command returned null instead. Report this to the plugin author!");
             if (!result.isSuccess()) {
-                throw new SpongeCommandResultException(result);
+                throw SpongeCommandResultException.createException(result);
             }
             return result.result();
         } catch (final CommandException e) {

@@ -80,6 +80,7 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
+import org.spongepowered.common.command.exception.SpongeCommandResultException;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
@@ -341,7 +342,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
         }
         final Object source = cause.cause().root();
 
-        final CommandResult result;
+        CommandResult result;
         try (final CommandPhaseContext context = GeneralPhase.State.COMMAND
             .createPhaseContext(PhaseTracker.getInstance())
             .source(source)
@@ -355,6 +356,8 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
             context.buildAndSwitch();
             try {
                 result = this.processCommand(cause, mapping, arguments, command, args);
+            } catch (final SpongeCommandResultException resultException) {
+                result = resultException.result();
             } catch (final CommandException exception) {
                 final CommandResult errorResult = CommandResult.builder().result(0)
                         .error(exception.componentMessage()).build();
