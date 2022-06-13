@@ -35,13 +35,13 @@ import org.spongepowered.api.entity.EntityCategory;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.generation.biome.CarvingStep;
-import org.spongepowered.api.world.generation.biome.DecorationStep;
+import org.spongepowered.api.world.generation.carver.CarvingStep;
+import org.spongepowered.api.world.generation.feature.DecorationStep;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawnCost;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
 import org.spongepowered.api.world.biome.climate.Precipitation;
 import org.spongepowered.api.world.biome.climate.TemperatureModifier;
-import org.spongepowered.api.world.generation.biome.ConfiguredCarver;
+import org.spongepowered.api.world.generation.carver.Carver;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
 import org.spongepowered.common.accessor.world.level.biome.BiomeAccessor;
 import org.spongepowered.common.accessor.world.level.biome.Biome_ClimateSettingsAccessor;
@@ -101,17 +101,17 @@ public final class BiomeData {
     }
     // @formatter:on
 
-    private static Map<CarvingStep, List<ConfiguredCarver<?, ?>>> carvers(final Biome biome) {
+    private static Map<CarvingStep, List<Carver>> carvers(final Biome biome) {
         final var settings = biome.getGenerationSettings();
         return Arrays.stream(GenerationStep.Carving.values())
                 .collect(Collectors.toMap(step -> (CarvingStep) (Object) step,
                                           step -> BiomeData.carverList(settings, step)));
     }
 
-    private static List<ConfiguredCarver<?, ?>> carverList(final BiomeGenerationSettings settings, final GenerationStep.Carving step) {
+    private static List<Carver> carverList(final BiomeGenerationSettings settings, final GenerationStep.Carving step) {
         final var carvers = settings.getCarvers(step);
         return StreamSupport.stream(carvers.spliterator(), false)
-                .map(carver -> (ConfiguredCarver<?, ?>) (Object) carver.value())
+                .map(carver -> (Carver) (Object) carver.value())
                 .collect(Collectors.toList());
     }
 
@@ -124,6 +124,9 @@ public final class BiomeData {
 
     private static List<PlacedFeature> featureList(final BiomeGenerationSettings settings, final GenerationStep.Decoration step) {
         final var features = settings.features();
+        if (step.ordinal() >= features.size()) {
+            return List.of();
+        }
         final var holders = features.get(step.ordinal());
         return holders.stream().map(Holder::value).map(f -> (PlacedFeature) (Object) f).toList();
     }

@@ -24,12 +24,38 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.carver;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.Codec;
+import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
+import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.carver.WorldCarver;
-import org.spongepowered.api.world.generation.biome.Carver;
-import org.spongepowered.api.world.generation.biome.CarverConfig;
+import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.world.generation.carver.Carver;
+import org.spongepowered.api.world.generation.carver.CarverType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.world.generation.carver.SpongeCarverTemplate;
+
+import java.io.IOException;
 
 @Mixin(WorldCarver.class)
-public abstract class WorldCarverMixin_API<CC extends CarverConfig> implements Carver<CC> {
+public abstract class WorldCarverMixin_API<C extends CarverConfiguration> implements CarverType {
 
+    //@formatter:off
+    @Shadow @Final private Codec<ConfiguredWorldCarver<C>> configuredCodec;
+    //@formatter:on
+
+    @Override
+    public Carver configure(final DataView config) throws IllegalArgumentException {
+        try {
+            final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(config));
+            return (Carver) (Object) SpongeCarverTemplate.decode((Codec<ConfiguredWorldCarver<?>>) (Object) this.configuredCodec, json, SpongeCommon.server().registryAccess());
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not read configuration: " + config, e);
+        }
+    }
 }

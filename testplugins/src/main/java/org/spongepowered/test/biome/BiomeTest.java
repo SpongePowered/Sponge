@@ -22,35 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test.world;
+package org.spongepowered.test.biome;
 
 import com.google.inject.Inject;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.entity.EntityCategories;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
@@ -59,19 +55,22 @@ import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
 import org.spongepowered.api.world.generation.ChunkGenerator;
-import org.spongepowered.api.world.generation.biome.BiomeTemplate;
-import org.spongepowered.api.world.generation.biome.DecorationSteps;
-import org.spongepowered.api.world.generation.feature.ConfiguredFeature;
-import org.spongepowered.api.world.generation.feature.ConfiguredFeatures;
-import org.spongepowered.api.world.generation.feature.Feature;
+import org.spongepowered.api.world.biome.BiomeTemplate;
+import org.spongepowered.api.world.generation.carver.Carver;
+import org.spongepowered.api.world.generation.carver.CarverTemplate;
+import org.spongepowered.api.world.generation.carver.CarverTypes;
+import org.spongepowered.api.world.generation.carver.Carvers;
+import org.spongepowered.api.world.generation.feature.DecorationSteps;
+import org.spongepowered.api.world.generation.feature.FeatureType;
 import org.spongepowered.api.world.generation.feature.PlacedFeatures;
 import org.spongepowered.api.world.server.DataPackManager;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
+import org.spongepowered.test.world.WorldTest;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -90,27 +89,45 @@ public final class BiomeTest {
     }
 
     @Listener
-    private void onLoad(StartedEngineEvent<Server> event) {
-        // TODO remove when done testing
-        this.registry().streamEntries().filter(e -> !e.key().namespace().equals("minecraft")).forEach(biome ->
-            System.err.println(biome.key())
-        );
-    }
-
-    @Listener
     private void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<ResourceKey> resourceKey = Parameter.resourceKey().key("key").optional().build();
+        final var biomeParam = Parameter.registryElement(TypeToken.get(Biome.class), RegistryTypes.BIOME, "minecraft").key("biome").build();
+        final Parameter.Value<String> filter = Parameter.string().key("filter").optional().build();
         event.register(this.plugin, Command.builder()
-                        .addChild(Command.builder().executor(this::listBiomes).build(), "list")
-                        .addChild(Command.builder().executor(this::listFeatures).build(), "features")
-                        .addChild(Command.builder().executor(this::registerBiome).build(), "register")
-                        .addChild(Command.builder().addParameter(resourceKey).executor(e -> this.place(e, resourceKey)).build(), "place")
+                        .addChild(Command.builder().addParameter(filter).executor(ctx -> this.list(ctx, filter)).build(), "list")
+                        .addChild(Command.builder().addParameter(biomeParam).executor(ctx -> this.info(ctx, biomeParam)).build(), "info")
+                        .addChild(Command.builder().executor(this::register).build(), "register")
+                        .addChild(Command.builder().executor(this::carvers).build(), "carvers")
                         .addChild(Command.builder().executor(this::world).build(), "world")
                         .build(), "biometest")
         ;
     }
 
-    private CommandResult registerBiome(CommandContext commandContext) {
+    private CommandResult info(final CommandContext ctx, final Parameter.Value<Biome> biomeParam) {
+        final Biome biome = ctx.requireOne(biomeParam);
+        ctx.sendMessage(Identity.nil(), Component.text("Biome Info:", NamedTextColor.GOLD));
+        biome.features().forEach((step, list) -> {
+            if (!list.isEmpty()) {
+                ctx.sendMessage(Identity.nil(), Component.text("Feature Step:", NamedTextColor.DARK_AQUA));
+                list.forEach(placedFeature -> {
+                    final var configurableFeature = placedFeature.feature();
+                    final FeatureType feature = configurableFeature.type();
+                    ctx.sendMessage(Identity.nil(), Component.text(" - " + feature.getClass().getSimpleName() +
+                            " @ " + placedFeature.placementModifiers().stream().map(mod -> mod.getClass().getSimpleName()).toList(), NamedTextColor.GRAY));
+                });
+            }
+        });
+        biome.carvers().forEach((step, list) -> {
+            if (!list.isEmpty()) {
+                ctx.sendMessage(Identity.nil(), Component.text("Carvers Step:", NamedTextColor.DARK_AQUA));
+                list.forEach(configuredCarver -> {
+                    ctx.sendMessage(Identity.nil(), Component.text(" - " + configuredCarver.type().getClass().getSimpleName(), NamedTextColor.GRAY));
+                });
+            }
+        });
+        return CommandResult.success();
+    }
+
+    private CommandResult register(CommandContext commandContext) {
         final Biome defaultBiome = Biomes.PLAINS.get(Sponge.server());
         final List<NaturalSpawner> naturalSpawners = defaultBiome.spawners().get(EntityCategories.MONSTER.get()).get(new Random());
         final WeightedTable<NaturalSpawner> spawner = new WeightedTable<>();
@@ -133,6 +150,32 @@ public final class BiomeTest {
         return CommandResult.success();
     }
 
+
+    private CommandResult carvers(final CommandContext ctx) {
+        ctx.sendMessage(Identity.nil(), Component.text("Carver Types", NamedTextColor.DARK_AQUA));
+        CarverTypes.registry().streamEntries().forEach(e -> {
+            ctx.sendMessage(Identity.nil(), Component.text(" - " + e.key(), NamedTextColor.GRAY));
+        });
+        ctx.sendMessage(Identity.nil(), Component.text("Carver", NamedTextColor.DARK_AQUA));
+        Carvers.registry().streamEntries().forEach(e -> {
+            ctx.sendMessage(Identity.nil(), Component.text(" - " + e.key(), NamedTextColor.GRAY));
+        });
+
+        final CarverTemplate template = CarverTemplate.builder().from(Carvers.CAVE.get()).key(ResourceKey.of(this.plugin, "custom_carver")).build();
+        final DataContainer container = template.toContainer();
+        try {
+            final CarverTemplate rebuiltTemplate = CarverTemplate.builder().fromDataPack(container).key(ResourceKey.of(this.plugin, "custom_carver")).build();
+            Sponge.server().dataPackManager().save(rebuiltTemplate);
+
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+        final Carver reconfigured = CarverTypes.CAVE.get().configure(container);
+
+        return CommandResult.success();
+    }
+
+
     private CommandResult world(CommandContext commandContext) {
         final WorldManager wm = Sponge.server().worldManager();
         final ResourceKey worldKey = ResourceKey.of(this.plugin, CUSTOM_PLAINS);
@@ -153,65 +196,22 @@ public final class BiomeTest {
         return CommandResult.success();
     }
 
-    private CommandResult listBiomes(CommandContext commandContext) {
-        commandContext.sendMessage(Identity.nil(), Component.text("non Vanilla Biomes in Registry: ", NamedTextColor.DARK_AQUA));
+    private CommandResult list(CommandContext ctx, final Parameter.Value<String> filterParam) {
+        final Optional<String> rawFilter = ctx.one(filterParam);
+        boolean invert = rawFilter.isPresent();
+        final String filter = rawFilter.orElse("minecraft:").toUpperCase();
         final Registry<Biome> registry = this.registry();
-        registry.streamEntries().filter(e -> !e.key().namespace().equals("minecraft")).forEach(biome ->
-            commandContext.sendMessage(Identity.nil(), Component.text(" - " + biome.key(), NamedTextColor.GRAY))
-        );
+        registry.streamEntries().filter(e -> invert == e.key().toString().toUpperCase().contains(filter))
+                .forEach(e -> ctx.sendMessage(Identity.nil(), Component.text(" - " + e.key(), NamedTextColor.GRAY)));
 
         final DataPackManager dpm = Sponge.server().dataPackManager();
         dpm.find(DataPackTypes.BIOME).forEach((pack, keys) -> {
-            commandContext.sendMessage(Identity.nil(), Component.text(pack.name() + ": " + pack.description() , NamedTextColor.DARK_AQUA));
-            keys.forEach(key -> commandContext.sendMessage(Identity.nil(), Component.text(" - " + key, NamedTextColor.GRAY)));
+            ctx.sendMessage(Identity.nil(), Component.text(pack.name() + ": " + pack.description() , NamedTextColor.DARK_AQUA));
+            keys.forEach(key -> ctx.sendMessage(Identity.nil(), Component.text(" - " + key, NamedTextColor.GRAY)));
         });
 
         dpm.load(DataPacks.BIOME, ResourceKey.of(this.plugin, CUSTOM_PLAINS)).join().ifPresent(template -> {
-            commandContext.sendMessage(Identity.nil(), Component.text("BiomeTemplate loaded from disk is present " + template.key(), NamedTextColor.DARK_AQUA));
-        });
-        return CommandResult.success();
-    }
-
-    // TODO move to feature test?
-    private CommandResult place(final CommandContext commandContext, final Parameter.Value<ResourceKey> resourceKey) {
-        final ResourceKey keyToPlace = commandContext.one(resourceKey).orElse(ConfiguredFeatures.TREES_PLAINS.location());
-        final Optional<ServerPlayer> player = commandContext.cause().first(ServerPlayer.class);
-        final Optional<ConfiguredFeature<?>> feature = ConfiguredFeatures.registry().findValue(keyToPlace);
-        if (feature.isPresent()) {
-            if (player.isEmpty()) {
-                commandContext.sendMessage(Identity.nil(), Component.text("Run as player to place the feature"));
-            } else {
-                final RayTrace<LocatableBlock> ray = RayTrace.block().select(RayTrace.nonAir()).limit(100).sourceEyePosition(player.get()).direction(player.get());
-                final ServerLocation location = ray.execute().orElseThrow().selectedObject().serverLocation().relativeTo(Direction.UP);
-                if (feature.get().place(location)) {
-                    commandContext.sendMessage(Identity.nil(), Component.text("Placed: " + keyToPlace));
-                } else {
-                    commandContext.sendMessage(Identity.nil(), Component.text("Not Placed: " + keyToPlace));
-                }
-            }
-        } else {
-            commandContext.sendMessage(Identity.nil(), Component.text("Feature not found: " + keyToPlace));
-        }
-        return CommandResult.success();
-    }
-
-    private CommandResult listFeatures(CommandContext commandContext) {
-        final Biome plainsBiome = this.registry().findValue(ResourceKey.of(this.plugin, CUSTOM_PLAINS)).orElse(Biomes.PLAINS.get(Sponge.server()));
-        System.out.println("Plains Biome Features:");
-        plainsBiome.features().forEach((step, list) -> {
-            System.out.println("Step: " + step);
-            list.forEach(placedFeature -> {
-                final var configurableFeature = placedFeature.feature();
-                final Feature feature = configurableFeature.feature();
-                System.out.println(" - " + feature.getClass().getSimpleName() + " /w " + configurableFeature.toContainer().getClass().getSimpleName() + " @ " + placedFeature.placementModifiers().stream().map(mod -> mod.getClass().getSimpleName()).toList());
-            });
-        });
-        System.out.println("Plains Biome Carvers:");
-        plainsBiome.carvers().forEach((step, list) -> {
-            System.out.println("Step: " + step);
-            list.forEach(configuredCarver -> {
-                System.out.println(" - " + configuredCarver.carver().getClass().getSimpleName() + " /w " + configuredCarver.config().getClass().getSimpleName());
-            });
+            ctx.sendMessage(Identity.nil(), Component.text("BiomeTemplate loaded from disk is present " + template.key(), NamedTextColor.DARK_AQUA));
         });
         return CommandResult.success();
     }

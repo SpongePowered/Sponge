@@ -116,11 +116,14 @@ import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.generation.biome.BiomeTemplate;
+import org.spongepowered.api.world.biome.BiomeTemplate;
+import org.spongepowered.api.world.generation.carver.CarverTemplate;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
+import org.spongepowered.api.world.generation.feature.FeatureTemplate;
+import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.WorldTemplate;
@@ -213,9 +216,12 @@ import org.spongepowered.common.world.biome.provider.SpongeEndStyleBiomeConfig;
 import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.generation.SpongeWorldGenerationConfigBuilder;
+import org.spongepowered.common.world.generation.carver.SpongeCarverTemplate;
 import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfig;
 import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
+import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
+import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
@@ -362,6 +368,9 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(MapCanvas.Builder.class, SpongeMapCanvasBuilder::new)
                 .register(Transformation.Builder.class, SpongeTransformationBuilder::new)
                 .register(BiomeTemplate.Builder.class, SpongeBiomeTemplate.BuilderImpl::new)
+                .register(CarverTemplate.Builder.class, SpongeCarverTemplate.BuilderImpl::new)
+                .register(FeatureTemplate.Builder.class, SpongeFeatureTemplate.BuilderImpl::new)
+                .register(PlacedFeatureTemplate.Builder.class, SpongePlacedFeatureTemplate.BuilderImpl::new)
         ;
     }
 }

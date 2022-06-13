@@ -52,8 +52,14 @@
         {
             "id": "biometest",
             "name": "Biome Test",
-            "entrypoint": "org.spongepowered.test.world.BiomeTest",
+            "entrypoint": "org.spongepowered.test.biome.BiomeTest",
             "description": "Testing biomes"
+        },
+        {
+            "id": "featuretest",
+            "name": "Feature Test",
+            "entrypoint": "org.spongepowered.test.feature.FeatureTest",
+            "description": "Testing features and structure features"
         },
         {
             "id": "commandtest",

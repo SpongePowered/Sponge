@@ -34,6 +34,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.world.generation.feature.Feature;
+import org.spongepowered.api.world.generation.feature.FeatureType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,19 +43,18 @@ import org.spongepowered.common.SpongeCommon;
 import java.io.IOException;
 
 @Mixin(net.minecraft.world.level.levelgen.feature.Feature.class)
-public abstract class FeatureMixin_API<FC extends FeatureConfiguration> implements Feature {
+public abstract class FeatureMixin_API<FC extends FeatureConfiguration> implements FeatureType {
 
     //@formatter:off
     @Shadow @Final private Codec<ConfiguredFeature<FC, net.minecraft.world.level.levelgen.feature.Feature<FC>>> configuredCodec;
     //@formatter:on
 
     @Override
-    public org.spongepowered.api.world.generation.feature.ConfiguredFeature<Feature> configure(final DataView config) {
+    public Feature configure(final DataView config) {
         try {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(config));
             final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
-            return (org.spongepowered.api.world.generation.feature.ConfiguredFeature<Feature>) (Object)
-                this.configuredCodec.parse(ops, json).getOrThrow(false, e -> {});
+            return (Feature) (Object) this.configuredCodec.parse(ops, json).getOrThrow(false, e -> {});
 
         } catch (IOException e) {
             throw new IllegalStateException("Could not read configuration: " + config, e);

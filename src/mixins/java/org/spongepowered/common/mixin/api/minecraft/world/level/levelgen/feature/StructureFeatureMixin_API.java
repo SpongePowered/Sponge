@@ -24,10 +24,48 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.feature;
 
+import net.minecraft.core.SectionPos;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3i;
 
 @Mixin(Structure.class)
 public abstract class StructureFeatureMixin_API implements org.spongepowered.api.world.generation.structure.Structure {
+
+    @Override
+    public boolean place(final ServerWorld world, final Vector3i pos) {
+        // see PlaceCommand#placeStructure
+        final ServerLevel level = (ServerLevel) world;
+        final ServerChunkCache chunkSource = level.getChunkSource();
+        final StructureStart start = ((Structure) (Object) this).generate(level.registryAccess(), chunkSource.getGenerator(), chunkSource.getGenerator().getBiomeSource(),
+                        chunkSource.randomState(), level.getStructureManager(), level.getSeed(), new ChunkPos(VecHelper.toBlockPos(pos)), 0, level, b -> true);
+
+        if (!start.isValid()) {
+            return false;
+        }
+
+        final BoundingBox bb = start.getBoundingBox();
+        ChunkPos minPos = new ChunkPos(SectionPos.blockToSectionCoord(bb.minX()), SectionPos.blockToSectionCoord(bb.minZ()));
+        ChunkPos maxPos = new ChunkPos(SectionPos.blockToSectionCoord(bb.maxX()), SectionPos.blockToSectionCoord(bb.maxZ()));
+        if (ChunkPos.rangeClosed(minPos, maxPos).anyMatch(($$1x) -> !level.isLoaded($$1x.getWorldPosition()))) {
+            return false;
+        }
+        ChunkPos.rangeClosed(minPos, maxPos).forEach((chunkPos) -> start.placeInChunk(level, level.structureManager(), chunkSource.getGenerator(), level.getRandom(),
+                new BoundingBox(chunkPos.getMinBlockX(), level.getMinBuildHeight(), chunkPos.getMinBlockZ(), chunkPos.getMaxBlockX(), level.getMaxBuildHeight(), chunkPos.getMaxBlockZ()), chunkPos));
+        return true;
+    }
+
+    @Override
+    public boolean place(final ServerLocation location) {
+        return this.place(location.world(), location.blockPosition());
+    }
 
 }

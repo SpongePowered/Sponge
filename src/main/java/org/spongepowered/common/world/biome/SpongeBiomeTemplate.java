@@ -26,7 +26,6 @@ package org.spongepowered.common.world.biome;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -49,7 +48,6 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
@@ -65,10 +63,10 @@ import org.spongepowered.api.world.biome.climate.GrassColorModifiers;
 import org.spongepowered.api.world.biome.climate.TemperatureModifiers;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawnCost;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
-import org.spongepowered.api.world.generation.biome.BiomeTemplate;
-import org.spongepowered.api.world.generation.biome.CarvingStep;
-import org.spongepowered.api.world.generation.biome.ConfiguredCarver;
-import org.spongepowered.api.world.generation.biome.DecorationStep;
+import org.spongepowered.api.world.biome.BiomeTemplate;
+import org.spongepowered.api.world.generation.carver.CarvingStep;
+import org.spongepowered.api.world.generation.carver.Carver;
+import org.spongepowered.api.world.generation.feature.DecorationStep;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -91,9 +89,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
     public DataContainer toContainer() {
         final JsonElement serialized = SpongeBiomeTemplate.encode(this, SpongeCommon.server().registryAccess());
         try {
-            final DataContainer container = DataFormats.JSON.get().read(serialized.toString());
-            container.set(Queries.CONTENT_VERSION, this.contentVersion());
-            return container;
+            return DataFormats.JSON.get().read(serialized.toString());
         } catch (IOException e) {
             throw new IllegalStateException("Could not read deserialized Biome:\n" + serialized, e);
         }
@@ -193,7 +189,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
             final Map<EntityType<?>, NaturalSpawnCost> spawnerCosts = this.manipulator.getOrElse(Keys.NATURAL_SPAWNER_COST, Map.of());
 
             final Map<DecorationStep, List<PlacedFeature>> features = this.manipulator.getOrElse(Keys.FEATURES, Map.of());
-            final Map<CarvingStep, List<ConfiguredCarver<?, ?>>> carvers = this.manipulator.getOrElse(Keys.CARVERS, Map.of());
+            final Map<CarvingStep, List<Carver>> carvers = this.manipulator.getOrElse(Keys.CARVERS, Map.of());
 
             final BiomeSpecialEffects.Builder effectsBuilder = new BiomeSpecialEffects.Builder()
                     .fogColor(fogColor.rgb())

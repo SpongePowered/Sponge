@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
 import net.minecraft.world.level.levelgen.GenerationStep;
-import org.spongepowered.api.world.generation.biome.CarvingStep;
+import org.spongepowered.api.world.generation.carver.CarvingStep;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(GenerationStep.Carving.class)

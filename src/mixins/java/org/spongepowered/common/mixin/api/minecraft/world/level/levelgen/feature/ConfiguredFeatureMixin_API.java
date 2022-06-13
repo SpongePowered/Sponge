@@ -32,10 +32,11 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.world.generation.feature.Feature;
+import org.spongepowered.api.world.generation.feature.FeatureType;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -49,10 +50,10 @@ import java.io.IOException;
 
 @Mixin(ConfiguredFeature.class)
 public abstract class ConfiguredFeatureMixin_API<
-        F extends Feature<FC>,
+        F extends net.minecraft.world.level.levelgen.feature.Feature<FC>,
         FC extends FeatureConfiguration,
-        APIF extends org.spongepowered.api.world.generation.feature.Feature>
-        implements org.spongepowered.api.world.generation.feature.ConfiguredFeature<APIF> {
+        APIF extends FeatureType>
+        implements Feature {
 
     // @formatter:off
     @Shadow @Final private F feature;
@@ -61,14 +62,14 @@ public abstract class ConfiguredFeatureMixin_API<
     // @formatter:on
 
     @Override
-    public APIF feature() {
+    public APIF type() {
         return (APIF) this.feature;
     }
 
     @Override
     public DataView toContainer() {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
-        final JsonElement serialized = this.feature.configuredCodec().encodeStart(ops, (ConfiguredFeature<FC, Feature<FC>>) (Object) this).getOrThrow(false, e -> {});
+        final JsonElement serialized = this.feature.configuredCodec().encodeStart(ops, (ConfiguredFeature<FC, net.minecraft.world.level.levelgen.feature.Feature<FC>>) (Object) this).getOrThrow(false, e -> {});
         try {
             return DataFormats.JSON.get().read(serialized.toString());
         } catch (IOException e) {

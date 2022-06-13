@@ -25,9 +25,20 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.feature;
 
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import org.spongepowered.api.world.generation.feature.PlacementModifierType;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(PlacementModifier.class)
 public abstract class PlacementModifierMixin_API implements org.spongepowered.api.world.generation.feature.PlacementModifier {
 
+    //@formatter:off
+    @Shadow public abstract net.minecraft.world.level.levelgen.placement.PlacementModifierType<?> shadow$type();
+    //@formatter:on
+
+    @Intrinsic
+    public PlacementModifierType type() {
+        return (PlacementModifierType) this.shadow$type();
+    }
 }

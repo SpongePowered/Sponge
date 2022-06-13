@@ -30,9 +30,10 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
-import org.spongepowered.api.world.generation.feature.ConfiguredFeature;
 import org.spongepowered.api.world.generation.feature.Feature;
+import org.spongepowered.api.world.generation.feature.FeatureType;
 import org.spongepowered.api.world.generation.feature.PlacementModifier;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,8 +53,8 @@ public abstract class PlacedFeatureMixin_API implements org.spongepowered.api.wo
     // @formatter:on
 
     @Override
-    public <F extends Feature> ConfiguredFeature<F> feature() {
-        return (ConfiguredFeature<F>) (Object) this.feature.value();
+    public <F extends FeatureType> Feature feature() {
+        return (Feature) (Object) this.feature.value();
     }
 
     @Override
@@ -64,5 +65,10 @@ public abstract class PlacedFeatureMixin_API implements org.spongepowered.api.wo
     @Override
     public boolean place(final ServerWorld world, final Vector3i pos) {
         return this.shadow$place(((WorldGenLevel) world), (ChunkGenerator) world.generator(), ((WorldGenLevel) world).getRandom(), VecHelper.toBlockPos(pos));
+    }
+
+    @Override
+    public boolean place(final ServerLocation location) {
+        return this.place(location.world(), location.blockPosition());
     }
 }

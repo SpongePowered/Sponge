@@ -22,45 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.carver;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.feature;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mojang.serialization.Codec;
-import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
-import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
-import net.minecraft.world.level.levelgen.carver.WorldCarver;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.resources.RegistryOps;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.world.generation.carver.Carver;
-import org.spongepowered.api.world.generation.carver.CarverType;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.world.generation.feature.PlacementModifier;
+import org.spongepowered.api.world.generation.feature.PlacementModifierType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.world.generation.carver.SpongeCarverTemplate;
 
-import java.io.IOException;
+@Mixin(net.minecraft.world.level.levelgen.placement.PlacementModifierType.class)
+public interface PlacementModifierTypeMixin_API<P extends net.minecraft.world.level.levelgen.placement.PlacementModifier> extends PlacementModifierType {
 
-@Mixin(ConfiguredWorldCarver.class)
-public abstract class ConfiguredWorldCarverMixin_API<WC extends CarverConfiguration> implements Carver {
-
-    // @formatter:off
-    @Shadow @Final private WorldCarver<WC> worldCarver;
-    @Shadow @Final private WC config;
-    // @formatter:on
+    //@formatter:off
+    @Shadow Codec<P> shadow$codec();
+    //@formatter:on
 
     @Override
-    public CarverType type() {
-        return (CarverType) this.worldCarver;
-    }
-
-    @Override
-    public DataView toContainer() {
-        final JsonElement serialized = SpongeCarverTemplate.encode((Codec<ConfiguredWorldCarver<?>>) (Object) this.worldCarver.configuredCodec(), (ConfiguredWorldCarver<WC>) (Object) this, SpongeCommon.server().registryAccess());
+    default PlacementModifier configure(final DataView config) throws IllegalArgumentException {
         try {
-            return DataFormats.JSON.get().read(serialized.toString());
-        } catch (IOException e) {
-            throw new IllegalStateException("Could not read deserialized Configured Carver: " + serialized, e);
+            final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(config));
+            final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
+            return (PlacementModifier) this.shadow$codec().parse(ops, json).getOrThrow(false, e -> {});
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Could not configure PlacementModifier." , e);
         }
     }
 }

@@ -189,6 +189,21 @@ public final class GeneratorMain {
                 Registry.BIOME_REGISTRY
             ),
             new RegistryEntriesGenerator<>(
+                "world.generation.carver",
+                "CarverTypes",
+                "CARVER_TYPE",
+                context.relativeClass("world.generation.carver", "CarverType"),
+                Registry.CARVER_REGISTRY
+            ),
+            new RegistryEntriesGenerator<>(
+                "world.generation.carver",
+                "Carvers",
+                "CARVER",
+                context.relativeClass("world.generation.carver", "Carver"),
+                Registry.CONFIGURED_CARVER_REGISTRY,
+                a -> true, RegistryScope.SERVER
+            ),
+            new RegistryEntriesGenerator<>(
                 "block",
                 "BlockTypes",
                 "BLOCK_TYPE",
@@ -295,7 +310,8 @@ public final class GeneratorMain {
                 "Structures",
                 "STRUCTURE",
                 context.relativeClass("world.generation.structure", "Structure"),
-                Registry.STRUCTURE_REGISTRY
+                Registry.STRUCTURE_REGISTRY,
+                $ -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
                 "data.type",
@@ -324,22 +340,28 @@ public final class GeneratorMain {
             ),
             new RegistryEntriesGenerator<>(
                     "world.generation.feature",
-                    "ConfiguredFeatures",
-                    "CONFIGURED_FEATURE",
-                    ParameterizedTypeName.get(context.relativeClass("world.generation.feature", "ConfiguredFeature"), Types.WILDCARD),
-                    Registry.CONFIGURED_FEATURE_REGISTRY,
-                    $ -> true, RegistryScope.SERVER
-            ),
-
-            new RegistryEntriesGenerator<>(
-                    "world.generation.feature",
                     "Features",
                     "FEATURE",
                     context.relativeClass("world.generation.feature", "Feature"),
+                    Registry.CONFIGURED_FEATURE_REGISTRY,
+                    $ -> true, RegistryScope.SERVER
+            ),
+            new RegistryEntriesGenerator<>(
+                    "world.generation.feature",
+                    "FeatureTypes",
+                    "FEATURE_TYPE",
+                    context.relativeClass("world.generation.feature", "FeatureType"),
                     Registry.FEATURE_REGISTRY,
                     $ -> true, RegistryScope.SERVER
             ),
-
+            new RegistryEntriesGenerator<>(
+                    "world.generation.feature",
+                    "PlacementModifierTypes",
+                    "PLACEMENT_MODIFIER",
+                    context.relativeClass("world.generation.feature", "PlacementModifierType"),
+                    Registry.PLACEMENT_MODIFIER_REGISTRY,
+                    $ -> true, RegistryScope.SERVER
+            ),
             new TagGenerator(
                     "BLOCK_TYPE",
                     Registry.BLOCK_REGISTRY,

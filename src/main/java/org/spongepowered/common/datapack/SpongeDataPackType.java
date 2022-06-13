@@ -38,13 +38,19 @@ import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.api.tag.Taggable;
 import org.spongepowered.api.world.WorldTypeTemplate;
-import org.spongepowered.api.world.generation.biome.BiomeTemplate;
+import org.spongepowered.api.world.biome.BiomeTemplate;
+import org.spongepowered.api.world.generation.carver.CarverTemplate;
+import org.spongepowered.api.world.generation.feature.FeatureTemplate;
+import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.advancement.SpongeAdvancementTemplate;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.tag.SpongeTagTemplate;
 import org.spongepowered.common.world.biome.SpongeBiomeTemplate;
+import org.spongepowered.common.world.generation.carver.SpongeCarverTemplate;
+import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
+import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
@@ -67,30 +73,36 @@ public record SpongeDataPackType<T extends DataPackEntry<T>>(String dir, boolean
     public static final class FactoryImpl implements DataPackType.Factory {
 
         private final SpongeDataPackType<@NonNull AdvancementTemplate> advancement = SpongeDataPackType.basic(AdvancementTemplate.class,
-                "advancements",
-                      SpongeAdvancementTemplate::encode, null, // TODO decoder
+                "advancements", SpongeAdvancementTemplate::encode, null, // TODO decoder
                       false, true);
 
-        // TODO accept DataPack in RecipeRegistration
         private final SpongeDataPackType<@NonNull RecipeRegistration> recipe = SpongeDataPackType.custom(RecipeRegistration.class,
-                "recipes",
-                      new RecipeDataPackSerializer(SpongeRecipeRegistration::encode, null), // TODO decoder
+                "recipes", new RecipeDataPackSerializer(SpongeRecipeRegistration::encode, null), // TODO decoder
                       false, true);
 
         private final SpongeDataPackType<@NonNull WorldTypeTemplate> worldType = SpongeDataPackType.basic(WorldTypeTemplate.class,
-                "dimension_type",
-                      SpongeWorldTypeTemplate::encode, null, // TODO decoder
+                "dimension_type", SpongeWorldTypeTemplate::encode, null, // TODO decoder
                       true, false);
 
         private final SpongeDataPackType<@NonNull WorldTemplate> world = SpongeDataPackType.basic(WorldTemplate.class,
-                "dimension",
-                      SpongeWorldTemplate::serialize, SpongeWorldTemplate::decode,
+                "dimension", SpongeWorldTemplate::serialize, SpongeWorldTemplate::decode,
                       true, false);
 
         private final SpongeDataPackType<@NonNull BiomeTemplate> biome = SpongeDataPackType.basic(BiomeTemplate.class,
-                "worldgen/biome",
-                      SpongeBiomeTemplate::encode, SpongeBiomeTemplate::decode,
+                "worldgen/biome", SpongeBiomeTemplate::encode, SpongeBiomeTemplate::decode,
                       true, false);
+
+        private final SpongeDataPackType<@NonNull CarverTemplate> carver = SpongeDataPackType.basic(CarverTemplate.class,
+                "worldgen/configured_carver", SpongeCarverTemplate::encode, SpongeCarverTemplate::decode,
+                true, false);
+
+        private final SpongeDataPackType<@NonNull FeatureTemplate> feature = SpongeDataPackType.basic(FeatureTemplate.class,
+                "worldgen/configured_feature", SpongeFeatureTemplate::encode, SpongeFeatureTemplate::decode,
+                true, false);
+
+        private final SpongeDataPackType<@NonNull PlacedFeatureTemplate> placedFeature = SpongeDataPackType.basic(PlacedFeatureTemplate.class,
+                "worldgen/placed_feature", SpongePlacedFeatureTemplate::encode, SpongePlacedFeatureTemplate::decode,
+                true, false);
 
         @Override
         public DataPackType<RecipeRegistration> recipe() {
@@ -115,6 +127,21 @@ public record SpongeDataPackType<T extends DataPackEntry<T>>(String dir, boolean
         @Override
         public DataPackType<BiomeTemplate> biome() {
             return this.biome;
+        }
+
+        @Override
+        public DataPackType<CarverTemplate> carver() {
+            return this.carver;
+        }
+
+        @Override
+        public DataPackType<FeatureTemplate> feature() {
+            return this.feature;
+        }
+
+        @Override
+        public DataPackType<PlacedFeatureTemplate> placedFeature() {
+            return this.placedFeature;
         }
 
         @Override
