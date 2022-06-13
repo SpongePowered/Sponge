@@ -29,4 +29,4 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.core.WritableRegistryMixin;
 
 @Mixin(targets = {"net.minecraftforge.registries.NamespacedWrapper", "net.minecraftforge.registries.NamespacedDefaultedWrapper"})
-public abstract class NamespacedWrapperMixin<T extends IForgeRegistryEntry<T>> extends WritableRegistryMixin<T> {}
+public abstract class NamespacedWrapperMixin_Forge<T extends IForgeRegistryEntry<T>> extends WritableRegistryMixin<T> {}
