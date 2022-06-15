@@ -122,6 +122,7 @@ import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigTemplate;
+import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
 import org.spongepowered.api.world.generation.feature.FeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.schematic.PaletteType;
@@ -220,6 +221,7 @@ import org.spongepowered.common.world.generation.carver.SpongeCarverTemplate;
 import org.spongepowered.common.world.generation.config.flat.SpongeFlatGeneratorConfig;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseGeneratorConfigTemplate;
+import org.spongepowered.common.world.generation.config.noise.SpongeNoiseTemplate;
 import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
 import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
@@ -360,6 +362,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(NoiseConfig.Builder.class, SpongeNoiseConfig.BuilderImpl::new)
                 .register(FlatGeneratorConfig.Builder.class, SpongeFlatGeneratorConfig.BuilderImpl::new)
                 .register(NoiseGeneratorConfigTemplate.Builder.class, SpongeNoiseGeneratorConfigTemplate.BuilderImpl::new)
+                .register(NoiseTemplate.Builder.class, SpongeNoiseTemplate.BuilderImpl::new)
                 .register(CheckerboardBiomeConfig.Builder.class, SpongeCheckerboardBiomeConfig.BuilderImpl::new)
                 .register(EndStyleBiomeConfig.Builder.class, SpongeEndStyleBiomeConfig.BuilderImpl::new)
                 .register(MultiNoiseBiomeConfig.Builder.class, SpongeMultiNoiseBiomeConfig.BuilderImpl::new)

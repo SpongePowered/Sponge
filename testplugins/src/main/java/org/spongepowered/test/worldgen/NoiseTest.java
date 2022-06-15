@@ -35,6 +35,8 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigTemplate;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigs;
+import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
+import org.spongepowered.api.world.generation.config.noise.Noises;
 import org.spongepowered.api.world.server.DataPackManager;
 
 import java.util.Optional;
@@ -43,9 +45,15 @@ public class NoiseTest {
 
     private CommandResult listNoise(final CommandContext ctx, final Parameter.Value<String> filterParam) {
         final Optional<String> rawFilter = ctx.one(filterParam);
-        final String filter = rawFilter.orElse("").toUpperCase();
+        final String filter = rawFilter.orElse("minecraft:").toUpperCase();
+        final boolean invert = rawFilter.isPresent();
+
+        ctx.sendMessage(Identity.nil(), Component.text("Noise:", NamedTextColor.DARK_AQUA));
+        Noises.registry().streamEntries().filter(e -> invert == e.key().toString().toUpperCase().contains(filter))
+                .forEach(e -> ctx.sendMessage(Identity.nil(), Component.text(" - " + e.key(), NamedTextColor.GRAY)));
+
         ctx.sendMessage(Identity.nil(), Component.text("Noise Generator Configs:", NamedTextColor.DARK_AQUA));
-        NoiseGeneratorConfigs.registry().streamEntries().filter(e -> e.key().toString().toUpperCase().contains(filter))
+        NoiseGeneratorConfigs.registry().streamEntries().filter(e -> invert == e.key().toString().toUpperCase().contains(filter))
                 .forEach(e -> ctx.sendMessage(Identity.nil(), Component.text(" - " + e.key(), NamedTextColor.GRAY)));
 
         return CommandResult.success();
@@ -54,12 +62,17 @@ public class NoiseTest {
     private CommandResult registerNoise(final CommandContext commandContext) {
         final DataPackManager dpm = Sponge.server().dataPackManager();
 
-        final NoiseGeneratorConfigTemplate template = NoiseGeneratorConfigTemplate.builder().from(NoiseGeneratorConfigs.CAVES.get())
+        final NoiseGeneratorConfigTemplate noiseGenCfgTemplate = NoiseGeneratorConfigTemplate.builder().from(NoiseGeneratorConfigs.CAVES.get())
                 .key(ResourceKey.of("noisetest", "test"))
                 .build();
 
+        final NoiseTemplate noiseTemplate = NoiseTemplate.builder().from(Noises.CALCITE.get())
+                .key(ResourceKey.of("noisetest", "calcite_copy"))
+                .build();
+
         try {
-            dpm.save(template);
+            dpm.save(noiseGenCfgTemplate);
+            dpm.save(noiseTemplate);
         } catch (Exception e) {
             e.printStackTrace();
         }

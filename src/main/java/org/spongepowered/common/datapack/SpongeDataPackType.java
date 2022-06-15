@@ -41,6 +41,7 @@ import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.biome.BiomeTemplate;
 import org.spongepowered.api.world.generation.carver.CarverTemplate;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigTemplate;
+import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
 import org.spongepowered.api.world.generation.feature.FeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
@@ -51,6 +52,7 @@ import org.spongepowered.common.tag.SpongeTagTemplate;
 import org.spongepowered.common.world.biome.SpongeBiomeTemplate;
 import org.spongepowered.common.world.generation.carver.SpongeCarverTemplate;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseGeneratorConfigTemplate;
+import org.spongepowered.common.world.generation.config.noise.SpongeNoiseTemplate;
 import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
 import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
@@ -110,6 +112,10 @@ public record SpongeDataPackType<T extends DataPackEntry<T>>(String dir, boolean
                 "worldgen/noise_settings", SpongeNoiseGeneratorConfigTemplate::encode, SpongeNoiseGeneratorConfigTemplate::decode,
                 true, false);
 
+        private final SpongeDataPackType<@NonNull NoiseTemplate> noise = SpongeDataPackType.basic(NoiseTemplate.class,
+                "worldgen/noise", SpongeNoiseTemplate::encode, SpongeNoiseTemplate::decode,
+                true, false);
+
         @Override
         public DataPackType<RecipeRegistration> recipe() {
             return this.recipe;
@@ -153,6 +159,11 @@ public record SpongeDataPackType<T extends DataPackEntry<T>>(String dir, boolean
         @Override
         public DataPackType<NoiseGeneratorConfigTemplate> noiseGeneratorConfig() {
             return this.noiseGeneratorConfig;
+        }
+
+        @Override
+        public DataPackType<NoiseTemplate> noise() {
+            return this.noise;
         }
 
         @Override

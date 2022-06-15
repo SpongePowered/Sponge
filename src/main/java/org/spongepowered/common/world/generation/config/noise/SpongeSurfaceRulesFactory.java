@@ -31,11 +31,11 @@ import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.minecraft.world.level.levelgen.VerticalAnchor;
 import net.minecraft.world.level.levelgen.placement.CaveSurface;
 import net.minecraft.world.level.levelgen.synth.NormalNoise;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
+import org.spongepowered.api.world.generation.config.noise.Noise;
 
 import java.util.Arrays;
 import java.util.List;
@@ -192,8 +192,8 @@ public final class SpongeSurfaceRulesFactory implements SurfaceRule.Factory {
     }
 
     @Override
-    public SurfaceRule.Condition noiseThreshold(final ResourceKey noiseParam, final double min, final double max) {
-        final net.minecraft.resources.ResourceKey<NormalNoise.NoiseParameters> key = net.minecraft.resources.ResourceKey.create(Registry.NOISE_REGISTRY, ((ResourceLocation) (Object) noiseParam));
+    public SurfaceRule.Condition noiseThreshold(final RegistryReference<Noise> noise, final double min, final double max) {
+        final net.minecraft.resources.ResourceKey<NormalNoise.NoiseParameters> key = net.minecraft.resources.ResourceKey.create(Registry.NOISE_REGISTRY, ((ResourceLocation) (Object) noise.location()));
         return (SurfaceRule.Condition) SurfaceRules.noiseCondition(key, min, max);
     }
 

@@ -420,7 +420,8 @@
         "minecraft.world.level.levelgen.structure.StructureSetMixin_API",
         "minecraft.world.level.levelgen.NoiseRouterMixin_API",
         "minecraft.world.level.levelgen.SurfaceRules_ConditionSourceMixin_API",
-        "minecraft.world.level.levelgen.VerticalAnchorMixin_API"
+        "minecraft.world.level.levelgen.VerticalAnchorMixin_API",
+        "minecraft.world.level.levelgen.NormalNoise_NoiseParametersMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

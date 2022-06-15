@@ -220,6 +220,14 @@ public final class GeneratorMain {
                 a -> true, RegistryScope.GAME
             ),
             new RegistryEntriesGenerator<>(
+                "world.generation.config.noise",
+                "Noises",
+                "NOISE",
+                context.relativeClass("world.generation.config.noise", "Noise"),
+                Registry.NOISE_REGISTRY,
+                a -> true, RegistryScope.SERVER
+            ),
+            new RegistryEntriesGenerator<>(
                 "block",
                 "BlockTypes",
                 "BLOCK_TYPE",
