@@ -61,6 +61,7 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
     private Integer impl$viewDistance = null;
     @Nullable private Vector3i impl$spawnPosition;
     @Nullable private Boolean impl$hardcore, impl$pvp, impl$commands;
+    @Nullable private Long impl$seed;
 
     private boolean impl$loadOnStartup = true;
     private boolean impl$performsSpawnLogic = false;
@@ -126,18 +127,24 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
     }
 
     @Override
+    public @Nullable Long bridge$seed() {
+        return this.impl$seed;
+    }
+
+    @Override
     public LevelStem bridge$decorateData(final SpongeWorldTemplate.SpongeDataSection data) {
-        this.impl$gameMode = data.gameMode;
-        this.impl$difficulty = data.difficulty;
-        this.impl$serializationBehavior = data.serializationBehavior;
-        this.impl$displayName = data.displayName;
-        this.impl$viewDistance = data.viewDistance;
-        this.impl$spawnPosition = data.spawnPosition;
-        this.impl$loadOnStartup = data.loadOnStartup == null || data.loadOnStartup;
-        this.impl$performsSpawnLogic = data.performsSpawnLogic != null && data.performsSpawnLogic;
-        this.impl$hardcore = data.hardcore;
-        this.impl$commands = data.commands;
-        this.impl$pvp = data.pvp;
+        this.impl$gameMode = data.gameMode();
+        this.impl$difficulty = data.difficulty();
+        this.impl$serializationBehavior = data.serializationBehavior();
+        this.impl$displayName = data.displayName();
+        this.impl$viewDistance = data.viewDistance();
+        this.impl$spawnPosition = data.spawnPosition();
+        this.impl$loadOnStartup = data.loadOnStartup() == null || data.loadOnStartup();
+        this.impl$performsSpawnLogic = data.performsSpawnLogic() != null && data.performsSpawnLogic();
+        this.impl$hardcore = data.hardcore();
+        this.impl$commands = data.commands();
+        this.impl$pvp = data.pvp();
+        this.impl$seed = data.seed();
         return (LevelStem) (Object) this;
     }
 
@@ -154,6 +161,7 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
         this.impl$hardcore = data.getOrNull(Keys.HARDCORE);
         this.impl$commands = data.getOrNull(Keys.COMMANDS);
         this.impl$pvp = data.getOrNull(Keys.PVP);
+        this.impl$seed = data.getOrNull(Keys.SEED);
         return (LevelStem) (Object) this;
     }
 
@@ -166,6 +174,6 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
             this.impl$viewDistance, this.impl$spawnPosition,
             this.impl$loadOnStartup, this.impl$performsSpawnLogic,
             this.impl$hardcore, this.impl$commands,
-            this.impl$pvp);
+            this.impl$pvp, this.impl$seed);
     }
 }

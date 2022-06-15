@@ -58,10 +58,12 @@ import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
+import org.spongepowered.api.world.biome.BiomeTemplate;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.world.biome.SpongeBiomeTemplate;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -94,6 +96,16 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
     public static JsonElement encode(final WorldTypeTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
         return SpongeDimensionTypes.DIRECT_CODEC.encodeStart(ops, (DimensionType) (Object) template.worldType()).getOrThrow(false, e -> {});
+    }
+
+    public static DimensionType decode(final JsonElement json, final RegistryAccess registryAccess) {
+        final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+        return SpongeDimensionTypes.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+    }
+
+    public static WorldTypeTemplate decode(final DataPack<WorldTypeTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
+        final DimensionType parsed = SpongeWorldTypeTemplate.decode(packEntry, registryAccess);
+        return new SpongeWorldTypeTemplate(key, parsed, pack);
     }
 
     public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTypeTemplate, Builder> implements WorldTypeTemplate.Builder {

@@ -83,11 +83,9 @@ import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
-import org.spongepowered.api.world.biome.provider.FixedBiomeConfig;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
-import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
-import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
+import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
@@ -115,7 +113,6 @@ import org.spongepowered.common.command.selector.SpongeSelectorFactory;
 import org.spongepowered.common.data.manipulator.ImmutableDataManipulatorFactory;
 import org.spongepowered.common.data.manipulator.MutableDataManipulatorFactory;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.datapack.SpongeDataPack;
 import org.spongepowered.common.datapack.SpongeDataPackType;
 import org.spongepowered.common.entity.effect.SpongeVanishState;
 import org.spongepowered.common.event.SpongeEventListenerRegistration;
@@ -148,11 +145,9 @@ import org.spongepowered.common.world.SpongeWorldTypeEffect;
 import org.spongepowered.common.world.biome.SpongeAttributedBiome;
 import org.spongepowered.common.world.biome.SpongeBiomeAttributesFactory;
 import org.spongepowered.common.world.biome.SpongeBiomeProviderFactory;
-import org.spongepowered.common.world.biome.provider.SpongeFixedBiomeConfig;
 import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
 import org.spongepowered.common.world.generation.SpongeChunkGeneratorFactory;
-import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfig;
-import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
+import org.spongepowered.common.world.generation.config.flat.SpongeFlatGeneratorConfig;
 import org.spongepowered.common.world.generation.config.flat.SpongeLayerConfigFactory;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
 import org.spongepowered.common.world.generation.config.noise.SpongeSurfaceRulesFactory;
@@ -242,15 +237,12 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(ServerLocationCreator.Factory.class, new SpongeServerLocationCreatorFactory())
                 .registerFactory(AttributedBiome.Factory.class, new SpongeAttributedBiome.FactoryImpl())
                 .registerFactory(MultiNoiseBiomeConfig.Factory.class, new SpongeMultiNoiseBiomeConfig.FactoryImpl())
-                .registerFactory(FixedBiomeConfig.Factory.class, new SpongeFixedBiomeConfig.FactoryImpl())
                 .registerFactory(BiomeAttributes.Factory.class, new SpongeBiomeAttributesFactory())
                 .registerFactory(BiomeProvider.Factory.class, new SpongeBiomeProviderFactory())
                 .registerFactory(WorldTypeEffect.Factory.class, new SpongeWorldTypeEffect.FactoryImpl())
                 .registerFactory(WorldTemplate.Factory.class, new SpongeWorldTemplate.FactoryImpl())
                 .registerFactory(LayerConfig.Factory.class, new SpongeLayerConfigFactory())
-                .registerFactory(NoiseConfig.Factory.class, new SpongeNoiseConfig.FactoryImpl())
                 .registerFactory(SurfaceRule.Factory.class, new SpongeSurfaceRulesFactory())
-                .registerFactory(NoiseGeneratorConfig.Factory.class, new SpongeNoiseGeneratorConfig.FactoryImpl())
                 .registerFactory(ChunkGenerator.Factory.class, new SpongeChunkGeneratorFactory())
                 .registerFactory(ItemStackComparators.Factory.class, new SpongeItemStackComparatorFactory())
                 .registerFactory(Favicon.Factory.class, new SpongeFavicon.FactoryImpl())

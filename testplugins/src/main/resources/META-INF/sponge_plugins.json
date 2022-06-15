@@ -50,16 +50,10 @@
             "description": "Testing world changes"
         },
         {
-            "id": "biometest",
-            "name": "Biome Test",
-            "entrypoint": "org.spongepowered.test.biome.BiomeTest",
-            "description": "Testing biomes"
-        },
-        {
-            "id": "featuretest",
-            "name": "Feature Test",
-            "entrypoint": "org.spongepowered.test.feature.FeatureTest",
-            "description": "Testing features and structure features"
+            "id": "worldgentest",
+            "name": "World Generation Test",
+            "entrypoint": "org.spongepowered.test.worldgen.WorldGenTest",
+            "description": "Testing world generation"
         },
         {
             "id": "commandtest",

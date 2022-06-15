@@ -32,8 +32,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
-import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.Climate.Parameter;
 import net.minecraft.world.level.biome.Climate.ParameterList;
 import net.minecraft.world.level.biome.Climate.ParameterPoint;
 import net.minecraft.world.level.biome.FixedBiomeSource;
@@ -41,11 +39,11 @@ import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.biome.AttributedBiome;
-import org.spongepowered.api.world.biome.BiomeAttributes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
 import org.spongepowered.api.world.biome.provider.ConfigurableBiomeProvider;
 import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
+import org.spongepowered.api.world.biome.provider.FixedBiomeProvider;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.biome.MultiNoiseBiomeSourceAccessor;
@@ -65,21 +63,12 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     }
 
     @Override
-    public <T extends MultiNoiseBiomeConfig> ConfigurableBiomeProvider<T> multiNoise(final T config) {
+    public ConfigurableBiomeProvider<MultiNoiseBiomeConfig> multiNoise(final MultiNoiseBiomeConfig config) {
         final List<Pair<ParameterPoint, Holder<Biome>>> climateParams = new ArrayList<>();
         for (final AttributedBiome attributedBiome : config.attributedBiomes()) {
-            final BiomeAttributes attr = attributedBiome.attributes();
-            final ParameterPoint point = Climate.parameters(
-                    Parameter.span(attr.temperature().min(), attr.temperature().max()),
-                    Parameter.span(attr.humidity().min(), attr.humidity().max()),
-                    Parameter.span(attr.continentalness().min(), attr.continentalness().max()),
-                    Parameter.span(attr.erosion().min(), attr.erosion().max()),
-                    Parameter.span(attr.depth().min(), attr.depth().max()),
-                    Parameter.span(attr.weirdness().min(), attr.weirdness().max()),
-                    attr.offset());
-            climateParams.add(Pair.of(point, this.biomeHolder(attributedBiome.biome())));
+            climateParams.add(Pair.of((ParameterPoint) (Object) attributedBiome.attributes(), this.biomeHolder(attributedBiome.biome())));
         }
-        return (ConfigurableBiomeProvider<T>) MultiNoiseBiomeSourceAccessor.invoker$new(new ParameterList<>(climateParams));
+        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSourceAccessor.invoker$new(new ParameterList<>(climateParams));
     }
 
     @Override
@@ -88,8 +77,8 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     }
 
     @Override
-    public <T extends EndStyleBiomeConfig> ConfigurableBiomeProvider<T> endStyle(final T config) {
-        return (ConfigurableBiomeProvider<T>) TheEndBiomeSourceAccessor.invoker$new(
+    public ConfigurableBiomeProvider<EndStyleBiomeConfig> endStyle(final EndStyleBiomeConfig config) {
+        return (ConfigurableBiomeProvider<EndStyleBiomeConfig>) TheEndBiomeSourceAccessor.invoker$new(
                 this.biomeHolder(config.endBiome()),
                 this.biomeHolder(config.highlandsBiome()),
                 this.biomeHolder(config.midlandsBiome()),
@@ -104,15 +93,15 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     }
 
     @Override
-    public <T extends CheckerboardBiomeConfig> ConfigurableBiomeProvider<T> checkerboard(final T config) {
+    public ConfigurableBiomeProvider<CheckerboardBiomeConfig> checkerboard(final CheckerboardBiomeConfig config) {
         final List<Holder<Biome>> biomes = config.biomes().stream().map(this::biomeHolder).collect(Collectors.toList());
-        return (ConfigurableBiomeProvider<T>) new CheckerboardColumnBiomeSource(HolderSet.direct(biomes), config.scale());
+        return (ConfigurableBiomeProvider<CheckerboardBiomeConfig>) new CheckerboardColumnBiomeSource(HolderSet.direct(biomes), config.scale());
     }
 
     @Override
-    public BiomeProvider fixed(final RegistryReference<org.spongepowered.api.world.biome.Biome> biome) {
+    public FixedBiomeProvider fixed(final RegistryReference<org.spongepowered.api.world.biome.Biome> biome) {
         Objects.requireNonNull(biome, "biome");
-        return (BiomeProvider) new FixedBiomeSource(this.biomeHolder(biome));
+        return (FixedBiomeProvider) new FixedBiomeSource(this.biomeHolder(biome));
     }
 
     private Registry<Biome> registry() {

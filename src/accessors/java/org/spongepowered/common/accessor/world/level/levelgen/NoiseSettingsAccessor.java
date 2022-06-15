@@ -22,41 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.biome;
+package org.spongepowered.common.accessor.world.level.levelgen;
 
-import org.spongepowered.api.registry.RegistryReference;
-import org.spongepowered.api.world.biome.AttributedBiome;
-import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.api.world.biome.BiomeAttributes;
+import net.minecraft.world.level.levelgen.NoiseSettings;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
-import java.util.Objects;
+@Mixin(NoiseSettings.class)
+public interface NoiseSettingsAccessor {
 
-public final class SpongeAttributedBiome implements AttributedBiome {
-
-    private final RegistryReference<Biome> biome;
-    private final BiomeAttributes attributes;
-
-    private SpongeAttributedBiome(final RegistryReference<Biome> biome, final BiomeAttributes attributes) {
-        this.biome = biome;
-        this.attributes = attributes;
+    @Accessor("OVERWORLD_NOISE_SETTINGS")
+    static NoiseSettings accessor$OVERWORLD_NOISE_SETTINGS() {
+        throw new UntransformedAccessorError();
     }
 
-    @Override
-    public RegistryReference<Biome> biome() {
-        return this.biome;
+    @Accessor("NETHER_NOISE_SETTINGS")
+    static NoiseSettings accessor$NETHER_NOISE_SETTINGS() {
+        throw new UntransformedAccessorError();
     }
 
-    @Override
-    public BiomeAttributes attributes() {
-        return this.attributes;
+    @Accessor("END_NOISE_SETTINGS")
+    static NoiseSettings accessor$END_NOISE_SETTINGS() {
+        throw new UntransformedAccessorError();
     }
 
-    public static final class FactoryImpl implements AttributedBiome.Factory {
+    @Accessor("CAVES_NOISE_SETTINGS")
+    static NoiseSettings accessor$CAVES_NOISE_SETTINGS() {
+        throw new UntransformedAccessorError();
+    }
 
-        @Override
-        public AttributedBiome of(final RegistryReference<Biome> biome, final BiomeAttributes attributes) {
-            return new SpongeAttributedBiome(Objects.requireNonNull(biome, "biome"), Objects.requireNonNull(attributes, "attributes"));
-        }
-
+    @Accessor("FLOATING_ISLANDS_NOISE_SETTINGS")
+    static NoiseSettings accessor$FLOATING_ISLANDS_NOISE_SETTINGS() {
+        throw new UntransformedAccessorError();
     }
 }

@@ -45,30 +45,15 @@ import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
-import org.spongepowered.api.registry.RegistryEntry;
-import org.spongepowered.api.registry.RegistryKey;
-import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Axis;
-import org.spongepowered.api.world.DefaultWorldKeys;
-import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.WorldTypes;
-import org.spongepowered.api.world.biome.AttributedBiome;
-import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.api.world.biome.BiomeAttributes;
-import org.spongepowered.api.world.biome.Biomes;
-import org.spongepowered.api.world.biome.provider.BiomeProvider;
-import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
-import org.spongepowered.api.world.generation.ChunkGenerator;
-import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
-import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.server.DataPackManager;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.api.world.server.WorldManager;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.plugin.PluginContainer;
@@ -78,9 +63,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Plugin("worldtest")
 public final class WorldTest {
@@ -136,8 +118,6 @@ public final class WorldTest {
                      .executor(context -> deleteWorld(context, worldKeyParameter)).build(), "dw", "deleteworld")
              .register(this.plugin, Command.builder().addParameter(optPlayerParameter)
                      .executor(context -> whereami(context, optPlayerParameter)) .build(), "wai", "whereami")
-             .register(this.plugin, Command.builder()
-                     .executor(this::createRandomWorld).build(), "createrandomworld", "crw")
              .register(this.plugin, Command.builder()
                      .executor(this::worldTypes).build(), "worldtypes")
             .register(this.plugin, Command.builder()
@@ -300,70 +280,7 @@ public final class WorldTest {
         return CommandResult.success();
     }
 
-    private CommandResult createRandomWorld(final CommandContext context) {
-        final WorldManager wm = Sponge.server().worldManager();
-        final ServerPlayer player = (ServerPlayer) context.cause().root();
-        final String owner = player.name();
-        final Random random = player.world().random();
 
-        final List<RegistryReference<Biome>> allBiomes = Sponge.server().registry(RegistryTypes.BIOME)
-                .streamEntries()
-                .map(RegistryEntry::asReference)
-                .collect(Collectors.toList());
-        final List<RegistryReference<Biome>> biomes = IntStream.range(0, random.nextInt(allBiomes.size()))
-                .mapToObj(i -> allBiomes.get(random.nextInt(allBiomes.size())))
-                .collect(Collectors.toList());
-        if (biomes.isEmpty()) {
-            biomes.add(Biomes.PLAINS);
-        }
-
-        final NoiseConfig noiseConfig = NoiseConfig.builder().minY(random.nextInt(128/16)*16-64).height(256).build();
-
-        final NoiseGeneratorConfig noiseGenConfig = NoiseGeneratorConfig.builder()
-                .noiseConfig(noiseConfig)
-                .seaLevel(random.nextInt(61 - 1) + 1 + random.nextInt(30)) // 2 rolls
-                .build();
-
-        final ResourceKey worldKey = ResourceKey.of(this.plugin, owner.toLowerCase());
-        final List<AttributedBiome> attributedBiomes = biomes.stream().map(biomeRef -> {
-                    final Biome biome = biomeRef.get(Sponge.server());
-                    final BiomeAttributes attr = BiomeAttributes.of((float) biome.temperature(),
-                            (float) biome.humidity(),
-                            random.nextFloat() * 4 - 2,
-                            random.nextFloat() * 4 - 2,
-                            random.nextFloat() * 4 - 2,
-                            random.nextFloat() / 5,
-                            0f);
-                    return AttributedBiome.of(biomeRef, attr);
-                }
-                ).collect(Collectors.toList());
-        final MultiNoiseBiomeConfig biomeCfg = MultiNoiseBiomeConfig.builder().addBiomes(attributedBiomes).build();
-        final WorldTemplate customTemplate = WorldTemplate.builder()
-                .from(WorldTemplate.overworld())
-                .key(worldKey)
-                .add(Keys.WORLD_TYPE, WorldTypes.OVERWORLD.get())
-                .add(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.NONE)
-                .add(Keys.IS_LOAD_ON_STARTUP, false)
-                .add(Keys.PERFORM_SPAWN_LOGIC, true)
-                .add(Keys.DISPLAY_NAME, Component.text("Custom world by " + owner))
-                .add(Keys.CHUNK_GENERATOR, ChunkGenerator.noise(BiomeProvider.multiNoise(biomeCfg), noiseGenConfig))
-                .build();
-
-        if (player.world().key().equals(worldKey)) {
-            final ServerWorld world = wm.world(DefaultWorldKeys.DEFAULT).get();
-            player.setLocation(ServerLocation.of(world, world.properties().spawnPosition()));
-        }
-        context.sendMessage(Identity.nil(), Component.text("Generating your world..."));
-        wm.deleteWorld(worldKey).thenCompose(b -> wm.loadWorld(customTemplate)).thenAccept(w -> WorldTest.transportToWorld(player, w)).exceptionally(e -> {
-                    context.sendMessage(Identity.nil(), Component.text("Failed to teleport!", NamedTextColor.DARK_RED));
-                    e.printStackTrace();
-                    return null;
-                }
-        );
-
-
-        return CommandResult.success();
-    }
 
     private CommandResult worldTypes(CommandContext commandContext) {
         final Optional<ServerPlayer> optPlayer = commandContext.cause().first(ServerPlayer.class);
@@ -407,8 +324,9 @@ public final class WorldTest {
     public static void transportToWorld(final ServerPlayer player, final ServerWorld world) {
         player.sendMessage(Identity.nil(), Component.text("Teleporting..."));
         final ServerLocation spawn = world.location(world.properties().spawnPosition());
-        player.setLocation(Sponge.server().teleportHelper().findSafeLocation(spawn).orElse(spawn));
-        player.showTitle(Title.title(Component.text("Welcome to your world"), Component.text(player.name())));
+        final Optional<ServerLocation> safeLoc = Sponge.server().teleportHelper().findSafeLocation(spawn);
+        player.setLocation(safeLoc.orElse(spawn));
+        player.showTitle(Title.title(Component.text("Welcome to your world"), Component.text(player.name() + " spawn" + spawn.blockPosition())));
     }
 
     private ServerPlayer getSourcePlayer(final CommandContext context) {

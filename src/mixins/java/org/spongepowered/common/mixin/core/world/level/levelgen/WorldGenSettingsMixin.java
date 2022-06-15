@@ -47,4 +47,8 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
         return new WorldGenSettings(this.seed, this.generateStructures, this.generateBonusChest, this.dimensions);
     }
 
+    @Override
+    public WorldGenSettings bridge$withSeed(final long customSeed) {
+        return new WorldGenSettings(customSeed, this.generateStructures, this.generateBonusChest, this.dimensions);
+    }
 }

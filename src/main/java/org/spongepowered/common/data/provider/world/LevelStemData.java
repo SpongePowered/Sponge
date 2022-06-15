@@ -70,6 +70,8 @@ public final class LevelStemData {
                         .get(LevelStemBridge::bridge$viewDistance)
                     .create(Keys.SPAWN_POSITION)
                         .get(LevelStemBridge::bridge$spawnPosition)
+                    .create(Keys.SEED)
+                        .get(LevelStemBridge::bridge$seed)
         ;
 
     }

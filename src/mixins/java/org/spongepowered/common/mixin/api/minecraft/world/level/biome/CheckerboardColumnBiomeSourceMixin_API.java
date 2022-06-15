@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.stream.Collectors;
 
@@ -49,6 +48,7 @@ public abstract class CheckerboardColumnBiomeSourceMixin_API extends BiomeSource
 
     // @formatter:off
     @Shadow @Final private HolderSet<Biome> allowedBiomes;
+    @Shadow @Final private int size;
     // @formatter:on
 
     @Nullable private CheckerboardBiomeConfig api$config;
@@ -56,14 +56,13 @@ public abstract class CheckerboardColumnBiomeSourceMixin_API extends BiomeSource
     @Override
     public CheckerboardBiomeConfig config() {
         if (this.api$config == null) {
-
-            final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
-            var biomeRegistry = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY);
+            var biomeRegistry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
             var biomes = this.allowedBiomes.stream().map(Holder::value)
                     .map(biome -> RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(biome)))
                     .collect(Collectors.toList());
             this.api$config = CheckerboardBiomeConfig.builder()
                     .addBiomes(biomes)
+                    .scale(this.size)
                     .build();
         }
         return this.api$config;

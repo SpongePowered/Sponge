@@ -416,7 +416,11 @@
         "minecraft.world.level.levelgen.carver.ConfiguredWorldCarverMixin_API",
         "minecraft.world.level.levelgen.carver.WorldCarverMixin_API",
         "minecraft.world.level.levelgen.feature.FeatureMixin_API",
-        "minecraft.world.level.levelgen.feature.PlacementModifierTypeMixin_API"
+        "minecraft.world.level.levelgen.feature.PlacementModifierTypeMixin_API",
+        "minecraft.world.level.levelgen.structure.StructureSetMixin_API",
+        "minecraft.world.level.levelgen.NoiseRouterMixin_API",
+        "minecraft.world.level.levelgen.SurfaceRules_ConditionSourceMixin_API",
+        "minecraft.world.level.levelgen.VerticalAnchorMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

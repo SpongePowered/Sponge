@@ -60,7 +60,7 @@ import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.generation.ChunkGenerator;
-import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
+import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigs;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
@@ -103,16 +103,17 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
                             Codec.BOOL.optionalFieldOf("performs_spawn_logic").forGetter(v -> Optional.ofNullable(v.performsSpawnLogic)),
                             Codec.BOOL.optionalFieldOf("hardcore").forGetter(v -> Optional.ofNullable(v.hardcore)),
                             Codec.BOOL.optionalFieldOf("commands").forGetter(v -> Optional.ofNullable(v.commands)),
-                            Codec.BOOL.optionalFieldOf("pvp").forGetter(v -> Optional.ofNullable(v.pvp))
+                            Codec.BOOL.optionalFieldOf("pvp").forGetter(v -> Optional.ofNullable(v.pvp)),
+                            Codec.LONG.optionalFieldOf("seed").forGetter(v -> Optional.ofNullable(v.seed))
                     )
                     // *Chuckles* I continue to be in danger...
-                    .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11) ->
+                    .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12) ->
                             new SpongeDataSection(f1.orElse(null),
                                     f2.map(l -> GameType.byName(l.getPath())).orElse(null),
                                     f3.map(l -> Difficulty.byName(l.getPath())).orElse(null),
                                     f4.orElse(null), f5.orElse(null), f6.orElse(null),
                                     f7.orElse(null), f8.orElse(null), f9.orElse(null),
-                                    f10.orElse(null), f11.orElse(null))
+                                    f10.orElse(null), f11.orElse(null), f12.orElse(null))
                     )
             );
 
@@ -175,35 +176,18 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         throw new IllegalArgumentException("WorldTemplate is not a SpongeWorldTemplate");
     }
 
-    public static final class SpongeDataSection {
-
-        @Nullable public final Component displayName;
-        @Nullable public final GameType gameMode;
-        @Nullable public final Difficulty difficulty;
-        @Nullable public final SerializationBehavior serializationBehavior;
-        @Nullable public final Integer viewDistance;
-        @Nullable public final Vector3i spawnPosition;
-
-        @Nullable public final Boolean loadOnStartup, performsSpawnLogic, hardcore, commands, pvp;
-
-        public SpongeDataSection(final @Nullable Component displayName, final @Nullable GameType gameMode,
-                final @Nullable Difficulty difficulty, final @Nullable SerializationBehavior serializationBehavior,
-                final @Nullable Integer viewDistance, final @Nullable Vector3i spawnPosition, final @Nullable Boolean loadOnStartup,
-                final @Nullable Boolean performsSpawnLogic, final @Nullable Boolean hardcore, final @Nullable Boolean commands,
-                final @Nullable Boolean pvp) {
-            this.displayName = displayName;
-            this.gameMode = gameMode;
-            this.difficulty = difficulty;
-            this.serializationBehavior = serializationBehavior;
-            this.viewDistance = viewDistance;
-            this.spawnPosition = spawnPosition;
-            this.loadOnStartup = loadOnStartup;
-            this.performsSpawnLogic = performsSpawnLogic;
-            this.hardcore = hardcore;
-            this.commands = commands;
-            this.pvp = pvp;
-        }
-
+    public record SpongeDataSection(@Nullable Component displayName,
+                                    @Nullable GameType gameMode,
+                                    @Nullable Difficulty difficulty,
+                                    @Nullable SerializationBehavior serializationBehavior,
+                                    @Nullable Integer viewDistance,
+                                    @Nullable Vector3i spawnPosition,
+                                    @Nullable Boolean loadOnStartup,
+                                    @Nullable Boolean performsSpawnLogic,
+                                    @Nullable Boolean hardcore,
+                                    @Nullable Boolean commands,
+                                    @Nullable Boolean pvp,
+                                    @Nullable Long seed) {
     }
 
 
@@ -334,7 +318,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
                     .reset()
                     .key(ResourceKey.minecraft("overworld_caves"))
                     .add(Keys.WORLD_TYPE, WorldTypes.OVERWORLD.get())
-                    .add(Keys.CHUNK_GENERATOR, ChunkGenerator.noise(BiomeProvider.overworld(), NoiseGeneratorConfig.caves()))
+                    .add(Keys.CHUNK_GENERATOR, ChunkGenerator.noise(BiomeProvider.overworld(), NoiseGeneratorConfigs.CAVES.get()))
                     .add(Keys.PERFORM_SPAWN_LOGIC, true)
                     .build();
         }

@@ -40,6 +40,7 @@ import org.spongepowered.api.tag.Taggable;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.biome.BiomeTemplate;
 import org.spongepowered.api.world.generation.carver.CarverTemplate;
+import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigTemplate;
 import org.spongepowered.api.world.generation.feature.FeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
@@ -49,6 +50,7 @@ import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.tag.SpongeTagTemplate;
 import org.spongepowered.common.world.biome.SpongeBiomeTemplate;
 import org.spongepowered.common.world.generation.carver.SpongeCarverTemplate;
+import org.spongepowered.common.world.generation.config.noise.SpongeNoiseGeneratorConfigTemplate;
 import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
 import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
@@ -81,7 +83,7 @@ public record SpongeDataPackType<T extends DataPackEntry<T>>(String dir, boolean
                       false, true);
 
         private final SpongeDataPackType<@NonNull WorldTypeTemplate> worldType = SpongeDataPackType.basic(WorldTypeTemplate.class,
-                "dimension_type", SpongeWorldTypeTemplate::encode, null, // TODO decoder
+                "dimension_type", SpongeWorldTypeTemplate::encode, SpongeWorldTypeTemplate::decode,
                       true, false);
 
         private final SpongeDataPackType<@NonNull WorldTemplate> world = SpongeDataPackType.basic(WorldTemplate.class,
@@ -102,6 +104,10 @@ public record SpongeDataPackType<T extends DataPackEntry<T>>(String dir, boolean
 
         private final SpongeDataPackType<@NonNull PlacedFeatureTemplate> placedFeature = SpongeDataPackType.basic(PlacedFeatureTemplate.class,
                 "worldgen/placed_feature", SpongePlacedFeatureTemplate::encode, SpongePlacedFeatureTemplate::decode,
+                true, false);
+
+        private final SpongeDataPackType<@NonNull NoiseGeneratorConfigTemplate> noiseGeneratorConfig = SpongeDataPackType.basic(NoiseGeneratorConfigTemplate.class,
+                "worldgen/noise_settings", SpongeNoiseGeneratorConfigTemplate::encode, SpongeNoiseGeneratorConfigTemplate::decode,
                 true, false);
 
         @Override
@@ -142,6 +148,11 @@ public record SpongeDataPackType<T extends DataPackEntry<T>>(String dir, boolean
         @Override
         public DataPackType<PlacedFeatureTemplate> placedFeature() {
             return this.placedFeature;
+        }
+
+        @Override
+        public DataPackType<NoiseGeneratorConfigTemplate> noiseGeneratorConfig() {
+            return this.noiseGeneratorConfig;
         }
 
         @Override

@@ -118,10 +118,10 @@ import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.biome.BiomeTemplate;
 import org.spongepowered.api.world.generation.carver.CarverTemplate;
-import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
-import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
+import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
+import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigTemplate;
 import org.spongepowered.api.world.generation.feature.FeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.schematic.PaletteType;
@@ -217,9 +217,9 @@ import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.generation.SpongeWorldGenerationConfigBuilder;
 import org.spongepowered.common.world.generation.carver.SpongeCarverTemplate;
-import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfig;
-import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
+import org.spongepowered.common.world.generation.config.flat.SpongeFlatGeneratorConfig;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
+import org.spongepowered.common.world.generation.config.noise.SpongeNoiseGeneratorConfigTemplate;
 import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
 import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
@@ -359,7 +359,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(WorldTemplate.Builder.class, SpongeWorldTemplate.BuilderImpl::new)
                 .register(NoiseConfig.Builder.class, SpongeNoiseConfig.BuilderImpl::new)
                 .register(FlatGeneratorConfig.Builder.class, SpongeFlatGeneratorConfig.BuilderImpl::new)
-                .register(NoiseGeneratorConfig.Builder.class, SpongeNoiseGeneratorConfig.BuilderImpl::new)
+                .register(NoiseGeneratorConfigTemplate.Builder.class, SpongeNoiseGeneratorConfigTemplate.BuilderImpl::new)
                 .register(CheckerboardBiomeConfig.Builder.class, SpongeCheckerboardBiomeConfig.BuilderImpl::new)
                 .register(EndStyleBiomeConfig.Builder.class, SpongeEndStyleBiomeConfig.BuilderImpl::new)
                 .register(MultiNoiseBiomeConfig.Builder.class, SpongeMultiNoiseBiomeConfig.BuilderImpl::new)

@@ -22,33 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.biome.provider;
+package org.spongepowered.common.accessor.world.level.biome;
 
-import org.spongepowered.api.registry.RegistryReference;
-import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.api.world.biome.provider.FixedBiomeConfig;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.OverworldBiomeBuilder;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
-import java.util.List;
+import java.util.function.Consumer;
 
-public final class SpongeFixedBiomeConfig extends AbstractBiomeProviderConfig implements FixedBiomeConfig {
+@Mixin(OverworldBiomeBuilder.class)
+public interface OverworldBiomeBuilderAccessor {
 
-    private final RegistryReference<Biome> biome;
-
-    public SpongeFixedBiomeConfig(final RegistryReference<Biome> biome) {
-        super(List.of(biome));
-        this.biome = biome;
-    }
-
-    @Override
-    public RegistryReference<Biome> biome() {
-        return this.biome;
-    }
-
-    public static final class FactoryImpl implements Factory {
-
-        @Override
-        public FixedBiomeConfig biome(RegistryReference<Biome> biome) {
-            return new SpongeFixedBiomeConfig(biome);
-        }
-    }
+    @Invoker("addBiomes")
+    void accessor$addBiomes(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> $$0);
 }

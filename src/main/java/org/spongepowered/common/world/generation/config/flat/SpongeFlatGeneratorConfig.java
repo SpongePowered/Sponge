@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.generation.config;
+package org.spongepowered.common.world.generation.config.flat;
 
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryAccess;
@@ -33,12 +33,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.world.biome.Biomes;
-import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
+import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.levelgen.flat.FlatLevelGeneratorSettingsAccessor;
-import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +50,7 @@ import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 public final class SpongeFlatGeneratorConfig {
 
     public static final class BuilderImpl implements FlatGeneratorConfig.Builder {
+
         public final List<LayerConfig> layers = new ArrayList<>();
         public @Nullable RegistryReference<org.spongepowered.api.world.biome.Biome> biome;
         public boolean performDecoration, populateLakes;
@@ -127,7 +126,8 @@ public final class SpongeFlatGeneratorConfig {
             if (this.layers.isEmpty()) {
                 throw new IllegalStateException("Flat generation requires at least 1 Layer!");
             }
-            final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
+            final Registry<Biome>
+                    biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
             final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
             final Optional<HolderSet<StructureSet>> defaultStructures = FlatLevelGeneratorSettings.getDefault(
                     registryAccess.registryOrThrow(Registry.BIOME_REGISTRY),
@@ -137,7 +137,7 @@ public final class SpongeFlatGeneratorConfig {
                     biomeRegistry,
                     defaultStructures, (List<FlatLayerInfo>) (Object) this.layers, this.populateLakes,
                     this.performDecoration, Optional.of(() -> registryAccess.registryOrThrow(Registry.BIOME_REGISTRY)
-                    .get((ResourceLocation) (Object) this.biome.location())));
+                            .get((ResourceLocation) (Object) this.biome.location())));
         }
     }
 

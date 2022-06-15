@@ -37,22 +37,15 @@ import java.util.Objects;
 
 public final class SpongeEndStyleBiomeConfig extends AbstractBiomeProviderConfig implements EndStyleBiomeConfig {
 
-    private final long seed;
     private final RegistryReference<Biome> endBiome, highlandsBiome, midlandsBiome, islandsBiome, barrensBiome;
 
-    protected SpongeEndStyleBiomeConfig(final BuilderImpl builder) {
+    private SpongeEndStyleBiomeConfig(final BuilderImpl builder) {
         super(Lists.newArrayList(builder.endBiome, builder.highlandsBiome, builder.midlandsBiome, builder.islandsBiome, builder.barrensBiome));
-        this.seed = builder.seed;
         this.endBiome = builder.endBiome;
         this.highlandsBiome = builder.highlandsBiome;
         this.midlandsBiome = builder.midlandsBiome;
         this.islandsBiome = builder.islandsBiome;
         this.barrensBiome = builder.barrensBiome;
-    }
-
-    @Override
-    public long seed() {
-        return this.seed;
     }
 
     @Override
@@ -82,14 +75,7 @@ public final class SpongeEndStyleBiomeConfig extends AbstractBiomeProviderConfig
     
     public static final class BuilderImpl implements Builder {
 
-        public long seed;
         public RegistryReference<Biome> endBiome, highlandsBiome, midlandsBiome, islandsBiome, barrensBiome;
-
-        @Override
-        public Builder seed(final long seed) {
-            this.seed = seed;
-            return this;
-        }
 
         @Override
         public Builder endBiome(final RegistryReference<Biome> endBiome) {
@@ -123,7 +109,6 @@ public final class SpongeEndStyleBiomeConfig extends AbstractBiomeProviderConfig
 
         @Override
         public Builder from(final EndStyleBiomeConfig value) {
-            this.seed = Objects.requireNonNull(value, "value").seed();
             this.endBiome = value.endBiome();
             this.highlandsBiome = value.highlandsBiome();
             this.midlandsBiome = value.midlandsBiome();
@@ -134,7 +119,6 @@ public final class SpongeEndStyleBiomeConfig extends AbstractBiomeProviderConfig
 
         @Override
         public Builder reset() {
-            this.seed = SpongeCommon.server().getWorldData().worldGenSettings().seed(); // TODO no more custom seed?
             this.endBiome = Biomes.THE_END;
             this.highlandsBiome = Biomes.END_HIGHLANDS;
             this.midlandsBiome = Biomes.END_MIDLANDS;

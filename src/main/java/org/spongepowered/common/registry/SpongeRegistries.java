@@ -84,6 +84,8 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.MAP_DECORATION_ORIENTATION, SpongeRegistryLoaders.mapDecorationOrientation());
         holder.createRegistry(RegistryTypes.MAP_DECORATION_TYPE, SpongeRegistryLoaders.mapDecorationType());
         holder.createRegistry(RegistryTypes.MAP_SHADE, SpongeRegistryLoaders.mapShade());
+        holder.createRegistry(RegistryTypes.FLAT_GENERATOR_CONFIG, SpongeRegistryLoaders.flatGeneratorConfig());
+        holder.createRegistry(RegistryTypes.NOISE_CONFIG, SpongeRegistryLoaders.noiseConfig());
     }
 
     public static void registerServerRegistries(final RegistryHolder holder) {

@@ -31,12 +31,11 @@ import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
+import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.List;
 import java.util.Optional;

@@ -95,31 +95,4 @@ public final class SpongeNoiseConfig {
         }
     }
 
-    public static final class FactoryImpl implements NoiseConfig.Factory {
-
-        private static final class Holder {
-
-            // See NoiseGeneratorSettings#overworld
-            private static final NoiseConfig OVERWORLD = (NoiseConfig) (Object) NoiseSettings.create(-64, 384, 1, 2);
-            // See NoiseGeneratorSettings#nether
-            private static final NoiseConfig NETHER = (NoiseConfig) (Object) NoiseSettings.create(0, 128, 1, 2);
-            // See NoiseGeneratorSettings#end
-            private static final NoiseConfig END = (NoiseConfig) (Object) NoiseSettings.create(0, 128, 2, 1);
-        }
-
-        @Override
-        public NoiseConfig overworld() {
-            return FactoryImpl.Holder.OVERWORLD;
-        }
-
-        @Override
-        public NoiseConfig nether() {
-            return FactoryImpl.Holder.NETHER;
-        }
-
-        @Override
-        public NoiseConfig end() {
-            return FactoryImpl.Holder.END;
-        }
-    }
 }

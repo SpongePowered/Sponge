@@ -22,41 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.biome;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure;
 
-import org.spongepowered.api.registry.RegistryReference;
-import org.spongepowered.api.world.biome.AttributedBiome;
-import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.api.world.biome.BiomeAttributes;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
+import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.api.world.generation.structure.Structure;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Objects;
+import java.util.List;
 
-public final class SpongeAttributedBiome implements AttributedBiome {
+@Mixin(StructureSet.class)
+public abstract class StructureSetMixin_API implements org.spongepowered.api.world.generation.structure.StructureSet {
 
-    private final RegistryReference<Biome> biome;
-    private final BiomeAttributes attributes;
-
-    private SpongeAttributedBiome(final RegistryReference<Biome> biome, final BiomeAttributes attributes) {
-        this.biome = biome;
-        this.attributes = attributes;
-    }
-
-    @Override
-    public RegistryReference<Biome> biome() {
-        return this.biome;
-    }
+    // @formatter:off
+    @Shadow @Final private StructurePlacement placement;
+    @Shadow @Final private List<StructureSet.StructureSelectionEntry> structures;
+    // @formatter:on
 
     @Override
-    public BiomeAttributes attributes() {
-        return this.attributes;
-    }
-
-    public static final class FactoryImpl implements AttributedBiome.Factory {
-
-        @Override
-        public AttributedBiome of(final RegistryReference<Biome> biome, final BiomeAttributes attributes) {
-            return new SpongeAttributedBiome(Objects.requireNonNull(biome, "biome"), Objects.requireNonNull(attributes, "attributes"));
+    public WeightedTable<Structure> structures() {
+        final WeightedTable<Structure> weightedTable = new WeightedTable<>();
+        for (final StructureSet.StructureSelectionEntry entry : structures) {
+            weightedTable.add((Structure) entry.structure().value(), entry.weight());
         }
+        return weightedTable;
+    }
 
+    @Override
+    public Placement placement() {
+        return (Placement) this.placement;
     }
 }

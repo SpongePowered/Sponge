@@ -22,41 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.biome;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
-import org.spongepowered.api.registry.RegistryReference;
-import org.spongepowered.api.world.biome.AttributedBiome;
-import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.api.world.biome.BiomeAttributes;
+import net.minecraft.world.level.levelgen.SurfaceRules;
+import org.spongepowered.api.world.generation.config.SurfaceRule;
+import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Objects;
+@Mixin(SurfaceRules.ConditionSource.class)
+public interface SurfaceRules_ConditionSourceMixin_API extends SurfaceRule.Condition {
 
-public final class SpongeAttributedBiome implements AttributedBiome {
-
-    private final RegistryReference<Biome> biome;
-    private final BiomeAttributes attributes;
-
-    private SpongeAttributedBiome(final RegistryReference<Biome> biome, final BiomeAttributes attributes) {
-        this.biome = biome;
-        this.attributes = attributes;
+    @Override
+    default SurfaceRule then(SurfaceRule rule) {
+        return (SurfaceRule) SurfaceRules.ifTrue((SurfaceRules.ConditionSource) this, (SurfaceRules.RuleSource) rule);
     }
 
     @Override
-    public RegistryReference<Biome> biome() {
-        return this.biome;
-    }
-
-    @Override
-    public BiomeAttributes attributes() {
-        return this.attributes;
-    }
-
-    public static final class FactoryImpl implements AttributedBiome.Factory {
-
-        @Override
-        public AttributedBiome of(final RegistryReference<Biome> biome, final BiomeAttributes attributes) {
-            return new SpongeAttributedBiome(Objects.requireNonNull(biome, "biome"), Objects.requireNonNull(attributes, "attributes"));
-        }
-
+    default SurfaceRule.Condition not() {
+        return (SurfaceRule.Condition) SurfaceRules.not((SurfaceRules.ConditionSource) this);
     }
 }

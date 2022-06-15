@@ -204,6 +204,22 @@ public final class GeneratorMain {
                 a -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
+                "world.generation.config.noise",
+                "NoiseGeneratorConfigs",
+                "NOISE_GENERATOR_CONFIG",
+                context.relativeClass("world.generation.config.noise", "NoiseGeneratorConfig"),
+                Registry.NOISE_GENERATOR_SETTINGS_REGISTRY,
+                a -> true, RegistryScope.SERVER
+            ),
+            new RegistryEntriesGenerator<>(
+                "world.generation.config.flat",
+                "FlatGeneratorConfigs",
+                "FLAT_GENERATOR_CONFIG",
+                context.relativeClass("world.generation.config.flat", "FlatGeneratorConfig"),
+                Registry.FLAT_LEVEL_GENERATOR_PRESET_REGISTRY,
+                a -> true, RegistryScope.GAME
+            ),
+            new RegistryEntriesGenerator<>(
                 "block",
                 "BlockTypes",
                 "BLOCK_TYPE",

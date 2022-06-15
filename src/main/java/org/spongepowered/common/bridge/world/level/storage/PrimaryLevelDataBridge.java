@@ -87,6 +87,8 @@ public interface PrimaryLevelDataBridge {
 
     void bridge$setViewDistance(@Nullable Integer viewDistance);
 
+    void bridge$triggerViewDistanceLogic();
+
     InheritableConfigHandle<WorldConfig> bridge$configAdapter();
 
     void bridge$configAdapter(InheritableConfigHandle<WorldConfig> adapter);

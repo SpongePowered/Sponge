@@ -58,6 +58,8 @@ public interface LevelStemBridge {
 
     @Nullable Boolean bridge$pvp();
 
+    @Nullable Long bridge$seed();
+
     LevelStem bridge$decorateData(SpongeWorldTemplate.SpongeDataSection data);
 
     LevelStem bridge$decorateData(DataManipulator data);

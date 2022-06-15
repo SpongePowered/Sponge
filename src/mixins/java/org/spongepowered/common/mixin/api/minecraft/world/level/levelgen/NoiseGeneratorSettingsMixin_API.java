@@ -24,12 +24,17 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
+import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.NoiseRouter;
+import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
+import org.spongepowered.api.world.biome.BiomeAttributes;
 import org.spongepowered.api.world.generation.config.SurfaceRule;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
+import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfig;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
@@ -37,64 +42,78 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.List;
+
 @Mixin(NoiseGeneratorSettings.class)
 @Implements(@Interface(iface = NoiseGeneratorConfig.class, prefix = "noiseGeneratorConfig$", remap = Remap.NONE))
 public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorConfig {
 
     // @formatter:off
-    @Shadow public abstract net.minecraft.world.level.levelgen.NoiseSettings shadow$noiseSettings();
-    @Shadow public abstract int shadow$seaLevel();
-    @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$defaultBlock();
-    @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$defaultFluid();
-    @Shadow public abstract boolean shadow$isAquifersEnabled();
-    @Shadow public abstract boolean shadow$oreVeinsEnabled();
-    @Shadow @Deprecated protected abstract boolean shadow$disableMobGeneration();
-    @Shadow public abstract boolean shadow$useLegacyRandomSource();
-    @Shadow public abstract SurfaceRules.RuleSource shadow$surfaceRule();
+    @Shadow @Final private NoiseSettings noiseSettings;
+    @Shadow @Final private net.minecraft.world.level.block.state.BlockState defaultBlock;
+    @Shadow @Final private net.minecraft.world.level.block.state.BlockState defaultFluid;
+    @Shadow @Final private NoiseRouter noiseRouter;
+    @Shadow @Final private SurfaceRules.RuleSource surfaceRule;
+    @Shadow @Final private List<Climate.ParameterPoint> spawnTarget;
+    @Shadow @Final private int seaLevel;
+    @Shadow @Final private boolean disableMobGeneration;
+    @Shadow @Final private boolean aquifersEnabled;
+    @Shadow @Final private boolean oreVeinsEnabled;
+    @Shadow @Final private boolean useLegacyRandomSource;
     // @formatter:on
 
     @Override
     public NoiseConfig noiseConfig() {
-        return (NoiseConfig) (Object) this.shadow$noiseSettings();
+        return (NoiseConfig) (Object) this.noiseSettings;
+    }
+
+    @Intrinsic
+    public org.spongepowered.api.world.generation.config.noise.NoiseRouter noiseGeneratorConfig$noiseRouter() {
+        return (org.spongepowered.api.world.generation.config.noise.NoiseRouter) (Object) this.noiseRouter;
     }
 
     @Override
-    public BlockState defaultBlock() {
-        return (BlockState) this.shadow$defaultBlock();
+    public List<BiomeAttributes> spawnTargets() {
+        return (List) this.spawnTarget;
     }
 
-    @Override
-    public BlockState defaultFluid() {
-        return (BlockState) this.shadow$defaultFluid();
+    @Intrinsic
+    public BlockState noiseGeneratorConfig$defaultBlock() {
+        return (BlockState) this.defaultBlock;
+    }
+
+    @Intrinsic
+    public BlockState noiseGeneratorConfig$defaultFluid() {
+        return (BlockState) this.defaultFluid;
     }
 
     @Intrinsic
     public int noiseGeneratorConfig$seaLevel() {
-        return this.shadow$seaLevel();
+        return this.seaLevel;
     }
 
     @Override
     public boolean aquifers() {
-        return this.shadow$isAquifersEnabled();
+        return this.aquifersEnabled;
     }
 
     @Override
     public boolean oreVeins() {
-        return this.shadow$oreVeinsEnabled();
+        return this.oreVeinsEnabled;
     }
 
     @Override
     public boolean legacyRandomSource() {
-        return this.shadow$useLegacyRandomSource();
+        return this.useLegacyRandomSource;
     }
 
     @Override
     public boolean mobGeneration() {
-        return !this.shadow$disableMobGeneration();
+        return !this.disableMobGeneration;
     }
 
     @Intrinsic
     public SurfaceRule surfaceRule() {
-        return (SurfaceRule) this.shadow$surfaceRule();
+        return (SurfaceRule) this.surfaceRule;
     }
 }
