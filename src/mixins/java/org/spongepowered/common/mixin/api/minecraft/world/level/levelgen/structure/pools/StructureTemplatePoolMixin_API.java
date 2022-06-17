@@ -22,23 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.feature;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure.pools;
 
-import net.minecraft.world.level.levelgen.placement.PlacementModifier;
-import org.spongepowered.api.world.generation.feature.PlacementModifierType;
-import org.spongepowered.asm.mixin.Intrinsic;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import org.spongepowered.api.world.generation.structure.JigsawPool;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(PlacementModifier.class)
-public abstract class PlacementModifierMixin_API implements org.spongepowered.api.world.generation.feature.PlacementModifier {
+@Mixin(StructureTemplatePool.class)
+public abstract class StructureTemplatePoolMixin_API implements JigsawPool {
 
-    //@formatter:off
-    @Shadow public abstract net.minecraft.world.level.levelgen.placement.PlacementModifierType<?> shadow$type();
-    //@formatter:on
 
-    @Intrinsic
-    public PlacementModifierType type() {
-        return (PlacementModifierType) this.shadow$type();
-    }
 }

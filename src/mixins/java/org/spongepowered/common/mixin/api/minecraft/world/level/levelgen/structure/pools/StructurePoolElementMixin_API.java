@@ -22,13 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.datapack;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure.pools;
 
-import net.minecraft.core.RegistryAccess;
-import org.spongepowered.api.datapack.DataPackEntry;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import org.spongepowered.api.world.generation.structure.JigsawPool;
+import org.spongepowered.asm.mixin.Mixin;
 
-public interface DataPackEncoder<E, T extends DataPackEntry<T>> {
+@Mixin(StructurePoolElement.class)
+public abstract class StructurePoolElementMixin_API implements JigsawPool.Element {
 
-    E encode(T serializable, RegistryAccess registryAccess);
 
 }

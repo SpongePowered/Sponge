@@ -34,7 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-public interface SpongeLocationBaseDataHolder extends LocationBaseDataHolder.Mutable {
+public interface SpongeServerLocationBaseDataHolder extends LocationBaseDataHolder.Mutable {
 
     ServerLocation impl$dataholder(int x, int y, int z);
 

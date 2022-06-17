@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.feature;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.placement;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;

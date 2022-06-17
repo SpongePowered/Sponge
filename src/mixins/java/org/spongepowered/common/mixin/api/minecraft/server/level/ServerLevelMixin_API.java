@@ -59,7 +59,6 @@ import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.server.ChunkManager;
 import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.weather.WeatherType;
@@ -69,7 +68,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.entity.raid.RaidsAccessor;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
-import org.spongepowered.common.data.holder.SpongeLocationBaseDataHolder;
+import org.spongepowered.common.data.holder.SpongeServerLocationBaseDataHolder;
 import org.spongepowered.common.mixin.api.minecraft.world.level.LevelMixin_API;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -93,7 +92,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowered.api.world.server.ServerWorld, ServerLocation> implements
-    org.spongepowered.api.world.server.ServerWorld, SpongeLocationBaseDataHolder {
+    org.spongepowered.api.world.server.ServerWorld, SpongeServerLocationBaseDataHolder {
 
     // @formatter:off
     @Shadow @Final private LevelTicks<Block> blockTicks;

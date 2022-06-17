@@ -89,6 +89,7 @@ public final class WorldGenTest {
         event.register(this.plugin,
                 Command.builder()
                         .addChild(this.featureTest.featureCmd(), "feature")
+                        .addChild(this.featureTest.schematicCmd(), "schematic")
                         .addChild(this.noiseTest.noiseCmd(), "noise")
                         .addChild(this.carverTest.carverCmd(), "carver")
                         .addChild(this.biomeTest.biomeCmd(), "biome")

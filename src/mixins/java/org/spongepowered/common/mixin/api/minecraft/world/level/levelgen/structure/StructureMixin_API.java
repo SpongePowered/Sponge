@@ -22,23 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.feature;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import org.spongepowered.api.world.generation.feature.DecorationStep;
+import org.spongepowered.api.world.generation.structure.StructureType;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.util.Collection;
+import java.util.Map;
+
 @Mixin(Structure.class)
-public abstract class StructureFeatureMixin_API implements org.spongepowered.api.world.generation.structure.Structure {
+public abstract class StructureMixin_API implements org.spongepowered.api.world.generation.structure.Structure {
+
+    // @formatter:off
+    @Shadow public abstract net.minecraft.world.level.levelgen.structure.StructureType<?> shadow$type();
+    @Shadow public abstract HolderSet<Biome> shadow$biomes();
+    @Shadow public abstract GenerationStep.Decoration shadow$step();
+
+    @Shadow public abstract Map<MobCategory, StructureSpawnOverride> shadow$spawnOverrides(); // TODO expose?
+    // @formatter:on
 
     @Override
     public boolean place(final ServerWorld world, final Vector3i pos) {
@@ -66,6 +86,21 @@ public abstract class StructureFeatureMixin_API implements org.spongepowered.api
     @Override
     public boolean place(final ServerLocation location) {
         return this.place(location.world(), location.blockPosition());
+    }
+
+    @Override
+    public StructureType type() {
+        return (StructureType) this.shadow$type();
+    }
+
+    @Override
+    public Collection<org.spongepowered.api.world.biome.Biome> allowedBiomes() {
+        return this.shadow$biomes().stream().map(Holder::value).map(org.spongepowered.api.world.biome.Biome.class::cast).toList();
+    }
+
+    @Override
+    public DecorationStep decorationStep() {
+        return (DecorationStep) (Object) this.shadow$step();
     }
 
 }

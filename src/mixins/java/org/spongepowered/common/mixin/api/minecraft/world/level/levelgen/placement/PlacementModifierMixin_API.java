@@ -22,13 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.datapack;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.placement;
 
-import net.minecraft.core.RegistryAccess;
-import org.spongepowered.api.datapack.DataPackEntry;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import org.spongepowered.api.world.generation.feature.PlacementModifierType;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public interface DataPackEncoder<E, T extends DataPackEntry<T>> {
+@Mixin(PlacementModifier.class)
+public abstract class PlacementModifierMixin_API implements org.spongepowered.api.world.generation.feature.PlacementModifier {
 
-    E encode(T serializable, RegistryAccess registryAccess);
+    //@formatter:off
+    @Shadow public abstract net.minecraft.world.level.levelgen.placement.PlacementModifierType<?> shadow$type();
+    //@formatter:on
 
+    @Intrinsic
+    public PlacementModifierType type() {
+        return (PlacementModifierType) this.shadow$type();
+    }
 }

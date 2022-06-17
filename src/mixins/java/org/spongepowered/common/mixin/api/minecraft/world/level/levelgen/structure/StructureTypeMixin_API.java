@@ -22,13 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.datapack;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure;
 
-import net.minecraft.core.RegistryAccess;
-import org.spongepowered.api.datapack.DataPackEntry;
+import org.spongepowered.asm.mixin.Mixin;
 
-public interface DataPackEncoder<E, T extends DataPackEntry<T>> {
-
-    E encode(T serializable, RegistryAccess registryAccess);
+@Mixin(net.minecraft.world.level.levelgen.structure.StructureType.class)
+public interface StructureTypeMixin_API extends org.spongepowered.api.world.generation.structure.StructureType {
 
 }

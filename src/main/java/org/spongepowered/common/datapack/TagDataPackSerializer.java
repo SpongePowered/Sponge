@@ -31,9 +31,9 @@ import org.spongepowered.api.tag.Taggable;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public final class TagDataPackSerializer<T extends Taggable<T>> extends DataPackSerializer<TagTemplate<T>> {
+public final class TagDataPackSerializer<T extends Taggable<T>> extends JsonDataPackSerializer<TagTemplate<T>> {
 
-    public TagDataPackSerializer(final DataPackEncoder<TagTemplate<T>> encoder, final DataPackDecoder<TagTemplate<T>> decoder) {
+    public TagDataPackSerializer(final DataPackEncoder<JsonElement, TagTemplate<T>> encoder, final DataPackDecoder<JsonElement, TagTemplate<T>> decoder) {
         super(encoder, decoder);
     }
 

@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.datapack;
 
+import com.google.gson.JsonElement;
 import io.leangen.geantyref.TypeToken;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagManager;
@@ -45,6 +47,8 @@ import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigT
 import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
 import org.spongepowered.api.world.generation.feature.FeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
+import org.spongepowered.api.world.generation.structure.SchematicTemplate;
+import org.spongepowered.api.world.generation.structure.StructureTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.advancement.SpongeAdvancementTemplate;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
@@ -57,69 +61,79 @@ import org.spongepowered.common.world.generation.config.noise.SpongeNoiseGenerat
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseTemplate;
 import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
 import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
+import org.spongepowered.common.world.generation.structure.SpongeSchematicTemplate;
+import org.spongepowered.common.world.generation.structure.SpongeStructureTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
-public record SpongeDataPackType<T extends DataPackEntry<T>>(String dir, boolean persistent, boolean reloadable, TypeToken<T> entryType, DataPackSerializer<T> packSerializer) implements DataPackType<T> {
+public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, boolean persistent, boolean reloadable, TypeToken<T> entryType, DataPackSerializer<E, T> packSerializer) implements DataPackType<T> {
 
-    public static <T extends DataPackEntry<T>> SpongeDataPackType<T> basic(final Class<T> clazz, final String dir, final DataPackEncoder<T> encoder, final DataPackDecoder<T> decoder, final boolean persistent, final boolean reloadable) {
+    public static <T extends DataPackEntry<T>> SpongeDataPackType<JsonElement, T> basic(final Class<T> clazz, final String dir, final DataPackEncoder<JsonElement, T> encoder, final DataPackDecoder<JsonElement, T> decoder, final boolean persistent, final boolean reloadable) {
         final TypeToken<T> tt = TypeToken.get(clazz);
-        return new SpongeDataPackType<>(dir, persistent, reloadable, tt, new DataPackSerializer<>(encoder, decoder));
+        return new SpongeDataPackType<>(dir, persistent, reloadable, tt, new JsonDataPackSerializer<>(encoder, decoder));
     }
 
-    public static <T extends DataPackEntry<T>> SpongeDataPackType<T> custom(final Class<T> clazz, final String dir, final DataPackSerializer<T> serializer, final boolean persistent, final boolean reloadable) {
+    public static <E, T extends DataPackEntry<T>> SpongeDataPackType<E, T> custom(final Class<T> clazz, final String dir, final DataPackSerializer<E, T> serializer, final boolean persistent, final boolean reloadable) {
         final TypeToken<T> tt = TypeToken.get(clazz);
         return new SpongeDataPackType<>(dir, persistent, reloadable, tt, serializer);
     }
 
-    public static <T extends DataPackEntry<T>> SpongeDataPackType<T> custom(final TypeToken<T> typeToken, final String dir, final DataPackSerializer<T> serializer, final boolean persistent, final boolean reloadable) {
+    public static <E, T extends DataPackEntry<T>> SpongeDataPackType<E, T> custom(final TypeToken<T> typeToken, final String dir, final DataPackSerializer<E, T> serializer, final boolean persistent, final boolean reloadable) {
         return new SpongeDataPackType<>(dir, persistent, reloadable, typeToken, serializer);
     }
 
     public static final class FactoryImpl implements DataPackType.Factory {
 
-        private final SpongeDataPackType<@NonNull AdvancementTemplate> advancement = SpongeDataPackType.basic(AdvancementTemplate.class,
+        private final SpongeDataPackType<JsonElement, @NonNull AdvancementTemplate> advancement = SpongeDataPackType.basic(AdvancementTemplate.class,
                 "advancements", SpongeAdvancementTemplate::encode, null, // TODO decoder
                       false, true);
 
-        private final SpongeDataPackType<@NonNull RecipeRegistration> recipe = SpongeDataPackType.custom(RecipeRegistration.class,
+        private final SpongeDataPackType<JsonElement, @NonNull RecipeRegistration> recipe = SpongeDataPackType.custom(RecipeRegistration.class,
                 "recipes", new RecipeDataPackSerializer(SpongeRecipeRegistration::encode, null), // TODO decoder
                       false, true);
 
-        private final SpongeDataPackType<@NonNull WorldTypeTemplate> worldType = SpongeDataPackType.basic(WorldTypeTemplate.class,
+        private final SpongeDataPackType<JsonElement, @NonNull WorldTypeTemplate> worldType = SpongeDataPackType.basic(WorldTypeTemplate.class,
                 "dimension_type", SpongeWorldTypeTemplate::encode, SpongeWorldTypeTemplate::decode,
                       true, false);
 
-        private final SpongeDataPackType<@NonNull WorldTemplate> world = SpongeDataPackType.basic(WorldTemplate.class,
+        private final SpongeDataPackType<JsonElement, @NonNull WorldTemplate> world = SpongeDataPackType.basic(WorldTemplate.class,
                 "dimension", SpongeWorldTemplate::serialize, SpongeWorldTemplate::decode,
                       true, false);
 
-        private final SpongeDataPackType<@NonNull BiomeTemplate> biome = SpongeDataPackType.basic(BiomeTemplate.class,
+        private final SpongeDataPackType<JsonElement, @NonNull BiomeTemplate> biome = SpongeDataPackType.basic(BiomeTemplate.class,
                 "worldgen/biome", SpongeBiomeTemplate::encode, SpongeBiomeTemplate::decode,
                       true, false);
 
-        private final SpongeDataPackType<@NonNull CarverTemplate> carver = SpongeDataPackType.basic(CarverTemplate.class,
+        private final SpongeDataPackType<JsonElement, @NonNull CarverTemplate> carver = SpongeDataPackType.basic(CarverTemplate.class,
                 "worldgen/configured_carver", SpongeCarverTemplate::encode, SpongeCarverTemplate::decode,
                 true, false);
 
-        private final SpongeDataPackType<@NonNull FeatureTemplate> feature = SpongeDataPackType.basic(FeatureTemplate.class,
+        private final SpongeDataPackType<JsonElement, @NonNull FeatureTemplate> feature = SpongeDataPackType.basic(FeatureTemplate.class,
                 "worldgen/configured_feature", SpongeFeatureTemplate::encode, SpongeFeatureTemplate::decode,
                 true, false);
 
-        private final SpongeDataPackType<@NonNull PlacedFeatureTemplate> placedFeature = SpongeDataPackType.basic(PlacedFeatureTemplate.class,
+        private final SpongeDataPackType<JsonElement, @NonNull PlacedFeatureTemplate> placedFeature = SpongeDataPackType.basic(PlacedFeatureTemplate.class,
                 "worldgen/placed_feature", SpongePlacedFeatureTemplate::encode, SpongePlacedFeatureTemplate::decode,
                 true, false);
 
-        private final SpongeDataPackType<@NonNull NoiseGeneratorConfigTemplate> noiseGeneratorConfig = SpongeDataPackType.basic(NoiseGeneratorConfigTemplate.class,
+        private final SpongeDataPackType<JsonElement, @NonNull NoiseGeneratorConfigTemplate> noiseGeneratorConfig = SpongeDataPackType.basic(NoiseGeneratorConfigTemplate.class,
                 "worldgen/noise_settings", SpongeNoiseGeneratorConfigTemplate::encode, SpongeNoiseGeneratorConfigTemplate::decode,
                 true, false);
 
-        private final SpongeDataPackType<@NonNull NoiseTemplate> noise = SpongeDataPackType.basic(NoiseTemplate.class,
+        private final SpongeDataPackType<JsonElement, @NonNull NoiseTemplate> noise = SpongeDataPackType.basic(NoiseTemplate.class,
                 "worldgen/noise", SpongeNoiseTemplate::encode, SpongeNoiseTemplate::decode,
                 true, false);
 
-        private final SpongeDataPackType<@NonNull DensityFunctionTemplate> densityFunction = SpongeDataPackType.basic(DensityFunctionTemplate.class,
+        private final SpongeDataPackType<JsonElement, @NonNull DensityFunctionTemplate> densityFunction = SpongeDataPackType.basic(DensityFunctionTemplate.class,
                 "worldgen/density_function", SpongeDensityFunctionTemplate::encode, SpongeDensityFunctionTemplate::decode,
+                true, false);
+
+        private final SpongeDataPackType<JsonElement, @NonNull StructureTemplate> structure = SpongeDataPackType.basic(StructureTemplate.class,
+                "worldgen/structure", SpongeStructureTemplate::encode, SpongeStructureTemplate::decode,
+                true, false);
+
+        private final SpongeDataPackType<CompoundTag, @NonNull SchematicTemplate> schematic = SpongeDataPackType.custom(SchematicTemplate.class,
+                "structures", new NbtDataPackSerializer<>(SpongeSchematicTemplate::encode, SpongeSchematicTemplate::decode),
                 true, false);
 
         @Override
@@ -175,6 +189,16 @@ public record SpongeDataPackType<T extends DataPackEntry<T>>(String dir, boolean
         @Override
         public DataPackType<DensityFunctionTemplate> densityFunction() {
             return this.densityFunction;
+        }
+
+        @Override
+        public DataPackType<StructureTemplate> structure() {
+            return this.structure;
+        }
+
+        @Override
+        public DataPackType<SchematicTemplate> schematic() {
+            return this.schematic;
         }
 
         @Override

@@ -27,6 +27,6 @@ package org.spongepowered.common.datapack;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPackEntry;
 
-public record SpongeDataPack<T extends DataPackEntry<T>>(String name, String description, SpongeDataPackType<T> type) implements DataPack<T> {
+public record SpongeDataPack<E, T extends DataPackEntry<T>>(String name, String description, SpongeDataPackType<E, T> type) implements DataPack<T> {
 
 }

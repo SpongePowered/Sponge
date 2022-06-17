@@ -24,34 +24,29 @@
  */
 package org.spongepowered.common.datapack;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import net.minecraft.SharedConstants;
-import org.apache.commons.io.FileUtils;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.datapack.DataPackEntry;
-import org.spongepowered.common.SpongeCommon;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public class DataPackSerializer<T extends DataPackEntry<T>> {
+public abstract class DataPackSerializer<E, T extends DataPackEntry<T>> {
 
-    private DataPackEncoder<T> encoder;
-    private DataPackDecoder<T> decoder;
+    protected DataPackEncoder<E, T> encoder;
+    protected DataPackDecoder<E, T> decoder;
 
-    public DataPackSerializer(final DataPackEncoder<T> encoder, final DataPackDecoder<T> decoder) {
+    public DataPackSerializer(final DataPackEncoder<E, T> encoder, final DataPackDecoder<E, T> decoder) {
         this.encoder = encoder;
         this.decoder = decoder;
     }
 
-    public boolean serialize(final SpongeDataPack<T> pack, final Path packDir, final List<T> packEntries) throws IOException {
+    public boolean serialize(final SpongeDataPack<E, T> pack, final Path packDir, final List<T> packEntries) throws IOException {
         if (!pack.type().persistent()) { // TODO persistence - reloadable types can now be saved at any time - which would delete all others...
 //            FileUtils.deleteDirectory(packDir.toFile());
         }
@@ -64,52 +59,35 @@ public class DataPackSerializer<T extends DataPackEntry<T>> {
         for (final T packEntry : packEntries) {
             this.serializeObject(pack, packDir, packEntry);
             this.serializeAdditional(pack, packDir, packEntry);
+            this.serializeAdditional(pack, packDir, packEntry);
         }
         return true;
     }
 
-    public Path packEntryFile(final SpongeDataPack<T> pack, final ResourceKey key, final Path packDir) {
+    public Path packEntryFile(final SpongeDataPackType<E, T> packType, final ResourceKey key, final Path packDir) {
+        final ResourceLocation loc = this.location(packType, key);
         return packDir.resolve("data")
-                .resolve(key.namespace())
-                .resolve(pack.type().dir())
-                .resolve(key.value() + ".json");
+                .resolve(loc.getNamespace())
+                .resolve(loc.getPath());
     }
 
-    protected void serializeObject(final SpongeDataPack<T> pack, final Path packDir, final T packEntry) throws IOException {
-        final JsonElement serialized = this.encoder.encode(packEntry, SpongeCommon.server().registryAccess());
-        final Path file = this.packEntryFile(pack, packEntry.key(), packDir);
-        final JsonElement finalJson = this.transformSerialized(file, packEntry, serialized);
-        Files.createDirectories(file.getParent());
-        DataPackSerializer.writeFile(file, finalJson);
+    public ResourceLocation location(final SpongeDataPackType<?, T> packType, final ResourceKey key) {
+        return new ResourceLocation(key.namespace(), packType.dir() + "/" + key.value() + this.fileEnding());
     }
 
-    protected JsonElement transformSerialized(final Path file, final T entry, final JsonElement serialized) throws IOException {
-        return serialized;
-    }
+    public abstract String fileEnding();
 
-    protected void serializeAdditional(final SpongeDataPack<T> type, Path packDir, T entry) throws IOException {
-    }
+    public abstract void serializeObject(final SpongeDataPack<E, T> pack, final Path packDir, final T packEntry) throws IOException;
 
-    public T deserialize(final SpongeDataPack<T> pack, final Path file, final ResourceKey key) throws IOException {
-        try (final InputStream stream = Files.newInputStream(file); final InputStreamReader reader = new InputStreamReader(stream)) {
-            final JsonElement element = JsonParser.parseReader(reader);
+    protected abstract void serializeAdditional(final SpongeDataPack<E, T> type, Path packDir, T entry) throws IOException;
 
-            if (this.decoder != null) {
-                // TODO this is actually blocking
-                return this.decoder.decode(pack, key, element, SpongeCommon.server().registryAccess());
-            }
-        }
-        return null;
-    }
+    public abstract T deserialize(final SpongeDataPack<E, T> pack, final Path file, final ResourceKey key) throws IOException;
 
-    public static void writeFile(final Path file, final JsonElement object) throws IOException {
-        Files.deleteIfExists(file);
-        try (BufferedWriter bufferedwriter = Files.newBufferedWriter(file)) {
-            bufferedwriter.write(object.toString());
-        }
-    }
+    public abstract T deserialize(final SpongeDataPack<E, T> pack, final InputStream is, final ResourceKey key) throws IOException;
 
-    public static void writePackMetadata(final SpongeDataPack<?> pack, final Path packDir, final boolean replace) throws IOException {
+
+
+    public static void writePackMetadata(final SpongeDataPack<?, ?> pack, final Path packDir, final boolean replace) throws IOException {
         // Write our pack metadata
         final Path packMeta = packDir.resolve("pack.mcmeta");
         if (replace || !Files.exists(packMeta)) {
@@ -119,7 +97,7 @@ public class DataPackSerializer<T extends DataPackEntry<T>> {
             packData.addProperty("pack_format", SharedConstants.getCurrentVersion().getPackVersion());
             packData.addProperty("description", pack.description());
 
-            writeFile(packMeta, packDataRoot);
+            JsonDataPackSerializer.writeFile(packMeta, packDataRoot);
         }
     }
 

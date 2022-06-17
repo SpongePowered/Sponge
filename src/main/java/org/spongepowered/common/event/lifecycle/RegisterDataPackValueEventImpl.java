@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.lifecycle;
 
+import com.google.gson.JsonElement;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.datapack.DataPackEntry;
 import org.spongepowered.api.datapack.DataPackType;
@@ -40,7 +41,7 @@ public final class RegisterDataPackValueEventImpl<T extends DataPackEntry<T>> ex
     private final DataPackType<T> type;
     private final List<T> serializables;
 
-    public RegisterDataPackValueEventImpl(final Cause cause, final Game game, final SpongeDataPackType<T> type) {
+    public RegisterDataPackValueEventImpl(final Cause cause, final Game game, final SpongeDataPackType<JsonElement, T> type) {
         super(cause, game, type.entryType());
         this.type = type;
         this.serializables = new ArrayList<>();

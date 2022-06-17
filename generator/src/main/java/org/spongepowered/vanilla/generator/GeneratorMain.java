@@ -347,11 +347,26 @@ public final class GeneratorMain {
             ),
             new RegistryEntriesGenerator<>(
                 "world.generation.structure",
+                "StructureTypes",
+                "STRUCTURE_TYPE",
+                context.relativeClass("world.generation.structure", "StructureType"),
+                Registry.STRUCTURE_TYPE_REGISTRY
+            ),
+            new RegistryEntriesGenerator<>(
+                "world.generation.structure",
                 "StructureSets",
                 "STRUCTURE_SET",
                 context.relativeClass("world.generation.structure", "StructureSet"),
                 Registry.STRUCTURE_SET_REGISTRY,
                 $ -> true, RegistryScope.SERVER
+            ),
+            new RegistryEntriesGenerator<>(
+                "world.generation.structure",
+                "JigsawPools",
+                "JIGSAW_POOL",
+                context.relativeClass("world.generation.structure", "JigsawPool"),
+                Registry.TEMPLATE_POOL_REGISTRY,
+                $ -> true, RegistryScope.GAME
             ),
             new RegistryEntriesGenerator<>(
                 "data.type",

@@ -34,7 +34,11 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPackTypes;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.blockray.RayTrace;
@@ -45,10 +49,15 @@ import org.spongepowered.api.world.generation.feature.Features;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
 import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacedFeatures;
+import org.spongepowered.api.world.generation.structure.SchematicTemplate;
 import org.spongepowered.api.world.generation.structure.Structure;
+import org.spongepowered.api.world.generation.structure.StructureTemplate;
 import org.spongepowered.api.world.generation.structure.Structures;
+import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.DataPackManager;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -106,9 +115,15 @@ public class FeatureTest {
                 .key(ResourceKey.of("featuretest", "test2"))
                 .build();
 
+
+        final StructureTemplate structureTemplate = StructureTemplate.builder().from(Structures.IGLOO.get())
+                .key(ResourceKey.of("featuretest", "test"))
+                .build();
+
         dpm.save(featureTemplate);
         dpm.save(placedFeatureTemplate1);
         dpm.save(placedFeatureTemplate2);
+        dpm.save(structureTemplate);
 
         return CommandResult.success();
     }
@@ -132,6 +147,46 @@ public class FeatureTest {
         return CommandResult.success();
     }
 
+    private CommandResult listSchematics(final CommandContext ctx, final Parameter.Value<String> filterParam) {
+        final Optional<String> rawFilter = ctx.one(filterParam);
+        final String filter = rawFilter.orElse("minecraft:").toUpperCase();
+        boolean invert = rawFilter.isPresent();
+
+        final DataPackManager dpm = Sponge.server().dataPackManager();
+        dpm.find(DataPackTypes.SCHEMATIC).forEach((pack, keys) -> {
+            if (keys.isEmpty()) {
+                return;
+            }
+            ctx.sendMessage(Identity.nil(), Component.text("Schematics Pack " + pack.name() + "(" + keys.size() + ")", NamedTextColor.DARK_AQUA));
+            keys.stream().filter(key -> invert == key.toString().toUpperCase().contains(filter)).forEach(key -> {
+                final Optional<SchematicTemplate> loaded = dpm.load(DataPacks.SCHEMATIC, key).join();
+
+                ctx.sendMessage(Identity.nil(), Component.text(" - " + key + " loaded " + loaded.isPresent(), NamedTextColor.GRAY));
+            });
+
+        });
+
+        return CommandResult.success();
+    }
+
+    private CommandResult placeSchematic(final CommandContext ctx, final Parameter.Value<ResourceKey> schematicParam) {
+        final DataPackManager dpm = Sponge.server().dataPackManager();
+        final ResourceKey key = ctx.one(schematicParam).orElse(ResourceKey.minecraft("village/desert/houses/desert_small_house_1"));
+        final Optional<DataPack<SchematicTemplate>> pack = dpm.findPack(DataPackTypes.SCHEMATIC, key);
+        final Optional<ServerPlayer> player = ctx.cause().first(ServerPlayer.class);
+        if (pack.isPresent()) {
+            final Optional<SchematicTemplate> loaded = dpm.load(pack.get(), key).join();
+            if (loaded.isPresent() && player.isPresent()) {
+                final Schematic schematic = loaded.get().schematic();
+                final RayTrace<LocatableBlock> ray = this.viewRay(player.get());
+                final ServerLocation location = ray.execute().orElseThrow().selectedObject().serverLocation().relativeTo(Direction.UP);
+                schematic.applyToWorld(location.world(), location.blockPosition(), SpawnTypes.CUSTOM);
+                ctx.sendMessage(Identity.nil(), Component.text("Placed Schematic: " + key + " from pack " + pack.get().name(), NamedTextColor.DARK_AQUA));
+            }
+        }
+        return CommandResult.success();
+    }
+
     Command.Parameterized featureCmd() {
         final Parameter.Value<Feature> feature = Parameter.registryElement(TypeToken.get(Feature.class), RegistryTypes.FEATURE, "minecraft").key("feature").optional().build();
         final Parameter.Value<PlacedFeature> placedFeature = Parameter.registryElement(TypeToken.get(PlacedFeature.class), RegistryTypes.PLACED_FEATURE, "minecraft").key("feature").optional().build();
@@ -146,7 +201,14 @@ public class FeatureTest {
                 .build();
     }
 
-
+    Command.Parameterized schematicCmd() {
+        final Parameter.Value<ResourceKey> schematic = Parameter.resourceKey().key("schematic").optional().build();
+        final Parameter.Value<String> filter = Parameter.string().key("filter").optional().build();
+        return Command.builder()
+                .addChild(Command.builder().addParameter(filter).executor(ctx -> this.listSchematics(ctx, filter)).build(), "list")
+                .addChild(Command.builder().addParameter(schematic).executor(ctx -> this.placeSchematic(ctx, schematic)).build(), "place")
+                .build();
+    }
 
 
 }

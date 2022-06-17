@@ -24,11 +24,38 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.tags.TagKey;
+import org.spongepowered.api.registry.DefaultedRegistryType;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.command.sponge.SpongeCommand;
 import org.spongepowered.common.data.holder.SpongeDataHolder;
+import org.spongepowered.common.mixin.api.minecraft.tags.TagKeyMixin_API;
+
+import java.util.Collection;
 
 @Mixin(net.minecraft.world.level.biome.Biome.class)
 public abstract class BiomeMixin_API implements Biome, SpongeDataHolder {
 
+    @Override
+    public DefaultedRegistryType<Biome> registryType() {
+        return RegistryTypes.BIOME;
+    }
+
+    @Override
+    public Collection<Tag<Biome>> tags() {
+        return this.registryType().get().tags().filter(this::is).toList();
+    }
+
+    @Override
+    public boolean is(final Tag<Biome> tag) {
+        final Registry<net.minecraft.world.level.biome.Biome> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+        final Holder.Reference<net.minecraft.world.level.biome.Biome> holder = registry.createIntrusiveHolder((net.minecraft.world.level.biome.Biome) (Object) this);
+        return holder.is(((TagKey<net.minecraft.world.level.biome.Biome>) (Object) tag));
+    }
 }

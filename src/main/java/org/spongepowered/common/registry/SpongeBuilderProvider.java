@@ -127,6 +127,8 @@ import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigT
 import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
 import org.spongepowered.api.world.generation.feature.FeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
+import org.spongepowered.api.world.generation.structure.SchematicTemplate;
+import org.spongepowered.api.world.generation.structure.StructureTemplate;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.WorldTemplate;
@@ -227,6 +229,8 @@ import org.spongepowered.common.world.generation.config.noise.SpongeNoiseGenerat
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseTemplate;
 import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
 import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
+import org.spongepowered.common.world.generation.structure.SpongeSchematicTemplate;
+import org.spongepowered.common.world.generation.structure.SpongeStructureTemplate;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
@@ -378,6 +382,8 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(CarverTemplate.Builder.class, SpongeCarverTemplate.BuilderImpl::new)
                 .register(FeatureTemplate.Builder.class, SpongeFeatureTemplate.BuilderImpl::new)
                 .register(PlacedFeatureTemplate.Builder.class, SpongePlacedFeatureTemplate.BuilderImpl::new)
+                .register(StructureTemplate.Builder.class, SpongeStructureTemplate.BuilderImpl::new)
+                .register(SchematicTemplate.Builder.class, SpongeSchematicTemplate.BuilderImpl::new)
         ;
     }
 }
