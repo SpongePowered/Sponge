@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
 import net.minecraft.world.level.levelgen.NoiseRouter;
+import org.spongepowered.api.world.generation.config.noise.DensityFunction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,4 +51,78 @@ public abstract class NoiseRouterMixin_API implements org.spongepowered.api.worl
     @Shadow @Final private net.minecraft.world.level.levelgen.DensityFunction veinGap;
     // @formatter:on
 
+    @Override
+    public DensityFunction barrierNoise() {
+        return (DensityFunction) this.barrierNoise;
+    }
+
+    @Override
+    public DensityFunction fluidLevelFloodednessNoise() {
+        return (DensityFunction) this.fluidLevelFloodednessNoise;
+    }
+
+    @Override
+    public DensityFunction fluidLevelSpreadNoise() {
+        return (DensityFunction) this.fluidLevelSpreadNoise;
+    }
+
+    @Override
+    public DensityFunction lavaNoise() {
+        return (DensityFunction) this.lavaNoise;
+    }
+
+    @Override
+    public DensityFunction temperature() {
+        return (DensityFunction) this.temperature;
+    }
+
+    @Override
+    public DensityFunction vegetation() {
+        return (DensityFunction) this.vegetation;
+    }
+
+    @Override
+    public DensityFunction continents() {
+        return (DensityFunction) this.continents;
+    }
+
+    @Override
+    public DensityFunction erosion() {
+        return (DensityFunction) this.erosion;
+    }
+
+    @Override
+    public DensityFunction depth() {
+        return (DensityFunction) this.depth;
+    }
+
+    @Override
+    public DensityFunction ridges() {
+        return (DensityFunction) this.ridges;
+    }
+
+    @Override
+    public DensityFunction initialDensityWithoutJaggedness() {
+        return (DensityFunction) this.initialDensityWithoutJaggedness;
+    }
+
+    @Override
+    public DensityFunction finalDensity() {
+        return (DensityFunction) this.finalDensity;
+    }
+
+    @Override
+    public DensityFunction veinToggle() {
+        return (DensityFunction) this.veinToggle;
+    }
+
+    @Override
+    public DensityFunction veinRidged() {
+        return (DensityFunction) this.veinRidged;
+    }
+
+    @Override
+    public DensityFunction veinGap() {
+        return (DensityFunction) this.veinGap;
+    }
 }

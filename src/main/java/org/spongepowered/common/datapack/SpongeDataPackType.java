@@ -40,6 +40,7 @@ import org.spongepowered.api.tag.Taggable;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.biome.BiomeTemplate;
 import org.spongepowered.api.world.generation.carver.CarverTemplate;
+import org.spongepowered.api.world.generation.config.noise.DensityFunctionTemplate;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigTemplate;
 import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
 import org.spongepowered.api.world.generation.feature.FeatureTemplate;
@@ -51,6 +52,7 @@ import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.tag.SpongeTagTemplate;
 import org.spongepowered.common.world.biome.SpongeBiomeTemplate;
 import org.spongepowered.common.world.generation.carver.SpongeCarverTemplate;
+import org.spongepowered.common.world.generation.config.noise.SpongeDensityFunctionTemplate;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseGeneratorConfigTemplate;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseTemplate;
 import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
@@ -116,6 +118,10 @@ public record SpongeDataPackType<T extends DataPackEntry<T>>(String dir, boolean
                 "worldgen/noise", SpongeNoiseTemplate::encode, SpongeNoiseTemplate::decode,
                 true, false);
 
+        private final SpongeDataPackType<@NonNull DensityFunctionTemplate> densityFunction = SpongeDataPackType.basic(DensityFunctionTemplate.class,
+                "worldgen/density_function", SpongeDensityFunctionTemplate::encode, SpongeDensityFunctionTemplate::decode,
+                true, false);
+
         @Override
         public DataPackType<RecipeRegistration> recipe() {
             return this.recipe;
@@ -164,6 +170,11 @@ public record SpongeDataPackType<T extends DataPackEntry<T>>(String dir, boolean
         @Override
         public DataPackType<NoiseTemplate> noise() {
             return this.noise;
+        }
+
+        @Override
+        public DataPackType<DensityFunctionTemplate> densityFunction() {
+            return this.densityFunction;
         }
 
         @Override

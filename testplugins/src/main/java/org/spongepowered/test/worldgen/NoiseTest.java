@@ -33,6 +33,8 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.world.generation.config.noise.DensityFunctionTemplate;
+import org.spongepowered.api.world.generation.config.noise.DensityFunctions;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigTemplate;
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigs;
 import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
@@ -56,6 +58,10 @@ public class NoiseTest {
         NoiseGeneratorConfigs.registry().streamEntries().filter(e -> invert == e.key().toString().toUpperCase().contains(filter))
                 .forEach(e -> ctx.sendMessage(Identity.nil(), Component.text(" - " + e.key(), NamedTextColor.GRAY)));
 
+        ctx.sendMessage(Identity.nil(), Component.text("Density Functions:", NamedTextColor.DARK_AQUA));
+        DensityFunctions.registry().streamEntries().filter(e -> invert == e.key().toString().toUpperCase().contains(filter))
+                .forEach(e -> ctx.sendMessage(Identity.nil(), Component.text(" - " + e.key(), NamedTextColor.GRAY)));
+
         return CommandResult.success();
     }
 
@@ -70,9 +76,14 @@ public class NoiseTest {
                 .key(ResourceKey.of("noisetest", "calcite_copy"))
                 .build();
 
+        final DensityFunctionTemplate overWorldDensity = DensityFunctionTemplate.builder().from(DensityFunctions.OVERWORLD_BASE_3D_NOISE.get())
+                .key(ResourceKey.of("noisetest", "overworld_base3d_copy"))
+                .build();
+
         try {
             dpm.save(noiseGenCfgTemplate);
             dpm.save(noiseTemplate);
+            dpm.save(overWorldDensity);
         } catch (Exception e) {
             e.printStackTrace();
         }

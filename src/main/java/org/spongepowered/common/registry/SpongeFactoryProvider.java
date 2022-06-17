@@ -253,7 +253,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(TagTemplate.Factory.class, new SpongeTagTemplateFactory())
                 .registerFactory(Tag.Factory.class, new SpongeTagFactory())
                 .registerFactory(EventListenerRegistration.Factory.class, new SpongeEventListenerRegistration.FactoryImpl())
-                .registerFactory(FlatGeneratorConfig.Factory.class, new SpongeFlatGeneratorConfig.FactoryImpl())
                 .registerFactory(CommandResult.Factory.class, new SpongeCommandResultFactory())
                 .registerFactory(ItemStack.Factory.class, new SpongeItemStack.FactoryImpl())
                 .registerFactory(BlockSnapshot.Factory.class, new SpongeBlockSnapshot.FactoryImpl())

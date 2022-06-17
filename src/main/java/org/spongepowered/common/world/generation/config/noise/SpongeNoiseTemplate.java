@@ -127,6 +127,7 @@ public record SpongeNoiseTemplate(ResourceKey key, NormalNoise.NoiseParameters n
         public Builder reset() {
             this.octave = null;
             this.amplitudes = null;
+            this.pack = DataPacks.NOISE;
             return this;
         }
 

@@ -52,8 +52,9 @@ public final class SpongeFlatGeneratorConfig {
     public static final class BuilderImpl implements FlatGeneratorConfig.Builder {
 
         public final List<LayerConfig> layers = new ArrayList<>();
-        public @Nullable RegistryReference<org.spongepowered.api.world.biome.Biome> biome;
+        @Nullable public RegistryReference<org.spongepowered.api.world.biome.Biome> biome;
         public boolean performDecoration, populateLakes;
+        @Nullable private List<org.spongepowered.api.world.generation.structure.StructureSet> structureSets;
 
         public BuilderImpl() {
             this.reset();
@@ -102,11 +103,18 @@ public final class SpongeFlatGeneratorConfig {
         }
 
         @Override
+        public FlatGeneratorConfig.Builder structureSets(@Nullable final List<org.spongepowered.api.world.generation.structure.StructureSet> structureSets) {
+            this.structureSets = structureSets;
+            return this;
+        }
+
+        @Override
         public FlatGeneratorConfig.Builder reset() {
             this.biome = null;
             this.layers.clear();
             this.performDecoration = false;
             this.populateLakes = true;
+            this.structureSets = null;
             return this;
         }
 
@@ -115,6 +123,7 @@ public final class SpongeFlatGeneratorConfig {
             this.layers.addAll(value.layers());
             this.performDecoration = value.performDecoration();
             this.populateLakes = value.populateLakes();
+            this.structureSets = value.structureSets().orElse(null);
             return this;
         }
 
@@ -141,14 +150,4 @@ public final class SpongeFlatGeneratorConfig {
         }
     }
 
-    public static final class FactoryImpl implements FlatGeneratorConfig.Factory {
-
-        @Override
-        public FlatGeneratorConfig standard() {
-            final Registry<Biome> biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-            final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
-            final Registry<StructureSet> structureRegistry = registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
-            return (FlatGeneratorConfig) FlatLevelGeneratorSettings.getDefault(biomeRegistry, structureRegistry);
-        }
-    }
 }

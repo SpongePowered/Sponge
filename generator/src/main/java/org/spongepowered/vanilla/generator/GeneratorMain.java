@@ -228,6 +228,14 @@ public final class GeneratorMain {
                 a -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
+                "world.generation.config.noise",
+                "DensityFunctions",
+                "DENSITY_FUNCTION",
+                context.relativeClass("world.generation.config.noise", "DensityFunction"),
+                Registry.DENSITY_FUNCTION_REGISTRY,
+                a -> true, RegistryScope.SERVER
+            ),
+            new RegistryEntriesGenerator<>(
                 "block",
                 "BlockTypes",
                 "BLOCK_TYPE",
@@ -335,6 +343,14 @@ public final class GeneratorMain {
                 "STRUCTURE",
                 context.relativeClass("world.generation.structure", "Structure"),
                 Registry.STRUCTURE_REGISTRY,
+                $ -> true, RegistryScope.SERVER
+            ),
+            new RegistryEntriesGenerator<>(
+                "world.generation.structure",
+                "StructureSets",
+                "STRUCTURE_SET",
+                context.relativeClass("world.generation.structure", "StructureSet"),
+                Registry.STRUCTURE_SET_REGISTRY,
                 $ -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
