@@ -105,7 +105,7 @@ public abstract class StructureTemplateMixin_API implements Schematic, SpongeArc
 
     @Override
     public Vector3i max() {
-        return VecHelper.toVector3i(this.shadow$getSize());
+        return VecHelper.toVector3i(this.shadow$getSize()).sub(Vector3i.ONE);
     }
 
     @Override
