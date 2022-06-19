@@ -314,8 +314,9 @@ public abstract class SpongeWorldManager implements WorldManager {
         final ResourceKey key = Objects.requireNonNull(template, "template").key();
         final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(key);
         if (Level.OVERWORLD.equals(registryKey)) {
-            FutureUtil.completedWithException(new IllegalArgumentException("The default world cannot be told to load!"));
+            return FutureUtil.completedWithException(new IllegalArgumentException("The default world cannot be told to load!"));
         }
+
         final ServerLevel serverWorld = this.worlds.get(registryKey);
         if (serverWorld != null) {
             return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) serverWorld);
@@ -329,9 +330,8 @@ public abstract class SpongeWorldManager implements WorldManager {
     @Override
     public CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld(final ResourceKey key) {
         final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(Objects.requireNonNull(key, "key"));
-
         if (Level.OVERWORLD.equals(registryKey)) {
-            FutureUtil.completedWithException(new IllegalArgumentException("The default world cannot be told to load!"));
+            return FutureUtil.completedWithException(new IllegalArgumentException("The default world cannot be told to load!"));
         }
 
         final ServerLevel world = this.worlds.get(registryKey);
@@ -376,7 +376,6 @@ public abstract class SpongeWorldManager implements WorldManager {
         try {
             storageSource = this.createStorageSource(worldKey);
         } catch (final IOException e) {
-            e.printStackTrace();
             return FutureUtil.completedWithException(new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e));
         }
 
@@ -450,14 +449,12 @@ public abstract class SpongeWorldManager implements WorldManager {
             return CompletableFuture.completedFuture(false);
         }
 
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                this.unloadWorld0((ServerLevel) world);
-            } catch (final IOException e) {
-                return false;
-            }
-            return true;
-        }, SpongeCommon.server());
+        try {
+            this.unloadWorld0((ServerLevel) world);
+            return CompletableFuture.completedFuture(true);
+        } catch (final IOException e) {
+            return FutureUtil.completedWithException(e);
+        }
     }
 
     @Override
@@ -473,7 +470,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                 final LevelStem template = SpongeWorldManager.stemFromJson(key, new JsonParser().parse(reader));
                 return CompletableFuture.completedFuture(Optional.of(((LevelStemBridge) (Object) template).bridge$asTemplate()));
             } catch (final IOException e) {
-                e.printStackTrace();
+                return FutureUtil.completedWithException(e);
             }
         }
 
@@ -487,7 +484,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             final JsonElement element = SpongeWorldManager.stemToJson(scratch);
             this.writeTemplate(element, template.key());
         } catch (final Exception ex) {
-            FutureUtil.completedWithException(ex);
+            return FutureUtil.completedWithException(ex);
         }
         return CompletableFuture.completedFuture(true);
     }
@@ -659,7 +656,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         final JsonElement template;
-        if (isVanillaWorld(key)) {
+        if (this.isVanillaWorld(key)) {
             final LevelStem stem = this.server.getWorldData().worldGenSettings().dimensions().get(SpongeWorldManager.createStemKey(key));
             template = SpongeWorldManager.stemToJson(stem);
         } else {
@@ -676,7 +673,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         try {
             this.writeTemplate(template, copyKey);
         } catch (final IOException e) {
-            FutureUtil.completedWithException(e);
+            return FutureUtil.completedWithException(e);
         }
 
         return CompletableFuture.completedFuture(true);
@@ -727,7 +724,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             return FutureUtil.completedWithException(e);
         }
 
-        if (isVanillaWorld(key)) {
+        if (this.isVanillaWorld(key)) {
             final LevelStem stem = this.server.getWorldData().worldGenSettings().dimensions().get(SpongeWorldManager.createStemKey(key));
             JsonElement template = SpongeWorldManager.stemToJson(stem);
 
@@ -795,7 +792,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         try {
             Files.deleteIfExists(dimensionTemplate);
         } catch (final IOException e) {
-            FutureUtil.completedWithException(e);
+            return FutureUtil.completedWithException(e);
         }
 
         return CompletableFuture.completedFuture(true);
