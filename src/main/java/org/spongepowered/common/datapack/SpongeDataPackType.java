@@ -49,6 +49,7 @@ import org.spongepowered.api.world.generation.feature.FeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.generation.structure.SchematicTemplate;
 import org.spongepowered.api.world.generation.structure.StructureTemplate;
+import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorListTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.advancement.SpongeAdvancementTemplate;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
@@ -63,6 +64,7 @@ import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
 import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
 import org.spongepowered.common.world.generation.structure.SpongeSchematicTemplate;
 import org.spongepowered.common.world.generation.structure.SpongeStructureTemplate;
+import org.spongepowered.common.world.generation.structure.jigsaw.SpongeProcessorListTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
@@ -136,6 +138,10 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
                 "structures", new NbtDataPackSerializer<>(SpongeSchematicTemplate::encode, SpongeSchematicTemplate::decode),
                 true, false);
 
+        private final SpongeDataPackType<JsonElement, @NonNull ProcessorListTemplate> processorList = SpongeDataPackType.basic(ProcessorListTemplate.class,
+                "worldgen/processor_list", SpongeProcessorListTemplate::encode, SpongeProcessorListTemplate::decode,
+                true, false);
+
         @Override
         public DataPackType<RecipeRegistration> recipe() {
             return this.recipe;
@@ -199,6 +205,11 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
         @Override
         public DataPackType<SchematicTemplate> schematic() {
             return this.schematic;
+        }
+
+        @Override
+        public DataPackType<ProcessorListTemplate> processorList() {
+            return this.processorList;
         }
 
         @Override

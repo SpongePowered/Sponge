@@ -361,11 +361,27 @@ public final class GeneratorMain {
                 $ -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
-                "world.generation.structure",
+                "world.generation.structure.jigsaw",
                 "JigsawPools",
                 "JIGSAW_POOL",
-                context.relativeClass("world.generation.structure", "JigsawPool"),
+                context.relativeClass("world.generation.structure.jigsaw", "JigsawPool"),
                 Registry.TEMPLATE_POOL_REGISTRY,
+                $ -> true, RegistryScope.SERVER
+            ),
+            new RegistryEntriesGenerator<>(
+                "world.generation.structure.jigsaw",
+                "ProcessorLists",
+                "PROCESSOR_LIST",
+                context.relativeClass("world.generation.structure.jigsaw", "ProcessorList"),
+                Registry.PROCESSOR_LIST_REGISTRY,
+                $ -> true, RegistryScope.SERVER
+            ),
+            new RegistryEntriesGenerator<>(
+                "world.generation.structure.jigsaw",
+                "ProcessorTypes",
+                "PROCESSOR_TYPE",
+                context.relativeClass("world.generation.structure.jigsaw", "ProcessorType"),
+                Registry.STRUCTURE_PROCESSOR_REGISTRY,
                 $ -> true, RegistryScope.GAME
             ),
             new RegistryEntriesGenerator<>(

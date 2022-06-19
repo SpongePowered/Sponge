@@ -22,45 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.carver;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure.templatesystem;
 
 import com.google.gson.JsonElement;
-import com.mojang.serialization.Codec;
-import net.minecraft.world.level.levelgen.carver.CarverConfiguration;
-import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
-import net.minecraft.world.level.levelgen.carver.WorldCarver;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.world.generation.carver.Carver;
-import org.spongepowered.api.world.generation.carver.CarverType;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.world.generation.structure.jigsaw.Processor;
+import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.world.generation.carver.SpongeCarverTemplate;
 
 import java.io.IOException;
 
-@Mixin(ConfiguredWorldCarver.class)
-public abstract class ConfiguredWorldCarverMixin_API<WC extends CarverConfiguration> implements Carver {
+@Mixin(StructureProcessor.class)
+public abstract class StructureProcessorMixin_API implements Processor {
 
     // @formatter:off
-    @Shadow @Final private WorldCarver<WC> worldCarver;
-    @Shadow @Final private WC config;
+    @Shadow protected abstract <P extends StructureProcessor> StructureProcessorType<P> shadow$getType();
     // @formatter:on
 
     @Override
-    public CarverType type() {
-        return (CarverType) this.worldCarver;
+    public ProcessorType type() {
+        return (ProcessorType) this.shadow$getType();
     }
 
     @Override
-    public DataView toContainer() {
-        final JsonElement serialized = SpongeCarverTemplate.encode((Codec<ConfiguredWorldCarver<?>>) (Object) this.worldCarver.configuredCodec(), (ConfiguredWorldCarver<WC>) (Object) this, SpongeCommon.server().registryAccess());
+    public DataContainer toContainer() {
+        final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
+        final JsonElement serialized = this.shadow$getType().codec().encodeStart(ops, (StructureProcessor) (Object) this).getOrThrow(false, e -> {});
         try {
             return DataFormats.JSON.get().read(serialized.toString());
         } catch (IOException e) {
-            throw new IllegalStateException("Could not read deserialized Carver: " + serialized, e);
+            throw new IllegalStateException("Could not read deserialized Processor:\n" + serialized, e);
         }
     }
 }

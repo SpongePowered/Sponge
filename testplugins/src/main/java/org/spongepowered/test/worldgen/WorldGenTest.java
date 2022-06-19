@@ -74,6 +74,7 @@ public final class WorldGenTest {
 
     private final PluginContainer plugin;
     private final FeatureTest featureTest = new FeatureTest();
+    private final StructureTest structureTest = new StructureTest();
     private final NoiseTest noiseTest = new NoiseTest();
     private final CarverTest carverTest = new CarverTest();
     private final BiomeTest biomeTest = new BiomeTest();
@@ -89,7 +90,10 @@ public final class WorldGenTest {
         event.register(this.plugin,
                 Command.builder()
                         .addChild(this.featureTest.featureCmd(), "feature")
-                        .addChild(this.featureTest.schematicCmd(), "schematic")
+                        .addChild(this.structureTest.structureCmd(), "structure")
+                        .addChild(this.structureTest.schematicCmd(), "schematic")
+                        .addChild(this.structureTest.jigsawCmd(), "jigsaw")
+                        .addChild(this.structureTest.processorCmd(), "processor")
                         .addChild(this.noiseTest.noiseCmd(), "noise")
                         .addChild(this.carverTest.carverCmd(), "carver")
                         .addChild(this.biomeTest.biomeCmd(), "biome")

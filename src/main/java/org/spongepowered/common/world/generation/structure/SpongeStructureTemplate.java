@@ -62,7 +62,7 @@ public record SpongeStructureTemplate(ResourceKey key, Structure representedStru
         try {
             return DataFormats.JSON.get().read(serialized.toString());
         } catch (IOException e) {
-            throw new IllegalStateException("Could not read deserialized NoiseGeneratorConfig:\n" + serialized, e);
+            throw new IllegalStateException("Could not read deserialized Structure:\n" + serialized, e);
         }
     }
 

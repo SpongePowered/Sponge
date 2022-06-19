@@ -427,7 +427,11 @@
         "minecraft.world.level.levelgen.structure.StructurePlacementMixin_API",
         "minecraft.world.level.levelgen.structure.pools.StructureTemplatePoolMixin_API",
         "minecraft.world.level.levelgen.structure.pools.StructurePoolElementMixin_API",
-        "minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateMixin_API"
+        "minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateMixin_API",
+        "minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorListMixin_API",
+        "minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorMixin_API",
+        "minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorTypeMixin_API",
+        "minecraft.world.level.levelgen.structure.pools.StructureTemplatePool_ProjectionMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

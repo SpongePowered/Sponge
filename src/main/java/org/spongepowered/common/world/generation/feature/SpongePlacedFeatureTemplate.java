@@ -67,7 +67,7 @@ public record SpongePlacedFeatureTemplate(ResourceKey key, net.minecraft.world.l
             container.set(Queries.CONTENT_VERSION, this.contentVersion());
             return container;
         } catch (IOException e) {
-            throw new IllegalStateException("Could not read deserialized Biome:\n" + serialized, e);
+            throw new IllegalStateException("Could not read deserialized Placed Feature:\n" + serialized, e);
         }
     }
 

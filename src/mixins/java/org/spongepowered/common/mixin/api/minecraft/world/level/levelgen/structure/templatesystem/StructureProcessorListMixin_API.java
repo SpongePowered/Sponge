@@ -22,42 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure.pools;
+package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure.templatesystem;
 
-import com.mojang.datafixers.util.Pair;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
-import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
-import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPool;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
+import org.spongepowered.api.world.generation.structure.jigsaw.Processor;
+import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorList;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
 
 import java.util.List;
 
-@Mixin(StructureTemplatePool.class)
-public abstract class StructureTemplatePoolMixin_API implements JigsawPool {
+@Mixin(StructureProcessorList.class)
+public abstract class StructureProcessorListMixin_API implements ProcessorList {
 
     // @formatter:off
-    @Shadow @Final private ResourceLocation fallback;
-    @Shadow @Final private List<Pair<StructurePoolElement, Integer>> rawTemplates;
+    @Shadow @Final private List<StructureProcessor> list;
     // @formatter:on
 
     @Override
-    public JigsawPool fallback() {
-        final Registry<StructureTemplatePool> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
-        return (JigsawPool) registry.get(this.fallback);
-    }
-
-    @Override
-    public WeightedTable<Element> elements() {
-        final WeightedTable<Element> weightedTable = new WeightedTable<>();
-        for (final Pair<StructurePoolElement, Integer> pair : this.rawTemplates) {
-            weightedTable.add((Element) pair.getFirst(), pair.getSecond());
-        }
-        return weightedTable;
+    public List<Processor> processors() {
+        return (List) this.list;
     }
 }

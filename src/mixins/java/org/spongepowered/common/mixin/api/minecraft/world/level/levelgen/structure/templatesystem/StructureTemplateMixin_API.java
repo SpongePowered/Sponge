@@ -74,27 +74,30 @@ import java.util.stream.Stream;
 public abstract class StructureTemplateMixin_API implements Schematic, SpongeArchetypeVolumeDataHolder {
 
     // @formatter:off
-    @Shadow public abstract Vec3i shadow$getSize();
-
+    @Shadow @Final private List<StructureTemplate.Palette> palettes;
     @Shadow @Final private List<StructureTemplate.StructureEntityInfo> entityInfoList;
+
+    @Shadow public abstract Vec3i shadow$getSize();
     // @formatter:on
 
-    @Shadow @Final private List<StructureTemplate.Palette> palettes;
 
     @Override
     public Palette<BlockState, BlockType> blockPalette() {
         final Palette<BlockState, BlockType> blockPallete = PaletteTypes.BLOCK_STATE_PALETTE.get().create(RegistryTypes.BLOCK_TYPE.get());
+        // TODO
         return blockPallete;
     }
 
     @Override
     public Palette<Biome, Biome> biomePalette() {
         final Palette<Biome, Biome> biomePalette = PaletteTypes.BIOME_PALETTE.get().create(RegistryTypes.BIOME.get());
+        // TODO
         return biomePalette;
     }
 
     @Override
     public DataView metadata() {
+        // TODO
         return DataContainer.createNew();
     }
 

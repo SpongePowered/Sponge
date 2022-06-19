@@ -73,7 +73,7 @@ public abstract class ConfiguredFeatureMixin_API<
         try {
             return DataFormats.JSON.get().read(serialized.toString());
         } catch (IOException e) {
-            throw new IllegalStateException("Could not read deserialized Configured Feature: " + serialized, e);
+            throw new IllegalStateException("Could not read deserialized Feature: " + serialized, e);
         }
     }
 

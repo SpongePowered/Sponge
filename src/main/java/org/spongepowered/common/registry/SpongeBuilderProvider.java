@@ -129,6 +129,8 @@ import org.spongepowered.api.world.generation.feature.FeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.generation.structure.SchematicTemplate;
 import org.spongepowered.api.world.generation.structure.StructureTemplate;
+import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorList;
+import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorListTemplate;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.WorldTemplate;
@@ -231,6 +233,7 @@ import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
 import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
 import org.spongepowered.common.world.generation.structure.SpongeSchematicTemplate;
 import org.spongepowered.common.world.generation.structure.SpongeStructureTemplate;
+import org.spongepowered.common.world.generation.structure.jigsaw.SpongeProcessorListTemplate;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
@@ -384,6 +387,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(PlacedFeatureTemplate.Builder.class, SpongePlacedFeatureTemplate.BuilderImpl::new)
                 .register(StructureTemplate.Builder.class, SpongeStructureTemplate.BuilderImpl::new)
                 .register(SchematicTemplate.Builder.class, SpongeSchematicTemplate.BuilderImpl::new)
+                .register(ProcessorListTemplate.Builder.class, SpongeProcessorListTemplate.BuilderImpl::new)
         ;
     }
 }

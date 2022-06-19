@@ -62,7 +62,7 @@ public record SpongeDensityFunctionTemplate(ResourceKey key, DensityFunction rep
         try {
             return DataFormats.JSON.get().read(serialized.toString());
         } catch (IOException e) {
-            throw new IllegalStateException("Could not read deserialized NoiseGeneratorConfig:\n" + serialized, e);
+            throw new IllegalStateException("Could not read deserialized Density Function:\n" + serialized, e);
         }
     }
 

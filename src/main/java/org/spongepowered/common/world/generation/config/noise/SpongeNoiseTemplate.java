@@ -64,7 +64,7 @@ public record SpongeNoiseTemplate(ResourceKey key, NormalNoise.NoiseParameters n
         try {
             return DataFormats.JSON.get().read(serialized.toString());
         } catch (IOException e) {
-            throw new IllegalStateException("Could not read deserialized NoiseGeneratorConfig:\n" + serialized, e);
+            throw new IllegalStateException("Could not read deserialized Noise:\n" + serialized, e);
         }
     }
 
