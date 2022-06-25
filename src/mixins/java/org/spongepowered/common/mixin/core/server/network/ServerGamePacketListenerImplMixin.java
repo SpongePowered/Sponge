@@ -51,9 +51,7 @@ import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
@@ -61,11 +59,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -89,7 +85,6 @@ import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
-import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.asm.mixin.Final;
@@ -102,16 +97,14 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundMovePlayerPacketAccessor;
 import org.spongepowered.common.accessor.server.level.ServerPlayerGameModeAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
-import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
 import org.spongepowered.common.data.value.ImmutableSpongeListValue;
@@ -128,7 +121,6 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -479,39 +471,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
                 this.impl$ignorePackets++;
             }
         }
-    }
-
-    @Redirect(
-            method = "handleClientCommand",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/server/players/PlayerList;respawn(Lnet/minecraft/server/level/ServerPlayer;Z)Lnet/minecraft/server/level/ServerPlayer;"
-            )
-    )
-    private net.minecraft.server.level.ServerPlayer impl$usePlayerDimensionForRespawn(final PlayerList playerList, final net.minecraft.server.level.ServerPlayer player,
-            final boolean keepAllPlayerData) {
-        // A few changes to Vanilla logic here that, by default, still preserve game mechanics:
-        // - If we have conquered The End then keep the dimension type we're headed to (which is Overworld as of 1.15)
-        // - Otherwise, check the platform hooks for which dimension to respawn to. In Sponge, this is the Player's dimension they
-        //   are already in if we can respawn there which is only true for Overworld dimensions
-        final ResourceKey<Level> respawnDimension = player.getRespawnDimension();
-        final @Nullable ServerLevel destinationWorld = this.server.getLevel(respawnDimension);
-        final ServerLevel overworld = this.server.getLevel(Level.OVERWORLD);
-        if (overworld == null) {
-            throw new IllegalStateException("Somehow the Overworld is not retrievable while trying to respawn player " + player.getGameProfile().getName());
-        }
-        final ServerLevel destination = destinationWorld == null ? overworld : destinationWorld;
-        final RespawnPlayerEvent.SelectWorld event =
-                SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getCauseStackManager().currentCause(),
-                        (org.spongepowered.api.world.server.ServerWorld) destination,
-                        (org.spongepowered.api.world.server.ServerWorld) player.getLevel(),
-                        (org.spongepowered.api.world.server.ServerWorld) overworld,
-                        (ServerPlayer) player);
-        SpongeCommon.post(event);
-        ((PlayerListBridge) this.server.getPlayerList()).bridge$setOriginalDestinationDimension(((ServerLevel) event.originalDestinationWorld()).dimension());
-        ((PlayerListBridge) this.server.getPlayerList()).bridge$setNewDestinationDimension(((ServerLevel) event.destinationWorld()).dimension());
-        // The key is reset to null in the overwrite
-        return playerList.respawn(player, keepAllPlayerData);
     }
 
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
