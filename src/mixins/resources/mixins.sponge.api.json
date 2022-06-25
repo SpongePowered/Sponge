@@ -431,7 +431,11 @@
         "minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorListMixin_API",
         "minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorMixin_API",
         "minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorTypeMixin_API",
-        "minecraft.world.level.levelgen.structure.pools.StructureTemplatePool_ProjectionMixin_API"
+        "minecraft.world.level.levelgen.structure.pools.StructureTemplatePool_ProjectionMixin_API",
+        "minecraft.world.level.biome.AmbientMoodSettingsMixin_API",
+        "minecraft.world.level.biome.AmbientAdditionsSettingsMixin_API",
+        "minecraft.world.level.biome.AmbientParticleSettingsMixin_API",
+        "minecraft.sounds.MusicMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

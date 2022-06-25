@@ -82,6 +82,8 @@ import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
+import org.spongepowered.api.world.biome.ambient.ParticleConfig;
+import org.spongepowered.api.world.biome.ambient.SoundConfig;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
@@ -144,6 +146,8 @@ import org.spongepowered.common.world.SpongeWorldTypeEffect;
 import org.spongepowered.common.world.biome.SpongeAttributedBiome;
 import org.spongepowered.common.world.biome.SpongeBiomeAttributesFactory;
 import org.spongepowered.common.world.biome.SpongeBiomeProviderFactory;
+import org.spongepowered.common.world.biome.ambient.SpongeParticleConfigFactory;
+import org.spongepowered.common.world.biome.ambient.SpongeSoundConfigFactory;
 import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
 import org.spongepowered.common.world.generation.SpongeChunkGeneratorFactory;
 import org.spongepowered.common.world.generation.config.flat.SpongeLayerConfigFactory;
@@ -263,6 +267,8 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(EnumStateProperty.Factory.class, new BlockStatePropertyImpl.EnumFactoryImpl())
                 .registerFactory(DefaultWorldKeys.Factory.class, new SpongeDefaultWorldKeysFactory())
                 .registerFactory(JigsawPoolElement.Factory.class, new SpongeJigsawFactory())
+                .registerFactory(ParticleConfig.Factory.class, new SpongeParticleConfigFactory())
+                .registerFactory(SoundConfig.Factory.class, new SpongeSoundConfigFactory())
         ;
     }
 }

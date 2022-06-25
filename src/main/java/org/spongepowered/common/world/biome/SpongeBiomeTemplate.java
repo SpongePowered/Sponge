@@ -56,9 +56,7 @@ import org.spongepowered.api.entity.EntityCategory;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.biome.ambient.AdditionalAmbientSound;
-import org.spongepowered.api.world.biome.ambient.AmbientMoodSettings;
-import org.spongepowered.api.world.biome.ambient.BackgroundMusic;
+import org.spongepowered.api.world.biome.ambient.SoundConfig;
 import org.spongepowered.api.world.biome.climate.GrassColorModifiers;
 import org.spongepowered.api.world.biome.climate.TemperatureModifiers;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawnCost;
@@ -72,7 +70,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.io.IOException;
 import java.util.List;
@@ -179,9 +176,9 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
             final var grassColorModifier = this.manipulator.getOrElse(Keys.GRASS_COLOR_MODIFIER, GrassColorModifiers.NONE.get());
             final var particleSettings = this.manipulator.get(Keys.AMBIENT_PARTICLE);
             final Optional<SoundType> ambientSound = this.manipulator.get(Keys.AMBIENT_SOUND);
-            final Optional<AmbientMoodSettings> ambientMood = this.manipulator.get(Keys.AMBIENT_MOOD);
-            final Optional<AdditionalAmbientSound> additionalSound = this.manipulator.get(Keys.AMBIENT_ADDITIONAL_SOUND);
-            final Optional<BackgroundMusic> backgroundMusic = this.manipulator.get(Keys.BACKGROUND_MUSIC);
+            final Optional<SoundConfig.Mood> ambientMood = this.manipulator.get(Keys.AMBIENT_MOOD);
+            final Optional<SoundConfig.Additional> additionalSound = this.manipulator.get(Keys.AMBIENT_ADDITIONAL_SOUND);
+            final Optional<SoundConfig.BackgroundMusic> backgroundMusic = this.manipulator.get(Keys.BACKGROUND_MUSIC);
 
             final Double spawnChance = this.manipulator.require(Keys.SPAWN_CHANCE);
             final Map<EntityCategory, WeightedTable<NaturalSpawner>> spawners = this.manipulator.getOrElse(Keys.NATURAL_SPAWNERS, Map.of());

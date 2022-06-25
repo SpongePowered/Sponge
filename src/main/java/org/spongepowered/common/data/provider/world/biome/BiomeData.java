@@ -35,13 +35,15 @@ import org.spongepowered.api.entity.EntityCategory;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.generation.carver.CarvingStep;
-import org.spongepowered.api.world.generation.feature.DecorationStep;
-import org.spongepowered.api.world.biome.spawner.NaturalSpawnCost;
-import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
+import org.spongepowered.api.world.biome.ambient.ParticleConfig;
+import org.spongepowered.api.world.biome.ambient.SoundConfig;
 import org.spongepowered.api.world.biome.climate.Precipitation;
 import org.spongepowered.api.world.biome.climate.TemperatureModifier;
+import org.spongepowered.api.world.biome.spawner.NaturalSpawnCost;
+import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
 import org.spongepowered.api.world.generation.carver.Carver;
+import org.spongepowered.api.world.generation.carver.CarvingStep;
+import org.spongepowered.api.world.generation.feature.DecorationStep;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
 import org.spongepowered.common.accessor.world.level.biome.BiomeAccessor;
 import org.spongepowered.common.accessor.world.level.biome.Biome_ClimateSettingsAccessor;
@@ -93,6 +95,14 @@ public final class BiomeData {
                         .get(h -> h.getSpecialEffects().getFoliageColorOverride().map(Color::ofRgb).orElse(null))
                     .create(Keys.GRASS_COLOR)
                         .get(h -> h.getSpecialEffects().getGrassColorOverride().map(Color::ofRgb).orElse(null))
+                    .create(Keys.BACKGROUND_MUSIC)
+                        .get(h -> h.getSpecialEffects().getBackgroundMusic().map(SoundConfig.BackgroundMusic.class::cast).orElse(null))
+                    .create(Keys.AMBIENT_ADDITIONAL_SOUND)
+                        .get(h -> h.getSpecialEffects().getAmbientAdditionsSettings().map(SoundConfig.Additional.class::cast).orElse(null))
+                    .create(Keys.AMBIENT_MOOD)
+                        .get(h -> h.getSpecialEffects().getAmbientMoodSettings().map(SoundConfig.Mood.class::cast).orElse(null))
+                    .create(Keys.AMBIENT_PARTICLE)
+                        .get(h -> h.getSpecialEffects().getAmbientParticleSettings().map(ParticleConfig.class::cast).orElse(null))
                 .asImmutable(BiomeAccessor.class)
                     .create(Keys.TEMPERATURE_MODIFIER)
                         .get(h -> (TemperatureModifier) (Object) ((Biome_ClimateSettingsAccessor) (Object) h.accessor$climateSettings()).accessor$temperatureModifier())
