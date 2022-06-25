@@ -37,6 +37,9 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.datapack.DataPacks;
+import org.spongepowered.api.effect.particle.ParticleType;
+import org.spongepowered.api.effect.particle.ParticleTypes;
+import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.EntityCategories;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -44,6 +47,8 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.BiomeTemplate;
 import org.spongepowered.api.world.biome.Biomes;
+import org.spongepowered.api.world.biome.ambient.ParticleConfig;
+import org.spongepowered.api.world.biome.ambient.SoundConfig;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
 import org.spongepowered.api.world.generation.feature.DecorationSteps;
 import org.spongepowered.api.world.generation.feature.FeatureType;
@@ -83,6 +88,20 @@ public final class BiomeTest {
                 });
             }
         });
+
+        biome.ambientMood().ifPresent(mood -> {
+            ctx.sendMessage(Identity.nil(), Component.text("Mood: " + mood, NamedTextColor.DARK_AQUA));
+        });
+        biome.additionalAmbientSound().ifPresent(additional -> {
+            ctx.sendMessage(Identity.nil(), Component.text("AdditionalSound: " + additional, NamedTextColor.DARK_AQUA));
+        });
+        biome.backgroundMusic().ifPresent(bgm -> {
+            ctx.sendMessage(Identity.nil(), Component.text("BGM: " + bgm, NamedTextColor.DARK_AQUA));
+        });
+        biome.ambientParticle().ifPresent(particle -> {
+            ctx.sendMessage(Identity.nil(), Component.text("Particle: " + particle, NamedTextColor.DARK_AQUA));
+        });
+
         return CommandResult.success();
     }
 
@@ -96,6 +115,8 @@ public final class BiomeTest {
                 .add(Keys.FEATURES, Map.of(DecorationSteps.LAKES.get(), List.of(PlacedFeatures.LAKE_LAVA_SURFACE.get())))
                 .add(Keys.CARVERS, Map.of())
                 .add(Keys.NATURAL_SPAWNERS, Map.of(EntityCategories.MONSTER.get(), spawner))
+                .add(Keys.AMBIENT_ADDITIONAL_SOUND, SoundConfig.factory().ofAdditional(SoundTypes.ENTITY_CREEPER_PRIMED.get(), 0.001))
+                .add(Keys.AMBIENT_PARTICLE, ParticleConfig.of(ParticleTypes.BUBBLE.get(), 0.01f))
                 .key(ResourceKey.of(NAMESPACE, CUSTOM_PLAINS)).build();
         Sponge.server().dataPackManager().save(template);
 
