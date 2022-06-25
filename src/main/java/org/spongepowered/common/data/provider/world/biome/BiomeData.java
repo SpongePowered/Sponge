@@ -50,6 +50,7 @@ import org.spongepowered.common.accessor.world.level.biome.Biome_ClimateSettings
 import org.spongepowered.common.accessor.world.level.biome.MobSpawnSettingsAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -141,22 +142,22 @@ public final class BiomeData {
         return holders.stream().map(Holder::value).map(f -> (PlacedFeature) (Object) f).toList();
     }
 
-    private static Map<EntityCategory, WeightedTable<NaturalSpawner>> naturalSpawners(Biome biome) {
+    private static Map<EntityCategory, List<NaturalSpawner>> naturalSpawners(Biome biome) {
 
-        Map<EntityCategory, WeightedTable<NaturalSpawner>> map = new HashMap<>();
+        Map<EntityCategory, List<NaturalSpawner>> map = new HashMap<>();
         for (final MobCategory cat : MobCategory.values()) {
             BiomeData.naturalSpawner(biome, cat).ifPresent(v -> map.put((EntityCategory) (Object) cat, v));
         }
         return map;
     }
 
-    private static Optional<WeightedTable<NaturalSpawner>> naturalSpawner(Biome biome, MobCategory cat) {
+    private static Optional<List<NaturalSpawner>> naturalSpawner(Biome biome, MobCategory cat) {
         final List<MobSpawnSettings.SpawnerData> unwrap = biome.getMobSettings().getMobs(cat).unwrap();
         if (unwrap.isEmpty()) {
             return Optional.empty();
         }
-        final WeightedTable<NaturalSpawner> result = new WeightedTable<>();
-        unwrap.forEach(data -> result.add((NaturalSpawner) data, data.getWeight().asInt()));
+        final List<NaturalSpawner> result = new ArrayList<>();
+        unwrap.forEach(data -> result.add((NaturalSpawner) data));
         return Optional.of(result);
     }
 

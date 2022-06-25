@@ -181,7 +181,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
             final Optional<SoundConfig.BackgroundMusic> backgroundMusic = this.manipulator.get(Keys.BACKGROUND_MUSIC);
 
             final Double spawnChance = this.manipulator.require(Keys.SPAWN_CHANCE);
-            final Map<EntityCategory, WeightedTable<NaturalSpawner>> spawners = this.manipulator.getOrElse(Keys.NATURAL_SPAWNERS, Map.of());
+            final Map<EntityCategory, List<NaturalSpawner>> spawners = this.manipulator.getOrElse(Keys.NATURAL_SPAWNERS, Map.of());
             final Map<EntityType<?>, NaturalSpawnCost> spawnerCosts = this.manipulator.getOrElse(Keys.NATURAL_SPAWNER_COST, Map.of());
 
             final Map<DecorationStep, List<PlacedFeature>> features = this.manipulator.getOrElse(Keys.FEATURES, Map.of());
@@ -204,11 +204,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
             final MobSpawnSettings.Builder spawnerBuilder = new MobSpawnSettings.Builder()
                     .creatureGenerationProbability(spawnChance.floatValue());
             spawners.forEach((cat, spawner) -> spawner.forEach(sp -> {
-                if (sp instanceof WeightedObject<NaturalSpawner> wo) {
-                    spawnerBuilder.addSpawn((MobCategory) (Object) cat, (MobSpawnSettings.SpawnerData) wo.get());
-                } else {
-                    throw new IllegalArgumentException("WeightedTable for NATURAL_SPAWNERS must consist of WeightedObjects");
-                }
+                spawnerBuilder.addSpawn((MobCategory) (Object) cat, (MobSpawnSettings.SpawnerData) sp);
             }));
             spawnerCosts.forEach((type, cost) -> spawnerBuilder.addMobCharge((net.minecraft.world.entity.EntityType<?>) (Object) type, cost.budget(),
                     cost.charge()));

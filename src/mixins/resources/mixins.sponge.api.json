@@ -435,7 +435,8 @@
         "minecraft.world.level.biome.AmbientMoodSettingsMixin_API",
         "minecraft.world.level.biome.AmbientAdditionsSettingsMixin_API",
         "minecraft.world.level.biome.AmbientParticleSettingsMixin_API",
-        "minecraft.sounds.MusicMixin_API"
+        "minecraft.sounds.MusicMixin_API",
+        "minecraft.world.level.biome.MobSpawnSettings_MobSpawnCostMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

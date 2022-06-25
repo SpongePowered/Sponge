@@ -25,33 +25,27 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
+import org.spongepowered.api.world.biome.spawner.NaturalSpawnCost;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(MobSpawnSettings.SpawnerData.class)
-public abstract class MobSpawnSettings_SpawnerDataMixin_API implements NaturalSpawner {
+@Mixin(MobSpawnSettings.MobSpawnCost.class)
+public abstract class MobSpawnSettings_MobSpawnCostMixin_API implements NaturalSpawnCost {
 
     // @formatter:off
-    @Shadow @Final public net.minecraft.world.entity.EntityType<?> type;
-    @Shadow @Final public int minCount;
-    @Shadow @Final public int maxCount;
+    @Shadow @Final private double energyBudget;
+    @Shadow @Final private double charge;
     // @formatter:on
 
     @Override
-    public EntityType<?> type() {
-        return (EntityType<?>) this.type;
+    public double budget() {
+        return this.energyBudget;
     }
 
     @Override
-    public int min() {
-        return this.minCount;
+    public double charge() {
+        return this.charge;
     }
 
-    @Override
-    public int max() {
-        return this.maxCount;
-    }
 }

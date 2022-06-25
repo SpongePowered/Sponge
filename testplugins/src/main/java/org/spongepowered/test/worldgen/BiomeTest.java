@@ -37,13 +37,11 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.datapack.DataPacks;
-import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.EntityCategories;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.BiomeTemplate;
 import org.spongepowered.api.world.biome.Biomes;
@@ -55,10 +53,11 @@ import org.spongepowered.api.world.generation.feature.FeatureType;
 import org.spongepowered.api.world.generation.feature.PlacedFeatures;
 import org.spongepowered.api.world.server.DataPackManager;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 public final class BiomeTest {
 
@@ -107,9 +106,9 @@ public final class BiomeTest {
 
     private CommandResult register(CommandContext commandContext) {
         final Biome defaultBiome = Biomes.PLAINS.get(Sponge.server());
-        final List<NaturalSpawner> naturalSpawners = defaultBiome.spawners().get(EntityCategories.MONSTER.get()).get(new Random());
-        final WeightedTable<NaturalSpawner> spawner = new WeightedTable<>();
-        naturalSpawners.forEach(s -> spawner.add(s, 1));
+        final List<NaturalSpawner> naturalSpawners = defaultBiome.spawners().get(EntityCategories.MONSTER.get());
+        Collections.shuffle(naturalSpawners);
+        final List<NaturalSpawner> spawner = Arrays.asList(naturalSpawners.get(0));
 
         final BiomeTemplate template = BiomeTemplate.builder().fromValue(defaultBiome)
                 .add(Keys.FEATURES, Map.of(DecorationSteps.LAKES.get(), List.of(PlacedFeatures.LAKE_LAVA_SURFACE.get())))
@@ -120,7 +119,6 @@ public final class BiomeTest {
                 .key(ResourceKey.of(NAMESPACE, CUSTOM_PLAINS)).build();
         Sponge.server().dataPackManager().save(template);
 
-        naturalSpawners.forEach(s -> spawner.add(s, 1));
         final Biome defaultBiome2 = Biomes.FLOWER_FOREST.get(Sponge.server());
         final BiomeTemplate template2 = BiomeTemplate.builder().fromValue(defaultBiome2)
                 .add(Keys.NATURAL_SPAWNERS, Map.of(EntityCategories.MONSTER.get(), spawner))

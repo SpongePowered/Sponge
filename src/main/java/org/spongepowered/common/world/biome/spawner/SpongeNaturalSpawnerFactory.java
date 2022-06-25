@@ -22,36 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
+package org.spongepowered.common.world.biome.spawner;
 
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(MobSpawnSettings.SpawnerData.class)
-public abstract class MobSpawnSettings_SpawnerDataMixin_API implements NaturalSpawner {
-
-    // @formatter:off
-    @Shadow @Final public net.minecraft.world.entity.EntityType<?> type;
-    @Shadow @Final public int minCount;
-    @Shadow @Final public int maxCount;
-    // @formatter:on
+public class SpongeNaturalSpawnerFactory implements NaturalSpawner.Factory {
 
     @Override
-    public EntityType<?> type() {
-        return (EntityType<?>) this.type;
-    }
-
-    @Override
-    public int min() {
-        return this.minCount;
-    }
-
-    @Override
-    public int max() {
-        return this.maxCount;
+    public NaturalSpawner of(final EntityType<?> type, final int weight, final int min, final int max) {
+        return (NaturalSpawner) new MobSpawnSettings.SpawnerData((net.minecraft.world.entity.EntityType<?>) type, weight, min, max);
     }
 }
