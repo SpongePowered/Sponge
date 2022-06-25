@@ -38,27 +38,17 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.entity.EntityCategories;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.registry.Registry;
-import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.api.world.biome.BiomeAttributes;
 import org.spongepowered.api.world.biome.BiomeTemplate;
 import org.spongepowered.api.world.biome.Biomes;
-import org.spongepowered.api.world.biome.provider.BiomeProvider;
-import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawner;
-import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.feature.DecorationSteps;
 import org.spongepowered.api.world.generation.feature.FeatureType;
 import org.spongepowered.api.world.generation.feature.PlacedFeatures;
 import org.spongepowered.api.world.server.DataPackManager;
-import org.spongepowered.api.world.server.WorldManager;
-import org.spongepowered.api.world.server.WorldTemplate;
-import org.spongepowered.test.world.WorldTest;
 
 import java.util.List;
 import java.util.Map;
@@ -102,7 +92,7 @@ public final class BiomeTest {
         final WeightedTable<NaturalSpawner> spawner = new WeightedTable<>();
         naturalSpawners.forEach(s -> spawner.add(s, 1));
 
-        final BiomeTemplate template = BiomeTemplate.builder().from(defaultBiome)
+        final BiomeTemplate template = BiomeTemplate.builder().fromValue(defaultBiome)
                 .add(Keys.FEATURES, Map.of(DecorationSteps.LAKES.get(), List.of(PlacedFeatures.LAKE_LAVA_SURFACE.get())))
                 .add(Keys.CARVERS, Map.of())
                 .add(Keys.NATURAL_SPAWNERS, Map.of(EntityCategories.MONSTER.get(), spawner))
@@ -111,7 +101,7 @@ public final class BiomeTest {
 
         naturalSpawners.forEach(s -> spawner.add(s, 1));
         final Biome defaultBiome2 = Biomes.FLOWER_FOREST.get(Sponge.server());
-        final BiomeTemplate template2 = BiomeTemplate.builder().from(defaultBiome2)
+        final BiomeTemplate template2 = BiomeTemplate.builder().fromValue(defaultBiome2)
                 .add(Keys.NATURAL_SPAWNERS, Map.of(EntityCategories.MONSTER.get(), spawner))
                 .key(ResourceKey.of(NAMESPACE, CUSTOM_FOREST)).build();
         Sponge.server().dataPackManager().save(template2);

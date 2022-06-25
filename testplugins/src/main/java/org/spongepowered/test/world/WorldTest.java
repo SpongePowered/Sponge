@@ -285,7 +285,7 @@ public final class WorldTest {
     private CommandResult worldTypes(CommandContext commandContext) {
         final Optional<ServerPlayer> optPlayer = commandContext.cause().first(ServerPlayer.class);
         for (WorldType wt : WorldTypes.registry().stream().toList()) {
-            final WorldTypeTemplate template = WorldTypeTemplate.builder().from(wt).key(ResourceKey.of(this.plugin, "test")).build();
+            final WorldTypeTemplate template = WorldTypeTemplate.builder().fromValue(wt).key(ResourceKey.of(this.plugin, "test")).build();
             final DataContainer dataContainer = template.toContainer();
             optPlayer.ifPresent(player -> player.sendMessage(Component.text(template.key().toString())));
             System.out.println(template.key());

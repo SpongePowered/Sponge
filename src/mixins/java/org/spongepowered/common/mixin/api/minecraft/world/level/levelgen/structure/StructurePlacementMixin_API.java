@@ -28,6 +28,6 @@ import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(StructurePlacement.class)
-public abstract class StructurePlacementMixin_API implements org.spongepowered.api.world.generation.structure.StructureSet.Placement {
+public abstract class StructurePlacementMixin_API implements org.spongepowered.api.world.generation.structure.StructurePlacement {
 
 }

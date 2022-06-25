@@ -91,6 +91,7 @@ public final class WorldGenTest {
                 Command.builder()
                         .addChild(this.featureTest.featureCmd(), "feature")
                         .addChild(this.structureTest.structureCmd(), "structure")
+                        .addChild(this.structureTest.setsCmd(), "sets")
                         .addChild(this.structureTest.schematicCmd(), "schematic")
                         .addChild(this.structureTest.jigsawCmd(), "jigsaw")
                         .addChild(this.structureTest.processorCmd(), "processor")

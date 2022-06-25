@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.generation.config.noise;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
@@ -33,17 +34,21 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.world.generation.config.noise.Noise;
 import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.world.generation.structure.SpongeStructureTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.DoubleStream;
 
 public record SpongeNoiseTemplate(ResourceKey key, NormalNoise.NoiseParameters noiseParameters, DataPack<NoiseTemplate> pack) implements NoiseTemplate {
@@ -83,9 +88,8 @@ public record SpongeNoiseTemplate(ResourceKey key, NormalNoise.NoiseParameters n
     }
 
 
-    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<NoiseTemplate, Builder> implements Builder {
+    public static final class BuilderImpl extends AbstractDataPackEntryBuilder<Noise, NoiseTemplate, Builder> implements Builder {
 
-        private DataPack<NoiseTemplate> pack = DataPacks.NOISE;
         @Nullable private Integer octave;
         @Nullable private List<Double> amplitudes;
 
@@ -94,13 +98,7 @@ public record SpongeNoiseTemplate(ResourceKey key, NormalNoise.NoiseParameters n
         }
 
         @Override
-        public Builder from(final NoiseTemplate value) {
-            this.key(value.key()).from(value.noise());
-            return this;
-        }
-
-        @Override
-        public Builder from(final Noise noise) {
+        public Builder fromValue(final Noise noise) {
             this.octave(noise.octave()).amplitudes(noise.amplitudes());
             return this;
         }
@@ -128,13 +126,19 @@ public record SpongeNoiseTemplate(ResourceKey key, NormalNoise.NoiseParameters n
             this.octave = null;
             this.amplitudes = null;
             this.pack = DataPacks.NOISE;
+            this.key = null;
             return this;
         }
 
         @Override
-        public Builder pack(final DataPack<NoiseTemplate> pack) {
-            this.pack = pack;
-            return this;
+        public Builder fromDataPack(final DataView datapack) throws IOException {
+            final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(datapack));
+            return this.fromValue((Noise) (Object) SpongeNoiseTemplate.decode(json, SpongeCommon.server().registryAccess()));
+        }
+
+        @Override
+        public Function<NoiseTemplate, Noise> valueExtractor() {
+            return NoiseTemplate::noise;
         }
 
         @Override

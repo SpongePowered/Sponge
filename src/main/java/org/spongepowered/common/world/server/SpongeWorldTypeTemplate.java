@@ -58,16 +58,16 @@ import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
-import org.spongepowered.api.world.biome.BiomeTemplate;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
+import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
-import org.spongepowered.common.world.biome.SpongeBiomeTemplate;
 
 import java.io.IOException;
 import java.util.Objects;
 import java.util.OptionalLong;
+import java.util.function.Function;
 
 public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionType, DataPack<WorldTypeTemplate> pack) implements WorldTypeTemplate {
 
@@ -108,12 +108,20 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
         return new SpongeWorldTypeTemplate(key, parsed, pack);
     }
 
-    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTypeTemplate, Builder> implements WorldTypeTemplate.Builder {
+    public static final class BuilderImpl extends AbstractDataPackEntryBuilder<WorldType, WorldTypeTemplate, Builder> implements WorldTypeTemplate.Builder {
 
         private static DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(WorldType.class);
 
         private DataManipulator.Mutable manipulator = DataManipulator.mutableOf();
-        private DataPack<WorldTypeTemplate> pack = DataPacks.WORLD_TYPE;
+
+        public BuilderImpl() {
+            this.reset();
+        }
+
+        @Override
+        public Function<WorldTypeTemplate, WorldType> valueExtractor() {
+            return WorldTypeTemplate::worldType;
+        }
 
         @Override
         public <V> WorldTypeTemplate.Builder add(final Key<? extends Value<V>> key, final V value) {
@@ -131,25 +139,13 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
             this.pack = DataPacks.WORLD_TYPE;
             final DimensionType defaultOverworld =
                     SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.OVERWORLD);
-            this.from((WorldType) (Object) defaultOverworld);
+            this.fromValue((WorldType) (Object) defaultOverworld);
             return this;
         }
 
         @Override
-        public Builder from(final WorldType type) {
+        public Builder fromValue(final WorldType type) {
             this.manipulator.set(type.getValues());
-            return this;
-        }
-
-        @Override
-        public WorldTypeTemplate.Builder from(final WorldTypeTemplate value) {
-            Objects.requireNonNull(value, "value");
-            return this.from(value.worldType()).key(value.key()).pack(value.pack());
-        }
-
-        @Override
-        public Builder pack(final DataPack<WorldTypeTemplate> pack) {
-            this.pack = pack;
             return this;
         }
 
@@ -159,10 +155,9 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
             // TODO catch & rethrow exceptions in CODEC?
             // TODO probably need to rewrite CODEC to allow reading after registries are frozen
             final DataResult<Holder<DimensionType>> parsed = DimensionType.CODEC.parse(JsonOps.INSTANCE, json);
-            final DimensionType dimensionType = parsed.getOrThrow(false, e -> {
-            }).value();
+            final DimensionType dimensionType = parsed.getOrThrow(false, e -> {}).value();
 
-            this.from((WorldType) (Object) dimensionType);
+            this.fromValue((WorldType) (Object) dimensionType);
             return this;
         }
 

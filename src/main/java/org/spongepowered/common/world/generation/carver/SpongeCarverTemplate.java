@@ -44,9 +44,11 @@ import org.spongepowered.api.world.generation.carver.Carver;
 import org.spongepowered.api.world.generation.carver.CarverTemplate;
 import org.spongepowered.api.world.generation.carver.CarverType;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.io.IOException;
+import java.util.function.Function;
 
 public record SpongeCarverTemplate(ResourceKey key, ConfiguredWorldCarver<?> representedCarver, DataPack<CarverTemplate> pack) implements CarverTemplate {
 
@@ -89,11 +91,15 @@ public record SpongeCarverTemplate(ResourceKey key, ConfiguredWorldCarver<?> rep
         return new SpongeCarverTemplate(key, parsed, pack);
     }
 
-    public static class BuilderImpl extends AbstractResourceKeyedBuilder<CarverTemplate, Builder> implements Builder {
+    public static class BuilderImpl extends AbstractDataPackEntryBuilder<Carver, CarverTemplate, Builder> implements Builder {
 
-        private DataPack<CarverTemplate> pack = DataPacks.CARVER;
         @Nullable private WorldCarver<?> type;
         @Nullable private CarverConfiguration config;
+
+        @Override
+        public Function<CarverTemplate, Carver> valueExtractor() {
+            return CarverTemplate::carver;
+        }
 
         @Override
         public Builder reset() {
@@ -111,28 +117,17 @@ public record SpongeCarverTemplate(ResourceKey key, ConfiguredWorldCarver<?> rep
         }
 
         @Override
-        public Builder from(final Carver carver) {
+        public Builder fromValue(final Carver carver) {
             this.type(carver.type());
             this.config = ((ConfiguredWorldCarver<?>) (Object) carver).config();
             return this;
         }
 
         @Override
-        public Builder from(final CarverTemplate value) {
-            return this.from(value.carver()).key(value.key()).pack(value.pack());
-        }
-
-        @Override
         public Builder fromDataPack(final DataView pack) throws IOException {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
             final ConfiguredWorldCarver<?> carver = SpongeCarverTemplate.decode(ConfiguredWorldCarver.DIRECT_CODEC, json, SpongeCommon.server().registryAccess());
-            this.from((Carver) (Object) carver);
-            return this;
-        }
-
-        @Override
-        public Builder pack(final DataPack<CarverTemplate> pack) {
-            this.pack = pack;
+            this.fromValue((Carver) (Object) carver);
             return this;
         }
 

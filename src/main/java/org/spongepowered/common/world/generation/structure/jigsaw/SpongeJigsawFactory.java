@@ -30,61 +30,61 @@ import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.generation.feature.PlacedFeature;
-import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPool;
+import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolElement;
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorList;
 
 import java.util.List;
 import java.util.function.Function;
 
-public class SpongeJigsawFactory implements JigsawPool.Factory {
+public class SpongeJigsawFactory implements JigsawPoolElement.Factory {
 
     @Override
-    public Function<JigsawPool.Projection, JigsawPool.Element> legacy(final ResourceKey template, final ProcessorList processors) {
+    public Function<JigsawPoolElement.Projection, JigsawPoolElement> legacy(final ResourceKey template, final ProcessorList processors) {
         final Holder<StructureProcessorList> holder = Holder.direct((StructureProcessorList) processors);
         return new Wrapped(StructurePoolElement.legacy(template.toString(), holder));
     }
 
     @Override
-    public Function<JigsawPool.Projection, JigsawPool.Element> single(final ResourceKey template, final ProcessorList processors) {
+    public Function<JigsawPoolElement.Projection, JigsawPoolElement> single(final ResourceKey template, final ProcessorList processors) {
         final Holder<StructureProcessorList> holder = Holder.direct((StructureProcessorList) processors);
         return new Wrapped(StructurePoolElement.single(template.toString(), holder));
     }
 
     @Override
-    public Function<JigsawPool.Projection, JigsawPool.Element> feature(final PlacedFeature feature) {
+    public Function<JigsawPoolElement.Projection, JigsawPoolElement> feature(final PlacedFeature feature) {
         final var holder = Holder.direct(((net.minecraft.world.level.levelgen.placement.PlacedFeature) (Object) feature));
         return new Wrapped(StructurePoolElement.feature(holder));
     }
 
     @Override
-    public Function<JigsawPool.Projection, JigsawPool.Element> list(final List<Function<JigsawPool.Projection, JigsawPool.Element>> elements) {
+    public Function<JigsawPoolElement.Projection, JigsawPoolElement> list(final List<Function<JigsawPoolElement.Projection, JigsawPoolElement>> elements) {
         var list = elements.stream().map(func -> {
             if (func instanceof Wrapped w) {
                 return w.func;
             }
-            return (Function<StructureTemplatePool.Projection, ? extends StructurePoolElement>) p -> (StructurePoolElement) func.apply((JigsawPool.Projection) (Object) p);
+            return (Function<StructureTemplatePool.Projection, ? extends StructurePoolElement>) p -> (StructurePoolElement) func.apply((JigsawPoolElement.Projection) (Object) p);
         }).toList();
         return new Wrapped(StructurePoolElement.list(list));
     }
 
     @Override
-    public Function<JigsawPool.Projection, JigsawPool.Element> empty() {
+    public Function<JigsawPoolElement.Projection, JigsawPoolElement> empty() {
         return new Wrapped(StructurePoolElement.empty());
     }
 
     @Override
-    public JigsawPool.Projection matchingTerrain() {
-        return (JigsawPool.Projection) (Object) StructureTemplatePool.Projection.TERRAIN_MATCHING;
+    public JigsawPoolElement.Projection matchingTerrain() {
+        return (JigsawPoolElement.Projection) (Object) StructureTemplatePool.Projection.TERRAIN_MATCHING;
     }
 
     @Override
-    public JigsawPool.Projection rigid() {
-        return (JigsawPool.Projection) (Object) StructureTemplatePool.Projection.RIGID;
+    public JigsawPoolElement.Projection rigid() {
+        return (JigsawPoolElement.Projection) (Object) StructureTemplatePool.Projection.RIGID;
     }
 
-    private record Wrapped(Function<StructureTemplatePool.Projection, ? extends StructurePoolElement> func) implements Function<JigsawPool.Projection, JigsawPool.Element> {
-        public JigsawPool.Element apply(JigsawPool.Projection projection) {
-            return (JigsawPool.Element) this.func.apply((StructureTemplatePool.Projection) (Object) projection);
+    private record Wrapped(Function<StructureTemplatePool.Projection, ? extends StructurePoolElement> func) implements Function<JigsawPoolElement.Projection, JigsawPoolElement> {
+        public JigsawPoolElement apply(JigsawPoolElement.Projection projection) {
+            return (JigsawPoolElement) this.func.apply((StructureTemplatePool.Projection) (Object) projection);
         }
     }
 

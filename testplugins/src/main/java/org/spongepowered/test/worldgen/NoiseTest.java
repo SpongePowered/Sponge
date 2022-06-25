@@ -68,15 +68,15 @@ public class NoiseTest {
     private CommandResult registerNoise(final CommandContext commandContext) {
         final DataPackManager dpm = Sponge.server().dataPackManager();
 
-        final NoiseGeneratorConfigTemplate noiseGenCfgTemplate = NoiseGeneratorConfigTemplate.builder().from(NoiseGeneratorConfigs.CAVES.get())
+        final NoiseGeneratorConfigTemplate noiseGenCfgTemplate = NoiseGeneratorConfigTemplate.builder().fromValue(NoiseGeneratorConfigs.CAVES.get())
                 .key(ResourceKey.of("noisetest", "test"))
                 .build();
 
-        final NoiseTemplate noiseTemplate = NoiseTemplate.builder().from(Noises.CALCITE.get())
+        final NoiseTemplate noiseTemplate = NoiseTemplate.builder().fromValue(Noises.CALCITE.get())
                 .key(ResourceKey.of("noisetest", "calcite_copy"))
                 .build();
 
-        final DensityFunctionTemplate overWorldDensity = DensityFunctionTemplate.builder().from(DensityFunctions.OVERWORLD_BASE_3D_NOISE.get())
+        final DensityFunctionTemplate overWorldDensity = DensityFunctionTemplate.builder().fromValue(DensityFunctions.OVERWORLD_BASE_3D_NOISE.get())
                 .key(ResourceKey.of("noisetest", "overworld_base3d_copy"))
                 .build();
 

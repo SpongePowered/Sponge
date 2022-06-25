@@ -22,13 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure.pools;
+package org.spongepowered.common.accessor.world.level.levelgen.structure.pools;
 
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
-import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolElement;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(StructureTemplatePool.Projection.class)
-public abstract class StructureTemplatePool_ProjectionMixin_API implements JigsawPoolElement.Projection {
+import java.util.List;
+
+@Mixin(StructureTemplatePool.class)
+public interface StructureTemplatePoolAccessor {
+
+    @Accessor("rawTemplates")
+    List<Pair<StructurePoolElement, Integer>> accessor$rawTemplates();
 
 }

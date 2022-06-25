@@ -87,15 +87,15 @@ public class FeatureTest {
     CommandResult registerFeature(final CommandContext ctx) {
         final DataPackManager dpm = Sponge.server().dataPackManager();
 
-        final FeatureTemplate featureTemplate = FeatureTemplate.builder().from(Features.TREES_PLAINS.get())
+        final FeatureTemplate featureTemplate = FeatureTemplate.builder().fromValue(Features.TREES_PLAINS.get())
                 .key(ResourceKey.of("featuretest", "test"))
                 .build();
 
-        final PlacedFeatureTemplate placedFeatureTemplate1 = PlacedFeatureTemplate.builder().from(PlacedFeatures.TREES_PLAINS.get())
+        final PlacedFeatureTemplate placedFeatureTemplate1 = PlacedFeatureTemplate.builder().fromValue(PlacedFeatures.TREES_PLAINS.get())
                 .key(ResourceKey.of("featuretest", "test"))
                 .build();
 
-        final PlacedFeatureTemplate placedFeatureTemplate2 = PlacedFeatureTemplate.builder().from(PlacedFeatures.TREES_PLAINS.get())
+        final PlacedFeatureTemplate placedFeatureTemplate2 = PlacedFeatureTemplate.builder().fromValue(PlacedFeatures.TREES_PLAINS.get())
                 .feature(featureTemplate)
                 .key(ResourceKey.of("featuretest", "test2"))
                 .build();

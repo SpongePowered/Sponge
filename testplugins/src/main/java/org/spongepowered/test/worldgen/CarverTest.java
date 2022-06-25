@@ -52,7 +52,7 @@ public class CarverTest {
             ctx.sendMessage(Identity.nil(), Component.text(" - " + e.key(), NamedTextColor.GRAY));
         });
 
-        final CarverTemplate template = CarverTemplate.builder().from(Carvers.CAVE.get()).key(ResourceKey.of("carvertest", "custom_carver")).build();
+        final CarverTemplate template = CarverTemplate.builder().fromValue(Carvers.CAVE.get()).key(ResourceKey.of("carvertest", "custom_carver")).build();
         final DataContainer container = template.toContainer();
         try {
             final CarverTemplate rebuiltTemplate = CarverTemplate.builder().fromDataPack(container).key(ResourceKey.of("carvertest", "custom_carver")).build();

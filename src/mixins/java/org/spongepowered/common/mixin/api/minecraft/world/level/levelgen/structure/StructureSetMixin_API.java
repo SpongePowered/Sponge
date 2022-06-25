@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure;
 
 import net.minecraft.world.level.levelgen.structure.StructureSet;
-import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.generation.structure.Structure;
+import org.spongepowered.api.world.generation.structure.StructurePlacement;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,7 +38,7 @@ import java.util.List;
 public abstract class StructureSetMixin_API implements org.spongepowered.api.world.generation.structure.StructureSet {
 
     // @formatter:off
-    @Shadow @Final private StructurePlacement placement;
+    @Shadow @Final private net.minecraft.world.level.levelgen.structure.placement.StructurePlacement placement;
     @Shadow @Final private List<StructureSet.StructureSelectionEntry> structures;
     // @formatter:on
 
@@ -52,7 +52,7 @@ public abstract class StructureSetMixin_API implements org.spongepowered.api.wor
     }
 
     @Override
-    public Placement placement() {
-        return (Placement) this.placement;
+    public StructurePlacement placement() {
+        return (StructurePlacement) this.placement;
     }
 }

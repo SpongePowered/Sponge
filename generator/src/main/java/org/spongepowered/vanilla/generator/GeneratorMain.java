@@ -441,6 +441,13 @@ public final class GeneratorMain {
                     "BlockTypeTags"
             ),
             new TagGenerator(
+                "BIOME",
+                Registry.BIOME_REGISTRY,
+                context.relativeClass("world.biome", "Biome"),
+                "tag",
+                "BiomeTags"
+            ),
+            new TagGenerator(
                     "ITEM_TYPE",
                     Registry.ITEM_REGISTRY,
                     context.relativeClass("item", "ItemType"),

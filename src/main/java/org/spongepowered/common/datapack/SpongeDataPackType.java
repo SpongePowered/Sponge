@@ -48,7 +48,9 @@ import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
 import org.spongepowered.api.world.generation.feature.FeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.generation.structure.SchematicTemplate;
+import org.spongepowered.api.world.generation.structure.StructureSetTemplate;
 import org.spongepowered.api.world.generation.structure.StructureTemplate;
+import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolTemplate;
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorListTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.advancement.SpongeAdvancementTemplate;
@@ -63,7 +65,9 @@ import org.spongepowered.common.world.generation.config.noise.SpongeNoiseTemplat
 import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
 import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
 import org.spongepowered.common.world.generation.structure.SpongeSchematicTemplate;
+import org.spongepowered.common.world.generation.structure.SpongeStructureSetTemplate;
 import org.spongepowered.common.world.generation.structure.SpongeStructureTemplate;
+import org.spongepowered.common.world.generation.structure.jigsaw.SpongeJigsawPoolTemplate;
 import org.spongepowered.common.world.generation.structure.jigsaw.SpongeProcessorListTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
@@ -142,6 +146,14 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
                 "worldgen/processor_list", SpongeProcessorListTemplate::encode, SpongeProcessorListTemplate::decode,
                 true, false);
 
+        private final SpongeDataPackType<JsonElement, @NonNull StructureSetTemplate> structureSet = SpongeDataPackType.basic(StructureSetTemplate.class,
+                "worldgen/structure_set", SpongeStructureSetTemplate::encode, SpongeStructureSetTemplate::decode,
+                true, false);
+
+        private final SpongeDataPackType<JsonElement, @NonNull JigsawPoolTemplate> jigsawPool = SpongeDataPackType.basic(JigsawPoolTemplate.class,
+                "worldgen/template_pool", SpongeJigsawPoolTemplate::encode, SpongeJigsawPoolTemplate::decode,
+                true, false);
+
         @Override
         public DataPackType<RecipeRegistration> recipe() {
             return this.recipe;
@@ -210,6 +222,16 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
         @Override
         public DataPackType<ProcessorListTemplate> processorList() {
             return this.processorList;
+        }
+
+        @Override
+        public DataPackType<StructureSetTemplate> structureSet() {
+            return this.structureSet;
+        }
+
+        @Override
+        public DataPackType<JigsawPoolTemplate> jigsawPool() {
+            return this.jigsawPool;
         }
 
         @Override

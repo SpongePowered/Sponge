@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.generation.structure.jigsaw;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
@@ -34,17 +35,19 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.world.generation.structure.jigsaw.Processor;
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorList;
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorListTemplate;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 public record SpongeProcessorListTemplate(ResourceKey key, StructureProcessorList representedProcessors, DataPack<ProcessorListTemplate> pack) implements ProcessorListTemplate {
 
@@ -83,9 +86,8 @@ public record SpongeProcessorListTemplate(ResourceKey key, StructureProcessorLis
         return new SpongeProcessorListTemplate(key, parsed, pack);
     }
 
-    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<ProcessorListTemplate, Builder> implements Builder {
+    public static final class BuilderImpl extends AbstractDataPackEntryBuilder<ProcessorList, ProcessorListTemplate, Builder> implements Builder {
 
-        private DataPack<ProcessorListTemplate> pack = DataPacks.PROCESSOR_LIST;
         @Nullable private StructureProcessorList processorList;
 
         public BuilderImpl() {
@@ -93,7 +95,12 @@ public record SpongeProcessorListTemplate(ResourceKey key, StructureProcessorLis
         }
 
         @Override
-        public Builder from(final List<Processor> processorList) {
+        public Function<ProcessorListTemplate, ProcessorList> valueExtractor() {
+            return ProcessorListTemplate::processorList;
+        }
+
+        @Override
+        public Builder fromValues(final List<Processor> processorList) {
             this.processorList = new StructureProcessorList((List) processorList);
             return this;
         }
@@ -105,7 +112,7 @@ public record SpongeProcessorListTemplate(ResourceKey key, StructureProcessorLis
         }
 
         @Override
-        public Builder from(final ProcessorList processorList) {
+        public Builder fromValue(final ProcessorList processorList) {
             this.processorList = (StructureProcessorList) processorList;
             return this;
         }
@@ -113,13 +120,16 @@ public record SpongeProcessorListTemplate(ResourceKey key, StructureProcessorLis
         @Override
         public Builder reset() {
             this.pack = DataPacks.PROCESSOR_LIST;
+            this.key = null;
             this.processorList = null;
             return this;
         }
 
         @Override
-        public Builder pack(final DataPack<ProcessorListTemplate> pack) {
-            this.pack = pack;
+        public Builder fromDataPack(final DataView datapack) throws IOException {
+            final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(datapack));
+            final StructureProcessorList decoded = SpongeProcessorListTemplate.decode(json, SpongeCommon.server().registryAccess());
+            this.fromValue((ProcessorList) decoded);
             return this;
         }
 

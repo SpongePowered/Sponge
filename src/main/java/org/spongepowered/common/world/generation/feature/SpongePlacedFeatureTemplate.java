@@ -46,11 +46,13 @@ import org.spongepowered.api.world.generation.feature.PlacedFeature;
 import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacementModifier;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 public record SpongePlacedFeatureTemplate(ResourceKey key, net.minecraft.world.level.levelgen.placement.PlacedFeature represented, DataPack<PlacedFeatureTemplate> pack) implements PlacedFeatureTemplate {
 
@@ -91,11 +93,19 @@ public record SpongePlacedFeatureTemplate(ResourceKey key, net.minecraft.world.l
         return new SpongePlacedFeatureTemplate(key, parsed, pack);
     }
 
-    public static class BuilderImpl extends AbstractResourceKeyedBuilder<PlacedFeatureTemplate, Builder> implements Builder {
+    public static class BuilderImpl extends AbstractDataPackEntryBuilder<PlacedFeature, PlacedFeatureTemplate, Builder> implements Builder {
 
-        private DataPack<PlacedFeatureTemplate> pack = DataPacks.PLACED_FEATURE;
         private Holder<ConfiguredFeature<?, ?>> feature;
         private List<net.minecraft.world.level.levelgen.placement.PlacementModifier> modifiers = new ArrayList<>();
+
+        public BuilderImpl() {
+            this.reset();
+        }
+
+        @Override
+        public Function<PlacedFeatureTemplate, PlacedFeature> valueExtractor() {
+            return PlacedFeatureTemplate::feature;
+        }
 
         @Override
         public Builder reset() {
@@ -107,7 +117,7 @@ public record SpongePlacedFeatureTemplate(ResourceKey key, net.minecraft.world.l
         }
 
         @Override
-        public Builder from(final PlacedFeature feature) {
+        public Builder fromValue(final PlacedFeature feature) {
             this.feature(feature.feature());
             this.modifiers.clear();
             this.modifiers.addAll((List) feature.placementModifiers());
@@ -143,21 +153,10 @@ public record SpongePlacedFeatureTemplate(ResourceKey key, net.minecraft.world.l
         }
 
         @Override
-        public Builder from(final PlacedFeatureTemplate value) {
-            return this.from(value.feature()).key(value.key()).pack(value.pack());
-        }
-
-        @Override
         public Builder fromDataPack(final DataView pack) throws IOException {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
             final net.minecraft.world.level.levelgen.placement.PlacedFeature feature = SpongePlacedFeatureTemplate.decode(json, SpongeCommon.server().registryAccess());
-            this.from((PlacedFeature) (Object) feature);
-            return this;
-        }
-
-        @Override
-        public Builder pack(final DataPack<PlacedFeatureTemplate> pack) {
-            this.pack = pack;
+            this.fromValue((PlacedFeature) (Object) feature);
             return this;
         }
 

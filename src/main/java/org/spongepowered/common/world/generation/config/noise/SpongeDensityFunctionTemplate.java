@@ -39,10 +39,12 @@ import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.world.generation.config.noise.DensityFunctionTemplate;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.function.Function;
 
 public record SpongeDensityFunctionTemplate(ResourceKey key, DensityFunction representedFunction, DataPack<DensityFunctionTemplate> pack) implements DensityFunctionTemplate {
 
@@ -81,9 +83,8 @@ public record SpongeDensityFunctionTemplate(ResourceKey key, DensityFunction rep
     }
 
 
-    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<DensityFunctionTemplate, Builder> implements Builder {
+    public static final class BuilderImpl extends AbstractDataPackEntryBuilder<org.spongepowered.api.world.generation.config.noise.DensityFunction, DensityFunctionTemplate, Builder> implements Builder {
 
-        private DataPack<DensityFunctionTemplate> pack = DataPacks.DENSITY_FUNCTION;
         @Nullable private DensityFunction densityFunction;
 
         public BuilderImpl() {
@@ -91,13 +92,12 @@ public record SpongeDensityFunctionTemplate(ResourceKey key, DensityFunction rep
         }
 
         @Override
-        public Builder from(final DensityFunctionTemplate value) {
-            this.densityFunction = (DensityFunction) value.densityFunction();
-            return this;
+        public Function<DensityFunctionTemplate, org.spongepowered.api.world.generation.config.noise.DensityFunction> valueExtractor() {
+            return DensityFunctionTemplate::densityFunction;
         }
 
         @Override
-        public Builder from(final org.spongepowered.api.world.generation.config.noise.DensityFunction densityFunction) {
+        public Builder fromValue(final org.spongepowered.api.world.generation.config.noise.DensityFunction densityFunction) {
             this.densityFunction = (DensityFunction) densityFunction;
             return this;
         }
@@ -112,13 +112,8 @@ public record SpongeDensityFunctionTemplate(ResourceKey key, DensityFunction rep
         @Override
         public Builder reset() {
             this.pack = DataPacks.DENSITY_FUNCTION;
+            this.key = null;
             this.densityFunction = null;
-            return this;
-        }
-
-        @Override
-        public Builder pack(final DataPack<DensityFunctionTemplate> pack) {
-            this.pack = pack;
             return this;
         }
 

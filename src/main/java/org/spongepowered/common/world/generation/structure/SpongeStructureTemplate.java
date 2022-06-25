@@ -29,6 +29,7 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -36,13 +37,13 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
-import net.minecraft.world.level.levelgen.structure.Structure;
 import org.spongepowered.api.world.generation.structure.StructureTemplate;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.function.Function;
 
 public record SpongeStructureTemplate(ResourceKey key, Structure representedStructure, DataPack<StructureTemplate> pack) implements StructureTemplate {
 
@@ -81,9 +82,8 @@ public record SpongeStructureTemplate(ResourceKey key, Structure representedStru
         return new SpongeStructureTemplate(key, parsed, pack);
     }
 
-    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<StructureTemplate, Builder> implements Builder {
+    public static final class BuilderImpl extends AbstractDataPackEntryBuilder<org.spongepowered.api.world.generation.structure.Structure, StructureTemplate, Builder> implements Builder {
 
-        private DataPack<StructureTemplate> pack = DataPacks.STRUCTURE;
         @Nullable private Structure structure;
 
         public BuilderImpl() {
@@ -91,13 +91,12 @@ public record SpongeStructureTemplate(ResourceKey key, Structure representedStru
         }
 
         @Override
-        public Builder from(final StructureTemplate value) {
-            this.structure = (Structure) value.structure();
-            return this;
+        public Function<StructureTemplate, org.spongepowered.api.world.generation.structure.Structure> valueExtractor() {
+            return StructureTemplate::structure;
         }
 
         @Override
-        public Builder from(final org.spongepowered.api.world.generation.structure.Structure structure) {
+        public Builder fromValue(final org.spongepowered.api.world.generation.structure.Structure structure) {
             this.structure = (Structure) structure;
             return this;
         }
@@ -111,14 +110,9 @@ public record SpongeStructureTemplate(ResourceKey key, Structure representedStru
 
         @Override
         public Builder reset() {
+            this.key = null;
             this.pack = DataPacks.STRUCTURE;
             this.structure = null;
-            return this;
-        }
-
-        @Override
-        public Builder pack(final DataPack<StructureTemplate> pack) {
-            this.pack = pack;
             return this;
         }
 

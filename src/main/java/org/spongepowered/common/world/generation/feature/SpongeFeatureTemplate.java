@@ -41,10 +41,12 @@ import org.spongepowered.api.world.generation.feature.Feature;
 import org.spongepowered.api.world.generation.feature.FeatureTemplate;
 import org.spongepowered.api.world.generation.feature.FeatureType;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.function.Function;
 
 public record SpongeFeatureTemplate(ResourceKey key, ConfiguredFeature<?, ?> representedFeature, DataPack<FeatureTemplate> pack) implements FeatureTemplate {
 
@@ -83,11 +85,19 @@ public record SpongeFeatureTemplate(ResourceKey key, ConfiguredFeature<?, ?> rep
         return new SpongeFeatureTemplate(key, parsed, pack);
     }
 
-    public static class BuilderImpl extends AbstractResourceKeyedBuilder<FeatureTemplate, Builder> implements Builder {
+    public static class BuilderImpl extends AbstractDataPackEntryBuilder<Feature, FeatureTemplate, Builder> implements Builder {
 
-        private DataPack<FeatureTemplate> pack = DataPacks.FEATURE;
         private net.minecraft.world.level.levelgen.feature.Feature<?> type;
         private FeatureConfiguration config;
+
+        public BuilderImpl() {
+            this.reset();
+        }
+
+        @Override
+        public Function<FeatureTemplate, Feature> valueExtractor() {
+            return FeatureTemplate::feature;
+        }
 
         @Override
         public Builder type(final FeatureType type) {
@@ -105,28 +115,17 @@ public record SpongeFeatureTemplate(ResourceKey key, ConfiguredFeature<?, ?> rep
         }
 
         @Override
-        public Builder from(final org.spongepowered.api.world.generation.feature.Feature feature) {
+        public Builder fromValue(final org.spongepowered.api.world.generation.feature.Feature feature) {
             this.type(feature.type());
             this.config = ((ConfiguredFeature) (Object) feature).config();
             return this;
         }
 
         @Override
-        public Builder from(final FeatureTemplate value) {
-            return this.from(value.feature()).pack(value.pack());
-        }
-
-        @Override
         public Builder fromDataPack(final DataView pack) throws IOException {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
             final ConfiguredFeature<?, ?> feature = SpongeFeatureTemplate.decode(json, SpongeCommon.server().registryAccess());
-            this.from((Feature) (Object) feature);
-            return this;
-        }
-
-        @Override
-        public Builder pack(final DataPack<FeatureTemplate> pack) {
-            this.pack = pack;
+            this.fromValue((Feature) (Object) feature);
             return this;
         }
 

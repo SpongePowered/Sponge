@@ -22,13 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure.pools;
+package org.spongepowered.common.util;
 
-import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
-import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolElement;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPackEntry;
+import org.spongepowered.api.util.DataPackEntryBuilder;
 
-@Mixin(StructureTemplatePool.Projection.class)
-public abstract class StructureTemplatePool_ProjectionMixin_API implements JigsawPoolElement.Projection {
+import java.util.function.Function;
+
+public abstract class AbstractDataPackEntryBuilder<T, TT extends DataPackEntry<TT>, B extends DataPackEntryBuilder<T, TT, B>>
+        extends AbstractResourceKeyedBuilder<TT, B> implements DataPackEntryBuilder<T, TT, B> {
+
+    protected DataPack<TT> pack;
+
+    @Override
+    public B pack(final DataPack<TT> pack) {
+        this.pack = pack;
+        return (B) this;
+    }
+
+    public abstract Function<TT, T> valueExtractor();
+
+    @Override
+    public B from(final TT value) {
+        this.fromValue(valueExtractor().apply(value)).pack(value.pack()).key(value.key());
+        return (B) this;
+    }
+
 
 }

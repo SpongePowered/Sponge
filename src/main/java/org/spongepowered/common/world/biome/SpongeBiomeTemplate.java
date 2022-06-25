@@ -71,12 +71,14 @@ import org.spongepowered.api.world.generation.feature.PlacedFeature;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
+import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataPack<BiomeTemplate> pack) implements BiomeTemplate {
 
@@ -115,12 +117,20 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
         return new SpongeBiomeTemplate(key, parsed, pack);
     }
 
-    public static class BuilderImpl extends AbstractResourceKeyedBuilder<BiomeTemplate, BiomeTemplate.Builder> implements BiomeTemplate.Builder {
+    public static class BuilderImpl extends AbstractDataPackEntryBuilder<org.spongepowered.api.world.biome.Biome, BiomeTemplate, Builder> implements BiomeTemplate.Builder {
 
         private static DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(Biome.class);
 
         private DataManipulator.Mutable manipulator = DataManipulator.mutableOf();
-        private DataPack<BiomeTemplate> pack = DataPacks.BIOME;
+
+        public BuilderImpl() {
+            this.reset();
+        }
+
+        @Override
+        public Function<BiomeTemplate, org.spongepowered.api.world.biome.Biome> valueExtractor() {
+            return BiomeTemplate::biome;
+        }
 
         @Override
         public <V> Builder add(final Key<? extends Value<V>> key, final V value) {
@@ -140,27 +150,16 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
         }
 
         @Override
-        public Builder from(final org.spongepowered.api.world.biome.Biome biome) {
+        public Builder fromValue(final org.spongepowered.api.world.biome.Biome biome) {
             this.manipulator.set(biome.getValues());
             return this;
-        }
-
-        @Override
-        public Builder from(final BiomeTemplate value) {
-            return this.from(value.biome()).key(value.key()).pack(value.pack());
         }
 
         @Override
         public Builder fromDataPack(final DataView pack) throws IOException {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
             final Biome biome = SpongeBiomeTemplate.decode(json, SpongeCommon.server().registryAccess());
-            this.from((org.spongepowered.api.world.biome.Biome) (Object) biome);
-            return this;
-        }
-
-        @Override
-        public Builder pack(final DataPack<BiomeTemplate> pack) {
-            this.pack = pack;
+            this.fromValue((org.spongepowered.api.world.biome.Biome) (Object) biome);
             return this;
         }
 

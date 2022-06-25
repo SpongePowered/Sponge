@@ -128,7 +128,11 @@ import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
 import org.spongepowered.api.world.generation.feature.FeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.generation.structure.SchematicTemplate;
+import org.spongepowered.api.world.generation.structure.StructurePlacement;
+import org.spongepowered.api.world.generation.structure.StructureSetTemplate;
 import org.spongepowered.api.world.generation.structure.StructureTemplate;
+import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPool;
+import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolTemplate;
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorList;
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorListTemplate;
 import org.spongepowered.api.world.schematic.PaletteType;
@@ -232,7 +236,10 @@ import org.spongepowered.common.world.generation.config.noise.SpongeNoiseTemplat
 import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
 import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
 import org.spongepowered.common.world.generation.structure.SpongeSchematicTemplate;
+import org.spongepowered.common.world.generation.structure.SpongeStructurePlacementBuilder;
+import org.spongepowered.common.world.generation.structure.SpongeStructureSetTemplate;
 import org.spongepowered.common.world.generation.structure.SpongeStructureTemplate;
+import org.spongepowered.common.world.generation.structure.jigsaw.SpongeJigsawPoolTemplate;
 import org.spongepowered.common.world.generation.structure.jigsaw.SpongeProcessorListTemplate;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
@@ -388,6 +395,9 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(StructureTemplate.Builder.class, SpongeStructureTemplate.BuilderImpl::new)
                 .register(SchematicTemplate.Builder.class, SpongeSchematicTemplate.BuilderImpl::new)
                 .register(ProcessorListTemplate.Builder.class, SpongeProcessorListTemplate.BuilderImpl::new)
+                .register(StructurePlacement.Builder.class, SpongeStructurePlacementBuilder::new)
+                .register(StructureSetTemplate.Builder.class, SpongeStructureSetTemplate.BuilderImpl::new)
+                .register(JigsawPoolTemplate.Builder.class, SpongeJigsawPoolTemplate.BuilderImpl::new)
         ;
     }
 }

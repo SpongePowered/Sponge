@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.structure;
 
+import com.google.gson.JsonElement;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.SectionPos;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.MobCategory;
@@ -37,15 +41,19 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.world.generation.feature.DecorationStep;
 import org.spongepowered.api.world.generation.structure.StructureType;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 
@@ -103,4 +111,19 @@ public abstract class StructureMixin_API implements org.spongepowered.api.world.
         return (DecorationStep) (Object) this.shadow$step();
     }
 
+    @Override
+    public DataView toContainer() {
+        final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
+        final JsonElement serialized = this.api$codec().encodeStart(ops, (Structure) (Object) this).getOrThrow(false, e -> {});
+        try {
+            return DataFormats.JSON.get().read(serialized.toString());
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not read deserialized Structure:\n" + serialized, e);
+        }
+    }
+
+    private <T extends Structure> Codec<T> api$codec() {
+        final var type = (net.minecraft.world.level.levelgen.structure.StructureType<T>) this.shadow$type();
+        return type.codec();
+    }
 }

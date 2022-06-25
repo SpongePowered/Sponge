@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.generation.config.noise;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
@@ -35,6 +36,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.world.biome.BiomeAttributes;
@@ -46,11 +48,12 @@ import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigT
 import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigs;
 import org.spongepowered.api.world.generation.config.noise.NoiseRouter;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 public record SpongeNoiseGeneratorConfigTemplate(ResourceKey key, NoiseGeneratorSettings representedSettings, DataPack<NoiseGeneratorConfigTemplate> pack) implements NoiseGeneratorConfigTemplate {
 
@@ -89,19 +92,23 @@ public record SpongeNoiseGeneratorConfigTemplate(ResourceKey key, NoiseGenerator
     }
 
 
-    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<NoiseGeneratorConfigTemplate, Builder> implements Builder {
+    public static final class BuilderImpl extends AbstractDataPackEntryBuilder<NoiseGeneratorConfig, NoiseGeneratorConfigTemplate, Builder> implements Builder {
 
         public NoiseConfig noiseConfig;
         public BlockState defaultBlock, defaultFluid;
         public int seaLevel;
         public boolean aquifers, oreVeins, legacyRandomSource, disableMobGeneration;
         public SurfaceRule surfaceRule;
-        private DataPack<NoiseGeneratorConfigTemplate> pack = DataPacks.NOISE_GENERATOR_CONFIG;
         private NoiseRouter router;
         private List<BiomeAttributes> spawnTargets;
 
         public BuilderImpl() {
             this.reset();
+        }
+
+        @Override
+        public Function<NoiseGeneratorConfigTemplate, NoiseGeneratorConfig> valueExtractor() {
+            return NoiseGeneratorConfigTemplate::config;
         }
 
         @Override
@@ -184,17 +191,12 @@ public record SpongeNoiseGeneratorConfigTemplate(ResourceKey key, NoiseGenerator
             this.router = NoiseGeneratorConfigs.OVERWORLD.get().noiseRouter();
             this.spawnTargets = (List) new OverworldBiomeBuilder().spawnTarget();;
             this.pack = DataPacks.NOISE_GENERATOR_CONFIG;
+            this.key = null;
             return this;
         }
 
         @Override
-        public Builder pack(final DataPack<NoiseGeneratorConfigTemplate> pack) {
-            this.pack = pack;
-            return this;
-        }
-
-        @Override
-        public Builder from(final NoiseGeneratorConfig value) {
+        public Builder fromValue(final NoiseGeneratorConfig value) {
             this.noiseConfig = value.noiseConfig();
             this.defaultBlock = value.defaultBlock();
             this.defaultFluid = value.defaultFluid();
@@ -206,8 +208,10 @@ public record SpongeNoiseGeneratorConfigTemplate(ResourceKey key, NoiseGenerator
         }
 
         @Override
-        public Builder from(final NoiseGeneratorConfigTemplate value) {
-            return this.from(value.config()).key(value.key()).pack(value.pack());
+        public Builder fromDataPack(final DataView datapack) throws IOException {
+            final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(datapack));
+            final NoiseGeneratorSettings decoded = SpongeNoiseGeneratorConfigTemplate.decode(json, SpongeCommon.server().registryAccess());
+            return this.fromValue((NoiseGeneratorConfig) (Object) decoded);
         }
 
         @Override

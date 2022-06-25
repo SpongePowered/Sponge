@@ -31,6 +31,7 @@ import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPool;
+import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolElement;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,10 +54,10 @@ public abstract class StructureTemplatePoolMixin_API implements JigsawPool {
     }
 
     @Override
-    public WeightedTable<Element> elements() {
-        final WeightedTable<Element> weightedTable = new WeightedTable<>();
+    public WeightedTable<JigsawPoolElement> elements() {
+        final WeightedTable<JigsawPoolElement> weightedTable = new WeightedTable<>();
         for (final Pair<StructurePoolElement, Integer> pair : this.rawTemplates) {
-            weightedTable.add((Element) pair.getFirst(), pair.getSecond());
+            weightedTable.add((JigsawPoolElement) pair.getFirst(), pair.getSecond());
         }
         return weightedTable;
     }

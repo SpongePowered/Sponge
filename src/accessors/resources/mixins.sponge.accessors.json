@@ -199,7 +199,8 @@
         "world.level.biome.BiomeAccessor",
         "world.level.biome.Biome_ClimateSettingsAccessor",
         "world.level.biome.OverworldBiomeBuilderAccessor",
-        "world.level.levelgen.NoiseSettingsAccessor"
+        "world.level.levelgen.NoiseSettingsAccessor",
+        "world.level.levelgen.structure.pools.StructureTemplatePoolAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"
