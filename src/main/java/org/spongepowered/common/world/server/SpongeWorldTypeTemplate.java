@@ -55,6 +55,7 @@ import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.util.MinecraftDayTime;
+import org.spongepowered.api.util.Range;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
@@ -62,10 +63,8 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.io.IOException;
-import java.util.Objects;
 import java.util.OptionalLong;
 import java.util.function.Function;
 
@@ -178,11 +177,11 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
             final int logicalHeight = this.manipulator.require(Keys.WORLD_LOGICAL_HEIGHT);
             @Nullable final Tag<BlockType> infiniburn = this.manipulator.getOrNull(Keys.INFINIBURN);
 
-            // TODO monstersettings
             final boolean piglinSafe = this.manipulator.require(Keys.PIGLIN_SAFE);
             final boolean hasRaids = this.manipulator.require(Keys.HAS_RAIDS);
-            final UniformInt monsterSpawnLightTest = UniformInt.of(0, 7);
-            final int monsterSpawnBlockLightLimit = 0;
+            final int monsterSpawnBlockLightLimit = this.manipulator.getOrElse(Keys.SPAWN_LIGHT_LIMIT, 0);
+            final Range<Integer> lightRange = this.manipulator.getOrElse(Keys.SPAWN_LIGHT_RANGE, Range.intRange(0, 7));
+            final UniformInt monsterSpawnLightTest = UniformInt.of(lightRange.min(), lightRange.max());
 
             // final boolean createDragonFight = this.manipulator.require(Keys.CREATE_DRAGON_FIGHT);
             try {

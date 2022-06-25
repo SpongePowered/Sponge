@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.world;
 
+import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -31,14 +32,13 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.util.MinecraftDayTime;
+import org.spongepowered.api.util.Range;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.registry.provider.DimensionEffectProvider;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
-import org.spongepowered.common.world.SpongeWorldTypeEffect;
 
-import java.util.Optional;
 import java.util.OptionalLong;
 
 public final class WorldTypeData {
@@ -78,6 +78,10 @@ public final class WorldTypeData {
                         .get(DimensionType::height)
                     .create(Keys.WORLD_LOGICAL_HEIGHT)
                         .get(DimensionType::logicalHeight)
+                    .create(Keys.SPAWN_LIGHT_LIMIT)
+                        .get(DimensionType::monsterSpawnBlockLightLimit)
+                    .create(Keys.SPAWN_LIGHT_RANGE)
+                        .get(t -> WorldTypeData.lightRange(t.monsterSettings().monsterSpawnLightTest()))
                 .asImmutable(DimensionTypeAccessor.class)
                     .create(Keys.AMBIENT_LIGHTING)
                         .get(DimensionTypeAccessor::accessor$ambientLight)
@@ -87,6 +91,10 @@ public final class WorldTypeData {
 
     }
     // @formatter:on
+
+    private static Range<Integer> lightRange(IntProvider provider) {
+        return Range.intRange(provider.getMinValue(), provider.getMaxValue());
+    }
 
     private static WorldTypeEffect worldTypeEffect(final DimensionType type) {
         final var key = (ResourceKey) (Object) type.effectsLocation();
