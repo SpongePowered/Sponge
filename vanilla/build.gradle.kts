@@ -233,13 +233,13 @@ minecraft {
             .forEach { accessWideners(it) }
 }
 
+val asmVersion: String by project
 dependencies {
     val apiAdventureVersion: String by project
     val apiConfigurateVersion: String by project
     val apiGsonVersion: String by project
     val apiGuavaVersion: String by project
     val apiPluginSpiVersion: String by project
-    val asmVersion: String by project
     val forgeFlowerVersion: String by project
     val forgeAutoRenamingToolVersion: String by project
     val jlineVersion: String by project
@@ -483,6 +483,10 @@ tasks {
                     "Agent-Class" to "org.spongepowered.vanilla.installer.Agent",
                     "Launcher-Agent-Class" to "org.spongepowered.vanilla.installer.Agent"
             ))
+            attributes(
+                mapOf("Implementation-Version" to asmVersion),
+                "org/objectweb/asm/"
+            )
             from(vanillaManifest)
         }
         from(commonProject.sourceSets.main.map { it.output })
