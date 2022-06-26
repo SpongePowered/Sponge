@@ -212,20 +212,34 @@ public final class SpongeDataPackManager implements DataPackManager {
     }
 
     public void copy(final DataPack<?> pack, final ResourceKey from, final ResourceKey to) throws IOException {
-        final SpongeDataPack<JsonElement, ?> packImpl = (SpongeDataPack<JsonElement, ?>) pack;
+        this.copy(pack, from, pack, to);
+    }
+
+    @Override
+    public void copy(final DataPack<?> fromPack, final ResourceKey from, final DataPack<?> toPack, final ResourceKey to) throws IOException {
+        final SpongeDataPack<?, ?> packImpl = (SpongeDataPack<?, ?>) fromPack;
+        final SpongeDataPack<?, ?> packImplTo = (SpongeDataPack<?, ?>) toPack;
         final Path fileFrom = this.packFile(packImpl, Objects.requireNonNull(from, "from"));
-        final Path fileto = this.packFile(packImpl, Objects.requireNonNull(to, "to"));
+        final Path fileto = this.packFile(packImplTo, Objects.requireNonNull(to, "to"));
         Files.createDirectories(fileto.getParent());
         Files.copy(fileFrom, fileto, StandardCopyOption.REPLACE_EXISTING);
     }
 
     public void move(final DataPack<?> pack, final ResourceKey from, final ResourceKey to) throws IOException {
-        final SpongeDataPack<JsonElement, ?> packImpl = (SpongeDataPack<JsonElement, ?>) pack;
+        this.move(pack, from, pack, to);
+    }
+
+
+    @Override
+    public void move(final DataPack<?> fromPack, final ResourceKey from, final DataPack<?> toPack, final ResourceKey to) throws IOException {
+        final SpongeDataPack<?, ?> packImpl = (SpongeDataPack<?, ?>) fromPack;
+        final SpongeDataPack<?, ?> packImplTo = (SpongeDataPack<?, ?>) toPack;
         final Path fileFrom = this.packFile(packImpl, Objects.requireNonNull(from, "from"));
-        final Path fileto = this.packFile(packImpl, Objects.requireNonNull(to, "to"));
+        final Path fileto = this.packFile(packImplTo, Objects.requireNonNull(to, "to"));
         Files.createDirectories(fileto.getParent());
         Files.copy(fileFrom, fileto, StandardCopyOption.REPLACE_EXISTING);
     }
+
 
     @Override
     public List<ResourceKey> list(final DataPack<?> pack) {
@@ -305,7 +319,7 @@ public final class SpongeDataPackManager implements DataPackManager {
         return ResourceKey.of(namespace, value);
     }
 
-    private <T extends DataPackEntry<T>> Path packFile(final SpongeDataPack<JsonElement, T> pack, final ResourceKey key) {
+    private <T extends DataPackEntry<T>> Path packFile(final SpongeDataPack<?, T> pack, final ResourceKey key) {
         return pack.type().packSerializer().packEntryFile(pack.type(), key, this.packDir(pack));
     }
 

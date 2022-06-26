@@ -64,7 +64,7 @@ public abstract class DataPackSerializer<E, T extends DataPackEntry<T>> {
         return true;
     }
 
-    public Path packEntryFile(final SpongeDataPackType<E, T> packType, final ResourceKey key, final Path packDir) {
+    public Path packEntryFile(final SpongeDataPackType<?, T> packType, final ResourceKey key, final Path packDir) {
         final ResourceLocation loc = this.location(packType, key);
         return packDir.resolve("data")
                 .resolve(loc.getNamespace())
