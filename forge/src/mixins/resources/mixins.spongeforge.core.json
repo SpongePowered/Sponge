@@ -9,6 +9,7 @@
     "mixins": [
         "api.event.EventMixin_Forge",
         "api.event.block.ChangeBlockEvent_AllMixin_Forge",
+        "api.event.block.InteractBlockEvent_SecondaryMixin_Forge",
         "api.event.entity.ChangeEntityWorldEvent_PreMixin_Forge",
         "api.event.entity.ChangeEventWorldEvent_PostMixin_Forge",
         "api.event.message.PlayerChatEventMixin_Forge",
