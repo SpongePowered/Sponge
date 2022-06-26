@@ -25,10 +25,9 @@
 package org.spongepowered.common.applaunch.config.common;
 
 import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -141,6 +140,27 @@ public final class PhaseTrackerCategory {
              + "https://github.com/TehNut/Soul-Shards-Respawn/pull/24\n"
              + "https://github.com/Epoxide-Software/Enchanting-Plus/pull/135\n")
     public final Map<String, Boolean> autoFixNullSourceBlockProvidingBlockEntities = new HashMap<>();
+
+    @Setting("warn-on-direct-chunk-access")
+    @Comment("For use with mods or plugins that directly need access to Chunk code, usually\n"
+        + "bypassing Sponge's Tracking system. In circumstances, these mods are directly\n"
+        + "modifying the World without tracking involved for performance and functionality.\n"
+        + "With Sponge's tracking system, it's possible to avoid a majority of block changes\n"
+        + "being logged and events thrown, which can result in loss of plugin functionality\n"
+        + "depending on tracking all block changes.\n"
+        + "It has been accepted as a compromise to enable these mods to continue to function\n" +
+        "in hopes that by logging a warning will make the administrator aware of this compromise\n." +
+        "A warning will be emitted on the first occurrence after each game start.")
+    public boolean logDirectChunkAccess = true;
+
+    @Setting("disable-direct-chunk-block-access")
+    @Comment("In certain situations, an administrator may wish to disable mods capabilities\n" +
+        "in performing block changes directly with a Chunk, effectively bypassing sponge's\n" +
+        "ability to track said changes. When enabled with `warn-on-direct-chunk-access`, a\n" +
+        "warning will be emitted each time a block is attempted to be changed on a Chunk.\n" +
+        "When logging is disabled, the changes are blocked regardless. Behaviors of these\n" +
+        "mods are not guaranteed.")
+    public boolean disableDirectChunkAccess = false;
 
     private boolean isVanilla() {
         return AppLaunch.pluginPlatform().vanilla();
