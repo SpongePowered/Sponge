@@ -204,17 +204,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         }
     }
 
-    /**
-     * Render localized/formatted chat components
-     *
-     * @param input original component
-     */
-    @Inject(method = "sendMessage", at = @At("HEAD"), cancellable = true)
-    private void impl$useTranslatingLogger(final net.minecraft.network.chat.Component input, final UUID sender, final CallbackInfo ci) {
-        MinecraftServerMixin.LOGGER.info(input.getString());
-        ci.cancel();
-    }
-
     @ModifyConstant(method = "tickServer", constant = @Constant(intValue = 6000, ordinal = 0))
     private int getSaveTickInterval(final int tickInterval) {
         if (!this.shadow$isDedicatedServer()) {

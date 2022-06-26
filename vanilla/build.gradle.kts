@@ -318,8 +318,7 @@ dependencies {
     bootstrapLibraries("org.apache.logging.log4j:log4j-api:$log4jVersion")
     bootstrapLibraries("org.apache.logging.log4j:log4j-core:$log4jVersion")
     bootstrapLibraries("org.apache.logging.log4j:log4j-slf4j18-impl:$log4jVersion")
-    bootstrapLibraries("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
-    
+
     // Mixin and dependencies
     bootstrapLibraries("org.spongepowered:mixin:$mixinVersion")
     bootstrapLibraries("org.ow2.asm:asm-util:$asmVersion")
