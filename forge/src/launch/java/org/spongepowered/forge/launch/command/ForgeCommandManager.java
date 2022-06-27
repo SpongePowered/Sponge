@@ -59,8 +59,10 @@ public final class ForgeCommandManager extends SpongeCommandManager {
         final CommandRegistrar<?> registrar = mapping.registrar();
         final boolean isBrig = registrar instanceof BrigadierBasedRegistrar;
         final ParseResults<CommandSourceStack> parseResults;
+        final ParseResults<CommandSourceStack> forgeResults;
         if (isBrig) {
             parseResults = this.getDispatcher().parse(original, (CommandSourceStack) cause);
+            forgeResults = new ParseResults<>(parseResults.getContext(), new SpongeStringReader("/" + original), parseResults.getExceptions());
         } else {
             // We have a non Brig registrar, so we just create a dummy result for mods to inspect.
             final CommandContextBuilder<CommandSourceStack> contextBuilder = new CommandContextBuilder<>(
@@ -73,10 +75,11 @@ public final class ForgeCommandManager extends SpongeCommandManager {
                 contextBuilder.withArgument("parsed", new ParsedArgument<>(command.length(), original.length(), args));
             }
             parseResults = new ParseResults<>(contextBuilder, new SpongeStringReader(original), Collections.emptyMap());
+            forgeResults = new ParseResults<>(contextBuilder, new SpongeStringReader("/" + original), Collections.emptyMap());
         }
 
         // Relocated from Commands (injection short circuits it there)
-        final CommandEvent event = new CommandEvent(parseResults);
+        final CommandEvent event = new CommandEvent(forgeResults);
         if (MinecraftForge.EVENT_BUS.post(event)) {
             if (event.getException() != null) {
                 Throwables.throwIfUnchecked(event.getException());
