@@ -20,6 +20,7 @@
         "minecraftforge.event.ServerChatEventMixin_Forge",
         "minecraftforge.event.entity.EntityTravelToDimensionEventMixin_Forge",
         "minecraftforge.event.entity.player.PlayerEvent_PlayerChangedDimensionEventMixin_Forge",
+        "minecraftforge.event.entity.player.PlayerInteractEvent_RightClickBlock_Forge",
         "minecraftforge.event.world.BlockEvent_BreakEventMixin_Forge",
         "minecraftforge.event.world.BlockEventMixin_Forge",
         "minecraftforge.fml.BrandingControlMixin_Forge",
