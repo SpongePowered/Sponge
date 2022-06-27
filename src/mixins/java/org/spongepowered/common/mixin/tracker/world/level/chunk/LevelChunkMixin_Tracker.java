@@ -109,6 +109,7 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
                     .hr()
                     .add(new IllegalAccessException("It has been configured to log when Chunk.setBlock in a ServerWorld has been called, effectively bypassing Sponge's tracking."))
                     .log(PhaseTracker.LOGGER, Level.WARN);
+                LevelChunkMixin_Tracker.tracker$hasLoggedDirectAccess = true;
             }
         }
         if (disableDirectAccess) {
