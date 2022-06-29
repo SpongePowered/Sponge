@@ -87,11 +87,13 @@ public interface PrimaryLevelDataBridge {
 
     void bridge$setViewDistance(@Nullable Integer viewDistance);
 
+    void bridge$triggerViewDistanceLogic();
+
     InheritableConfigHandle<WorldConfig> bridge$configAdapter();
 
     void bridge$configAdapter(InheritableConfigHandle<WorldConfig> adapter);
 
-    void bridge$populateFromDimension(LevelStem dimension);
+    void bridge$populateFromLevelStem(LevelStem dimension);
 
     void bridge$setMapUUIDIndex(BiMap<Integer, UUID> index);
 
@@ -104,4 +106,8 @@ public interface PrimaryLevelDataBridge {
     void bridge$readSpongeLevelData(Dynamic<Tag> impl$spongeLevelData);
 
     CompoundTag bridge$writeSpongeLevelData();
+
+    void bridge$hardcore(boolean hardcore);
+
+    void bridge$allowCommands(boolean commands);
 }

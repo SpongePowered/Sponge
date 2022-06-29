@@ -25,129 +25,134 @@
 package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.mojang.serialization.JsonOps;
 import io.leangen.geantyref.TypeToken;
-import net.minecraft.core.Registry;
-import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.resources.RegistryOps;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.tags.TagManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.advancement.Advancement;
-import org.spongepowered.api.datapack.DataPackSerializable;
+import org.spongepowered.api.advancement.AdvancementTemplate;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPackEntry;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.tag.TagTemplate;
+import org.spongepowered.api.tag.Taggable;
 import org.spongepowered.api.world.WorldTypeTemplate;
+import org.spongepowered.api.world.biome.BiomeTemplate;
+import org.spongepowered.api.world.generation.carver.CarverTemplate;
+import org.spongepowered.api.world.generation.config.noise.DensityFunctionTemplate;
+import org.spongepowered.api.world.generation.config.noise.NoiseGeneratorConfigTemplate;
+import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
+import org.spongepowered.api.world.generation.feature.FeatureTemplate;
+import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
+import org.spongepowered.api.world.generation.structure.SchematicTemplate;
+import org.spongepowered.api.world.generation.structure.StructureSetTemplate;
+import org.spongepowered.api.world.generation.structure.StructureTemplate;
+import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolTemplate;
+import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorListTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
-import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
+import org.spongepowered.common.advancement.SpongeAdvancementTemplate;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
-import org.spongepowered.common.datapack.recipe.RecipeSerializedObject;
-import org.spongepowered.common.datapack.tag.TagSerializedObject;
-import org.spongepowered.common.server.BootstrapProperties;
+import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.tag.SpongeTagTemplate;
+import org.spongepowered.common.world.biome.SpongeBiomeTemplate;
+import org.spongepowered.common.world.generation.carver.SpongeCarverTemplate;
+import org.spongepowered.common.world.generation.config.noise.SpongeDensityFunctionTemplate;
+import org.spongepowered.common.world.generation.config.noise.SpongeNoiseGeneratorConfigTemplate;
+import org.spongepowered.common.world.generation.config.noise.SpongeNoiseTemplate;
+import org.spongepowered.common.world.generation.feature.SpongeFeatureTemplate;
+import org.spongepowered.common.world.generation.feature.SpongePlacedFeatureTemplate;
+import org.spongepowered.common.world.generation.structure.SpongeSchematicTemplate;
+import org.spongepowered.common.world.generation.structure.SpongeStructureSetTemplate;
+import org.spongepowered.common.world.generation.structure.SpongeStructureTemplate;
+import org.spongepowered.common.world.generation.structure.jigsaw.SpongeJigsawPoolTemplate;
+import org.spongepowered.common.world.generation.structure.jigsaw.SpongeProcessorListTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
-import java.util.OptionalLong;
-import java.util.function.BiFunction;
+public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, boolean reloadable, TypeToken<T> entryType, DataPackSerializer<E, T> packSerializer) implements DataPackType<T> {
 
-public final class SpongeDataPackType<T extends DataPackSerializable, U extends DataPackSerializedObject> implements DataPackType<T> {
-
-    private final TypeToken<T> token;
-    private final DataPackSerializer<U> packSerializer;
-    private final DataPackSerializableSerializer<T> objectSerializer;
-    private final BiFunction<T, JsonObject, U> objectFunction;
-    private final boolean persistent;
-
-    public SpongeDataPackType(final TypeToken<T> token, final DataPackSerializer<U> packSerializer, final DataPackSerializableSerializer<T>
-            objectSerializer, final BiFunction<T, JsonObject, U> objectFunction, final boolean persistent) {
-        this.token = token;
-        this.packSerializer = packSerializer;
-        this.objectSerializer = objectSerializer;
-        this.objectFunction = objectFunction;
-        this.persistent = persistent;
+    public static <T extends DataPackEntry<T>> SpongeDataPackType<JsonElement, T> basic(final Class<T> clazz, final String dir, final DataPackEncoder<JsonElement, T> encoder, final DataPackDecoder<JsonElement, T> decoder, final boolean reloadable) {
+        final TypeToken<T> tt = TypeToken.get(clazz);
+        return new SpongeDataPackType<>(dir, reloadable, tt, new JsonDataPackSerializer<>(encoder, decoder));
     }
 
-    @Override
-    public TypeToken<T> type() {
-        return this.token;
+    public static <E, T extends DataPackEntry<T>> SpongeDataPackType<E, T> custom(final Class<T> clazz, final String dir, final DataPackSerializer<E, T> serializer, final boolean reloadable) {
+        final TypeToken<T> tt = TypeToken.get(clazz);
+        return new SpongeDataPackType<>(dir, reloadable, tt, serializer);
     }
 
-    @Override
-    public boolean persistent() {
-        return this.persistent;
-    }
-
-    public DataPackSerializer<U> getPackSerializer() {
-        return this.packSerializer;
-    }
-
-    public DataPackSerializableSerializer<T> getObjectSerializer() {
-        return this.objectSerializer;
-    }
-
-    public BiFunction<T, JsonObject, U> getObjectFunction() {
-        return this.objectFunction;
+    public static <E, T extends DataPackEntry<T>> SpongeDataPackType<E, T> custom(final TypeToken<T> typeToken, final String dir, final DataPackSerializer<E, T> serializer, final boolean reloadable) {
+        return new SpongeDataPackType<>(dir, reloadable, typeToken, serializer);
     }
 
     public static final class FactoryImpl implements DataPackType.Factory {
 
-        private final SpongeDataPackType<@NonNull Advancement, DataPackSerializedObject> advancement = new SpongeDataPackType<>(TypeToken.get(Advancement.class),
-                new DataPackSerializer<>("Advancements", "advancements"),
-                (s, registryAccess) -> ((net.minecraft.advancements.Advancement) s).deconstruct().serializeToJson(),
-                (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
-                false
-        );
+        private final SpongeDataPackType<JsonElement, @NonNull AdvancementTemplate> advancement = SpongeDataPackType.basic(AdvancementTemplate.class,
+                "advancements", SpongeAdvancementTemplate::encode, null, // TODO decoder
+                true);
 
-        private final SpongeDataPackType<@NonNull RecipeRegistration, RecipeSerializedObject> recipe = new SpongeDataPackType<>(TypeToken.get(RecipeRegistration.class),
-                new RecipeDataPackSerializer(),
-                (s, registryAccess) -> ((FinishedRecipe) s).serializeRecipe(),
-                (i1, i2) -> new RecipeSerializedObject(i1.key(), i2, new DataPackSerializedObject(i1.key(), ((FinishedRecipe) i1).serializeAdvancement())),
-                false
-        );
+        private final SpongeDataPackType<JsonElement, @NonNull RecipeRegistration> recipe = SpongeDataPackType.custom(RecipeRegistration.class,
+                "recipes", new RecipeDataPackSerializer(SpongeRecipeRegistration::encode, null), // TODO decoder
+                true);
 
-        private final SpongeDataPackType<@NonNull WorldTypeTemplate, DataPackSerializedObject> worldType = new SpongeDataPackType<>(TypeToken.get(WorldTypeTemplate.class),
-                new DataPackSerializer<>("Dimension Types", "dimension_type"),
-                (s, registryAccess) -> {
-                    final OptionalLong fixedTime = s.fixedTime().isEmpty() ? OptionalLong.empty() : OptionalLong.of(s.fixedTime().get().asTicks().ticks());
-                    final DimensionType.MonsterSettings monsterSettings = new DimensionType.MonsterSettings(s.piglinSafe(), s.hasRaids(), UniformInt.of(0, 7), 0); // TODO monsterlight settings
-                    final DimensionType type = new DimensionType(fixedTime, s.hasSkylight(), s.hasCeiling(), s.scorching(), s.natural(),
-                        s.coordinateMultiplier(), s.bedsUsable(), s.respawnAnchorsUsable(), s.minY(), s.maximumHeight(), s.logicalHeight(),
-                            BlockTags.INFINIBURN_OVERWORLD, (ResourceLocation) (Object) s.effect().key(), s.ambientLighting(), monsterSettings);
-                    final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-                    return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(ops, type).getOrThrow(false, e -> {});
-                },
-                (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
-                true
-        );
+        private final SpongeDataPackType<JsonElement, @NonNull WorldTypeTemplate> worldType = SpongeDataPackType.basic(WorldTypeTemplate.class,
+                "dimension_type", SpongeWorldTypeTemplate::encode, SpongeWorldTypeTemplate::decode,
+                false);
 
-        private final SpongeDataPackType<@NonNull WorldTemplate, DataPackSerializedObject> world = new SpongeDataPackType<>(TypeToken.get(WorldTemplate.class),
-                new DataPackSerializer<>("Dimensions", "dimension"),
-                (s, registryAccess) -> {
-                    final Registry<DimensionType> dimensionTypeRegistry = registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
-                    final ResourceKey<DimensionType> key = ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, (ResourceLocation) (Object) s.worldType().location());
-                    final LevelStem template = new LevelStem(dimensionTypeRegistry.getHolderOrThrow(key), (ChunkGenerator) s.generator());
-                    ((LevelStemBridge) (Object) template).bridge$setFromSettings(false);
-                    ((LevelStemBridge) (Object) template).bridge$populateFromTemplate((SpongeWorldTemplate) s);
-                    final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-                    return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(ops, template).getOrThrow(false, e -> {});
-                },
-                (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
-                true
-        );
+        private final SpongeDataPackType<JsonElement, @NonNull WorldTemplate> world = SpongeDataPackType.basic(WorldTemplate.class,
+                "dimension", SpongeWorldTemplate::serialize, SpongeWorldTemplate::decode,
+                false);
 
-        private final SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject> tag = new SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject>(TypeToken.get(SpongeTagTemplate.class),
-                new TagDataPackSerializer("Tag", "tags"),
-                (spongeTagTemplate, registryAccess) -> spongeTagTemplate.toJson(),
-                (i1, i2) -> new TagSerializedObject(i1.key(), i2, i1.registryType()),
-                false
-        );
+        private final SpongeDataPackType<JsonElement, @NonNull BiomeTemplate> biome = SpongeDataPackType.basic(BiomeTemplate.class,
+                "worldgen/biome", SpongeBiomeTemplate::encode, SpongeBiomeTemplate::decode,
+                false);
+
+        private final SpongeDataPackType<JsonElement, @NonNull CarverTemplate> carver = SpongeDataPackType.basic(CarverTemplate.class,
+                "worldgen/configured_carver", SpongeCarverTemplate::encode, SpongeCarverTemplate::decode,
+                false);
+
+        private final SpongeDataPackType<JsonElement, @NonNull FeatureTemplate> feature = SpongeDataPackType.basic(FeatureTemplate.class,
+                "worldgen/configured_feature", SpongeFeatureTemplate::encode, SpongeFeatureTemplate::decode,
+                false);
+
+        private final SpongeDataPackType<JsonElement, @NonNull PlacedFeatureTemplate> placedFeature = SpongeDataPackType.basic(PlacedFeatureTemplate.class,
+                "worldgen/placed_feature", SpongePlacedFeatureTemplate::encode, SpongePlacedFeatureTemplate::decode,
+                false);
+
+        private final SpongeDataPackType<JsonElement, @NonNull NoiseGeneratorConfigTemplate> noiseGeneratorConfig = SpongeDataPackType.basic(NoiseGeneratorConfigTemplate.class,
+                "worldgen/noise_settings", SpongeNoiseGeneratorConfigTemplate::encode, SpongeNoiseGeneratorConfigTemplate::decode,
+                false);
+
+        private final SpongeDataPackType<JsonElement, @NonNull NoiseTemplate> noise = SpongeDataPackType.basic(NoiseTemplate.class,
+                "worldgen/noise", SpongeNoiseTemplate::encode, SpongeNoiseTemplate::decode,
+                false);
+
+        private final SpongeDataPackType<JsonElement, @NonNull DensityFunctionTemplate> densityFunction = SpongeDataPackType.basic(DensityFunctionTemplate.class,
+                "worldgen/density_function", SpongeDensityFunctionTemplate::encode, SpongeDensityFunctionTemplate::decode,
+                false);
+
+        private final SpongeDataPackType<JsonElement, @NonNull StructureTemplate> structure = SpongeDataPackType.basic(StructureTemplate.class,
+                "worldgen/structure", SpongeStructureTemplate::encode, SpongeStructureTemplate::decode,
+                false);
+
+        private final SpongeDataPackType<CompoundTag, @NonNull SchematicTemplate> schematic = SpongeDataPackType.custom(SchematicTemplate.class,
+                "structures", new NbtDataPackSerializer<>(SpongeSchematicTemplate::encode, SpongeSchematicTemplate::decode),
+                false);
+
+        private final SpongeDataPackType<JsonElement, @NonNull ProcessorListTemplate> processorList = SpongeDataPackType.basic(ProcessorListTemplate.class,
+                "worldgen/processor_list", SpongeProcessorListTemplate::encode, SpongeProcessorListTemplate::decode,
+                false);
+
+        private final SpongeDataPackType<JsonElement, @NonNull StructureSetTemplate> structureSet = SpongeDataPackType.basic(StructureSetTemplate.class,
+                "worldgen/structure_set", SpongeStructureSetTemplate::encode, SpongeStructureSetTemplate::decode,
+                false);
+
+        private final SpongeDataPackType<JsonElement, @NonNull JigsawPoolTemplate> jigsawPool = SpongeDataPackType.basic(JigsawPoolTemplate.class,
+                "worldgen/template_pool", SpongeJigsawPoolTemplate::encode, SpongeJigsawPoolTemplate::decode,
+                false);
 
         @Override
         public DataPackType<RecipeRegistration> recipe() {
@@ -155,7 +160,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         }
 
         @Override
-        public DataPackType<Advancement> advancement() {
+        public DataPackType<AdvancementTemplate> advancement() {
             return this.advancement;
         }
 
@@ -170,8 +175,76 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         }
 
         @Override
-        public DataPackType tag() {
-            return this.tag;
+        public DataPackType<BiomeTemplate> biome() {
+            return this.biome;
         }
+
+        @Override
+        public DataPackType<CarverTemplate> carver() {
+            return this.carver;
+        }
+
+        @Override
+        public DataPackType<FeatureTemplate> feature() {
+            return this.feature;
+        }
+
+        @Override
+        public DataPackType<PlacedFeatureTemplate> placedFeature() {
+            return this.placedFeature;
+        }
+
+        @Override
+        public DataPackType<NoiseGeneratorConfigTemplate> noiseGeneratorConfig() {
+            return this.noiseGeneratorConfig;
+        }
+
+        @Override
+        public DataPackType<NoiseTemplate> noise() {
+            return this.noise;
+        }
+
+        @Override
+        public DataPackType<DensityFunctionTemplate> densityFunction() {
+            return this.densityFunction;
+        }
+
+        @Override
+        public DataPackType<StructureTemplate> structure() {
+            return this.structure;
+        }
+
+        @Override
+        public DataPackType<SchematicTemplate> schematic() {
+            return this.schematic;
+        }
+
+        @Override
+        public DataPackType<ProcessorListTemplate> processorList() {
+            return this.processorList;
+        }
+
+        @Override
+        public DataPackType<StructureSetTemplate> structureSet() {
+            return this.structureSet;
+        }
+
+        @Override
+        public DataPackType<JigsawPoolTemplate> jigsawPool() {
+            return this.jigsawPool;
+        }
+
+        @Override
+        public <T extends Taggable<T>> DataPackType<TagTemplate<T>> tag(RegistryType<T> registry) {
+            final String tagDir = TagManager.getTagDir(ResourceKey.createRegistryKey((ResourceLocation) (Object) registry.location()));
+            return SpongeDataPackType.custom(new TypeToken<>() {}, tagDir,
+                            new TagDataPackSerializer<>(SpongeTagTemplate::encode, null), // TODO decoder
+                    true);
+        }
+
+    }
+
+    public DataPack<T> pack(final String name, final String description) {
+        return new SpongeDataPack<>(name, description, this);
     }
 }

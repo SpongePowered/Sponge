@@ -25,11 +25,11 @@
 package org.spongepowered.common.bridge.world.level.dimension;
 
 import net.minecraft.world.level.dimension.DimensionType;
-import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
+import org.spongepowered.common.world.server.SpongeDimensionTypes;
 
 public interface DimensionTypeBridge {
 
-    DimensionType bridge$decorateData(SpongeWorldTypeTemplate.SpongeDataSection data);
+    DimensionType bridge$decorateData(SpongeDimensionTypes.SpongeDataSection data);
 
-    SpongeWorldTypeTemplate.SpongeDataSection bridge$createData();
+    SpongeDimensionTypes.SpongeDataSection bridge$createData();
 }

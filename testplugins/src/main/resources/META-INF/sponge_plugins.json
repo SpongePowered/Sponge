@@ -50,6 +50,12 @@
             "description": "Testing world changes"
         },
         {
+            "id": "worldgentest",
+            "name": "World Generation Test",
+            "entrypoint": "org.spongepowered.test.worldgen.WorldGenTest",
+            "description": "Testing world generation"
+        },
+        {
             "id": "commandtest",
             "name": "Command Test",
             "entrypoint": "org.spongepowered.test.command.CommandTest",

@@ -43,11 +43,9 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
 import net.minecraft.commands.arguments.UuidArgument;
-import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec2Argument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
-import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
@@ -57,9 +55,11 @@ import net.minecraft.commands.synchronization.brigadier.FloatArgumentInfo;
 import net.minecraft.commands.synchronization.brigadier.IntegerArgumentInfo;
 import net.minecraft.commands.synchronization.brigadier.LongArgumentInfo;
 import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.phys.Vec2;
@@ -91,8 +91,6 @@ import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
-import org.spongepowered.api.data.type.CatType;
-import org.spongepowered.api.data.type.CatTypes;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseColors;
@@ -140,7 +138,6 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
@@ -156,6 +153,8 @@ import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientations;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.placeholder.PlaceholderParsers;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.service.ban.Ban;
@@ -174,6 +173,9 @@ import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.LightType;
 import org.spongepowered.api.world.LightTypes;
 import org.spongepowered.api.world.Locatable;
+import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
+import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
+import org.spongepowered.api.world.generation.config.noise.NoiseConfigs;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.portal.PortalTypes;
 import org.spongepowered.api.world.schematic.PaletteType;
@@ -185,6 +187,7 @@ import org.spongepowered.api.world.teleport.TeleportHelperFilters;
 import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.common.accessor.commands.arguments.DimensionArgumentAccessor;
+import org.spongepowered.common.accessor.world.level.levelgen.NoiseSettingsAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.adventure.SpongeResolveOperation;
 import org.spongepowered.common.ban.SpongeBanType;
@@ -274,7 +277,6 @@ import org.spongepowered.common.inventory.query.type.ReverseQuery;
 import org.spongepowered.common.inventory.query.type.SlotLensQuery;
 import org.spongepowered.common.inventory.query.type.TypeQuery;
 import org.spongepowered.common.inventory.query.type.UnionQuery;
-import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.map.color.SpongeMapColorType;
 import org.spongepowered.common.map.color.SpongeMapShade;
 import org.spongepowered.common.map.decoration.SpongeMapDecorationBannerType;
@@ -1095,6 +1097,24 @@ public final class SpongeRegistryLoaders {
             l.add(1, MapShades.DARK, k -> new SpongeMapShade(1, 220));
             l.add(2, MapShades.DARKER, k -> new SpongeMapShade(2, 255));
             l.add(3, MapShades.DARKEST, k -> new SpongeMapShade(3, 135));
+        });
+    }
+
+    public static RegistryLoader<FlatGeneratorConfig> flatGeneratorConfig() {
+        return RegistryLoader.of(l -> {
+            for (final var entry : BuiltinRegistries.FLAT_LEVEL_GENERATOR_PRESET.entrySet()) {
+                l.add(RegistryKey.of(RegistryTypes.FLAT_GENERATOR_CONFIG, (ResourceKey) (Object) entry.getKey().location()), () -> (FlatGeneratorConfig) entry.getValue().settings());
+            }
+        });
+    }
+
+    public static RegistryLoader<NoiseConfig> noiseConfig() {
+        return RegistryLoader.of(l -> {
+            l.add(NoiseConfigs.OVERWORLD, k -> (NoiseConfig) (Object) NoiseSettingsAccessor.accessor$OVERWORLD_NOISE_SETTINGS());
+            l.add(NoiseConfigs.NETHER, k -> (NoiseConfig) (Object) NoiseSettingsAccessor.accessor$NETHER_NOISE_SETTINGS());
+            l.add(NoiseConfigs.END, k -> (NoiseConfig) (Object) NoiseSettingsAccessor.accessor$END_NOISE_SETTINGS());
+            l.add(NoiseConfigs.CAVES, k -> (NoiseConfig) (Object) NoiseSettingsAccessor.accessor$CAVES_NOISE_SETTINGS());
+            l.add(NoiseConfigs.FLOATING_ISLANDS, k -> (NoiseConfig) (Object) NoiseSettingsAccessor.accessor$FLOATING_ISLANDS_NOISE_SETTINGS());
         });
     }
 

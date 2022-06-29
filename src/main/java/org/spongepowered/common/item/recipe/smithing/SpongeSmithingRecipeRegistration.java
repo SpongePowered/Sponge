@@ -25,6 +25,8 @@
 package org.spongepowered.common.item.recipe.smithing;
 
 import com.google.gson.JsonObject;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
@@ -50,8 +52,9 @@ public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration {
     private Function<Container, ItemStack> resultFunction;
 
     public SpongeSmithingRecipeRegistration(ResourceLocation key, RecipeSerializer<?> serializer, String group, Ingredient base,
-            Ingredient addition, ItemStack spongeResult, Function<Container, ItemStack> resultFunction) {
-        super(key, serializer, spongeResult.getItem(), group);
+            Ingredient addition, ItemStack spongeResult, Function<Container, ItemStack> resultFunction,
+            DataPack<RecipeRegistration> pack) {
+        super(key, serializer, spongeResult.getItem(), group, pack);
         this.base = base;
         this.addition = addition;
         this.result = spongeResult.getItem();

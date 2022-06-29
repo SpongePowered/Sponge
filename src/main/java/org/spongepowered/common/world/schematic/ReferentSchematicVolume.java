@@ -43,11 +43,8 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.Optional;
 import java.util.Set;
 
-class ReferentSchematicVolume extends AbstractReferentArchetypeVolume<Schematic> implements Schematic {
-    ReferentSchematicVolume(
-        final Schematic reference,
-        final Transformation transformation
-    ) {
+public class ReferentSchematicVolume extends AbstractReferentArchetypeVolume<Schematic> implements Schematic {
+    public ReferentSchematicVolume(final Schematic reference, final Transformation transformation) {
         super(() -> reference, transformation);
     }
 

@@ -24,20 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world.level.storage;
 
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.storage.LevelData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 
 @Mixin(LevelData.class)
-public interface LevelDataMixin {
-
-    // @formatter:off
-    @Shadow int shadow$getXSpawn();
-    @Shadow int shadow$getYSpawn();
-    @Shadow int shadow$getZSpawn();
-    @Shadow boolean shadow$isHardcore();
-    @Shadow Difficulty shadow$getDifficulty();
-    // @formatter:on
+public interface LevelDataMixin extends SpongeMutableDataHolder {
 
 }

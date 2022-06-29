@@ -27,48 +27,44 @@ package org.spongepowered.common.mixin.core.world.level.dimension;
 import com.mojang.serialization.Codec;
 import net.kyori.adventure.text.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.data.holder.SpongeDataHolder;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.Optional;
-
 @Mixin(LevelStem.class)
-public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBridge {
+public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolder {
 
     // @formatter:off
-
-    @Shadow @Final @Mutable public static Codec<LevelStem> CODEC;
-
+    @Shadow @Final @org.spongepowered.asm.mixin.Mutable public static Codec<LevelStem> CODEC;
     // @formatter:on
 
-    private ResourceKey impl$key;
-    private ResourceLocation impl$gameMode;
-    @Nullable private ResourceLocation impl$difficulty;
-    private SerializationBehavior impl$serializationBehavior = null;
+    @Nullable private GameType impl$gameMode;
+    @Nullable private Difficulty impl$difficulty;
+    @Nullable private SerializationBehavior impl$serializationBehavior = null;
     @Nullable private Component impl$displayName = null;
     private Integer impl$viewDistance = null;
     @Nullable private Vector3i impl$spawnPosition;
     @Nullable private Boolean impl$hardcore, impl$pvp, impl$commands;
+    @Nullable private Long impl$seed;
 
-    private boolean impl$loadOnStartup = true, impl$performsSpawnLogic = false, impl$fromSettings = true;
+    private boolean impl$loadOnStartup = true;
+    private boolean impl$performsSpawnLogic = false;
 
     @Inject(method = "<clinit>", at = @At("RETURN"))
     private static void impl$useTemplateCodec(final CallbackInfo ci) {
@@ -76,43 +72,33 @@ public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBrid
     }
 
     @Override
-    public ResourceKey bridge$getKey() {
-        return this.impl$key;
+    public Component bridge$displayName() {
+        return this.impl$displayName;
     }
 
     @Override
-    public void bridge$setKey(final ResourceKey key) {
-        this.impl$key = key;
+    public GameType bridge$gameMode() {
+        return this.impl$gameMode;
     }
 
     @Override
-    public Optional<Component> bridge$displayName() {
-        return Optional.ofNullable(this.impl$displayName);
+    public Difficulty bridge$difficulty() {
+        return this.impl$difficulty;
     }
 
     @Override
-    public Optional<ResourceLocation> bridge$gameMode() {
-        return Optional.ofNullable(this.impl$gameMode);
+    public SerializationBehavior bridge$serializationBehavior() {
+        return this.impl$serializationBehavior;
     }
 
     @Override
-    public Optional<ResourceLocation> bridge$difficulty() {
-        return Optional.ofNullable(this.impl$difficulty);
+    public Integer bridge$viewDistance() {
+        return this.impl$viewDistance;
     }
 
     @Override
-    public Optional<SerializationBehavior> bridge$serializationBehavior() {
-        return Optional.ofNullable(this.impl$serializationBehavior);
-    }
-
-    @Override
-    public Optional<Integer> bridge$viewDistance() {
-        return Optional.ofNullable(this.impl$viewDistance);
-    }
-
-    @Override
-    public Optional<Vector3i> bridge$spawnPosition() {
-        return Optional.ofNullable(this.impl$spawnPosition);
+    public @Nullable Vector3i bridge$spawnPosition() {
+        return this.impl$spawnPosition;
     }
 
     @Override
@@ -126,92 +112,68 @@ public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBrid
     }
 
     @Override
-    public Optional<Boolean> bridge$hardcore() {
-        return Optional.ofNullable(this.impl$hardcore);
+    public @Nullable Boolean bridge$hardcore() {
+        return this.impl$hardcore;
     }
 
     @Override
-    public Optional<Boolean> bridge$commands() {
-        return Optional.ofNullable(this.impl$commands);
+    public @Nullable Boolean bridge$commands() {
+        return this.impl$commands;
     }
 
     @Override
-    public Optional<Boolean> bridge$pvp() {
-        return Optional.ofNullable(this.impl$pvp);
+    public @Nullable Boolean bridge$pvp() {
+        return this.impl$pvp;
     }
 
     @Override
-    public boolean bridge$fromSettings() {
-        return this.impl$fromSettings;
-    }
-
-    @Override
-    public void bridge$setFromSettings(final boolean fromSettings) {
-        this.impl$fromSettings = fromSettings;
+    public @Nullable Long bridge$seed() {
+        return this.impl$seed;
     }
 
     @Override
     public LevelStem bridge$decorateData(final SpongeWorldTemplate.SpongeDataSection data) {
-        this.impl$gameMode = data.gameMode;
-        this.impl$difficulty = data.difficulty;
-        this.impl$serializationBehavior = data.serializationBehavior;
-        this.impl$displayName = data.displayName;
-        this.impl$viewDistance = data.viewDistance;
-        this.impl$spawnPosition = data.spawnPosition;
-        this.impl$loadOnStartup = data.loadOnStartup == null || data.loadOnStartup;
-        this.impl$performsSpawnLogic = data.performsSpawnLogic != null && data.performsSpawnLogic;
-        this.impl$hardcore = data.hardcore;
-        this.impl$commands = data.commands;
-        this.impl$pvp = data.pvp;
+        this.impl$gameMode = data.gameMode();
+        this.impl$difficulty = data.difficulty();
+        this.impl$serializationBehavior = data.serializationBehavior();
+        this.impl$displayName = data.displayName();
+        this.impl$viewDistance = data.viewDistance();
+        this.impl$spawnPosition = data.spawnPosition();
+        this.impl$loadOnStartup = data.loadOnStartup() == null || data.loadOnStartup();
+        this.impl$performsSpawnLogic = data.performsSpawnLogic() != null && data.performsSpawnLogic();
+        this.impl$hardcore = data.hardcore();
+        this.impl$commands = data.commands();
+        this.impl$pvp = data.pvp();
+        this.impl$seed = data.seed();
+        return (LevelStem) (Object) this;
+    }
 
+    @Override
+    public LevelStem bridge$decorateData(final DataManipulator data) {
+        this.impl$gameMode = (GameType) (Object) data.get(Keys.GAME_MODE).orElse(null);
+        this.impl$difficulty = (Difficulty) (Object) data.get(Keys.WORLD_DIFFICULTY).orElse(null);
+        this.impl$serializationBehavior = data.getOrElse(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.AUTOMATIC);
+        this.impl$displayName = data.getOrNull(Keys.DISPLAY_NAME);
+        this.impl$viewDistance = data.getOrNull(Keys.VIEW_DISTANCE);
+        this.impl$spawnPosition = data.getOrNull(Keys.SPAWN_POSITION);
+        this.impl$loadOnStartup = data.getOrElse(Keys.IS_LOAD_ON_STARTUP, true);
+        this.impl$performsSpawnLogic = data.getOrElse(Keys.PERFORM_SPAWN_LOGIC, false);
+        this.impl$hardcore = data.getOrNull(Keys.HARDCORE);
+        this.impl$commands = data.getOrNull(Keys.COMMANDS);
+        this.impl$pvp = data.getOrNull(Keys.PVP);
+        this.impl$seed = data.getOrNull(Keys.SEED);
         return (LevelStem) (Object) this;
     }
 
     @Override
     public SpongeWorldTemplate.SpongeDataSection bridge$createData() {
-        return new SpongeWorldTemplate.SpongeDataSection(this.bridge$displayName().orElse(null),
-            this.bridge$gameMode().orElse(null), this.bridge$difficulty().orElse(null),
-            this.bridge$serializationBehavior().orElse(null),
-            this.bridge$viewDistance().orElse(null), this.bridge$spawnPosition().orElse(null),
-            this.bridge$loadOnStartup(), this.bridge$performsSpawnLogic(),
-            this.bridge$hardcore().orElse(null), this.bridge$commands().orElse(null),
-            this.bridge$pvp().orElse(null));
-    }
-
-    @Override
-    public void bridge$populateFromTemplate(final SpongeWorldTemplate s) {
-        this.impl$key = s.key();
-        this.impl$gameMode = s.gameMode == null ? null : (ResourceLocation) (Object) s.gameMode.location();
-        this.impl$difficulty = s.difficulty == null ? null : (ResourceLocation) (Object) s.difficulty.location();
-        this.impl$serializationBehavior = s.serializationBehavior;
-        this.impl$displayName = s.displayName;
-        this.impl$viewDistance = s.viewDistance;
-        this.impl$spawnPosition = s.spawnPosition;
-        this.impl$loadOnStartup = s.loadOnStartup;
-        this.impl$performsSpawnLogic = s.performsSpawnLogic;
-        this.impl$hardcore = s.hardcore;
-        this.impl$commands = s.commands;
-        this.impl$pvp = s.pvp;
-    }
-
-    @Override
-    public void bridge$populateFromLevelData(final PrimaryLevelData levelData) {
-        final PrimaryLevelDataBridge levelDataBridge = (PrimaryLevelDataBridge) levelData;
-        this.impl$gameMode = (ResourceLocation) (Object) RegistryTypes.GAME_MODE.get().valueKey((GameMode) (Object) levelData.getGameType());
-        this.impl$difficulty = (ResourceLocation) (Object) RegistryTypes.DIFFICULTY.get().valueKey((Difficulty) (Object) levelData.getDifficulty());
-        this.impl$serializationBehavior = levelDataBridge.bridge$serializationBehavior().orElse(null);
-        this.impl$displayName = levelDataBridge.bridge$displayName().orElse(null);
-        this.impl$viewDistance = levelDataBridge.bridge$viewDistance().orElse(null);
-        this.impl$spawnPosition = new Vector3i(levelData.getXSpawn(), levelData.getYSpawn(), levelData.getZSpawn());
-        this.impl$loadOnStartup = levelDataBridge.bridge$loadOnStartup();
-        this.impl$performsSpawnLogic = levelDataBridge.bridge$performsSpawnLogic();
-        this.impl$hardcore = levelData.isHardcore();
-        this.impl$commands = levelData.getAllowCommands();
-        this.impl$pvp = levelDataBridge.bridge$pvp().orElse(null);
-    }
-
-    @Override
-    public SpongeWorldTemplate bridge$asTemplate() {
-        return new SpongeWorldTemplate((LevelStem) (Object) this);
+        return new SpongeWorldTemplate.SpongeDataSection(this.bridge$displayName(),
+            this.impl$gameMode,
+            this.impl$difficulty,
+            this.impl$serializationBehavior,
+            this.impl$viewDistance, this.impl$spawnPosition,
+            this.impl$loadOnStartup, this.impl$performsSpawnLogic,
+            this.impl$hardcore, this.impl$commands,
+            this.impl$pvp, this.impl$seed);
     }
 }

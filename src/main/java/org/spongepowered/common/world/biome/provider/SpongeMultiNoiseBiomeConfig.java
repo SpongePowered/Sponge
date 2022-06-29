@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.world.biome.provider;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -77,9 +77,10 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
             return this;
         }
 
-        public Builder addMcBiomes(final Climate.ParameterList<Supplier<net.minecraft.world.level.biome.Biome>> biomes) {
+        public Builder addMcBiomes(final Climate.ParameterList<Holder<net.minecraft.world.level.biome.Biome>> biomes) {
             for (var pair : biomes.values()) {
-                var biome = RegistryTypes.BIOME.referenced(RegistryTypes.BIOME.keyFor(Sponge.server(), (Biome) (Object) pair.getSecond().get()));
+                final ResourceKey key = RegistryTypes.BIOME.keyFor(Sponge.server(), (Biome) (Object) pair.getSecond().value());
+                var biome = RegistryTypes.BIOME.referenced(key);
                 this.biomes.add(AttributedBiome.of(biome, (BiomeAttributes) (Object) pair.getFirst()));
             }
             return this;
@@ -127,7 +128,7 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
 
         @Override
         public MultiNoiseBiomeConfig nether() {
-            var biomeSource = (MultiNoiseBiomeSourceAccessor) MultiNoiseBiomeSource.Preset.NETHER.biomeSource((Registry) Sponge.server().registry(RegistryTypes.BIOME));
+            var biomeSource = (MultiNoiseBiomeSourceAccessor) MultiNoiseBiomeSource.Preset.NETHER.biomeSource((Registry<net.minecraft.world.level.biome.Biome>) Sponge.server().registry(RegistryTypes.BIOME));
             return new BuilderImpl().addMcBiomes(biomeSource.accessor$parameters()).build();
         }
 

@@ -66,7 +66,6 @@ public abstract class TheEndBiomeSourceMixin_API extends BiomeSourceMixin_API im
                     .midlandsBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.midlands.value())))
                     .islandsBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.islands.value())))
                     .barrensBiome(RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(this.barrens.value())))
-                    // TODO no more custom seeds? .seed(this.seed)
                     .build();
         }
         return this.api$config;

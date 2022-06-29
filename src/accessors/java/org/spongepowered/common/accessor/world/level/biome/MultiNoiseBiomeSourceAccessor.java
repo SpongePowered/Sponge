@@ -39,7 +39,7 @@ import java.util.function.Supplier;
 public interface MultiNoiseBiomeSourceAccessor {
 
     @Accessor("parameters")
-    Climate.ParameterList<Supplier<Biome>> accessor$parameters();
+    Climate.ParameterList<Holder<Biome>> accessor$parameters();
 
     @Invoker("<init>")
     static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Holder<Biome>> $$0) {

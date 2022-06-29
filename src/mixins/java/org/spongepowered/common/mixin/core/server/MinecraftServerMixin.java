@@ -39,13 +39,12 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.WorldData;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -84,6 +83,7 @@ import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -109,10 +109,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract PackRepository shadow$getPackRepository();
     @Shadow public abstract RegistryAccess.Frozen shadow$registryAccess();
     @Shadow public abstract GameProfileCache shadow$getProfileCache();
-
+    @Shadow public abstract CompletableFuture<Void> shadow$reloadResources(final Collection<String> $$0);
+    @Shadow public abstract WorldData shadow$getWorldData();
     @Shadow protected abstract void loadLevel(); // has overrides!
     // @formatter:on
-
 
 
     private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
@@ -340,13 +340,9 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "reloadResources", at = @At(value = "HEAD"))
     public void impl$reloadResources(final Collection<String> datapacksToLoad, final CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents(this.storageSource.getLevelPath(LevelResource.DATAPACK_DIR), datapacksToLoad);
+        final List<String> reloadablePacks = ((SpongeDataPackManager) this.dataPackManager()).registerPacks();
+        datapacksToLoad.addAll(reloadablePacks);
         this.shadow$getPackRepository().reload();
-    }
-
-    @Inject(method = "reloadResources", at = @At(value = "RETURN"))
-    public void impl$serializeDelayedDataPack(final Collection<String> datapacksToLoad, final CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        cir.getReturnValue().thenAccept(v -> SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD, this.shadow$registryAccess()));
     }
 
     @Override

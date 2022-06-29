@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.tracker.world.level;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.Util;
+import net.minecraft.util.RandomSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -69,7 +70,7 @@ public abstract class ExplosionMixin_Tracker {
     @Shadow @Final private ObjectArrayList<BlockPos> toBlow;
 
     @Shadow @Final private boolean fire;
-    @Shadow @Final private Random random;
+    @Shadow @Final private RandomSource random;
 
     /**
      * @author gabziou

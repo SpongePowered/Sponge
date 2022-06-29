@@ -57,5 +57,6 @@ public final class SpongeAttributedBiome implements AttributedBiome {
         public AttributedBiome of(final RegistryReference<Biome> biome, final BiomeAttributes attributes) {
             return new SpongeAttributedBiome(Objects.requireNonNull(biome, "biome"), Objects.requireNonNull(attributes, "attributes"));
         }
+
     }
 }

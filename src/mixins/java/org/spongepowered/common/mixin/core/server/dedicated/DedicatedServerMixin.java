@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
+import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
@@ -62,6 +63,8 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
         });
         SpongeCommon.game().setServer(this);
         $$6.profileCache().load();
+
+        ((SpongeDataPackManager) this.dataPackManager()).init();
     }
 
     @Override

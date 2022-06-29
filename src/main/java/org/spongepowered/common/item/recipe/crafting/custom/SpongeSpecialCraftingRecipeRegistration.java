@@ -28,8 +28,10 @@ import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
@@ -53,8 +55,9 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
     public SpongeSpecialCraftingRecipeRegistration(ResourceLocation key,
             BiPredicate<CraftingGridInventory, ServerWorld> biPredicate,
             Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction,
-            Function<CraftingGridInventory, ItemStack> resultFunction) {
-        super(key, null, Items.AIR, "");
+            Function<CraftingGridInventory, ItemStack> resultFunction,
+            DataPack<RecipeRegistration> pack) {
+        super(key, null, Items.AIR, "", pack);
 
         this.biPredicate = biPredicate;
         this.remainingItemsFunction = remainingItemsFunction;

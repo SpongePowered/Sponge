@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.accessor.world.level.dimension;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -35,8 +34,6 @@ import java.util.OptionalLong;
 public interface DimensionTypeAccessor {
 
     @Accessor("fixedTime") OptionalLong accessor$fixedTime();
-
-    @Accessor("effectsLocation") ResourceLocation accessor$effectsLocation();
 
     @Accessor("ambientLight") float accessor$ambientLight();
 }

@@ -133,12 +133,6 @@ public final class SpongeLifecycle implements Lifecycle {
     }
 
     @Override
-    public void callRegisterDataPackValueEvent(final Path dataPacksDirectory) {
-        // TODO call from WorldOpenFlow#createPackRepository for Client?
-        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents(dataPacksDirectory);
-    }
-
-    @Override
     public void callRegisterChannelEvent() {
         this.game.eventManager().post(new RegisterChannelEventImpl(Cause.of(EventContext.empty(), this.game), this.game,
                 (SpongeChannelManager) this.game.channelManager()));

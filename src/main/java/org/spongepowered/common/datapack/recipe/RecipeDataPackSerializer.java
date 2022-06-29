@@ -24,24 +24,37 @@
  */
 package org.spongepowered.common.datapack.recipe;
 
-import org.spongepowered.common.datapack.DataPackSerializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import net.minecraft.data.recipes.FinishedRecipe;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.common.datapack.DataPackDecoder;
+import org.spongepowered.common.datapack.DataPackEncoder;
+import org.spongepowered.common.datapack.JsonDataPackSerializer;
+import org.spongepowered.common.datapack.SpongeDataPack;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public final class RecipeDataPackSerializer extends DataPackSerializer<RecipeSerializedObject> {
+public final class RecipeDataPackSerializer extends JsonDataPackSerializer<RecipeRegistration> {
 
-    public RecipeDataPackSerializer() {
-        super("Recipes", "recipes");
+    public RecipeDataPackSerializer(final DataPackEncoder<JsonElement, RecipeRegistration> encoder, final DataPackDecoder<JsonElement, RecipeRegistration> decoder) {
+        super(encoder, decoder);
     }
 
     @Override
-    protected void serializeAdditional(final Path dataDirectory, final RecipeSerializedObject object) throws IOException {
-        if (object.getAdvancementObject() != null) {
-            final Path advancementFile = dataDirectory.resolve("advancements").resolve(object.getAdvancementObject().getKey().value() + ".json");
-            Files.createDirectories(advancementFile.getParent());
-            this.writeFile(advancementFile, object.getAdvancementObject().getObject());
+    protected void serializeAdditional(
+            final SpongeDataPack<JsonElement, RecipeRegistration> type, final Path packDir,
+            final RecipeRegistration entry) throws IOException {
+        final JsonObject advancement = ((FinishedRecipe) entry).serializeAdvancement();
+        if (advancement != null) {
+            final Path file = packDir.resolve("data")
+                    .resolve(entry.key().namespace())
+                    .resolve("advancements")
+                    .resolve(entry.key().value() + ".json");
+            Files.createDirectories(file.getParent());
+            JsonDataPackSerializer.writeFile(file, advancement);
         }
     }
 }

@@ -29,4 +29,6 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 public interface WorldGenSettingsBridge {
 
     WorldGenSettings bridge$copy();
+
+    WorldGenSettings bridge$withSeed(long customSeed);
 }

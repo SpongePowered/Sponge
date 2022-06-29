@@ -25,6 +25,8 @@
 package org.spongepowered.common.item.recipe.cooking;
 
 import com.google.gson.JsonObject;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
@@ -53,8 +55,9 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration {
 
     public SpongeCookingRecipeRegistration(final ResourceLocation key, final RecipeSerializer<?> serializer,
                                            final String group, final Ingredient ingredient, final float experience, final Ticks cookingTime,
-                                           final ItemStack spongeResult, final Function<Container, ItemStack> resultFunction) {
-        super(key, serializer, spongeResult.getItem(), group);
+                                           final ItemStack spongeResult, final Function<Container, ItemStack> resultFunction,
+                                           final DataPack<RecipeRegistration> pack) {
+        super(key, serializer, spongeResult.getItem(), group, pack);
         this.ingredient = ingredient;
         this.result = spongeResult.getItem();
         this.experience = experience;

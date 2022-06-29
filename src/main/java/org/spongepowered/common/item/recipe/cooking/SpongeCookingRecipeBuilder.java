@@ -24,7 +24,15 @@
  */
 package org.spongepowered.common.item.recipe.cooking;
 
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -41,12 +49,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 
 public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, CookingRecipe.Builder>
         implements CookingRecipe.Builder.ResultStep, CookingRecipe.Builder.IngredientStep, CookingRecipe.Builder.EndStep {
@@ -59,6 +61,7 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
     private @Nullable Float experience;
     private @Nullable Ticks cookingTime;
     private @Nullable String group;
+    private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
     @Override
     public ResultStep ingredient(final org.spongepowered.api.item.recipe.crafting.Ingredient ingredient) {
@@ -76,6 +79,7 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
         this.experience = null;
         this.cookingTime = null;
         this.group = null;
+        this.pack = DataPacks.RECIPE;
         return this;
     }
 
@@ -133,6 +137,12 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
     }
 
     @Override
+    public EndStep pack(final DataPack<RecipeRegistration> pack) {
+        this.pack = pack;
+        return this;
+    }
+
+    @Override
     protected RecipeRegistration build0() {
         Objects.requireNonNull(this.type, "type");
         Objects.requireNonNull(this.ingredient, "ingredient");
@@ -170,7 +180,7 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
         }
 
         return new SpongeCookingRecipeRegistration((ResourceLocation) (Object) this.key, serializer, this.group,
-                this.ingredient, this.experience, this.cookingTime, this.result, this.resultFunction);
+                this.ingredient, this.experience, this.cookingTime, this.result, this.resultFunction, this.pack);
     }
 
 }

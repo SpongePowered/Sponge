@@ -58,12 +58,13 @@ public abstract class LevelStorageSourceMixin_Vanilla {
                     ),
                     to = @At(
                             value = "INVOKE",
-                            target = "Lnet/minecraft/world/level/storage/LevelStorageSource;readWorldGenSettings(Lcom/mojang/serialization/Dynamic;Lcom/mojang/datafixers/DataFixer;I)Lcom/mojang/datafixers/util/Pair;"
+                            target = "Lnet/minecraft/nbt/CompoundTag;contains(Ljava/lang/String;I)Z"
                     )
             ),
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/nbt/CompoundTag;getCompound(Ljava/lang/String;)Lnet/minecraft/nbt/CompoundTag;"
+                    target = "Lnet/minecraft/nbt/CompoundTag;getCompound(Ljava/lang/String;)Lnet/minecraft/nbt/CompoundTag;",
+                    ordinal = 0
             )
     )
     private static CompoundTag impl$createSpongeLevelData(final CompoundTag compoundNBT, final String path, final DynamicOps<Tag> ops,

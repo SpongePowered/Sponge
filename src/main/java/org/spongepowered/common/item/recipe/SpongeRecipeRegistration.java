@@ -29,6 +29,7 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -40,8 +41,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.datapack.DataPackType;
-import org.spongepowered.api.datapack.DataPackTypes;
+import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
@@ -57,10 +58,12 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
     protected final ResourceLocation advancementId;
     protected final Advancement.Builder advancementBuilder = Advancement.Builder.advancement();
     protected final String group;
+    protected final DataPack<RecipeRegistration> pack;
 
-    public SpongeRecipeRegistration(final ResourceLocation key, final RecipeSerializer<?> serializer, final Item resultItem, final String group) {
+    public SpongeRecipeRegistration(final ResourceLocation key, final RecipeSerializer<?> serializer, final Item resultItem, final String group, final DataPack<RecipeRegistration> pack) {
         this.key = key;
         this.serializer = serializer;
+        this.pack = pack;
         final CreativeModeTab itemGroup = resultItem.getItemCategory();
         this.advancementId = new ResourceLocation(key.getNamespace(), "recipes/" + (itemGroup == null ? "uncategorized" : itemGroup.getRecipeFolderName()) + "/" + key.getPath());
         this.advancementBuilder
@@ -146,7 +149,11 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
     }
 
     @Override
-    public DataPackType type() {
-        return DataPackTypes.RECIPE;
+    public DataPack<RecipeRegistration> pack() {
+        return this.pack;
+    }
+
+    public static JsonObject encode(RecipeRegistration template, RegistryAccess access) {
+        return ((FinishedRecipe) template).serializeRecipe();
     }
 }

@@ -54,6 +54,8 @@ import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.properties.AttachFace;
@@ -74,6 +76,7 @@ import net.minecraft.world.level.block.state.properties.StairsShape;
 import net.minecraft.world.level.block.state.properties.StructureMode;
 import net.minecraft.world.level.block.state.properties.Tilt;
 import net.minecraft.world.level.block.state.properties.WallSide;
+import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
@@ -221,6 +224,11 @@ final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
         this.knownName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values(), MobCategory::getName);
         this.automaticSerializedName(RegistryTypes.WALL_TYPE, WallSide.values());
+        this.automaticName(RegistryTypes.GRASS_COLOR_MODIFIER, BiomeSpecialEffects.GrassColorModifier.values());
+        this.automaticName(RegistryTypes.PRECIPITATION, Biome.Precipitation.values());
+        this.automaticName(RegistryTypes.TEMPERATURE_MODIFIER, Biome.TemperatureModifier.values());
+        this.automaticName(RegistryTypes.CARVING_STEP, GenerationStep.Carving.values());
+        this.automaticName(RegistryTypes.DECORATION_STEP, GenerationStep.Decoration.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {

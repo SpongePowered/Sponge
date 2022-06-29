@@ -24,23 +24,25 @@
  */
 package org.spongepowered.common.event.lifecycle;
 
+import com.google.gson.JsonElement;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.datapack.DataPackSerializable;
+import org.spongepowered.api.datapack.DataPackEntry;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
+import org.spongepowered.common.datapack.SpongeDataPackType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public final class RegisterDataPackValueEventImpl<T extends DataPackSerializable> extends AbstractLifecycleEvent.GenericImpl<T> implements RegisterDataPackValueEvent<T> {
+public final class RegisterDataPackValueEventImpl<T extends DataPackEntry<T>> extends AbstractLifecycleEvent.GenericImpl<T> implements RegisterDataPackValueEvent<T> {
 
     private final DataPackType<T> type;
     private final List<T> serializables;
 
-    public RegisterDataPackValueEventImpl(final Cause cause, final Game game, final DataPackType<T> type) {
-        super(cause, game, type.type());
+    public RegisterDataPackValueEventImpl(final Cause cause, final Game game, final SpongeDataPackType<JsonElement, T> type) {
+        super(cause, game, type.entryType());
         this.type = type;
         this.serializables = new ArrayList<>();
     }

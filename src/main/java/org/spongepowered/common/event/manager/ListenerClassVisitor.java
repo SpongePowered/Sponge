@@ -472,8 +472,9 @@ public class ListenerClassVisitor extends ClassVisitor {
                 }
                 return TypeFactory.parameterizedClass(this.clazz());
             }
-            final java.lang.reflect.Type generic = TypeFactory.parameterizedClass(this.method.classByLoader(this.genericType.getClassName()));
-            return TypeFactory.parameterizedClass(this.clazz(), generic);
+            final Class<?> gClazz = this.method.classByLoader(this.genericType.getClassName());
+//            final java.lang.reflect.Type generic = TypeFactory.parameterizedClass(gClazz);
+            return TypeFactory.parameterizedClass(this.clazz(), gClazz);
         }
     }
 

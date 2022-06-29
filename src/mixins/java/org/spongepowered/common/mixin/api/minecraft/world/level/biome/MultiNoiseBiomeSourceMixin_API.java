@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
@@ -42,7 +43,7 @@ import javax.annotation.Nullable;
 public abstract class MultiNoiseBiomeSourceMixin_API extends BiomeSourceMixin_API implements ConfigurableBiomeProvider<MultiNoiseBiomeConfig> {
 
     // @formatter:off
-    @Shadow @Final private Climate.ParameterList<Supplier<Biome>> parameters;
+    @Shadow @Final private Climate.ParameterList<Holder<Biome>> parameters;
     // @formatter:on
 
     @Nullable private MultiNoiseBiomeConfig api$config;

@@ -67,6 +67,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldLike;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.WorldChunk;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.biome.BiomeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
@@ -74,6 +75,7 @@ import org.spongepowered.api.world.volume.stream.VolumeApplicators;
 import org.spongepowered.api.world.volume.stream.VolumeCollectors;
 import org.spongepowered.api.world.volume.stream.VolumePositionTranslators;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
+import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -129,6 +131,8 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             net.minecraft.world.phys.AABB param1,
             @org.jetbrains.annotations.Nullable Predicate<? super T> param2);
     // @formatter:on
+
+    @Shadow public abstract ResourceKey<Level> dimension();
 
     private Context api$context;
     private RegistryHolderLogic api$registryHolder;
@@ -482,5 +486,13 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     public Collection<? extends Entity> entities(final AABB box, final Predicate<? super Entity> filter) {
         return (List) this.shadow$getEntities((net.minecraft.world.entity.Entity) null, VecHelper.toMinecraftAABB(box), (Predicate) filter);
     }
+
+    // WeatherUniverse
+
+    @Override
+    public Weather weather() {
+        return ((WorldProperties) this.shadow$getLevelData()).weather();
+    }
+
 
 }

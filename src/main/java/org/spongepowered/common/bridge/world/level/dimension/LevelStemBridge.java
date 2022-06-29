@@ -25,54 +25,44 @@
 package org.spongepowered.common.bridge.world.level.dimension;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.server.WorldTemplate;
-import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.Optional;
-import java.util.UUID;
-
 public interface LevelStemBridge {
 
-    Optional<Component> bridge$displayName();
+    @Nullable Component bridge$displayName();
 
-    Optional<ResourceLocation> bridge$gameMode();
+    @Nullable GameType bridge$gameMode();
 
-    Optional<ResourceLocation> bridge$difficulty();
+    @Nullable Difficulty bridge$difficulty();
 
-    Optional<SerializationBehavior> bridge$serializationBehavior();
+    @Nullable SerializationBehavior bridge$serializationBehavior();
 
-    Optional<Integer> bridge$viewDistance();
+    Integer bridge$viewDistance();
 
-    Optional<Vector3i> bridge$spawnPosition();
+    @Nullable Vector3i bridge$spawnPosition();
 
     boolean bridge$loadOnStartup();
 
     boolean bridge$performsSpawnLogic();
 
-    Optional<Boolean> bridge$hardcore();
+    @Nullable Boolean bridge$hardcore();
 
-    Optional<Boolean> bridge$commands();
+    @Nullable Boolean bridge$commands();
 
-    Optional<Boolean> bridge$pvp();
+    @Nullable Boolean bridge$pvp();
 
-    boolean bridge$fromSettings();
-
-    void bridge$setFromSettings(boolean fromSettings);
-
-    void bridge$populateFromTemplate(SpongeWorldTemplate s);
-
-    void bridge$populateFromLevelData(PrimaryLevelData levelData);
-
-    SpongeWorldTemplate bridge$asTemplate();
+    @Nullable Long bridge$seed();
 
     LevelStem bridge$decorateData(SpongeWorldTemplate.SpongeDataSection data);
+
+    LevelStem bridge$decorateData(DataManipulator data);
 
     SpongeWorldTemplate.SpongeDataSection bridge$createData();
 }

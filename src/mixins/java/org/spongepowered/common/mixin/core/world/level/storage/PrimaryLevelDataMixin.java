@@ -47,6 +47,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -59,7 +60,6 @@ import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -67,8 +67,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
-import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAccessor;
-import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
+import org.spongepowered.common.accessor.world.gen.WorldGenSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBridge;
@@ -76,7 +75,6 @@ import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridg
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.data.fixer.LegacyUUIDCodec;
-import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -117,8 +115,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     private final List<UUID> impl$pendingUniqueIds = new ArrayList<>();
     private int impl$trackedUniqueIdCount = 0;
 
-    private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$loadOnStartup,
-            impl$performsSpawnLogic;
+    private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$loadOnStartup, impl$performsSpawnLogic;
 
     private BiMap<Integer, UUID> impl$mapUUIDIndex = HashBiMap.create();
 
@@ -194,7 +191,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public void bridge$forceSetDifficulty(final Difficulty difficulty) {
         this.impl$customDifficulty = true;
-        ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(difficulty);
+        this.settings = this.settings.withDifficulty(difficulty);
         this.impl$updateWorldForDifficultyChange(this.bridge$world(), this.shadow$isDifficultyLocked());
     }
 
@@ -256,10 +253,14 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public void bridge$setViewDistance(@Nullable final Integer viewDistance) {
         this.impl$viewDistance = viewDistance;
+        this.bridge$triggerViewDistanceLogic();
+    }
 
+    @Override
+    public void bridge$triggerViewDistanceLogic() {
         final ServerLevel world = this.bridge$world();
         if (world != null) {
-            final int actual = viewDistance == null ? ((DedicatedServer) SpongeCommon.server()).getProperties().viewDistance : viewDistance;
+            final int actual = this.impl$viewDistance == null ? ((DedicatedServer) SpongeCommon.server()).getProperties().viewDistance : this.impl$viewDistance;
             world.getChunkSource().setViewDistance(actual);
             final ClientboundSetChunkCacheRadiusPacket packet = new ClientboundSetChunkCacheRadiusPacket(actual);
 
@@ -278,29 +279,38 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     }
 
     @Override
-    public void bridge$populateFromDimension(final LevelStem dimension) {
+    public void bridge$populateFromLevelStem(final LevelStem dimension) {
         final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) dimension;
-        this.impl$key = ((ResourceKeyBridge) (Object) dimension).bridge$getKey();
         this.impl$dimensionType = dimension.typeHolder().value();
-        this.impl$displayName = levelStemBridge.bridge$displayName().orElse(null);
-        levelStemBridge.bridge$difficulty().ifPresent(v -> {
-            ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(RegistryTypes.DIFFICULTY.get().value((ResourceKey) (Object) v));
+        this.impl$displayName = levelStemBridge.bridge$displayName();
+        final Difficulty difficulty = levelStemBridge.bridge$difficulty();
+        final GameType gameType = levelStemBridge.bridge$gameMode();
+        final Boolean isHardcore = levelStemBridge.bridge$hardcore();
+        if (difficulty != null) {
             this.impl$customDifficulty = true;
-        });
-        levelStemBridge.bridge$gameMode().ifPresent(v -> {
-            ((LevelSettingsAccessor) (Object) this.settings).accessor$gameType(RegistryTypes.GAME_MODE.get().value((ResourceKey) (Object) v));
+        }
+        if (gameType != null) {
             this.impl$customGameType = true;
-        });
-        levelStemBridge.bridge$spawnPosition().ifPresent(v -> {
-            this.shadow$setSpawn(VecHelper.toBlockPos(v), this.spawnAngle);
+        }
+        this.settings = new LevelSettings(this.settings.levelName(),
+                gameType == null ? this.settings.gameType() : gameType,
+                this.settings.allowCommands(),
+                difficulty == null ? this.settings.difficulty() : difficulty,
+                isHardcore == null ? this.settings.hardcore() : isHardcore,
+                this.settings.gameRules(),
+                this.settings.getDataPackConfig());
+
+        final Vector3i spawnPos = levelStemBridge.bridge$spawnPosition();
+        if (spawnPos != null) {
+            this.shadow$setSpawn(VecHelper.toBlockPos(spawnPos), this.spawnAngle);
             this.impl$customSpawnPosition = true;
-        });
-        levelStemBridge.bridge$hardcore().ifPresent(v -> ((LevelSettingsAccessor) (Object) this.settings).accessor$hardcode(v));
-        this.impl$serializationBehavior = levelStemBridge.bridge$serializationBehavior().orElse(null);
-        this.impl$pvp = levelStemBridge.bridge$pvp().orElse(null);
+        }
+
+        this.impl$serializationBehavior = levelStemBridge.bridge$serializationBehavior();
+        this.impl$pvp = levelStemBridge.bridge$pvp();
         this.impl$loadOnStartup = levelStemBridge.bridge$loadOnStartup();
         this.impl$performsSpawnLogic = levelStemBridge.bridge$performsSpawnLogic();
-        this.impl$viewDistance = levelStemBridge.bridge$viewDistance().orElse(null);
+        this.impl$viewDistance = levelStemBridge.bridge$viewDistance();
     }
 
     @Override
@@ -353,7 +363,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
                 ((org.spongepowered.api.registry.Registry<LevelStem>) (Object) registry).register(entry.key(), entry.value());
             }
         });
-        ((DimensionGeneratorSettingsAccessor) dimensionGeneratorSettings).accessor$dimensions(registry);
+        ((WorldGenSettingsAccessor) dimensionGeneratorSettings).accessor$dimensions(registry);
         return codec.encodeStart(ops, dimensionGeneratorSettings);
     }
 
@@ -421,6 +431,16 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         this.impl$pendingUniqueIds.clear();
 
         return data;
+    }
+
+    @Override
+    public void bridge$hardcore(final boolean hardcore) {
+        this.settings = new LevelSettings(this.settings.levelName(), this.settings.gameType(), hardcore, this.settings.difficulty(), this.settings.allowCommands(), this.settings.gameRules(), this.settings.getDataPackConfig());
+    }
+
+    @Override
+    public void bridge$allowCommands(final boolean commands) {
+        this.settings = new LevelSettings(this.settings.levelName(), this.settings.gameType(), this.settings.allowCommands(), this.settings.difficulty(), commands, this.settings.gameRules(), this.settings.getDataPackConfig());
     }
 
     @Override
