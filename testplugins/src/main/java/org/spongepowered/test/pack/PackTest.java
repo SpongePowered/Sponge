@@ -105,7 +105,7 @@ public final class PackTest {
                                 }
                             }
                             PackContents contents = pack.contents();
-                            for (ResourcePath path : contents.paths(PackType.server(), namespace, "", Integer.MAX_VALUE, s -> true)) {
+                            for (ResourcePath path : contents.paths(PackType.server(), namespace, "", s -> true)) {
                                 try (final Resource resource = pack.contents().requireResource(PackType.server(), path)) {
                                     final BufferedReader reader = new BufferedReader(new InputStreamReader(resource.inputStream()));
                                     reader.lines().map(x -> Component.text(x.substring(0, Math.min(100, x.length()))))

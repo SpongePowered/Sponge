@@ -86,14 +86,13 @@ public interface PackResourcesMixin_API extends PackContents {
     }
 
     @Override
-    default Collection<ResourcePath> paths(final PackType root, final String namespace, final String prefix, final int depth, final Predicate<String> filter) {
+    default Collection<ResourcePath> paths(final PackType root, final String namespace, final String prefix, final Predicate<ResourceKey> filter) {
         Objects.requireNonNull(filter, "filter");
-        // TODO depth is now unused?
         final net.minecraft.server.packs.PackType packType = (net.minecraft.server.packs.PackType) (Object) Objects.requireNonNull(root, "root");
         final Collection<ResourceLocation> resources = this.shadow$getResources(packType,
                                                        Objects.requireNonNull(namespace, "namespace"),
                                                        Objects.requireNonNull(prefix, "prefix"),
-                                                       loc -> filter.test(loc.getPath())); // TODO check filter
+                                                       loc -> filter.test((ResourceKey) (Object) loc));
 
         return resources.stream()
             .map(r -> new SpongeResourcePath((ResourceKey) (Object) r))
