@@ -47,10 +47,6 @@ public abstract class DataPackSerializer<E, T extends DataPackEntry<T>> {
     }
 
     public boolean serialize(final SpongeDataPack<E, T> pack, final Path packDir, final List<T> packEntries) throws IOException {
-        if (!pack.type().persistent()) { // TODO persistence - reloadable types can now be saved at any time - which would delete all others...
-//            FileUtils.deleteDirectory(packDir.toFile());
-        }
-
         if (packEntries.isEmpty()) {
             return false;
         }

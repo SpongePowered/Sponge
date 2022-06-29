@@ -129,7 +129,6 @@ public record SpongePlacedFeatureTemplate(ResourceKey key, net.minecraft.world.l
             final Registry<ConfiguredFeature<?, ?>> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY);
             final ResourceLocation key = registry.getKey((ConfiguredFeature<?, ?>) (Object) feature);
             if (key == null) {
-                // TODO this gets serialized as inline configured feature - is that an issue?
                 this.feature = Holder.direct((ConfiguredFeature<?, ?>) (Object) feature);
             } else {
                 this.feature = registry.getHolderOrThrow(net.minecraft.resources.ResourceKey.create(Registry.CONFIGURED_FEATURE_REGISTRY, key));

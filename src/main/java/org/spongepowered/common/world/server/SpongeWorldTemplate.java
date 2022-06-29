@@ -228,7 +228,6 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
 
         @Override
         public Builder fromDataPack(DataView pack) throws IOException {
-            // TODO maybe accept JsonElement instead?
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
             final LevelStem levelStem = SpongeWorldTemplate.decodeStem(json, SpongeCommon.server().registryAccess());
             return this.from(levelStem);

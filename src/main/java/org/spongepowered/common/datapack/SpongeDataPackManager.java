@@ -63,6 +63,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+// TODO make IO non-blocking
+// TODO not all data-pack entries are on disk - this is currently not handled
 public final class SpongeDataPackManager implements DataPackManager {
 
     private final MinecraftServer server;

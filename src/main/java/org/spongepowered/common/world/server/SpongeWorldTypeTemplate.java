@@ -151,8 +151,6 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
         @Override
         public Builder fromDataPack(final DataView pack) throws IOException {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
-            // TODO catch & rethrow exceptions in CODEC?
-            // TODO probably need to rewrite CODEC to allow reading after registries are frozen
             final DataResult<Holder<DimensionType>> parsed = DimensionType.CODEC.parse(JsonOps.INSTANCE, json);
             final DimensionType dimensionType = parsed.getOrThrow(false, e -> {}).value();
 
