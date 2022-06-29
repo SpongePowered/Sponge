@@ -36,6 +36,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
+import org.spongepowered.api.util.RandomProvider;
 import org.spongepowered.api.util.weighted.WeightedTable;
 
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public ItemStack apply(final Random random) {
+    public ItemStack apply(final RandomProvider.RandomSource random) {
         final ItemStack.Builder builder = ItemStack.builder();
         final List<ItemType> itemTypes = this.baseType.get(random);
         builder.itemType(itemTypes.get(random.nextInt(itemTypes.size())));

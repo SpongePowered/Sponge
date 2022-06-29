@@ -218,9 +218,9 @@ public class StructureTest {
 
     private CommandResult placeJigsaw(final CommandContext ctx, final Parameter.Value<JigsawPool> jigsawPoolParam) {
         final JigsawPool pool = ctx.one(jigsawPoolParam).orElse(JigsawPools.VILLAGE_DESERT_DECOR.get());
-        final JigsawPoolElement element = pool.elements().get(new Random()).iterator().next();
         final Optional<ServerPlayer> player = ctx.cause().first(ServerPlayer.class);
         if (player.isPresent()) {
+            final JigsawPoolElement element = pool.elements().get(new Random()).iterator().next();
             final RayTrace<LocatableBlock> ray = FeatureTest.viewRay(player.get());
             final ServerLocation location = ray.execute().orElseThrow().selectedObject().serverLocation().relativeTo(Direction.UP);
             element.place(location);

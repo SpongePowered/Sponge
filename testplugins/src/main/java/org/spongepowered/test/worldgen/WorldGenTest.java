@@ -42,6 +42,7 @@ import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.util.RandomProvider;
 import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldTypes;
@@ -134,7 +135,7 @@ public final class WorldGenTest {
         final WorldManager wm = Sponge.server().worldManager();
         final ServerPlayer player = (ServerPlayer) context.cause().root();
         final String owner = player.name();
-        final Random random = new Random();
+        final RandomProvider.RandomSource random = player.random();
 
         final List<RegistryReference<Biome>> allBiomes = Sponge.server().registry(RegistryTypes.BIOME)
                 .streamEntries()

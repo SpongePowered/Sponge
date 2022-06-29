@@ -35,7 +35,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
@@ -74,7 +73,6 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
@@ -88,7 +86,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     // @formatter:off
     @Shadow public float yRot;
     @Shadow public float xRot;
-    @Shadow @Final protected RandomSource random;
+    @Shadow @Final protected net.minecraft.util.RandomSource random;
     @Shadow public int tickCount;
     @Shadow protected UUID uuid;
     @Shadow @Final private net.minecraft.world.entity.EntityType<?> type;
@@ -118,9 +116,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     // @formatter:on
 
     @Override
-    public Random random() {
-        // TODO random
-        return null;
+    public RandomSource random() {
+        return (RandomSource) this.random;
     }
 
     @Override

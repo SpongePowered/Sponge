@@ -66,7 +66,7 @@ public interface LevelAccessorMixin_API<P extends WorldLike<P>> extends WorldLik
 
     //@formatter:off
     @Shadow boolean shadow$hasChunk(int p_217354_1_, int p_217354_2_);
-    @Shadow RandomSource shadow$getRandom();
+    @Shadow net.minecraft.util.RandomSource shadow$getRandom();
     @Shadow LevelData shadow$getLevelData();
     //@formatter:on
 
@@ -122,10 +122,8 @@ public interface LevelAccessorMixin_API<P extends WorldLike<P>> extends WorldLik
     // RandomProvider
 
     @Intrinsic
-    default Random worldLike$random() {
-        // TODO randomsource
-        final RandomSource randomSource = this.shadow$getRandom();
-        return null;
+    default RandomSource worldLike$random() {
+        return (RandomSource) this.shadow$getRandom();
     }
 
     // WorldLike

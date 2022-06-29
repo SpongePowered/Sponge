@@ -54,7 +54,6 @@ import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Objects;
-import java.util.Random;
 
 @SuppressWarnings({"RedundantTypeArguments", "unchecked", "RedundantCast"})
 @Mixin(LevelReader.class)
@@ -136,11 +135,9 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     // RandomProvider
 
     @Override
-    default Random random() {
-        return new Random();
+    default RandomSource random() {
+        return (RandomSource) net.minecraft.util.RandomSource.create();
     }
-
-
 
     // ChunkVolume
 

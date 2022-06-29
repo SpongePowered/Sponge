@@ -22,30 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.npc;
+package org.spongepowered.common.mixin.api.minecraft.util;
 
 import net.minecraft.util.RandomSource;
-import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.util.RandomProvider;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.npc.VillagerTrades;
-import net.minecraft.world.item.trading.MerchantOffer;
-
-@Mixin(VillagerTrades.ItemListing.class)
-public interface VillagerTrades_ItemListingMixin_API extends TradeOfferGenerator {
-
-    // @formatter:off
-    @Shadow @Nullable MerchantOffer shadow$getOffer(Entity entity, RandomSource random);
-    // @formatter:on
-
-    @Override
-    default TradeOffer apply(final org.spongepowered.api.entity.Entity merchant, final RandomProvider.RandomSource random) {
-        return (TradeOffer) this.shadow$getOffer((Entity) merchant, (RandomSource) random);
-    }
+@Mixin(value = RandomSource.class)
+public interface RandomSourceMixin_API extends RandomProvider.RandomSource {
 
 }

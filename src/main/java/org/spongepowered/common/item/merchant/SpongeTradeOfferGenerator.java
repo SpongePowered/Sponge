@@ -32,6 +32,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
+import org.spongepowered.api.util.RandomProvider;
 import org.spongepowered.api.util.weighted.VariableAmount;
 
 import java.util.Objects;
@@ -39,8 +40,8 @@ import java.util.Random;
 
 public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
 
-    public static org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator.Builder builder() {
-        return new org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator.Builder();
+    public static SpongeTradeOfferGenerator.Builder builder() {
+        return new SpongeTradeOfferGenerator.Builder();
     }
 
     final ItemStackGenerator firstItemGenerator;
@@ -51,7 +52,7 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
     final VariableAmount maxUses;
     final VariableAmount grantedExperience;
 
-    SpongeTradeOfferGenerator(final org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator.Builder builder) {
+    SpongeTradeOfferGenerator(final SpongeTradeOfferGenerator.Builder builder) {
         this.firstItemGenerator = builder.firstGenerator;
         this.secondItemGenerator = builder.secondGenerator;
         this.sellingItemGenerator = builder.sellingGenerator;
@@ -62,7 +63,7 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
     }
 
     @Override
-    public TradeOffer apply(final Entity merchant, final Random random) {
+    public TradeOffer apply(final Entity merchant, final RandomProvider.RandomSource random) {
         Objects.requireNonNull(random, "Random cannot be null!");
         final TradeOffer.Builder builder = TradeOffer.builder();
         builder.firstBuyingItem(this.firstItemGenerator.apply(random));

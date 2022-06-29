@@ -111,7 +111,7 @@ import java.util.stream.Stream;
 public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W, L>> implements World<W, L>, SpongeRegistryHolder, AutoCloseable {
 
     // @formatter:off
-    @Shadow public @Final RandomSource random;
+    @Shadow public @Final net.minecraft.util.RandomSource random;
     @Shadow @Final protected List<TickingBlockEntity> blockEntityTickers;
 
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
