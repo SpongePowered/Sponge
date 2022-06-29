@@ -26,9 +26,67 @@ package org.spongepowered.common.mixin.api.minecraft.util;
 
 import net.minecraft.util.RandomSource;
 import org.spongepowered.api.util.RandomProvider;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(value = RandomSource.class)
-public interface RandomSourceMixin_API extends RandomProvider.RandomSource {
+@Implements(@Interface(iface = RandomProvider.Source.class, prefix = "source$", remap = Interface.Remap.NONE))
+public interface RandomSourceMixin_API extends RandomProvider.Source {
 
+    @Intrinsic
+    default void source$setSeed(long var1) {
+        ((RandomSource) this).setSeed(var1);
+    }
+
+    @Intrinsic
+    default RandomProvider.Source source$fork() {
+        return (RandomProvider.Source) ((RandomSource) this).fork();
+    }
+
+    @Override
+    default void consume(int n) {
+        ((RandomSource) this).consumeCount(n);
+    }
+
+    @Intrinsic
+    default boolean source$nextBoolean() {
+        return ((RandomSource) this).nextBoolean();
+    }
+
+    @Intrinsic
+    default float source$nextFloat() {
+        return ((RandomSource) this).nextFloat();
+    }
+
+    @Intrinsic
+    default double source$nextDouble() {
+        return ((RandomSource) this).nextDouble();
+    }
+
+    @Intrinsic
+    default int source$nextInt() {
+        return ((RandomSource) this).nextInt();
+    }
+
+    @Intrinsic
+    default int source$nextInt(int bound) {
+        return ((RandomSource) this).nextInt(bound);
+    }
+
+    @Intrinsic
+    default int source$nextInt(int origin, int bound) {
+        return ((RandomSource) this).nextInt(origin, bound);
+    }
+
+    @Intrinsic
+    default long source$nextLong() {
+        return ((RandomSource) this).nextLong();
+    }
+
+    @Intrinsic
+    default double source$nextGaussian() {
+        return ((RandomSource) this).nextGaussian();
+    }
 }

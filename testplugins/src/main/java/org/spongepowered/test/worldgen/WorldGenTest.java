@@ -67,7 +67,6 @@ import org.spongepowered.test.world.WorldTest;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.IntStream;
 
 @Plugin("worldgentest")
@@ -135,7 +134,7 @@ public final class WorldGenTest {
         final WorldManager wm = Sponge.server().worldManager();
         final ServerPlayer player = (ServerPlayer) context.cause().root();
         final String owner = player.name();
-        final RandomProvider.RandomSource random = player.random();
+        final RandomProvider.Source random = player.random();
 
         final List<RegistryReference<Biome>> allBiomes = Sponge.server().registry(RegistryTypes.BIOME)
                 .streamEntries()

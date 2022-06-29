@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
@@ -57,7 +56,6 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 
 @Mixin(LevelAccessor.class)
@@ -122,8 +120,8 @@ public interface LevelAccessorMixin_API<P extends WorldLike<P>> extends WorldLik
     // RandomProvider
 
     @Intrinsic
-    default RandomSource worldLike$random() {
-        return (RandomSource) this.shadow$getRandom();
+    default Source worldLike$random() {
+        return (Source) this.shadow$getRandom();
     }
 
     // WorldLike

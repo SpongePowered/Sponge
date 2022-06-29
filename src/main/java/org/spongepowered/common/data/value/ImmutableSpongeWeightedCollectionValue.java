@@ -33,6 +33,7 @@ import org.spongepowered.common.data.key.SpongeKey;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.random.RandomGenerator;
 
 public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCollectionValue<TableEntry<E>, WeightedTable<E>,
         WeightedCollectionValue.Immutable<E>, WeightedCollectionValue.Mutable<E>> implements WeightedCollectionValue.Immutable<E> {
@@ -49,7 +50,7 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
     }
 
     @Override
-    public List<E> get(Random random) {
+    public List<E> get(RandomGenerator random) {
         return this.element.get(random);
     }
 

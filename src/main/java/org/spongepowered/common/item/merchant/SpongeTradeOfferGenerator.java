@@ -36,7 +36,6 @@ import org.spongepowered.api.util.RandomProvider;
 import org.spongepowered.api.util.weighted.VariableAmount;
 
 import java.util.Objects;
-import java.util.Random;
 
 public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
 
@@ -63,7 +62,7 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
     }
 
     @Override
-    public TradeOffer apply(final Entity merchant, final RandomProvider.RandomSource random) {
+    public TradeOffer apply(final Entity merchant, final RandomProvider.Source random) {
         Objects.requireNonNull(random, "Random cannot be null!");
         final TradeOffer.Builder builder = TradeOffer.builder();
         builder.firstBuyingItem(this.firstItemGenerator.apply(random));

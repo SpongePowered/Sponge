@@ -44,7 +44,7 @@ public interface VillagerTrades_ItemListingMixin_API extends TradeOfferGenerator
     // @formatter:on
 
     @Override
-    default TradeOffer apply(final org.spongepowered.api.entity.Entity merchant, final RandomProvider.RandomSource random) {
+    default TradeOffer apply(final org.spongepowered.api.entity.Entity merchant, final RandomProvider.Source random) {
         return (TradeOffer) this.shadow$getOffer((Entity) merchant, (RandomSource) random);
     }
 

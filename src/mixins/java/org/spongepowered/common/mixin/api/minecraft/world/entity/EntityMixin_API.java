@@ -116,8 +116,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     // @formatter:on
 
     @Override
-    public RandomSource random() {
-        return (RandomSource) this.random;
+    public Source random() {
+        return (Source) this.random;
     }
 
     @Override

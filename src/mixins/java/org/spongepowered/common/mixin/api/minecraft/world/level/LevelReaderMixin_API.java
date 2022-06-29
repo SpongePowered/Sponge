@@ -135,8 +135,8 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     // RandomProvider
 
     @Override
-    default RandomSource random() {
-        return (RandomSource) net.minecraft.util.RandomSource.create();
+    default Source random() {
+        return (Source) net.minecraft.util.RandomSource.create();
     }
 
     // ChunkVolume

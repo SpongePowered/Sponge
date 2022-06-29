@@ -49,12 +49,13 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
+import java.util.random.RandomGenerator;
 
 public final class SpongeItemStackGenerator implements ItemStackGenerator {
 
     final WeightedTable<ItemType> baseType;
     final Map<Key<@NonNull ?>, Object> keyValues;
-    final List<BiConsumer<ItemStack.Builder, Random>> biConsumers;
+    final List<BiConsumer<ItemStack.Builder, RandomGenerator>> biConsumers;
 
     SpongeItemStackGenerator(final org.spongepowered.common.item.generation.SpongeItemStackGenerator.Builder builder) {
         this.biConsumers = ImmutableList.copyOf(builder.consumers);
@@ -64,7 +65,7 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public ItemStack apply(final RandomProvider.RandomSource random) {
+    public ItemStack apply(final RandomProvider.Source random) {
         final ItemStack.Builder builder = ItemStack.builder();
         final List<ItemType> itemTypes = this.baseType.get(random);
         builder.itemType(itemTypes.get(random.nextInt(itemTypes.size())));
@@ -106,18 +107,18 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
 
     public static final class Builder implements ItemStackGenerator.Builder {
 
-        final List<BiConsumer<ItemStack.Builder, Random>> consumers = new ArrayList<>();
+        final List<BiConsumer<ItemStack.Builder, RandomGenerator>> consumers = new ArrayList<>();
         @MonotonicNonNull WeightedTable<ItemType> baseItem;
         @Nullable LinkedHashMap<Key<@NonNull ?>, Object> keyValues;
 
         @Override
-        public org.spongepowered.common.item.generation.SpongeItemStackGenerator.Builder add(final BiConsumer<ItemStack.Builder, Random> consumer) {
+        public org.spongepowered.common.item.generation.SpongeItemStackGenerator.Builder add(final BiConsumer<ItemStack.Builder, RandomGenerator> consumer) {
             this.consumers.add(Objects.requireNonNull(consumer, "Consumer cannot be null!"));
             return this;
         }
 
         @Override
-        public org.spongepowered.common.item.generation.SpongeItemStackGenerator.Builder addAll(final Collection<BiConsumer<ItemStack.Builder, Random>> collection) {
+        public org.spongepowered.common.item.generation.SpongeItemStackGenerator.Builder addAll(final Collection<BiConsumer<ItemStack.Builder, RandomGenerator>> collection) {
             this.consumers.addAll(Objects.requireNonNull(collection, "Collecton cannot be null!"));
             return this;
         }
