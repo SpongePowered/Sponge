@@ -43,6 +43,7 @@ import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.entity.EntityCategory;
 import org.spongepowered.api.world.generation.feature.DecorationStep;
 import org.spongepowered.api.world.generation.structure.StructureType;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -64,8 +65,7 @@ public abstract class StructureMixin_API implements org.spongepowered.api.world.
     @Shadow public abstract net.minecraft.world.level.levelgen.structure.StructureType<?> shadow$type();
     @Shadow public abstract HolderSet<Biome> shadow$biomes();
     @Shadow public abstract GenerationStep.Decoration shadow$step();
-
-    @Shadow public abstract Map<MobCategory, StructureSpawnOverride> shadow$spawnOverrides(); // TODO expose?
+    @Shadow public abstract Map<MobCategory, StructureSpawnOverride> shadow$spawnOverrides();
     // @formatter:on
 
     @Override
@@ -104,6 +104,11 @@ public abstract class StructureMixin_API implements org.spongepowered.api.world.
     @Override
     public Collection<org.spongepowered.api.world.biome.Biome> allowedBiomes() {
         return this.shadow$biomes().stream().map(Holder::value).map(org.spongepowered.api.world.biome.Biome.class::cast).toList();
+    }
+
+    @Override
+    public Map<EntityCategory, StructureNaturalSpawner> spawners() {
+        return (Map) this.shadow$spawnOverrides();
     }
 
     @Override
