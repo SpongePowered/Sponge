@@ -376,6 +376,11 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
+    public void sendMessage(final @NonNull Component message) {
+        this.cause().sendMessage(message);
+    }
+
+    @Override
     public void sendMessage(final @NonNull Identified identity, final @NonNull Component message) {
         this.cause().sendMessage(identity, message);
     }

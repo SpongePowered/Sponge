@@ -175,6 +175,11 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
     }
 
     @Override
+    public void sendMessage(final @NonNull Component message) {
+        this.cause().sendMessage(message);
+    }
+
+    @Override
     public void sendMessage(final @NonNull Identified identity, final @NonNull Component message) {
         this.cause().sendMessage(identity, message);
     }

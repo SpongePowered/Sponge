@@ -102,6 +102,11 @@ public abstract class CommandSourceStackMixin_API implements CommandCause {
     }
 
     @Override
+    public void sendMessage(final @NonNull Component message) {
+        this.audience().sendMessage(message);
+    }
+
+    @Override
     public void sendMessage(@NonNull final Identified identity, @NonNull final Component message) {
         this.audience().sendMessage(identity, message);
     }
