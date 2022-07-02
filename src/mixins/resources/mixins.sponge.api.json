@@ -438,7 +438,8 @@
         "minecraft.sounds.MusicMixin_API",
         "minecraft.world.level.biome.MobSpawnSettings_MobSpawnCostMixin_API",
         "minecraft.world.level.levelgen.structure.StructureSpawnOverrideMixin_API",
-        "minecraft.util.RandomSourceMixin_API"
+        "minecraft.util.RandomSourceMixin_API",
+        "minecraft.network.chat.ChatTypeMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

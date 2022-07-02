@@ -33,6 +33,7 @@ import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
+import org.spongepowered.api.adventure.ChatTypeTemplate;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
@@ -145,6 +146,7 @@ import org.spongepowered.common.advancement.SpongeFilteredTriggerBuilder;
 import org.spongepowered.common.advancement.SpongeTriggerBuilder;
 import org.spongepowered.common.advancement.criterion.SpongeCriterionBuilder;
 import org.spongepowered.common.advancement.criterion.SpongeScoreCriterionBuilder;
+import org.spongepowered.common.adventure.SpongeChatTypeTemplate;
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
@@ -398,6 +400,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(StructurePlacement.Builder.class, SpongeStructurePlacementBuilder::new)
                 .register(StructureSetTemplate.Builder.class, SpongeStructureSetTemplate.BuilderImpl::new)
                 .register(JigsawPoolTemplate.Builder.class, SpongeJigsawPoolTemplate.BuilderImpl::new)
+                .register(ChatTypeTemplate.Builder.class, SpongeChatTypeTemplate.BuilderImpl::new)
         ;
     }
 }

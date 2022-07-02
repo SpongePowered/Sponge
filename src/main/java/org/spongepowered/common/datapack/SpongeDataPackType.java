@@ -32,6 +32,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.advancement.AdvancementTemplate;
+import org.spongepowered.api.adventure.ChatTypeTemplate;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPackEntry;
 import org.spongepowered.api.datapack.DataPackType;
@@ -54,6 +55,7 @@ import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolTemplat
 import org.spongepowered.api.world.generation.structure.jigsaw.ProcessorListTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.advancement.SpongeAdvancementTemplate;
+import org.spongepowered.common.adventure.SpongeChatTypeTemplate;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.tag.SpongeTagTemplate;
@@ -154,6 +156,12 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
                 "worldgen/template_pool", SpongeJigsawPoolTemplate::encode, SpongeJigsawPoolTemplate::decode,
                 false);
 
+        // TODO should be reloadable https://bugs.mojang.com/browse/MC-251318
+        private final SpongeDataPackType<JsonElement, @NonNull ChatTypeTemplate> chatType = SpongeDataPackType.basic(ChatTypeTemplate.class,
+                "chat_type", SpongeChatTypeTemplate::encode, SpongeChatTypeTemplate::decode,
+                false);
+
+
         @Override
         public DataPackType<RecipeRegistration> recipe() {
             return this.recipe;
@@ -232,6 +240,11 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
         @Override
         public DataPackType<JigsawPoolTemplate> jigsawPool() {
             return this.jigsawPool;
+        }
+
+        @Override
+        public DataPackType<ChatTypeTemplate> chatType() {
+            return this.chatType;
         }
 
         @Override

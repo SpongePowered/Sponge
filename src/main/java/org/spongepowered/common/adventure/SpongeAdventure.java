@@ -99,6 +99,7 @@ import org.spongepowered.common.bridge.adventure.ComponentBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.util.MissingImplementationException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -780,6 +781,14 @@ public final class SpongeAdventure {
             return list;
         }
         return Collections.singletonList(audience);
+    }
+
+    public static ChatType asVanilla(final org.spongepowered.api.adventure.ChatType value) {
+        if ((Object) value instanceof ChatType ct) {
+            return ct;
+        }
+        // TODO convert adventure type
+        throw new MissingImplementationException("SpongeAdventure", "asVanilla(ChatType)");
     }
 
     public static class Factory implements SpongeComponents.Factory {
