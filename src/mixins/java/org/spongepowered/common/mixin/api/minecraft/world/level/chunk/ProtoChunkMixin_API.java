@@ -24,45 +24,116 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
-import org.spongepowered.api.util.Ticks;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.generation.GenerationChunk;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.volume.stream.StreamOptions;
+import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.world.level.chunk.ChunkBiomeContainerAccessor;
-import org.spongepowered.common.util.SpongeTicks;
-import org.spongepowered.common.world.volume.VolumeStreamUtils;
+import org.spongepowered.common.data.holder.SpongeLocationBaseDataHolder;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MissingImplementationException;
+import org.spongepowered.common.world.storage.SpongeChunkLayout;
+import org.spongepowered.math.vector.Vector3i;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 @Mixin(ProtoChunk.class)
-public abstract class ProtoChunkMixin_API implements GenerationChunk {
+public abstract class ProtoChunkMixin_API implements GenerationChunk, SpongeLocationBaseDataHolder {
 
-    // @formatter:off
-    @Shadow private ChunkBiomeContainer biomes;
-    @Shadow private long inhabitedTime;
-    @Shadow private volatile ChunkStatus status;
-    // @formatter:on
+    //@formatter:off
+    @Shadow @javax.annotation.Nullable public abstract net.minecraft.world.level.block.state.BlockState shadow$setBlockState(final BlockPos param0,
+            final net.minecraft.world.level.block.state.BlockState param1, final boolean param2);
+    @Shadow public abstract Map<BlockPos, net.minecraft.world.level.block.entity.BlockEntity> shadow$getBlockEntities();
+    @Shadow public abstract void shadow$setBlockEntity(final BlockPos param0, final net.minecraft.world.level.block.entity.BlockEntity param1);
+    @Shadow public abstract void shadow$removeBlockEntity(final BlockPos param0);
+    @Shadow @javax.annotation.Nullable private ChunkBiomeContainer biomes;
+    //@formatter:on
+
+    private @Nullable Vector3i api$blockMin;
+    private @Nullable Vector3i api$blockMax;
+
 
     @Override
-    public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.biomes, () -> {});
+    public VolumeStream<GenerationChunk, Biome> biomeStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
+        throw new UnsupportedOperationException("Cannot stream biomes on ProtoChunk");
     }
 
     @Override
-    public Ticks inhabitedTime() {
-        return new SpongeTicks(this.inhabitedTime);
+    public VolumeStream<GenerationChunk, BlockState> blockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
+        throw new UnsupportedOperationException("Cannot stream block states on ProtoChunk");
     }
 
     @Override
-    public void setInhabitedTime(final Ticks newInhabitedTime) {
-        this.inhabitedTime = newInhabitedTime.ticks();
+    public VolumeStream<GenerationChunk, BlockEntity> blockEntityStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
+        throw new UnsupportedOperationException("Cannot stream block entities on ProtoChunk");
     }
 
     @Override
-    public boolean isEmpty() {
-        return this.status == ChunkStatus.EMPTY;
+    public Vector3i min() {
+        if (this.api$blockMin == null) {
+            this.api$blockMin = SpongeChunkLayout.INSTANCE.forceToWorld(this.chunkPosition());
+        }
+        return this.api$blockMin;
+    }
+
+    @Override
+    public Vector3i max() {
+        if (this.api$blockMax == null) {
+            this.api$blockMax = this.min().add(SpongeChunkLayout.CHUNK_SIZE).sub(1, 1, 1);
+        }
+        return this.api$blockMax;
+    }
+
+    @Override
+    public boolean setBlock(final int x, final int y, final int z, final BlockState block) {
+        return false;
+    }
+
+    @Override
+    public boolean removeBlock(final int x, final int y, final int z) {
+        return false;
+    }
+
+    @Override
+    public Collection<? extends BlockEntity> blockEntities() {
+        return (Collection) Collections.unmodifiableCollection(this.shadow$getBlockEntities().values());
+    }
+
+    @Override
+    public void addBlockEntity(final int x, final int y, final int z, final BlockEntity blockEntity) {
+        this.shadow$setBlockEntity(new BlockPos(x, y, z), (net.minecraft.world.level.block.entity.BlockEntity) blockEntity);
+    }
+
+    @Override
+    public void removeBlockEntity(final int x, final int y, final int z) {
+        this.shadow$removeBlockEntity(new BlockPos(x, y, z));
+    }
+
+    @Override
+    public Biome biome(int x, int y, int z) {
+        if (!this.contains(x, y, z)) {
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);
+        }
+        if (this.biomes != null) {
+            return (Biome) (Object) this.biomes.getNoiseBiome(x, y, z);
+        }
+        return null;
+    }
+
+    @Override
+    public ServerLocation impl$dataholder(int x, int y, int z) {
+        throw new MissingImplementationException("ProtoChunk", "impl$dataholder");
     }
 
 }
