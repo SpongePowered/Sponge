@@ -30,8 +30,6 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minecraft.SharedConstants;
@@ -39,12 +37,12 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.Connection;
-import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
-import net.minecraft.network.protocol.game.ServerboundChatPacket;
+import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
@@ -88,7 +86,6 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
-import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -128,7 +125,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class ServerGamePacketListenerImplMixin implements ConnectionHolderBridge, ServerGamePacketListenerImplBridge {
@@ -145,13 +142,17 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     @Shadow private int knownMovePacketCount;
     @Shadow private int tickCount;
     @Shadow private int awaitingTeleportTime;
-    @Shadow private int chatSpamTickCount;
+    @Shadow private int chatSpamTickCount; // TODO -20 when canceling chat?
 
     @Shadow protected abstract boolean shadow$isSingleplayerOwner();
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch);
-    @Shadow protected abstract void shadow$filterTextPacket(List<String> p_244537_1_, Consumer<List<String>> p_244537_2_);
+    @Shadow protected abstract CompletableFuture<List<FilteredText>> shadow$filterTextPacket(final List<String> $$0);
     @Shadow public abstract void shadow$resetPosition();
     // @formatter:on
+
+    @Shadow public abstract void send(final Packet<?> $$0);
+
+    @Shadow protected abstract void shadow$performChatCommand(final ServerboundChatCommandPacket $$0);
 
     private int impl$ignorePackets;
 
@@ -166,10 +167,10 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     }
 
     @Inject(
-        method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/util/concurrent/GenericFutureListener;)V",
+        method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V",
         at = @At("HEAD")
     )
-    private void impl$onClientboundPacketSend(final Packet<?> packet, final GenericFutureListener<? extends Future<? super Void>> listener, final CallbackInfo ci) {
+    private void impl$onClientboundPacketSend(final Packet<?> packet, final PacketSendListener listener, final CallbackInfo ci) {
         if (packet instanceof ClientboundPlayerInfoPacket) {
             ((SpongeTabList) ((ServerPlayer) this.player).tabList()).updateEntriesOnSend((ClientboundPlayerInfoPacket) packet);
         }
@@ -478,8 +479,8 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     }
 
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/resources/ResourceKey;)V"))
-    public void impl$handlePlayerDisconnect(final PlayerList instance, final net.minecraft.network.chat.Component $$0, final ResourceKey<ChatType> $$1) {
+            target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V"))
+    public void impl$handlePlayerDisconnect(final PlayerList instance, final net.minecraft.network.chat.Component $$0, final boolean $$1) {
         // If this happens, the connection has not been fully established yet so we've kicked them during ClientConnectionEvent.Login,
         // but FML has created this handler earlier to send their handshake. No message should be sent, no disconnection event should
         // be fired either.
@@ -502,25 +503,24 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         ((ServerPlayerBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();
     }
 
-    @Redirect(method = "handleSignUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;filterTextPacket(Ljava/util/List;Ljava/util/function/Consumer;)V"))
-    private void impl$switchToSignPhaseState(final ServerGamePacketListenerImpl serverPlayNetHandler, final List<String> p_244537_1_, final Consumer<List<String>> p_244537_2_) {
+    @Redirect(method = "handleSignUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;filterTextPacket(Ljava/util/List;)Ljava/util/concurrent/CompletableFuture;"))
+    private CompletableFuture<List<FilteredText>> impl$switchToSignPhaseState(final ServerGamePacketListenerImpl instance, final List<String> $$0) {
         try (final BasicPacketContext context = PacketPhase.General.UPDATE_SIGN.createPhaseContext(PhaseTracker.getInstance())
                 .packetPlayer(this.player)
                 .buildAndSwitch()
         ) {
-
-            this.shadow$filterTextPacket(p_244537_1_, p_244537_2_);
+            return this.shadow$filterTextPacket($$0);
         }
     }
 
     @Redirect(method = "updateSignText", at = @At(value = "INVOKE", remap = false, target = "Ljava/util/List;size()I"))
-    private int impl$callChangeSignEvent(final List<FilteredText<String>> list, final ServerboundSignUpdatePacket p_244542_1_, final List<String> p_244542_2_) {
+    private int impl$callChangeSignEvent(final List<FilteredText> list, final ServerboundSignUpdatePacket p_244542_1_, final List<String> p_244542_2_) {
         final SignBlockEntity blockEntity = (SignBlockEntity) this.player.level.getBlockEntity(p_244542_1_.getPos());
         final ListValue<Component> originalLinesValue = ((Sign) blockEntity).getValue(Keys.SIGN_LINES)
                 .orElseGet(() -> new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.of()));
 
         final List<Component> newLines = new ArrayList<>();
-        for (final FilteredText<String> line : list) {
+        for (final FilteredText line : list) {
             // TODO is this still needed?
             // Sponge Start - While Vanilla does some strip formatting, it doesn't catch everything. This patches an exploit that allows color
             // signs to be created.
@@ -540,22 +540,17 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         return 0;
     }
 
+    @Redirect(method = "lambda$handleChatCommand$11", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandPacket;)V"))
+    public void impl$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandPacket $$0) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this.player);
+            this.shadow$performChatCommand($$0);
+        }
+    }
+
     @Override
     public void bridge$captureCurrentPlayerPosition() {
         this.shadow$resetPosition();
-    }
-
-
-    @Inject(method = "handleChat(Lnet/minecraft/network/protocol/game/ServerboundChatPacket;Lnet/minecraft/server/network/FilteredText;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundChatPacket;getSignature(Ljava/util/UUID;)Lnet/minecraft/network/chat/MessageSignature;"),
-            cancellable = true)
-    private void impl$onHandleChat(final ServerboundChatPacket $$0, final FilteredText<String> $$1, final CallbackInfo ci) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
-            final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(frame.currentCause(), Component.text($$1.raw()));
-            if (SpongeCommon.post(event)) {
-                ci.cancel();
-            }
-        }
     }
 
 }

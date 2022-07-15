@@ -32,6 +32,7 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.TaskChainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -87,12 +88,12 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     private Cause impl$cause;
     @Nullable private Supplier<String> impl$potentialPermissionNode = null;
 
-    @Inject(method = "<init>(Lnet/minecraft/commands/CommandSource;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec2;Lnet/minecraft/server/level/ServerLevel;ILjava/lang/String;Lnet/minecraft/network/chat/Component;Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/entity/Entity;ZLcom/mojang/brigadier/ResultConsumer;Lnet/minecraft/commands/arguments/EntityAnchorArgument$Anchor;Lnet/minecraft/commands/CommandSigningContext;)V",
+    @Inject(method = "<init>(Lnet/minecraft/commands/CommandSource;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec2;Lnet/minecraft/server/level/ServerLevel;ILjava/lang/String;Lnet/minecraft/network/chat/Component;Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/entity/Entity;ZLcom/mojang/brigadier/ResultConsumer;Lnet/minecraft/commands/arguments/EntityAnchorArgument$Anchor;Lnet/minecraft/commands/CommandSigningContext;Lnet/minecraft/util/TaskChainer;)V",
             at = @At("RETURN"))
     private void impl$setCauseOnConstruction(
-            final CommandSource $$0, final Vec3 $$1, final Vec2 $$2, final ServerLevel $$3, final int $$4, final String $$5,
-            final Component $$6, final MinecraftServer $$7, final Entity $$8, final boolean $$9, final ResultConsumer $$10,
-            final EntityAnchorArgument.Anchor $$11, final CommandSigningContext $$12, final CallbackInfo ci
+            final CommandSource $$0, final Vec3 $$1, final Vec2 $$2, final ServerLevel $$3, final int $$4, final String $$5, final Component $$6,
+            final MinecraftServer $$7, final Entity $$8, final boolean $$9, final ResultConsumer $$10, final EntityAnchorArgument.Anchor $$11,
+            final CommandSigningContext $$12, final TaskChainer $$13, final CallbackInfo ci
     ) {
         this.impl$cause = PhaseTracker.getCauseStackManager().currentCause();
         final EventContext context = this.impl$cause.context();
@@ -140,7 +141,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     public CommandCause bridge$withCurrentCause() {
         // Cause is set in ctor.
         return (CommandCause) CommandSourceStackAccessor.invoker$new(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel,
-                this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor, this.signingContext);
+                this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor, this.signingContext, TaskChainer.IMMEDIATE);
     }
 
     /*

@@ -63,6 +63,7 @@ import net.kyori.adventure.util.Codec;
 import net.kyori.adventure.util.TriState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -79,7 +80,6 @@ import net.minecraft.network.chat.contents.ScoreContents;
 import net.minecraft.network.chat.contents.SelectorContents;
 import net.minecraft.network.chat.contents.StorageDataSource;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.sounds.SoundSource;
@@ -116,6 +116,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public final class SpongeAdventure {
+
     public static final AttributeKey<Locale> CHANNEL_LOCALE = AttributeKey.newInstance("sponge:locale");
     public static final Codec<CompoundTag, String, IOException, IOException> NBT_CODEC = new Codec<CompoundTag, String, IOException, IOException>() {
         @Override
@@ -459,11 +460,9 @@ public final class SpongeAdventure {
         return null;
     }
 
-    public static ResourceKey<ChatType> asVanilla(final MessageType type) {
-        if (type == MessageType.SYSTEM) {
-            return ChatType.SYSTEM;
-        } else if (type == MessageType.CHAT) {
-            return ChatType.CHAT;
+    public static ChatType.Bound asVanilla(final MessageType type, final RegistryAccess registryAccess, final net.minecraft.network.chat.Component name) {
+        if (type == MessageType.CHAT) {
+            return ChatType.bind(ChatType.CHAT, registryAccess, name);
         }
         throw new IllegalArgumentException(type.name());
     }

@@ -31,6 +31,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
@@ -51,14 +52,17 @@ public final class SpongeTabListEntry implements TabListEntry {
     private int latency;
     private GameMode gameMode;
     private boolean updateWithoutSend;
+    private ProfilePublicKey.Data profilePublicKey;
 
-    public SpongeTabListEntry(TabList list, GameProfile profile, @Nullable Component displayName, int latency, GameMode gameMode) {
+    public SpongeTabListEntry(TabList list, GameProfile profile, @Nullable Component displayName, int latency, GameMode gameMode,
+            final ProfilePublicKey.Data profilePublicKey) {
         checkState(list instanceof SpongeTabList, "list is not a SpongeTabList");
         this.list = (SpongeTabList) list;
         this.profile = checkNotNull(profile, "profile");
         this.displayName = displayName;
         this.latency = latency;
         this.gameMode = checkNotNull(gameMode, "game mode");
+        this.profilePublicKey = profilePublicKey;
     }
 
     @Override
@@ -105,6 +109,10 @@ public final class SpongeTabListEntry implements TabListEntry {
         this.gameMode = checkNotNull(gameMode, "game mode");
         this.sendUpdate(ClientboundPlayerInfoPacket.Action.UPDATE_GAME_MODE);
         return this;
+    }
+
+    public ProfilePublicKey.Data profilePublicKey() {
+        return profilePublicKey;
     }
 
     private void sendUpdate(ClientboundPlayerInfoPacket.Action action) {

@@ -29,6 +29,7 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.ChatTypeDecoration;
 import net.minecraft.resources.RegistryOps;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.adventure.ChatTypeTemplate;
@@ -41,7 +42,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
@@ -85,9 +85,8 @@ public record SpongeChatTypeTemplate(ResourceKey key, ChatType representedType, 
 
     public static final class BuilderImpl extends AbstractDataPackEntryBuilder<org.spongepowered.api.adventure.ChatType, ChatTypeTemplate, Builder> implements Builder {
 
-        private @Nullable ChatType.TextDisplay chat;
-        private @Nullable ChatType.TextDisplay overlay;
-        private @Nullable ChatType.Narration narration;
+        private @Nullable ChatTypeDecoration chat;
+        private @Nullable ChatTypeDecoration narration;
 
         public BuilderImpl() {
             this.reset();
@@ -96,9 +95,14 @@ public record SpongeChatTypeTemplate(ResourceKey key, ChatType representedType, 
         @Override
         public Builder fromValue(final org.spongepowered.api.adventure.ChatType value) {
             ChatType chatType = SpongeAdventure.asVanilla(value);
-            this.chat = chatType.chat().orElse(null);
-            this.overlay = chatType.overlay().orElse(null);
-            this.narration = chatType.narration().orElse(null);
+            this.chat = chatType.chat();
+            this.narration = chatType.narration();
+            return this;
+        }
+
+        @Override
+        public Builder translationKey(final String translationKey) {
+            this.chat = ChatTypeDecoration.withSender(translationKey);
             return this;
         }
 
@@ -112,7 +116,6 @@ public record SpongeChatTypeTemplate(ResourceKey key, ChatType representedType, 
             this.key = null;
             this.pack = DataPacks.CHAT_TYPE;
             this.chat = null;
-            this.overlay = null;
             this.narration = null;
             return this;
         }
@@ -127,7 +130,7 @@ public record SpongeChatTypeTemplate(ResourceKey key, ChatType representedType, 
 
         @Override
         protected ChatTypeTemplate build0() {
-            final ChatType chatType = new ChatType(Optional.ofNullable(this.chat), Optional.ofNullable(this.overlay), Optional.ofNullable(this.narration));
+            final ChatType chatType = new ChatType(this.chat, this.narration);
             return new SpongeChatTypeTemplate(this.key, chatType, this.pack);
         }
     }

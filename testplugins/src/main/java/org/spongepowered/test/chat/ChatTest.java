@@ -30,6 +30,7 @@ import net.kyori.adventure.identity.Identified;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.translation.GlobalTranslator;
@@ -138,6 +139,14 @@ public class ChatTest implements LoadableModule {
             return CommandResult.success();
         })
         .build(), "tellresolve");
+
+        event.register(this.container, Command.builder().addParameters(messageArg).executor(ctx -> {
+            ctx.sendMessage(Component.text("here it comes..."));
+            if (ctx.cause().audience() instanceof ServerPlayer player) {
+                player.simulateChat(ctx.requireOne(messageArg), event.cause());
+            }
+            return CommandResult.success();
+        }).build(), "simulatechat");
     }
 
     static class Listeners {
@@ -156,6 +165,17 @@ public class ChatTest implements LoadableModule {
                                                                                       .colorIfAbsent(NamedTextColor.AQUA))
                                                                .color(NamedTextColor.DARK_AQUA));
             ChatTest.LOGGER.info("Player has health of {}", health);
+
+            if (event instanceof PlayerChatEvent.Decorate) {
+                event.setMessage(event.message().color(NamedTextColor.GREEN));
+            } else if (event instanceof PlayerChatEvent.Submit submitEvent) {
+                submitEvent.setCustom(true);
+                final TextComponent name = Component.text("Prefix", NamedTextColor.RED)
+                        .append(Component.text(" | ", NamedTextColor.GOLD))
+                        .append(event.player().displayName().get().color(NamedTextColor.DARK_GREEN))
+                        .append(Component.text(": ", NamedTextColor.WHITE));
+                submitEvent.setSender(name);
+            }
         }
     }
 }

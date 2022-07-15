@@ -47,9 +47,9 @@ public class SpongeChatDecorator implements ChatDecorator {
                 frame.pushCause(player);
             }
             final var component = SpongeAdventure.asAdventure(message);
-            final PlayerChatEvent.Decorate event = SpongeEventFactory.createPlayerChatEventDecorate(frame.currentCause(), component, component);
+            final PlayerChatEvent.Decorate event = SpongeEventFactory.createPlayerChatEventDecorate(frame.currentCause(), component, component, (org.spongepowered.api.entity.living.player.server.ServerPlayer) player);
             SpongeCommon.post(event);
-            return CompletableFuture.completedFuture(SpongeAdventure.asVanilla(event.message()));
+            return CompletableFuture.completedFuture(SpongeAdventure.asVanillaMutable(event.message()));
         }
     }
 }

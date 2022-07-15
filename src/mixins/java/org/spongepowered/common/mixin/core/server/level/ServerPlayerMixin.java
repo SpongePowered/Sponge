@@ -36,6 +36,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.OutgoingPlayerChatMessage;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
@@ -93,6 +94,7 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
 import org.spongepowered.api.event.entity.living.player.PlayerChangeClientSettingsEvent;
+import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -127,6 +129,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
+import org.spongepowered.common.network.channel.PacketSender;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
@@ -613,7 +616,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         final boolean flag = this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !event.isMessageCancelled();
         if (flag) {
             final net.minecraft.network.chat.Component component = this.shadow$getCombatTracker().getDeathMessage();
-            this.connection.send(new ClientboundPlayerCombatKillPacket(this.shadow$getCombatTracker(), component), (p_212356_2_) -> {
+            final ClientboundPlayerCombatKillPacket packet = new ClientboundPlayerCombatKillPacket(this.shadow$getCombatTracker(), component);
+            PacketSender.sendTo((EngineConnection) this.connection, packet, (p_212356_2_) -> {
                 if (!p_212356_2_.isSuccess()) {
                     final int i = 256;
                     final String s = component.getString(256);
@@ -622,7 +626,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                             .withStyle((p_212357_1_) -> p_212357_1_.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, itextcomponent1)));
                     this.connection.send(new ClientboundPlayerCombatKillPacket(this.shadow$getCombatTracker(), itextcomponent2));
                 }
-
             });
             final Team team = this.shadow$getTeam();
             if (team != null && team.getDeathMessageVisibility() != Team.Visibility.ALWAYS) {
@@ -754,9 +757,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         return this.impl$borderListener;
     }
 
-    @Inject(method = "sendSystemMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/resources/ResourceKey;)V",
+    @Inject(method = "sendSystemMessage(Lnet/minecraft/network/chat/Component;Z)V",
             cancellable = true, at = @At("HEAD"))
-    public void sendMessage(final net.minecraft.network.chat.Component $$0, final ResourceKey<ChatType> $$1, final CallbackInfo ci) {
+    public void sendMessage(final net.minecraft.network.chat.Component $$0, final boolean $$1, final CallbackInfo ci) {
         if (this.impl$isFake) {
             // Don't bother sending messages to fake players
             ci.cancel();
@@ -764,7 +767,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Inject(method = "sendChatMessage", cancellable = true, at = @At("HEAD"))
-    public void sendMessage(final PlayerChatMessage $$0, final ChatSender $$1, final ResourceKey<ChatType> $$2, final CallbackInfo ci) {
+    public void sendMessage(final OutgoingPlayerChatMessage $$0, final boolean $$1, final ChatType.Bound $$2, final CallbackInfo ci) {
         if (this.impl$isFake) {
             // Don't bother sending messages to fake players
             ci.cancel();

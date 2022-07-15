@@ -169,7 +169,7 @@ public abstract class RconClientMixin extends GenericThread implements RconClien
                                         // Only add the RemoteConnection here, the RconSource
                                         // will be added by the command manager
                                         causeStackManager.pushCause(this);
-                                        SpongeCommon.server().getCommands().performCommand(this.impl$source.createCommandSourceStack(), command);
+                                        SpongeCommon.server().getCommands().performPrefixedCommand(this.impl$source.createCommandSourceStack(), command);
                                         causeStackManager.popCause();
                                     }).get();
                                     final String logContents = this.impl$source.getCommandResponse();

@@ -22,21 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.network.chat;
+package org.spongepowered.common.mixin.core.network.chat;
 
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
-import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.ChatTypeDecoration;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.adventure.SpongeChatTypes;
 
-import java.util.Optional;
+@Mixin(ChatType.class)
+public class ChatTypeMixin {
 
-public class NoOpPlayerChatFormatter implements PlayerChatFormatter {
-
-    public static final PlayerChatFormatter INSTANCE = new NoOpPlayerChatFormatter();
-
-    @Override
-    public Optional<Component> format(final ServerPlayer player, final Audience target, final Component message, final Component originalMessage) {
-        return Optional.ofNullable(message);
+    @Inject(method = "bootstrap", at = @At("HEAD"))
+    private static void impl$onBootstrap(final Registry<ChatType> $$0, final CallbackInfoReturnable<Holder<ChatType>> cir) {
+        BuiltinRegistries.register($$0, SpongeChatTypes.SPONGE_CHAT, new ChatType(ChatTypeDecoration.withSender("%s%s"), ChatTypeDecoration.withSender("chat.type.text.narrate")));
     }
+
 }

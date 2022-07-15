@@ -79,7 +79,7 @@ public final class TabListEntryBuilder implements TabListEntry.Builder {
         checkState(this.profile != null, "profile must be set");
         checkState(this.gameMode != null, "game mode must be set");
 
-        return new SpongeTabListEntry(this.list, this.profile, this.displayName, this.latency, this.gameMode);
+        return new SpongeTabListEntry(this.list, this.profile, this.displayName, this.latency, this.gameMode, null);
     }
 
     @Override

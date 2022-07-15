@@ -25,7 +25,10 @@
 package org.spongepowered.common.network.channel;
 
 import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
+import net.minecraft.network.Connection;
+import net.minecraft.network.PacketSendListener;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.util.thread.BlockableEventLoop;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.network.EngineConnection;
@@ -34,9 +37,6 @@ import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.util.thread.BlockableEventLoop;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class PacketSender {
@@ -45,24 +45,9 @@ public final class PacketSender {
         PacketSender.sendTo(connection, packet, (Consumer) null);
     }
 
-    public static void sendTo(final EngineConnection connection, final Packet<?> packet,
-            final @Nullable Consumer<Future<? super Void>> listener) {
+    public static void sendTo(final EngineConnection connection, final Packet<?> packet, final @Nullable Consumer<Future<? super Void>> listener) {
         final Connection networkManager = ((ConnectionHolderBridge) connection).bridge$getConnection();
-        GenericFutureListener<? extends Future<? super Void>> asyncListener = null;
-        if (listener != null) {
-            final EngineConnectionSide<?> side = connection.side();
-            // Complete the netty callback on the sync thread
-            asyncListener = future -> {
-                final BlockableEventLoop<?> executor;
-                if (side == EngineConnectionSide.CLIENT) {
-                    executor = (BlockableEventLoop<?>) Sponge.client();
-                } else {
-                    executor = (BlockableEventLoop<?>) Sponge.server();
-                }
-                executor.execute(() -> listener.accept(future));
-            };
-        }
-        networkManager.send(packet, asyncListener);
+        networkManager.send(packet, listener == null ? null : new SpongePacketSendListener(connection.side(), listener));
     }
 
     public static void sendTo(final EngineConnection connection, final Packet<?> packet, final CompletableFuture<Void> future) {
@@ -73,6 +58,20 @@ public final class PacketSender {
                 future.completeExceptionally(sendFuture.cause());
             }
         });
+    }
+
+    public static final class SpongePacketSendListener implements PacketSendListener {
+        private final BlockableEventLoop<?> executor;
+        private final Consumer<Future<? super Void>> listener;
+
+        public SpongePacketSendListener(final EngineConnectionSide<? extends EngineConnection> side, final Consumer<Future<? super Void>> listener) {
+            this.executor = (BlockableEventLoop<?>) (side == EngineConnectionSide.CLIENT ? Sponge.client() : Sponge.server());
+            this.listener = listener;
+        }
+
+        public void accept(final Future nettyFuture) {
+            this.executor.execute(() -> this.listener.accept(nettyFuture));
+        }
     }
 
     private PacketSender() {

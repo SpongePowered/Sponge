@@ -147,7 +147,8 @@ public final class SpongeTabList implements TabList {
                     SpongeGameProfile.of(profile),
                     displayName == null ? null : SpongeAdventure.asAdventure(displayName),
                     entry.getLatency(),
-                    (GameMode) (Object) entry.getGameMode()
+                    (GameMode) (Object) entry.getGameMode(),
+                    entry.getProfilePublicKey()
             ), false);
         }
     }
@@ -188,7 +189,7 @@ public final class SpongeTabList implements TabList {
         final ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket(action, new ArrayList<>());
         final ClientboundPlayerInfoPacket.PlayerUpdate data = new ClientboundPlayerInfoPacket.PlayerUpdate(SpongeGameProfile.toMcProfile(entry.profile()),
             entry.latency(), (GameType) (Object) entry.gameMode(),
-            entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null, null);
+            entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null, ((SpongeTabListEntry)entry).profilePublicKey());
         packet.getEntries().add(data);
         this.player.connection.send(packet);
     }

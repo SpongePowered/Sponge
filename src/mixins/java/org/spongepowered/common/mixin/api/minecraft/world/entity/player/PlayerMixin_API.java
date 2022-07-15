@@ -54,6 +54,8 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API implements P
     @Shadow public abstract GameProfile shadow$getGameProfile();
     // @formatter:on
 
+    @Shadow public abstract Component getName();
+
     public final boolean impl$isFake = ((PlatformEntityBridge) this).bridge$isFakePlayer();
 
     @Override

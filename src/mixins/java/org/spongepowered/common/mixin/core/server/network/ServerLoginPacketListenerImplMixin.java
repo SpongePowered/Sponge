@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.server.network;
 
 import net.minecraft.network.Connection;
+import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
@@ -43,12 +44,12 @@ import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -60,8 +61,6 @@ import org.spongepowered.common.network.channel.SpongeChannelManager;
 
 import java.io.IOException;
 import java.util.concurrent.CompletionException;
-
-import javax.annotation.Nullable;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginPacketListenerImplBridge, ConnectionHolderBridge {
@@ -76,7 +75,6 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     @Shadow public abstract void shadow$disconnect(Component reason);
     @Shadow protected abstract void shadow$placeNewPlayer(final ServerPlayer param0);
 
-    @Shadow @Nullable private ProfilePublicKey playerProfilePublicKey;
     private boolean impl$accepted = false;
 
     @Override
@@ -90,13 +88,14 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
      *
      * @reason support async ban/whitelist service and user->player syncing.
      */
-    @Overwrite
-    public void handleAcceptedLogin() {
-        if (!this.gameProfile.isComplete()) {
-            this.gameProfile = this.shadow$createFakeProfile(this.gameProfile);
+    @Inject(method = "handleAcceptedLogin", cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;", ordinal = 0))
+    public void impl$onHandleAcceptedLogin(final CallbackInfo ci, final ProfilePublicKey playerProfilePublicKey) {
+        if (true) {
+            return;
         }
-
         // Sponge start - avoid #tick calling handleAcceptedLogin more than once.
+        ci.cancel(); // Return early after inject
         if (this.impl$accepted) {
             return;
         }
@@ -136,14 +135,14 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                     // Sponge end
                     this.state = ServerLoginPacketListenerImpl.State.ACCEPTED;
                     if (this.server.getCompressionThreshold() >= 0 && !this.connection.isMemoryConnection()) {
-                        this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), (param0) -> this.connection.setupCompression(this.server.getCompressionThreshold(), true));
+                        this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), PacketSendListener.thenRun(() -> this.connection.setupCompression(this.server.getCompressionThreshold(), true)));
                     }
 
                     this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
                     final ServerPlayer var1 = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
                     if (var1 != null) {
                         this.state = ServerLoginPacketListenerImpl.State.DELAY_ACCEPT;
-                        this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, this.playerProfilePublicKey);
+                        this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, playerProfilePublicKey);
                     } else {
                         // Sponge start - Also send the channel registrations using the minecraft channel, for compatibility
                         final ServerSideConnection connection = (ServerSideConnection) this;
@@ -152,7 +151,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
 
                         try {
                             this.server.getPlayerList()
-                                    .placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile, this.playerProfilePublicKey));
+                                    .placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile, playerProfilePublicKey));
                             // invalidate just to be sure there is no user cached for the online player anymore
                             Sponge.server().userManager().removeFromCache(this.gameProfile.getId());
                         } catch (final Exception e) {
@@ -186,7 +185,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         final Component message = Component.literal("Internal Server Error: unable to complete login.");
         // At this point, the client might be in the GAME state, so we need to send the right packet.
         if (gameDisconnect) {
-            this.connection.send(new ClientboundDisconnectPacket(message), (param1) -> this.connection.disconnect(message));
+            this.connection.send(new ClientboundDisconnectPacket(message), PacketSendListener.thenRun(() -> this.connection.disconnect(message)));
         } else {
             this.shadow$disconnect(message);
         }

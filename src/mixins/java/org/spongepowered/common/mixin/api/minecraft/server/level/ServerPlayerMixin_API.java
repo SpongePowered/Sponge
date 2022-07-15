@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.server.level;
 
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.identity.Identity;
@@ -38,10 +37,8 @@ import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.ChatDecorator;
-import net.minecraft.network.chat.ChatSender;
+import net.minecraft.network.chat.ChatMessageContent;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
@@ -56,15 +53,12 @@ import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
-import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerBossEvent;
-import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.server.network.TextFilter;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -81,7 +75,6 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
-import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
@@ -104,7 +97,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.chat.NoOpPlayerChatFormatter;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
@@ -133,7 +125,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
@@ -146,18 +137,15 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Shadow public ServerGamePacketListenerImpl connection;
 
     @Shadow public abstract net.minecraft.server.level.ServerLevel shadow$getLevel();
-    @Shadow public abstract void shadow$sendChatMessage(PlayerChatMessage $$0, ChatSender $$1, ResourceKey<ChatType> $$2);
-    @Shadow public abstract void shadow$sendSystemMessage(net.minecraft.network.chat.Component $$0, ResourceKey<ChatType> $$1);
+    @Shadow public abstract void shadow$sendSystemMessage(final net.minecraft.network.chat.Component $$0);
+
     // @formatter:on
 
-    @Shadow public abstract TextFilter getTextFilter();
 
-    @Shadow protected abstract int resolveChatTypeId(final ResourceKey<ChatType> $$0);
-
+    @Shadow @Nullable private Vec3 enteredLavaOnVehiclePosition;
     private volatile Pointers api$pointers;
 
     private final TabList api$tabList = new SpongeTabList((net.minecraft.server.level.ServerPlayer) (Object) this);
-    @Nullable private PlayerChatFormatter api$chatRouter;
     @Nullable private WorldBorderBridge api$worldBorder;
 
     @Override
@@ -321,30 +309,16 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public PlayerChatFormatter chatFormatter() {
-        if (this.api$chatRouter == null) {
-            this.api$chatRouter = NoOpPlayerChatFormatter.INSTANCE;
-        }
-        return this.api$chatRouter;
-    }
-
-    @Override
-    public void setChatFormatter(final PlayerChatFormatter router) {
-        this.api$chatRouter = Objects.requireNonNull(router, "router");
-    }
-
-    @Override
-    public PlayerChatEvent simulateChat(final Component message, final Cause cause) {
+    public void simulateChat(final Component message, final Cause cause) {
         Objects.requireNonNull(message, "message");
         Objects.requireNonNull(cause, "cause");
-        final var thisPlayer = (net.minecraft.server.level.ServerPlayer) (Object) this;
-        final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(cause, message);
+        final PlayerChatEvent.Decorate event = SpongeEventFactory.createPlayerChatEventDecorate(cause, message, message, this);
         if (!SpongeCommon.post(event)) {
-            final var filtered = FilteredText.passThrough(SpongeAdventure.asVanilla(message));
-            final var decorated = this.server.getChatDecorator().decorateChat(thisPlayer, filtered, MessageSignature.unsigned(), false).join();
-            this.server.getPlayerList().broadcastChatMessage(decorated, thisPlayer, ChatType.CHAT);
+            final net.minecraft.network.chat.Component decoratedMessage = SpongeAdventure.asVanilla(event.message());
+            final ChatType.Bound boundType = ChatType.bind(ChatType.CHAT, this.server.registryAccess(), this.getName());
+            final var thisPlayer = (net.minecraft.server.level.ServerPlayer) (Object) this;
+            this.server.getPlayerList().broadcastChatMessage(PlayerChatMessage.system(new ChatMessageContent(decoratedMessage.getString(), decoratedMessage)), thisPlayer, boundType);
         }
-        return event;
     }
 
     @Override
@@ -461,10 +435,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        final net.minecraft.network.chat.Component mcMessage = SpongeAdventure.asVanilla(Objects.requireNonNull(message, "message"));
-        final ResourceKey<ChatType> mcType = SpongeAdventure.asVanilla(Objects.requireNonNull(type, "type"));
-        final UUID mcIdentity = Objects.requireNonNull(identity, "identity").uuid();
-        this.shadow$sendSystemMessage(mcMessage, mcType);
+        this.shadow$sendSystemMessage(SpongeAdventure.asVanilla(Objects.requireNonNull(message, "message")));
         // TODO chatMessage
         // this.shadow$sendChatMessage(PlayerChatMessage.unsigned(mcMessage), new ChatSender(mcIdentity, name, teamName));
     }

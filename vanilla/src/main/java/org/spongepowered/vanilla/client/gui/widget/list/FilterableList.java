@@ -240,8 +240,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
     }
 
     @Override
-    protected void renderList(final PoseStack stack, final int renderX, final int renderY, final int p_renderList_3_, final int p_renderList_4_,
-            final float p_renderList_5_) {
+    protected void renderList(final PoseStack stack, final int renderX, final int renderY, final float p_renderList_3_) {
         // Most of this is based on AbstractList::renderList logic
         final List<E> filteredList = this.filterSupplier == null ? new ObjectArrayList<>(this.children()) : this.filterSupplier.get();
         final int itemCount = filteredList.size();
@@ -291,7 +290,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
                 }
 
                 final E entry = filteredList.get(i);
-                entry.render(stack, i, rowTop, this.getRowLeft(), rowWidth, yEnd, p_renderList_3_, p_renderList_4_, false, p_renderList_5_);
+                entry.render(stack, i, rowTop, this.getRowLeft(), rowWidth, yEnd, renderX, renderY, false, p_renderList_3_);
             }
         }
     }

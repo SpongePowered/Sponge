@@ -65,7 +65,7 @@ public abstract class CommandSourceStackMixin_API implements CommandCause {
     public Audience audience() {
         return this.cause().context()
                 .get(EventContextKeys.AUDIENCE)
-                .orElseGet(() -> this.cause().first(Audience.class).orElseGet(Sponge::systemSubject));
+                .orElseGet(() -> this.cause().first(Audience.class).orElseGet(Sponge::systemSubject)); // TODO context is missing for cmds
     }
 
     @Override

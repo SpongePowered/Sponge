@@ -157,8 +157,8 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
     @Redirect(method = "award",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/resources/ResourceKey;)V"))
-    private void impl$updateTextOnGranting(final PlayerList instance, final net.minecraft.network.chat.Component $$0, final ResourceKey<ChatType> $$1) {
+                    target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V"))
+    private void impl$updateTextOnGranting(final PlayerList instance, final net.minecraft.network.chat.Component $$0, final boolean $$1) {
         this.impl$message = SpongeAdventure.asAdventure($$0);
         this.impl$wasSuccess = true;
     }

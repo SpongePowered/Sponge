@@ -28,15 +28,21 @@ import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalAddress;
+import io.netty.util.concurrent.Future;
+import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeMinecraftVersion;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
+import org.spongepowered.common.network.channel.PacketSender;
 import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.util.Constants;
 
@@ -138,4 +144,10 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         this.impl$version = new SpongeMinecraftVersion(String.valueOf(version), version);
     }
 
+    @Inject(method = "lambda$doSendPacket$8", at = @At(value = "INVOKE", target = "Lio/netty/util/concurrent/Future;isSuccess()Z"))
+    public void impl$onPacketSent(final PacketSendListener $$0x, final Future $$1x, final CallbackInfo ci) {
+        if ($$0x instanceof PacketSender.SpongePacketSendListener spongeListener) {
+            spongeListener.accept($$1x);
+        }
+    }
 }

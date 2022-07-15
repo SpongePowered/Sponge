@@ -32,6 +32,7 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.TaskChainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -46,7 +47,7 @@ public interface CommandSourceStackAccessor {
 
     @Invoker("<init>")
     static CommandSourceStack invoker$new(CommandSource $$0, Vec3 $$1, Vec2 $$2, ServerLevel $$3, int $$4, String $$5, Component $$6, MinecraftServer $$7, @Nullable
-            Entity $$8, boolean $$9, @Nullable ResultConsumer<CommandSourceStack> $$10, EntityAnchorArgument.Anchor $$11, CommandSigningContext $$12) {
+            Entity $$8, boolean $$9, @Nullable ResultConsumer<CommandSourceStack> $$10, EntityAnchorArgument.Anchor $$11, CommandSigningContext $$12, TaskChainer $$13) {
         throw new UntransformedInvokerError();
     }
 
