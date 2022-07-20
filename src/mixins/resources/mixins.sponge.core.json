@@ -239,7 +239,8 @@
         "world.scores.ObjectiveMixin",
         "world.scores.PlayerTeamMixin",
         "world.scores.ScoreboardMixin",
-        "world.scores.ScoreMixin"
+        "world.scores.ScoreMixin",
+        "stats.StatsCounterMixin"
     ],
     "client": [
         "client.MinecraftMixin",
