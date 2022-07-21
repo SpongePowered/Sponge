@@ -30,5 +30,5 @@ import java.util.Map;
 
 public interface StatsCounterBridge {
 
-    Map<Stat<?>, Integer> bridge$getStatsData();
+    Map<Stat<?>, Integer> bridge$stats();
 }

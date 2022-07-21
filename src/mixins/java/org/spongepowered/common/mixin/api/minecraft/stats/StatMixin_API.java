@@ -26,30 +26,35 @@ package org.spongepowered.common.mixin.api.minecraft.stats;
 
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatFormatter;
-import org.spongepowered.api.scoreboard.criteria.Criterion;
+import net.minecraft.stats.StatType;
 import org.spongepowered.api.statistic.Statistic;
+import org.spongepowered.api.statistic.StatisticCategory;
+import org.spongepowered.api.statistic.StatisticFormatter;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.stats.StatFormatterBridge;
-
-import java.text.NumberFormat;
-import java.util.Optional;
 
 @Mixin(Stat.class)
-public abstract class StatMixin_API implements Statistic {
+public abstract class StatMixin_API<T> implements Statistic<T> {
 
     // @formatter:off
+    @Shadow @Final private StatType<T> type;
+    @Shadow @Final private T value;
     @Shadow @Final private StatFormatter formatter;
     // @formatter:on
 
     @Override
-    public Optional<Criterion> criterion() {
-        return Optional.empty();
+    public StatisticCategory<T> category() {
+        return (StatisticCategory<T>) (Object) this.type;
     }
 
     @Override
-    public NumberFormat format() {
-        return ((StatFormatterBridge) this.formatter).bridge$getFormat();
+    public T value() {
+        return this.value;
+    }
+
+    @Override
+    public StatisticFormatter formatter() {
+        return (StatisticFormatter) this.formatter;
     }
 }

@@ -63,9 +63,11 @@ import org.spongepowered.api.resource.ResourcePath;
 import org.spongepowered.api.resource.pack.PackStatus;
 import org.spongepowered.api.resource.pack.PackType;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.service.permission.NodeTree;
 import org.spongepowered.api.state.StateMatcher;
+import org.spongepowered.api.statistic.StatisticFormatter;
 import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.MinecraftDayTime;
@@ -132,8 +134,10 @@ import org.spongepowered.common.resource.pack.SpongePackTypeFactory;
 import org.spongepowered.common.resource.pack.SpongePackStatusFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
+import org.spongepowered.common.scoreboard.criteria.SpongeCriterionFactory;
 import org.spongepowered.common.service.server.permission.SpongeNodeTree;
 import org.spongepowered.common.state.SpongeStateMatcherFactory;
+import org.spongepowered.common.statistic.SpongeStatisticFormatterFactory;
 import org.spongepowered.common.tag.SpongeTagTemplateFactory;
 import org.spongepowered.common.util.SpongeAABB;
 import org.spongepowered.common.util.SpongeDamageSourceFactory;
@@ -280,6 +284,8 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(ResourcePath.Factory.class, new SpongeResourcePath.FactoryImpl())
                 .registerFactory(VanishState.Factory.class, new SpongeVanishState.SpongeVanishStateFactory())
                 .registerFactory(DefaultWorldKeys.Factory.class, new SpongeDefaultWorldKeysFactory())
+                .registerFactory(Criterion.Factory.class, new SpongeCriterionFactory())
+                .registerFactory(StatisticFormatter.Factory.class, new SpongeStatisticFormatterFactory())
         ;
     }
 }

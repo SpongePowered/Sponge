@@ -113,7 +113,6 @@ final class VanillaRegistryLoader {
     }
 
     private void loadInstanceRegistries() {
-        this.holder.createRegistry(RegistryTypes.CRITERION, VanillaRegistryLoader.criterion());
         this.manualName(RegistryTypes.DRAGON_PHASE_TYPE, EnderDragonPhase.getCount(), map -> {
             map.put(EnderDragonPhase.HOLDING_PATTERN, "holding_pattern");
             map.put(EnderDragonPhase.STRAFE_PLAYER, "strafe_player");
@@ -208,22 +207,6 @@ final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());
         this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
         this.knownName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values(), VanillaRegistryLoader.sanitizedName(MobCategory::getName));
-    }
-
-    private static RegistryLoader<Criterion> criterion() {
-        return RegistryLoader.of(l -> {
-            l.add(Criteria.AIR, k -> (Criterion) ObjectiveCriteria.AIR);
-            l.add(Criteria.ARMOR, k -> (Criterion) ObjectiveCriteria.ARMOR);
-            l.add(Criteria.DEATH_COUNT, k -> (Criterion) ObjectiveCriteria.DEATH_COUNT);
-            l.add(Criteria.DUMMY, k -> (Criterion) ObjectiveCriteria.DUMMY);
-            l.add(Criteria.EXPERIENCE, k -> (Criterion) ObjectiveCriteria.EXPERIENCE);
-            l.add(Criteria.FOOD, k -> (Criterion) ObjectiveCriteria.FOOD);
-            l.add(Criteria.HEALTH, k -> (Criterion) ObjectiveCriteria.HEALTH);
-            l.add(Criteria.LEVEL, k -> (Criterion) ObjectiveCriteria.LEVEL);
-            l.add(Criteria.PLAYER_KILL_COUNT, k -> (Criterion) ObjectiveCriteria.KILL_COUNT_PLAYERS);
-            l.add(Criteria.TOTAL_KILL_COUNT, k -> (Criterion) ObjectiveCriteria.KILL_COUNT_ALL);
-            l.add(Criteria.TRIGGER, k -> (Criterion) ObjectiveCriteria.TRIGGER);
-        });
     }
 
     private static RegistryLoader<FireworkShape> fireworkShape() {

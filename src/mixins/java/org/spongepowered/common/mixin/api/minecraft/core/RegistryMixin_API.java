@@ -53,7 +53,6 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     @Shadow public abstract Optional<T> shadow$getOptional(@Nullable net.minecraft.resources.ResourceLocation param0);
     // @formatter:on
 
-
     @Override
     public RegistryType<T> type() {
         return ((RegistryBridge<T>) this).bridge$type();

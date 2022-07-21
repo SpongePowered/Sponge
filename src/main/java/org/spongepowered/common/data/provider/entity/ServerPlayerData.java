@@ -72,7 +72,7 @@ public final class ServerPlayerData {
                         .set((h, v) -> h.setCamera((net.minecraft.world.entity.Entity) v))
                         .delete(h -> h.setCamera(null))
                     .create(Keys.STATISTICS)
-                        .get(h -> ((StatsCounterBridge) h.getStats()).bridge$getStatsData().entrySet().stream()
+                        .get(h -> ((StatsCounterBridge) h.getStats()).bridge$stats().entrySet().stream()
                                 .collect(Collectors.toMap(e -> (Statistic)e.getKey(), e -> e.getValue().longValue())))
                         .set((h, v) -> v.forEach((ik, iv) -> h.getStats().setValue(h, (Stat<?>) ik, iv.intValue())))
                     .create(Keys.CHAT_VISIBILITY)

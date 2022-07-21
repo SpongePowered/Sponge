@@ -25,10 +25,12 @@
 package org.spongepowered.common.mixin.api.minecraft.stats;
 
 import net.minecraft.stats.Stat;
+import net.minecraft.stats.StatFormatter;
 import net.minecraft.stats.StatType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticCategory;
+import org.spongepowered.api.statistic.StatisticFormatter;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,17 +38,39 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
+@SuppressWarnings("unchecked")
 @Mixin(StatType.class)
-public abstract class StatTypeMixin_API implements StatisticCategory {
+public abstract class StatTypeMixin_API<T> implements StatisticCategory<T> {
 
     // @formatter:off
-    @Shadow @Final private Map<Object, Stat<Object>> map;
+    @Shadow @Final private Map<T, Stat<T>> map;
+
+    @Shadow public abstract Stat<T> shadow$get(T param0);
+    @Shadow public abstract Stat<T> shadow$get(T param0, StatFormatter param1);
     // @formatter:on
 
     @Override
+    public Optional<Statistic<T>> statistic(final T value) {
+        return (Optional<Statistic<T>>) (Object) Optional.ofNullable(this.map.get(value));
+    }
+
+    @Override
+    public Statistic<T> statisticOrCreate(final T value) {
+        return (Statistic<T>) (Object) this.shadow$get(Objects.requireNonNull(value, "value"));
+    }
+
+    @Override
+    public Statistic<T> statisticOrCreate(final T value, final StatisticFormatter formatter) {
+        return (Statistic<T>) (Object) this.shadow$get(Objects.requireNonNull(value, "value"),
+            Objects.requireNonNull((StatFormatter) (Object) formatter, "formatter"));
+    }
+
+    @Override
     @SuppressWarnings({"unchecked"})
-    public @NonNull Collection<? extends Statistic> statistics() {
-        return Collections.unmodifiableCollection((Collection<? extends Statistic>) (Object) this.map.values());
+    public @NonNull Collection<Statistic<T>> statistics() {
+        return Collections.unmodifiableCollection((Collection<Statistic<T>>) (Object) this.map.values());
     }
 }

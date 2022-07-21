@@ -42,7 +42,7 @@ public abstract class StatsCounterMixin implements StatsCounterBridge {
     // @formatter:on
 
     @Override
-    public Map<Stat<?>, Integer> bridge$getStatsData() {
+    public Map<Stat<?>, Integer> bridge$stats() {
         return this.stats;
     }
 

@@ -22,11 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.stats;
+package org.spongepowered.common.statistic;
 
-import java.text.NumberFormat;
+import net.minecraft.stats.StatFormatter;
+import org.spongepowered.api.statistic.StatisticFormatter;
 
-public interface StatFormatterBridge {
+public final class SpongeStatisticFormatterFactory implements StatisticFormatter.Factory {
 
-    NumberFormat bridge$getFormat();
+    @Override
+    public StatisticFormatter defaultFormat() {
+        return (StatisticFormatter) StatFormatter.DEFAULT;
+    }
+
+    @Override
+    public StatisticFormatter divideByTen() {
+        return (StatisticFormatter) StatFormatter.DIVIDE_BY_TEN;
+    }
+
+    @Override
+    public StatisticFormatter distance() {
+        return (StatisticFormatter) StatFormatter.DISTANCE;
+    }
+
+    @Override
+    public StatisticFormatter time() {
+        return (StatisticFormatter) StatFormatter.TIME;
+    }
 }

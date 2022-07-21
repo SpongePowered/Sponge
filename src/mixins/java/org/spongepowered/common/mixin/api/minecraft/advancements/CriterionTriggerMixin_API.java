@@ -39,7 +39,9 @@ import org.spongepowered.common.bridge.advancements.CriterionTriggerBridge;
 @Mixin(CriterionTrigger.class)
 public interface CriterionTriggerMixin_API<C extends FilteredTriggerConfiguration> extends Trigger<C> {
 
+    // @formatter:off
     @Shadow ResourceLocation shadow$getId();
+    // @formatter:on
 
     @Override
     default ResourceKey key() {
