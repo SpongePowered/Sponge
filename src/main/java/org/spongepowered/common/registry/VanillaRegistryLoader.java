@@ -68,6 +68,7 @@ import net.minecraft.world.level.block.state.properties.RedstoneSide;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.block.state.properties.StairsShape;
 import net.minecraft.world.level.block.state.properties.StructureMode;
+import net.minecraft.world.level.block.state.properties.WallSide;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
@@ -209,6 +210,7 @@ final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());
         this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
         this.knownName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values(), VanillaRegistryLoader.sanitizedName(MobCategory::getName));
+        this.knownName(RegistryTypes.WALL_CONNECTION_STATE, WallSide.values(), WallSide::getSerializedName);
     }
 
     private static RegistryLoader<Criterion> criterion() {

@@ -357,6 +357,7 @@
         "minecraft.world.level.block.state.properties.SlabTypeMixin_API",
         "minecraft.world.level.block.state.properties.StairsShapeMixin_API",
         "minecraft.world.level.block.state.properties.StructureModeMixin_API",
+        "minecraft.world.level.block.state.properties.WallSideMixin_API",
         "minecraft.world.level.border.WorldBorderMixin_Settings_API",
         "minecraft.world.level.chunk.ChunkAccessMixin_API",
         "minecraft.world.level.chunk.ChunkGeneratorMixin_API",

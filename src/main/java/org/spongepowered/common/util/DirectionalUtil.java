@@ -25,8 +25,12 @@
 package org.spongepowered.common.util;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.world.level.block.WallBlock;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.type.WallConnectionState;
 import org.spongepowered.api.util.Direction;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +49,22 @@ public final class DirectionalUtil {
                 Direction.NORTH, north,
                 Direction.SOUTH, south);
         return DirectionalUtil.getFrom(holder, sides);
+    }
+
+    public static Map<Direction, WallConnectionState> getHorizontalFrom(final BlockState holder,
+        final EnumProperty<WallSide> east, final EnumProperty<WallSide> west, final EnumProperty<WallSide> north, final EnumProperty<WallSide> south) {
+        final Map<Direction, EnumProperty<WallSide>> sides = ImmutableMap.<Direction, EnumProperty<WallSide>>builder()
+            .put(Direction.EAST, east)
+            .put(Direction.WEST, west)
+            .put(Direction.NORTH, north)
+            .put(Direction.SOUTH, south)
+            .build();
+        Map<Direction, WallConnectionState> wallConnectionStates = new HashMap<>();
+        for (final Map.Entry<Direction, EnumProperty<WallSide>> entry : sides.entrySet()) {
+            WallConnectionState wallConnectionState = (WallConnectionState) (Object) holder.getValue(entry.getValue());
+            wallConnectionStates.put(entry.getKey(), wallConnectionState);
+        }
+        return wallConnectionStates;
     }
 
     public static Set<Direction> getHorizontalUpFrom(final BlockState holder,
@@ -118,6 +138,25 @@ public final class DirectionalUtil {
         return DirectionalUtil.set(holder, value, sides);
     }
 
+    public static BlockState setHorizontalFor(BlockState holder, final Map<Direction, WallConnectionState> value,
+        final EnumProperty<WallSide> east, final EnumProperty<WallSide> west, final EnumProperty<WallSide> north, final EnumProperty<WallSide> south) {
+        final Map<Direction, EnumProperty<WallSide>> sides = ImmutableMap.<Direction, EnumProperty<WallSide>>builder()
+            .put(Direction.EAST, east)
+            .put(Direction.WEST, west)
+            .put(Direction.NORTH, north)
+            .put(Direction.SOUTH, south)
+            .build();
+        for (final Map.Entry<Direction, EnumProperty<WallSide>> entry : sides.entrySet()) {
+            @Nullable
+            final WallConnectionState wallConnectionState = value.get(entry.getKey());
+            final EnumProperty<WallSide> property = entry.getValue();
+            if (wallConnectionState != null) {
+                holder = holder.setValue(property, (WallSide) (Object) wallConnectionState);
+            }
+        }
+        return holder;
+    }
+
     public static BlockState setHorizontalUpFor(final BlockState holder, final Set<Direction> value,
             final BooleanProperty east, final BooleanProperty west, final BooleanProperty north, final BooleanProperty south,
             final BooleanProperty up) {
@@ -141,10 +180,14 @@ public final class DirectionalUtil {
                 .put(Direction.SOUTH, south)
                 .build();
         for (final Map.Entry<Direction, EnumProperty<WallSide>> entry : sides.entrySet()) {
-            holder = holder.setValue(entry.getValue(), value.contains(entry.getKey()) ? WallSide.TALL : WallSide.NONE);
+            final boolean connected = value.contains(entry.getKey());
+            final EnumProperty<WallSide> property = entry.getValue();
+            final WallSide wallSide = holder.getValue(property);
+            if (!(connected && wallSide != WallSide.NONE)) {
+                holder = holder.setValue(property, connected ? WallSide.TALL : WallSide.NONE);
+            }
         }
-        holder.setValue(up, value.contains(Direction.UP));
-        return holder;
+        return holder.setValue(up, value.contains(Direction.UP));
     }
 
     public static BlockState setHorizontalUpDownFor(final BlockState holder, final Set<Direction> value,
