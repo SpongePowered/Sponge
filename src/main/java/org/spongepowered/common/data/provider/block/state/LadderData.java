@@ -42,6 +42,10 @@ public final class LadderData {
                     .create(Keys.DIRECTION)
                         .get(h -> DirectionUtil.getFor(h.getValue(LadderBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, LadderBlock.FACING))
+                        .supports(h -> h.getBlock() instanceof LadderBlock)
+                    .create(Keys.IS_ATTACHED)
+                        .get(h -> true)
+                        .set((h, v) -> null)
                         .supports(h -> h.getBlock() instanceof LadderBlock);
     }
     // @formatter:on
