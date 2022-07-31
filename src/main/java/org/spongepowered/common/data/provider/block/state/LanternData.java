@@ -40,7 +40,7 @@ public final class LanternData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
             .asImmutable(BlockState.class)
-                .create(Keys.HANGING)
+                .create(Keys.IS_HANGING)
                     .get(h -> h.getValue(Lantern.HANGING))
                     .set((h, v) -> h.setValue(Lantern.HANGING, v))
                     .supports(h -> h.getBlock() instanceof Lantern)
