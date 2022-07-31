@@ -39,6 +39,7 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
         AttachedStemData.register(this.registrator);
         BambooData.register(this.registrator);
         BannerData.register(this.registrator);
+        BarrelData.register(this.registrator);
         BedData.register(this.registrator);
         BlockData.register(this.registrator);
         CactusData.register(this.registrator);
