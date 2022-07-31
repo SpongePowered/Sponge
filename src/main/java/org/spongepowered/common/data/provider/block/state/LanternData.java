@@ -29,7 +29,6 @@ import net.minecraft.world.level.block.Lantern;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.bridge.data.DataContainerHolder.Immutable;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class LanternData {
