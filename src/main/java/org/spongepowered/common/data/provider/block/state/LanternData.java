@@ -45,6 +45,10 @@ public final class LanternData {
                     .get(h -> h.getValue(Lantern.HANGING))
                     .set((h, v) -> h.setValue(Lantern.HANGING, v))
                     .supports(h -> h.getBlock() instanceof Lantern)
+                .create(Keys.IS_ATTACHED)
+                    .get(h -> h.getValue(Lantern.HANGING))
+                    .set((h, v) -> h.setValue(Lantern.HANGING, v))
+                    .supports(h -> h.getBlock() instanceof Lantern)
                 .create(Keys.CONNECTED_DIRECTIONS)
                     .get(h -> h.getValue(Lantern.HANGING) ? ImmutableSet.of(Direction.UP) : ImmutableSet.of(Direction.DOWN))
                     .set((h, v) -> {
