@@ -28,9 +28,12 @@ import io.netty.channel.local.LocalAddress;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatMessageContent;
@@ -45,6 +48,7 @@ import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.bossevents.CustomBossEvents;
@@ -63,6 +67,7 @@ import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
+import org.spongepowered.api.adventure.ChatTypes;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
@@ -71,9 +76,12 @@ import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
+import org.spongepowered.api.event.message.SystemMessageEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -92,7 +100,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.adventure.SpongeChatTypes;
 import org.spongepowered.common.bridge.client.server.IntegratedPlayerListBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
@@ -609,20 +616,19 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Inject(method = "broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Ljava/util/function/Function;Z)V",
             at = @At("HEAD"), cancellable = true)
     private void impl$onBroadcastSystemMessage(final net.minecraft.network.chat.Component $$0,
-            final Function<net.minecraft.server.level.ServerPlayer, net.minecraft.network.chat.Component> $$1, final boolean $$2,
-            final CallbackInfo ci) {
-        // TODO MessageEvent
-        this.server.sendSystemMessage($$0);
-
-        for(net.minecraft.server.level.ServerPlayer $$3 : this.players) {
-            net.minecraft.network.chat.Component $$4 = $$1.apply($$3);
-            if ($$4 != null) {
-                $$3.sendSystemMessage($$4, $$2);
-            }
-        }
-
+            final Function<net.minecraft.server.level.ServerPlayer, net.minecraft.network.chat.Component> $$1, final boolean $$2, final CallbackInfo ci) {
         ci.cancel();
 
+        final Audience originalAudience = (Audience) this.server;
+        final Component originalMessage = SpongeAdventure.asAdventure($$0);
+        final SystemMessageEvent event = SpongeEventFactory.createSystemMessageEvent(Sponge.server().causeStackManager().currentCause(),
+                    originalAudience, Optional.of(originalAudience), originalMessage, originalMessage);
+        if (SpongeCommon.post(event)) {
+            ci.cancel();
+            return;
+        }
+
+        event.audience().ifPresent(audience -> audience.sendMessage(event.message()));
     }
 
     @Redirect(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatSender;Lnet/minecraft/network/chat/ChatType$Bound;)V"))
@@ -644,34 +650,37 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         final boolean isTrusted = this.verifyChatTrusted($$0, $$3);
 
-        final var content = SpongeAdventure.asAdventure($$0.serverContent());
-        final var originalFilter = $$1;
+        final Component content = SpongeAdventure.asAdventure($$0.serverContent());
+        final Component sender = SpongeAdventure.asAdventure($$4.name());
+        final Component target = $$4.targetName() == null ? null : SpongeAdventure.asAdventure($$4.targetName());
+        final Registry<ChatType> chatTypeRegistry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+        final var chatType = RegistryTypes.CHAT_TYPE.defaultReferenced((org.spongepowered.api.ResourceKey) (Object) chatTypeRegistry.getKey($$4.chatType()));
+
         final Predicate<net.minecraft.server.level.ServerPlayer> filter;
-        final ChatType.Bound chatType;
+        final ChatType.Bound boundChatType;
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
             frame.pushCause($$2);
 
-            final PlayerChatEvent.Submit event = SpongeEventFactory.createPlayerChatEventSubmit(frame.currentCause(), content, content, Optional.empty(), (ServerPlayer) $$2, SpongeAdventure.asAdventure($$4.name()), false, isTrusted);
+            final PlayerChatEvent.Submit event = SpongeEventFactory.createPlayerChatEventSubmit(frame.currentCause(), content, content, chatType,
+                    Optional.empty(), (ServerPlayer) $$2, sender, Optional.ofNullable(target), isTrusted);
             if (SpongeCommon.post(event)) {
                 return; // Do nothing when canceled or audience removed
             }
-            if (event.isCustom()) {
-                chatType = ChatType.bind(SpongeChatTypes.SPONGE_CHAT, this.server.registryAccess(), SpongeAdventure.asVanilla(event.sender()));
-            } else {
-                chatType = ChatType.bind(ChatType.CHAT, this.server.registryAccess(), SpongeAdventure.asVanilla(event.sender()));
-            }
-            filter = event.filter().map(f -> originalFilter.and((Predicate) f)).orElse(originalFilter);
+            boundChatType = ChatType.bind(ResourceKey.create(Registry.CHAT_TYPE_REGISTRY, (ResourceLocation) (Object) event.chatType().location()),
+                    this.server.registryAccess(), SpongeAdventure.asVanilla(event.sender())).withTargetName(event.target().map(SpongeAdventure::asVanilla).orElse(null));
+
+            filter = event.filter().map(f -> $$1.and((Predicate) f)).orElse($$1);
             if (!isTrusted && event.message() != event.originalMessage()) {
                 final net.minecraft.network.chat.Component customMessage = SpongeAdventure.asVanilla(event.message());
                 // TODO does this work?
                 var systemMessage = PlayerChatMessage.unsigned(MessageSigner.system(), new ChatMessageContent(customMessage.getString(), customMessage));
-                this.shadow$broadcastChatMessage(systemMessage, filter, $$2, $$3, chatType);
+                this.shadow$broadcastChatMessage(systemMessage, filter, $$2, $$3, boundChatType);
                 return;
             }
         }
 
-        this.shadow$broadcastChatMessage($$0, filter, $$2, $$3, chatType);
+        this.shadow$broadcastChatMessage($$0, filter, $$2, $$3, boundChatType);
     }
 
 }

@@ -40,6 +40,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.adventure.ChatTypeTemplate;
+import org.spongepowered.api.adventure.ChatTypes;
 import org.spongepowered.api.adventure.ResolveOperations;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
@@ -53,9 +56,13 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.filter.data.GetValue;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
+import org.spongepowered.api.event.lifecycle.LifecycleEvent;
+import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
@@ -72,6 +79,7 @@ public class ChatTest implements LoadableModule {
 
     private static final BossBar INFO_BAR = BossBar.bossBar(Component.translatable("chattest.bars.info"), 1f, BossBar.Color.PINK,
                                                       BossBar.Overlay.PROGRESS);
+    public static final ResourceKey INVERTED_CHAT_ORDER = ResourceKey.of("chattest", "inverted");
 
     private final Game game;
     private final PluginContainer container;
@@ -91,6 +99,17 @@ public class ChatTest implements LoadableModule {
                 lang.registerAll(it, ResourceBundle.getBundle("org.spongepowered.test.chat.messages", it,
                                                               UTF8ResourceBundleControl.get()), false));
         GlobalTranslator.translator().addSource(lang);
+    }
+
+    @Listener
+    private void onLoaded(final LoadedGameEvent event)
+    {
+        // TODO register this earlier - static context?
+        final ChatTypeTemplate template = ChatTypeTemplate.builder().translationKey("%s by <%s>")
+                .addContent().addSender()
+                .key(INVERTED_CHAT_ORDER)
+                .build();
+        Sponge.server().dataPackManager().save(template);
     }
 
     @Override
@@ -169,11 +188,11 @@ public class ChatTest implements LoadableModule {
             if (event instanceof PlayerChatEvent.Decorate) {
                 event.setMessage(event.message().color(NamedTextColor.GREEN));
             } else if (event instanceof PlayerChatEvent.Submit submitEvent) {
-                submitEvent.setCustom(true);
+
+                submitEvent.setChatType(ChatTypes.key(INVERTED_CHAT_ORDER));
                 final TextComponent name = Component.text("Prefix", NamedTextColor.RED)
                         .append(Component.text(" | ", NamedTextColor.GOLD))
-                        .append(event.player().displayName().get().color(NamedTextColor.DARK_GREEN))
-                        .append(Component.text(": ", NamedTextColor.WHITE));
+                        .append(event.player().displayName().get().color(NamedTextColor.DARK_GREEN));
                 submitEvent.setSender(name);
             }
         }

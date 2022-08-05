@@ -24,21 +24,29 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.network.chat;
 
-import net.kyori.adventure.key.Key;
-import net.minecraft.data.BuiltinRegistries;
+import net.kyori.adventure.text.format.Style;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
-import org.spongepowered.api.ResourceKey;
+import net.minecraft.network.chat.ChatTypeDecoration;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 @Mixin(ChatType.class)
 public abstract class ChatTypeMixin_API implements org.spongepowered.api.adventure.ChatType {
 
-    @Override
-    public @NotNull Key key() {
-        final ResourceLocation loc = BuiltinRegistries.CHAT_TYPE.getKey((ChatType) (Object) this);
-        return (ResourceKey) (Object) loc;
+    // @formatter:off
+
+    @Shadow @Final private ChatTypeDecoration chat;
+    @Shadow @Final private ChatTypeDecoration narration;
+
+    // @formatter:on
+
+    public String translationKey() {
+        return this.chat.translationKey();
     }
 
+    public Style style() {
+        return SpongeAdventure.asAdventure(this.chat.style());
+    }
 }

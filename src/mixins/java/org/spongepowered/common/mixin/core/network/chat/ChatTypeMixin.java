@@ -29,18 +29,21 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ChatTypeDecoration;
+import net.minecraft.resources.ResourceLocation;
+import org.spongepowered.api.adventure.ChatTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.adventure.SpongeChatTypes;
 
 @Mixin(ChatType.class)
 public class ChatTypeMixin {
 
     @Inject(method = "bootstrap", at = @At("HEAD"))
     private static void impl$onBootstrap(final Registry<ChatType> $$0, final CallbackInfoReturnable<Holder<ChatType>> cir) {
-        BuiltinRegistries.register($$0, SpongeChatTypes.SPONGE_CHAT, new ChatType(ChatTypeDecoration.withSender("%s%s"), ChatTypeDecoration.withSender("chat.type.text.narrate")));
+        final ChatTypeDecoration narration = ChatTypeDecoration.withSender("chat.type.text.narrate");
+        BuiltinRegistries.register($$0, (ResourceLocation) (Object) ChatTypes.CUSTOM_CHAT.location(), new ChatType(ChatTypeDecoration.withSender("%s%s"), narration));
+        BuiltinRegistries.register($$0, (ResourceLocation) (Object) ChatTypes.CUSTOM_MESSAGE.location(), new ChatType(ChatTypeDecoration.teamMessage("%s%s%s"), narration));
     }
 
 }

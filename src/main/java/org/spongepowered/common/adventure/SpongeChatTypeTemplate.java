@@ -27,6 +27,7 @@ package org.spongepowered.common.adventure;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
+import net.kyori.adventure.text.format.Style;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ChatTypeDecoration;
@@ -42,9 +43,10 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 public record SpongeChatTypeTemplate(ResourceKey key, ChatType representedType, DataPack<ChatTypeTemplate> pack) implements ChatTypeTemplate {
 
@@ -85,8 +87,11 @@ public record SpongeChatTypeTemplate(ResourceKey key, ChatType representedType, 
 
     public static final class BuilderImpl extends AbstractDataPackEntryBuilder<org.spongepowered.api.adventure.ChatType, ChatTypeTemplate, Builder> implements Builder {
 
-        private @Nullable ChatTypeDecoration chat;
-        private @Nullable ChatTypeDecoration narration;
+        private String translationKey;
+        private net.minecraft.network.chat.Style style;
+        private List<ChatTypeDecoration.Parameter> parameters;
+
+        private ChatTypeDecoration narration;
 
         public BuilderImpl() {
             this.reset();
@@ -94,15 +99,58 @@ public record SpongeChatTypeTemplate(ResourceKey key, ChatType representedType, 
 
         @Override
         public Builder fromValue(final org.spongepowered.api.adventure.ChatType value) {
-            ChatType chatType = SpongeAdventure.asVanilla(value);
-            this.chat = chatType.chat();
+            ChatType chatType = (ChatType) (Object) value;
+            this.translationKey = chatType.chat().translationKey();
+            this.parameters = chatType.chat().parameters();
+            this.style = chatType.chat().style();
             this.narration = chatType.narration();
             return this;
         }
 
         @Override
         public Builder translationKey(final String translationKey) {
-            this.chat = ChatTypeDecoration.withSender(translationKey);
+            this.translationKey = translationKey;
+            return this;
+        }
+
+        @Override
+        public Builder style(final Style style) {
+            this.style = SpongeAdventure.asVanilla(style);
+            return this;
+        }
+
+        private void addParameter(final ChatTypeDecoration.Parameter parameter) {
+            if (this.parameters.contains(parameter)) {
+                // TODO check
+                //   throw new IllegalStateException("Parameter already exists");
+            }
+            this.parameters.add(parameter);
+        }
+
+        @Override
+        public Builder addSender() {
+            if (this.parameters == null) {
+                this.parameters = new ArrayList<>();
+            }
+            this.addParameter(ChatTypeDecoration.Parameter.SENDER);
+            return this;
+        }
+
+        @Override
+        public Builder addContent() {
+            if (this.parameters == null) {
+                this.parameters = new ArrayList<>();
+            }
+            this.addParameter(ChatTypeDecoration.Parameter.CONTENT);
+            return this;
+        }
+
+        @Override
+        public Builder addTarget() {
+            if (this.parameters == null) {
+                this.parameters = new ArrayList<>();
+            }
+            this.addParameter(ChatTypeDecoration.Parameter.TARGET);
             return this;
         }
 
@@ -115,8 +163,10 @@ public record SpongeChatTypeTemplate(ResourceKey key, ChatType representedType, 
         public Builder reset() {
             this.key = null;
             this.pack = DataPacks.CHAT_TYPE;
-            this.chat = null;
-            this.narration = null;
+            this.translationKey = null;
+            this.style = net.minecraft.network.chat.Style.EMPTY;
+            this.parameters = null;
+            this.narration = ChatTypeDecoration.withSender("chat.type.text.narrate");;
             return this;
         }
 
@@ -130,7 +180,10 @@ public record SpongeChatTypeTemplate(ResourceKey key, ChatType representedType, 
 
         @Override
         protected ChatTypeTemplate build0() {
-            final ChatType chatType = new ChatType(this.chat, this.narration);
+            Objects.requireNonNull(this.translationKey, "name");
+            Objects.requireNonNull(this.parameters, "parameter");
+            Objects.requireNonNull(this.style, "style");
+            final ChatType chatType = new ChatType(new ChatTypeDecoration(this.translationKey, this.parameters, this.style), this.narration);
             return new SpongeChatTypeTemplate(this.key, chatType, this.pack);
         }
     }

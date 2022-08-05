@@ -782,14 +782,6 @@ public final class SpongeAdventure {
         return Collections.singletonList(audience);
     }
 
-    public static ChatType asVanilla(final org.spongepowered.api.adventure.ChatType value) {
-        if ((Object) value instanceof ChatType ct) {
-            return ct;
-        }
-        // TODO convert adventure type
-        throw new MissingImplementationException("SpongeAdventure", "asVanilla(ChatType)");
-    }
-
     public static class Factory implements SpongeComponents.Factory {
         @Override
         public @NonNull ClickEvent callbackClickEvent(final @NonNull Consumer<CommandCause> callback) {
