@@ -198,7 +198,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
                         }
                         this.pluginCandidates.computeIfAbsent(languageService, k -> new LinkedList<>()).addAll(candidates);
                     } catch (final Exception ex) {
-                        ex.printStackTrace();
+                        this.standardEnvironment.logger().error("Failed to create plugin candidates", ex);
                     }
                 }
             }

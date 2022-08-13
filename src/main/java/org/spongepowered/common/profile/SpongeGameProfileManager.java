@@ -180,13 +180,13 @@ public final class SpongeGameProfileManager implements GameProfileManager {
             try {
                 this.basicProfile(uniqueId).get();
             } catch (final InterruptedException | ExecutionException e) {
-                e.printStackTrace();
+                SpongeGameProfileManager.LOGGER.error("Failed to lookup profile {}", uniqueId, e);
             }
             if (SpongeGameProfileManager.canLookup(uniqueId)) { // only wait when it's possible that a lookup has actually occurred
                 try {
                     Thread.sleep(SpongeConfigs.getCommon().get().world.gameProfileQueryTaskInterval * 1000L);
                 } catch (final InterruptedException e) {
-                    e.printStackTrace();
+                    SpongeGameProfileManager.LOGGER.warn("The lookup service was interrupted while sleeping", e);
                 }
             }
         });
@@ -207,7 +207,7 @@ public final class SpongeGameProfileManager implements GameProfileManager {
                     .log(SpongeGameProfileManager.LOGGER, Level.WARN);
             }
         } catch (final InterruptedException e) {
-            SpongeGameProfileManager.LOGGER.error("The async scheduler was interrupted while awaiting shutdown!");
+            SpongeGameProfileManager.LOGGER.error("The lookup service was interrupted while awaiting shutdown", e);
         }
     }
 }

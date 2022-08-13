@@ -199,12 +199,11 @@ public final class SpongeDataManager implements DataManager {
                 builder.add(updater);
             }
         }
-        if (version < toVersion || version > toVersion) { // There wasn't a registered updater for the version being requested
-            final Exception e = new IllegalStateException("The requested content version for: " + clazz.getSimpleName() + " was requested, "
-                                                    + "\nhowever, the versions supplied: from "+ fromVersion + " to " + toVersion + " is impossible"
-                                                    + "\nas the latest version registered is: " + version+". Please notify the developer of"
-                                                    + "\nthe requested consumed DataSerializable of this error.");
-            e.printStackTrace();
+        if (version < fromVersion || version > toVersion) { // There wasn't a registered updater for the version being requested
+            SpongeCommon.logger().warn("The requested content version for: " + clazz.getSimpleName() + " was requested, "
+                                       + "\nhowever, the versions supplied: from " + fromVersion + " to " + toVersion + " is impossible"
+                                       + "\nas the latest version registered is: " + version + ". Please notify the developer of"
+                                       + "\nthe requested consumed DataSerializable of this error.");
             return Optional.empty();
         }
         return Optional.of(new DataUpdaterDelegate(builder.build(), fromVersion, toVersion));

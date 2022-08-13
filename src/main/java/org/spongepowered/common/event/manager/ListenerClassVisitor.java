@@ -26,6 +26,8 @@ package org.spongepowered.common.event.manager;
 
 import io.leangen.geantyref.AnnotationFormatException;
 import io.leangen.geantyref.TypeFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.AnnotationVisitor;
@@ -60,6 +62,8 @@ public class ListenerClassVisitor extends ClassVisitor {
     public static final String SPONGE_API_ANNOTATION_PREFIX = "org.spongepowered.api";
 
     public static final int ASM_VERSION = Opcodes.ASM9;
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     final List<DiscoveredMethod> foundListenerMethods = new LinkedList<>();
     final Class<?> declaringClass;
@@ -250,7 +254,7 @@ public class ListenerClassVisitor extends ClassVisitor {
             try {
                 this.annotation.put(name == null ? "value" : name, value);
             } catch (final ClassNotFoundException | AnnotationFormatException e) {
-                e.printStackTrace();
+                ListenerClassVisitor.LOGGER.error("Failed to visit annotation primitive value", e);
             }
         }
 
@@ -267,7 +271,7 @@ public class ListenerClassVisitor extends ClassVisitor {
                 final String className = Type.getType(descriptor).getClassName();
                 this.visit(name, Enum.valueOf((Class<? extends Enum>) this.annotation.discoveredMethod.classByLoader(className), value));
             } catch (final ClassNotFoundException e) {
-                e.printStackTrace();
+                ListenerClassVisitor.LOGGER.error("Failed to visit annotation enum value", e);
             }
         }
     }
@@ -565,7 +569,7 @@ public class ListenerClassVisitor extends ClassVisitor {
                     this.returnTypes.put(element.getName(), element.getReturnType());
                 }
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                ListenerClassVisitor.LOGGER.error("Failed to initialize return types", e);
             }
         }
     }

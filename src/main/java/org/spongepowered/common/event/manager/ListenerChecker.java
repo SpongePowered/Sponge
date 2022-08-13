@@ -27,8 +27,9 @@ package org.spongepowered.common.event.manager;
 import com.google.common.base.CaseFormat;
 import io.leangen.geantyref.GenericTypeReflector;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.configurate.util.Types;
 
 import java.lang.reflect.Field;
@@ -44,6 +45,7 @@ public final class ListenerChecker {
 
     private static final boolean ALL_TRUE = Boolean.parseBoolean(System.getProperty("sponge.shouldFireAll", "").toLowerCase());
     private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("sponge.debugShouldFire", "").toLowerCase());
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final Class<?> clazz;
     private Map<String, FieldData> fields = new HashMap<>();
@@ -66,12 +68,12 @@ public final class ListenerChecker {
                 this.fields.put(field.getName(), data);
                 if (ListenerChecker.ALL_TRUE) {
                     if (ListenerChecker.DEBUG) {
-                        System.err.println(String.format("Forcing field %s to true!", field.getName()));
+                        ListenerChecker.LOGGER.debug("Forcing field {} to true!", field.getName());
                     }
                     try {
                         field.set(null, true);
                     } catch (IllegalAccessException e) {
-                        e.printStackTrace();
+                        ListenerChecker.LOGGER.error("Error setting field {} to true", field.getName(), e);
                     }
                 }
             } else {
@@ -187,18 +189,18 @@ public final class ListenerChecker {
                 this.listenerCount--;
             }
             if (this.listenerCount < 0) {
-                SpongeCommon.logger().error(String.format("Decremented listener count to %s for field %s", this.listenerCount, this.field), new Exception("Dummy exception"));
+                ListenerChecker.LOGGER.error("Decremented listener count to {} for field {}", this.listenerCount, this.field, new Exception("Dummy exception"));
             }
             boolean val = this.listenerCount > 0;
 
             if (ListenerChecker.DEBUG) {
-                System.err.println(String.format("Updating field %s with value %s", this.field, val));
+                ListenerChecker.LOGGER.debug("Updating field {} with value {}", this.field, val);
             }
 
             try {
                 this.field.set(null, val);
             } catch (IllegalAccessException e) {
-                SpongeCommon.logger().error(String.format("Error setting field %s to %s", this.field, val), e);
+                ListenerChecker.LOGGER.error("Error setting field {} to {}", this.field, val, e);
             }
         }
     }

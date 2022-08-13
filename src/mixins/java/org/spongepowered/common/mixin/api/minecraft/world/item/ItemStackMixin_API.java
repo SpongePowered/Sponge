@@ -36,6 +36,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
+import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
@@ -50,6 +51,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
@@ -71,6 +73,8 @@ import java.util.function.UnaryOperator;
 public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutable, ComponentLike, HoverEventSource<HoverEvent.ShowItem> {       // conflict from overriding ValueContainer#copy() from DataHolder
 
     // @formatter:off
+    @Shadow @Final private static Logger LOGGER;
+
     @Shadow public abstract int shadow$getCount();
     @Shadow public abstract void shadow$setCount(int size); // Do not use field directly as Minecraft tracks the empty state
     @Shadow public abstract void shadow$setDamageValue(int meta);
@@ -190,7 +194,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         try {
             PlatformHooks.INSTANCE.getItemHooks().writeItemStackCapabilitiesToDataView(container, (net.minecraft.world.item.ItemStack) (Object) this);
         } catch (final Exception e) {
-            e.printStackTrace();
+            ItemStackMixin_API.LOGGER.error("Failed to write capabilities to data view", e);
         }
         return container;
     }

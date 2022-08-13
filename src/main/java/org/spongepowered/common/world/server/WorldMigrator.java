@@ -184,12 +184,12 @@ public final class WorldMigrator {
                                 FileUtils.deleteDirectory(invalidSaveDataFolder.toFile());
                             }
                         } catch (IOException e) {
-                            e.printStackTrace();
+                            SpongeCommon.logger().error("Failed to move invalid save folder from {} to {}", invalidSaveDataFolder, saveFolder, e);
                         }
                     }
                 });
             } catch (IOException e) {
-                e.printStackTrace();
+                SpongeCommon.logger().error("Failed to list world directories", e);
             }
         }
     }
