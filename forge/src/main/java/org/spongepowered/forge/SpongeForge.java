@@ -118,6 +118,8 @@ public final class SpongeForge {
     public void onServerStarted(final FMLServerStartedEvent event) {
         final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.callStartedEngineEvent((Server) event.getServer());
+
+        lifecycle.callLoadedGameEvent();
     }
 
     @SubscribeEvent
