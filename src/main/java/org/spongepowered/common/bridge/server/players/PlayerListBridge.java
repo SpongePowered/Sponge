@@ -26,17 +26,11 @@ package org.spongepowered.common.bridge.server.players;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
 
 import java.net.SocketAddress;
 import java.util.concurrent.CompletableFuture;
 
 public interface PlayerListBridge {
-
-    void bridge$setNewDestinationDimension(ResourceKey<Level> dimension);
-
-    void bridge$setOriginalDestinationDimension(ResourceKey<Level> dimension);
 
     CompletableFuture<Component> bridge$canPlayerLogin(SocketAddress param0, GameProfile param1);
 }
