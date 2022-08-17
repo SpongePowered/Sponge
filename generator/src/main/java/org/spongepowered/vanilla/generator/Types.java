@@ -45,6 +45,8 @@ final class Types {
 
     public static final String NAMESPACE_SPONGE = "sponge";
 
+    public static final String NAMESPACE_MINECRAFT = "minecraft";
+
     public static final WildcardTypeName WILDCARD = WildcardTypeName.subtypeOf(TypeName.OBJECT);
 
     public static final ClassName RESOURCE_KEY = ClassName.get(Context.BASE_PACKAGE, "ResourceKey");

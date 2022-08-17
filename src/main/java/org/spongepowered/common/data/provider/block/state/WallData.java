@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.block.state;
 
 import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.WallSide;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -38,26 +39,23 @@ public final class WallData {
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
-        // TODO Keys#IS_CONNECTED_X takes a boolean. API needs something to support WallHeight.
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.CONNECTED_DIRECTIONS)
-                        .get(h -> DirectionalUtil.getHorizontalUpFrom(h, WallBlock.EAST_WALL, WallBlock.WEST_WALL, WallBlock.NORTH_WALL, WallBlock.SOUTH_WALL,
-                                WallBlock.UP))
-                        .set((h, v) -> DirectionalUtil.setHorizontalUpFor(h, v, WallBlock.EAST_WALL, WallBlock.WEST_WALL, WallBlock.NORTH_WALL, WallBlock.SOUTH_WALL,
-                                WallBlock.UP))
+                        .get(h -> DirectionalUtil.getHorizontalUpFrom(h, WallBlock.EAST_WALL, WallBlock.WEST_WALL, WallBlock.NORTH_WALL, WallBlock.SOUTH_WALL, WallBlock.UP))
+                        .set((h, v) -> DirectionalUtil.setHorizontalUpFor(h, v, WallBlock.EAST_WALL, WallBlock.WEST_WALL, WallBlock.NORTH_WALL, WallBlock.SOUTH_WALL, WallBlock.UP))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_EAST)
                         .get(h -> h.getValue(WallBlock.EAST_WALL) != WallSide.NONE)
-                        .set((h, v) -> h.setValue(WallBlock.EAST_WALL, v ? WallSide.TALL : WallSide.NONE))
+                        .set((h, v) -> WallData.setWallSideProperty(h, WallBlock.EAST_WALL, v))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_NORTH)
                         .get(h -> h.getValue(WallBlock.NORTH_WALL) != WallSide.NONE)
-                        .set((h, v) -> h.setValue(WallBlock.NORTH_WALL, v ? WallSide.TALL : WallSide.NONE))
+                        .set((h, v) -> WallData.setWallSideProperty(h, WallBlock.NORTH_WALL, v))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_SOUTH)
                         .get(h -> h.getValue(WallBlock.SOUTH_WALL) != WallSide.NONE)
-                        .set((h, v) -> h.setValue(WallBlock.SOUTH_WALL, v ? WallSide.TALL : WallSide.NONE))
+                        .set((h, v) -> WallData.setWallSideProperty(h, WallBlock.SOUTH_WALL, v))
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_UP)
                         .get(h -> h.getValue(WallBlock.UP))
@@ -65,8 +63,20 @@ public final class WallData {
                         .supports(h -> h.getBlock() instanceof WallBlock)
                     .create(Keys.IS_CONNECTED_WEST)
                         .get(h -> h.getValue(WallBlock.WEST_WALL) != WallSide.NONE)
-                        .set((h, v) -> h.setValue(WallBlock.WEST_WALL, v ? WallSide.TALL : WallSide.NONE))
-                        .supports(h -> h.getBlock() instanceof WallBlock);
+                        .set((h, v) -> WallData.setWallSideProperty(h, WallBlock.WEST_WALL, v))
+                        .supports(h -> h.getBlock() instanceof WallBlock)
+                   .create(Keys.WALL_CONNECTION_STATES)
+                        .get(h -> DirectionalUtil.getHorizontalFrom(h, WallBlock.EAST_WALL, WallBlock.WEST_WALL, WallBlock.NORTH_WALL, WallBlock.SOUTH_WALL))
+                        .set((h, v) -> DirectionalUtil.setHorizontalFor(h, v, WallBlock.EAST_WALL, WallBlock.WEST_WALL, WallBlock.NORTH_WALL, WallBlock.SOUTH_WALL))
+                        .supports(h -> h.getBlock() instanceof WallBlock)
+        ;
     }
     // @formatter:on
+
+    private static BlockState setWallSideProperty(final BlockState state, final EnumProperty<WallSide> property, final Boolean connected) {
+        final WallSide wallSide = state.getValue(property);
+        if (connected && wallSide != WallSide.NONE) {
+            return state;
+        }
+        return state.setValue(property, connected ? WallSide.TALL : WallSide.NONE);}
 }
