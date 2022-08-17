@@ -24,18 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.world.level;
 
-import com.google.common.collect.Sets;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.enchantment.ProtectionEnchantment;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.event.Cause;
@@ -45,10 +39,12 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
@@ -61,8 +57,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.StringJoiner;
 
 @Mixin(net.minecraft.world.level.Explosion.class)
@@ -90,6 +84,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     private int impl$resolution;
     private float impl$randomness;
     private double impl$knockback;
+    private List<Entity> impl$affectedEntities;
 
     @Inject(
         method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Explosion$BlockInteraction;)V",
@@ -118,158 +113,109 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         this.impl$knockback = 1.0;
     }
 
-    /**
-     * @author gabizou
-     * @author zidane
-     * @reason Fire ExplosionEvent.Detonate
-     */
-    @Overwrite
-    public void explode() {
-
-        // Sponge Start - Do not run calculation logic on client thread
+    @Inject(method = "explode", at = @At("HEAD"), cancellable = true)
+    private void impl$explode_clientCheck(final CallbackInfo callback) {
         if (this.level.isClientSide) {
-            return;
+            callback.cancel();
         }
-        // Sponge End
+    }
 
-        // Sponge Start - If the explosion should not break blocks, don't bother calculating it on server thread
-        if (this.impl$shouldBreakBlocks) {
-            final Set<BlockPos> set = Sets.newHashSet();
-            final int i = 16;
+    @ModifyConstant(method = "explode", constant = @Constant(intValue = 16, ordinal = 1))
+    public int impl$explode_skipLoop(final int previousValue) {
+        return this.impl$shouldBreakBlocks ? previousValue : 0;
+    }
 
-            for (int j = 0; j < 16; ++j) {
-                for (int k = 0; k < 16; ++k) {
-                    for (int l = 0; l < 16; ++l) {
-                        if (j == 0 || j == 15 || k == 0 || k == 15 || l == 0 || l == 15) {
-                            double d0 = (double) ((float) j / 15.0F * 2.0F - 1.0F);
-                            double d1 = (double) ((float) k / 15.0F * 2.0F - 1.0F);
-                            double d2 = (double) ((float) l / 15.0F * 2.0F - 1.0F);
-                            final double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
-                            d0 = d0 / d3;
-                            d1 = d1 / d3;
-                            d2 = d2 / d3;
-                            float f = this.radius * (0.7F + this.level.random.nextFloat() * 0.6F);
-                            double d4 = this.x;
-                            double d6 = this.y;
-                            double d8 = this.z;
+    @Redirect(
+        method = "explode",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/level/Level;getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;)Ljava/util/List;"
+        )
+    )
+    public List<Entity> impl$explode_onlyDamageableEntities(final Level instance, final Entity entity, final AABB aabb) {
+        this.impl$affectedEntities = this.impl$shouldDamageEntities ? instance.getEntities(entity, aabb) : Collections.emptyList();
+        return this.impl$affectedEntities;
+    }
 
-                            for (final float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
-                                final BlockPos blockpos = new BlockPos(d4, d6, d8);
-                                final BlockState blockstate = this.level.getBlockState(blockpos);
-                                final FluidState fluidstate = this.level.getFluidState(blockpos);
-                                Optional<Float> optional = this.damageCalculator.getBlockExplosionResistance((net.minecraft.world.level.Explosion) (Object) this, this.level, blockpos, blockstate, fluidstate);
-                                if (optional.isPresent()) {
-                                    f -= (optional.get() + 0.3F) * 0.3F;
-                                }
-
-                                if (f > 0.0F && this.damageCalculator.shouldBlockExplode((net.minecraft.world.level.Explosion) (Object) this, this.level, blockpos, blockstate, f)) {
-                                    set.add(blockpos);
-                                }
-
-                                d4 += d0 * (double) 0.3F;
-                                d6 += d1 * (double) 0.3F;
-                                d8 += d2 * (double) 0.3F;
-                            }
-                        }
-                    }
-                }
-            }
-
-            this.toBlow.addAll(set);
-        }
-        // Sponge End
-
-        final float f3 = this.radius * 2.0F;
-        final int k1 = Mth.floor(this.x - (double) f3 - 1.0D);
-        final int l1 = Mth.floor(this.x + (double) f3 + 1.0D);
-        final int i2 = Mth.floor(this.y - (double) f3 - 1.0D);
-        final int i1 = Mth.floor(this.y + (double) f3 + 1.0D);
-        final int j2 = Mth.floor(this.z - (double) f3 - 1.0D);
-        final int j1 = Mth.floor(this.z + (double) f3 + 1.0D);
-
-        // Sponge Start - Only query for entities if we're to damage them
-        final List<Entity> list = this.impl$shouldDamageEntities ? this.level.getEntities(this.source,
-                new AABB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1)) : Collections.emptyList();
-        // Sponge End
-
+    @Inject(
+        method = "explode",
+        at = @At(
+            value = "NEW",
+            target = "net/minecraft/world/phys/Vec3",
+            ordinal = 0
+        ),
+        cancellable = true
+    )
+    public void impl$explode_eventHook(final CallbackInfo callback) {
         if (ShouldFire.EXPLOSION_EVENT_DETONATE) {
             final List<ServerLocation> blockPositions = new ArrayList<>(this.toBlow.size());
-            final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(list.size());
+            final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(this.impl$affectedEntities.size());
             for (final BlockPos pos : this.toBlow) {
-                blockPositions
-                        .add(ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) this.level, pos.getX(), pos.getY(), pos.getZ()));
+                blockPositions.add(ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) this.level, pos.getX(), pos.getY(), pos.getZ()));
             }
-            for (final Entity entity : list) {
+
+            for (final Entity entity : this.impl$affectedEntities) {
                 // Make sure to check the entity is immune first.
                 if (!entity.ignoreExplosion()) {
                     entities.add((org.spongepowered.api.entity.Entity) entity);
                 }
             }
+
             final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-            final ExplosionEvent.Detonate detonate = SpongeEventFactory.createExplosionEventDetonate(cause, blockPositions, entities,
-                    (Explosion) this, (org.spongepowered.api.world.server.ServerWorld) this.level);
+            final ExplosionEvent.Detonate detonate = SpongeEventFactory.createExplosionEventDetonate(
+                    cause,
+                    blockPositions,
+                    entities,
+                    (Explosion) this,
+                    (org.spongepowered.api.world.server.ServerWorld) this.level
+            );
+
             SpongeCommon.post(detonate);
-            // Clear the positions so that they can be pulled from the event
+
+            // Clear the positions so that they can be pulled from the event.
             this.toBlow.clear();
             if (detonate.isCancelled()) {
-                return;
+                callback.cancel();
             }
+
             if (this.impl$shouldBreakBlocks) {
                 for (final ServerLocation worldLocation : detonate.affectedLocations()) {
                     this.toBlow.add(VecHelper.toBlockPos(worldLocation));
                 }
             }
-            // Clear the list of entities so they can be pulled from the event.
-            list.clear();
+
+            // Clear the list of entities, so they can be pulled from the event.
+            this.impl$affectedEntities.clear();
             if (this.impl$shouldDamageEntities) {
                 for (final org.spongepowered.api.entity.Entity entity : detonate.entities()) {
                     try {
-                        list.add((Entity) entity);
-                    } catch (final Exception e) {
+                        this.impl$affectedEntities.add((Entity) entity);
+                    } catch (final Exception ignored) {
                         // Do nothing, a plugin tried to use the wrong entity somehow.
                     }
                 }
             }
         }
-        // Sponge End
+    }
 
-        final Vec3 vec3d = new Vec3(this.x, this.y, this.z);
+    @Redirect(
+        method = "explode",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/phys/Vec3;add(DDD)Lnet/minecraft/world/phys/Vec3;",
+            ordinal = 0
+        )
+    )
+    private Vec3 impl$explode_applyKnockbackModifier(final Vec3 instance, final double motX, final double motY, final double motZ) {
+        return instance.add(motX * this.impl$knockback, motY * this.impl$knockback, motZ * this.impl$knockback);
+    }
 
-        for (int k2 = 0; k2 < list.size(); ++k2) {
-            final Entity entity = list.get(k2);
-            if (!entity.ignoreExplosion()) {
-                final double d12 = (double)(Mth.sqrt(entity.distanceToSqr(vec3d)) / f3);
-                if (d12 <= 1.0D) {
-                    double d5 = entity.getX() - this.x;
-                    double d7 = entity.getEyeY() - this.y;
-                    double d9 = entity.getZ() - this.z;
-                    final double d13 = (double)Mth.sqrt(d5 * d5 + d7 * d7 + d9 * d9);
-                    if (d13 != 0.0D) {
-                        d5 = d5 / d13;
-                        d7 = d7 / d13;
-                        d9 = d9 / d13;
-                        final double d14 = (double) net.minecraft.world.level.Explosion.getSeenPercent(vec3d, entity);
-                        final double d10 = (1.0D - d12) * d14;
-                        entity.hurt(this.shadow$getDamageSource(), (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * (double)f3 + 1.0D)));
-                        double d11 = d10;
-                        if (entity instanceof LivingEntity) {
-                            d11 = ProtectionEnchantment.getExplosionKnockbackAfterDampener((LivingEntity)entity, d10);
-                        }
-
-                        // Sponge Start - Honor our knockback value from event
-                        entity.setDeltaMovement(entity.getDeltaMovement().add(d5 * d11 * this.impl$knockback, d7 * d11 * this.impl$knockback, d9 * d11 * this.impl$knockback));
-                        if (entity instanceof Player) {
-                            final Player playerentity = (Player)entity;
-                            if (!playerentity.isSpectator() && (!playerentity.isCreative() || !playerentity.abilities.flying)) {
-                                this.hitPlayers.put(playerentity, new Vec3(d5 * d10 * this.impl$knockback,
-                                        d7 * d10 * this.impl$knockback, d9 * d10 * this.impl$knockback));
-                            }
-                        }
-                        // Sponge End
-                    }
-                }
-            }
-        }
+    @Redirect(
+        method = "explode",
+        at = @At(value = "NEW", target = "net/minecraft/world/phys/Vec3", ordinal = 1)
+    )
+    private Vec3 impl$explode_recordKnockbackModifier(final double motX, final double motY, final double motZ) {
+        return new Vec3(motX * this.impl$knockback, motY * this.impl$knockback, motZ * this.impl$knockback);
     }
 
     @Override
