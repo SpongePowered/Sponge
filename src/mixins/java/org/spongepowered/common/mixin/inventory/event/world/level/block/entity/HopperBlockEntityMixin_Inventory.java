@@ -34,14 +34,18 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.accessor.world.level.block.entity.HopperBlockEntityAccessor;
+import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -132,6 +136,24 @@ public abstract class HopperBlockEntityMixin_Inventory {
             SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);
             // Call event
             InventoryEventFactory.callTransferPost(capture, InventoryUtil.toInventory(iInventory), InventoryUtil.toInventory(hopper), itemStack1, sourceSlotTransaction);
+        }
+
+        // Ignore all container transactions in affected inventories
+        if (hopper instanceof ViewableInventoryBridge) {
+            try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER)) {
+                context.buildAndSwitch();
+                for (final ServerPlayer player : ((ViewableInventoryBridge) hopper).viewableBridge$getViewers()) {
+                    player.containerMenu.broadcastChanges();
+                }
+            }
+        }
+        if (iInventory instanceof ViewableInventoryBridge) {
+            try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER)) {
+                context.buildAndSwitch();
+                for (final ServerPlayer player : ((ViewableInventoryBridge) iInventory).viewableBridge$getViewers()) {
+                    player.containerMenu.broadcastChanges();
+                }
+            }
         }
     }
 

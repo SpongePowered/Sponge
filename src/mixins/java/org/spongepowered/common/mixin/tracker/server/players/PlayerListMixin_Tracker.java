@@ -55,7 +55,16 @@ public class PlayerListMixin_Tracker {
 
     @Redirect(method = "placeNewPlayer",
               at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu()V"))
-    private void tracker$onInitMenu(final ServerPlayer player) {
+    private void tracker$onPlaceNewPlayerInitMenu(final ServerPlayer player) {
+        try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER).source(player);) {
+            context.buildAndSwitch();
+            player.initMenu();
+        }
+    }
+
+    @Redirect(method = "respawn",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu()V"))
+    private void tracker$onRespawnInitMenu(final ServerPlayer player) {
         try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER).source(player);) {
             context.buildAndSwitch();
             player.initMenu();
