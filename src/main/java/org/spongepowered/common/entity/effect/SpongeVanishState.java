@@ -29,7 +29,7 @@ import org.spongepowered.api.effect.VanishState;
 
 public final class SpongeVanishState implements VanishState {
     private static final VanishState VISIBLE = new SpongeVanishState(false, true, false, true, true, true);
-    private static final VanishState DEFAULT_VANISHED = new SpongeVanishState(true, false, false, false, false, false);
+    private static final VanishState DEFAULT_VANISHED = new SpongeVanishState(true, false, true, false, false, false);
 
     private final boolean vanished;
     private final boolean ignoresCollisions;
