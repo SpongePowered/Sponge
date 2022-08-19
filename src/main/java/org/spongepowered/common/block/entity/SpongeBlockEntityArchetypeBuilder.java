@@ -102,7 +102,7 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
     public BlockEntityArchetype.Builder state(final BlockState state) {
         final net.minecraft.world.level.block.state.BlockState blockState = (net.minecraft.world.level.block.state.BlockState) state;
         if (!((BlockStateBridge) (blockState)).bridge$hasTileEntity()) {
-            SpongeBlockEntityArchetypeBuilder.LOGGER.warn("BlockState " + state + " does not provide TileEntities!", new IllegalArgumentException());
+            SpongeBlockEntityArchetypeBuilder.LOGGER.warn("BlockState {} does not provide BlockEntities!", state, new IllegalArgumentException());
         }
         if (this.blockState != state) {
             this.data = null;

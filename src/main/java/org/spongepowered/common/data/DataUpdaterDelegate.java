@@ -62,10 +62,10 @@ public final class DataUpdaterDelegate implements DataContentUpdater {
             try {
                 updated = updater.update(updated);
             } catch (Exception e) {
-                DataUpdaterDelegate.LOGGER.error("There was error attempting to update some data for the content updater:"
-                                                 +  updater.getClass().getName() + "\nThe original data is being returned, possibly causing "
+                DataUpdaterDelegate.LOGGER.error("There was error attempting to update some data for the content updater: {}"
+                                                 + "\nThe original data is being returned, possibly causing "
                                                  + "issues later on, \nbut the original data should not be lost. Please notify the developer "
-                                                 + "of this exception with the stacktrace.", e);
+                                                 + "of this exception with the stacktrace.", updater.getClass().getName(), e);
                 return copied;
             }
         }
