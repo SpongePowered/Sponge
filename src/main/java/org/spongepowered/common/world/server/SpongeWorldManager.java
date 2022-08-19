@@ -726,12 +726,12 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         if (this.isVanillaWorld(key)) {
             final LevelStem stem = this.server.getWorldData().worldGenSettings().dimensions().get(SpongeWorldManager.createStemKey(key));
-            JsonElement template = SpongeWorldManager.stemToJson(stem);
+            final JsonElement template = SpongeWorldManager.stemToJson(stem);
 
             try {
                 this.writeTemplate(template, movedKey);
             } catch (final IOException e) {
-                FutureUtil.completedWithException(e);
+                return FutureUtil.completedWithException(e);
             }
         } else {
             final Path dimensionTemplate = this.getDataPackFile(key);
@@ -741,7 +741,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                 Files.createDirectories(movedDimensionTemplate.getParent());
                 Files.move(dimensionTemplate, movedDimensionTemplate, StandardCopyOption.REPLACE_EXISTING);
             } catch (final IOException e) {
-                FutureUtil.completedWithException(e);
+                return FutureUtil.completedWithException(e);
             }
         }
 
