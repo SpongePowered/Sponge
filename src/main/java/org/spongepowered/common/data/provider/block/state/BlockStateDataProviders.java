@@ -66,6 +66,7 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
         HorizontalFaceData.register(this.registrator);
         HugeMushroomData.register(this.registrator);
         LadderData.register(this.registrator);
+        LanternData.register(this.registrator);
         LeavesData.register(this.registrator);
         LeverData.register(this.registrator);
         MovingPistonData.register(this.registrator);
