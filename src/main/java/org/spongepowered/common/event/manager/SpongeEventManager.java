@@ -227,7 +227,8 @@ public abstract class SpongeEventManager implements EventManager {
 
     protected abstract AnnotatedEventListener.Factory computeFactory(final PluginContainer key);
 
-    private void registerListener(final PluginContainer plugin, final Object listenerObject) {
+    private void registerListener(final PluginContainer plugin, final Object listenerObject,
+                                  final MethodHandles.@Nullable Lookup lookup) {
         Objects.requireNonNull(plugin, "plugin");
         Objects.requireNonNull(listenerObject, "listener");
 
@@ -254,7 +255,7 @@ public abstract class SpongeEventManager implements EventManager {
                     final Type eventType = method.parameterTypes()[0].genericType();
                     final AnnotatedEventListener handler;
                     try {
-                        handler = handlerFactory.create(listenerObject, method);
+                        handler = handlerFactory.create(listenerObject, method, lookup);
                     } catch (final Throwable thr) {
                         SpongeCommon.logger().error("Failed to create handler for {} on {}", method, handle, thr);
                         continue;
@@ -318,7 +319,15 @@ public abstract class SpongeEventManager implements EventManager {
 
     @Override
     public SpongeEventManager registerListeners(final PluginContainer plugin, final Object listener) {
-        this.registerListener(plugin, listener);
+        this.registerListener(plugin, listener, null);
+        return this;
+    }
+
+    @Override
+    public SpongeEventManager registerListeners(final PluginContainer plugin, final Object listener,
+                                                final MethodHandles.Lookup lookup) {
+        Objects.requireNonNull(lookup, "lookup");
+        this.registerListener(plugin, listener, lookup);
         return this;
     }
 
