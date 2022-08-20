@@ -161,6 +161,6 @@ public abstract class HopperBlockEntityMixin_Inventory {
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/Container;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/Direction;)Lnet/minecraft/world/item/ItemStack;"))
     private static ItemStack impl$onPutStackInInventoryAllSlots(final Container source, final Container destination, final ItemStack stack, final Direction direction, final Container d2, final ItemEntity entity) {
-        return InventoryEventFactory.callInventoryPickupEvent(destination, entity, stack);
+        return InventoryEventFactory.callHopperInventoryPickupEvent(destination, entity, stack);
     }
 }
