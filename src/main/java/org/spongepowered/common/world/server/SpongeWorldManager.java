@@ -417,8 +417,7 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         this.prepareWorld(world, isDebugGeneration);
         ((MinecraftServerAccessor) this.server).invoker$forceDifficulty();
-        this.postWorldLoad(world, false);
-        return CompletableFuture.completedFuture((org.spongepowered.api.world.server.ServerWorld) world);
+        return this.postWorldLoad(world, false).thenApply(w -> (org.spongepowered.api.world.server.ServerWorld) w);
     }
 
     @Override
