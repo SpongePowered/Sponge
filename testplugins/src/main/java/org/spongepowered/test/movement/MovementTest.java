@@ -121,14 +121,14 @@ public final class MovementTest implements LoadableModule {
 
     private CommandResult toggleMovement(CommandContext context) {
         this.cancelMovement = !this.cancelMovement;
-        final Component newState = Component.text(this.cancelMovement ? "OFF" : "ON", this.cancelMovement ? NamedTextColor.RED : NamedTextColor.GREEN);
+        final Component newState = Component.text(this.cancelMovement ? "ON" : "OFF", this.cancelMovement ? NamedTextColor.GREEN : NamedTextColor.RED);
         context.sendMessage(Identity.nil(), Component.text("Cancel Player All Movement : ").append(newState));
         return CommandResult.success();
     }
 
     private CommandResult toggleUnnatural(CommandContext context) {
         this.cancelUnnaturalMovement = !this.cancelUnnaturalMovement;
-        final Component newState = Component.text(this.cancelUnnaturalMovement ? "OFF" : "ON", this.cancelUnnaturalMovement ? NamedTextColor.RED : NamedTextColor.GREEN);
+        final Component newState = Component.text(this.cancelUnnaturalMovement ? "ON" : "OFF", this.cancelUnnaturalMovement ? NamedTextColor.GREEN : NamedTextColor.RED);
         context.sendMessage(Identity.nil(), Component.text("Cancel Player Unnatural Movement : ").append(newState));
         return CommandResult.success();
     }
