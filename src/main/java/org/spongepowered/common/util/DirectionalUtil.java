@@ -59,9 +59,9 @@ public final class DirectionalUtil {
             .put(Direction.NORTH, north)
             .put(Direction.SOUTH, south)
             .build();
-        Map<Direction, WallConnectionState> wallConnectionStates = new HashMap<>();
+        final Map<Direction, WallConnectionState> wallConnectionStates = new HashMap<>();
         for (final Map.Entry<Direction, EnumProperty<WallSide>> entry : sides.entrySet()) {
-            WallConnectionState wallConnectionState = (WallConnectionState) (Object) holder.getValue(entry.getValue());
+            final WallConnectionState wallConnectionState = (WallConnectionState) (Object) holder.getValue(entry.getValue());
             wallConnectionStates.put(entry.getKey(), wallConnectionState);
         }
         return wallConnectionStates;
