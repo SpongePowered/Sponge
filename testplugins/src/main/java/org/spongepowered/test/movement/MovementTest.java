@@ -83,7 +83,7 @@ public final class MovementTest implements LoadableModule {
         event.register(this.plugin, Command.builder()
             .executor(context -> {
                 this.cancelMovement = !this.cancelMovement;
-                final Component newState = Component.text(this.cancelMovement ? "OFF" : "ON", this.cancelMovement ? NamedTextColor.RED : NamedTextColor.GREEN);
+                final Component newState = Component.text(this.cancelMovement ? "ON" : "OFF", this.cancelMovement ? NamedTextColor.GREEN : NamedTextColor.RED);
                 context.sendMessage(Identity.nil(), Component.text("Cancel Entity Movement : ").append(newState));
                 return CommandResult.success();
             })
@@ -166,7 +166,7 @@ public final class MovementTest implements LoadableModule {
             }
             pluginLogger.log(Level.INFO, MovementTest.marker, "/");
             final Vector3d sub = event.originalDestinationPosition().sub(event.originalPosition());
-            final Vector3d mul = sub.mul(5);
+            final Vector3d mul = sub.normalize().mul(5);
             event.setDestinationPosition(event.originalDestinationPosition().add(mul));
             MovementTest.this.teleportOnMove = false;
         }

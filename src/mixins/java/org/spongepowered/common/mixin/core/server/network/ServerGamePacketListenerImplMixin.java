@@ -45,6 +45,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockBreakAckPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
@@ -69,7 +70,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.entity.Sign;
@@ -98,13 +98,11 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundMovePlayerPacketAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundMoveVehiclePacketAccessor;
 import org.spongepowered.common.accessor.server.level.ServerPlayerGameModeAccessor;
-import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
@@ -122,15 +120,16 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.CommandUtil;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -141,14 +140,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     @Shadow @Final public Connection connection;
     @Shadow public net.minecraft.server.level.ServerPlayer player;
     @Shadow @Final private MinecraftServer server;
-    @Shadow private Vec3 awaitingPositionFromClient;
-    @Shadow private double firstGoodX;
-    @Shadow private double firstGoodY;
-    @Shadow private double firstGoodZ;
-    @Shadow private int receivedMovePacketCount;
-    @Shadow private int knownMovePacketCount;
-    @Shadow private int tickCount;
-    @Shadow private int awaitingTeleportTime;
     @Shadow private double vehicleFirstGoodX;
     @Shadow private double vehicleFirstGoodY;
     @Shadow private double vehicleFirstGoodZ;
@@ -156,8 +147,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     @Shadow private double vehicleLastGoodY;
     @Shadow private double vehicleLastGoodZ;
 
-    @Shadow protected abstract boolean shadow$isSingleplayerOwner();
-    @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch);
+    @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch, Set<ClientboundPlayerPositionPacket.RelativeArgument> relativeArguments);
     @Shadow protected abstract void shadow$filterTextPacket(List<String> p_244537_1_, Consumer<List<String>> p_244537_2_);
     @Shadow public abstract void shadow$resetPosition();
     // @formatter:on
@@ -235,66 +225,25 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
         return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, p_147340_1_.getTarget(this.player.level));
     }
 
-    /**
-     * Effectively, hooking into the following code block:
-     * <pre>
-     *       if (isMovePlayerPacketInvalid(packetIn)) {
-     *          this.disconnect(new TranslationTextComponent("multiplayer.disconnect.invalid_player_movement"));
-     *       } else {
-     *          ServerWorld serverworld = this.server.world(this.player.dimension);
-     *          if (!this.player.queuedEndExit) { // <---- Here is where we're injecting
-     *             if (this.networkTickCount == 0) {
-     *                this.captureCurrentPosition();
-     *             }
-     * </pre>
-     * we can effectively short circuit the method to handle movement code where
-     * returning {@code true} will escape the packet being processed further entirely and
-     * {@code false} will allow the remaining processing of the method run.
-     *
-     * @param packetIn The movement packet
-     */
     @Inject(method = "handleMovePlayer",
-            at = @At(
-                    value = "FIELD",
-                    opcode = Opcodes.GETFIELD,
-                    target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;awaitingPositionFromClient:Lnet/minecraft/world/phys/Vec3;"
-            ),
-            slice = @Slice(
-                    from = @At(
-                            value = "FIELD",
-                            target = "Lnet/minecraft/server/level/ServerPlayer;wonGame:Z"
-                    ),
-                    to = @At(
-                            value = "FIELD",
-                            target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;tickCount:I",
-                            ordinal = 1
-                    )
-            ),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isPassenger()Z"),
             cancellable = true
     )
     private void impl$callMoveEntityEvent(final ServerboundMovePlayerPacket packetIn, final CallbackInfo ci) {
-
-        // If the movement is modified we pretend that the player has queuedEndExit = true
-        // so that vanilla wont process that packet further
-
         final ServerboundMovePlayerPacketAccessor packetInAccessor = (ServerboundMovePlayerPacketAccessor) packetIn;
+
+        final boolean fireMoveEvent = packetInAccessor.accessor$hasPos();
+        final boolean fireRotationEvent = packetInAccessor.accessor$hasRot();
 
         // During login, minecraft sends a packet containing neither the 'moving' or 'rotating' flag set - but only once.
         // We don't fire an event to avoid confusing plugins.
-        if (!packetInAccessor.accessor$hasPos() && !packetInAccessor.accessor$hasRot()) {
+        if (!fireMoveEvent && !fireRotationEvent) {
             return;
         }
 
-        final boolean goodMovementPacket = this.receivedMovePacketCount - this.knownMovePacketCount <= 5;
-        final boolean fireMoveEvent = goodMovementPacket && packetInAccessor.accessor$hasPos();
-        final boolean fireRotationEvent = goodMovementPacket && packetInAccessor.accessor$hasRot();
-
         final ServerPlayer player = (ServerPlayer) this.player;
-        final Vector3d fromRotation = new Vector3d(this.player.yRot, this.player.xRot, 0);
-
-        // Use the position of the last movement with an event or the current player position if never called
-        // We need this because we ignore very small position changes as to not spam as many move events.
         final Vector3d fromPosition = player.position();
+        final Vector3d fromRotation = player.rotation();
 
         final Vector3d originalToPosition = new Vector3d(packetIn.getX(this.player.getX()),
                 packetIn.getY(this.player.getY()), packetIn.getZ(this.player.getZ()));
@@ -309,66 +258,50 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
                     fromPosition,
                     originalToPosition);
         } else {
-            toPosition = null;
+            toPosition = originalToPosition;
         }
 
         // Rotation result
-        final Vector3d toRotation;
+        Vector3d toRotation;
         if (fireRotationEvent) {
             toRotation = SpongeCommonEventFactory.callRotateEvent(
                     player,
                     fromRotation,
                     originalToRotation);
+            if (toRotation == null) {
+                toRotation = fromRotation;
+            }
         } else {
-            toRotation = fromRotation;
+            toRotation = originalToRotation;
         }
 
         // At this point, we cancel out and let the "confirmed teleport" code run through to update the
         // player position and update the player's relation in the chunk manager.
         if (toPosition == null) {
-            if (fromPosition.distanceSquared(originalToPosition) > 0) {
-                // Set the location, as if the player was teleporting
-                this.awaitingTeleportTime = this.tickCount;
-                this.shadow$teleport(fromPosition.x(), fromPosition.y(), fromPosition.z(), (float) toRotation.x(), (float) toRotation.y());
-            } else {
-                // If this is only rotation do not teleport back
-                this.player.absMoveTo(fromPosition.x(), fromPosition.y(), fromPosition.z(), (float) toRotation.x(), (float) toRotation.y());
-            }
+            // This will both cancel the movement and notify the client about the new rotation if any.
+            // The position is absolute so the momentum will be reset by the client.
+            // The rotation is relative so the head movement is still smooth.
+            // The client thinks its current rotation is originalToRotation so the new rotation is relative to that.
+            this.player.absMoveTo(fromPosition.x(), fromPosition.y(), fromPosition.z(),
+                    (float) originalToRotation.x(), (float) originalToRotation.y());
+            this.shadow$teleport(fromPosition.x(), fromPosition.y(), fromPosition.z(),
+                    (float) toRotation.x(), (float) toRotation.y(),
+                    EnumSet.of(ClientboundPlayerPositionPacket.RelativeArgument.X_ROT, ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT));
             ci.cancel();
             return;
         }
 
         // Handle event results
-        if (!toPosition.equals(originalToPosition)) {
-            // Check if we have to say it's a "teleport" vs a standard move
-            final double d4 = packetIn.getX(this.player.getX());
-            final double d5 = packetIn.getY(this.player.getY());
-            final double d6 = packetIn.getZ(this.player.getZ());
-            final double d7 = d4 - this.firstGoodX;
-            final double d8 = d5 - this.firstGoodY;
-            final double d9 = d6 - this.firstGoodZ;
-            final double d10 = this.player.getDeltaMovement().lengthSqr();
-            final double d11 = d7 * d7 + d8 * d8 + d9 * d9;
-            final float f2 = this.player.isFallFlying() ? 300.0F : 100.0F;
-            final int i = this.receivedMovePacketCount - this.knownMovePacketCount;
-            if (d11 - d10 > (double)(f2 * (float)i) && !this.shadow$isSingleplayerOwner()) {
-                // At this point, we need to set the target position so the teleport code forces it
-                this.awaitingPositionFromClient = VecHelper.toVanillaVector3d(toPosition);
-                ((EntityAccessor) this.player).invoker$setRot((float) toRotation.x(), (float) toRotation.y());
-                // And reset the position update so the force set is done.
-                this.awaitingTeleportTime = this.tickCount - Constants.Networking.MAGIC_TRIGGER_TELEPORT_CONFIRM_DIFF;
-            } else {
-                // otherwise, set the data back onto the packet
-                packetInAccessor.accessor$hasPos(true);
-                packetInAccessor.accessor$x(toPosition.x());
-                packetInAccessor.accessor$y(toPosition.y());
-                packetInAccessor.accessor$z(toPosition.z());
-                if (packetInAccessor.accessor$hasRot()) {
-                    // this is intended, see the from rotation line above.
-                    packetInAccessor.accessor$xRot((float) toRotation.y());
-                    packetInAccessor.accessor$yRot((float) toRotation.x());
-                }
-            }
+        if (!toPosition.equals(originalToPosition) || !toRotation.equals(originalToRotation)) {
+            // Notify the client about the new position and new rotation.
+            // Both are relatives so the client will keep its momentum.
+            // The client thinks its current position is originalToPosition so the new position is relative to that.
+            this.player.absMoveTo(originalToPosition.x(), originalToPosition.y(), originalToPosition.z(),
+                    (float) originalToRotation.x(), (float) originalToRotation.y());
+            this.shadow$teleport(toPosition.x(), toPosition.y(), toPosition.z(),
+                    (float) toRotation.x(), (float) toRotation.y(),
+                    EnumSet.allOf(ClientboundPlayerPositionPacket.RelativeArgument.class));
+            ci.cancel();
         }
     }
 
