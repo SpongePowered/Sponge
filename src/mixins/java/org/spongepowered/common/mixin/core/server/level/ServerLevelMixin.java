@@ -452,13 +452,14 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             shift = At.Shift.AFTER
         )
     )
+    @SuppressWarnings("SuspiciousMethodCalls")
     private void impl$unloadBlockEntities(final BooleanSupplier param0, final CallbackInfo ci) {
         // This code fixes block entity memory leak
         // https://github.com/SpongePowered/Sponge/pull/3689
-        if (this.emptyTime >= 300 && !this.blockEntitiesToUnload.isEmpty()) {
-            this.tickableBlockEntities.removeAll(this.blockEntitiesToUnload);
-            this.blockEntityList.removeAll(this.blockEntitiesToUnload);
-            this.blockEntitiesToUnload.clear();
+        if (this.emptyTime >= 300 && !this.bridge$blockEntitiesToUnload().isEmpty()) {
+            this.tickableBlockEntities.removeAll(this.bridge$blockEntitiesToUnload());
+            this.blockEntityList.removeAll(this.bridge$blockEntitiesToUnload());
+            this.bridge$blockEntitiesToUnload().clear();
         }
     }
 
