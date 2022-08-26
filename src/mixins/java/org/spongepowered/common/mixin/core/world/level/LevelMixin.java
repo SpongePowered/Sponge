@@ -80,7 +80,6 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
     @Shadow protected float thunderLevel;
     @Shadow @Final public List<BlockEntity> blockEntityList;
     @Shadow @Final public List<BlockEntity> tickableBlockEntities;
-    @Shadow @Final protected List<BlockEntity> blockEntitiesToUnload;
 
     @Shadow public abstract LevelData shadow$getLevelData();
     @Shadow public abstract void shadow$updateSkyBrightness();
