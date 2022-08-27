@@ -252,10 +252,13 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
         // common checks and throws are done here.
         final @Nullable Vector3d toPosition;
         if (fireMoveEvent) {
-            toPosition = SpongeCommonEventFactory.callMoveEvent(
-                    player,
-                    fromPosition,
-                    originalToPosition);
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
+                toPosition = SpongeCommonEventFactory.callMoveEvent(
+                        player,
+                        fromPosition,
+                        originalToPosition);
+            }
         } else {
             toPosition = originalToPosition;
         }
