@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
@@ -48,6 +50,9 @@ import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.effect.particle.ParticleOption;
+import org.spongepowered.api.effect.particle.ParticleType;
+import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.EventListenerRegistration;
@@ -61,10 +66,20 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotDataBuilder;
+import org.spongepowered.common.data.datasync.entity.EntityBabyConverter;
+import org.spongepowered.common.data.datasync.entity.EntityCustomNameConverter;
+import org.spongepowered.common.data.datasync.entity.EntityCustomNameVisibleConverter;
+import org.spongepowered.common.data.datasync.entity.EntityFlagsConverter;
+import org.spongepowered.common.data.datasync.entity.EntityNoGravityConverter;
+import org.spongepowered.common.data.datasync.entity.EntitySilentConverter;
+import org.spongepowered.common.data.datasync.entity.LivingEntityArrowCountConverter;
+import org.spongepowered.common.data.datasync.entity.LivingHealthConverter;
+import org.spongepowered.common.data.datasync.entity.MobEntityAIFlagsConverter;
 import org.spongepowered.common.data.key.KeyBasedDataListener;
 import org.spongepowered.common.data.persistence.datastore.DataStoreRegistry;
 import org.spongepowered.common.data.provider.CustomDataProvider;
@@ -233,6 +248,11 @@ public final class SpongeDataManager implements DataManager {
         return DataTranslatorProvider.INSTANCE.getSerializer(objectClass);
     }
 
+    @Override
+    public <T> void registerTranslator(final Class<T> objectClass, final DataTranslator<T> translator) {
+        DataTranslatorProvider.INSTANCE.register(objectClass, translator);
+    }
+
     public void registerKeyListeners() {
         this.keyListeners.forEach(this::registerKeyListener0);
         this.keyListeners.clear();
@@ -320,6 +340,15 @@ public final class SpongeDataManager implements DataManager {
 
     public void registerDefaultProviders() {
         this.dataProviderRegistry.registerDefaultProviders();
+        new EntityBabyConverter();
+        new EntityCustomNameConverter();
+        new EntityCustomNameVisibleConverter();
+        new EntityFlagsConverter();
+        new EntityNoGravityConverter();
+        new EntitySilentConverter();
+        new LivingEntityArrowCountConverter();
+        new LivingHealthConverter();
+        new MobEntityAIFlagsConverter();
 
     }
 
@@ -343,6 +372,7 @@ public final class SpongeDataManager implements DataManager {
         this.registerBuilder(ServerLocation.class, new SpongeServerLocationBuilder());
         this.registerBuilder(GameProfile.class, new SpongeGameProfileDataBuilder());
         this.registerBuilder(ProfileProperty.class, new SpongeProfilePropertyDataBuilder());
+        this.registerBuilder(Color.class, new Color.Builder());
     }
 
     public Optional<DataStore> getDataStore(ResourceKey key, Class<? extends DataHolder> typeToken) {
@@ -356,6 +386,9 @@ public final class SpongeDataManager implements DataManager {
         if (this.registryTypeMap == null) {
             this.registryTypeMap = new HashMap<>();
             this.registryTypeMap.put(ItemType.class, RegistryTypes.ITEM_TYPE);
+            this.registryTypeMap.put(ParticleType.class, RegistryTypes.PARTICLE_TYPE);
+            this.registryTypeMap.put(ParticleOption.class, RegistryTypes.PARTICLE_OPTION);
+            this.registryTypeMap.put(PotionEffectType.class, RegistryTypes.POTION_EFFECT_TYPE);
             // TODO add all RegistryTypes that we have global registries for
             // there needs to be a better way to do this
         }

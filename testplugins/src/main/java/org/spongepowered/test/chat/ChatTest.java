@@ -89,7 +89,7 @@ public class ChatTest implements LoadableModule {
         Arrays.asList(Locales.EN_US, new Locale("en", "UD")).forEach(it ->
                 lang.registerAll(it, ResourceBundle.getBundle("org.spongepowered.test.chat.messages", it,
                                                               UTF8ResourceBundleControl.get()), false));
-        GlobalTranslator.get().addSource(lang);
+        GlobalTranslator.translator().addSource(lang);
     }
 
     @Override

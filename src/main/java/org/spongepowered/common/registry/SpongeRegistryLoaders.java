@@ -54,9 +54,13 @@ import net.minecraft.commands.synchronization.brigadier.DoubleArgumentSerializer
 import net.minecraft.commands.synchronization.brigadier.FloatArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.IntegerArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.LongArgumentSerializer;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.phys.Vec2;
@@ -157,6 +161,8 @@ import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientations;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.placeholder.PlaceholderParsers;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
@@ -165,6 +171,9 @@ import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultTypes;
+import org.spongepowered.api.state.BooleanStateProperty;
+import org.spongepowered.api.state.EnumStateProperty;
+import org.spongepowered.api.state.IntegerStateProperty;
 import org.spongepowered.api.tag.TagType;
 import org.spongepowered.api.tag.TagTypes;
 import org.spongepowered.api.util.Color;
@@ -174,6 +183,7 @@ import org.spongepowered.api.util.orientation.Orientation;
 import org.spongepowered.api.util.orientation.Orientations;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.ChunkRegenerateFlags;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.LightType;
 import org.spongepowered.api.world.LightTypes;
 import org.spongepowered.api.world.Locatable;
@@ -237,6 +247,7 @@ import org.spongepowered.common.data.nbt.validation.ValidationTypes;
 import org.spongepowered.common.data.persistence.HoconDataFormat;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.persistence.NBTDataFormat;
+import org.spongepowered.common.data.persistence.SNBTDataFormat;
 import org.spongepowered.common.data.type.SpongeBodyPart;
 import org.spongepowered.common.data.type.SpongeCatType;
 import org.spongepowered.common.data.type.SpongeHorseColor;
@@ -248,6 +259,7 @@ import org.spongepowered.common.data.type.SpongeParrotType;
 import org.spongepowered.common.data.type.SpongeRabbitType;
 import org.spongepowered.common.data.type.SpongeSkinPart;
 import org.spongepowered.common.economy.SpongeAccountDeletionResultType;
+import org.spongepowered.common.economy.SpongeTransactionType;
 import org.spongepowered.common.effect.particle.SpongeParticleOption;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.ai.SpongeGoalExecutorType;
@@ -288,7 +300,6 @@ import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOr
 import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
-import org.spongepowered.common.economy.SpongeTransactionType;
 import org.spongepowered.common.tag.SpongeTagType;
 import org.spongepowered.common.util.SpongeOrientation;
 import org.spongepowered.common.util.VecHelper;
@@ -309,50 +320,15 @@ import org.spongepowered.math.vector.Vector2d;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.LongArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.ComponentArgument;
-import net.minecraft.commands.arguments.CompoundTagArgument;
-import net.minecraft.commands.arguments.DimensionArgument;
-import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.GameProfileArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.commands.arguments.ScoreHolderArgument;
-import net.minecraft.commands.arguments.UuidArgument;
-import net.minecraft.commands.arguments.blocks.BlockStateArgument;
-import net.minecraft.commands.arguments.coordinates.RotationArgument;
-import net.minecraft.commands.arguments.coordinates.Vec2Argument;
-import net.minecraft.commands.arguments.coordinates.Vec3Argument;
-import net.minecraft.commands.arguments.item.ItemArgument;
-import net.minecraft.commands.arguments.selector.EntitySelectorParser;
-import net.minecraft.commands.synchronization.SuggestionProviders;
-import net.minecraft.commands.synchronization.brigadier.DoubleArgumentSerializer;
-import net.minecraft.commands.synchronization.brigadier.FloatArgumentSerializer;
-import net.minecraft.commands.synchronization.brigadier.IntegerArgumentSerializer;
-import net.minecraft.commands.synchronization.brigadier.LongArgumentSerializer;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.RecordItem;
-import net.minecraft.world.level.material.MaterialColor;
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
-import net.minecraft.world.phys.Vec2;
-import org.checkerframework.checker.nullness.qual.NonNull;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Comparator;
-import java.util.List;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
@@ -798,7 +774,7 @@ public final class SpongeRegistryLoaders {
             l.add(PlaceholderParsers.CURRENT_WORLD, k -> new SpongePlaceholderParserBuilder()
                     .parser(placeholderText -> Component.text(placeholderText.associatedObject().filter(x -> x instanceof Locatable)
                             .map(x -> ((Locatable) x).serverLocation().worldKey())
-                            .orElseGet(() -> Sponge.server().worldManager().defaultWorld().key()).toString()))
+                            .orElseGet(() -> DefaultWorldKeys.DEFAULT).toString()))
                     .build());
             l.add(PlaceholderParsers.NAME, k -> new SpongePlaceholderParserBuilder()
                     .parser(placeholderText -> placeholderText.associatedObject()
@@ -1026,6 +1002,7 @@ public final class SpongeRegistryLoaders {
         return RegistryLoader.of(l -> {
             l.add(DataFormats.JSON, k -> new JsonDataFormat());
             l.add(DataFormats.HOCON, k -> new HoconDataFormat());
+            l.add(DataFormats.SNBT, k -> new SNBTDataFormat());
             l.add(DataFormats.NBT, k -> new NBTDataFormat());
         });
     }
@@ -1161,6 +1138,56 @@ public final class SpongeRegistryLoaders {
             l.add(TagTypes.ENTITY_TYPE, k -> new SpongeTagType<@NonNull EntityType<?>>("entity_types", RegistryTypes.ENTITY_TYPE, RegistryTypes.ENTITY_TYPE_TAGS));
             l.add(TagTypes.FLUID_TYPE, k -> new SpongeTagType<@NonNull FluidType>("fluids", RegistryTypes.FLUID_TYPE, RegistryTypes.FLUID_TYPE_TAGS));
             l.add(TagTypes.ITEM_TYPE, k -> new SpongeTagType<@NonNull ItemType>("items", RegistryTypes.ITEM_TYPE, RegistryTypes.ITEM_TYPE_TAGS));
+        });
+    }
+
+    private static final Pattern ILLEGAL_FIELD_CHARACTERS = Pattern.compile("[./-]");
+
+    private static String sanitizedKey(String key) {
+        return SpongeRegistryLoaders.ILLEGAL_FIELD_CHARACTERS.matcher(key).replaceAll("_").toLowerCase(Locale.ROOT);
+    }
+
+    private static <T> Map<String, T> stateProperties(Class<T> clazz) {
+        Map<String, T> propertyMap = new HashMap<>();
+        Registry.BLOCK.forEach(block -> block.defaultBlockState().getProperties().forEach(prop -> {
+            if (clazz.isInstance(prop)) {
+                final String key = Registry.BLOCK.getKey(block).getPath() + "_" + prop.getName();
+                propertyMap.put(SpongeRegistryLoaders.sanitizedKey(key), clazz.cast(prop));
+            }
+        }));
+        return propertyMap;
+    }
+
+    public static RegistryLoader<BooleanStateProperty> booleanStateProperties() {
+        return RegistryLoader.of(l -> {
+            final Map<String, BooleanProperty> props = SpongeRegistryLoaders.stateProperties(BooleanProperty.class);
+            final Map<String, BooleanProperty> finalProps = new HashMap<>();
+            props.forEach((key, value) -> finalProps.put(key, BooleanProperty.create(value.getName()))); // Create clones for API States
+            props.values().stream().distinct().forEach(property -> finalProps.put(sanitizedKey(property.getName()), property)); // Add real keys of properties
+            finalProps.forEach((key, value) -> l.add(RegistryKey.of(RegistryTypes.BOOLEAN_STATE_PROPERTY, ResourceKey.sponge(key)), k -> (BooleanStateProperty) value));
+        });
+    }
+
+    public static RegistryLoader<IntegerStateProperty> integerStateProperties() {
+        return RegistryLoader.of(l -> {
+            final Map<String, IntegerProperty> props = SpongeRegistryLoaders.stateProperties(IntegerProperty.class);
+            final Map<String, IntegerProperty> finalProps = new HashMap<>();
+            props.forEach((key, value) -> finalProps.put(key, IntegerProperty.create(value.getName(),
+                    value.getPossibleValues().stream().min(Integer::compare).get(),
+                    value.getPossibleValues().stream().max(Integer::compare).get()))); // Create clones for API States
+            props.values().stream().distinct().forEach(property -> finalProps.put(sanitizedKey(property.getName()), property)); // Add real keys of properties
+            finalProps.forEach((key, value) -> l.add(RegistryKey.of(RegistryTypes.INTEGER_STATE_PROPERTY, ResourceKey.sponge(key)), k -> (IntegerStateProperty) value));
+        });
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static RegistryLoader<EnumStateProperty<?>> enumStateProperties() {
+        return RegistryLoader.of(l -> {
+            final Map<String, EnumProperty> props = SpongeRegistryLoaders.stateProperties(EnumProperty.class);
+            final Map<String, EnumProperty> finalProps = new HashMap<>();
+            props.forEach((key, value) -> finalProps.put(key, EnumProperty.create(value.getName(), value.getValueClass(), value.getPossibleValues()))); // Create clones for API States
+            props.values().stream().distinct().forEach(property -> finalProps.put(sanitizedKey(property.getName()), property)); // Add real keys of properties
+            finalProps.forEach((key, value) -> l.add(RegistryKey.of(RegistryTypes.ENUM_STATE_PROPERTY, ResourceKey.sponge(key)), k -> (EnumStateProperty<?>) value));
         });
     }
 

@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import co.aikar.timings.Timing;
-import co.aikar.timings.sponge.ServerTimingsHandler;
-import co.aikar.timings.sponge.TimingsManager;
 import com.google.inject.Injector;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -48,10 +45,13 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.world.UnloadWorldEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectProxy;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -114,7 +114,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
     private @Nullable ResourcePack impl$resourcePack;
-    private @Nullable ServerTimingsHandler impl$timingsHandler;
 
     @Override
     public Subject subject() {
@@ -153,7 +152,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "tickServer", at = @At(value = "HEAD"))
     private void impl$onServerTickStart(final CallbackInfo ci) {
-        TimingsManager.FULL_SERVER_TICK.startTiming();
         this.scheduler().tick();
     }
 
@@ -171,9 +169,12 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         frame.pushCause(Sponge.systemSubject());
     }
 
-    @Inject(method = "tickServer", at = @At(value = "RETURN"))
-    private void impl$completeTickCheckAnimation(final CallbackInfo ci) {
-        TimingsManager.FULL_SERVER_TICK.stopTiming();
+    @Inject(method = "stopServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;saveAllChunks(ZZZ)Z"))
+    private void impl$callUnloadWorldEvents(final CallbackInfo ci) {
+        for(ServerLevel level : this.shadow$getAllLevels()) {
+            final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerWorld) level);
+            SpongeCommon.post(unloadWorldEvent);
+        }
     }
 
     @Inject(method = "stopServer", at = @At(value = "TAIL"))
@@ -217,9 +218,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             this.shadow$getPlayerList().saveAll();
         }
 
-        try (final Timing timing = this.bridge$timingsHandler().save.startTiming()) {
-            this.saveAllChunks(true, false, false);
-        }
+        this.saveAllChunks(true, false, false);
 
         // force check to fail as we handle everything above
         return this.tickCount + 1;
@@ -323,15 +322,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         } else {
             ((PrimaryLevelData) world.getLevelData()).setDifficulty(newDifficulty);
         }
-    }
-
-    @Override
-    public ServerTimingsHandler bridge$timingsHandler() {
-        if (this.impl$timingsHandler == null) {
-            this.impl$timingsHandler = new ServerTimingsHandler((MinecraftServer) (Object) this);
-        }
-
-        return this.impl$timingsHandler;
     }
 
     @Override

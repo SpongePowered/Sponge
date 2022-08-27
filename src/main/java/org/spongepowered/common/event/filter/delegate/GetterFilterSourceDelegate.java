@@ -44,31 +44,32 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Optional;
 
 public class GetterFilterSourceDelegate implements ParameterFilterSourceDelegate {
 
     private final Getter anno;
 
-    public GetterFilterSourceDelegate(Getter a) {
+    public GetterFilterSourceDelegate(final Getter a) {
         this.anno = a;
     }
 
     @Override
     public Tuple<Integer, Integer> write(
-        ClassWriter cw, MethodVisitor mv, Method method, int paramIdx, int local, final int[] plocals, final Parameter[] params
-    ) {
-        Class<?> targetType = params[paramIdx].getType();
-        Class<?> eventClass = params[0].getType();
-        String targetMethod = this.anno.value();
+        final ClassWriter cw, final MethodVisitor mv, final ListenerClassVisitor.DiscoveredMethod method,
+        final int paramIdx, int local, final int[] plocals, final ListenerClassVisitor.ListenerParameter[] params
+    ) throws ClassNotFoundException {
+        final Class<?> targetType = method.classByLoader(params[paramIdx].type().getClassName());
+        final Class<?> eventClass = method.classByLoader(params[0].type().getClassName());
+        final String targetMethod = this.anno.value();
         Method targetMethodObj = null;
 
         try {
             targetMethodObj = eventClass.getMethod(targetMethod);
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             throw new IllegalArgumentException(String.format("Method %s specified by getter annotation was not found in type %s", targetMethod, eventClass.getName()));
         }
 
@@ -81,17 +82,17 @@ public class GetterFilterSourceDelegate implements ParameterFilterSourceDelegate
                     + targetType.getName() + " Found: " + targetMethodObj.getReturnType().getName());
         }
 
-        Type returnType = Type.getReturnType(targetMethodObj);
-        Class<?> declaringClass = targetMethodObj.getDeclaringClass();
+        final Type returnType = Type.getReturnType(targetMethodObj);
+        final Class<?> declaringClass = targetMethodObj.getDeclaringClass();
         mv.visitVarInsn(ALOAD, 1);
         mv.visitTypeInsn(CHECKCAST, Type.getInternalName(declaringClass));
-        int op = declaringClass.isInterface() ? INVOKEINTERFACE : INVOKEVIRTUAL;
+        final int op = declaringClass.isInterface() ? INVOKEINTERFACE : INVOKEVIRTUAL;
         mv.visitMethodInsn(op, Type.getInternalName(declaringClass), targetMethod, "()" + returnType.getDescriptor(), declaringClass.isInterface());
-        int paramLocal = local++;
+        final int paramLocal = local++;
         mv.visitVarInsn(returnType.getOpcode(ISTORE), paramLocal);
         if (!targetMethodObj.getReturnType().isPrimitive()) {
-            Label failure = new Label();
-            Label success = new Label();
+            final Label failure = new Label();
+            final Label success = new Label();
             if (Optional.class.equals(targetMethodObj.getReturnType()) && !Optional.class.equals(targetType)) {
                 // Unwrap the optional
                 mv.visitVarInsn(ALOAD, paramLocal);

@@ -170,7 +170,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow protected abstract void shadow$tellNeutralMobsThatIDied();
     @Shadow protected abstract void shadow$createEndPlatform(ServerLevel p_241206_1_, BlockPos blockPos);
     @Shadow protected abstract void shadow$triggerDimensionChangeTriggers(ServerLevel serverworld);
+    @Shadow public abstract void shadow$doCloseContainer();
     // @formatter:on
+
 
     private net.minecraft.network.chat.@Nullable Component impl$connectionMessage;
     private Locale impl$language = Locales.EN_US;
@@ -598,7 +600,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             )
     )
     private void impl$closePreviousContainer(final net.minecraft.server.level.ServerPlayer self) {
-        this.shadow$closeContainer();
+        this.shadow$doCloseContainer();
     }
 
     /**

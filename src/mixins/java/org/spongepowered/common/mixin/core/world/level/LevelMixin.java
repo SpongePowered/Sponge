@@ -66,6 +66,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 @Mixin(net.minecraft.world.level.Level.class)
@@ -77,6 +78,8 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
     @Shadow protected float rainLevel;
     @Shadow protected float oThunderLevel;
     @Shadow protected float thunderLevel;
+    @Shadow @Final public List<BlockEntity> blockEntityList;
+    @Shadow @Final public List<BlockEntity> tickableBlockEntities;
 
     @Shadow public abstract LevelData shadow$getLevelData();
     @Shadow public abstract void shadow$updateSkyBrightness();

@@ -35,7 +35,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -48,12 +47,13 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.AABB;
-import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.WorldLike;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.WorldChunk;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.asm.mixin.Final;
@@ -63,11 +63,12 @@ import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.world.level.chunk.ChunkBiomeContainerAccessor;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
+import org.spongepowered.common.data.holder.SpongeLocationBaseDataHolder;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.util.SpongeTicks;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
@@ -93,11 +94,9 @@ import java.util.stream.Stream;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
 @Implements(@Interface(iface = WorldChunk.class, prefix = "worldChunk$", remap = Remap.NONE))
-public abstract class LevelChunkMixin_API implements WorldChunk {
+public abstract class LevelChunkMixin_API implements WorldChunk, SpongeLocationBaseDataHolder {
 
     //@formatter:off
-    @Shadow private ChunkBiomeContainer biomes;
-    @Shadow private long inhabitedTime;
     @Shadow @Final private ChunkPos chunkPos;
     @Shadow @Final private Level level;
     @Shadow @Final private ClassInstanceMultiMap<net.minecraft.world.entity.Entity>[] entitySections;
@@ -112,29 +111,20 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
             net.minecraft.world.phys.AABB param1,
             List<net.minecraft.world.entity.Entity> param2,
             @org.jetbrains.annotations.Nullable Predicate<? super net.minecraft.world.entity.Entity> param3);
+    @Shadow public abstract Map<BlockPos, net.minecraft.world.level.block.entity.BlockEntity> shadow$getBlockEntities();
+    @Shadow public abstract void shadow$setBlockEntity(BlockPos param0, net.minecraft.world.level.block.entity.BlockEntity param1);
+    @Shadow public abstract void shadow$removeBlockEntity(BlockPos param0);
     //@formatter:on
 
     private @Nullable Vector3i api$blockMin;
     private @Nullable Vector3i api$blockMax;
 
     @Override
-    public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.biomes, () -> this.shadow$setUnsaved(true));
-    }
-
-    @Override
-    public Ticks inhabitedTime() {
-        return new SpongeTicks(this.inhabitedTime);
-    }
-
-    @Override
-    public void setInhabitedTime(final Ticks newInhabitedTime) {
-        this.inhabitedTime = newInhabitedTime.ticks();
-    }
-
-    @Override
-    public Vector3i chunkPosition() {
-        return new Vector3i(this.chunkPos.x, 0, this.chunkPos.z);
+    public Biome biome(final int x, final int y, final int z) {
+        if (!this.contains(x, y, z)) {
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);
+        }
+        return (Biome) (Object) this.level.getBiome(new BlockPos(x, y, z));
     }
 
     @Override
@@ -240,6 +230,11 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
     }
 
     @Override
+    public Collection<? extends BlockEntity> blockEntities() {
+        return (Collection) Collections.unmodifiableCollection(this.shadow$getBlockEntities().values());
+    }
+
+    @Override
     public VolumeStream<WorldChunk, BlockEntity> blockEntityStream(
         final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
@@ -282,9 +277,17 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
     }
 
     @Override
-    public VolumeStream<WorldChunk, Biome> biomeStream(
-        final Vector3i min, final Vector3i max, final StreamOptions options
-    ) {
+    public void addBlockEntity(int x, int y, int z, BlockEntity blockEntity) {
+        this.world().addBlockEntity(x, y, z, blockEntity);
+    }
+
+    @Override
+    public void removeBlockEntity(int x, int y, int z) {
+        this.world().removeBlockEntity(x, y, z);
+    }
+
+    @Override
+    public VolumeStream<WorldChunk, Biome> biomeStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
         VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
             Objects.requireNonNull(options, "options"));
 
@@ -324,11 +327,6 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
     }
 
     @Override
-    public int highestYAt(final int x, final int z) {
-        return this.shadow$getHeight((Heightmap.Types) (Object) HeightTypes.WORLD_SURFACE.get(), x, z);
-    }
-
-    @Override
     public Vector3i min() {
         if (this.api$blockMin == null) {
             this.api$blockMin = SpongeChunkLayout.INSTANCE.forceToWorld(this.chunkPosition());
@@ -347,16 +345,6 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
     @Override
     public Vector3i size() {
         return SpongeChunkLayout.CHUNK_SIZE;
-    }
-
-    @Override
-    public boolean contains(final int x, final int y, final int z) {
-        return VecHelper.inBounds(x, y, z, this.min(), this.max());
-    }
-
-    @Override
-    public boolean isAreaAvailable(final int x, final int y, final int z) {
-        return VecHelper.inBounds(x, y, z, this.min(), this.max());
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -456,4 +444,13 @@ public abstract class LevelChunkMixin_API implements WorldChunk {
         return VecHelper.inBounds(position, this.min(), this.max());
     }
 
+
+    @Override
+    public ServerLocation impl$dataholder(final int x, final int y, final int z) {
+        this.api$checkPositionInChunk(x, y, z);
+        if (this.level instanceof ServerWorld) {
+            return ((ServerWorld) this.level).location(x, y ,z);
+        }
+        throw new MissingImplementationException("LevelChunk", "impl$dataholder");
+    }
 }

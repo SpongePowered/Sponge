@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.datasync.entity;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
@@ -34,30 +35,30 @@ import org.spongepowered.common.data.datasync.DataParameterConverter;
 
 import java.util.Optional;
 
-public final class EntityCustomNameConverter extends DataParameterConverter<net.minecraft.network.chat.Component> {
+public final class EntityCustomNameConverter extends DataParameterConverter<Optional<Component>> {
     public EntityCustomNameConverter() {
         super(EntityAccessor.accessor$DATA_CUSTOM_NAME());
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(final Entity entity, final net.minecraft.network.chat.Component oldValue, final net.minecraft.network.chat.Component newValue) {
-        return Optional.of(DataTransactionResult.builder()
-                .replace(Value.immutableOf(Keys.DISPLAY_NAME, SpongeAdventure.asAdventure(oldValue)))
-                .success(Value.immutableOf(Keys.DISPLAY_NAME, SpongeAdventure.asAdventure(newValue)))
-                .result(DataTransactionResult.Type.SUCCESS)
-                .build());
+    public Optional<DataTransactionResult> createTransaction(final Entity entity, final Optional<Component> oldValue, final Optional<Component> newValue) {
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+        oldValue.ifPresent(v -> builder.replace(Value.immutableOf(Keys.CUSTOM_NAME, SpongeAdventure.asAdventure(v))));
+        newValue.ifPresent(v -> builder.success(Value.immutableOf(Keys.CUSTOM_NAME, SpongeAdventure.asAdventure(v))));
+        return Optional.of(builder.result(DataTransactionResult.Type.SUCCESS).build());
     }
 
     @Override
-    public net.minecraft.network.chat.Component getValueFromEvent(final net.minecraft.network.chat.Component oldValue, final DataTransactionResult result) {
-        return result.successfulValue(Keys.DISPLAY_NAME)
-                .map(v -> {
-                    try {
-                        return SpongeAdventure.asVanilla(v.get());
-                    } catch (final Exception ignored) {
-                        return oldValue;
-                    }
-                })
-                .orElse(oldValue);
+    public Optional<Component> getValueFromEvent(final Optional<Component> oldValue, final DataTransactionResult result) {
+        final Optional<net.kyori.adventure.text.Component> component = result.successfulValue(Keys.CUSTOM_NAME).map(Value::get);
+        if (component.isPresent()) {
+            try {
+                return Optional.of(SpongeAdventure.asVanilla(component.get()));
+            } catch (final Exception e) {
+                return oldValue;
+            }
+        }
+        // no successful value -- name was removed, so don't try to set it back to the old value
+        return Optional.empty();
     }
 }

@@ -24,9 +24,14 @@
  */
 package org.spongepowered.common.mixin.tracker.world.entity;
 
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatEntry;
+import net.minecraft.world.damagesource.CombatTracker;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
-
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,12 +48,6 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.damagesource.CombatTracker;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-
 import java.util.Random;
 
 @Mixin(LivingEntity.class)
@@ -175,6 +174,23 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
         ) {
             context.buildAndSwitch();
             this.shadow$pushEntities();
+        }
+    }
+
+    @Redirect(
+        method = "tickEffects",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/effect/MobEffectInstance;tick(Lnet/minecraft/world/entity/LivingEntity;Ljava/lang/Runnable;)Z"
+        )
+    )
+    private boolean impl$wrapEffectWithFrame(
+        final MobEffectInstance instance, final LivingEntity thisEntity, final Runnable runnable) {
+        try {
+            PhaseTracker.getInstance().pushCause(instance); // push the PotionEffect
+            return instance.tick(thisEntity, runnable);
+        } finally {
+            PhaseTracker.getInstance().popCause();
         }
     }
 

@@ -32,6 +32,7 @@ import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -91,6 +92,7 @@ public final class DataSerializers {
     public static final DataTranslator<Instant> INSTANT_DATA_SERIALIZER;
     public static final DataTranslator<ZonedDateTime> ZONED_DATE_TIME_DATA_SERIALIZER;
     public static final DataTranslator<Month> MONTH_DATA_SERIALIZER;
+    public static final DataTranslator<Direction> DIRECTION_SERIALIZER;
 
 
     static {
@@ -983,6 +985,34 @@ public final class DataSerializers {
             @Override
             public DataView addTo(Month obj, DataView dataView) {
                 return dataView.set(Constants.DataSerializers.LOCAL_DATE_MONTH, obj.getValue());
+            }
+        };
+
+        DIRECTION_SERIALIZER = new DataTranslator<Direction>() {
+            final TypeToken<Direction> token = TypeToken.get(Direction.class);
+
+            @Override
+            public TypeToken<Direction> token() {
+                return this.token;
+            }
+
+            @Override
+            public Direction translate(DataView view) throws InvalidDataException {
+                try {
+                    return Direction.valueOf(view.getString(Constants.DataSerializers.DIRECTION).get());
+                } catch (IllegalArgumentException e) {
+                    throw new InvalidDataException("Invalid Direction" + view);
+                }
+            }
+
+            @Override
+            public DataContainer translate(Direction obj) throws InvalidDataException {
+                return DataContainer.createNew().set(Constants.DataSerializers.DIRECTION, obj.name());
+            }
+
+            @Override
+            public DataView addTo(Direction obj, DataView dataView) {
+                return dataView.set(Constants.DataSerializers.DIRECTION, obj.name());
             }
         };
 

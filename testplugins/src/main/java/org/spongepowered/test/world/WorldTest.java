@@ -46,6 +46,7 @@ import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Axis;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
@@ -376,7 +377,7 @@ public final class WorldTest {
                 .build();
 
         if (player.world().key().equals(worldKey)) {
-            player.setLocation(ServerLocation.of(wm.defaultWorld(), wm.defaultWorld().properties().spawnPosition()));
+            player.setLocation(ServerLocation.of(wm.world(DefaultWorldKeys.DEFAULT).get(), wm.world(DefaultWorldKeys.DEFAULT).get().properties().spawnPosition()));
         }
         context.sendMessage(Identity.nil(), Component.text("Generating your world..."));
         wm.deleteWorld(worldKey).thenCompose(b -> wm.loadWorld(customTemplate)).thenAccept(w -> this.transportToWorld(player, w)).exceptionally(e -> {

@@ -629,7 +629,7 @@ public final class PhaseTracker implements CauseStackManager {
                 throw new IllegalStateException("Cause Stack Frame Corruption! Attempted to pop a frame that was not on the stack.");
             }
             final PrettyPrinter printer = new PrettyPrinter(100).add("Cause Stack Frame Corruption!").centre().hr()
-                                              .add("Found %n frames left on the stack. Clearing them all.", new Object[]{offset + 1});
+                                              .add("Found %d frames left on the stack. Clearing them all.", new Object[]{offset + 1});
             if (!PhaseTracker.DEBUG_CAUSE_FRAMES) {
                 printer.add()
                     .add("Please add -Dsponge.debugcauseframes=true to your startup flags to enable further debugging output.");
@@ -646,7 +646,7 @@ public final class PhaseTracker implements CauseStackManager {
             while (offset >= 0) {
                 final @Nullable SpongeCauseStackFrame f = this.frames.peek();
                 if (PhaseTracker.DEBUG_CAUSE_FRAMES && offset > 0) {
-                    printer.add("   Stack frame in position %n :", offset);
+                    printer.add("   Stack frame in position %d :", new Object[]{offset});
                     printer.add(f.stackDebug);
                 }
                 this.popCauseFrame(f);

@@ -621,7 +621,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     @Override
     public String identifier() {
-        return this.name();
+        return this.uniqueId().toString();
     }
 
 }

@@ -24,42 +24,43 @@
  */
 package org.spongepowered.common.event.filter;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class FilterFactory {
 
     private final AtomicInteger id = new AtomicInteger();
     private final DefineableClassLoader classLoader;
-    private final LoadingCache<Method, Class<? extends EventFilter>> cache = Caffeine.newBuilder()
+    private final LoadingCache<ListenerClassVisitor.DiscoveredMethod, Class<? extends EventFilter>> cache = Caffeine.newBuilder()
             .weakValues().build(this::createClass);
     private final String targetPackage;
 
-    public FilterFactory(String targetPackage, DefineableClassLoader classLoader) {
+    public FilterFactory(final String targetPackage, final DefineableClassLoader classLoader) {
         checkNotNull(targetPackage, "targetPackage");
         checkArgument(!targetPackage.isEmpty(), "targetPackage cannot be empty");
         this.targetPackage = targetPackage + '.';
         this.classLoader = checkNotNull(classLoader, "classLoader");
     }
 
-    public Class<? extends EventFilter> createFilter(Method method) throws Exception {
+    public Class<? extends EventFilter> createFilter(final ListenerClassVisitor.DiscoveredMethod method) throws Exception {
         final Class<? extends EventFilter> clazz = this.cache.get(method);
         return clazz == EventFilter.class ? null : clazz;
     }
 
-    Class<? extends EventFilter> createClass(Method method) {
-        Class<?> handle = method.getDeclaringClass();
-        Class<?> eventClass = method.getParameterTypes()[0];
-        String name = this.targetPackage + eventClass.getSimpleName() + "Filter_" + handle.getSimpleName() + '_'
-                + method.getName() + this.id.incrementAndGet();
-        byte[] cls = FilterGenerator.getInstance().generateClass(name, method);
+    Class<? extends EventFilter> createClass(final ListenerClassVisitor.DiscoveredMethod method) throws
+        ClassNotFoundException {
+        final Class<?> handle = method.declaringClass();
+        final Class<?> eventClass = method.parameterTypes()[0].clazz();
+        final String name = this.targetPackage + eventClass.getSimpleName() + "Filter_" + handle.getSimpleName() + '_'
+                + method.methodName() + this.id.incrementAndGet();
+        final byte[] cls = FilterGenerator.getInstance().generateClass(name, method);
         if (cls == null) {
             return EventFilter.class; // cache does not permit nulls
         }

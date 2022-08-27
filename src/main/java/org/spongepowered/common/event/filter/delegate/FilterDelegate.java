@@ -26,11 +26,11 @@ package org.spongepowered.common.event.filter.delegate;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
-
-import java.lang.reflect.Method;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 
 public interface FilterDelegate {
 
-    int write(String name, ClassWriter cw, MethodVisitor mv, Method method, int locals);
+    int write(String name, ClassWriter cw, MethodVisitor mv, ListenerClassVisitor.DiscoveredMethod method, int locals) throws
+        ClassNotFoundException;
 
 }

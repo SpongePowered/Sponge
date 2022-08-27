@@ -47,11 +47,10 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.filter.data.GetValue;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 import org.spongepowered.common.util.generator.GeneratorUtils;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Optional;
 
 public class GetValueFilterSourceDelegate implements ParameterFilterSourceDelegate {
@@ -69,9 +68,9 @@ public class GetValueFilterSourceDelegate implements ParameterFilterSourceDelega
 
     @Override
     public Tuple<Integer, Integer> write(
-        final ClassWriter cw, final MethodVisitor mv, final Method method, final int paramIdx, int local, final int[] plocals,
-        final Parameter[] params
-    ) {
+        final ClassWriter cw, final MethodVisitor mv, final ListenerClassVisitor.DiscoveredMethod method, final int paramIdx, int local, final int[] plocals,
+        final ListenerClassVisitor.ListenerParameter[] params
+    ) throws ClassNotFoundException {
         final Field targetField;
         try {
             targetField = this.anno.container().getField(this.anno.value());
@@ -83,8 +82,8 @@ public class GetValueFilterSourceDelegate implements ParameterFilterSourceDelega
             throw new IllegalArgumentException(String.format("Field %s.%s was not a Key", targetField.getName(), targetField.getType()));
         }
 
-        final Class<?> paramType = params[paramIdx].getType();
-        final Type eventType = Type.getType(params[0].getType());
+        final Type paramType = params[paramIdx].type();
+        final Type eventType = params[0].type();
         // key := <container>.<value>
         final int keyIdx = local++;
         mv.visitFieldInsn(GETSTATIC, Type.getInternalName(this.anno.container()), this.anno.value(), Type.getDescriptor(Key.class));
@@ -94,8 +93,8 @@ public class GetValueFilterSourceDelegate implements ParameterFilterSourceDelega
         final Label failure = new Label();
         // for all parameters p' before `param` that inherit from ValueContainer, excluding the event itself
         for (int i = paramIdx - 1; i > 0; --i) {
-            final Parameter param = params[i];
-            if (!ValueContainer.class.isAssignableFrom(param.getType())) {
+            final ListenerClassVisitor.ListenerParameter param = params[i];
+            if (!ValueContainer.class.isAssignableFrom(method.classByLoader(param.type().getClassName()))) {
                 continue;
             }
             mv.visitVarInsn(ALOAD, plocals[i - 1]); // p'
@@ -103,7 +102,7 @@ public class GetValueFilterSourceDelegate implements ParameterFilterSourceDelega
             // x = p'.get(key)
             mv.visitMethodInsn(
                 INVOKEINTERFACE,
-                Type.getInternalName(param.getType()),
+                param.type().getInternalName(),
                 "get",
                 GetValueFilterSourceDelegate.VALUE_CONTAINER_GET,
                 true
@@ -189,13 +188,12 @@ public class GetValueFilterSourceDelegate implements ParameterFilterSourceDelega
             GetValueFilterSourceDelegate.OPTIONAL_GET,
             false
         );
-        final Type param = Type.getType(paramType);
-        if (paramType.isPrimitive()) {
-            GeneratorUtils.visitUnboxingMethod(mv, param);
+        if (paramType.getSort() < Type.ARRAY) {
+            GeneratorUtils.visitUnboxingMethod(mv, paramType);
         } else {
             final Label success2 = new Label();
             mv.visitInsn(DUP);
-            mv.visitTypeInsn(INSTANCEOF, param.getInternalName());
+            mv.visitTypeInsn(INSTANCEOF, paramType.getInternalName());
             mv.visitJumpInsn(IFNE, success2);
             mv.visitInsn(ACONST_NULL);
             mv.visitInsn(ARETURN);
@@ -203,8 +201,8 @@ public class GetValueFilterSourceDelegate implements ParameterFilterSourceDelega
         }
 
         final int paramLocal = local;
-        local += param.getSize();
-        mv.visitVarInsn(param.getOpcode(ISTORE), paramLocal);
+        local += paramType.getSize();
+        mv.visitVarInsn(paramType.getOpcode(ISTORE), paramLocal);
         return new Tuple<>(local, paramLocal);
     }
 }

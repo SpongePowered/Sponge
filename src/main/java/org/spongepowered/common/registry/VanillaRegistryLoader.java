@@ -86,6 +86,7 @@ import org.spongepowered.api.scoreboard.criteria.Criteria;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.MushroomCow_MushroomTypeAccessor;
+import org.spongepowered.common.accessor.world.entity.boss.enderdragon.phases.EnderDragonPhaseAccessor;
 import org.spongepowered.common.accessor.world.item.ArmorMaterialsAccessor;
 import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.accessor.world.level.block.entity.BannerPatternAccessor;
@@ -114,7 +115,7 @@ final class VanillaRegistryLoader {
 
     private void loadInstanceRegistries() {
         this.holder.createRegistry(RegistryTypes.CRITERION, VanillaRegistryLoader.criterion());
-        this.manualName(RegistryTypes.DRAGON_PHASE_TYPE, EnderDragonPhase.getCount(), map -> {
+        this.manualOrAutomaticName(RegistryTypes.DRAGON_PHASE_TYPE, EnderDragonPhaseAccessor.accessor$PHASES(), map -> {
             map.put(EnderDragonPhase.HOLDING_PATTERN, "holding_pattern");
             map.put(EnderDragonPhase.STRAFE_PLAYER, "strafe_player");
             map.put(EnderDragonPhase.LANDING_APPROACH, "landing_approach");
@@ -126,7 +127,7 @@ final class VanillaRegistryLoader {
             map.put(EnderDragonPhase.CHARGING_PLAYER, "charging_player");
             map.put(EnderDragonPhase.DYING, "dying");
             map.put(EnderDragonPhase.HOVERING, "hover");
-        });
+        }, phase -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, ((EnderDragonPhaseAccessor) phase).accessor$name()));
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape());
         this.holder.createRegistry(RegistryTypes.TRIGGER, VanillaRegistryLoader.trigger(), true,
                 (k, trigger) -> CriteriaTriggersAccessor.invoker$register((CriterionTrigger<?>) trigger));
@@ -207,7 +208,7 @@ final class VanillaRegistryLoader {
         this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), b -> ((BannerPatternAccessor) (Object) b).accessor$filename());
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());
         this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
-        this.knownName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values(), MobCategory::getName);
+        this.knownName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values(), VanillaRegistryLoader.sanitizedName(MobCategory::getName));
     }
 
     private static RegistryLoader<Criterion> criterion() {
@@ -293,7 +294,7 @@ final class VanillaRegistryLoader {
 
     @SuppressWarnings("UnusedReturnValue")
     private <A, I extends Enum<I>> Registry<A> automaticName(final RegistryType<A> type, final I[] values) {
-        return this.naming(type, values, value -> value.name().toLowerCase(Locale.ROOT));
+        return this.naming(type, values, VanillaRegistryLoader.sanitizedName(Enum::name));
     }
 
     @SuppressWarnings("UnusedReturnValue")
@@ -318,9 +319,12 @@ final class VanillaRegistryLoader {
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    private <A, I> Registry<A> manualName(final RegistryType<A> type, final int values, final Consumer<Manual<A, I>> byName) {
-        final Map<I, String> map = new HashMap<>(values);
+    private <A, I> Registry<A> manualOrAutomaticName(final RegistryType<A> type, final I[] values, final Consumer<Manual<A, I>> byName, final Function<I, String> autoName) {
+        final Map<I, String> map = new HashMap<>(values.length);
         byName.accept(map::put);
+        for (final I value : values) {
+            map.computeIfAbsent(value, autoName);
+        }
         return this.naming(type, values, map);
     }
 
@@ -334,7 +338,7 @@ final class VanillaRegistryLoader {
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    private <A, I extends Enum<I>> Registry<A> naming(final RegistryType<A> type, final I[] values, final Map<I, String> byName) {
+    private <A, I> Registry<A> naming(final RegistryType<A> type, final I[] values, final Map<I, String> byName) {
         return this.naming(type, values.length, byName);
     }
 
@@ -362,5 +366,9 @@ final class VanillaRegistryLoader {
     @SuppressWarnings("unused")
     private interface Manual<A, I> {
         void put(final I value, final String key);
+    }
+
+    private static <I> Function<I, String> sanitizedName(final Function<I, String> original) {
+        return original.andThen(s -> s.toLowerCase(Locale.ROOT));
     }
 }

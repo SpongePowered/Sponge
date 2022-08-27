@@ -513,6 +513,7 @@ public final class Constants {
         // These are the various tag compound id's for getting to various places
         public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
         public static final String BLOCK_ENTITY_ID = "id";
+        public static final String ENTITY_TAG = "EntityTag";
         public static final String ITEM_ENCHANTMENT_LIST = "Enchantments";
         public static final String ITEM_STORED_ENCHANTMENTS_LIST = "StoredEnchantments";
         public static final String ITEM_DISPLAY = "display";
@@ -1183,6 +1184,7 @@ public final class Constants {
         public static final DataQuery Y_POS = of("y");
         public static final DataQuery Z_POS = of("z");
         public static final DataQuery W_POS = of("w");
+        public static final DataQuery DIRECTION = of("Direction");
     }
 
     public static final class Fluids {

@@ -28,12 +28,9 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import net.minecraft.tags.StaticTagHelper;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.event.EventManager;
@@ -41,14 +38,10 @@ import org.spongepowered.api.network.channel.ChannelManager;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.BuilderProvider;
 import org.spongepowered.api.registry.FactoryProvider;
-import org.spongepowered.api.registry.Registry;
-import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
-import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.config.PluginConfigManager;
-import org.spongepowered.common.registry.InitialRegistryData;
 import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.AsyncScheduler;
@@ -57,10 +50,6 @@ import org.spongepowered.common.util.LocaleCache;
 
 import java.nio.file.Path;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.stream.Stream;
 
 @Singleton
 public final class SpongeGame implements Game, SpongeRegistryHolder {
@@ -223,21 +212,7 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
     }
 
     @Override
-    public <T> Registry<T> registry(final RegistryType<T> type) {
-        return this.registryHolder().registry(Objects.requireNonNull(type, "type"));
-    }
-
-    @Override
-    public <T> Optional<Registry<T>> findRegistry(final RegistryType<T> type) {
-        return this.registryHolder().findRegistry(Objects.requireNonNull(type, "type"));
-    }
-
-    @Override
-    public Stream<Registry<?>> streamRegistries(final ResourceKey root) {
-        return this.registryHolder().streamRegistries(Objects.requireNonNull(root, "root"));
-    }
-
-    private RegistryHolderLogic registryHolder() {
+    public RegistryHolderLogic registryHolder() {
         if (this.registryHolder == null) {
             this.registryHolder = new RegistryHolderLogic();
         }
@@ -250,21 +225,5 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
         return MoreObjects.toStringHelper(this)
                 .add("platform", this.platform)
                 .toString();
-    }
-
-    @Override
-    public void setRootMinecraftRegistry(final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> registry) {
-        this.registryHolder().setRootMinecraftRegistry(registry);
-    }
-
-    @Override
-    public <T> Registry<T> createRegistry(final RegistryType<T> type, @Nullable final InitialRegistryData<T> defaultValues, final boolean isDynamic,
-        @Nullable final BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback) {
-        return this.registryHolder().createRegistry(type, defaultValues, isDynamic, callback);
-    }
-
-    @Override
-    public <T> void wrapTagHelperAsRegistry(final RegistryType<Tag<T>> type, final StaticTagHelper<T> helper) {
-        this.registryHolder().wrapTagHelperAsRegistry(type, helper);
     }
 }

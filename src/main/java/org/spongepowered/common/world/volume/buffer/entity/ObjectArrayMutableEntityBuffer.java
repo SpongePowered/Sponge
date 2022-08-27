@@ -48,7 +48,6 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -101,19 +100,18 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
 
     @Override
     public VolumeStream<EntityVolume.Mutable, BlockState> blockStateStream(final Vector3i min, final Vector3i max,
-        final StreamOptions options
-    ) {
-        final Stream<VolumeElement<EntityVolume.Mutable, BlockState>> stateStream = IntStream.range(
-            this.min().x(),
-            this.max().x() + 1
-        )
-            .mapToObj(x -> IntStream.range(this.min().z(), this.max().z() + 1)
-                .mapToObj(z -> IntStream.range(this.min().y(), this.max().y() + 1)
-                    .mapToObj(y -> VolumeElement.of(
-                        (EntityVolume.Mutable) this,
-                        () -> this.blockBuffer.block(x, y, z),
-                        new Vector3d(x, y, z)
-                    ))
+        final StreamOptions options) {
+        VolumeStreamUtils.validateStreamArgs(min, max, this.min(), this.max(), options);
+        final ArrayMutableBlockBuffer buffer;
+        if (options.carbonCopy()) {
+            buffer = this.blockBuffer.copy();
+        } else {
+            buffer = this.blockBuffer;
+        }
+        final Stream<VolumeElement<EntityVolume.Mutable, BlockState>> stateStream = IntStream.range(min.x(), max.x() + 1)
+            .mapToObj(x -> IntStream.range(min.z(), max.z() + 1)
+                .mapToObj(z -> IntStream.range(min.y(), max.y() + 1)
+                    .mapToObj(y -> VolumeElement.of((EntityVolume.Mutable) this, () -> buffer.block(x, y, z), new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);

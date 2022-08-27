@@ -24,11 +24,15 @@ version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVer
 // Vanilla extra configurations
 val vanillaBootstrapLibrariesConfig = configurations.register("bootstrapLibraries")
 val vanillaLibrariesConfig = configurations.register("libraries")
+val mlTransformersConfig = configurations.register("mlTransformers")
 val vanillaAppLaunchConfig = configurations.register("applaunch") {
     extendsFrom(vanillaBootstrapLibrariesConfig.get())
     extendsFrom(configurations.minecraft.get())
+    extendsFrom(mlTransformersConfig.get())
 }
-val vanillaInstallerConfig = configurations.register("installer")
+val vanillaInstallerConfig = configurations.register("installer") {
+    extendsFrom(mlTransformersConfig.get())
+}
 
 // Common source sets and configurations
 val launchConfig = commonProject.configurations.named("launch")
@@ -104,6 +108,7 @@ val vanillaAppLaunch by sourceSets.register("applaunch") {
     
     configurations.named(runtimeClasspathConfigurationName) {
         extendsFrom(vanillaLibrariesConfig.get())
+        extendsFrom(mlTransformersConfig.get())
     }
 }
 val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementationConfigurationName) {
@@ -119,6 +124,7 @@ configurations.named(vanillaAppLaunch.implementationConfigurationName) {
 }
 val vanillaAppLaunchRuntime by configurations.named(vanillaAppLaunch.runtimeOnlyConfigurationName)
 
+val superclassConfigs = spongeImpl.getNamedConfigurations("superClassChanges")
 val mixinConfigs = spongeImpl.mixinConfigurations
 minecraft {
     runs {
@@ -186,10 +192,15 @@ minecraft {
                         .flatMap { sequenceOf("--mixin.config", it) }
                         .toList()
             }
+            allArgumentProviders += CommandLineArgumentProvider {
+                superclassConfigs.asSequence()
+                    .flatMap { sequenceOf("--superclass_change.config", it) }
+                    .toList()
+            }
             mainClass("org.spongepowered.vanilla.applaunch.Main")
             classpath.setFrom(
                 vanillaAppLaunch.output,
-                vanillaAppLaunch.runtimeClasspath
+                vanillaAppLaunch.runtimeClasspath,
             )
             ideaRunSourceSet.set(vanillaAppLaunch)
         }
@@ -219,7 +230,6 @@ dependencies {
     val log4jVersion: String by project
     val mixinVersion: String by project
     val modlauncherVersion: String by project
-    val timingsVersion: String by project
     val tinyLogVersion: String by project
 
     api(project(":", configuration = "launch"))
@@ -232,6 +242,7 @@ dependencies {
     installer("com.google.code.gson:gson:2.8.0")
     installer("org.spongepowered:configurate-hocon:$apiConfigurateVersion")
     installer("org.spongepowered:configurate-core:$apiConfigurateVersion")
+    installer("org.spongepowered:configurate-jackson:$apiConfigurateVersion")
     installer("net.sf.jopt-simple:jopt-simple:5.0.3")
     installer("org.tinylog:tinylog-api:$tinyLogVersion")
     installer("org.tinylog:tinylog-impl:$tinyLogVersion")
@@ -245,6 +256,7 @@ dependencies {
         exclude(group = "net.sf.jopt-simple")
         asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
     }
+    mlTransformersConfig.name(rootProject.project(":modlauncher-transformers"))
 
     // Add the API as a runtime dependency, just so it gets shaded into the jar
     add(vanillaInstaller.runtimeOnlyConfigurationName, "org.spongepowered:spongeapi:$apiVersion") {
@@ -261,7 +273,6 @@ dependencies {
     libraries("org.spongepowered:spongeapi:$apiVersion")
     libraries(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
     libraries("net.kyori:adventure-serializer-configurate4")
-    libraries("org.spongepowered:timings:$timingsVersion")
     libraries("javax.inject:javax.inject:1")
     libraries("org.spongepowered:configurate-jackson") {
         exclude(group = "org.spongepowered", module = "configurate-core")
@@ -310,9 +321,6 @@ dependencies {
     }
     appLaunch("org.ow2.asm:asm-commons:$asmVersion")
     appLaunch("cpw.mods:grossjava9hacks:1.3.3") {
-        exclude(group = "org.apache.logging.log4j")
-    }
-    appLaunch("net.fabricmc:access-widener:1.0.2") {
         exclude(group = "org.apache.logging.log4j")
     }
     appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
@@ -450,6 +458,7 @@ tasks {
         archiveClassifier.set("universal")
         manifest {
             attributes(mapOf(
+                    "Superclass-Transformer" to "common.superclasschange,vanilla.superclasschange",
                     "Access-Widener" to "common.accesswidener",
                     "MixinConfigs" to mixinConfigs.joinToString(","),
                     "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",

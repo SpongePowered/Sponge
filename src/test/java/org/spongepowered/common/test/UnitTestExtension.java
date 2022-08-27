@@ -28,11 +28,16 @@ import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.launch.Launch;
 
 public class UnitTestExtension implements BeforeAllCallback {
     @Override
     public void beforeAll(final ExtensionContext context) throws Exception {
-        AppLaunch.setPluginPlatform(new TestPluginPlatform());
-        SpongeConfigs.getCommon();
+        final TestPluginPlatform platform = new TestPluginPlatform();
+        if (AppLaunch.pluginPlatform() == null) {
+            AppLaunch.setPluginPlatform(platform);
+            Launch.setInstance(new TestLaunch(platform));
+            SpongeConfigs.getCommon();
+        }
     }
 }

@@ -39,37 +39,38 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.filter.cause.Root;
-
-import java.lang.reflect.Parameter;
+import org.spongepowered.common.event.manager.ListenerClassVisitor;
 
 public class RootCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
 
     private final Root anno;
 
-    public RootCauseFilterSourceDelegate(Root anno) {
+    public RootCauseFilterSourceDelegate(final Root anno) {
         this.anno = anno;
     }
 
     @Override
-    protected void insertCauseCall(MethodVisitor mv, Parameter param, Class<?> targetType) {
+    protected void insertCauseCall(
+        final MethodVisitor mv, final ListenerClassVisitor.ListenerParameter param, final Type targetType) {
         mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Cause.class), "root",
                 "()Ljava/lang/Object;", false);
     }
 
     @Override
-    protected void insertTransform(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
-        Label failure = new Label();
-        Label success = new Label();
+    protected void insertTransform(
+        final MethodVisitor mv, final ListenerClassVisitor.ListenerParameter param, final Type targetType, final int local) {
+        final Label failure = new Label();
+        final Label success = new Label();
 
         mv.visitVarInsn(ALOAD, local);
-        mv.visitTypeInsn(INSTANCEOF, Type.getInternalName(targetType));
+        mv.visitTypeInsn(INSTANCEOF, targetType.getInternalName());
 
         if (this.anno.typeFilter().length != 0) {
             mv.visitJumpInsn(IFEQ, failure);
             mv.visitVarInsn(ALOAD, local);
             // For each type we do an instance check and jump to either failure or success if matched
             for (int i = 0; i < this.anno.typeFilter().length; i++) {
-                Class<?> filter = this.anno.typeFilter()[i];
+                final Class<?> filter = this.anno.typeFilter()[i];
                 if (i < this.anno.typeFilter().length - 1) {
                     mv.visitInsn(DUP);
                 }

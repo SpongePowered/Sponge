@@ -39,7 +39,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
@@ -55,6 +54,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
@@ -72,6 +72,7 @@ import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -85,15 +86,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoPacketAccessor;
-import org.spongepowered.common.accessor.network.protocol.game.ClientboundRespawnPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.client.server.IntegratedPlayerListBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
-import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.entity.player.LoginPermissions;
 import org.spongepowered.common.entity.player.SpongeUserView;
@@ -110,7 +110,6 @@ import org.spongepowered.common.service.server.ban.SpongeUserBanList;
 import org.spongepowered.common.service.server.whitelist.SpongeUserWhiteList;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NetworkUtil;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.net.InetAddress;
@@ -148,24 +147,13 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     // @formatter:on
 
     private boolean impl$isGameMechanicRespawn = false;
-    ResourceKey<Level> impl$newDestination = null;
-    ResourceKey<Level> impl$originalDestination = null;
+    private ResourceKey<Level> impl$originalRespawnDestination = null;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setSpongeLists(final CallbackInfo callbackInfo) {
         this.bans = new SpongeUserBanList(PlayerList.USERBANLIST_FILE);
         this.ipBans = new SpongeIPBanList(PlayerList.IPBANLIST_FILE);
         this.whitelist = new SpongeUserWhiteList(PlayerList.WHITELIST_FILE);
-    }
-
-    @Override
-    public void bridge$setOriginalDestinationDimension(final ResourceKey<Level> dimension) {
-        this.impl$originalDestination = dimension;
-    }
-
-    @Override
-    public void bridge$setNewDestinationDimension(final ResourceKey<Level> dimension) {
-        this.impl$newDestination = dimension;
     }
 
     @Override
@@ -521,56 +509,64 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             to = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;isDemo()Z")
         )
     )
-    private boolean impl$flagIfRespawnLocationIsGameMechanic(final Optional<?> optional) {
-        this.impl$isGameMechanicRespawn = optional.isPresent();
-        return this.impl$isGameMechanicRespawn;
+    private boolean impl$flagIfRespawnPositionIsGameMechanic(final Optional<Vec3> respawnPosition) {
+        this.impl$isGameMechanicRespawn = respawnPosition.isPresent();
+        return false; // force call of MinecraftServer#overworld which is redirected into impl$callRespawnPlayerSelectWorld
     }
 
-    @Redirect(method = "respawn",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V",
-            ordinal = 1
+    @Redirect(method = "respawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/server/level/ServerLevel;"))
+    private ServerLevel impl$callRespawnPlayerSelectWorld(final MinecraftServer server, final net.minecraft.server.level.ServerPlayer player) {
+        final ServerLevel playerRespawnDestination = server.getLevel(player.getRespawnDimension());
+        final ServerLevel originalDestination = playerRespawnDestination != null && this.impl$isGameMechanicRespawn ? playerRespawnDestination : server.overworld();
+        this.impl$originalRespawnDestination = originalDestination.dimension();
+
+        final RespawnPlayerEvent.SelectWorld event = SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getCauseStackManager().currentCause(),
+                (ServerWorld) originalDestination, (ServerWorld) player.getLevel(), (ServerWorld) originalDestination, (ServerPlayer) player);
+        SpongeCommon.post(event);
+
+        return (ServerLevel) event.destinationWorld();
+    }
+
+    @Redirect(
+        method = "respawn",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getX()D"),
+        slice = @Slice(
+            from = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundRespawnPacket"),
+            to = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundSetDefaultSpawnPositionPacket")
         )
     )
-    private void impl$callRespawnPlayerRecreateEvent(
-        final ServerGamePacketListenerImpl serverPlayNetHandler, final Packet<?> packetIn, final net.minecraft.server.level.ServerPlayer originalPlayer, final boolean keepAllPlayerData) {
-        final net.minecraft.server.level.ServerPlayer recreatedPlayer = serverPlayNetHandler.player;
+    private double impl$callRespawnPlayerRecreateEvent(final net.minecraft.server.level.ServerPlayer newPlayer,
+            final net.minecraft.server.level.ServerPlayer player, final boolean keepAllPlayerData) {
+        final ServerPlayer originalPlayer = (ServerPlayer) player;
+        final ServerPlayer recreatedPlayer = (ServerPlayer) newPlayer;
 
-        final Vector3d originalPosition = VecHelper.toVector3d(originalPlayer.position());
-        final Vector3d destinationPosition = VecHelper.toVector3d(recreatedPlayer.position());
-        final org.spongepowered.api.world.server.ServerWorld originalWorld = (org.spongepowered.api.world.server.ServerWorld) originalPlayer.level;
-        final org.spongepowered.api.world.server.ServerWorld originalDestinationWorld = (org.spongepowered.api.world.server.ServerWorld) this.server.getLevel(this.impl$originalDestination == null ? Level.OVERWORLD : this.impl$originalDestination);
-        final org.spongepowered.api.world.server.ServerWorld destinationWorld = (org.spongepowered.api.world.server.ServerWorld) this.server.getLevel(this.impl$newDestination == null ? Level.OVERWORLD : this.impl$newDestination);
+        final Vector3d originalPosition = originalPlayer.position();
+        final Vector3d destinationPosition = recreatedPlayer.position();
+        final ServerWorld originalWorld = originalPlayer.world();
+        final ServerWorld destinationWorld = recreatedPlayer.world();
 
-        final RespawnPlayerEvent.Recreate event = SpongeEventFactory.createRespawnPlayerEventRecreate(PhaseTracker.getCauseStackManager().currentCause(), destinationPosition, originalWorld, originalPosition, destinationWorld, originalDestinationWorld, destinationPosition, (ServerPlayer) originalPlayer, (ServerPlayer) recreatedPlayer, this.impl$isGameMechanicRespawn, !keepAllPlayerData);
+        final RespawnPlayerEvent.Recreate event = SpongeEventFactory.createRespawnPlayerEventRecreate(PhaseTracker.getCauseStackManager().currentCause(),
+                destinationPosition, originalWorld, originalPosition, destinationWorld,
+                (ServerWorld) this.server.getLevel(this.impl$originalRespawnDestination),
+                destinationPosition, originalPlayer, recreatedPlayer, this.impl$isGameMechanicRespawn, !keepAllPlayerData);
         SpongeCommon.post(event);
-        recreatedPlayer.setPos(event.destinationPosition().x(), event.destinationPosition().y(), event.destinationPosition().z());
-        this.impl$isGameMechanicRespawn = false;
-        this.impl$originalDestination = null;
-        this.impl$newDestination = null;
 
-        final ServerLevel targetWorld = (ServerLevel) event.destinationWorld();
-        ((ServerPlayerBridge) recreatedPlayer).bridge$sendChangeDimension(
-            targetWorld.dimensionType(),
-            ((ClientboundRespawnPacketAccessor) packetIn).accessor$dimension(),
-            ((ClientboundRespawnPacketAccessor) packetIn).accessor$seed(),
-            recreatedPlayer.gameMode.getGameModeForPlayer(),
-            recreatedPlayer.gameMode.getPreviousGameModeForPlayer(),
-            targetWorld.isDebug(),
-            targetWorld.isFlat(),
-            keepAllPlayerData
-        );
+        this.impl$isGameMechanicRespawn = false;
+        newPlayer.setPos(event.destinationPosition().x(), event.destinationPosition().y(), event.destinationPosition().z());
+
+        return newPlayer.getX();
     }
 
     @Inject(method = "respawn", at = @At("RETURN"))
     private void impl$callRespawnPlayerPostEvent(final net.minecraft.server.level.ServerPlayer player, final boolean keepAllPlayerData, final CallbackInfoReturnable<net.minecraft.server.level.ServerPlayer> cir) {
-        final org.spongepowered.api.world.server.ServerWorld originalWorld = (org.spongepowered.api.world.server.ServerWorld) player.level;
-        final org.spongepowered.api.world.server.ServerWorld originalDestinationWorld = (org.spongepowered.api.world.server.ServerWorld) this.server.getLevel(this.impl$originalDestination == null ? Level.OVERWORLD : this.impl$originalDestination);
-        final org.spongepowered.api.world.server.ServerWorld destinationWorld = (org.spongepowered.api.world.server.ServerWorld) this.server.getLevel(this.impl$newDestination == null ? Level.OVERWORLD : this.impl$newDestination);
+        final ServerPlayer recreatedPlayer = (ServerPlayer) cir.getReturnValue();
+        final ServerWorld originalWorld = (ServerWorld) player.level;
 
-        final RespawnPlayerEvent.Post event = SpongeEventFactory.createRespawnPlayerEventPost(PhaseTracker.getCauseStackManager().currentCause(), destinationWorld, originalWorld, originalDestinationWorld, (ServerPlayer) cir.getReturnValue());
+        final RespawnPlayerEvent.Post event = SpongeEventFactory.createRespawnPlayerEventPost(PhaseTracker.getCauseStackManager().currentCause(),
+                recreatedPlayer.world(), originalWorld, (ServerWorld) this.server.getLevel(this.impl$originalRespawnDestination), recreatedPlayer);
         SpongeCommon.post(event);
+
+        this.impl$originalRespawnDestination = null;
     }
 
     @Redirect(method = "sendLevelInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/server/level/ServerLevel;"))

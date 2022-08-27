@@ -39,7 +39,7 @@ public abstract class EntityDataAccessorMixin<T> implements EntityDataAccessorBr
     @Nullable private DataParameterConverter<T> impl$converter;
 
     @Override
-    public void bridge$setDataConverter(DataParameterConverter<T> converter) {
+    public void bridge$setDataConverter(final DataParameterConverter<T> converter) {
         this.impl$converter = converter;
     }
 

@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.datapack;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.SharedConstants;
 import org.apache.commons.io.FileUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -34,9 +37,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import net.minecraft.SharedConstants;
 
 public class DataPackSerializer<T extends DataPackSerializedObject> {
+
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     protected final String name;
     protected final String typeDirectoryName;
@@ -91,8 +95,8 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
     public static void writeFile(final Path file, final JsonElement object) throws IOException {
         Files.deleteIfExists(file);
 
-        try (BufferedWriter bufferedwriter = Files.newBufferedWriter(file)) {
-            bufferedwriter.write(object.toString());
+        try (BufferedWriter writer = Files.newBufferedWriter(file)) {
+            DataPackSerializer.GSON.toJson(object, writer);
         }
     }
 

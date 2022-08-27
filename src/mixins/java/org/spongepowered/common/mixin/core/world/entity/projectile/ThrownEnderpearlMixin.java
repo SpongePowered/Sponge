@@ -72,7 +72,6 @@ public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entity);
-            frame.pushCause(this);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.ENDER_PEARL);
 
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
@@ -81,6 +80,7 @@ public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
             if (SpongeCommon.post(event)) {
                 // Eventhough the event is made, the pearl was still created so remove it anyways
                 this.shadow$remove();
+                ci.cancel();
                 return;
             }
 

@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level;
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.resources.ResourceKey;
@@ -36,7 +37,6 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -57,15 +57,12 @@ import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.WorldLike;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.WorldLike;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
@@ -85,11 +82,11 @@ import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.living.human.HumanEntity;
-import org.spongepowered.common.registry.InitialRegistryData;
 import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.level.chunk.SpongeEmptyChunk;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.archetype.SpongeArchetypeVolume;
@@ -105,7 +102,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -121,7 +117,6 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     @Shadow public abstract void shadow$playSound(@javax.annotation.Nullable net.minecraft.world.entity.player.Player p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundSource p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow public abstract LevelData shadow$getLevelData();
     @Shadow public abstract void shadow$setBlockEntity(BlockPos pos, @javax.annotation.Nullable net.minecraft.world.level.block.entity.BlockEntity tileEntityIn);
-    @Shadow public abstract void shadow$removeBlockEntity(BlockPos pos);
     @Shadow public abstract ResourceKey<net.minecraft.world.level.Level> shadow$dimension();
     @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos param0);
     @Shadow public abstract List<net.minecraft.world.entity.Entity> shadow$getEntities(
@@ -152,7 +147,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         if (chunk instanceof ImposterProtoChunk) {
             return (WorldChunk) ((ImposterProtoChunk) chunk).getWrapped();
         }
-        throw new IllegalStateException("Chunk is a Proto-Chunk"); // TODO this may return a ProtoChunk
+        return new SpongeEmptyChunk((Level) (Object) this, chunk);
     }
 
     @Override
@@ -163,7 +158,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         final ChunkSource chunkProvider = ((LevelAccessor) this).getChunkSource();
 
         // If we aren't generating, return the chunk
-        final ChunkStatus status = shouldGenerate ? ChunkStatus.EMPTY : ChunkStatus.FULL;
+        final ChunkStatus status = shouldGenerate ? ChunkStatus.FULL : ChunkStatus.EMPTY;
         final @Nullable ChunkAccess chunkAccess = chunkProvider.getChunk(cx, cz, status, true);
         if (chunkAccess == null) {
             return Optional.empty();
@@ -173,7 +168,10 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             return Optional.of((WorldChunk) ((ImposterProtoChunk) chunkAccess).getWrapped());
         }
 
-        return Optional.of((WorldChunk) chunkAccess);
+        if (chunkAccess instanceof WorldChunk) {
+            return Optional.of((WorldChunk) chunkAccess);
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -194,37 +192,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     }
 
     @Override
-    public <T> org.spongepowered.api.registry.Registry<T> registry(final RegistryType<T> type) {
-        return this.api$registryHolder().registry(Objects.requireNonNull(type, "type"));
-    }
-
-    @Override
-    public <T> Optional<org.spongepowered.api.registry.Registry<T>> findRegistry(final RegistryType<T> type) {
-        return this.api$registryHolder().findRegistry(Objects.requireNonNull(type, "type"));
-    }
-
-    @Override
-    public Stream<org.spongepowered.api.registry.Registry<?>> streamRegistries(final org.spongepowered.api.ResourceKey root) {
-        return this.api$registryHolder().streamRegistries(Objects.requireNonNull(root, "root"));
-    }
-
-    @Override
-    public void setRootMinecraftRegistry(final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> registry) {
-        this.api$registryHolder().setRootMinecraftRegistry(registry);
-    }
-
-    @Override
-    public <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, @Nullable final InitialRegistryData<T> defaultValues, final boolean isDynamic,
-        @Nullable final BiConsumer<ResourceKey<T>, T> callback) {
-        return this.api$registryHolder().createRegistry(type, defaultValues, isDynamic, callback);
-    }
-
-    @Override
-    public <T> void wrapTagHelperAsRegistry(final RegistryType<Tag<T>> type, final StaticTagHelper<T> helper) {
-        this.api$registryHolder().wrapTagHelperAsRegistry(type, helper);
-    }
-
-    private RegistryHolderLogic api$registryHolder() {
+    public RegistryHolderLogic registryHolder() {
         if (this.api$registryHolder == null) {
             this.api$registryHolder = new RegistryHolderLogic(((LevelAccessor) this).registryAccess());
         }
@@ -340,7 +308,23 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public void addBlockEntity(final int x, final int y, final int z, final BlockEntity blockEntity) {
-        this.shadow$setBlockEntity(new BlockPos(x, y, z), (net.minecraft.world.level.block.entity.BlockEntity) Objects.requireNonNull(blockEntity, "blockEntity"));
+        // So, here we basically want to copy the given block entity into the location.
+        // BlockEntity stores its location, as well as it being mutable and stuff, so just setting what we've given here
+        // would cause unexpected bugs.
+        final net.minecraft.world.level.block.entity.BlockEntity mcOriginalBlockEntity = (net.minecraft.world.level.block.entity.BlockEntity) Objects.requireNonNull(blockEntity, "blockEntity");
+        // Save the nbt so we can copy it
+        final CompoundTag tag = mcOriginalBlockEntity.save(new CompoundTag());
+        // Ensure that where we are placing this blockentity is the right blockstate, so that minecraft will actually accept it.
+        this.world().setBlock(x, y, z, (org.spongepowered.api.block.BlockState) mcOriginalBlockEntity.getBlockState());
+
+        // Retrieve a "blank" block entity from the one we just created (or already existed) through sponge.
+        final net.minecraft.world.level.block.entity.BlockEntity mcNewBlockEntity = (net.minecraft.world.level.block.entity.BlockEntity) this.blockEntity(x, y, z)
+                .orElseThrow(() -> new IllegalStateException("Failed to create Block Entity at " + this.location(Vector3i.from(x, y, z))));
+
+        // Load the data into it.
+        mcNewBlockEntity.load(mcOriginalBlockEntity.getBlockState(), tag);
+        // Finally, inform minecraft about our actions.
+        this.shadow$setBlockEntity(new BlockPos(x, y, z), mcNewBlockEntity);
     }
 
     // MutableEntityVolume

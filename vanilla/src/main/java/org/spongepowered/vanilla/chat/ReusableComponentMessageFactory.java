@@ -34,8 +34,8 @@ import org.apache.logging.log4j.message.MessageFactory2;
 import org.apache.logging.log4j.message.ReusableMessageFactory;
 import org.apache.logging.log4j.message.ReusableObjectMessage;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
-import org.spongepowered.common.adventure.SpongeAdventure;
 
 import java.util.Locale;
 
@@ -61,74 +61,74 @@ public class ReusableComponentMessageFactory implements MessageFactory2 {
 
 
     @Override
-    public Message newMessage(Object message) {
+    public Message newMessage(final Object message) {
         final ComponentMessage result = ReusableComponentMessageFactory.getComponentMessage();
         result.set(message);
         return result;
     }
 
     @Override
-    public Message newMessage(String message) {
+    public Message newMessage(final String message) {
         return this.backing.newMessage(message);
     }
 
     @Override
-    public Message newMessage(String message, Object... params) {
+    public Message newMessage(final String message, final Object... params) {
         return this.backing.newMessage(message, params);
     }
 
     @Override
-    public Message newMessage(CharSequence charSequence) {
+    public Message newMessage(final CharSequence charSequence) {
         return this.backing.newMessage(charSequence);
     }
 
     @Override
-    public Message newMessage(String message, Object p0) {
+    public Message newMessage(final String message, final Object p0) {
         return this.backing.newMessage(message, p0);
     }
 
     @Override
-    public Message newMessage(String message, Object p0, Object p1) {
+    public Message newMessage(final String message, final Object p0, final Object p1) {
         return this.backing.newMessage(message, p0, p1);
     }
 
     @Override
-    public Message newMessage(String message, Object p0, Object p1, Object p2) {
+    public Message newMessage(final String message, final Object p0, final Object p1, final Object p2) {
         return this.backing.newMessage(message, p0, p1, p2);
     }
 
     @Override
-    public Message newMessage(String message, Object p0, Object p1, Object p2, Object p3) {
+    public Message newMessage(final String message, final Object p0, final Object p1, final Object p2, final Object p3) {
         return this.backing.newMessage(message, p0, p1, p2, p3);
     }
 
     @Override
-    public Message newMessage(String message, Object p0, Object p1, Object p2, Object p3, Object p4) {
+    public Message newMessage(final String message, final Object p0, final Object p1, final Object p2, final Object p3, final Object p4) {
         return this.backing.newMessage(message, p0, p1, p2, p3, p4);
     }
 
     @Override
-    public Message newMessage(String message, Object p0, Object p1, Object p2, Object p3, Object p4, Object p5) {
+    public Message newMessage(final String message, final Object p0, final Object p1, final Object p2, final Object p3, final Object p4, final Object p5) {
         return this.backing.newMessage(message, p0, p1, p2, p3, p4, p5);
     }
 
     @Override
-    public Message newMessage(String message, Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6) {
+    public Message newMessage(final String message, final Object p0, final Object p1, final Object p2, final Object p3, final Object p4, final Object p5, final Object p6) {
         return this.backing.newMessage(message, p0, p1, p2, p3, p4, p5, p6);
     }
 
     @Override
-    public Message newMessage(String message, Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7) {
+    public Message newMessage(final String message, final Object p0, final Object p1, final Object p2, final Object p3, final Object p4, final Object p5, final Object p6, final Object p7) {
         return this.backing.newMessage(message, p0, p1, p2, p3, p4, p5, p6, p7);
     }
 
     @Override
-    public Message newMessage(String message, Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8) {
+    public Message newMessage(final String message, final Object p0, final Object p1, final Object p2, final Object p3, final Object p4, final Object p5, final Object p6, final Object p7, final Object p8) {
         return this.backing.newMessage(message, p0, p1, p2, p3, p4, p5, p6, p7, p8);
     }
 
     @Override
-    public Message newMessage(String message, Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7, Object p8, Object p9) {
+    public Message newMessage(final String message, final Object p0, final Object p1, final Object p2, final Object p3, final Object p4, final Object p5, final Object p6, final Object p7, final Object p8, final Object p9) {
         return this.backing.newMessage(message, p0, p1, p2, p3, p4, p5, p6, p7, p8, p9);
     }
 
@@ -155,7 +155,7 @@ public class ReusableComponentMessageFactory implements MessageFactory2 {
             final Object param = this.getParameter();
             // TODO: ansi formatting
             if (param instanceof ComponentLike) {
-                SpongeAdventure.flattener().flatten(
+                SpongeComponents.flattener().flatten(
                     ComponentMessage.RENDERER.render(((ComponentLike) param).asComponent(), Locale.getDefault()),
                     buffer::append
                 );

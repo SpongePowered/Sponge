@@ -4,6 +4,8 @@ import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.SourceSet;
 
+import javax.annotation.Nullable;
+import javax.inject.Inject;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -11,9 +13,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
-import javax.inject.Inject;
 
 public abstract class SpongeImplementationExtension {
 
@@ -100,17 +99,21 @@ public abstract class SpongeImplementationExtension {
      * @return the mixin configuration files that should be applied to this project
      */
     public Set<String> getMixinConfigurations() {
+        return this.getNamedConfigurations(SpongeImplementationExtension.MIXIN_CONFIGS_PROPERTY);
+    }
+
+    public Set<String> getNamedConfigurations(final String name) {
         final Set<String> configs = new HashSet<>();
 
         // if we have a parent
         final Project parentProject = this.project.getParent();
         if (parentProject != null) {
             SpongeImplementationExtension
-                .splitAndAddIfNonNull(configs, (String) parentProject.findProperty(SpongeImplementationExtension.MIXIN_CONFIGS_PROPERTY));
+                .splitAndAddIfNonNull(configs, (String) parentProject.findProperty(name));
         }
 
         // own project
-        SpongeImplementationExtension.splitAndAddIfNonNull(configs, (String) this.project.findProperty("mixinConfigs"));
+        SpongeImplementationExtension.splitAndAddIfNonNull(configs, (String) this.project.findProperty(name));
         return configs;
     }
 

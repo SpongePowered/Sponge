@@ -37,12 +37,10 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
-import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.registry.RegistryHolder;
@@ -233,15 +231,7 @@ public class MemoryDataView implements DataView {
         Objects.requireNonNull(value, "value");
         checkState(this.container != null);
         checkState(!path.parts().isEmpty(), "The path is empty");
-
-        @Nullable DataManager manager;
-
-        // TODO: this call to dataManager each set can be cleaned up
-        try {
-            manager = Sponge.dataManager();
-        } catch (final Exception e) {
-            manager = null;
-        }
+        checkArgument(value != this, "Cannot set a DataView to itself.");
 
         final List<String> parts = path.parts();
         final String key = parts.get(0);
@@ -258,164 +248,21 @@ public class MemoryDataView implements DataView {
             subView.set(path.popFirst(), value);
             return this;
         }
-        if (value instanceof DataView) {
-            checkArgument(value != this, "Cannot set a DataView to itself.");
+
+        final Object serialized = DataSerializer.serialize(this.safetyMode(), value);
+        checkArgument(!this.equals(serialized), "Cannot insert self-referencing DataView!");
+        if (serialized instanceof DataView) {
             // always have to copy a data view to avoid overwriting existing
             // views and to set the interior path correctly.
-            this.copyDataView(path, (DataView) value);
-        } else if (value instanceof DataSerializable) {
-            final DataContainer valueContainer = ((DataSerializable) value).toContainer();
-            checkArgument(!(valueContainer).equals(this), "Cannot insert self-referencing DataSerializable");
-            // see above for why this is copied
-            this.copyDataView(path, valueContainer);
-        } else if (SpongeDataManager.INSTANCE.findRegistryTypeFor(value.getClass()).isPresent()) {
-            final RegistryType<Object> registry = SpongeDataManager.INSTANCE.findRegistryTypeFor(value.getClass()).get();
-            final ResourceKey valueKey = Sponge.game().registry(registry).valueKey(value);
-            // TODO if we serialize into a DataView - deserialize needs to do it too
-//            final DataView view = this.createView(path);
-//            view.set(DataQuery.of("registryroot"), registry.root());
-//            view.set(DataQuery.of("registrylocation"), registry.location());
-//            view.set(DataQuery.of("valuekey"), valueKey);
-//            view.set(DataQuery.of("scope"), scope);
-            return this.set(path, valueKey);
-        }
-        else if (value instanceof ResourceKey) {
-            return this.set(path, value.toString());
-        } else if (manager != null && manager.translator(value.getClass()).isPresent()) {
-            final DataTranslator serializer = manager.translator(value.getClass()).get();
-            final DataContainer container = serializer.translate(value);
-            checkArgument(!container.equals(this), "Cannot insert self-referencing Objects!");
-            // see above for why this is copied
-            this.copyDataView(path, container);
-        } else if (value instanceof Collection) {
-            this.setCollection(key, (Collection) value);
-        } else if (value instanceof Map) {
-            this.setMap(key, (Map) value);
-        } else if (value.getClass().isArray()) {
-            if (this.safety == org.spongepowered.api.data.persistence.DataView.SafetyMode.ALL_DATA_CLONED || this.safety == org.spongepowered.api.data.persistence.DataView.SafetyMode.CLONED_ON_SET) {
-                if (value instanceof byte[]) {
-                    this.map.put(key, ArrayUtils.clone((byte[]) value));
-                } else if (value instanceof short[]) {
-                    this.map.put(key, ArrayUtils.clone((short[]) value));
-                } else if (value instanceof int[]) {
-                    this.map.put(key, ArrayUtils.clone((int[]) value));
-                } else if (value instanceof long[]) {
-                    this.map.put(key, ArrayUtils.clone((long[]) value));
-                } else if (value instanceof float[]) {
-                    this.map.put(key, ArrayUtils.clone((float[]) value));
-                } else if (value instanceof double[]) {
-                    this.map.put(key, ArrayUtils.clone((double[]) value));
-                } else if (value instanceof boolean[]) {
-                    this.map.put(key, ArrayUtils.clone((boolean[]) value));
-                } else {
-                    this.map.put(key, ArrayUtils.clone((Object[]) value));
-                }
-            } else {
-                this.map.put(key, value);
+            final Collection<DataQuery> valueKeys = ((DataView) serialized).keys(true);
+            for (final DataQuery oldKey : valueKeys) {
+                this.set(path.then(oldKey), ((DataView) serialized).get(oldKey).get());
             }
         } else {
-            this.map.put(key, value);
+            this.map.put(key, serialized);
         }
+
         return this;
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private void setCollection(final String key, final Collection<?> value) {
-        final ImmutableList.Builder<Object> builder = ImmutableList.builder();
-        @Nullable DataManager manager;
-
-        try {
-            manager = Sponge.dataManager();
-        } catch (final Exception e) {
-            manager = null;
-        }
-
-        for (final Object object : value) {
-            if (object instanceof DataSerializable) {
-                builder.add(((DataSerializable) object).toContainer());
-            } else if (object instanceof DataView) {
-                if (this.safety == org.spongepowered.api.data.persistence.DataView.SafetyMode.ALL_DATA_CLONED || this.safety == org.spongepowered.api.data.persistence.DataView.SafetyMode.CLONED_ON_SET) {
-                    final MemoryDataView view = new MemoryDataContainer(this.safety);
-                    final DataView internalView = (DataView) object;
-                    for (final Map.Entry<DataQuery, Object> entry : internalView.values(false).entrySet()) {
-                        view.set(entry.getKey(), entry.getValue());
-                    }
-                    builder.add(view);
-                } else {
-                    builder.add(object);
-                }
-            } else if (object instanceof ResourceKey) {
-                builder.add(object.toString());
-            } else if (object instanceof Map) {
-                builder.add(this.ensureSerialization((Map) object));
-            } else if (object instanceof Collection) {
-                builder.add(this.ensureSerialization((Collection) object));
-            } else {
-                if (manager != null) {
-                    final Optional<? extends DataTranslator<?>> translatorOptional = manager.translator(
-                        object.getClass());
-                    if (translatorOptional.isPresent()) {
-                        final DataTranslator translator = translatorOptional.get();
-                        final DataContainer container = translator.translate(object);
-                        checkArgument(!container.equals(this), "Cannot insert self-referencing Objects!");
-                        builder.add(container);
-                    } else {
-                        builder.add(object);
-                    }
-                } else {
-                    builder.add(object);
-                }
-
-            }
-        }
-        this.map.put(key, builder.build());
-    }
-
-    @SuppressWarnings("rawtypes")
-    private ImmutableList<Object> ensureSerialization(final Collection<?> collection) {
-        final ImmutableList.Builder<Object> objectBuilder = ImmutableList.builder();
-        collection.forEach(element -> {
-            if (element instanceof Collection) {
-                objectBuilder.add(this.ensureSerialization((Collection) element));
-            } else if (element instanceof DataSerializable) {
-                objectBuilder.add(((DataSerializable) element).toContainer());
-            } else {
-                objectBuilder.add(element);
-            }
-        });
-        return objectBuilder.build();
-
-    }
-
-    @SuppressWarnings("rawtypes")
-    private ImmutableMap<?, ?> ensureSerialization(final Map<?, ?> map) {
-        final ImmutableMap.Builder<Object, Object> builder = ImmutableMap.builder();
-        map.forEach((key, value) -> {
-            if (value instanceof Map) {
-                builder.put(key, this.ensureSerialization((Map) value));
-            } else if (value instanceof DataSerializable) {
-                builder.put(key, ((DataSerializable) value).toContainer());
-            } else if (value instanceof Collection) {
-                builder.put(key, this.ensureSerialization((Collection) value));
-            } else {
-                builder.put(key, value);
-            }
-        });
-        return builder.build();
-    }
-
-    private void setMap(final String key, final Map<?, ?> value) {
-        final DataView view = this.createView(DataQuery.of(key));
-        for (final Map.Entry<?, ?> entry : value.entrySet()) {
-            view.set(DataQuery.of(entry.getKey().toString()), entry.getValue());
-        }
-    }
-
-    private void copyDataView(final DataQuery path, final DataView value) {
-        final Collection<DataQuery> valueKeys = value.keys(true);
-        for (final DataQuery oldKey : valueKeys) {
-            this.set(path.then(oldKey), value.get(oldKey).get());
-        }
     }
 
     @Override

@@ -40,6 +40,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockBreakAckPacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
@@ -53,18 +54,14 @@ import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -79,6 +76,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -86,9 +84,10 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.entity.ChangeSignEvent;
+import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
-import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
+import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -104,10 +103,9 @@ import org.spongepowered.common.accessor.network.protocol.game.ServerboundMovePl
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundMoveVehiclePacketAccessor;
 import org.spongepowered.common.accessor.server.level.ServerPlayerGameModeAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
-import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
 import org.spongepowered.common.data.value.ImmutableSpongeListValue;
@@ -146,6 +144,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     @Shadow private double vehicleLastGoodX;
     @Shadow private double vehicleLastGoodY;
     @Shadow private double vehicleLastGoodZ;
+    @Shadow private int chatSpamTickCount;
 
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch, Set<ClientboundPlayerPositionPacket.RelativeArgument> relativeArguments);
     @Shadow protected abstract void shadow$filterTextPacket(List<String> p_244537_1_, Consumer<List<String>> p_244537_2_);
@@ -473,39 +472,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
         }
     }
 
-    @Redirect(
-            method = "handleClientCommand",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/server/players/PlayerList;respawn(Lnet/minecraft/server/level/ServerPlayer;Z)Lnet/minecraft/server/level/ServerPlayer;"
-            )
-    )
-    private net.minecraft.server.level.ServerPlayer impl$usePlayerDimensionForRespawn(final PlayerList playerList, final net.minecraft.server.level.ServerPlayer player,
-            final boolean keepAllPlayerData) {
-        // A few changes to Vanilla logic here that, by default, still preserve game mechanics:
-        // - If we have conquered The End then keep the dimension type we're headed to (which is Overworld as of 1.15)
-        // - Otherwise, check the platform hooks for which dimension to respawn to. In Sponge, this is the Player's dimension they
-        //   are already in if we can respawn there which is only true for Overworld dimensions
-        final ResourceKey<Level> respawnDimension = player.getRespawnDimension();
-        final @Nullable ServerLevel destinationWorld = this.server.getLevel(respawnDimension);
-        final ServerLevel overworld = this.server.getLevel(Level.OVERWORLD);
-        if (overworld == null) {
-            throw new IllegalStateException("Somehow the Overworld is not retrievable while trying to respawn player " + player.getGameProfile().getName());
-        }
-        final ServerLevel destination = destinationWorld == null ? overworld : destinationWorld;
-        final RespawnPlayerEvent.SelectWorld event =
-                SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getCauseStackManager().currentCause(),
-                        (org.spongepowered.api.world.server.ServerWorld) destination,
-                        (org.spongepowered.api.world.server.ServerWorld) player.getLevel(),
-                        (org.spongepowered.api.world.server.ServerWorld) overworld,
-                        (ServerPlayer) player);
-        SpongeCommon.post(event);
-        ((PlayerListBridge) this.server.getPlayerList()).bridge$setOriginalDestinationDimension(((ServerLevel) event.originalDestinationWorld()).dimension());
-        ((PlayerListBridge) this.server.getPlayerList()).bridge$setNewDestinationDimension(((ServerLevel) event.destinationWorld()).dimension());
-        // The key is reset to null in the overwrite
-        return playerList.respawn(player, keepAllPlayerData);
-    }
-
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"))
     public void impl$handlePlayerDisconnect(final PlayerList playerList, final net.minecraft.network.chat.Component component, final ChatType chatType, final UUID uuid) {
@@ -572,5 +538,44 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     public void bridge$captureCurrentPlayerPosition() {
         this.shadow$resetPosition();
     }
+
+    @Redirect(method = "handleChat(Ljava/lang/String;)V",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V") )
+    private void impl$postChatMessageEventAndSend(final PlayerList playerList, final net.minecraft.network.chat.Component component, final ChatType chatType, final UUID playerUUID, final String initialMessage) {
+        final ServerPlayer player = (ServerPlayer) this.player;
+        final PlayerChatFormatter chatFormatter = player.chatFormatter();
+        Component currentMessage = Component.text(initialMessage);
+        if (component instanceof TranslatableComponent && ((TranslatableComponent) component).getArgs().length == 2) {
+            if (((TranslatableComponent) component).getArgs()[1] instanceof net.minecraft.network.chat.Component) {
+                currentMessage = SpongeAdventure.asAdventure((net.minecraft.network.chat.Component) ((TranslatableComponent) component).getArgs()[1]);
+            } else if (((TranslatableComponent) component).getArgs()[1] instanceof String) {
+                currentMessage = Component.text((String) ((TranslatableComponent) component).getArgs()[1]);
+            }
+        }
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
+            frame.pushCause(this.player);
+            final Audience audience = (Audience) this.server;
+            // Forge's event is accounted for in here.
+            final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(frame.currentCause(), audience, Optional.of(audience), chatFormatter, Optional.of(chatFormatter), currentMessage, currentMessage);
+            if (SpongeCommon.post(event)) {
+                // We reduce the chatSpamTickCount by 20 to account for the fact we cancelled the event (the method increments by 20).
+                // Otherwise, we need do nothing.
+                this.chatSpamTickCount -= 20;
+            } else {
+                event.chatFormatter().ifPresent(formatter ->
+                        event.audience().map(SpongeAdventure::unpackAudiences).ifPresent(targets -> {
+                            for (final Audience target : targets) {
+                                formatter.format(player, target, event.message(), event.originalMessage()).ifPresent(formattedMessage ->
+                                        target.sendMessage(player, formattedMessage));
+                            }
+                        })
+                );
+            }
+        }
+    }
+
 
 }

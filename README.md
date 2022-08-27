@@ -13,11 +13,15 @@ The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms
 
 ### Sponge
 
-**1.16.5**: ![Snapshots](https://img.shields.io/nexus/maven-snapshots/org.spongepowered/sponge?label=Sponge&server=https%3A%2F%2Frepo.spongepowered.org%2F)
+[![Sponge Latest](https://img.shields.io/nexus/maven-snapshots/org.spongepowered/sponge?label=Latest&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dsponge%20AND%20attributes.maven2.groupId%3Dorg.spongepowered)
+
+[![Sponge 1.16.5](https://img.shields.io/nexus/maven-snapshots/org.spongepowered/sponge?label=1.16.5&queryOpt=%3Aversion%3D1.16.5*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dsponge%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.16.5*)
 
 ### SpongeVanilla
 
-**1.16.5**: ![Snapshots](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=SpongeVanilla&server=https%3A%2F%2Frepo.spongepowered.org%2F)
+[![SpongeVanilla Latest](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=Latest&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongevanilla%20AND%20attributes.maven2.groupId%3Dorg.spongepowered)
+
+[![SpongeVanilla 1.16.5](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=1.16.5&queryOpt=%3Aversion%3D1.16.5*&server=https%3A%2F%2Frepo.spongepowered.org%2F)](https://repo.spongepowered.org/#browse/search=attributes.maven2.artifactId%3Dspongevanilla%20AND%20attributes.maven2.groupId%3Dorg.spongepowered%20AND%20version%3D1.16.5*)
 
 
 ## Prerequisites

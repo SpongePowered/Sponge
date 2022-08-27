@@ -49,14 +49,14 @@ public class SpongeBlockVolumeFactory implements BlockVolumeFactory {
         final Vector3i min,
         final Vector3i max
     ) {
-        return new ArrayMutableBlockBuffer(palette, defaultState, min, max.sub(min));
+        return new ArrayMutableBlockBuffer(palette, defaultState, min, max.sub(min).add(Vector3i.ONE));
     }
 
     @Override
     public BlockVolume.Mutable copyFromRange(
         final BlockVolume.Streamable<@NonNull ?> existing, final Vector3i newMin, final Vector3i newMax
     ) {
-        final ArrayMutableBlockBuffer buffer = new ArrayMutableBlockBuffer(newMin, newMax.sub(newMin));
+        final ArrayMutableBlockBuffer buffer = new ArrayMutableBlockBuffer(newMin, newMax.sub(newMin).add(Vector3i.ONE));
         existing.blockStateStream(newMin, newMax, StreamOptions.lazily())
             .apply(VolumeCollectors.of(buffer, VolumePositionTranslators.identity(), VolumeApplicators.applyBlocks()));
         return buffer;
@@ -95,7 +95,7 @@ public class SpongeBlockVolumeFactory implements BlockVolumeFactory {
     @Override
     public BlockVolume.Immutable immutableOf(final BlockVolume.Streamable<@NonNull ?> existing, final Vector3i newMin, final Vector3i newMax
     ) {
-        final ArrayMutableBlockBuffer buffer = new ArrayMutableBlockBuffer(newMin, newMax.sub(newMin));
+        final ArrayMutableBlockBuffer buffer = new ArrayMutableBlockBuffer(newMin, newMax.sub(newMin).add(Vector3i.ONE));
         existing.blockStateStream(newMin, newMax, StreamOptions.lazily())
             .apply(VolumeCollectors.of(buffer, VolumePositionTranslators.identity(), VolumeApplicators.applyBlocks()));
         return this.createImmutableFromBufferData(buffer);

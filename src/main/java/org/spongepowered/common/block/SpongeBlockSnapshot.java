@@ -51,6 +51,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
@@ -65,6 +66,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DataUtil;
+import org.spongepowered.common.util.MemoizedSupplier;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -80,6 +82,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.function.Supplier;
 
 @DefaultQualifier(NonNull.class)
 public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutableDataHolder<BlockSnapshot>, DataContainerHolder.Immutable<BlockSnapshot>, DataCompoundHolder {
@@ -152,7 +155,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     @Override
     public Optional<ServerLocation> location() {
         return this.getServerWorld()
-                .map(world -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, this.pos));
+                .map(world -> ServerLocation.of((ServerWorld) world, this.pos));
     }
 
     @Override
@@ -164,7 +167,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     public boolean restore(final boolean force, final BlockChangeFlag flag) {
         // TODO - rewrite with the PhaseTracker being the hook or use SpongeImplHooks to do the restore.
 
-        final Optional<ServerLevel> optionalWorld = Optional.ofNullable(this.world.get());
+        final Optional<ServerLevel> optionalWorld = this.getServerWorld();
         if (!optionalWorld.isPresent()) {
             return false;
         }
@@ -313,8 +316,9 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
         final BuilderImpl builder = BuilderImpl.pooled();
         builder.blockState(this.blockState)
                .position(this.pos);
-        if (this.world != null && this.world.get() != null) {
-            builder.world(this.world.get());
+        final Optional<ServerLevel> optionalWorld = this.getServerWorld();
+        if (optionalWorld.isPresent()) {
+            builder.world(optionalWorld.get());
         } else {
             builder.world(this.worldKey);
         }
@@ -448,7 +452,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
         }
 
         public BuilderImpl world(final ServerLevel world) {
-            this.worldKey = ((org.spongepowered.api.world.server.ServerWorld) Objects.requireNonNull(world)).key();
+            this.worldKey = ((ServerWorld) Objects.requireNonNull(world)).key();
             this.worldRef = new WeakReference<>(world);
             return this;
         }
@@ -649,11 +653,11 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     }
 
     public static final class FactoryImpl implements Factory {
-        private static final SpongeBlockSnapshot EMPTY = new SpongeBlockSnapshot();
+        private static final Supplier<SpongeBlockSnapshot> EMPTY = MemoizedSupplier.memoize(SpongeBlockSnapshot::new);
 
         @Override
         public BlockSnapshot empty() {
-            return FactoryImpl.EMPTY;
+            return FactoryImpl.EMPTY.get();
         }
     }
 }

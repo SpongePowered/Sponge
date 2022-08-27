@@ -42,20 +42,19 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.HitResult;
-import org.spongepowered.api.data.Keys;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.projectile.FishingBobber;
-import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
@@ -63,16 +62,15 @@ import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
+
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
 @Mixin(FishingHook.class)
-public abstract class FishingHookMixin extends EntityMixin {
+public abstract class FishingHookMixin extends ProjectileMixin {
 
     // @formatter:off
     @Shadow @Nullable private net.minecraft.world.entity.Entity hookedIn;
@@ -80,15 +78,11 @@ public abstract class FishingHookMixin extends EntityMixin {
     @Shadow @Final private int luck;
 
     @Shadow @Nullable public abstract Player shadow$getPlayerOwner();
+    @Shadow protected abstract void bringInHookedEntity();
     // @formatter:on
 
-    @Shadow protected abstract void bringInHookedEntity();
-
-
-    @Nullable private ProjectileSource impl$projectileSource;
-
     @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
-    private void onSetHookedEntity(CallbackInfo ci) {
+    private void onSetHookedEntity(final CallbackInfo ci) {
         if (SpongeCommon
             .post(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getCauseStackManager().currentCause(), (Entity) this.hookedIn, (FishingBobber) this))) {
             this.hookedIn = null;
@@ -103,20 +97,20 @@ public abstract class FishingHookMixin extends EntityMixin {
      * @reason This needs to handle for both cases where a fish and/or an entity is being caught.
      */
     @Overwrite
-    public int retrieve(ItemStack stack) {
+    public int retrieve(final ItemStack stack) {
         final Player playerEntity = this.shadow$getPlayerOwner();
 
         if (!this.level.isClientSide && playerEntity != null) {
             int i = 0;
 
             // Sponge start
-            final List<Transaction<ItemStackSnapshot>> transactions;
+            final List<Transaction<@NonNull ItemStackSnapshot>> transactions;
             if (this.nibble > 0) {
                 // Moved from below
                 final LootContext.Builder lootcontext$builder = new LootContext.Builder((ServerLevel)this.level)
                         .withParameter(LootContextParams.ORIGIN, this.shadow$position())
                         .withParameter(LootContextParams.TOOL, stack)
-                        .withParameter(LootContextParams.THIS_ENTITY, (net.minecraft.world.entity.Entity) (Object) this)
+                        .withParameter(LootContextParams.THIS_ENTITY, (FishingHook) (Object) this)
                         .withRandom(this.random)
                         .withLuck((float)this.luck + playerEntity.getLuck());
                 final LootTable lootTable = this.level.getServer().getLootTables().get(BuiltInLootTables.FISHING);
@@ -139,7 +133,7 @@ public abstract class FishingHookMixin extends EntityMixin {
             if (this.hookedIn != null) {
                 this.bringInHookedEntity();
                 CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer) playerEntity, stack, (FishingHook) (Object) this, Collections.emptyList());
-                this.level.broadcastEntityEvent((net.minecraft.world.entity.Entity) (Object) this, (byte) 31);
+                this.level.broadcastEntityEvent((FishingHook) (Object) this, (byte) 31);
                 i = this.hookedIn instanceof ItemEntity ? 3 : 5;
             } // Sponge: Remove else
 
@@ -149,25 +143,25 @@ public abstract class FishingHookMixin extends EntityMixin {
                 //lootcontext$builder.withLuck((float) this.field_191518_aw + playerEntity.getLuck());
 
                 // Use transactions
-                for (Transaction<ItemStackSnapshot> transaction : transactions) {
+                for (final Transaction<@NonNull ItemStackSnapshot> transaction : transactions) {
                     if (!transaction.isValid()) {
                         continue;
                     }
-                    ItemStack itemstack = (ItemStack) (Object) transaction.finalReplacement().createStack();
+                    final ItemStack itemstack = (ItemStack) (Object) transaction.finalReplacement().createStack();
                     // Sponge end
 
-                    ItemEntity entityitem = new ItemEntity(this.level, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), itemstack);
-                    double d0 = playerEntity.getX() - this.shadow$getX();
-                    double d1 = playerEntity.getY() - this.shadow$getY();
-                    double d2 = playerEntity.getZ() - this.shadow$getZ();
-                    double d3 = Mth.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+                    final ItemEntity entityitem = new ItemEntity(this.level, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), itemstack);
+                    final double d0 = playerEntity.getX() - this.shadow$getX();
+                    final double d1 = playerEntity.getY() - this.shadow$getY();
+                    final double d2 = playerEntity.getZ() - this.shadow$getZ();
+                    final double d3 = Mth.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
                     //double d4 = 0.1D;
                     entityitem.setDeltaMovement(d0 * 0.1D, d1 * 0.1D + Mth.sqrt(d3) * 0.08D, d2 * 0.1D);
                     this.level.addFreshEntity(entityitem);
                     playerEntity.level.addFreshEntity(new ExperienceOrb(playerEntity.level, playerEntity.getX(), playerEntity.getY() + 0.5D,
                             playerEntity.getZ() + 0.5D,
                             this.random.nextInt(6) + 1));
-                    Item item = itemstack.getItem();
+                    final Item item = itemstack.getItem();
 
                     if (item.is(ItemTags.FISHES)) {
                         playerEntity.awardStat(Stats.FISH_CAUGHT, 1);
@@ -197,9 +191,21 @@ public abstract class FishingHookMixin extends EntityMixin {
         }
 
         if (SpongeCommonEventFactory.handleCollideImpactEvent((FishingHook) (Object) this,
-                ((Projectile) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
+            this.impl$getProjectileSource(), hitResult)) {
             this.shadow$remove();
             ci.cancel();
         }
     }
+
+    @Inject(method = "tick",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;remove()V"),
+        slice = @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;shouldStopFishing(Lnet/minecraft/world/entity/player/Player;)Z"),
+            to = @At(value = "TAIL")
+        )
+    )
+    private void impl$expireFishingHookOnLand(final CallbackInfo ci) {
+        this.impl$callExpireEntityEvent();
+    }
+
 }

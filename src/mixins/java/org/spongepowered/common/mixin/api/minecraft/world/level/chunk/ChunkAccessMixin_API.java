@@ -24,29 +24,49 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.levelgen.Heightmap;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.scheduler.ScheduledUpdateList;
+import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.HeightType;
+import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.biome.Biome;
-import org.spongepowered.api.world.chunk.ChunkState;
 import org.spongepowered.api.world.chunk.Chunk;
+import org.spongepowered.api.world.chunk.ChunkState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.level.chunk.ChunkBiomeContainerAccessor;
+import org.spongepowered.common.util.MissingImplementationException;
+import org.spongepowered.common.util.SpongeTicks;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
+import org.spongepowered.math.vector.Vector3i;
 
 import javax.annotation.Nullable;
 
 @Mixin(ChunkAccess.class)
 public interface ChunkAccessMixin_API<P extends Chunk<P>> extends Chunk<P> {
 
-    // @formatter:on
+    // @formatter:off
     @Shadow ChunkStatus shadow$getStatus();
     @Shadow @Nullable ChunkBiomeContainer shadow$getBiomes();
     @Shadow void shadow$addEntity(net.minecraft.world.entity.Entity entity);
     @Shadow void shadow$setUnsaved(boolean var1);
-    // @formatter:off
+    @Shadow void shadow$setInhabitedTime(long var1);
+    @Shadow long shadow$getInhabitedTime();
+
+    @Shadow ChunkPos shadow$getPos();
+
+    @Shadow int shadow$getHeight(Heightmap.Types var1, int var2, int var3);
+
+    // @formatter:on
+
 
     @Override
     default void addEntity(final Entity entity) {
@@ -67,5 +87,52 @@ public interface ChunkAccessMixin_API<P extends Chunk<P>> extends Chunk<P> {
     default boolean setBiome(final int x, final int y, final int z, final Biome biome) {
         return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.shadow$getBiomes(), () -> this.shadow$setUnsaved(true));
     }
+
+    @Override
+    default Ticks inhabitedTime() {
+        return new SpongeTicks(this.shadow$getInhabitedTime());
+    }
+
+    @Override
+    default void setInhabitedTime(Ticks newInhabitedTime) {
+        this.shadow$setInhabitedTime(newInhabitedTime.ticks());
+    }
+
+    @Override
+    default Vector3i chunkPosition() {
+        final ChunkPos chunkPos = this.shadow$getPos();
+        return new Vector3i(chunkPos.x, 0, chunkPos.z);
+    }
+
+    @Override
+    default boolean contains(int x, int y, int z) {
+        return VecHelper.inBounds(x, y, z, this.min(), this.max());
+    }
+
+    @Override
+    default boolean isAreaAvailable(int x, int y, int z) {
+        return VecHelper.inBounds(x, y, z, this.min(), this.max());
+    }
+
+    @Override
+    default int highestYAt(int x, int z) {
+        return this.shadow$getHeight((Heightmap.Types) (Object) HeightTypes.WORLD_SURFACE.get(), x, z);
+    }
+
+    @Override
+    default int height(HeightType type, int x, int z) {
+        return this.shadow$getHeight((Heightmap.Types) (Object) HeightTypes.WORLD_SURFACE.get(), x, z);
+    }
+
+    @Override
+    default ScheduledUpdateList<BlockType> scheduledBlockUpdates() {
+        throw new MissingImplementationException("ChunkAccess", "scheduledBlockUpdates");
+    }
+
+    @Override
+    default ScheduledUpdateList<FluidType> scheduledFluidUpdates() {
+        throw new MissingImplementationException("ChunkAccess", "scheduledFluidUpdates");
+    }
+
 
 }

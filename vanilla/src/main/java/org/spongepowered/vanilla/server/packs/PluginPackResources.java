@@ -89,12 +89,15 @@ public final class PluginPackResources extends AbstractPackResources {
             final Predicate<String> fileNameValidator) {
         try {
             final Path root = this.typeRoot(type);
-            return Files.walk(root.resolve(namespace).resolve(namespace), depth)
-                .filter(s -> !s.getFileName().toString().endsWith(".mcmeta"))
-                .map(Object::toString)
-                .filter(fileNameValidator)
-                .map(s -> new ResourceLocation(namespace, path))
-                .collect(Collectors.toList());
+            final Path namespaceDir = root.resolve(namespace).toAbsolutePath();
+            return Files.walk(namespaceDir, depth)
+                    .filter(Files::isRegularFile)
+                    .filter(s -> !s.getFileName().toString().endsWith(".mcmeta"))
+                    .map(namespaceDir::relativize)
+                    .map(Object::toString)
+                    .filter(fileNameValidator)
+                    .map(s -> new ResourceLocation(namespace, s))
+                    .collect(Collectors.toList());
         } catch (final IOException e) {
             return Collections.emptyList();
         }

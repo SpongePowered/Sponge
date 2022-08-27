@@ -38,6 +38,11 @@ import org.spongepowered.forge.launch.ForgeLaunch;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 @Mixin(value = ModContainer.class, remap = false)
@@ -46,9 +51,10 @@ public abstract class ModContainerMixin_Forge implements ModContainerBridge, Plu
     // @formatter:off
     @Shadow @Final protected IModInfo modInfo;
     @Shadow @Final protected String modId;
+    @Shadow protected Supplier<?> contextExtension;
+    @Shadow public abstract Object shadow$getMod();
     // @formatter:on
 
-    @Shadow protected Supplier<?> contextExtension;
     private Logger forge$logger;
     private PluginMetadata forge$pluginMetadata;
 
@@ -73,6 +79,22 @@ public abstract class ModContainerMixin_Forge implements ModContainerBridge, Plu
         }
 
         return this.forge$logger;
+    }
+
+    @Override
+    public Optional<URI> locateResource(URI relative) {
+        Objects.requireNonNull(relative, "relative");
+
+        final ClassLoader classLoader = this.shadow$getMod().getClass().getClassLoader();
+        final URL resolved = classLoader.getResource(relative.getPath());
+        try {
+            if (resolved == null) {
+                return Optional.empty();
+            }
+            return Optional.of(resolved.toURI());
+        } catch (final URISyntaxException ignored) {
+            return Optional.empty();
+        }
     }
 
     @Override

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.registry;
 
-import co.aikar.timings.TimingsFactory;
-import co.aikar.timings.sponge.SpongeTimingsFactory;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.ResourceKey;
@@ -76,6 +74,7 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.biome.AttributedBiome;
@@ -143,6 +142,7 @@ import org.spongepowered.common.util.SpongeRange;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.SpongeTransform;
 import org.spongepowered.common.util.raytrace.SpongeRayTraceFactory;
+import org.spongepowered.common.world.SpongeDefaultWorldKeysFactory;
 import org.spongepowered.common.world.SpongeWorldTypeEffect;
 import org.spongepowered.common.world.biome.SpongeAttributedBiome;
 import org.spongepowered.common.world.biome.SpongeBiomeAttributesFactory;
@@ -219,7 +219,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(ResourcePack.Factory.class, new SpongeResourcePack.Factory())
                 .registerFactory(ServerLocation.Factory.class, new SpongeServerLocation.Factory())
                 .registerFactory(SpongeComponents.Factory.class, new SpongeAdventure.Factory())
-                .registerFactory(TimingsFactory.class, new SpongeTimingsFactory())
                 .registerFactory(Transform.Factory.class, new SpongeTransform.Factory())
                 .registerFactory(VariableValueParameters.Factory.class, new SpongeVariableValueParametersFactory())
                 .registerFactory(ChannelExceptionHandler.Factory.class, new SpongeChannelExceptionHandlerFactory())
@@ -280,6 +279,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(PackStatus.Factory.class, new SpongePackStatusFactory())
                 .registerFactory(ResourcePath.Factory.class, new SpongeResourcePath.FactoryImpl())
                 .registerFactory(VanishState.Factory.class, new SpongeVanishState.SpongeVanishStateFactory())
+                .registerFactory(DefaultWorldKeys.Factory.class, new SpongeDefaultWorldKeysFactory())
         ;
     }
 }

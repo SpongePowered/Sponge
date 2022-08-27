@@ -128,10 +128,11 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 
     @Override
     default Weather weather() {
+        if (((ServerLevelData) this).isThundering()) {
+            return new SpongeWeather((SpongeWeatherType) WeatherTypes.THUNDER.get(), new SpongeTicks(this.shadow$getThunderTime()), new SpongeTicks(6000 - this.shadow$getThunderTime()));
+        }
         if (((ServerLevelData) this).isRaining()) {
             return new SpongeWeather((SpongeWeatherType) WeatherTypes.RAIN.get(), new SpongeTicks(this.shadow$getRainTime()), new SpongeTicks(6000 - this.shadow$getRainTime()));
-        } else if (((ServerLevelData) this).isThundering()) {
-            return new SpongeWeather((SpongeWeatherType) WeatherTypes.THUNDER.get(), new SpongeTicks(this.shadow$getThunderTime()), new SpongeTicks(6000 - this.shadow$getThunderTime()));
         }
         return new SpongeWeather((SpongeWeatherType) WeatherTypes.CLEAR.get(), new SpongeTicks(this.shadow$getClearWeatherTime()), new SpongeTicks(6000 - this.shadow$getClearWeatherTime()));
     }

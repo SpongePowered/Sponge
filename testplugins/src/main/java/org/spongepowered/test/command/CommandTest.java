@@ -620,6 +620,9 @@ public final class CommandTest {
                         return CommandResult.success();
                     })
                     .build(), "firstoftest");
+
+        event.register(this.plugin,
+                Command.builder().executor(ctx -> CommandResult.error(Component.text("error"))).build(), "error");
     }
 
     @Listener

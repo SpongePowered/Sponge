@@ -95,6 +95,7 @@
         "world.entity.animal.horse.HorseAccessor",
         "world.entity.animal.horse.LlamaAccessor",
         "world.entity.animal.horse.TraderLlamaAccessor",
+        "world.entity.boss.enderdragon.phases.EnderDragonPhaseAccessor",
         "world.entity.boss.wither.WitherBossAccessor",
         "world.entity.decoration.ArmorStandAccessor",
         "world.entity.decoration.HangingEntityAccessor",

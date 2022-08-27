@@ -32,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
@@ -52,7 +53,7 @@ public final class MapInfoItemStackData {
 							if (itemStack.getTag() == null) {
 								return null;
 							}
-							return (MapInfo) ((Level)Sponge.server().worldManager().defaultWorld())
+							return (MapInfo) ((Level)Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get())
 									.getMapData(Constants.Map.MAP_PREFIX + itemStack.getTag().getInt(Constants.Map.MAP_ID));
 						}) // Nullable
 						.set((itemStack, mapInfo) -> {

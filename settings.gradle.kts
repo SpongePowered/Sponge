@@ -9,13 +9,13 @@ pluginManagement {
 
     plugins {
         // Default plugin versions
-        id("org.spongepowered.gradle.vanilla") version "0.2"
+        id("org.spongepowered.gradle.vanilla") version "0.2.1-SNAPSHOT"
         id("org.cadixdev.licenser") version "0.6.1"
-        id("com.github.johnrengelman.shadow") version "7.0.0"
-        id("org.spongepowered.gradle.sponge.dev") version "1.1.1"
+        id("com.github.johnrengelman.shadow") version "7.1.2"
+        id("org.spongepowered.gradle.sponge.dev") version "2.0.2"
         id("implementation-structure")
-        id("org.jetbrains.gradle.plugin.idea-ext") version "1.0"
-        id("com.github.ben-manes.versions") version "0.39.0"
+        id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.5"
+        id("com.github.ben-manes.versions") version "0.42.0"
     }
 }
 
@@ -58,6 +58,7 @@ includeBuild("SpongeAPI") {
 }
 include(":SpongeVanilla")
 project(":SpongeVanilla").projectDir = file("vanilla")
+include("modlauncher-transformers")
 include("generator")
 
 val testPlugins = file("testplugins.settings.gradle.kts")
