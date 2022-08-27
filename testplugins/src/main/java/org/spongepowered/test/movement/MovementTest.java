@@ -37,6 +37,7 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.CommonParameters;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
@@ -157,10 +158,24 @@ public final class MovementTest implements LoadableModule {
         }
 
         @Listener
-        public void onMovePlayer(final MoveEntityEvent event, final @Getter("entity") ServerPlayer player) {
+        public void onMovePlayer(final MoveEntityEvent event) {
+            final ServerPlayer player;
+            final String name;
+            if (event.entity() instanceof ServerPlayer) {
+                player = (ServerPlayer) event.entity();
+                name = player.name();
+            } else {
+                player = (ServerPlayer) event.entity().get(Keys.PASSENGERS).get().stream()
+                        .filter(ServerPlayer.class::isInstance).findFirst().orElse(null);
+                if (player == null) {
+                    return;
+                }
+                name = player.name() + " (vehicle)";
+            }
+
             final Optional<MovementType> type = event.context().get(EventContextKeys.MOVEMENT_TYPE);
             final Logger logger = MovementTest.this.plugin.logger();
-            logger.info(MovementTest.marker, player.name() + ": Movement Type: " + type.map(t -> RegistryTypes.MOVEMENT_TYPE.get().valueKey(t).toString()).orElse("?"));
+            logger.info(MovementTest.marker, name + ": Movement Type: " + type.map(t -> RegistryTypes.MOVEMENT_TYPE.get().valueKey(t).toString()).orElse("?"));
 
             if (MovementTest.this.cancelMovement) {
                 event.setCancelled(true);
