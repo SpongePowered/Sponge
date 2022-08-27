@@ -310,7 +310,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     @Inject(
             method = "handleMoveVehicle",
             cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getLevel()Lnet/minecraft/server/level/ServerLevel;")
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getControllingPassenger()Lnet/minecraft/world/entity/Entity;")
     )
     private void impl$handleVehicleMoveEvent(final ServerboundMoveVehiclePacket param0, final CallbackInfo ci) {
         final ServerboundMoveVehiclePacketAccessor packet = (ServerboundMoveVehiclePacketAccessor) param0;
@@ -325,14 +325,12 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
         final Vector3d originalToRotation = new Vector3d(param0.getYRot(), param0.getXRot(), 0);
 
         // common checks and throws are done here.
-        Vector3d toPosition = SpongeCommonEventFactory.callMoveEvent(
+        final @Nullable Vector3d toPosition = SpongeCommonEventFactory.callMoveEvent(
                 (org.spongepowered.api.entity.Entity) rootVehicle,
                 fromPosition,
                 originalToPosition
         );
-        if (toPosition == null) {
-            toPosition = fromPosition;
-        }
+
         Vector3d toRotation = SpongeCommonEventFactory.callRotateEvent(
                 (org.spongepowered.api.entity.Entity) rootVehicle,
                 fromRotation,
@@ -342,7 +340,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
             toRotation = fromRotation;
         }
 
-        if (fromPosition.equals(toPosition)) {
+        if (toPosition == null) {
             // no point doing all that processing, just account for a potential rotation change.
             if (!fromRotation.equals(toRotation)) {
                 rootVehicle.absMoveTo(rootVehicle.getX(), rootVehicle.getY(), rootVehicle.getZ(), (float) toRotation.y(), (float) toRotation.x());
@@ -352,14 +350,17 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
             return;
         }
 
-        packet.accessor$yRot((float) toRotation.x());
-        packet.accessor$xRot((float) toRotation.y());
+        if (!toPosition.equals(originalToPosition) || !toRotation.equals(originalToRotation)) {
+            // notify the client about the new position
+            rootVehicle.absMoveTo(toPosition.x(), toPosition.y(), toPosition.z(), (float) toRotation.y(), (float) toRotation.x());
+            this.connection.send(new ClientboundMoveVehiclePacket(rootVehicle));
 
-        if (!toPosition.equals(originalToPosition)) {
             // update the packet, let MC take care of the rest.
             packet.accessor$x(toPosition.x());
             packet.accessor$y(toPosition.y());
             packet.accessor$z(toPosition.z());
+            packet.accessor$yRot((float) toRotation.x());
+            packet.accessor$xRot((float) toRotation.y());
 
             // set the first and last good position now so we don't cause the "moved too quickly" warnings.
             this.vehicleFirstGoodX = toPosition.x();
