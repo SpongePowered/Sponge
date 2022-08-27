@@ -24,6 +24,7 @@
         "minecraftforge.fml.BrandingControlMixin_Forge",
         "minecraftforge.fml.FMLModContainerMixin_Forge",
         "minecraftforge.fml.ModContainerMixin_Forge",
+        "minecraftforge.fml.NetworkHooksMixin_Forge",
         "minecraftforge.util.ITeleporterMixin_Forge",
         "server.BootstrapMixin_Forge",
         "server.MinecraftServerMixin_Forge",
