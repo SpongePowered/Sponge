@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.manager.CommandMapping;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.effect.BroadcastInventoryChangesEffect;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.PrettyPrinter;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 
 public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext> {
 
@@ -73,6 +73,20 @@ public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext
             .add(s + "- %s: %s", "Command", this.command == null ? "empty command" : this.command)
             .add(s + "- %s: %s", "Command Mapping", this.commandMapping == null ? "no mapping" : this.commandMapping.toString());
         return printer;
+    }
+
+    @Override
+    public void close() {
+        // Make sure to broadcast any changes to capture any inventory transactions for events.
+        if (this.getSource() instanceof ServerPlayer) {
+            final TransactionalCaptureSupplier transactor = this.getTransactor();
+            transactor.logPlayerInventoryChange((ServerPlayer) this.getSource(), PlayerInventoryTransaction.EventCreator.STANDARD);
+            try (EffectTransactor ignored = BroadcastInventoryChangesEffect.transact(transactor)) {
+                ((ServerPlayer) this.getSource()).containerMenu.broadcastChanges();
+            }
+        }
+
+        super.close();
     }
 
     // Maybe we could provide the command?
