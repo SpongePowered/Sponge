@@ -408,6 +408,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         values.add(this.requireValue(Keys.GAME_MODE).asImmutable());
         values.add(this.requireValue(Keys.HAS_VIEWED_CREDITS).asImmutable());
         values.add(this.requireValue(Keys.LOCALE).asImmutable());
+        values.add(this.requireValue(Keys.PREVIOUS_GAME_MODE).asImmutable());
         values.add(this.requireValue(Keys.SKIN_PARTS).asImmutable());
         values.add(this.requireValue(Keys.SPECTATOR_TARGET).asImmutable());
         // TODO ClassCastException: ServerStatsCounter -> StatsCounterBridge
