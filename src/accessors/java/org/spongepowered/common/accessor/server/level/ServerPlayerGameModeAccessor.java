@@ -26,14 +26,11 @@ package org.spongepowered.common.accessor.server.level;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayerGameMode;
-import net.minecraft.world.level.GameType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ServerPlayerGameMode.class)
 public interface ServerPlayerGameModeAccessor {
-
-    @Accessor("previousGameModeForPlayer") void accessor$previousGameModeForPlayer(GameType previousGameModeForPlayer);
 
     @Accessor("isDestroyingBlock") boolean accessor$isDestroyingBlock();
 

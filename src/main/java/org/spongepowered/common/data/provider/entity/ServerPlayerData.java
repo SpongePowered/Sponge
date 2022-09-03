@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.provider.entity;
 
 import com.mojang.authlib.properties.Property;
-import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stat;
 import net.minecraft.world.level.GameType;
@@ -37,7 +36,6 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
-import org.spongepowered.common.accessor.server.level.ServerPlayerGameModeAccessor;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerEntityHealthScaleBridge;
 import org.spongepowered.common.bridge.stats.StatsCounterBridge;
@@ -63,14 +61,6 @@ public final class ServerPlayerData {
                         .set((h, v) -> h.setGameMode((GameType) (Object) v))
                     .create(Keys.PREVIOUS_GAME_MODE)
                         .get(h -> (GameMode) (Object) h.gameMode.getPreviousGameModeForPlayer())
-                        .set((h, v) -> {
-                            ((ServerPlayerGameModeAccessor) h.gameMode).accessor$previousGameModeForPlayer((GameType) (Object) v);
-                            // Update MultiPlayerGameMode#previousLocalPlayerMode field on the client
-                            h.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.CHANGE_GAME_MODE,
-                                (float) ((GameType) (Object) v).getId()));
-                            h.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.CHANGE_GAME_MODE,
-                                (float) h.gameMode.getGameModeForPlayer().getId()));
-                        })
                     .create(Keys.SKIN_PROFILE_PROPERTY)
                         .get(h -> {
                             final Collection<Property> properties = h.getGameProfile().getProperties().get(ProfileProperty.TEXTURES);
