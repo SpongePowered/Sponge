@@ -114,11 +114,11 @@ public class ServerGamePacketListenerImplMixin_Inventory {
             final Level param1, final ItemStack param2, final InteractionHand param3) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        final InteractionResult result = serverPlayerGameMode.useItem(param0, param1, param2, param3);
         try (EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(this.player, PlayerInventoryTransaction.EventCreator.STANDARD)) {
+            final InteractionResult result = serverPlayerGameMode.useItem(param0, param1, param2, param3);
             this.player.inventoryMenu.broadcastChanges(); // capture
+            return result;
         }
-        return result;
         // TrackingUtil.processBlockCaptures called by UseItemPacketState
     }
 
