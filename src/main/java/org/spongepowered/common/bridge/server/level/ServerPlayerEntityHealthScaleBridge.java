@@ -29,9 +29,11 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 
 public interface ServerPlayerEntityHealthScaleBridge {
 
-    void bridge$setHealthScale(Double scale);
+    boolean bridge$setHealthScale(double scale);
 
-    Double bridge$getHealthScale();
+    void bridge$resetHealthScale();
+
+    double bridge$getHealthScale();
 
     float bridge$getInternalScaledHealth();
 
