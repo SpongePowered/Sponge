@@ -325,8 +325,13 @@ public abstract class SpongeEventManager implements EventManager {
 
     @Override
     public SpongeEventManager registerListeners(final PluginContainer plugin, final Object listener,
-                                                final MethodHandles.Lookup lookup) {
+                                                MethodHandles.Lookup lookup) {
         Objects.requireNonNull(lookup, "lookup");
+        try {
+            lookup = MethodHandles.privateLookupIn(listener.getClass(), lookup);
+        } catch (IllegalAccessException ex) {
+            throw new IllegalArgumentException("Provider lookup lacks sufficient privilege", ex);
+        }
         this.registerListener(plugin, listener, lookup);
         return this;
     }
