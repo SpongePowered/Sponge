@@ -325,14 +325,17 @@ public abstract class SpongeEventManager implements EventManager {
 
     @Override
     public SpongeEventManager registerListeners(final PluginContainer plugin, final Object listener,
-                                                MethodHandles.Lookup lookup) {
+                                                final MethodHandles.Lookup lookup) {
         Objects.requireNonNull(lookup, "lookup");
+        MethodHandles.Lookup usedLookup;
         try {
-            lookup = MethodHandles.privateLookupIn(listener.getClass(), lookup);
+            usedLookup = MethodHandles.privateLookupIn(listener.getClass(), lookup);
         } catch (IllegalAccessException ex) {
-            throw new IllegalArgumentException("Provider lookup lacks sufficient privilege", ex);
+            String errorMessage = "The plugin " + plugin.metadata().id() + " supplied a lookup " +
+                    "with insufficient privileges to register listeners";
+            throw new IllegalArgumentException(errorMessage, ex);
         }
-        this.registerListener(plugin, listener, lookup);
+        this.registerListener(plugin, listener, usedLookup);
         return this;
     }
 
