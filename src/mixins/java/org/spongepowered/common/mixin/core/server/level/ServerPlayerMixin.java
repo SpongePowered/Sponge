@@ -63,6 +63,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -171,11 +172,12 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow protected abstract void shadow$createEndPlatform(ServerLevel p_241206_1_, BlockPos blockPos);
     @Shadow protected abstract void shadow$triggerDimensionChangeTriggers(ServerLevel serverworld);
     @Shadow public abstract void shadow$doCloseContainer();
+    @Shadow public abstract void shadow$refreshContainer(AbstractContainerMenu container);
     // @formatter:on
 
 
     private net.minecraft.network.chat.@Nullable Component impl$connectionMessage;
-    private Locale impl$language = Locales.EN_US;
+    private Locale impl$language = Locales.DEFAULT;
     private Scoreboard impl$scoreboard = Sponge.game().server().serverScoreboard().get();
     @Nullable private Boolean impl$keepInventory = null;
     // Used to restore original item received in a packet after canceling an event
@@ -265,17 +267,21 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Override
     public void bridge$setLanguage(final Locale language) {
+        this.impl$language = language;
+
         // Update locale on Channel, used for sending localized messages
         if (this.connection != null) {
             final Channel channel = ((ConnectionAccessor) this.connection.connection).accessor$channel();
             channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(language);
+
             SpongeAdventure.forEachBossBar(bar -> {
                 if (bar.getPlayers().contains(this)) {
                     this.connection.send(new ClientboundBossEventPacket(ClientboundBossEventPacket.Operation.UPDATE_NAME, bar));
                 }
             });
+
+            this.shadow$refreshContainer(this.containerMenu);
         }
-        this.impl$language = language;
     }
 
     @Override
