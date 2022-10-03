@@ -160,17 +160,17 @@ public final class VolumeStreamUtils {
         return VolumeStreamUtils.getElementByPosition(VolumeStreamUtils.chunkSectionBlockStateGetter(), min, max);
     }
 
-    public static boolean setBiomeOnNativeChunk(final int x, final int y, final int z, final
-        org.spongepowered.api.world.biome.Biome biome, final Supplier<@Nullable ChunkBiomeContainerAccessor> accessor,
+    public static boolean setBiomeOnNativeChunk(final int x, final int y, final int z,
+        final org.spongepowered.api.world.biome.Biome biome, final Supplier<@Nullable ChunkBiomeContainerAccessor> accessor,
         final Runnable finalizer
-        ) {
+    ) {
         @Nullable final ChunkBiomeContainerAccessor chunkBiomeContainerAccessor = accessor.get();
         if (chunkBiomeContainerAccessor == null) {
             return false;
         }
-        final int maskedX = x & ChunkBiomeContainer.HORIZONTAL_MASK;
-        final int maskedY = Mth.clamp(y, 0, ChunkBiomeContainer.VERTICAL_MASK);
-        final int maskedZ = z & ChunkBiomeContainer.HORIZONTAL_MASK;
+        final int maskedX = (x >> 2) & ChunkBiomeContainer.HORIZONTAL_MASK;
+        final int maskedY = Mth.clamp((y >> 2), 0, ChunkBiomeContainer.VERTICAL_MASK);
+        final int maskedZ = (z >> 2) & ChunkBiomeContainer.HORIZONTAL_MASK;
         final int WIDTH_BITS = ChunkBiomeContainerAccessor.accessor$WIDTH_BITS();
         final int posKey = maskedY << WIDTH_BITS + WIDTH_BITS | maskedZ << WIDTH_BITS | maskedX;
         final Biome[] biomes = chunkBiomeContainerAccessor.accessor$biomes();
