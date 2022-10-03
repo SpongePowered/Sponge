@@ -453,7 +453,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     @SuppressWarnings("rawtypes")
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        if (!((Level) (Object) this).hasChunk(x << 4, z << 4)) {
+        if (!((Level) (Object) this).hasChunk(x >> 4, z >> 4)) {
             return false;
         }
         final LevelChunk levelChunk = this.shadow$getChunkAt(new BlockPos(x, y, z));
