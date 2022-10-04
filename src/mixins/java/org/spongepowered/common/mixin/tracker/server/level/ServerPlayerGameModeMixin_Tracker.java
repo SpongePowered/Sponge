@@ -103,7 +103,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
         final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(playerIn, stackIn, hitVec, snapshot, direction, handIn);
         final Tristate useItem = event.useItemResult();
         final Tristate useBlock = event.useBlockResult();
-        ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(event.isCancelled() || useItem == Tristate.FALSE);
+        ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(event.isCancelled());
         if (event.isCancelled()) {
             return InteractionResult.FAIL;
         }
@@ -154,6 +154,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
             if (!stackIn.isEmpty() && !playerIn.getCooldowns().isOnCooldown(stackIn.getItem())) {
                 // Sponge start
                 if (useItem == Tristate.FALSE) {
+                    ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(true);
                     return InteractionResult.PASS;
                 }
                 // Sponge end
@@ -179,6 +180,12 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
 
                 return result;
             } else {
+                // Sponge start
+                if(useBlock == Tristate.FALSE && !flag1) {
+                    ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(true);
+                }
+                // Sponge end
+
                 return InteractionResult.PASS;
             }
         }
