@@ -250,7 +250,12 @@ public final class TrackingUtil {
             }
         }
 
-        final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world(apiWorld).position(pos.getX(), pos.getY(), pos.getZ()).state((BlockState) blockState).build();
+        final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
+            .world(apiWorld)
+            .position(pos.getX(), pos.getY(), pos.getZ())
+            .state((BlockState) blockState)
+                .fluid((org.spongepowered.api.fluid.FluidState) fluidState)
+            .build();
         final FluidTickContext phaseContext = TickPhase.Tick.FLUID.createPhaseContext(PhaseTracker.SERVER)
             .source(locatable)
             .fluid(fluidState);

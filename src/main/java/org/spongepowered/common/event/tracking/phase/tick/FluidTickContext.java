@@ -50,7 +50,7 @@ public class FluidTickContext extends LocationBasedTickContext<FluidTickContext>
         if (owner instanceof LocatableBlock) {
             final LocatableBlock locatableBlock = (LocatableBlock) owner;
             final Block block = ((BlockState) locatableBlock.blockState()).getBlock();
-            this.providesModifier = !(block instanceof LiquidBlock);
+            this.providesModifier = !(block instanceof  LiquidBlock);
             this.world = locatableBlock.world();
             if (block instanceof TrackableBridge) {
                 final TrackableBridge trackable = (TrackableBridge) block;
@@ -63,7 +63,7 @@ public class FluidTickContext extends LocationBasedTickContext<FluidTickContext>
         return this;
     }
 
-    public FluidTickContext fluid(FluidState fluidState) {
+    public FluidTickContext fluid(final FluidState fluidState) {
         this.tickingBlock = fluidState;
         return this;
     }
