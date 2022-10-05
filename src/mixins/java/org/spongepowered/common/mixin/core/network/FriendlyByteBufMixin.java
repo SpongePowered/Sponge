@@ -55,58 +55,60 @@ public abstract class FriendlyByteBufMixin implements FriendlyByteBufBridge {
     @Redirect(method = "writeItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getTag()Lnet/minecraft/nbt/CompoundTag;"))
     public CompoundTag renderItemComponents(final ItemStack stack) {
         CompoundTag tag = stack.getTag();
-        if (tag != null && tag.contains(Constants.Item.ITEM_DISPLAY, 10)) {
-            final Locale locale = this.impl$locale == null ? Locales.DEFAULT : this.impl$locale;
-            CompoundTag display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
-            boolean copy = true;
+        if (tag == null || !tag.contains(Constants.Item.ITEM_DISPLAY, 10)) {
+            return tag;
+        }
 
-            if (display.contains(Constants.Item.ITEM_NAME, 8)) {
-                final String nameStr = display.getString(Constants.Item.ITEM_NAME);
-                final Component name = Component.Serializer.fromJson(nameStr);
-                final Component renderedName = NativeComponentRenderer.apply(name, locale);
+        final Locale locale = this.impl$locale == null ? Locales.DEFAULT : this.impl$locale;
+        CompoundTag display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
+        boolean copy = true;
 
-                if (!renderedName.equals(name)) {
-                    if (copy) {
-                        tag = tag.copy();
-                        display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
-                        copy = false;
-                    }
+        if (display.contains(Constants.Item.ITEM_NAME, 8)) {
+            final String nameStr = display.getString(Constants.Item.ITEM_NAME);
+            final Component name = Component.Serializer.fromJson(nameStr);
+            final Component renderedName = NativeComponentRenderer.apply(name, locale);
 
-                    display.putString(Constants.Item.ITEM_ORIGINAL_NAME, nameStr);
-                    display.putString(Constants.Item.ITEM_NAME, Component.Serializer.toJson(renderedName));
+            if (!renderedName.equals(name)) {
+                if (copy) {
+                    tag = tag.copy();
+                    display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
+                    copy = false;
                 }
+
+                display.putString(Constants.Item.ITEM_ORIGINAL_NAME, nameStr);
+                display.putString(Constants.Item.ITEM_NAME, Component.Serializer.toJson(renderedName));
+            }
+        }
+
+        if (display.contains(Constants.Item.ITEM_LORE, 9)) {
+            final ListTag lore = display.getList(Constants.Item.ITEM_LORE, 8);
+
+            final Component[] renderedLines = new Component[lore.size()];
+            boolean equal = true;
+
+            for (int i = 0; i < renderedLines.length; i++) {
+                final String lineStr = lore.getString(i);
+                final Component line = Component.Serializer.fromJson(lineStr);
+                final Component renderedLine = NativeComponentRenderer.apply(line, locale);
+
+                renderedLines[i] = renderedLine;
+                equal = equal && renderedLine.equals(line);
             }
 
-            if (display.contains(Constants.Item.ITEM_LORE, 9)) {
-                final ListTag lore = display.getList(Constants.Item.ITEM_LORE, 8);
-
-                final Component[] renderedLines = new Component[lore.size()];
-                boolean equal = true;
-
-                for (int i = 0; i < renderedLines.length; i++) {
-                    final String lineStr = lore.getString(i);
-                    final Component line = Component.Serializer.fromJson(lineStr);
-                    final Component renderedLine = NativeComponentRenderer.apply(line, locale);
-
-                    renderedLines[i] = renderedLine;
-                    equal = equal && renderedLine.equals(line);
+            if (!equal) {
+                if (copy) {
+                    tag = tag.copy();
+                    display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
+                    copy = false;
                 }
 
-                if (!equal) {
-                    if (copy) {
-                        tag = tag.copy();
-                        display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
-                        copy = false;
-                    }
-
-                    final ListTag newLore = new ListTag();
-                    for (Component renderedLine : renderedLines) {
-                        newLore.add(StringTag.valueOf(Component.Serializer.toJson(renderedLine)));
-                    }
-
-                    display.put(Constants.Item.ITEM_ORIGINAL_LORE, lore);
-                    display.put(Constants.Item.ITEM_LORE, newLore);
+                final ListTag newLore = new ListTag();
+                for (Component renderedLine : renderedLines) {
+                    newLore.add(StringTag.valueOf(Component.Serializer.toJson(renderedLine)));
                 }
+
+                display.put(Constants.Item.ITEM_ORIGINAL_LORE, lore);
+                display.put(Constants.Item.ITEM_LORE, newLore);
             }
         }
         return tag;
