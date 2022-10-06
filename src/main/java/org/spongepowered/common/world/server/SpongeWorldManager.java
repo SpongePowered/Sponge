@@ -28,8 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Decoder;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
@@ -42,7 +41,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryResourceAccess;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
@@ -129,7 +128,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -456,7 +454,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final Path dataPackFile = this.getDataPackFile(Objects.requireNonNull(key, "key"));
         if (Files.exists(dataPackFile)) {
             try (final BufferedReader reader = Files.newBufferedReader(dataPackFile)) {
-                final LevelStem template = SpongeWorldManager.stemFromJson(key, new JsonParser().parse(reader));
+                final LevelStem template = SpongeWorldManager.stemFromJson(key, JsonParser.parseReader(reader));
                 return CompletableFuture.completedFuture(Optional.of(((LevelStemBridge) (Object) template).bridge$asTemplate()));
             } catch (final IOException e) {
                 return FutureUtil.completedWithException(e);
@@ -650,7 +648,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             template = SpongeWorldManager.stemToJson(stem);
         } else {
             try (final BufferedReader reader = Files.newBufferedReader(this.getDataPackFile(key))) {
-                template = new JsonParser().parse(reader);
+                template = JsonParser.parseReader(reader);
             } catch (final IOException e) {
                 return FutureUtil.completedWithException(e);
             }
@@ -1110,22 +1108,18 @@ public abstract class SpongeWorldManager implements WorldManager {
         return net.minecraft.resources.ResourceKey.create(net.minecraft.core.Registry.LEVEL_STEM_REGISTRY, (ResourceLocation) (Object) key);
     }
 
-    private static LevelStem stemFromJson(final ResourceKey key, final JsonElement element) {
-        final MappedRegistry<LevelStem> registry = new MappedRegistry<>(net.minecraft.core.Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
-        RegistryReadOps.create(JsonOps.INSTANCE,
-                        new SingleTemplateAccess(SpongeWorldManager.createRegistryKey(key), element),
-                        (RegistryAccess.RegistryHolder) BootstrapProperties.registries)
-                .decodeElements(registry, net.minecraft.core.Registry.LEVEL_STEM_REGISTRY, LevelStem.CODEC);
-
-        final LevelStem stem = registry.stream().findAny().get();
+    private static LevelStem stemFromJson(final ResourceKey key, final JsonElement element) throws IOException {
+        final LevelStem stem = LevelStem.CODEC.parse(
+                new Dynamic<>(RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), element))
+                .getOrThrow(true, s -> {});
         ((LevelStemBridge) (Object) stem).bridge$setFromSettings(false);
         ((ResourceKeyBridge) (Object) stem).bridge$setKey(key);
         return stem;
     }
 
     private static JsonElement stemToJson(final LevelStem stem) {
-        return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(
-                RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries),
+        return LevelStem.CODEC.encodeStart(
+                RegistryOps.create(JsonOps.INSTANCE, BootstrapProperties.registries),
                 stem).getOrThrow(true, s -> {});
     }
 
@@ -1183,32 +1177,5 @@ public abstract class SpongeWorldManager implements WorldManager {
     private Path getConfigFile(final ResourceKey key) {
         return SpongeCommon.spongeConfigDirectory().resolve(Launch.instance().id()).resolve("worlds").resolve(key.namespace())
                 .resolve(key.value() + ".conf");
-    }
-
-    private static final class SingleTemplateAccess implements RegistryResourceAccess {
-
-        private final net.minecraft.resources.ResourceKey<?> key;
-        private final JsonElement element;
-
-        public SingleTemplateAccess(final net.minecraft.resources.ResourceKey<?> key, final JsonElement element) {
-            this.key = key;
-            this.element = element;
-        }
-
-        @Override
-        public <E> Collection<net.minecraft.resources.ResourceKey<E>> listResources(final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<E>> registryKey) {
-            if (this.key.isFor(registryKey)) {
-                return Collections.singletonList(net.minecraft.resources.ResourceKey.create(registryKey, new ResourceLocation(this.key.location().getNamespace(),
-                        registryKey.location().getPath() + "/" + this.key.location().getPath() + ".json")));
-            }
-            return Collections.emptyList();
-        }
-
-        @Override
-        public <E> Optional<DataResult<RegistryResourceAccess.ParsedEntry<E>>> parseElement(final DynamicOps<JsonElement> ops,
-                final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<E>> registryKey, final net.minecraft.resources.ResourceKey<E> elementKey, final Decoder<E> decoder) {
-            final DataResult<E> result = decoder.parse(ops, this.element);
-            return Optional.of(result.map(t -> new ParsedEntry<>(t, OptionalInt.empty())));
-        }
     }
 }
