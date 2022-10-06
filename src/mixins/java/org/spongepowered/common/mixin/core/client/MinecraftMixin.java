@@ -31,14 +31,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
-import net.minecraft.world.level.DataPackConfig;
-import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
@@ -61,6 +57,8 @@ import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 import javax.annotation.Nullable;
 
@@ -113,34 +111,22 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         this.runAllTasks();
     }
 
-    @Redirect(method = "loadLevel",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/WorldStem$WorldDataSupplier;loadFromWorld(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;)Lnet/minecraft/server/WorldStem$WorldDataSupplier;"))
-    private static WorldStem.WorldDataSupplier impl$serializeDelayedDataPackOnLoadAndSetBootstrapProperties1(LevelStorageSource.LevelStorageAccess $$0) {
-        return (rm, dpc) -> {
-            final WorldStem.WorldDataSupplier supplier = WorldStem.WorldDataSupplier.loadFromWorld($$0);
-            SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
+    @Redirect(method = "makeWorldStem(Lnet/minecraft/server/packs/repository/PackRepository;ZLnet/minecraft/server/WorldStem$DataPackConfigSupplier;Lnet/minecraft/server/WorldStem$WorldDataSupplier;)Lnet/minecraft/server/WorldStem;",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/WorldStem;load(Lnet/minecraft/server/WorldStem$InitConfig;Lnet/minecraft/server/WorldStem$DataPackConfigSupplier;Lnet/minecraft/server/WorldStem$WorldDataSupplier;Ljava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;"))
+    private CompletableFuture<WorldStem> impl$serializeDelayedDataPackOnLoadAndSetBootstrapProperties(
+            final WorldStem.InitConfig initConfig,
+            final WorldStem.DataPackConfigSupplier dataPackConfigSupplier, final WorldStem.WorldDataSupplier worldDataSupplier,
+            final Executor executor1, final Executor executor2) {
+        return WorldStem.load(initConfig, dataPackConfigSupplier,
+                (rm, dpc) -> {
+                    SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
 
-            final Pair<WorldData, RegistryAccess.Frozen> pair = supplier.get(rm, dpc);
-            final WorldData saveData = pair.getFirst();
-            BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(),  saveData.getDifficulty(), true, saveData.isHardcore(),
-                    saveData.getAllowCommands(), 10, null);  // TODO registryAccess?
-            return pair;
-        };
-    }
-
-    @Redirect(method = "makeWorldStem(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;Z)Lnet/minecraft/server/WorldStem;",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/WorldStem$WorldDataSupplier;loadFromWorld(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;)Lnet/minecraft/server/WorldStem$WorldDataSupplier;"))
-    private static WorldStem.WorldDataSupplier impl$serializeDelayedDataPackOnLoadAndSetBootstrapProperties(LevelStorageSource.LevelStorageAccess $$0) {
-        return (rm, dpc) -> {
-            final WorldStem.WorldDataSupplier supplier = WorldStem.WorldDataSupplier.loadFromWorld($$0);
-            SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
-
-            final Pair<WorldData, RegistryAccess.Frozen> pair = supplier.get(rm, dpc);
-            final WorldData saveData = pair.getFirst();
-            BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(),  saveData.getDifficulty(), true, saveData.isHardcore(),
-                    saveData.getAllowCommands(), 10, null); // TODO registryAccess?
-            return pair;
-        };
+                    final Pair<WorldData, RegistryAccess.Frozen> pair = worldDataSupplier.get(rm, dpc);
+                    final WorldData saveData = pair.getFirst();
+                    BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(),  saveData.getDifficulty(), true, saveData.isHardcore(),
+                            saveData.getAllowCommands(), 10, pair.getSecond());
+                    return pair;
+                }, executor1, executor2);
     }
 
     @Override
@@ -180,19 +166,14 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
     }
 
     @Redirect(method = "lambda$createLevel$33", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess$Writable;Lnet/minecraft/server/packs/resources/ResourceManager;)Lnet/minecraft/resources/RegistryOps;"))
-    private static <T> RegistryOps<T> impl$setWorldSettingsAdapter(final DynamicOps<T> $$0, final RegistryAccess.Writable $$1, final ResourceManager $$2) {
-        final RegistryOps<T> worldSettingsAdapter = RegistryOps.createAndLoad($$0, $$1, $$2);
+    private static <T> RegistryOps<T> impl$setWorldSettingsAdapter(final DynamicOps<T> ops, final RegistryAccess.Writable registryAccess, final ResourceManager resourceManager) {
+        final RegistryOps<T> worldSettingsAdapter = RegistryOps.createAndLoad(ops, registryAccess, resourceManager);
         BootstrapProperties.worldSettingsAdapter(worldSettingsAdapter);
         return worldSettingsAdapter;
     }
 
     @Inject(method = "createLevel", at = @At("HEAD"))
-    private void impl$setBootstrapProperties(final String levelName, final LevelSettings settings,
-                                             final RegistryAccess registries,
-                                             final WorldGenSettings dimensionGeneratorSettings,
-                                             final CallbackInfo ci) {
-        BootstrapProperties.init(dimensionGeneratorSettings, settings.gameType(), settings.difficulty(), true, settings.hardcore(),
-            settings.allowCommands(), 10, registries);
+    private void impl$setIsNewLevel(final CallbackInfo ci) {
         BootstrapProperties.setIsNewLevel(true);
     }
 
