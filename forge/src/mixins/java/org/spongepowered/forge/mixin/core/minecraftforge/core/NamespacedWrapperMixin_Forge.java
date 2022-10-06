@@ -22,8 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.packet.inventory;
+package org.spongepowered.forge.mixin.core.minecraftforge.core;
 
-public final class SwapHandItemsState extends BasicInventoryPacketState {
+import net.minecraftforge.registries.IForgeRegistryEntry;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.core.core.WritableRegistryMixin;
 
-}
+@Mixin(targets = {"net.minecraftforge.registries.NamespacedWrapper", "net.minecraftforge.registries.NamespacedDefaultedWrapper"})
+public abstract class NamespacedWrapperMixin_Forge<T extends IForgeRegistryEntry<T>> extends WritableRegistryMixin<T> {}

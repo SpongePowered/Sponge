@@ -200,10 +200,16 @@ public final class EntityData {
                         .set((h, v) -> h.startRiding((Entity) v, true))
                     .create(Keys.VELOCITY)
                         .get(h -> VecHelper.toVector3d(h.getDeltaMovement()))
-                        .set((h, v) -> h.setDeltaMovement(VecHelper.toVanillaVector3d(v)))
+                        .set((h, v) -> {
+                            h.setDeltaMovement(VecHelper.toVanillaVector3d(v));
+                            h.hurtMarked = true;
+                        })
                     .create(Keys.SWIFTNESS)
                         .get(m -> m.getDeltaMovement().length())
-                        .set((m, v) -> m.setDeltaMovement(m.getDeltaMovement().normalize().scale(v)))
+                        .set((m, v) -> {
+                            m.setDeltaMovement(m.getDeltaMovement().normalize().scale(v));
+                            m.hurtMarked = true;
+                        })
                         .supports(m -> m.getDeltaMovement().lengthSqr() > 0)
                 .asMutable(EntityMaxAirBridge.class)
                     .create(Keys.MAX_AIR)

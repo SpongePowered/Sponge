@@ -101,4 +101,12 @@ public final class DataTranslatorProvider {
         final DataTranslator dataTranslator = this.mappings.get(clazz);
         return Optional.ofNullable((DataTranslator<T>) dataTranslator);
     }
+
+    public <T> void register(final Class<T> objectClass, final DataTranslator<T> translator) {
+        if (!this.mappings.containsKey(objectClass)) {
+            this.mappings.put(objectClass, translator);
+        } else {
+            throw new IllegalArgumentException("DataTranslator already registered for " + objectClass);
+        }
+    }
 }

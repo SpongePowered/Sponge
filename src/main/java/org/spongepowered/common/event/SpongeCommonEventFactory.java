@@ -139,6 +139,9 @@ import java.util.stream.Stream;
 
 public final class SpongeCommonEventFactory {
 
+    private static final double MOVEMENT_GRID_POINTS_PER_BLOCK = 8.0d;
+    private static final double ROTATION_GRID_POINTS_PER_UNIT = 20.0f;
+
     @SuppressWarnings("unchecked")
     public static <T extends net.minecraft.world.entity.Entity> CollideEntityEvent callCollideEntityEvent(
         final net.minecraft.world.entity.@Nullable Entity sourceEntity,
@@ -387,26 +390,20 @@ public final class SpongeCommonEventFactory {
             return;
         }
 
-        final double deltaX = entity.xOld - entity.getX();
-        final double deltaY = entity.yOld - entity.getY();
-        final double deltaZ = entity.zOld - entity.getZ();
-        final double deltaChange = Math.pow(deltaX, 2) + Math.pow(deltaY, 2) + Math.pow(deltaZ, 2);
-        if (deltaChange < 1f / 256) {
-            return;
-        }
-
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entity);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
 
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(), (Entity) entity,
-                    new Vector3d(entity.xOld, entity.yOld, entity.zOld), new Vector3d(entity.getX(), entity.getY(), entity.getZ()),
-                    new Vector3d(entity.getX(), entity.getY(), entity.getZ()));
+            final @Nullable Vector3d finalPosition =
+                    SpongeCommonEventFactory.callMoveEvent(
+                            (Entity) entity,
+                            new Vector3d(entity.xOld, entity.yOld, entity.zOld),
+                            new Vector3d(entity.getX(), entity.getY(), entity.getZ()));
 
-            if (SpongeCommon.post(event)) {
+            if (finalPosition == null) {
                 entity.setPos(entity.xOld, entity.yOld, entity.zOld);
             } else {
-                entity.setPos(event.destinationPosition().x(), event.destinationPosition().y(), event.destinationPosition().z());
+                entity.setPos(finalPosition.x(), finalPosition.y(), finalPosition.z());
             }
         }
     }
@@ -424,16 +421,65 @@ public final class SpongeCommonEventFactory {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entity);
 
-            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(frame.currentCause(), (Entity) entity,
-                    new Vector3d(entity.xRotO, entity.yRotO, 0), new Vector3d(entity.getXRot(), entity.getYRot(), 0));
+            // x and y are the opposite way around to the rotation in the API.
+            final @Nullable Vector3d finalRotation =
+                    SpongeCommonEventFactory.callRotateEvent(
+                            (Entity) entity,
+                            new Vector3d(entity.yRotO, entity.xRotO, 0),
+                            new Vector3d(entity.getYRot(), entity.getXRot(), 0)
+                    );
 
-            if (SpongeCommon.post(event)) {
+            if (finalRotation == null) {
                 entity.setXRot(entity.xRotO);
                 entity.setYRot(entity.yRotO);
             } else {
-                entity.setXRot((float) event.toRotation().x());
-                entity.setYRot((float) event.toRotation().y());
+                entity.setXRot((float) finalRotation.y());
+                entity.setYRot((float) finalRotation.x());
             }
+        }
+    }
+
+    public static @Nullable Vector3d callMoveEvent(
+            final org.spongepowered.api.entity.Entity movingEntity,
+            final Vector3d fromPosition,
+            final Vector3d toPosition) {
+
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+        // Call move & rotate event as needed...
+        if (ShouldFire.MOVE_ENTITY_EVENT && fromPosition != null && toPosition != null &&
+                !fromPosition.mul(SpongeCommonEventFactory.MOVEMENT_GRID_POINTS_PER_BLOCK).toInt()
+                        .equals(toPosition.mul(SpongeCommonEventFactory.MOVEMENT_GRID_POINTS_PER_BLOCK).toInt())) {
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(cause, movingEntity, fromPosition,
+                    toPosition, toPosition);
+            if (SpongeCommon.post(event)) {
+                return null;
+            } else {
+                return event.destinationPosition();
+            }
+        } else {
+            return toPosition;
+        }
+    }
+
+    public static @Nullable Vector3d callRotateEvent(
+            final org.spongepowered.api.entity.Entity movingEntity,
+            final Vector3d fromRotation,
+            final Vector3d toRotation
+    ) {
+
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+        if (ShouldFire.ROTATE_ENTITY_EVENT && fromRotation != null && toRotation != null &&
+                !fromRotation.mul(SpongeCommonEventFactory.ROTATION_GRID_POINTS_PER_UNIT).toInt()
+                        .equals(toRotation.mul(SpongeCommonEventFactory.ROTATION_GRID_POINTS_PER_UNIT).toInt())) {
+            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(cause, movingEntity, fromRotation,
+                    toRotation);
+            if (SpongeCommon.post(event)) {
+                return null;
+            } else {
+                return event.toRotation();
+            }
+        } else {
+            return toRotation;
         }
     }
 

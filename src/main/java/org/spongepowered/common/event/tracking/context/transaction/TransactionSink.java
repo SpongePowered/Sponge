@@ -88,6 +88,7 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Shi
 import org.spongepowered.common.event.tracking.context.transaction.world.EntityPerformingDropsTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
+import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -277,6 +278,7 @@ interface TransactionSink {
      */
     /*
      Non-Javadoc: Known areas where we are keeping transactions recorded:
+     - events - during EventListenerPhaseContext
      - commands - during CommandPhaseContext see below
      - place/use ServerPlayerGameModeMixin_Tracker#useItemOn
      - Dispenser equip PlayerEntityMixin_Inventory#setItemSlot
@@ -296,8 +298,12 @@ interface TransactionSink {
         final PhaseContext<@NonNull ?> phaseContext, final SlotTransaction newTransaction,
         final AbstractContainerMenu abstractContainerMenu
     ) {
-        // Inventory change during command
+        // Inventory change during event or command
         if (abstractContainerMenu instanceof InventoryMenu) {
+            if (phaseContext instanceof EventListenerPhaseContext) {
+                this.logPlayerInventoryChange(((InventoryMenuAccessor) abstractContainerMenu).accessor$owner(),
+                    PlayerInventoryTransaction.EventCreator.STANDARD);
+            }
             if (phaseContext instanceof CommandPhaseContext) {
                 this.logPlayerInventoryChange(((InventoryMenuAccessor) abstractContainerMenu).accessor$owner(),
                     PlayerInventoryTransaction.EventCreator.STANDARD);

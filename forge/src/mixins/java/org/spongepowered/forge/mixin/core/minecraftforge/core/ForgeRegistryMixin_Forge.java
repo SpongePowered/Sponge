@@ -62,10 +62,13 @@ public abstract class ForgeRegistryMixin_Forge<V extends IForgeRegistryEntry<V>>
         final ResourceKey location = (ResourceKey) (Object) this.key.location();
 
         if (!this.forge$warnedIfNoParent && this.forge$parents.isEmpty()) {
-            SpongeCommon.logger().error(String.format(
-                    "No parent registry found for %s, things might not work correctly!",
-                    new StringJoiner("/").add(root.formatted()).add(location.formatted())
-            ));
+            // We only care about minecraft namespaced registries, as that is what we've got parents for.
+            if (location.namespace().equalsIgnoreCase("minecraft")) {
+                SpongeCommon.logger().error(String.format(
+                        "No parent registry found for %s, things might not work correctly!",
+                        new StringJoiner("/").add(root.formatted()).add(location.formatted())
+                ));
+            }
             this.forge$warnedIfNoParent = true;
         }
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.event.server.network;
 
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
@@ -102,7 +101,9 @@ public class ServerGamePacketListenerImplMixin_Inventory {
     private void impl$onSpectatorClick(final AbstractContainerMenu menu, final ServerboundContainerClickPacket packet) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        try (final EffectTransactor ignored = transactor.logClickContainer(menu, packet.getSlotNum(), packet.getButtonNum(), packet.getClickType(), player)) {
+        try (final EffectTransactor ignored = transactor.logClickContainer(menu, packet.getSlotNum(), packet.getButtonNum(), packet.getClickType(),
+            this.player
+        )) {
             menu.sendAllDataToRemote();
         }
     }
@@ -113,11 +114,11 @@ public class ServerGamePacketListenerImplMixin_Inventory {
             final Level param1, final ItemStack param2, final InteractionHand param3) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        final InteractionResult result = serverPlayerGameMode.useItem(param0, param1, param2, param3);
-        try (EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(this.player, PlayerInventoryTransaction.EventCreator.STANDARD)) {
+        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(this.player, PlayerInventoryTransaction.EventCreator.STANDARD)) {
+            final InteractionResult result = serverPlayerGameMode.useItem(param0, param1, param2, param3);
             this.player.inventoryMenu.broadcastChanges(); // capture
+            return result;
         }
-        return result;
         // TrackingUtil.processBlockCaptures called by UseItemPacketState
     }
 

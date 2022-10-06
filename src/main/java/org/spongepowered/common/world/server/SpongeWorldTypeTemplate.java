@@ -231,7 +231,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         }
     }
 
-    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTypeTemplate, Builder> implements WorldTypeTemplate.Builder {
+    public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTypeTemplate, WorldTypeTemplate.Builder> implements WorldTypeTemplate.Builder {
 
         @Nullable protected WorldTypeEffect effect;
         @Nullable protected MinecraftDayTime fixedTime;
@@ -315,7 +315,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         }
 
         @Override
-        public Builder minY(final int y) {
+        public WorldTypeTemplate.Builder minY(final int y) {
             this.minY = y;
             return this;
         }
@@ -327,7 +327,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         }
 
         @Override
-        public Builder maximumHeight(final int maximumHeight) {
+        public WorldTypeTemplate.Builder maximumHeight(final int maximumHeight) {
             this.maximumHeight = maximumHeight;
             return this;
         }
@@ -339,7 +339,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         }
 
         @Override
-        public Builder reset() {
+        public WorldTypeTemplate.Builder reset() {
             super.reset();
             this.effect = WorldTypeEffects.OVERWORLD;
             this.fixedTime = null;

@@ -44,15 +44,15 @@ public class Inventory2DLens extends SlotBasedLens {
     protected final int xBase;
     protected final int yBase;
 
-    public Inventory2DLens(int base, int width, int height, SlotLensProvider slots) {
+    public Inventory2DLens(final int base, final int width, final int height, final SlotLensProvider slots) {
         this(base, width, height, width, Inventory2DAdapter.class, slots);
     }
 
-    public Inventory2DLens(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
+    public Inventory2DLens(final int base, final int width, final int height, final int rowStride, final Class<? extends Inventory> adapterType, final SlotLensProvider slots) {
         this(base, width, height, rowStride, 0, 0, adapterType, slots);
     }
 
-    protected Inventory2DLens(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
+    protected Inventory2DLens(final int base, final int width, final int height, final int rowStride, final int xBase, final int yBase, final Class<? extends Inventory> adapterType, final SlotLensProvider slots) {
         super(base, width * height, rowStride, adapterType, slots);
 
         checkArgument(width > 0, "Invalid width: %s", width);
@@ -66,10 +66,10 @@ public class Inventory2DLens extends SlotBasedLens {
         this.init(slots);
     }
 
-    private void init(SlotLensProvider slots) {
+    private void init(final SlotLensProvider slots) {
         for (int y = 0, slot = this.base; y < this.height; y++) {
             for (int x = 0; x < this.width; x++, slot += this.stride) {
-                SlotLens slotLens = slots.getSlotLens(slot);
+                final SlotLens slotLens = slots.getSlotLens(slot);
                 this.addChild(slotLens, KeyValuePair.of(Keys.SLOT_POSITION, new Vector2i(this.xBase + x, this.yBase + y)));
             }
         }
@@ -83,12 +83,12 @@ public class Inventory2DLens extends SlotBasedLens {
         return this.height;
     }
 
-    public SlotLens getSlot(Vector2i pos) {
-        return (SlotLens) this.spanningChildren.get(pos.y() + pos.x() * this.width);
+    public SlotLens getSlot(final Vector2i pos) {
+        return (SlotLens) this.spanningChildren.get(pos.x() + pos.y() * this.width);
     }
 
     @Override
-    public Inventory getAdapter(Fabric fabric, Inventory parent) {
+    public Inventory getAdapter(final Fabric fabric, final Inventory parent) {
         return new Inventory2DAdapter(fabric, this, parent);
     }
 

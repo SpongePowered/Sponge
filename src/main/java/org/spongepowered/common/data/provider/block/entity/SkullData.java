@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.block.entity;
 
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.accessor.world.level.block.entity.SkullBlockEntityAccessor;
 import org.spongepowered.common.bridge.world.level.block.entity.SkullBlockEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -41,7 +42,14 @@ public final class SkullData {
         registrator
                 .asMutable(SkullBlockEntity.class)
                     .create(Keys.GAME_PROFILE)
-                        .get(h -> SpongeGameProfile.of(((SkullBlockEntityAccessor) h).accessor$owner()))
+                        .get(h -> {
+                            if (h instanceof SkullBlockEntityAccessor sbea) {
+                                if (sbea.accessor$owner() != null) {
+                                    return SpongeGameProfile.of(sbea.accessor$owner());
+                                }
+                            }
+                            return null;
+                        })
                         .set((h, v) -> ((SkullBlockEntityBridge) h).bridge$setUnresolvedPlayerProfile(SpongeGameProfile.toMcProfile(v)))
                         .delete(h -> ((SkullBlockEntityBridge) h).bridge$setUnresolvedPlayerProfile(null));
     }

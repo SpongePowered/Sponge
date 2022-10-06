@@ -22,11 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.minecraftforge.core;
+package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraftforge.registries.IForgeRegistryEntry;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.core.WritableRegistryMixin;
+import net.minecraft.world.level.block.BarrelBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.DirectionUtil;
 
-@Mixin(targets = {"net.minecraftforge.registries.NamespacedWrapper", "net.minecraftforge.registries.NamespacedDefaultedWrapper"})
-public abstract class NamespacedWrapperMixin<T extends IForgeRegistryEntry<T>> extends WritableRegistryMixin<T> {}
+public final class BarrelData {
+
+    private BarrelData() {
+    }
+
+    // @formatter:off
+    public static void register(final DataProviderRegistrator registrator) {
+        registrator
+                .asImmutable(BlockState.class)
+                    .create(Keys.DIRECTION)
+                        .get(h -> DirectionUtil.getFor(h.getValue(BarrelBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, BarrelBlock.FACING))
+                        .supports(h -> h.getBlock() instanceof BarrelBlock)
+                    .create(Keys.IS_OPEN)
+                        .get(h -> h.getValue(BarrelBlock.OPEN))
+                        .set((h, v) -> h.setValue(BarrelBlock.OPEN, v))
+                        .supports(h -> h.getBlock() instanceof BarrelBlock);
+    }
+    // @formatter:on
+}

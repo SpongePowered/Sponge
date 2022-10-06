@@ -22,8 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.packet.inventory;
+package org.spongepowered.common.accessor.stats;
 
-public final class SwapHandItemsState extends BasicInventoryPacketState {
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.stats.Stat;
+import net.minecraft.stats.StatsCounter;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+
+@Mixin(StatsCounter.class)
+public interface StatsCounterAccessor {
+
+    @Accessor("stats") Object2IntMap<Stat<?>> accessor$stats();
 
 }

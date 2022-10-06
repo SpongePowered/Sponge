@@ -26,8 +26,10 @@ package org.spongepowered.common.command.exception;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 /**
  * Used as a vehicle to transfer an error result down to the command
@@ -35,11 +37,15 @@ import org.spongepowered.api.command.CommandResult;
  */
 public final class SpongeCommandResultException extends CommandSyntaxException {
 
-    private final static net.minecraft.network.chat.Component EMPTY = new TextComponent("");
+    private final static Component EMPTY = new TextComponent("");
     private final CommandResult result;
 
-    public SpongeCommandResultException(final CommandResult result) {
-        super(new SimpleCommandExceptionType(SpongeCommandResultException.EMPTY), SpongeCommandResultException.EMPTY);
+    public static SpongeCommandResultException createException(final CommandResult result) {
+        return new SpongeCommandResultException(result, result.errorMessage().map(SpongeAdventure::asVanilla).orElse(SpongeCommandResultException.EMPTY));
+    }
+
+    private SpongeCommandResultException(final CommandResult result, final Component error) {
+        super(new SimpleCommandExceptionType(error), error);
         this.result = result;
     }
 

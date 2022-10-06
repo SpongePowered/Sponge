@@ -89,7 +89,7 @@ public final class PluginPackResources extends AbstractPackResources {
             final Predicate<String> fileNameValidator) {
         try {
             final Path root = this.typeRoot(type);
-            final Path namespaceDir = root.resolve(namespace);
+            final Path namespaceDir = root.resolve(namespace).toAbsolutePath();
             return Files.walk(namespaceDir, depth)
                     .filter(Files::isRegularFile)
                     .filter(s -> !s.getFileName().toString().endsWith(".mcmeta"))

@@ -22,13 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.stats;
+package org.spongepowered.common.accessor.network.protocol.game;
 
-import net.minecraft.stats.Stat;
+import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Map;
+@Mixin(ServerboundMoveVehiclePacket.class)
+public interface ServerboundMoveVehiclePacketAccessor {
 
-public interface StatsCounterBridge {
+    @Accessor("x") void accessor$x(final double x);
 
-    Map<Stat<?>, Integer> bridge$getStatsData();
+    @Accessor("y") void accessor$y(final double y);
+
+    @Accessor("z") void accessor$z(final double z);
+
+    @Accessor("yRot") void accessor$yRot(final float yRot);
+
+    @Accessor("xRot") void accessor$xRot(final float xRot);
+
 }

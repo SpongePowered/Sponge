@@ -54,12 +54,9 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.fluid.FluidType;
-import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.generation.ChunkGenerator;
@@ -78,15 +75,12 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.data.holder.SpongeLocationBaseDataHolder;
 import org.spongepowered.common.mixin.api.minecraft.world.level.LevelMixin_API;
-import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -97,6 +91,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerLevel.class)
@@ -211,7 +208,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Override
     public boolean save() throws IOException {
         ((ServerLevelBridge) this).bridge$setManualSave(true);
-        this.shadow$save(null, false, true);
+        this.shadow$save(null, false, false);
         return true;
     }
 
@@ -267,7 +264,9 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public void removeBlockEntity(final int x, final int y, final int z) {
-        this.shadow$removeBlockEntity(new BlockPos(x, y, z));
+        // *Just* removing the block entity is going to give is a glitchy state that should never happen.
+        // So just remove the whole block.
+        this.blockEntity(x, y, z).ifPresent(ignored -> this.removeBlock(x, y, z));
     }
 
     // UpdateableVolume

@@ -90,7 +90,6 @@ public class PlayerInventoryTransaction extends InventoryBasedTransaction {
         return false;
     }
 
-    @SuppressWarnings("NullableProblems")
     public interface EventCreator {
         EventCreator STANDARD = SpongeEventFactory::createChangeInventoryEvent;
         EventCreator PICKUP = SpongeEventFactory::createChangeInventoryEventPickup;

@@ -22,8 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.packet.inventory;
+package org.spongepowered.common.accessor.world.entity.boss.enderdragon.phases;
 
-public final class SwapHandItemsState extends BasicInventoryPacketState {
+import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
+
+@Mixin(EnderDragonPhase.class)
+public interface EnderDragonPhaseAccessor {
+
+    @Accessor("phases") static EnderDragonPhase<?>[] accessor$PHASES() {
+        throw new UntransformedAccessorError();
+    }
+
+    @Accessor("name") String accessor$name();
 
 }

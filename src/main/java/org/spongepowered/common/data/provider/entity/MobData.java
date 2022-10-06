@@ -48,7 +48,13 @@ public final class MobData {
                         .set((h, v) -> h.setLeftHanded(v.equals(HandPreferences.LEFT.get())))
                     .create(Keys.LEASH_HOLDER)
                         .get(h -> ((Entity) h.getLeashHolder()))
-                        .set((h, v) -> h.setLeashedTo(h, true))
+                        .set((h, v) -> {
+                            if (v == null) {
+                                h.dropLeash(true, false);
+                            } else {
+                                h.setLeashedTo((net.minecraft.world.entity.Entity) v, true);
+                            }
+                        })
                     .create(Keys.TARGET_ENTITY)
                         .get(h -> (Living) h.getTarget())
                         .setAnd((h, v) -> {
