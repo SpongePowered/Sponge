@@ -28,9 +28,11 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerChunkCache;
@@ -134,9 +136,11 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow protected abstract void shadow$saveLevelData();
-    // @formatter:on
+    @Shadow @Final private MinecraftServer server;
 
     @Shadow public abstract void levelEvent(@org.jetbrains.annotations.Nullable Player $$0, int $$1, BlockPos $$2, int $$3);
+    // @formatter:on
+
 
     private final long[] impl$recentTickTimes = new long[100];
 
@@ -513,7 +517,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Override
     public String toString() {
-        final Optional<ResourceKey> worldTypeKey = RegistryTypes.WORLD_TYPE.get().findValueKey((WorldType) this.shadow$dimensionType());
+        final Optional<ResourceKey> worldTypeKey = Optional.ofNullable(this.server.registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getKey(this.shadow$dimensionType())).map(ResourceKey.class::cast);
         return new StringJoiner(",", ServerLevel.class.getSimpleName() + "[", "]")
                 .add("key=" + this.shadow$dimension())
                 .add("worldType=" + worldTypeKey.map(ResourceKey::toString).orElse("inline"))

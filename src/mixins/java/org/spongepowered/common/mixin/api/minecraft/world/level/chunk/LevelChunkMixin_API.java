@@ -69,7 +69,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.level.LevelAccessor;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
-import org.spongepowered.common.data.holder.SpongeLocationBaseDataHolder;
+import org.spongepowered.common.data.holder.SpongeServerLocationBaseDataHolder;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
@@ -98,7 +98,7 @@ import java.util.stream.StreamSupport;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
 @Implements(@Interface(iface = WorldChunk.class, prefix = "worldChunk$", remap = Interface.Remap.NONE))
-public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldChunk, SpongeLocationBaseDataHolder {
+public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldChunk, SpongeServerLocationBaseDataHolder {
     //@formatter:off
     @Shadow @Final Level level;
 

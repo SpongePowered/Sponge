@@ -48,7 +48,7 @@ import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.holder.SpongeLocationBaseDataHolder;
+import org.spongepowered.common.data.holder.SpongeServerLocationBaseDataHolder;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.SpongeTicks;
@@ -61,7 +61,7 @@ import java.util.Collections;
 import java.util.Map;
 
 @Mixin(ProtoChunk.class)
-public abstract class ProtoChunkMixin_API extends ChunkAccess implements GenerationChunk, SpongeLocationBaseDataHolder {
+public abstract class ProtoChunkMixin_API extends ChunkAccess implements GenerationChunk, SpongeServerLocationBaseDataHolder {
 
     //@formatter:off
     @Shadow @javax.annotation.Nullable private BelowZeroRetrogen belowZeroRetrogen;
