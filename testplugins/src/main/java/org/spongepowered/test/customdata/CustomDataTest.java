@@ -38,8 +38,14 @@ import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.persistence.DataBuilder;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataStore;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
@@ -78,6 +84,8 @@ public final class CustomDataTest {
     private Key<Value<String>> mySimpleDataKey;
     private Key<Value<ItemType>> myItemTypeKey;
 
+    private Key<Value<MyObject>> myObjectKey;
+
     @Inject
     public CustomDataTest(final PluginContainer plugin) {
         this.plugin = plugin;
@@ -108,6 +116,7 @@ public final class CustomDataTest {
                             stack.offer(this.myDataKey, number);
                             stack.offer(this.mySimpleDataKey, "It works! " + number);
                             stack.offer(this.myItemTypeKey, ItemTypes.PAPER.get());
+                            stack.offer(this.myObjectKey, new MyObject(MyEnum.FOO, "it works!"));
                             player.inventory().offer(stack);
                             final List<Slot> slots = player.inventory().query(QueryTypes.ITEM_STACK_CUSTOM.get().of(s -> s.get(this.myDataKey).isPresent())).slots();
                             final int itemSum = slots.stream().map(Slot::peek).mapToInt(item -> item.get(this.myDataKey).get()).sum();
@@ -182,6 +191,54 @@ public final class CustomDataTest {
 
         this.myItemTypeKey = Key.from(this.plugin, "myitemtypedata", ItemType.class);
         event.register(DataRegistration.of(this.myItemTypeKey, ItemStack.class));
+
+        // Custom Plugin controlled Object. Must implement DataSerializable to serialize and provider a DataBuilder to deserialize.
+        this.myObjectKey = Key.from(this.plugin, "myobjectdata", MyObject.class);
+        event.register(DataRegistration.of(this.myObjectKey, ItemStack.class));
+        Sponge.dataManager().registerBuilder(MyObject.class, new MyObjectBuilder());
+    }
+
+    private static class MyObject implements DataSerializable
+    {
+        public MyObject(final MyEnum enumValue, final String stringValue) {
+            this.enumValue = enumValue;
+            this.stringValue = stringValue;
+        }
+
+        public static final DataQuery ENUM_VALUE = DataQuery.of("enum_value");
+        public static final DataQuery STRING_VALUE = DataQuery.of("string_value");
+        public MyEnum enumValue;
+        public String stringValue;
+
+        @Override
+        public int contentVersion() {
+            return 1;
+        }
+
+        @Override
+        public DataContainer toContainer() {
+            return DataContainer.createNew()
+                    .set(Queries.CONTENT_VERSION, this.contentVersion())
+                    .set(ENUM_VALUE, enumValue.name())
+                    .set(STRING_VALUE, stringValue);
+        }
+    }
+
+    private static class MyObjectBuilder implements DataBuilder<MyObject>
+    {
+        @Override
+        public Optional<MyObject> build(final DataView container) throws InvalidDataException {
+            final Optional<String> enumValue = container.getString(MyObject.ENUM_VALUE);
+            final Optional<String> stringValue = container.getString(MyObject.STRING_VALUE);
+            if (enumValue.isPresent() && stringValue.isPresent()) {
+                return Optional.of(new MyObject(MyEnum.valueOf(enumValue.get()), stringValue.get()));
+            }
+            return Optional.empty();
+        }
+    }
+
+    private enum MyEnum {
+        FOO, BAR
     }
 
     // replace with mongoDB - for web-scale

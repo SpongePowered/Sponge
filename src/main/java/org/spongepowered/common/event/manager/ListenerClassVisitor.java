@@ -190,6 +190,8 @@ public class ListenerClassVisitor extends ClassVisitor {
 
     static final class ListenerSignatureVisitor extends SignatureVisitor {
         private final ListenerParameter parameter;
+        private boolean secondType = true;
+        private boolean isGeneric = false;
 
         public ListenerSignatureVisitor(final ListenerParameter parameter) {
             super(ListenerClassVisitor.ASM_VERSION);
@@ -202,11 +204,22 @@ public class ListenerClassVisitor extends ClassVisitor {
             // twice, once for the generic class, then a second time for
             // the generic type. Ideally we don't have to deal with additional
             // nested types, but if we do, well, we'll just ignore them.
+
+            // Only accept the first and second type
+            if (!secondType) {
+                return;
+            }
+            // The first type will be base type
             if (this.parameter.baseType == null) {
                 this.parameter.baseType = Type.getType("L" + name + ";");
-            } else if (this.parameter.genericType == null) {
+                return;
+            }
+            // The second type will be generic type or ignore
+            else if (isGeneric && this.parameter.genericType == null) {
                 this.parameter.genericType = Type.getType("L" + name + ";");
             }
+            // Ignore after second type
+            secondType = false;
         }
 
         @Override
@@ -214,6 +227,13 @@ public class ListenerClassVisitor extends ClassVisitor {
             // And sometimes, some plugins just care about the parent type
             // and wildcard their bounds.
             this.parameter.wildcard = true;
+        }
+
+        @Override
+        public SignatureVisitor visitTypeArgument(char wildcard) {
+            // For treating the second type as generic
+            this.isGeneric = true;
+            return this;
         }
     }
 

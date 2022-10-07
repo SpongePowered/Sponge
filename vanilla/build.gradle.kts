@@ -233,17 +233,16 @@ minecraft {
             .forEach { accessWideners(it) }
 }
 
+val asmVersion: String by project
 dependencies {
     val apiAdventureVersion: String by project
     val apiConfigurateVersion: String by project
     val apiGsonVersion: String by project
     val apiGuavaVersion: String by project
     val apiPluginSpiVersion: String by project
-    val asmVersion: String by project
     val forgeFlowerVersion: String by project
     val forgeAutoRenamingToolVersion: String by project
     val jlineVersion: String by project
-    val jansiVersion: String by project
     val log4jVersion: String by project
     val mixinVersion: String by project
     val modlauncherVersion: String by project
@@ -304,13 +303,7 @@ dependencies {
     bootstrapLibraries("net.minecrell:terminalconsoleappender:1.3.0")
     bootstrapLibraries("org.jline:jline-terminal:$jlineVersion")
     bootstrapLibraries("org.jline:jline-reader:$jlineVersion")
-    bootstrapLibraries("org.jline:jline-terminal-jansi:$jlineVersion") {
-        exclude(group = "org.fusesource.jansi", module = "jansi")
-    }
-    // If JLine is updated and updates the jansi dep, the above exclusion
-    // and below library can be removed.
-    // https://github.com/SpongePowered/Sponge/issues/3429
-    bootstrapLibraries("org.fusesource.jansi:jansi:$jansiVersion")
+    bootstrapLibraries("org.jline:jline-terminal-jansi:$jlineVersion")
     // Must be on the base ClassLoader since ModLauncher has a dependency on log4j
     bootstrapLibraries("org.apache.logging.log4j:log4j-jpl:$log4jVersion")
 
@@ -324,8 +317,8 @@ dependencies {
     }
     bootstrapLibraries("org.apache.logging.log4j:log4j-api:$log4jVersion")
     bootstrapLibraries("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    bootstrapLibraries("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
-    
+    bootstrapLibraries("org.apache.logging.log4j:log4j-slf4j18-impl:$log4jVersion")
+
     // Mixin and dependencies
     bootstrapLibraries("org.spongepowered:mixin:$mixinVersion")
     bootstrapLibraries("org.ow2.asm:asm-util:$asmVersion")
@@ -490,6 +483,10 @@ tasks {
                     "Agent-Class" to "org.spongepowered.vanilla.installer.Agent",
                     "Launcher-Agent-Class" to "org.spongepowered.vanilla.installer.Agent"
             ))
+            attributes(
+                mapOf("Implementation-Version" to asmVersion),
+                "org/objectweb/asm/"
+            )
             from(vanillaManifest)
         }
         from(commonProject.sourceSets.main.map { it.output })

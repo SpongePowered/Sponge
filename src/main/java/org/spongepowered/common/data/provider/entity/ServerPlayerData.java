@@ -36,9 +36,9 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
+import org.spongepowered.common.accessor.stats.StatsCounterAccessor;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerEntityHealthScaleBridge;
-import org.spongepowered.common.bridge.stats.StatsCounterBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.profile.SpongeProfileProperty;
@@ -72,8 +72,8 @@ public final class ServerPlayerData {
                         .set((h, v) -> h.setCamera((net.minecraft.world.entity.Entity) v))
                         .delete(h -> h.setCamera(null))
                     .create(Keys.STATISTICS)
-                        .get(h -> ((StatsCounterBridge) h.getStats()).bridge$getStatsData().entrySet().stream()
-                                .collect(Collectors.toMap(e -> (Statistic)e.getKey(), e -> e.getValue().longValue())))
+                        .get(h -> ((StatsCounterAccessor) h.getStats()).accessor$stats().object2IntEntrySet().stream()
+                                .collect(Collectors.toMap(e -> (Statistic)e.getKey(), e -> (long) e.getIntValue())))
                         .set((h, v) -> v.forEach((ik, iv) -> h.getStats().setValue(h, (Stat<?>) ik, iv.intValue())))
                     .create(Keys.CHAT_VISIBILITY)
                         .get(h -> {

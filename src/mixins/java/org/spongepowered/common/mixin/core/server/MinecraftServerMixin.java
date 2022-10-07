@@ -114,7 +114,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow protected abstract void loadLevel(); // has overrides!
     // @formatter:on
 
-
+    private final ChatDecorator impl$spongeDecorator = new SpongeChatDecorator();
     private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
     protected @Nullable ResourcePack impl$resourcePack;
 
@@ -349,8 +349,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     public String toString() {
         return this.getClass().getSimpleName();
     }
-
-    private final ChatDecorator impl$spongeDecorator = new SpongeChatDecorator();
 
     @Inject(method = "getChatDecorator", at = @At("RETURN"), cancellable = true)
     private void impl$redirectChatDecorator(final CallbackInfoReturnable<ChatDecorator> cir) {

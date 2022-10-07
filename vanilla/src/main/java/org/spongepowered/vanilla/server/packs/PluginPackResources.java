@@ -85,12 +85,12 @@ public final class PluginPackResources extends AbstractPackResources {
         }
     }
 
-    @Override 
+    @Override
     public Collection<ResourceLocation> getResources(PackType type, String namespace, String path, Predicate<ResourceLocation> fileNameValidator) {
 
         try {
             final Path root = this.typeRoot(type);
-            final Path namespaceDir = root.resolve(namespace);
+            final Path namespaceDir = root.resolve(namespace).toAbsolutePath();
             return Files.walk(namespaceDir)
                     .filter(Files::isRegularFile)
                     .filter(s -> !s.getFileName().toString().endsWith(".mcmeta"))

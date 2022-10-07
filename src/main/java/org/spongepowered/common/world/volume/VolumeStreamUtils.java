@@ -167,10 +167,10 @@ public final class VolumeStreamUtils {
         return VolumeStreamUtils.getElementByPosition(VolumeStreamUtils.chunkSectionBlockStateGetter(), min, max);
     }
 
-    public static boolean setBiomeOnNativeChunk(final int x, final int y, final int z, final
-        org.spongepowered.api.world.biome.Biome biome, final Supplier<@Nullable LevelChunkSection> accessor,
+    public static boolean setBiomeOnNativeChunk(final int x, final int y, final int z,
+        final org.spongepowered.api.world.biome.Biome biome, final Supplier<@Nullable LevelChunkSection> accessor,
         final Runnable finalizer
-        ) {
+    ) {
         @Nullable final LevelChunkSection section = accessor.get();
         if (section == null) {
             return false;

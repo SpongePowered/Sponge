@@ -99,7 +99,7 @@ public abstract class ServerPlayerMixin_Tracker extends PlayerMixin_Tracker {
             // and only if those stacks can be stacked (count increased). Otherwise, we'll just continue to throw the entity item.
             // For now, due to refactoring a majority of all of this code, pre-merging is disabled entirely.
 
-            final ItemEntity itemEntity = new ItemEntity(this.level, posX1, posY1, posZ1, droppedItem);
+            final ItemEntity itemEntity = new ItemEntity(this.level, posX1, posY1, posZ1, item);
             itemEntity.setPickUpDelay(40);
 
             if (traceItem) {

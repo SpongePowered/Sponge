@@ -45,7 +45,7 @@ public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
         return "spongevanilla";
     }
 
-    @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "stopServer", at = @At(value = "HEAD"))
     private void vanilla$callStoppingEngineEvent(final CallbackInfo ci) {
         Launch.instance().lifecycle().callStoppingEngineEvent(this);
     }

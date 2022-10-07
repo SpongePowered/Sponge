@@ -166,7 +166,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default Biome biome(final int x, final int y, final int z) {
-        return (Biome) (Object) this.shadow$getBiome(new BlockPos(x, y, z));
+        return (Biome) (Object) this.shadow$getBiome(new BlockPos(x, y, z)).value();
     }
 
     @Override

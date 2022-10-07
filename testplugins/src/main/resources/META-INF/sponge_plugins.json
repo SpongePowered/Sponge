@@ -86,6 +86,12 @@
             "description": "Testing data"
         },
         {
+            "id": "dataformattest",
+            "name": "Data Format Test",
+            "entrypoint": "org.spongepowered.test.data.DataFormatTest",
+            "description": "Testing data formats"
+        },
+        {
             "id": "entitytest",
             "name": "Entity Test",
             "entrypoint": "org.spongepowered.test.entity.EntityTest",
@@ -261,6 +267,12 @@
             "name": "Key Listener Test",
             "entrypoint": "org.spongepowered.test.keys.KeyTest",
             "description": "Key Listener Testing"
+        },
+        {
+            "id": "blockentityvolumetest",
+            "name": "Block Entity Volume Test",
+            "entrypoint": "org.spongepowered.test.blockentity.BlockEntityVolumeTest",
+            "description": "Block Entity Volume testing for chunks."
         }
     ]
 }

@@ -59,6 +59,7 @@ import org.spongepowered.common.event.tracking.context.transaction.EffectTransac
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.packet.inventory.SwapHandItemsState;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
@@ -86,7 +87,9 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     protected void impl$beforeSetItemSlot(final EquipmentSlot param0, final ItemStack param1, final CallbackInfo ci) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        this.inventory$effectTransactor = transactor.logPlayerInventoryChangeWithEffect((Player) (Object) this, PlayerInventoryTransaction.EventCreator.STANDARD);
+        final PlayerInventoryTransaction.EventCreator eventCreator = context.getState() instanceof SwapHandItemsState ?
+                PlayerInventoryTransaction.EventCreator.SWAP_HAND : PlayerInventoryTransaction.EventCreator.STANDARD;
+        this.inventory$effectTransactor = transactor.logPlayerInventoryChangeWithEffect((Player) (Object) this, eventCreator);
     }
 
     @Override
@@ -108,7 +111,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
 
     @Inject(method = "drop(Z)Z",
             at = @At(value = "RETURN"))
-    protected void impl$onPlayerDrop(boolean param0, CallbackInfoReturnable<Boolean> cir) {
+    protected void impl$onPlayerDrop(final boolean param0, final CallbackInfoReturnable<Boolean> cir) {
         try (final EffectTransactor ignored = this.inventory$effectTransactor) {
             this.containerMenu.broadcastChanges(); // for capture
         } finally {

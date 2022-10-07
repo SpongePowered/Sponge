@@ -27,6 +27,7 @@ package org.spongepowered.test.inventory;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
@@ -40,6 +41,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.entity.CookingEvent;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
+import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -207,9 +209,8 @@ public final class InventoryTest implements LoadableModule {
         }
 
         @Listener
-        private void onChangeEquipment(final ChangeEntityEquipmentEvent event) {
+        public void onChangeEquipment(final ChangeEntityEquipmentEvent event, @Getter("transaction") final Transaction<@NonNull ItemStackSnapshot> transaction) {
             final Slot slot = event.slot();
-            final Transaction<ItemStackSnapshot> transaction = event.transaction();
             this.plugin.logger().info("Equipment: {}: {} {}->{}",
                     event.entity().type().key(RegistryTypes.ENTITY_TYPE),
                     slot.get(Keys.EQUIPMENT_TYPE).get().key(RegistryTypes.EQUIPMENT_TYPE),

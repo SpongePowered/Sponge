@@ -248,6 +248,11 @@ public final class SpongeDataManager implements DataManager {
         return DataTranslatorProvider.INSTANCE.getSerializer(objectClass);
     }
 
+    @Override
+    public <T> void registerTranslator(final Class<T> objectClass, final DataTranslator<T> translator) {
+        DataTranslatorProvider.INSTANCE.register(objectClass, translator);
+    }
+
     public void registerKeyListeners() {
         this.keyListeners.forEach(this::registerKeyListener0);
         this.keyListeners.clear();

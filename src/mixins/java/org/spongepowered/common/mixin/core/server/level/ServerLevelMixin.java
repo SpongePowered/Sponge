@@ -114,15 +114,14 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin extends LevelMixin implements ServerLevelBridge, PlatformServerLevelBridge, ResourceKeyBridge {
@@ -131,6 +130,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Shadow @Final private ServerLevelData serverLevelData;
     @Shadow @Final private LevelTicks<Block> blockTicks;
     @Shadow @Final private LevelTicks<Fluid> fluidTicks;
+    @Shadow private int emptyTime;
 
     @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
     @Shadow protected abstract void shadow$saveLevelData();
@@ -513,9 +513,10 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Override
     public String toString() {
+        final Optional<ResourceKey> worldTypeKey = RegistryTypes.WORLD_TYPE.get().findValueKey((WorldType) this.shadow$dimensionType());
         return new StringJoiner(",", ServerLevel.class.getSimpleName() + "[", "]")
                 .add("key=" + this.shadow$dimension())
-                .add("worldType=" + ((WorldType) (Object) this.shadow$dimensionType()).key(RegistryTypes.WORLD_TYPE))
+                .add("worldType=" + worldTypeKey.map(ResourceKey::toString).orElse("inline"))
                 .toString();
     }
 }

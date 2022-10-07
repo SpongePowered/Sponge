@@ -58,4 +58,5 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_
 
         lifecycle.callLoadedGameEvent();
     }
+
 }

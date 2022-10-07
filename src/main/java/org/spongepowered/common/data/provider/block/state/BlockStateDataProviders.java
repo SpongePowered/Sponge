@@ -39,6 +39,7 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
         AttachedStemData.register(this.registrator);
         BambooData.register(this.registrator);
         BannerData.register(this.registrator);
+        BarrelData.register(this.registrator);
         BedData.register(this.registrator);
         BlockData.register(this.registrator);
         CactusData.register(this.registrator);
@@ -66,6 +67,7 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
         HorizontalFaceData.register(this.registrator);
         HugeMushroomData.register(this.registrator);
         LadderData.register(this.registrator);
+        LanternData.register(this.registrator);
         LeavesData.register(this.registrator);
         LeverData.register(this.registrator);
         MovingPistonData.register(this.registrator);

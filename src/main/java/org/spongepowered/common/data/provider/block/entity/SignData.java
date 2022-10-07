@@ -96,8 +96,9 @@ public final class SignData {
 
     private static void setSignLines(final SignBlockEntity holder, final List<Component> value) {
         final SignBlockEntityAccessor accessor = (SignBlockEntityAccessor) holder;
-        for (int i = 0; i < accessor.accessor$messages().length; i++) {
-            accessor.accessor$messages()[i] = SpongeAdventure.asVanilla(i > value.size() - 1 ? Component.empty() : value.get(i));
+        final int messageCount = accessor.accessor$messages().length;
+        for (int i = 0; i < messageCount; i++) {
+            holder.setMessage(i, SpongeAdventure.asVanilla(i > value.size() - 1 ? Component.empty() : value.get(i)));
         }
         holder.setChanged();
         holder.getLevel().sendBlockUpdated(holder.getBlockPos(), holder.getBlockState(), holder.getBlockState(), 3);
@@ -109,9 +110,10 @@ public final class SignData {
 
     private static List<Component> getSignLines(SignBlockEntity h) {
         final SignBlockEntityAccessor accessor = (SignBlockEntityAccessor) h;
-        final List<Component> lines = new ArrayList<>(accessor.accessor$messages().length);
-        for (int i = 0; i < accessor.accessor$messages().length; i++) {
-            lines.add(SpongeAdventure.asAdventure(accessor.accessor$messages()[i]));
+        final int messageCount = accessor.accessor$messages().length;
+        final List<Component> lines = new ArrayList<>(messageCount);
+        for (int i = 0; i < messageCount; i++) {
+            lines.add(SpongeAdventure.asAdventure(h.getMessage(i, false)));
         }
         return lines;
     }

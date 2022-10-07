@@ -22,13 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.stats;
+package org.spongepowered.forge.bridge.minecraftforge.fml;
 
-import net.minecraft.stats.Stat;
+import org.spongepowered.common.bridge.core.RegistryBridge;
 
-import java.util.Map;
+public interface ForgeRegistryBridge<T> {
 
-public interface StatsCounterBridge {
+    RegistryBridge<T> bridge$parent();
 
-    Map<Stat<?>, Integer> bridge$getStatsData();
 }

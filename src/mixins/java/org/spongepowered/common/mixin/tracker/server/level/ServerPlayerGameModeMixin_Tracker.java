@@ -82,8 +82,8 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
 
     @Inject(method = "useItem", cancellable = true,
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/item/ItemStack;getCount()I", ordinal = 0))
-    public void impl$callInteractItemSecondary(final ServerPlayer player, final Level p_187250_2_, final ItemStack stack, final InteractionHand hand,
+                    target = "Lnet/minecraft/world/item/ItemCooldowns;isOnCooldown(Lnet/minecraft/world/item/Item;)Z"))
+    public void impl$callInteractItemSecondary(final ServerPlayer player, final Level level, final ItemStack stack, final InteractionHand hand,
         final CallbackInfoReturnable<InteractionResult> cir
     ) {
         final InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(player, stack, hand);

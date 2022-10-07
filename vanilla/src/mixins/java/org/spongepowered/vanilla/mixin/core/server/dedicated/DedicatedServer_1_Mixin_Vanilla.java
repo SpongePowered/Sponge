@@ -33,7 +33,9 @@ import org.spongepowered.vanilla.chat.console.VanillaConsole;
 @Mixin(targets = "net.minecraft.server.dedicated.DedicatedServer$1")
 public abstract class DedicatedServer_1_Mixin_Vanilla implements Runnable {
 
+    // @formatter: off
     @Shadow(aliases = "this$0") @Final private DedicatedServer server;
+    // @formatter: on
 
     @Override
     public void run() {

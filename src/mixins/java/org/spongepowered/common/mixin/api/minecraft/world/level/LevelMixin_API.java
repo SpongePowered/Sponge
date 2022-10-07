@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level;
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.resources.ResourceKey;
@@ -326,7 +327,23 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public void addBlockEntity(final int x, final int y, final int z, final BlockEntity blockEntity) {
-        this.shadow$setBlockEntity((net.minecraft.world.level.block.entity.BlockEntity) Objects.requireNonNull(blockEntity, "blockEntity"));
+        // So, here we basically want to copy the given block entity into the location.
+        // BlockEntity stores its location, as well as it being mutable and stuff, so just setting what we've given here
+        // would cause unexpected bugs.
+        final net.minecraft.world.level.block.entity.BlockEntity mcOriginalBlockEntity = (net.minecraft.world.level.block.entity.BlockEntity) Objects.requireNonNull(blockEntity, "blockEntity");
+        // Save the nbt so we can copy it, specifically wout the metadata of x,y,z coordinates
+        final CompoundTag tag = mcOriginalBlockEntity.saveWithId();
+        // Ensure that where we are placing this blockentity is the right blockstate, so that minecraft will actually accept it.
+        this.world().setBlock(x, y, z, (org.spongepowered.api.block.BlockState) mcOriginalBlockEntity.getBlockState());
+
+        // Retrieve a "blank" block entity from the one we just created (or already existed) through sponge.
+        final net.minecraft.world.level.block.entity.BlockEntity mcNewBlockEntity = (net.minecraft.world.level.block.entity.BlockEntity) this.blockEntity(x, y, z)
+                .orElseThrow(() -> new IllegalStateException("Failed to create Block Entity at " + this.location(Vector3i.from(x, y, z))));
+
+        // Load the data into it.
+        mcNewBlockEntity.load(tag);
+        // Finally, inform minecraft about our actions.
+        this.shadow$setBlockEntity(mcNewBlockEntity);
     }
 
     // MutableEntityVolume
@@ -455,7 +472,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     @SuppressWarnings("rawtypes")
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        if (!((Level) (Object) this).hasChunk(x << 4, z << 4)) {
+        if (!((Level) (Object) this).hasChunk(x >> 4, z >> 4)) {
             return false;
         }
         final LevelChunk levelChunk = this.shadow$getChunkAt(new BlockPos(x, y, z));

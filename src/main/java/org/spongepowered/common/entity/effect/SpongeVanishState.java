@@ -29,7 +29,7 @@ import org.spongepowered.api.effect.VanishState;
 
 public final class SpongeVanishState implements VanishState {
     private static final VanishState VISIBLE = new SpongeVanishState(false, true, false, true, true, true, true);
-    private static final VanishState DEFAULT_VANISHED = new SpongeVanishState(true, false, false, false, false, false, false);
+    private static final VanishState DEFAULT_VANISHED = new SpongeVanishState(true, false, true, false, false, false, false);
 
     private final boolean vanished;
     private final boolean ignoresCollisions;
@@ -101,9 +101,9 @@ public final class SpongeVanishState implements VanishState {
             true,
             ignoresCollisions,
             this.untargetable,
-            affectsSpawning,
-            createsSounds,
-            createsParticles,
+            this.affectsSpawning,
+            this.createsSounds,
+            this.createsParticles,
             this.triggersVibrations
         );
     }
@@ -125,16 +125,16 @@ public final class SpongeVanishState implements VanishState {
             true,
             this.ignoresCollisions,
             untargetable,
-            affectsSpawning,
-            createsSounds,
-            createsParticles,
+            this.affectsSpawning,
+            this.createsSounds,
+            this.createsParticles,
             this.triggersVibrations
         );
     }
 
     @Override
     public boolean affectsMonsterSpawning() {
-        return false;
+        return this.affectsSpawning;
     }
 
     @Override
@@ -230,12 +230,20 @@ public final class SpongeVanishState implements VanishState {
 
     @Override
     public String toString() {
-        return "VanishedState{ignoresCollisions=" + this.ignoresCollisions + ", untargetable=" + this.untargetable + "}";
+        return "SpongeVanishState{" +
+                "vanished=" + this.vanished +
+                ", ignoresCollisions=" + this.ignoresCollisions +
+                ", untargetable=" + this.untargetable +
+                ", affectsSpawning=" + this.affectsSpawning +
+                ", createsSounds=" + this.createsSounds +
+                ", createsParticles=" + this.createsParticles +
+                '}';
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(true, this.ignoresCollisions, this.untargetable);
+        return Objects.hashCode(this.vanished, this.ignoresCollisions, this.untargetable,
+                this.affectsSpawning, this.createsSounds, this.createsParticles);
     }
 
     @Override
@@ -250,10 +258,13 @@ public final class SpongeVanishState implements VanishState {
         return
             this.invisible() == other.invisible()
                 && this.ignoresCollisions == other.ignoresCollisions()
-                && this.untargetable == other.untargetable();
+                && this.untargetable == other.untargetable()
+                && this.affectsSpawning == other.affectsMonsterSpawning()
+                && this.createsSounds == other.createsSounds()
+                && this.createsParticles == other.createsParticles();
     }
 
-    public static final class SpongeVanishStateFactory implements Factory {
+    public static final class SpongeVanishStateFactory implements VanishState.Factory {
         @Override
         public VanishState vanished() {
             return SpongeVanishState.DEFAULT_VANISHED;
