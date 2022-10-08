@@ -28,14 +28,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.nio.file.Path;
 
-public record GroupArtifactVersion(String group, String artifact, @Nullable String version) {
+public record GroupArtifactVersion(String group, String artifact, @Nullable String version, @Nullable String classifier) {
 
     public static GroupArtifactVersion parse(final String notation) {
         final String[] split = notation.split(":");
         if (split.length > 4 || split.length < 2) {
             throw new IllegalArgumentException("Unsupported notation '" + notation + "', must be in the format of group:artifact[:version[:classifier]]");
         }
-        return new GroupArtifactVersion(split[0], split[1], split.length > 2 ? split[2] : null);
+        return new GroupArtifactVersion(split[0], split[1], split.length > 2 ? split[2] : null, split.length > 3 ? split[3] : null);
     }
 
     public Path resolve(final Path base) {
@@ -45,7 +45,7 @@ public record GroupArtifactVersion(String group, String artifact, @Nullable Stri
 
     @Override
     public String toString() {
-        return this.group() + ':' + this.artifact() + (this.version() == null ? "" : ':' + this.version());
+        return this.group() + ':' + this.artifact() + (this.version() == null ? "" : ':' + this.version()) + (this.classifier == null ? "" : ':' + this.classifier());
     }
 
 }

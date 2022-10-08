@@ -307,7 +307,7 @@ public final class InstallerMain {
             final Map<GroupArtifactVersion, Path> libs = new HashMap<>();
             for (final BundleElement library : md.libraries()) {
                 final GroupArtifactVersion gav = GroupArtifactVersion.parse(library.id());
-                final Path destination = gav.resolve(librariesDirectory).resolve(gav.artifact() + '-' + gav.version() + ".jar");
+                final Path destination = gav.resolve(librariesDirectory).resolve(gav.artifact() + '-' + gav.version() + (gav.classifier() == null ? "" : '-' + gav.classifier()) +".jar");
 
                 if (Files.exists(destination)) {
                     if (InstallerUtils.validateSha256(library.sha256(), destination)) {
