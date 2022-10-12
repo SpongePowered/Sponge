@@ -74,7 +74,7 @@ public abstract class ServerLoginPacketListenerImplMixin_IpForward {
             value = "FIELD",
             target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;gameProfile:Lcom/mojang/authlib/GameProfile;",
             opcode = Opcodes.PUTFIELD,
-            ordinal = 0,
+            ordinal = 1,
             shift = At.Shift.AFTER))
     private void bungee$initUuid(final CallbackInfo ci) {
         if (!this.server.usesAuthentication() && SpongeConfigs.getCommon().get().ipForwarding.mode == IpForwardingCategory.Mode.LEGACY) {
