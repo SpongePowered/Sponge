@@ -43,6 +43,7 @@ import org.spongepowered.api.adventure.ResolveOperations;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
@@ -55,12 +56,15 @@ import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -123,6 +127,20 @@ public class ChatTest implements LoadableModule {
                                                                                Component.translatable("chattest.book.2")));
                           return CommandResult.success();
                       }).build(), "sendbook");
+
+        event.register(this.container, Command.builder()
+                .permission("chattest.giveitem")
+                .executor(ctx -> {
+                    final ServerPlayer player = ctx.cause().first(ServerPlayer.class)
+                            .orElseThrow(() -> new CommandException(Component.text("You must be a player to use this command!")));
+
+                    final ItemStack itemStack = ItemStack.builder().itemType(ItemTypes.PAPER)
+                            .add(Keys.CUSTOM_NAME, Component.translatable("chattest.item.name"))
+                            .add(Keys.LORE, Collections.singletonList(Component.translatable("chattest.item.lore"))).build();
+
+                    player.inventory().offer(itemStack);
+                    return CommandResult.success();
+                }).build(), "giveitem");
 
         final Parameter.Value<ServerPlayer> targetArg = Parameter.player().key("target").build();
         final Parameter.Value<Component> messageArg = Parameter.jsonText().key("message").build();
