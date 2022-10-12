@@ -53,6 +53,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.bridge.server.level.ServerPlayerGameModeBridge;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
@@ -100,11 +101,12 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
         final Vector3d hitVec = Vector3d.from(blockRaytraceResultIn.getBlockPos().getX(), blockRaytraceResultIn.getBlockPos().getY(), blockRaytraceResultIn.getBlockPos().getZ());
         final org.spongepowered.api.util.Direction direction = DirectionFacingProvider.INSTANCE.getKey(blockRaytraceResultIn.getDirection()).get();
         final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(playerIn, stackIn, hitVec, snapshot, direction, handIn);
+        final Tristate useItem = event.useItemResult();
+        final Tristate useBlock = event.useBlockResult();
+        ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(event.isCancelled());
         if (event.isCancelled()) {
             return InteractionResult.FAIL;
         }
-        final Tristate useItem = event.useItemResult();
-        final Tristate useBlock = event.useBlockResult();
         // Sponge end
         if (this.gameModeForPlayer == GameType.SPECTATOR) {
             final MenuProvider inamedcontainerprovider = blockstate.getMenuProvider(worldIn, blockpos);
@@ -152,6 +154,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
             if (!stackIn.isEmpty() && !playerIn.getCooldowns().isOnCooldown(stackIn.getItem())) {
                 // Sponge start
                 if (useItem == Tristate.FALSE) {
+                    ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(true);
                     return InteractionResult.PASS;
                 }
                 // Sponge end
@@ -177,6 +180,12 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
 
                 return result;
             } else {
+                // Sponge start
+                if(useBlock == Tristate.FALSE && !flag1) {
+                    ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(true);
+                }
+                // Sponge end
+
                 return InteractionResult.PASS;
             }
         }
