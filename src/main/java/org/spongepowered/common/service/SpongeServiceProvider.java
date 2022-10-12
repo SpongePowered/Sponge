@@ -212,7 +212,10 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
         try {
             ((SpongeEventManager) this.getGame().eventManager()).postToPlugin(event, container);
         } catch (final Exception ex) {
-            ex.printStackTrace();
+            SpongeCommon.logger().error("Failed to post ProvideServiceEvent for service {} to plugin {}.",
+                    service.getServiceClass().getSimpleName(),
+                    container.metadata().id(),
+                    ex);
         }
         if (event.getSuggestion() != null) {
             try {
