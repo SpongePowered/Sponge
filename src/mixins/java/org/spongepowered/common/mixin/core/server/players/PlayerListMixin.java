@@ -28,12 +28,9 @@ import io.netty.channel.local.LocalAddress;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatMessageContent;
@@ -67,7 +64,6 @@ import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
-import org.spongepowered.api.adventure.ChatTypes;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
@@ -80,7 +76,6 @@ import org.spongepowered.api.event.message.SystemMessageEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -166,6 +161,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
 
     private boolean impl$isGameMechanicRespawn = false;
+    private boolean impl$isDuringSystemMessageEvent = false;
+
     private ResourceKey<Level> impl$originalRespawnDestination = null;
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -610,6 +607,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             at = @At("HEAD"), cancellable = true)
     private void impl$onBroadcastSystemMessage(final net.minecraft.network.chat.Component $$0,
             final Function<net.minecraft.server.level.ServerPlayer, net.minecraft.network.chat.Component> $$1, final boolean $$2, final CallbackInfo ci) {
+        if (this.impl$isDuringSystemMessageEvent) {
+            return;
+        }
         ci.cancel();
 
         final Audience originalAudience = (Audience) this.server;
@@ -621,7 +621,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             return;
         }
 
+        this.impl$isDuringSystemMessageEvent = true;
         event.audience().ifPresent(audience -> audience.sendMessage(event.message()));
+        this.impl$isDuringSystemMessageEvent = false;
     }
 
     @Redirect(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatSender;Lnet/minecraft/network/chat/ChatType$Bound;)V"))
