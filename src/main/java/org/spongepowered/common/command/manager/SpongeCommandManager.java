@@ -44,6 +44,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.util.ComponentMessageThrowable;
+import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.MinecraftServer;
@@ -68,7 +69,6 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.command.ExecuteCommandEvent;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.Subject;
@@ -88,8 +88,6 @@ import org.spongepowered.common.command.result.SpongeCommandResult;
 import org.spongepowered.common.command.sponge.SpongeCommand;
 import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.service.game.pagination.SpongePaginationService;
 import org.spongepowered.common.util.Constants;
@@ -116,7 +114,7 @@ import java.util.stream.Collectors;
 
 public abstract class SpongeCommandManager implements CommandManager.Mutable {
 
-    private static final CommandResult UNKNOWN_ERROR = new SpongeCommandResult(false, 0, null);
+    public static final CommandResult UNKNOWN_ERROR = new SpongeCommandResult(false, 0, null);
     private static final boolean ALWAYS_PRINT_STACKTRACES = System.getProperty("sponge.command.alwaysPrintStacktraces") != null;
 
     private final Game game;
@@ -302,125 +300,19 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
     @Override
     public @NonNull CommandResult process(final @NonNull String arguments) throws CommandException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            final int result = this.getDispatcher().execute(arguments, ((CommandSourceStack) CommandCause.create()));
             frame.addContext(EventContextKeys.COMMAND, arguments);
-            return this.process(CommandCause.create(), arguments);
-        } catch (final CommandSyntaxException commandSyntaxException) {
-            throw new CommandException(Component.text(commandSyntaxException.getMessage()), commandSyntaxException);
-        }
-    }
-
-    public CommandResult process(final CommandCause cause, final String arguments)
-            throws CommandException, CommandSyntaxException {
-        final String[] splitArg = arguments.split(" ", 2);
-        final String originalCommand = splitArg[0];
-        final String originalArgs = splitArg.length == 2 ? splitArg[1] : "";
-
-        final String command;
-        final String args;
-        final ExecuteCommandEvent.Pre preEvent = SpongeEventFactory.createExecuteCommandEventPre(
-                cause.cause(),
-                originalArgs,
-                originalArgs,
-                originalCommand,
-                originalCommand,
-                cause,
-                Optional.empty(),
-                false
-        );
-        if (this.game.eventManager().post(preEvent)) {
-            return preEvent.result().orElse(SpongeCommandManager.UNKNOWN_ERROR);
-        }
-        command = preEvent.command();
-        args = preEvent.arguments();
-
-        final SpongeCommandMapping mapping = this.commandMappings.get(command.toLowerCase());
-        if (mapping == null) {
-            throw new CommandException(Component.text("Unknown command. Type /help for a list of commands."));
-        }
-        final Object source = cause.cause().root();
-
-        CommandResult result;
-        try (final CommandPhaseContext context = GeneralPhase.State.COMMAND
-            .createPhaseContext(PhaseTracker.getInstance())
-            .source(source)
-            .command(args)
-            .commandMapping(mapping)) {
-            if (source instanceof ServerPlayer) {
-                final ServerPlayer serverPlayer = (ServerPlayer) source;
-                context.creator(serverPlayer.uniqueId());
-                context.notifier(serverPlayer.uniqueId());
-            }
-            context.buildAndSwitch();
-            try {
-                result = this.processCommand(cause, mapping, arguments, command, args);
-            } catch (final SpongeCommandResultException resultException) {
-                result = resultException.result();
-            } catch (final CommandException exception) {
-                final CommandResult errorResult = CommandResult.builder().result(0)
-                        .error(exception.componentMessage()).build();
-                this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
-                if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
-                    this.prettyPrintThrowableError(exception, command, args, cause);
-                }
-                throw exception;
-            } catch (final CommandSyntaxException cse) {
-                final CommandResult errorResult = CommandResult.builder().result(0)
-                        .error(SpongeAdventure.asAdventure(cse.getRawMessage())).build();
-                this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
-                if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
-                    this.prettyPrintThrowableError(cse, command, args, cause);
-                }
-                throw cse;
-            } catch (final net.minecraft.commands.CommandRuntimeException ex) {
-                final CommandResult errorResult = CommandResult.builder().result(0).error(
-                    SpongeAdventure.asAdventure(ex.getComponent())).build();
-                this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
-                if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
-                    this.prettyPrintThrowableError(ex, command, args, cause);
-                }
-                throw ex;
-            } catch (final Throwable thr) {
-                this.prettyPrintThrowableError(thr, command, args, cause);
-
-                Component excBuilder;
-                if (thr instanceof ComponentMessageThrowable) {
-                    final Component text = ((ComponentMessageThrowable) thr).componentMessage();
-                    excBuilder = text == null ? Component.text("null") : text;
-                } else {
-                    excBuilder = Component.text(String.valueOf(thr.getMessage()));
-                }
-                if (cause.hasPermission(Constants.Permissions.DEBUG_HOVER_STACKTRACE)) {
-                    final StringWriter writer = new StringWriter();
-                    thr.printStackTrace(new PrintWriter(writer));
-                    excBuilder = excBuilder.hoverEvent(HoverEvent.showText(Component.text(writer.toString()
-                        .replace("\t", "    ")
-                        .replace("\r\n", "\n")
-                        .replace("\r", "\n")))); // I mean I guess somebody could be running this on like OS 9?
-                }
-                final Component error = Component.text().content(
-                    "Unexpected error occurred while executing command: ").append(excBuilder).build();
-                this.postExecuteCommandPostEvent(
-                    cause, originalArgs, args, originalCommand, command, CommandResult.error(error));
-                throw new CommandException(error, thr);
-            }
-
-            this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, result);
-            if (!result.isSuccess()) {
-                cause.sendMessage(Identity.nil(), result.errorMessage()
-                        .map(x -> x.colorIfAbsent(NamedTextColor.RED))
-                        .orElseGet(() ->
-                    Component.text()
-                            .content(String.format("An empty error result was returned while executing the command \"%s\"", arguments))
-                            .color(NamedTextColor.RED)
-                            .build()));
-            }
-            return result;
+            return CommandResult.builder().result(result).build();
+        } catch (final CommandRuntimeException cre) {
+            throw new CommandException(SpongeAdventure.asAdventure(cre.getComponent()), cre);
+        } catch (final CommandSyntaxException cse) {
+            throw new CommandException(Component.text(cse.getMessage()), cse);
         }
     }
 
     // Used to support the Forge event for all commands.
-    protected abstract CommandResult processCommand(final CommandCause cause, final CommandMapping mapping,
-            final String original, final String command, final String args) throws Throwable;
+    public abstract CommandResult processCommand(final CommandCause cause, final CommandMapping mapping,
+            final String command, final String args) throws CommandException;
 
     @Override
     public <T extends Subject & Audience> @NonNull CommandResult process(
@@ -662,5 +554,63 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
                 game,
                 registrar
         );
+    }
+
+    public int handleException(final String originalCommand, final String originalArgs, final CommandCause cause, final Exception ex, final String command, final String args) throws CommandRuntimeException, CommandSyntaxException {
+        if (ex instanceof SpongeCommandResultException scre) {
+            final CommandResult result = scre.result();
+            this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, result);
+            cause.sendMessage(Identity.nil(), result.errorMessage()
+                    .map(x -> x.colorIfAbsent(NamedTextColor.RED))
+                    .orElseGet(() ->
+                            Component.text()
+                                    .content(String.format("An empty error result was returned while executing the command \"%s\"", command))
+                                    .color(NamedTextColor.RED)
+                                    .build()));
+            return 0;
+        }
+        if (ex instanceof CommandException ce) {
+            final CommandResult result = CommandResult.error(ce.componentMessage());
+            this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, result);
+            if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
+                this.prettyPrintThrowableError(ex, command, args, cause);
+            }
+            throw new CommandRuntimeException(SpongeAdventure.asVanilla(ce.componentMessage()));
+        }
+        if (ex instanceof CommandSyntaxException cse) {
+            final CommandResult result = CommandResult.error(SpongeAdventure.asAdventure(cse.getRawMessage()));
+            this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, result);
+            if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
+                this.prettyPrintThrowableError(ex, command, args, cause);
+            }
+            throw cse;
+        } if (ex instanceof CommandRuntimeException cre) {
+            final CommandResult result = CommandResult.error(SpongeAdventure.asAdventure(cre.getComponent()));
+            this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, result);
+            if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
+                this.prettyPrintThrowableError(ex, command, args, cause);
+            }
+            throw cre;
+        }
+        this.prettyPrintThrowableError(ex, command, args, cause);
+
+        Component excBuilder;
+        if (ex instanceof ComponentMessageThrowable) {
+            final Component text = ((ComponentMessageThrowable) ex).componentMessage();
+            excBuilder = text == null ? Component.text("null") : text;
+        } else {
+            excBuilder = Component.text(String.valueOf(ex.getMessage()));
+        }
+        if (cause.hasPermission(Constants.Permissions.DEBUG_HOVER_STACKTRACE)) {
+            final StringWriter writer = new StringWriter();
+            ex.printStackTrace(new PrintWriter(writer));
+            excBuilder = excBuilder.hoverEvent(HoverEvent.showText(Component.text(writer.toString()
+                    .replace("\t", "    ")
+                    .replace("\r\n", "\n")
+                    .replace("\r", "\n")))); // I mean I guess somebody could be running this on like OS 9?
+        }
+        final Component error = Component.text().content("Unexpected error occurred while executing command: ").append(excBuilder).build();
+        this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, CommandResult.error(error));
+        throw new CommandRuntimeException(SpongeAdventure.asVanilla(error));
     }
 }

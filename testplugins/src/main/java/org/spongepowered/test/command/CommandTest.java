@@ -29,6 +29,7 @@ import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.apache.logging.log4j.Logger;
@@ -61,6 +62,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.command.ExecuteCommandEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -68,6 +70,9 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
+import org.spongepowered.test.LoadableModule;
+import org.spongepowered.test.command.raw.ClientSuggestionsRawCommand;
+import org.spongepowered.test.command.raw.RawCommand;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -79,7 +84,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Plugin("commandtest")
-public final class CommandTest {
+public final class CommandTest implements LoadableModule {
 
     private final PluginContainer plugin;
     private final Logger logger;
@@ -88,6 +93,11 @@ public final class CommandTest {
     public CommandTest(final PluginContainer plugin, final Logger logger) {
         this.plugin = plugin;
         this.logger = logger;
+    }
+
+    @Override
+    public void enable(final CommandContext ctx) {
+        Sponge.eventManager().registerListeners(this.plugin, new CommandListener());
     }
 
     @Listener
@@ -627,8 +637,8 @@ public final class CommandTest {
 
     @Listener
     private void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
-        event.register(this.plugin, new RawCommandTest(), "rawcommandtest");
-        event.register(this.plugin, new ClientSuggestionsRawCommandTest(), "rawrecipescommandtest");
+        event.register(this.plugin, new RawCommand(), "rawcommandtest");
+        event.register(this.plugin, new ClientSuggestionsRawCommand(), "rawrecipescommandtest");
     }
 
     private static CommandResult printParameters(final CommandContext context, final Parameter.Value<?>... params) {
@@ -641,6 +651,34 @@ public final class CommandTest {
         context.executedCommand().ifPresent(cmd -> context.sendMessage(Identity.nil(), cmd.usage(context.cause()).color(NamedTextColor.GRAY)));
         return CommandResult.success();
     }
+
+    static final class CommandListener {
+        @Listener
+        private void onPreCommand(final ExecuteCommandEvent.Pre event) {
+            event.commandCause().sendMessage(
+                                Component.text("Pre: ", NamedTextColor.GOLD)
+                        .append(Component.text(event.originalCommand(), NamedTextColor.GRAY).append(Component.space()).append(Component.text(event.originalArguments())))
+            );
+        }
+
+        @Listener
+        private void onPostCommand(final ExecuteCommandEvent.Post event) {
+            final TextComponent newLine = Component.newline().append(Component.text("   "));
+
+            final TextComponent command = Component.text(event.command(), NamedTextColor.GRAY).append(Component.space()).append(Component.text(event.originalArguments()));
+            final TextComponent success = Component.text(event.result().isSuccess(), NamedTextColor.GRAY);
+            final Component errorMessage = event.result().errorMessage().orElse(Component.text("N/A")).color(NamedTextColor.GRAY);
+            final TextComponent result = Component.text(event.result().result(), NamedTextColor.GRAY);
+            event.commandCause().sendMessage(Component.text("Post: ", NamedTextColor.GOLD).append(command).append(newLine)
+                                     .append(Component.text("Success: ")).append(success).append(newLine)
+                                     .append(Component.text("ErrorMessage: ")).append(errorMessage).append(newLine)
+                                     .append(Component.text("Result: ")).append(result)
+            );
+        }
+    }
+
+
+
 
     public enum TestEnum {
         ONE,

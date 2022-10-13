@@ -29,6 +29,7 @@ import com.google.inject.Provider;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.sponge.SpongeCommand;
@@ -41,8 +42,8 @@ public final class VanillaCommandManager extends SpongeCommandManager {
     }
 
     @Override
-    protected CommandResult processCommand(final CommandCause cause, final CommandMapping mapping, final String original, final String command,
-            final String args) throws Throwable {
+    public CommandResult processCommand(final CommandCause cause, final CommandMapping mapping, final String command, final String args)
+            throws CommandException {
         return mapping.registrar().process(cause, mapping, command, args);
     }
 

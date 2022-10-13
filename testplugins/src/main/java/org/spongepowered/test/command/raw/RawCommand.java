@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test.command;
+package org.spongepowered.test.command.raw;
 
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
@@ -42,7 +42,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class RawCommandTest implements Command.Raw {
+public class RawCommand implements Command.Raw {
 
     private final List<CommandCompletion> completions = Arrays.asList("eggs", "bacon", "spam")
             .stream()

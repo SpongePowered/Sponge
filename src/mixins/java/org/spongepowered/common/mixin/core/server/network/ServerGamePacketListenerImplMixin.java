@@ -83,11 +83,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.entity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
-import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
-import org.spongepowered.api.event.entity.living.player.RespawnPlayerEvent;
-import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -144,6 +140,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     @Shadow public abstract void shadow$resetPosition();
     @Shadow public abstract void send(final Packet<?> $$0);
     @Shadow protected abstract void shadow$performChatCommand(final ServerboundChatCommandPacket $$0);
+    @Shadow protected abstract ParseResults<CommandSourceStack> shadow$parseCommand(final String $$0);
     // @formatter:on
 
     private int impl$ignorePackets;
@@ -505,8 +502,16 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     public void impl$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandPacket $$0) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this.player);
+            frame.addContext(EventContextKeys.COMMAND, $$0.command());
             this.shadow$performChatCommand($$0);
         }
+    }
+
+    @Redirect(method = "performChatCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;parseCommand(Ljava/lang/String;)Lcom/mojang/brigadier/ParseResults;"))
+    public ParseResults<CommandSourceStack> impl$onParseChatCommand(final ServerGamePacketListenerImpl instance, final String $$0)
+    {
+        // TODO ExecuteCommandEvent.Pre
+        return this.shadow$parseCommand($$0);
     }
 
     @Override

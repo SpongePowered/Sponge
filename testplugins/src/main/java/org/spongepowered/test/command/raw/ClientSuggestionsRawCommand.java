@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.test.command;
+package org.spongepowered.test.command.raw;
 
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
@@ -42,7 +42,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class ClientSuggestionsRawCommandTest implements Command.Raw {
+public class ClientSuggestionsRawCommand implements Command.Raw {
 
     @Override
     public @NonNull CommandResult process(@NotNull final CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) throws CommandException {

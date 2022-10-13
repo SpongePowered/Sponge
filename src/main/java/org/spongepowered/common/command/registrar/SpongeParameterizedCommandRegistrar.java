@@ -26,7 +26,6 @@ package org.spongepowered.common.command.registrar;
 
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
@@ -39,7 +38,6 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
-import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.SpongeParameterizedCommand;
@@ -116,8 +114,9 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
             final @NonNull CommandMapping mapping,
             final @NonNull String command,
             final @NonNull String arguments) throws CommandException {
-        return this.process(cause, mapping, command,
-                this.commandManager().getDispatcher().parse(this.createCommandString(command, arguments), (CommandSourceStack) cause));
+        final SpongeCommandDispatcher dispatcher = this.commandManager().getDispatcher();
+        final ParseResults<CommandSourceStack> parsed = dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause);
+        return this.process(cause, mapping, command, parsed);
     }
 
     @Override

@@ -41,6 +41,10 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandManager;
@@ -48,7 +52,9 @@ import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.command.ExecuteCommandEvent;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
@@ -59,7 +65,11 @@ import org.spongepowered.common.command.brigadier.tree.SpongeNode;
 import org.spongepowered.common.command.brigadier.tree.SpongeRootCommandNode;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.common.command.registrar.SpongeRawCommandRegistrar;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.util.CommandUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,8 +80,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import net.minecraft.commands.CommandSourceStack;
-import org.spongepowered.common.util.CommandUtil;
 
 // For use on the Brigadier dispatcher
 public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSourceStack> {
@@ -118,19 +126,49 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
     }
 
     @Override
-    public int execute(final StringReader input, final CommandSourceStack source) throws CommandSyntaxException {
+    public int execute(final ParseResults<CommandSourceStack> parse) throws CommandSyntaxException {
+        final String fullCommand = parse.getReader().getString();
+        final CommandSourceStack source = parse.getContext().getSource();
+        final ServerPlayer player = source.getPlayer();
+
+        final String originalRawCommand = PhaseTracker.getCauseStackManager().currentContext().get(EventContextKeys.COMMAND).orElse(fullCommand);
+        final String[] origSplitArg = originalRawCommand.split(" ", 2);
+        final String originalCommand = origSplitArg[0];
+        final String originalArgs = origSplitArg.length == 2 ? origSplitArg[1] : "";
+
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final CommandSourceStackBridge sourceBridge = (CommandSourceStackBridge) source;
-            frame.addContext(EventContextKeys.COMMAND, input.getString());
+            frame.addContext(EventContextKeys.COMMAND, fullCommand);
             sourceBridge.bridge$updateFrameFromCommandSource(frame);
-            return this.commandManager.process(sourceBridge.bridge$withCurrentCause(), input.getRemaining()).result();
-        } catch (final CommandException e) {
-            throw new net.minecraft.commands.CommandRuntimeException(SpongeAdventure.asVanilla(e.componentMessage()));
+
+            final CommandCause cause = sourceBridge.bridge$withCurrentCause();
+
+            final String[] splitArg = fullCommand.split(" ", 2);
+            final String baseCommand = splitArg[0];
+            final String args = splitArg.length == 2 ? splitArg[1] : "";
+            final CommandMapping mapping = this.commandManager.commandMapping(baseCommand).orElse(null);
+
+            try (final CommandPhaseContext context = GeneralPhase.State.COMMAND
+                    .createPhaseContext(PhaseTracker.getInstance())
+                    .source(source)
+                    .command(fullCommand)
+                    .commandMapping(mapping)) {
+                if (player != null) {
+                    context.creator(player.getUUID());
+                    context.notifier(player.getUUID());
+                }
+                context.buildAndSwitch();
+                final int result = this.execute0(parse, fullCommand);
+                SpongeCommon.post(SpongeEventFactory.createExecuteCommandEventPost(cause.cause(), originalArgs, args, originalCommand, baseCommand, cause,
+                        CommandResult.builder().result(result).build()));
+                return result;
+            } catch (final Exception exception) {
+                return this.commandManager.handleException(originalCommand, originalArgs, cause, exception, baseCommand, args);
+            }
         }
     }
 
-    @Override
-    public int execute(final ParseResults<CommandSourceStack> parse) throws CommandSyntaxException {
+    private int execute0(final ParseResults<CommandSourceStack> parse, final String command) throws CommandSyntaxException {
         if (parse.getReader().canRead()) {
             // TODO plugin exception handling here
             if (parse.getExceptions().size() == 1) {
@@ -147,7 +185,6 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         int successfulForks = 0;
         boolean forked = false;
         boolean foundCommand = false;
-        final String command = parse.getReader().getString();
         final CommandContext<CommandSourceStack> original = parse.getContext().build(command);
         List<CommandContext<CommandSourceStack>> contexts = Collections.singletonList(original);
         ArrayList<CommandContext<CommandSourceStack>> next = null;
@@ -237,7 +274,77 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             final CommandNode<CommandSourceStack> node,
             final SpongeStringReader originalReader,
             final SpongeCommandContextBuilder contextSoFar) {
+        final SpongeStringReader reader;
+        if (isRoot) {
+            // Raw Command Handling...
+            final String rawCommand = originalReader.getString();
+            final String[] splitArg = rawCommand.split(" ", 2);
+            final String originalCommand = splitArg[0];
+            final String originalArgs = splitArg.length == 2 ? splitArg[1] : "";
+            final String command;
+            final String args;
 
+            if (isSuggestion || rawCommand.isEmpty()) {
+                command = originalCommand;
+                args = originalArgs;
+                reader = originalReader;
+            } else {
+                final CommandCause cause = ((CommandSourceStackBridge) contextSoFar.getSource()).bridge$withCurrentCause();
+
+                final ExecuteCommandEvent.Pre preEvent = SpongeEventFactory.createExecuteCommandEventPre(
+                        cause.cause(),
+                        originalArgs,
+                        originalArgs,
+                        originalCommand,
+                        originalCommand,
+                        cause,
+                        Optional.empty(),
+                        false
+                );
+                if (SpongeCommon.post(preEvent)) {
+                    // TODO setResult should autocancel but seems it does not?
+                    final CommandResult result = preEvent.result().orElse(SpongeCommandManager.UNKNOWN_ERROR);
+                    contextSoFar.withCommand(ctx -> result.result());
+                    return new ParseResults<>(contextSoFar, originalReader, Map.of());
+                }
+
+                command = preEvent.command();
+                args = preEvent.arguments();
+                reader = new SpongeStringReader(command + " " + args);
+            }
+
+            final Optional<CommandMapping> mapping = this.commandManager.commandMapping(command);
+            if (mapping.isPresent()) {
+                if (mapping.get().registrar() instanceof SpongeRawCommandRegistrar) {
+                    contextSoFar.withCommand((ctx) -> {
+                        final CommandCause cause = (CommandCause) ctx.getSource();
+                        try {
+                            return this.commandManager.processCommand(cause, mapping.get(), command, args).result();
+                        } catch (CommandException e) {
+                            return this.commandManager.handleException(originalCommand, originalArgs, cause, e, command, args);
+                        }
+                    });
+                    // skip the rest
+                    while (reader.canRead())
+                    {
+                        reader.skip();
+                    }
+                    return new ParseResults<>(contextSoFar, reader.immutable(), Map.of());
+                }
+            }
+        } else {
+            reader = originalReader;
+        }
+
+        return this.parseNodes0(isRoot, isSuggestion, node, reader, contextSoFar);
+    }
+
+    private ParseResults<CommandSourceStack> parseNodes0(
+            final boolean isRoot,
+            final boolean isSuggestion,
+            final CommandNode<CommandSourceStack> node,
+            final SpongeStringReader originalReader,
+            final SpongeCommandContextBuilder contextSoFar) {
         final CommandSourceStack source = contextSoFar.getSource();
         // Sponge Start
         Map<CommandNode<CommandSourceStack>, CommandSyntaxException> errors = null;
@@ -257,8 +364,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         }
 
         for (final CommandNode<CommandSourceStack> child : nodes) {
-            final boolean doesNotRead =
-                    child instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) child).getParser().doesNotRead();
+            final boolean doesNotRead = child instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) child).getParser().doesNotRead();
             // We need to do a little more scaffolding for permissions
             // if (!child.canUse(source)) {
             if (!SpongeNodePermissionCache.canUse(isRoot, this, child, source)) {
@@ -336,12 +442,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                                     childContext.withCommand(commandContext -> {
                                         final SpongeCommandContext spongeContext = (SpongeCommandContext) commandContext;
                                         try {
-                                            return mapping.registrar().process(
-                                                    spongeContext.cause(),
-                                                    mapping,
-                                                    commandToAttempt,
-                                                    remaining
-                                            ).result();
+                                            return this.commandManager.processCommand(spongeContext.cause(), mapping, commandToAttempt, remaining).result();
                                         } catch (final CommandException e) {
                                             throw new SpongeCommandSyntaxException(e, spongeContext);
                                         }
