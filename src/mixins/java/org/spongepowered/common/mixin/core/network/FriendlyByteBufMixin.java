@@ -27,7 +27,8 @@ package org.spongepowered.common.mixin.core.network;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,11 +37,9 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
 import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Locale;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import org.spongepowered.common.util.Constants;
 
 @Mixin(FriendlyByteBuf.class)
 public abstract class FriendlyByteBufMixin implements FriendlyByteBufBridge {
@@ -52,9 +51,8 @@ public abstract class FriendlyByteBufMixin implements FriendlyByteBufBridge {
         return NativeComponentRenderer.apply(input, this.impl$locale == null ? Locales.DEFAULT : this.impl$locale);
     }
 
-    @Redirect(method = "writeItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getTag()Lnet/minecraft/nbt/CompoundTag;"))
-    public CompoundTag renderItemComponents(final ItemStack stack) {
-        CompoundTag tag = stack.getTag();
+    @Override
+    public CompoundTag bridge$renderItemComponents(CompoundTag tag) {
         if (tag == null || !tag.contains(Constants.Item.ITEM_DISPLAY, 10)) {
             return tag;
         }
@@ -114,24 +112,27 @@ public abstract class FriendlyByteBufMixin implements FriendlyByteBufBridge {
         return tag;
     }
 
-    @Redirect(method = "readItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;setTag(Lnet/minecraft/nbt/CompoundTag;)V"))
-    public void restoreItemComponents(final ItemStack stack, final CompoundTag tag) {
-        if (tag != null && tag.contains(Constants.Item.ITEM_DISPLAY, 10)) {
-            final CompoundTag display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
-
-            if (display.contains(Constants.Item.ITEM_ORIGINAL_NAME, 8)) {
-                final String name = display.getString(Constants.Item.ITEM_ORIGINAL_NAME);
-                display.remove(Constants.Item.ITEM_ORIGINAL_NAME);
-                display.putString(Constants.Item.ITEM_NAME, name);
-            }
-
-            if (display.contains(Constants.Item.ITEM_ORIGINAL_LORE, 9)) {
-                final ListTag lore = display.getList(Constants.Item.ITEM_ORIGINAL_LORE, 8);
-                display.remove(Constants.Item.ITEM_ORIGINAL_LORE);
-                display.put(Constants.Item.ITEM_LORE, lore);
-            }
+    @Redirect(method = "readItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;readNbt()Lnet/minecraft/nbt/CompoundTag;"))
+    public CompoundTag restoreItemComponents(final FriendlyByteBuf buf) {
+        CompoundTag tag = buf.readNbt();
+        if (tag == null || !tag.contains(Constants.Item.ITEM_DISPLAY, 10)) {
+            return tag;
         }
-        stack.setTag(tag);
+
+        final CompoundTag display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
+
+        if (display.contains(Constants.Item.ITEM_ORIGINAL_NAME, 8)) {
+            final String name = display.getString(Constants.Item.ITEM_ORIGINAL_NAME);
+            display.remove(Constants.Item.ITEM_ORIGINAL_NAME);
+            display.putString(Constants.Item.ITEM_NAME, name);
+        }
+
+        if (display.contains(Constants.Item.ITEM_ORIGINAL_LORE, 9)) {
+            final ListTag lore = display.getList(Constants.Item.ITEM_ORIGINAL_LORE, 8);
+            display.remove(Constants.Item.ITEM_ORIGINAL_LORE);
+            display.put(Constants.Item.ITEM_LORE, lore);
+        }
+        return tag;
     }
 
     @Override
