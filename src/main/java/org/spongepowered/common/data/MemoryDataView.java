@@ -250,7 +250,8 @@ public class MemoryDataView implements DataView {
         }
 
         final Object serialized = DataSerializer.serialize(this.safetyMode(), value);
-        checkArgument(!this.equals(serialized), "Cannot insert self-referencing DataView!");
+
+        checkArgument(this.isEmpty() || !this.equals(serialized), "Cannot insert self-referencing DataView!");
         if (serialized instanceof DataView) {
             // always have to copy a data view to avoid overwriting existing
             // views and to set the interior path correctly.
