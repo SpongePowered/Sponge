@@ -507,13 +507,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         }
     }
 
-    @Redirect(method = "performChatCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;parseCommand(Ljava/lang/String;)Lcom/mojang/brigadier/ParseResults;"))
-    public ParseResults<CommandSourceStack> impl$onParseChatCommand(final ServerGamePacketListenerImpl instance, final String $$0)
-    {
-        // TODO ExecuteCommandEvent.Pre
-        return this.shadow$parseCommand($$0);
-    }
-
     @Override
     public void bridge$captureCurrentPlayerPosition() {
         this.shadow$resetPosition();
