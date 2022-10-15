@@ -301,8 +301,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                         Optional.empty(),
                         false
                 );
-                if (SpongeCommon.post(preEvent)) {
-                    // TODO setResult should autocancel but seems it does not?
+                if (SpongeCommon.post(preEvent) || preEvent.result().isPresent()) {
                     final CommandResult result = preEvent.result().orElse(SpongeCommandManager.UNKNOWN_ERROR);
                     contextSoFar.withCommand(ctx -> result.result());
                     return new ParseResults<>(contextSoFar, originalReader, Map.of());
