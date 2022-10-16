@@ -28,8 +28,9 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import java.util.Collection;
 import net.minecraft.commands.CommandSourceStack;
+
+import java.util.Collection;
 
 public interface SpongeNode {
 

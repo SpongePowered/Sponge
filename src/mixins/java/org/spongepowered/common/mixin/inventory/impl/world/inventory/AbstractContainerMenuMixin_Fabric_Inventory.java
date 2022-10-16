@@ -25,6 +25,9 @@
 package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,9 +39,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
 
 @Mixin(AbstractContainerMenu.class)
 public abstract class AbstractContainerMenuMixin_Fabric_Inventory implements Fabric, InventoryBridge {

@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.state;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.world.level.block.state.StateHolder;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.state.State;
@@ -37,8 +39,6 @@ import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.world.level.block.state.StateHolder;
-import net.minecraft.world.level.block.state.properties.Property;
 
 @Mixin(StateHolder.class)
 public abstract class StateHolderMixin_API<S extends State<S>, C> implements State<S>, SpongeImmutableDataHolder<S> {

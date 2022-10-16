@@ -24,7 +24,6 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.network;
 
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;

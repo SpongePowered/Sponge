@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.state;
 
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.FluidState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.mirror.Mirror;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
 import java.util.Objects;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.FluidState;
 
 @Mixin(BlockBehaviour.BlockStateBase.class)
 public abstract class BlockBehaviour_BlockStateBaseMixin_API extends StateHolderMixin_API<BlockState, net.minecraft.world.level.block.state.BlockState> implements BlockState {

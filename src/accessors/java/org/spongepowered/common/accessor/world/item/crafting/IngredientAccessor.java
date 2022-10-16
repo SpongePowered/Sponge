@@ -25,12 +25,12 @@
 package org.spongepowered.common.accessor.world.item.crafting;
 
 import com.google.gson.JsonObject;
+import net.minecraft.world.item.crafting.Ingredient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
 import java.util.stream.Stream;
-import net.minecraft.world.item.crafting.Ingredient;
 
 @Mixin(Ingredient.class)
 public interface IngredientAccessor {

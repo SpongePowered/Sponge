@@ -27,6 +27,13 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,13 +47,6 @@ import org.spongepowered.common.data.provider.item.stack.ShieldItemStackData;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.entity.BannerBlockEntity;
 
 @Mixin(BannerBlockEntity.class)
 public abstract class BannerBlockEntityMixin extends BlockEntityMixin implements BannerBlockEntityBridge, CustomNameableBridge {

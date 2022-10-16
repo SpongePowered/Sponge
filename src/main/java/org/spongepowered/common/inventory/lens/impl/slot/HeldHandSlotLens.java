@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
@@ -46,7 +46,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import net.minecraft.world.item.ItemStack;
 
 /**
  * Single Slot pointing to a players {@link EquipmentTypes#MAIN_HAND} slot.

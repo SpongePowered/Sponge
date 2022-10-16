@@ -25,6 +25,23 @@
 package org.spongepowered.common.entity.projectile;
 
 import com.google.common.collect.Maps;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.world.entity.projectile.LargeFireball;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.entity.projectile.ThrownEgg;
+import net.minecraft.world.entity.projectile.ThrownEnderpearl;
+import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
+import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.data.Keys;
@@ -48,31 +65,13 @@ import org.spongepowered.api.entity.projectile.explosive.fireball.DragonFireball
 import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
 import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
 import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import net.minecraft.core.Direction;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.horse.Llama;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
-import net.minecraft.world.entity.projectile.FishingHook;
-import net.minecraft.world.entity.projectile.LargeFireball;
-import net.minecraft.world.entity.projectile.ThrowableProjectile;
-import net.minecraft.world.entity.projectile.ThrownEgg;
-import net.minecraft.world.entity.projectile.ThrownEnderpearl;
-import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
-import net.minecraft.world.entity.projectile.ThrownPotion;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 
 public final class ProjectileUtil {
 

@@ -24,14 +24,17 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.dimension;
 
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.BiomeZoomer;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.world.WorldType;
+import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.biome.BiomeSampler;
-import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -46,9 +49,6 @@ import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
 import java.util.Optional;
 import java.util.OptionalLong;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.biome.BiomeZoomer;
-import net.minecraft.world.level.dimension.DimensionType;
 
 @Mixin(DimensionType.class)
 @Implements(@Interface(iface = WorldType.class, prefix = "worldType$", remap = Remap.NONE))

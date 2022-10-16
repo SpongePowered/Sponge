@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity.player.tab;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;

@@ -151,12 +151,12 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
         SpongeCommon.logger().error("Map id could not be got from map name, (" + mapname + ")");
     }
 
-    @Override 
+    @Override
     public CompoundTag data$getCompound() {
         return this.impl$nbt;
     }
 
-    @Override 
+    @Override
     public void data$setCompound(final CompoundTag nbt) {
         this.impl$nbt = nbt;
     }

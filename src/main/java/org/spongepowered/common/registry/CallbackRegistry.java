@@ -25,10 +25,11 @@
 package org.spongepowered.common.registry;
 
 import com.mojang.serialization.Lifecycle;
-import java.util.function.BiConsumer;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
+
+import java.util.function.BiConsumer;
 
 public final class CallbackRegistry<T> extends MappedRegistry<T> {
 

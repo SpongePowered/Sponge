@@ -27,7 +27,6 @@ package org.spongepowered.vanilla.applaunch.handler.test;
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
-import org.spongepowered.vanilla.applaunch.Main;
 import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 

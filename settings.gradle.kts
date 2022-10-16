@@ -42,8 +42,8 @@ extensions.configure(MinecraftRepositoryExtension::class) {
 
 if (!file("SpongeAPI/gradle.properties").exists()) {
     throw InvalidUserDataException("""
-        The SpongeAPI submodule required to build does not appear to be set up. 
-        
+        The SpongeAPI submodule required to build does not appear to be set up.
+
         To correct this, run
             git submodule update --init --recursive
         from the project's checkout directory.

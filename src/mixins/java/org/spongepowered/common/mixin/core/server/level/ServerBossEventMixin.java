@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.mixin.core.world.BossEventMixin;
+
 import java.util.Set;
 
 @Mixin(ServerBossEvent.class)

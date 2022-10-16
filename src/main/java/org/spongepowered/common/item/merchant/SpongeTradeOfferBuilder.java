@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.world.item.trading.MerchantOffer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
@@ -41,7 +42,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
-import net.minecraft.world.item.trading.MerchantOffer;
 
 public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> implements TradeOffer.Builder, DataBuilder<TradeOffer> {
 

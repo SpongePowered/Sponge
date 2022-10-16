@@ -32,8 +32,8 @@ import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.common.accessor.world.entity.player.AbilitiesAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.accessor.world.food.FoodDataAccessor;
-import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.ExperienceHolderUtil;
 

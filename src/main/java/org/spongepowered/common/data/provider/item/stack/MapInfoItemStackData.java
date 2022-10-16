@@ -40,10 +40,10 @@ import org.spongepowered.common.util.Constants;
 
 public final class MapInfoItemStackData {
 
-	private MapInfoItemStackData() {
-	}
+    private MapInfoItemStackData() {
+    }
 
-	// @formatter:off
+    // @formatter:off
 	public static void register(final DataProviderRegistrator registrator) {
 		registrator
 				.asMutable(ItemStack.class)

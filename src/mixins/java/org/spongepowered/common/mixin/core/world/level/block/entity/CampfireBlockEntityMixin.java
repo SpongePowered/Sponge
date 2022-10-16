@@ -24,6 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import org.spongepowered.api.block.entity.carrier.Campfire;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -45,12 +51,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Collections;
 import java.util.Optional;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CampfireCookingRecipe;
-import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 
 @Mixin(CampfireBlockEntity.class)
 public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBridge {

@@ -34,7 +34,6 @@ import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.mapping.SpongeMappingManager;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResourceLocatorService;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.builtin.MetadataContainer;
 import org.spongepowered.plugin.metadata.builtin.MetadataParser;
@@ -102,7 +101,7 @@ public abstract class VanillaLaunch extends Launch {
     public SpongeMappingManager mappingManager() {
         return this.mappingManager;
     }
-    
+
     @Override
     public Injector createInjector() {
         final List<Module> modules = Lists.newArrayList(

@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.spongepowered.api.block.entity.Skull;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
+
 import java.util.Set;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
 
 @Mixin(SkullBlockEntity.class)
 public abstract class SkullBlockEntityMixin_API extends BlockEntityMixin_API implements Skull {

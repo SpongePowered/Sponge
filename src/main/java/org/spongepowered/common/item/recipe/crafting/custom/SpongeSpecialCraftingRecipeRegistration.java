@@ -25,6 +25,10 @@
 package org.spongepowered.common.item.recipe.crafting.custom;
 
 import com.google.gson.JsonObject;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -33,10 +37,6 @@ import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
 
 public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistration {
 

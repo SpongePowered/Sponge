@@ -26,7 +26,6 @@ package org.spongepowered.common.data.provider.block.entity;
 
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.accessor.world.level.block.entity.SkullBlockEntityAccessor;
 import org.spongepowered.common.bridge.world.level.block.entity.SkullBlockEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;

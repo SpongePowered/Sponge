@@ -65,4 +65,3 @@ public abstract class MinecraftBlockDamageSourceMixin_API extends DamageSourceMi
             .toString();
     }
 }
-

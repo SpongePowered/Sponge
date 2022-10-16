@@ -115,14 +115,15 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin extends LevelMixin implements ServerLevelBridge, PlatformServerLevelBridge, ResourceKeyBridge {

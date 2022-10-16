@@ -25,6 +25,10 @@
 package org.spongepowered.common.util;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleOptions;
@@ -34,10 +38,6 @@ import org.spongepowered.math.vector.Vector3d;
 
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ItemParticleOption;
-import net.minecraft.core.particles.ParticleType;
 
 public final class ParticleOptionUtil {
 

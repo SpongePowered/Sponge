@@ -177,7 +177,7 @@ public abstract class AbstractMinecartMixin extends EntityMixin implements Abstr
     public Vector3d bridge$getDerailedMod() {
         return this.impl$derailedMod;
     }
-    
+
     @Override
     public void bridge$setDerailedMod(final Vector3d impl$derailedMod) {
         this.impl$derailedMod = impl$derailedMod;

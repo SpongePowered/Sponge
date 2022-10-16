@@ -25,11 +25,11 @@
 package org.spongepowered.common.accessor.commands.synchronization;
 
 import com.mojang.brigadier.arguments.ArgumentType;
+import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.function.Supplier;
-import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 
 @Mixin(EmptyArgumentSerializer.class)
 public interface EmptyArgumentSerializerAccessor<T extends ArgumentType<?>> {

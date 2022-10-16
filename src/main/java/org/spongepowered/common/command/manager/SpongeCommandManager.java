@@ -47,7 +47,6 @@ import net.kyori.adventure.util.ComponentMessageThrowable;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -88,9 +87,7 @@ import org.spongepowered.common.command.registrar.tree.builder.RootCommandTreeNo
 import org.spongepowered.common.command.result.SpongeCommandResult;
 import org.spongepowered.common.command.sponge.SpongeCommand;
 import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.launch.Launch;

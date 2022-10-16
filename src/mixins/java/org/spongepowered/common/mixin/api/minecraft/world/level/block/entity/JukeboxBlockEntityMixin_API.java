@@ -24,6 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.JukeboxBlock;
+import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.block.entity.Jukebox;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -34,12 +40,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Set;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.RecordItem;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.JukeboxBlock;
-import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(JukeboxBlockEntity.class)
 public abstract class JukeboxBlockEntityMixin_API extends BlockEntityMixin_API implements Jukebox {

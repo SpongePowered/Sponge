@@ -26,6 +26,7 @@ package org.spongepowered.common.command.brigadier.dispatcher;
 
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.common.SpongeCommon;
@@ -39,7 +40,6 @@ import java.util.WeakHashMap;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import net.minecraft.commands.CommandSourceStack;
 
 public final class SpongeNodePermissionCache {
 

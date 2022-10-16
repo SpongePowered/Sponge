@@ -38,10 +38,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.core.RegistryBridge;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.core.Registry.class)
 @Implements(@Interface(iface = Registry.class, prefix = "registry$", remap = Remap.NONE))
@@ -62,7 +63,7 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     @Override
     public ResourceKey valueKey(final T value) {
         Objects.requireNonNull(value, "value");
-        
+
         final ResourceLocation key = this.shadow$getKey(value);
         if (key == null) {
             throw new IllegalStateException(String.format("No key was found for '%s'!", value));

@@ -24,6 +24,16 @@
  */
 package org.spongepowered.common.mixin.inventory.event.inventory.container;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.DataSlot;
+import net.minecraft.world.inventory.EnchantmentMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.level.Level;
 import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -43,16 +53,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
 import java.util.Random;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.Container;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.DataSlot;
-import net.minecraft.world.inventory.EnchantmentMenu;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.EnchantmentInstance;
-import net.minecraft.world.level.Level;
 
 @Mixin(value = EnchantmentMenu.class)
 public abstract class EnchantmentContainerMixin_Inventory {

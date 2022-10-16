@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.mixin.entitycollision.world.entity;
 
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,11 +36,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.entitycollision.entity.EntityMixin_EntityCollision;
+
 import java.util.List;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.entity.player.Player;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_EntityCollision extends EntityMixin_EntityCollision {

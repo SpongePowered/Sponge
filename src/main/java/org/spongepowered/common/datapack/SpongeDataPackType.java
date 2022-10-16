@@ -35,7 +35,6 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.datapack.DataPackType;

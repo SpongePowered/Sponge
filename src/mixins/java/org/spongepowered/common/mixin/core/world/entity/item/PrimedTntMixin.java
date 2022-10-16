@@ -24,11 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.item;
 
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.PrimedTnt;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,19 +39,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.entity.item.PrimedTntBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
+import org.spongepowered.common.bridge.world.entity.item.PrimedTntBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.PrimedTnt;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(PrimedTnt.class)
 public abstract class PrimedTntMixin extends EntityMixin implements PrimedTntBridge, FusedExplosiveBridge, ExplosiveBridge {

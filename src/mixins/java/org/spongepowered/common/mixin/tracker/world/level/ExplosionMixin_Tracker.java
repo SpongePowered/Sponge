@@ -24,13 +24,23 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseFireBlock;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.level.ExplosionBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.level.ExplosionBridge;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -44,16 +54,6 @@ import org.spongepowered.common.util.Constants;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseFireBlock;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(Explosion.class)
 public abstract class ExplosionMixin_Tracker {

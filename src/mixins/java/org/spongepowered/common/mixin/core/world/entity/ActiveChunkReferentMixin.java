@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
@@ -32,8 +34,6 @@ import org.spongepowered.common.bridge.world.level.chunk.TrackedLevelChunkBridge
 import java.lang.ref.WeakReference;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 @Mixin({Entity.class, BlockEntity.class})
 public abstract class ActiveChunkReferentMixin implements ActiveChunkReferantBridge {

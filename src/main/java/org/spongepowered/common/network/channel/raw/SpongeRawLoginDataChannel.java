@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.network.channel.raw;
 
+import net.minecraft.network.protocol.Packet;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.channel.ChannelBuf;
@@ -44,7 +45,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import net.minecraft.network.protocol.Packet;
 
 @SuppressWarnings("unchecked")
 public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {

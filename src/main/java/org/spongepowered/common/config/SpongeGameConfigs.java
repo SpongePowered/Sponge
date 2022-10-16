@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.config;
 
+import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -45,7 +46,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import net.minecraft.world.level.Level;
 
 /**
  * SpongeCommon configurations that need to interact with game state

@@ -242,9 +242,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         }
         return compound;
     }
-    
+
     @Redirect(method = "placeNewPlayer",
-        at = @At(value = "INVOKE", 
+        at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/MinecraftServer;getLevel(Lnet/minecraft/resources/ResourceKey;)Lnet/minecraft/server/level/ServerLevel;"
         )
     )

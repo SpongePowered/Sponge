@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.accessor.world.level.block;
 
+import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.DispenserBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Map;
-import net.minecraft.core.dispenser.DispenseItemBehavior;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.DispenserBlock;
 
 @Mixin(DispenserBlock.class)
 public interface DispenserBlockAccessor {

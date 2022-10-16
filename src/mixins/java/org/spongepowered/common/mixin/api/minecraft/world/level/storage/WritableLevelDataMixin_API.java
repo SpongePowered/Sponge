@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.storage;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.storage.WritableLevelData;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -33,8 +35,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Objects;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.storage.WritableLevelData;
 
 @Mixin(WritableLevelData.class)
 @Implements(@Interface(iface = WorldProperties.class, prefix = "worldProperties$"))

@@ -26,10 +26,10 @@ package org.spongepowered.common.config;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Singleton;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.config.ConfigRoot;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.reference.WatchServiceListener;
 import org.spongepowered.configurate.serialize.TypeSerializerCollection;

@@ -24,6 +24,13 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.level.block.entity;
 
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.Hopper;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,14 +50,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.InventoryUtil;
-
-import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.Hopper;
-import net.minecraft.world.level.block.entity.HopperBlockEntity;
 
 @Mixin(HopperBlockEntity.class)
 public abstract class HopperBlockEntityMixin_Inventory {

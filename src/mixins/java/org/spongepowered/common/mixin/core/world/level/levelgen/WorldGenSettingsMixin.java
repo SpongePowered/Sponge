@@ -87,7 +87,7 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
         if (BootstrapProperties.worldGenSettings == null) {
             BootstrapProperties.worldGenSettings = (WorldGenSettings) (Object) this;
         }
-        
+
         if (BootstrapProperties.worldGenSettings == (Object) this) {
             return registry.get(registryKey);
         }

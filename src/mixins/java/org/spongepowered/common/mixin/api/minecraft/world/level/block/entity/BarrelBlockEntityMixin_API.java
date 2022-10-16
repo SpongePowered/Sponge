@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
+import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import org.spongepowered.api.block.entity.carrier.Barrel;
 import org.spongepowered.asm.mixin.Mixin;
-
-import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 
 @Mixin(BarrelBlockEntity.class)
 public abstract class BarrelBlockEntityMixin_API extends BaseContainerBlockEntityMixin_API implements Barrel {

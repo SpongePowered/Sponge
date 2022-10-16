@@ -80,7 +80,7 @@ public final class VecHelper {
         }
         return new org.spongepowered.math.vector.Vector3d(pos.getX(), pos.getY(), pos.getZ());
     }
-    
+
     // === Rotations --> Flow Vector ===
 
     public static org.spongepowered.math.vector.Vector3d toVector3d(final Rotations rotation) {

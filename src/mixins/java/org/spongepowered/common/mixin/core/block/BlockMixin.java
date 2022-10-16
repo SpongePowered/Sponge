@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.spongepowered.api.block.BlockType;
+import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -43,10 +43,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
-
-import javax.annotation.Nullable;
-
-import net.minecraft.world.level.block.Block;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.ReflectionUtil;

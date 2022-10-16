@@ -25,6 +25,11 @@
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -41,11 +46,6 @@ import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(net.minecraft.world.level.block.entity.BlockEntity.class)
 public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoundHolder {

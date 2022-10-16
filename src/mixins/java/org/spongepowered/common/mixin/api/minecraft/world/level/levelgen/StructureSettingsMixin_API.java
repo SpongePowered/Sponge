@@ -24,10 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen;
 
-import org.spongepowered.api.world.generation.structure.Structure;
+import net.minecraft.world.level.levelgen.StructureSettings;
+import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;
 import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
+import org.spongepowered.api.world.generation.structure.Structure;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
@@ -41,9 +44,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.level.levelgen.StructureSettings;
-import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 
 @Mixin(StructureSettings.class)
 @Implements(@Interface(iface = StructureGenerationConfig.class, prefix = "structureGenerationConfig$", remap = Remap.NONE))

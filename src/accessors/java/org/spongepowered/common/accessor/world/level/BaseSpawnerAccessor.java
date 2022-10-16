@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.accessor.world.level;
 
+import net.minecraft.world.level.BaseSpawner;
+import net.minecraft.world.level.SpawnData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
-import net.minecraft.world.level.BaseSpawner;
-import net.minecraft.world.level.SpawnData;
 
 @Mixin(BaseSpawner.class)
 public interface BaseSpawnerAccessor {

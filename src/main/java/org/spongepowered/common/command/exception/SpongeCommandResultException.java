@@ -30,7 +30,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.command.result.SpongeCommandResult;
 
 /**
  * Used as a vehicle to transfer an error result down to the command

@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.network.channel;
 
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.login.ClientLoginPacketListener;
+import net.minecraft.network.protocol.login.ServerLoginPacketListener;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 
 import java.util.Set;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.login.ClientLoginPacketListener;
-import net.minecraft.network.protocol.login.ServerLoginPacketListener;
 
 public final class ConnectionUtil {
 

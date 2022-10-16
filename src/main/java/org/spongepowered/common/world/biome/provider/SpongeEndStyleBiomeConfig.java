@@ -78,7 +78,7 @@ public final class SpongeEndStyleBiomeConfig extends AbstractBiomeProviderConfig
     public RegistryReference<Biome> barrensBiome() {
         return this.barrensBiome;
     }
-    
+
     public static final class BuilderImpl implements Builder {
 
         public long seed;

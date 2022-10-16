@@ -121,4 +121,3 @@ public abstract class ChestBlockEntityMixin_Optimization_BlockEntity extends Ran
     }
 
 }
-

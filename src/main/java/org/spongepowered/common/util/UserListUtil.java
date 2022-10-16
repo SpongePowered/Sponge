@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.util;
 
-import java.io.IOException;
 import net.minecraft.server.players.StoredUserEntry;
 import net.minecraft.server.players.StoredUserList;
 import org.spongepowered.common.accessor.server.players.StoredUserEntryAccessor;
 import org.spongepowered.common.accessor.server.players.StoredUserListAccessor;
+
+import java.io.IOException;
 
 public final class UserListUtil {
 

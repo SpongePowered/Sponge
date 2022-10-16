@@ -28,7 +28,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.util.Angle;
 import org.spongepowered.api.util.orientation.Orientation;
 
-import java.util.Optional;
 
 public final class SpongeOrientation implements Orientation {
 

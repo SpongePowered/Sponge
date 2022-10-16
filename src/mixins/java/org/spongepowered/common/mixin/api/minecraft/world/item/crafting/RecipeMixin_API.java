@@ -26,6 +26,10 @@ package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
 import static org.spongepowered.common.inventory.util.InventoryUtil.toNativeInventory;
 
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.Recipe;
@@ -41,10 +45,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
-import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
 
 @Mixin(net.minecraft.world.item.crafting.Recipe.class)
 public interface RecipeMixin_API<C extends Container> extends Recipe {

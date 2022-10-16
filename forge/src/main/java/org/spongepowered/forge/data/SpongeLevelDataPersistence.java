@@ -29,7 +29,6 @@ import com.mojang.serialization.DynamicOps;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import net.minecraftforge.fml.WorldPersistenceHooks;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;

@@ -25,6 +25,13 @@
 package org.spongepowered.common.mixin.core.world.damagesource;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.IndirectEntityDamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Explosion;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
@@ -48,13 +55,6 @@ import org.spongepowered.common.util.MemoizedSupplier;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Explosion;
 
 @Mixin(DamageSource.class)
 public abstract class DamageSourceMixin implements DamageSourceBridge {

@@ -27,15 +27,15 @@ package org.spongepowered.common.world.biome.provider;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.OverworldBiomeSource;
+import org.spongepowered.common.bridge.world.level.biome.OverworldBiomeSourceBridge;
+import org.spongepowered.common.data.fixer.SpongeDataCodec;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.OverworldBiomeSource;
-import org.spongepowered.common.bridge.world.level.biome.OverworldBiomeSourceBridge;
-import org.spongepowered.common.data.fixer.SpongeDataCodec;
 
 public final class OverworldBiomeSourceHelper {
 

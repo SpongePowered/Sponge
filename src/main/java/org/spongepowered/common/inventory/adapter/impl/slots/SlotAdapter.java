@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.adapter.impl.slots;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -40,7 +41,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
 import java.util.StringJoiner;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 
 /**
  * Base SlotAdapter implementation for {@link net.minecraft.world.item.ItemStack} based Inventories.

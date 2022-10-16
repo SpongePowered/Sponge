@@ -25,6 +25,9 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
@@ -42,9 +45,6 @@ import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.stream.Collectors;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 
 public final class EntityData {
 

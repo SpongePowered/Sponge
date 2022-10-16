@@ -24,6 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -43,15 +51,6 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.SpawnEggItem;
-import net.minecraft.world.level.block.Block;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;

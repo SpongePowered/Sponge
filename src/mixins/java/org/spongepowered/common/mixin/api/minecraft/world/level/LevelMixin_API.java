@@ -225,7 +225,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     }
 
     // ContextSource
-    
+
     @Override
     public Context context() {
         if (this.api$context == null) {

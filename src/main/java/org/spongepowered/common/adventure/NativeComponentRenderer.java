@@ -35,6 +35,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.adventure.NativeComponentRenderer.SiblingConsumer;
+
 import java.text.AttributedCharacterIterator;
 import java.text.MessageFormat;
 import java.util.List;

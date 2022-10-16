@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.accessor.world.level.block.state;
 
+import net.minecraft.world.level.block.state.StateHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
 import java.util.Collection;
-import net.minecraft.world.level.block.state.StateHolder;
 
 @Mixin(StateHolder.class)
 public interface StateHolderAccessor {

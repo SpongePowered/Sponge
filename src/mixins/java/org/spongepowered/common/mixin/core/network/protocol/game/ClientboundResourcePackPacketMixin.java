@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.network.protocol.game;
 
+import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,7 +35,6 @@ import org.spongepowered.common.bridge.network.protocol.game.ClientboundResource
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
 import java.net.URISyntaxException;
-import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 
 @Mixin(ClientboundResourcePackPacket.class)
 public abstract class ClientboundResourcePackPacketMixin implements ClientboundResourcePackPacketBridge {

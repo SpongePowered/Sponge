@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.util;
 
-import java.util.Random;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
+
+import java.util.Random;
 
 final class SpongeAABBTest {
     private static final Random RANDOM = new Random();

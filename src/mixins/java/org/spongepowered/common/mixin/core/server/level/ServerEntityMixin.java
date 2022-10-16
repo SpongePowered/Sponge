@@ -24,7 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -42,14 +50,6 @@ import org.spongepowered.common.entity.living.human.HumanEntity;
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
-import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerEntity;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 
 @Mixin(ServerEntity.class)
 public abstract class ServerEntityMixin {

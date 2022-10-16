@@ -24,6 +24,16 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.level.block;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.BlockSourceImpl;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.DropperBlock;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,18 +45,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
-
-import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSourceImpl;
-import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraft.world.level.block.DropperBlock;
-import net.minecraft.world.level.block.entity.DispenserBlockEntity;
-import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 
 @Mixin(DropperBlock.class)

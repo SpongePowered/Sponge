@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.piston;
 
+import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
 import org.spongepowered.api.block.entity.Piston;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.level.block.entity.BlockEntityMixin_API;
+
 import java.util.Set;
-import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
 
 @Mixin(PistonMovingBlockEntity.class)
 public abstract class PistonMovingBlockEntityMixin_API extends BlockEntityMixin_API implements Piston {

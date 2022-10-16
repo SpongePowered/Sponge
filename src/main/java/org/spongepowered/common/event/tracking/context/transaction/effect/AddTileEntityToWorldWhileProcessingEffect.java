@@ -45,7 +45,7 @@ public final class AddTileEntityToWorldWhileProcessingEffect implements Processi
     }
 
     AddTileEntityToWorldWhileProcessingEffect() {}
-    
+
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag,

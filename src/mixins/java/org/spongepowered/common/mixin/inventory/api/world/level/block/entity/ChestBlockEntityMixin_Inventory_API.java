@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.level.block.entity;
 
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import org.spongepowered.api.block.entity.carrier.chest.Chest;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 
 import java.util.Optional;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
 
 @Mixin(ChestBlockEntity.class)
 public abstract class ChestBlockEntityMixin_Inventory_API implements Chest {
@@ -41,4 +41,3 @@ public abstract class ChestBlockEntityMixin_Inventory_API implements Chest {
     }
 
 }
-

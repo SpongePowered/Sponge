@@ -24,25 +24,26 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.boss.enderdragon;
 
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.entity.boss.enderdragon.EndCrystalBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
+import org.spongepowered.common.bridge.world.entity.boss.enderdragon.EndCrystalBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(EndCrystal.class)
 public abstract class EndCrystalMixin extends EntityMixin implements ExplosiveBridge, EndCrystalBridge {

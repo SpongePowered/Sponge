@@ -24,6 +24,18 @@
  */
 package org.spongepowered.common.effect.particle;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
+import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -39,18 +51,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.DustParticleOptions;
-import net.minecraft.core.particles.ItemParticleOption;
-import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
-import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.players.PlayerList;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 
 public final class SpongeParticleHelper {
 

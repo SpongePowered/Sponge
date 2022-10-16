@@ -26,6 +26,8 @@ package org.spongepowered.common.mixin.core.world.damagesource;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.IndirectEntityDamageSource;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -38,11 +40,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import javax.annotation.Nullable;
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
-import net.minecraft.world.entity.Entity;
 
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 @Mixin(value = IndirectEntityDamageSource.class, priority = 992)
 public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSourceMixin {

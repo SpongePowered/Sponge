@@ -31,11 +31,9 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryEvent;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
-import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.common.registry.RegistryLoader;
-import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 
 import java.util.Map;

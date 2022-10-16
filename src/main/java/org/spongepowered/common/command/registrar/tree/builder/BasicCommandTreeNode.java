@@ -25,8 +25,8 @@
 package org.spongepowered.common.command.registrar.tree.builder;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 
 public final class BasicCommandTreeNode extends ArgumentCommandTreeNode<CommandTreeNode.Basic> implements CommandTreeNode.Basic {
 

@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
+import net.minecraft.world.level.block.entity.ComparatorBlockEntity;
 import org.spongepowered.api.block.entity.Comparator;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
-import net.minecraft.world.level.block.entity.ComparatorBlockEntity;
 
 @Mixin(ComparatorBlockEntity.class)
 public abstract class ComparatorBlockEntityMixin_API extends BlockEntityMixin_API implements Comparator {

@@ -30,12 +30,12 @@ import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
 import java.util.Collection;
-import net.minecraft.commands.CommandSourceStack;
 
 public class SpongeLiteralCommandNode extends LiteralCommandNode<CommandSourceStack> implements SpongeNode {
 

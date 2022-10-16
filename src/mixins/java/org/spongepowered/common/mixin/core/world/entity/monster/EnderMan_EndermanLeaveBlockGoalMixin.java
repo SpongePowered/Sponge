@@ -24,6 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.monster;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -43,11 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.monster.EnderMan;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(targets = "net/minecraft/world/entity/monster/EnderMan$EndermanLeaveBlockGoal")
 public abstract class EnderMan_EndermanLeaveBlockGoalMixin extends Goal {

@@ -28,7 +28,6 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.mojang.authlib.properties.Property;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;

@@ -24,6 +24,11 @@
  */
 package org.spongepowered.common.mixin.inventory.api.inventory.container;
 
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -44,11 +49,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.Container;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerListener;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
 
 @Mixin(value = AbstractContainerMenu.class, priority = 998)
 public abstract class ContainerMixin_Inventory_API implements org.spongepowered.api.item.inventory.Container,

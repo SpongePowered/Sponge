@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.decoration;
 
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -38,12 +40,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin;
+import org.spongepowered.common.util.DamageEventUtil;
+
 import java.util.ArrayList;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.decoration.ArmorStand;
 
 @Mixin(ArmorStand.class)
 public abstract class ArmorStandMixin extends LivingEntityMixin {

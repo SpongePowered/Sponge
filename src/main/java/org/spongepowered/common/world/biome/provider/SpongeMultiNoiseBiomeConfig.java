@@ -89,7 +89,7 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
     public MultiNoiseConfig weirdnessConfig() {
         return this.weirdnessConfig;
     }
-    
+
     public static final class BuilderImpl implements Builder {
 
         public long seed;

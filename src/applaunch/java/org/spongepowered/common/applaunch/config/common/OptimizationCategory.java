@@ -25,10 +25,9 @@
 package org.spongepowered.common.applaunch.config.common;
 
 import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
 @ConfigSerializable
 public final class OptimizationCategory {

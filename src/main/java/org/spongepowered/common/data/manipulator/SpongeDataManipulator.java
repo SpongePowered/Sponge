@@ -80,7 +80,7 @@ abstract class SpongeDataManipulator implements DataManipulator {
                 .map(entry -> (Value.Immutable<?>)Value.immutableOf((Key) entry.getKey(), CopyHelper.copy(entry.getValue())).asImmutable())
                 .collect(ImmutableSet.toImmutableSet());
     }
-    
+
     @Override
     public String toString() {
         final MoreObjects.ToStringHelper builder = MoreObjects.toStringHelper(this);

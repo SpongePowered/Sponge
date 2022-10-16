@@ -24,13 +24,6 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
-
-import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
@@ -38,7 +31,14 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CompassItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
+
+import java.util.Optional;
 
 final class CompassItemData {
     private CompassItemData() {

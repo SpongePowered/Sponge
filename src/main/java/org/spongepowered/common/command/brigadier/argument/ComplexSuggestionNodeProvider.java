@@ -25,9 +25,10 @@
 package org.spongepowered.common.command.brigadier.argument;
 
 import com.mojang.brigadier.tree.CommandNode;
+import net.minecraft.commands.SharedSuggestionProvider;
+
 import java.util.List;
 import java.util.function.Consumer;
-import net.minecraft.commands.SharedSuggestionProvider;
 
 /**
  * If the node to suggest is going to be complicated, use this

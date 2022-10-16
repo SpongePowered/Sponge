@@ -38,7 +38,7 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 
 @Mixin(ServerChunkCache.class)
 public abstract class ServerChunkCacheMixin_Tracker {
-    
+
     @Redirect(
         method = "*",
         at = @At(

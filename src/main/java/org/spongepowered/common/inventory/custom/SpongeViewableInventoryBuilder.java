@@ -408,7 +408,7 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
         ContainerTypeInfo.of(0, 0,
                 (id, i, p, vi) -> new MerchantMenu(id, i, merchant));
     }
-    
+
     private static ContainerLevelAccess toPos(Player p) {
         return ContainerLevelAccess.create(p.level, p.blockPosition());
     }

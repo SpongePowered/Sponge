@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.tracker.world.entity.animal;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.animal.Animal;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -31,10 +34,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.mixin.tracker.world.entity.LivingEntityMixin_Tracker;
-
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.animal.Animal;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 @Mixin(Animal.class)
 public abstract class AnimalMixin_Tracker extends LivingEntityMixin_Tracker {

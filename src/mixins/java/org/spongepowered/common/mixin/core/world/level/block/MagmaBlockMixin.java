@@ -34,7 +34,6 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
 import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
 import org.spongepowered.common.util.MinecraftBlockDamageSource;

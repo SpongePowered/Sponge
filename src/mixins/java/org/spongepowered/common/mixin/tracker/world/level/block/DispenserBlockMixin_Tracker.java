@@ -52,7 +52,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.MemoizedSupplier;
 
 import java.util.ArrayList;
 import java.util.List;

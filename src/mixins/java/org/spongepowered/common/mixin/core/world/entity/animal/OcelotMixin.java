@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.animal;
 
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -33,10 +36,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.AgableMobMixin;
+
 import java.util.Random;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 
 @Mixin(net.minecraft.world.entity.animal.Ocelot.class)
 public abstract class OcelotMixin extends AgableMobMixin {

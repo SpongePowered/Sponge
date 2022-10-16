@@ -42,7 +42,7 @@ public abstract class ServerChunkCacheMixin {
     // @formatter:off
     @Shadow @Final private ServerLevel level;
     // @formatter:on
-    
+
     @Redirect(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ChunkMap;saveAllChunks(Z)V"))
     private void impl$useSerializationBehaviorWhenSaving(final ChunkMap chunkManager, final boolean flush) {
         final ServerLevel world = this.level;

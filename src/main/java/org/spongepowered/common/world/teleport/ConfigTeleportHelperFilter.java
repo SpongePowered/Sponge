@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.world.teleport;
 
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -38,9 +40,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
 
 public final class ConfigTeleportHelperFilter implements TeleportHelperFilter {
 

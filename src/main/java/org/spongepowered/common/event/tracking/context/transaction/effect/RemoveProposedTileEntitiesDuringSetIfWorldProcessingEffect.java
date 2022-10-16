@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.accessor.world.level.LevelAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
@@ -31,10 +35,6 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Pipe
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Iterator;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 
 public final class RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect implements ProcessingSideEffect {
 

@@ -25,8 +25,9 @@
 package org.spongepowered.common.item.recipe.ingredient;
 
 import com.google.gson.JsonObject;
-import java.util.function.Predicate;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.function.Predicate;
 
 public class SpongePredicateItemList extends SpongeItemList {
 

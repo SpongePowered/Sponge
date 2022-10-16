@@ -35,10 +35,6 @@ import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.world.portal.PortalLogic;
 import org.spongepowered.math.vector.Vector3d;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-
 public interface EntityBridge {
 
     boolean bridge$isConstructing();

@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.util;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.spongepowered.common.accessor.world.entity.animal.SheepAccessor;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DyeColorUtil {
 

@@ -58,12 +58,13 @@ import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 @Mixin(PlayerAdvancements.class)
 public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {

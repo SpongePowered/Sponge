@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.server.rcon.thread;
 
+import net.minecraft.server.rcon.PktUtils;
+import net.minecraft.server.rcon.RconConsoleSource;
+import net.minecraft.server.rcon.thread.GenericThread;
+import net.minecraft.server.rcon.thread.RconClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.event.CauseStackManager;
@@ -39,18 +43,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.server.rcon.thread.RconClientBridge;
 import org.spongepowered.common.bridge.server.rcon.RconConsoleSourceBridge;
+import org.spongepowered.common.bridge.server.rcon.thread.RconClientBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ExecutionException;
-import net.minecraft.server.rcon.PktUtils;
-import net.minecraft.server.rcon.RconConsoleSource;
-import net.minecraft.server.rcon.thread.GenericThread;
-import net.minecraft.server.rcon.thread.RconClient;
 
 @Mixin(RconClient.class)
 public abstract class RconClientMixin extends GenericThread implements RconClientBridge {

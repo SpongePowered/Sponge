@@ -128,12 +128,13 @@ import org.spongepowered.common.world.portal.SpongePortalInfo;
 import org.spongepowered.common.world.portal.VanillaPortal;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+
+import javax.annotation.Nullable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, CommandSourceProviderBridge, DataCompoundHolder {

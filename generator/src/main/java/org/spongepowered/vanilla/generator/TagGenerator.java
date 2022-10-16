@@ -32,11 +32,12 @@ import com.squareup.javapoet.TypeName;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
 
-import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
+
+import javax.lang.model.element.Modifier;
 
 public final class TagGenerator implements Generator {
 

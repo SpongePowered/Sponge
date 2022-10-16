@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import java.util.Objects;
 
 @SuppressWarnings("unchecked")

@@ -39,7 +39,7 @@ public abstract class AbstractBlockBuffer extends AbstractVolumeBuffer implement
     protected AbstractBlockBuffer(final Vector3i start, final Vector3i size) {
         super(start, size);
     }
-    
+
     public abstract Palette<BlockState, BlockType> getPalette();
 
 

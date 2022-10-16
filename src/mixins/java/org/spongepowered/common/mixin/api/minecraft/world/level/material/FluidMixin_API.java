@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.material;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.world.level.material.Fluid;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -34,11 +35,10 @@ import org.spongepowered.api.tag.TagType;
 import org.spongepowered.api.tag.TagTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.TagUtil;
 
 import java.util.Collection;
 import java.util.Optional;
-import net.minecraft.world.level.material.Fluid;
-import org.spongepowered.common.util.TagUtil;
 
 @Mixin(Fluid.class)
 public abstract class FluidMixin_API implements FluidType {

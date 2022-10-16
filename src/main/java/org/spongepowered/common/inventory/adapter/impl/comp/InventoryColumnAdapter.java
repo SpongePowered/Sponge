@@ -32,7 +32,7 @@ import org.spongepowered.common.inventory.lens.impl.comp.InventoryColumnLens;
 public class InventoryColumnAdapter extends Inventory2DAdapter implements InventoryColumn {
 
     protected InventoryColumnLens columnLens;
-    
+
     public InventoryColumnAdapter(Fabric fabric, InventoryColumnLens root, Inventory parent) {
         super(fabric, root, parent);
         this.columnLens = root;

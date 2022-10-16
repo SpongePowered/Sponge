@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens;
 
+import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
@@ -31,14 +32,12 @@ import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.List;
 
-import net.minecraft.world.item.ItemStack;
-
 /**
  * Base Lens interface. A lens presents an indexed view of a number of child
  * lenses, the leaf nodes in this structure being {@link SlotLens}es. Slots can
  * be accessed directly via this lens, and their index within the lens is the
  * slot <tt>ordinal</tt>.
- * 
+ *
  * <p>Internally, a lens will always attempt to fetch a particular slot via
  * whichever <em>child</em> lens can provide access to the target slot which is
  * part of the lens's spanning set. For query purposes, the lens may have other
@@ -46,36 +45,36 @@ import net.minecraft.world.item.ItemStack;
  * slots, however most of the time access is via the spanning set.</p>
  */
 public interface Lens extends LensCollection {
-    
+
     /**
-     * Returns the <em>primary</em> parent lens of this lens. Can be null. 
+     * Returns the <em>primary</em> parent lens of this lens. Can be null.
      */
     Lens getParent();
-    
+
     /**
      * Get the corresponding adapter type for this lens
-     * 
+     *
      * @return class of the adapter which corresponds to this specific lens type
      */
     Class<? extends Inventory> getAdapterType();
-    
+
     /**
      * Get an instance of the corresponding adapter type for this lens
-     * 
+     *
      * @return adapter for this lens
      */
     Inventory getAdapter(Fabric fabric, Inventory parent);
-    
+
     /**
      * Get the number of slots referenced by this lens
-     * 
+     *
      * @return
      */
     int slotCount();
 
     /**
      * Get the maximum stack size from the target inventory
-     * 
+     *
      * @param fabric
      * @return
      */
@@ -83,21 +82,21 @@ public interface Lens extends LensCollection {
 
     /**
      * Get child lenses of this lens
-     * 
+     *
      * @return
      */
     List<Lens> getChildren();
-    
+
     /**
      * Get child lenses of this lens
-     * 
+     *
      * @return
      */
     List<Lens> getSpanningChildren();
-    
+
     /**
-     * Set the stack at the specified offset 
-     * 
+     * Set the stack at the specified offset
+     *
      * @param fabric
      * @param ordinal
      * @param stack

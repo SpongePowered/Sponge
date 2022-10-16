@@ -71,7 +71,7 @@ public final class PlayerOwnBorderListener implements BorderChangeListener {
     @Override
     public void onBorderSetDamageSafeZOne(final WorldBorder border, final double newSize) {
     }
-    
+
     /**
      * This method is for cleaning up the player reference once they disconnect.
      */

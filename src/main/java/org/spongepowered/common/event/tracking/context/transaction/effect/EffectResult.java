@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
 import java.util.List;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
 
 public final class EffectResult {
 

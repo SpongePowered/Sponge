@@ -25,12 +25,10 @@
 package org.spongepowered.common.mixin.core.world.entity.npc;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.npc.Villager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;

@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.world.portal;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.portal.PortalInfo;
 import org.spongepowered.api.event.cause.entity.MovementType;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.portal.PortalTypes;
 
 import java.util.function.Function;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.portal.PortalInfo;
 
 public abstract class VanillaPortalLogic implements PortalLogic {
 

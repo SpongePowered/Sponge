@@ -28,58 +28,58 @@ import org.spongepowered.api.map.MapInfo;
 
 public interface MapDecorationBridge {
 
-	/**
-	 * If this MapDecoration should be saved to disk,
-	 * not necessary if it would be recalculated.
-	 * @param persistent if should be saved to disk
-	 */
-	void bridge$setPersistent(boolean persistent);
+    /**
+     * If this MapDecoration should be saved to disk,
+     * not necessary if it would be recalculated.
+     * @param persistent if should be saved to disk
+     */
+    void bridge$setPersistent(boolean persistent);
 
-	/**
-	 * If this MapDecoration will be saved to disk
-	 * @return if this MapDecoration will be saved to disk
-	 */
-	boolean bridge$isPersistent();
+    /**
+     * If this MapDecoration will be saved to disk
+     * @return if this MapDecoration will be saved to disk
+     */
+    boolean bridge$isPersistent();
 
-	/**
-	 * Sets the key used in the decoration map of a MapData
-	 * This can be compared using == since they are the same String
-	 * @param key String to set as key
-	 */
-	void bridge$setKey(String key);
+    /**
+     * Sets the key used in the decoration map of a MapData
+     * This can be compared using == since they are the same String
+     * @param key String to set as key
+     */
+    void bridge$setKey(String key);
 
-	/**
-	 * Gets the key used in the decoration map of a MapData
-	 * This can be compared using == since they are the same String
-	 * @return String key
-	 */
-	String bridge$getKey();
+    /**
+     * Gets the key used in the decoration map of a MapData
+     * This can be compared using == since they are the same String
+     * @return String key
+     */
+    String bridge$getKey();
 
-	/**
-	 * Notifies this {@link org.spongepowered.api.map.decoration.MapDecoration MapDecoration}
-	 * that it has been added, from the given {@link MapInfo}, and therefore,
-	 * when the MapDecoration changes, the given MapData needs to be re-saved.
-	 * @param mapInfo that needs to be marked as dirty if this changes.
-	 *
-	 * @see #bridge$markAllDirty()
-	 */
-	void notifyAddedToMap(MapInfo mapInfo);
+    /**
+     * Notifies this {@link org.spongepowered.api.map.decoration.MapDecoration MapDecoration}
+     * that it has been added, from the given {@link MapInfo}, and therefore,
+     * when the MapDecoration changes, the given MapData needs to be re-saved.
+     * @param mapInfo that needs to be marked as dirty if this changes.
+     *
+     * @see #bridge$markAllDirty()
+     */
+    void notifyAddedToMap(MapInfo mapInfo);
 
-	/**
-	 * Notifies this {@link org.spongepowered.api.map.decoration.MapDecoration MapDecoration}
-	 * that it has been removed, from the given {@link MapInfo}, and therefore,
-	 * when the MapDecoration changes, the given MapData does not need to be need to be re-saved.
-	 * @param mapInfo that no longer needs to be marked as dirty if this changes.
-	 *
-	 * @see #bridge$markAllDirty()
-	 */
-	void notifyRemovedFromMap(MapInfo mapInfo);
+    /**
+     * Notifies this {@link org.spongepowered.api.map.decoration.MapDecoration MapDecoration}
+     * that it has been removed, from the given {@link MapInfo}, and therefore,
+     * when the MapDecoration changes, the given MapData does not need to be need to be re-saved.
+     * @param mapInfo that no longer needs to be marked as dirty if this changes.
+     *
+     * @see #bridge$markAllDirty()
+     */
+    void notifyRemovedFromMap(MapInfo mapInfo);
 
-	/**
-	 * If {@link #bridge$isPersistent()}, marks every {@link net.minecraft.world.storage.MapData MapData} that
-	 * this {@link org.spongepowered.api.map.decoration.MapDecoration MapDecoration}
-	 * is attached to, that this decoration has changed, and therefore all of those MapDatas need to be saved in order to preserve
-	 * the changes made to this Decoration.
-	 */
-	void bridge$markAllDirty();
+    /**
+     * If {@link #bridge$isPersistent()}, marks every {@link net.minecraft.world.storage.MapData MapData} that
+     * this {@link org.spongepowered.api.map.decoration.MapDecoration MapDecoration}
+     * is attached to, that this decoration has changed, and therefore all of those MapDatas need to be saved in order to preserve
+     * the changes made to this Decoration.
+     */
+    void bridge$markAllDirty();
 }

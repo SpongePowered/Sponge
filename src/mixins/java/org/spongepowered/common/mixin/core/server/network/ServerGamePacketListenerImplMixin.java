@@ -65,7 +65,6 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;

@@ -291,6 +291,27 @@ allprojects {
         isPreserveFileTimestamps = false
         isReproducibleFileOrder = true
     }
+
+    spotless {
+        java {
+            toggleOffOn("@formatter:off", "@formatter:on")
+            endWithNewline()
+            indentWithSpaces(4)
+            trimTrailingWhitespace()
+            importOrderFile(rootProject.file("SpongeAPI/extra/eclipse/sponge_eclipse.importorder"))
+        }
+        if (project.name != "generator") { // removeUnusedImports parses with the javac version used by Gradle, so generator can fail to parse
+            java {
+                removeUnusedImports()
+            }
+        }
+        kotlinGradle {
+            endWithNewline()
+            indentWithSpaces(4)
+            trimTrailingWhitespace()
+        }
+    }
+
     val spongeSnapshotRepo: String? by project
     val spongeReleaseRepo: String? by project
     tasks {

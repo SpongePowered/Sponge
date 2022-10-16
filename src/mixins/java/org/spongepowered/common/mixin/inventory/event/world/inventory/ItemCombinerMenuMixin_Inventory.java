@@ -27,18 +27,9 @@ package org.spongepowered.common.mixin.inventory.event.world.inventory;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.ItemCombinerMenu;
 import net.minecraft.world.inventory.ResultContainer;
-import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.inventory.InventoryEventFactory;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(ItemCombinerMenu.class)
 public abstract class ItemCombinerMenuMixin_Inventory {

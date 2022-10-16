@@ -24,9 +24,15 @@
  */
 package org.spongepowered.common.mixin.entitycollision.world.level.chunk;
 
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,14 +48,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.List;
 import java.util.function.Predicate;
-
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
 public abstract class LevelChunkMixin_EntityCollision {

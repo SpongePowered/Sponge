@@ -64,7 +64,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
         super(start, size);
         this.biomes = new RegistryKey[size.x() * size.y() * size.z()];
         this.registry = biomeRegistry;
-        // for now, biomes are still global to the world/gen register, but we're passing in a registry 
+        // for now, biomes are still global to the world/gen register, but we're passing in a registry
         Arrays.fill(this.biomes, Biomes.OCEAN);
     }
 
@@ -78,7 +78,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     /**
      * Gets the native biome for the position, resolving virtual biomes to
      * persisted types if needed.
-     * 
+     *
      * @param x The X position
      * @param y The Y position
      * @param z The X position

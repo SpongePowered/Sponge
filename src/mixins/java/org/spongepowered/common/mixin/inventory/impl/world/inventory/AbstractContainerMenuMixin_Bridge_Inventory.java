@@ -24,6 +24,11 @@
  */
 package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.Slot;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
@@ -40,15 +45,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerListener;
-import net.minecraft.world.inventory.Slot;
 
 @Mixin(AbstractContainerMenu.class)
 public abstract class AbstractContainerMenuMixin_Bridge_Inventory implements CarriedBridge, ContainerBridge, InventoryAdapter {

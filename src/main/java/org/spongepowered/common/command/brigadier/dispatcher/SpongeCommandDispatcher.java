@@ -41,6 +41,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import net.minecraft.commands.CommandSourceStack;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandManager;
@@ -60,6 +61,7 @@ import org.spongepowered.common.command.brigadier.tree.SpongeRootCommandNode;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.CommandUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,8 +72,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import net.minecraft.commands.CommandSourceStack;
-import org.spongepowered.common.util.CommandUtil;
 
 // For use on the Brigadier dispatcher
 public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSourceStack> {

@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.world.generation.config.noise;
 
+import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
 import org.spongepowered.api.world.generation.config.noise.SlideConfig;
 
 import java.util.Objects;
-import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
 
 public final class SpongeNoiseConfig {
 
@@ -41,7 +41,7 @@ public final class SpongeNoiseConfig {
 
         public SamplingConfig sampling;
         public SlideConfig top, bottom;
-        
+
         public int height, horizontalSize, verticalSize;
         public double densityFactor, densityOffset;
         public boolean simplexForSurface, randomizeDensityOffset, amplified;

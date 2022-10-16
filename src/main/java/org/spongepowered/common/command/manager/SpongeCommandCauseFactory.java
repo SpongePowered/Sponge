@@ -45,8 +45,8 @@ import org.spongepowered.api.util.Nameable;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.VecHelper;
 

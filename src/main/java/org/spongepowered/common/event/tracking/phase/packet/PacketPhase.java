@@ -71,9 +71,9 @@ import org.spongepowered.common.event.tracking.phase.packet.inventory.CloseWindo
 import org.spongepowered.common.event.tracking.phase.packet.inventory.CreativeInventoryPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DoubleClickInventoryState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DropInventoryState;
+import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemInsideWindowState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemOutsideWindowState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemWithHotkeyState;
-import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemInsideWindowState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.EnchantItemPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.MiddleInventoryClickState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.OpenInventoryState;

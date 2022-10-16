@@ -47,8 +47,9 @@ import org.spongepowered.common.event.tracking.context.transaction.EffectTransac
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
-import javax.annotation.Nullable;
 import java.util.Random;
+
+import javax.annotation.Nullable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {

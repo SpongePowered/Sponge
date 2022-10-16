@@ -44,8 +44,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 
-import javax.annotation.Nullable;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 @Mixin(AbstractContainerMenu.class)
 public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuBridge {

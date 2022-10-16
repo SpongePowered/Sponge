@@ -31,9 +31,9 @@ package org.spongepowered.common.launch.mapping;
  * mapping.
  */
 public interface SpongeMappingManager {
-	String toRuntimeClassName(String srcName);
+    String toRuntimeClassName(String srcName);
 
-	String toRuntimeFieldName(Class<?> owner, String srcName);
+    String toRuntimeFieldName(Class<?> owner, String srcName);
 
-	String toRuntimeMethodName(Class<?> owner, String srcName, Class<?> ...params);
+    String toRuntimeMethodName(Class<?> owner, String srcName, Class<?> ...params);
 }

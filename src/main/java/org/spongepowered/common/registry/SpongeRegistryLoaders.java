@@ -162,7 +162,6 @@ import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation
 import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.placeholder.PlaceholderParsers;
 import org.spongepowered.api.registry.RegistryKey;
-import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
@@ -324,7 +323,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;

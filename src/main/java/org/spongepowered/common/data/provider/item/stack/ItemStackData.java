@@ -27,27 +27,9 @@ package org.spongepowered.common.data.provider.item.stack;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.effect.potion.PotionEffect;
-import org.spongepowered.api.item.ItemRarity;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.util.weighted.ChanceTable;
-import org.spongepowered.api.util.weighted.NestedTableEntry;
-import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.item.DiggerItemAccessor;
-import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.NBTCollectors;
-
-import java.util.List;
-import java.util.Set;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
@@ -56,6 +38,22 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.item.ItemRarity;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.util.weighted.ChanceTable;
+import org.spongepowered.api.util.weighted.NestedTableEntry;
+import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.common.accessor.world.item.DiggerItemAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.NBTCollectors;
+
+import java.util.List;
+import java.util.Set;
 
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
 public final class ItemStackData {

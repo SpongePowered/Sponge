@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -43,10 +47,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Random;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.FallingBlock;
-import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(FallingBlock.class)
 public abstract class FallingBlockMixin {

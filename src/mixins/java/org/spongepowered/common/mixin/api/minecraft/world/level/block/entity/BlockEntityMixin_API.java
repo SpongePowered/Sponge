@@ -50,9 +50,10 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.level.block.entity.BlockEntity.class)
 public abstract class BlockEntityMixin_API implements BlockEntity {

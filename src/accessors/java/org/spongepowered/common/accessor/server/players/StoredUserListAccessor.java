@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.accessor.server.players;
 
+import net.minecraft.server.players.StoredUserEntry;
+import net.minecraft.server.players.StoredUserList;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -31,8 +33,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Map;
-import net.minecraft.server.players.StoredUserEntry;
-import net.minecraft.server.players.StoredUserList;
 
 @Mixin(StoredUserList.class)
 public interface StoredUserListAccessor<K, V extends StoredUserEntry<K>> {

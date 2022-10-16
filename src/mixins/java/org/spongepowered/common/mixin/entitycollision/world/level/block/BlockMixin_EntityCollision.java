@@ -30,14 +30,14 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.applaunch.config.core.ConfigHandle;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
-import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
-import org.spongepowered.common.config.inheritable.EntityCollisionCategory;
-import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.config.inheritable.EntityCollisionCategory;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.WorldConfig;
 
 @Mixin(Block.class)
 public abstract class BlockMixin_EntityCollision implements CollisionCapabilityBridge {

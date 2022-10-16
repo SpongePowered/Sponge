@@ -24,10 +24,22 @@
  */
 package org.spongepowered.common.mixin.core.server.commands;
 
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.server.commands.TeleportCommand;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.level.ChunkPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
@@ -45,18 +57,6 @@ import org.spongepowered.math.vector.Vector3d;
 import java.util.Set;
 
 import javax.annotation.Nullable;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
-import net.minecraft.server.commands.TeleportCommand;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.TicketType;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.level.ChunkPos;
 
 @Mixin(TeleportCommand.class)
 public abstract class TeleportCommandMixin {

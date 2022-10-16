@@ -35,7 +35,6 @@ import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.DelegatingLens;
 import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.QueryLens;
-import org.spongepowered.common.inventory.lens.impl.slot.DelegatingSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.QueriedSlotLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
@@ -125,4 +124,3 @@ public abstract class SpongeQuery implements Query {
         return lens.getAdapter(fabric, inventory);
     }
 }
-

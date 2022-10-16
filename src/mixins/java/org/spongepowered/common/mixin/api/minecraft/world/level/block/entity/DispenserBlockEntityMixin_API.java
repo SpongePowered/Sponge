@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -35,7 +36,6 @@ import org.spongepowered.common.entity.projectile.ProjectileUtil;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
-import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 
 @Mixin(DispenserBlockEntity.class)
 public abstract class DispenserBlockEntityMixin_API extends RandomizableContainerBlockEntityMixin_API<Dispenser> implements Dispenser {

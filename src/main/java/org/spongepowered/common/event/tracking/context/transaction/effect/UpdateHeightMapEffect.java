@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.spongepowered.common.accessor.world.level.chunk.LevelChunkAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Map;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.Heightmap;
 
 public final class UpdateHeightMapEffect implements ProcessingSideEffect {
 

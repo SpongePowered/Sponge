@@ -28,7 +28,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.block.Blocks;
 import org.checkerframework.checker.nullness.qual.NonNull;
-
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

@@ -39,11 +39,9 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelMixin_API implements org.spongepowered.api.world.client.ClientWorld {

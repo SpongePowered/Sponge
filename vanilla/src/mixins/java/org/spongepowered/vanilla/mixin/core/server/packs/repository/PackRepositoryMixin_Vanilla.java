@@ -31,11 +31,8 @@ import net.minecraft.server.packs.repository.PackRepository;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.vanilla.bridge.server.packs.repository.PackRepositoryBridge_Vanilla;
-import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 import org.spongepowered.vanilla.server.packs.PluginRepositorySource;
 
 import java.util.Arrays;

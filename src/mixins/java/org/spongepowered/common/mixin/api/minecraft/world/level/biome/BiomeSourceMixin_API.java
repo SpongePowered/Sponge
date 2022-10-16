@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
+import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.BiomeSource;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
 import java.util.Set;
-import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.biome.BiomeSource;
 
 @Mixin(BiomeSource.class)
 public abstract class BiomeSourceMixin_API implements org.spongepowered.api.world.biome.provider.BiomeProvider, BiomeManager.NoiseBiomeSource {

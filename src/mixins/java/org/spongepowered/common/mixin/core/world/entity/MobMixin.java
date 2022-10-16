@@ -24,6 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.Level;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
@@ -52,23 +62,13 @@ import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.DamageEventUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
-import net.minecraft.util.Mth;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.GoalSelector;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.level.Level;
 
 @Mixin(Mob.class)
 public abstract class MobMixin extends LivingEntityMixin {

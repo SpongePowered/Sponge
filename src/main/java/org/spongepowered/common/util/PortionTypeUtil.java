@@ -24,15 +24,14 @@
  */
 package org.spongepowered.common.util;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.type.PortionType;
-import org.spongepowered.api.data.type.PortionTypes;
-
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Half;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.PortionTypes;
 
 public final class PortionTypeUtil {
 

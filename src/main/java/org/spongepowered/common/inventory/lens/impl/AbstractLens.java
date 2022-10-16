@@ -32,8 +32,6 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.impl.slot.DelegatingSlotLens;
-import org.spongepowered.common.inventory.lens.impl.slot.QueriedSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.property.KeyValuePair;

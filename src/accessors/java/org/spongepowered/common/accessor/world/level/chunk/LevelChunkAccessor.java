@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.accessor.world.level.chunk;
 
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Map;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.levelgen.Heightmap;
 
 @Mixin(LevelChunk.class)
 public interface LevelChunkAccessor {

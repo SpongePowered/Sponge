@@ -26,6 +26,9 @@ package org.spongepowered.common.advancement;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.critereon.SerializationContext;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
@@ -36,9 +39,6 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataSerializable;
 
 import java.io.IOException;
-import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.critereon.SerializationContext;
-import net.minecraft.resources.ResourceLocation;
 
 @SuppressWarnings("rawtypes")
 public final class SpongeFilteredTrigger implements CriterionTriggerInstance, FilteredTrigger {

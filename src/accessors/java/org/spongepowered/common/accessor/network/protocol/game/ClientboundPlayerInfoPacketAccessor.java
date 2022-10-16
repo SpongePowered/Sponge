@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.accessor.network.protocol.game;
 
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 
 @Mixin(ClientboundPlayerInfoPacket.class)
 public interface ClientboundPlayerInfoPacketAccessor {

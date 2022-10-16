@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.volume.game.PrimitiveGameVolume;
@@ -31,13 +34,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.state.BlockState;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(BlockGetter.class)
 public interface BlockGetterMixin_API extends PrimitiveGameVolume {

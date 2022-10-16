@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.adventure;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.KeybindComponent;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -41,6 +37,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.spongepowered.common.accessor.client.KeyMappingAccessor;
 import org.spongepowered.common.launch.Launch;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 final class ComponentFlattenerProvider {
     private static final Pattern LOCALIZATION_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?s");

@@ -39,10 +39,10 @@ import org.spongepowered.math.vector.Vector2i;
 
 public final class MapInfoData {
 
-	private MapInfoData() {
-	}
+    private MapInfoData() {
+    }
 
-	// @formatter:off
+    // @formatter:off
 	public static void register(final DataProviderRegistrator registrator) {
 		registrator.asMutable(MapItemSavedData.class)
 				.create(Keys.MAP_CANVAS)

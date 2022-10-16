@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.item.recipe.cooking;
 
-import java.util.function.Function;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
+
+import java.util.function.Function;
 
 public class SpongeCampfireCookingRecipe extends CampfireCookingRecipe {
 

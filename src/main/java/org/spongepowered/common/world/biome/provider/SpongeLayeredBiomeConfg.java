@@ -56,7 +56,7 @@ public final class SpongeLayeredBiomeConfg extends AbstractBiomeProviderConfig i
     public boolean largeBiomes() {
         return this.largeBiomes;
     }
-    
+
     public static final class BuilderImpl implements Builder {
 
         public List<RegistryReference<Biome>> biomes = new ArrayList<>();

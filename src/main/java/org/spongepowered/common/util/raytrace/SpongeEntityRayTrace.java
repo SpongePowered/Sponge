@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.util.raytrace;
 
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.blockray.RayTraceResult;
@@ -34,9 +37,6 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 public final class SpongeEntityRayTrace extends AbstractSpongeRayTrace<@NonNull Entity> {
 

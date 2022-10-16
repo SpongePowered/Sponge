@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.accessor.commands.arguments.selector.options;
 
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.function.Predicate;
-import net.minecraft.commands.arguments.selector.EntitySelectorParser;
-import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
 
 @Mixin(targets = "net.minecraft.commands.arguments.selector.options.EntitySelectorOptions$Option")
 public interface EntitySelectorOptions_OptionAccessor {
