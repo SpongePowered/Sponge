@@ -1,18 +1,21 @@
 plugins {
     id "java-gradle-plugin"
-    id "org.spongepowered.gradle.sponge.dev" version "2.0.2"
-}
-
-repositories {
-    maven {
-        url = "https://repo.spongepowered.org/repository/maven-public"
-        name = "sponge"
-    }
+    id "org.spongepowered.gradle.sponge.dev" version "2.1.1"
 }
 
 dependencies {
-    api("com.google.code.gson:gson:2.9.0")
-    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.5")
+    api("com.google.code.gson:gson:2.9.1")
+    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.6")
+}
+
+indraSpotlessLicenser {
+    def parentProject = gradle.parent.rootProject
+
+    licenseHeaderFile(parentProject.file('HEADER.txt'))
+
+    property("name", "Sponge")
+    property("organization", parentProject.ext.organization)
+    property("url", parentProject.ext.projectUrl)
 }
 
 gradlePlugin {

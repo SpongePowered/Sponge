@@ -22,10 +22,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-/*
- * Credit: MinecraftForge
- * Changes: Minor tweaks, fixed scroll limits able to hit negative
- */
 package org.spongepowered.vanilla.client.gui.widget;
 
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -43,6 +39,10 @@ import org.lwjgl.opengl.GL11;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Credit: MinecraftForge
+ * Changes: Minor tweaks, fixed scroll limits able to hit negative
+ */
 public abstract class ScrollPanel extends AbstractContainerEventHandler implements Widget {
 
     private final Minecraft client;
@@ -93,7 +93,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
     }
 
     private void applyScrollLimits() {
-        int max = Math.max(0, this.getMaxScroll());
+        final int max = Math.max(0, this.getMaxScroll());
 
         if (this.scrollDistance < 0.0F) {
             this.scrollDistance = 0.0F;

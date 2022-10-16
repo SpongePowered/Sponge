@@ -10,11 +10,11 @@ pluginManagement {
     plugins {
         // Default plugin versions
         id("org.spongepowered.gradle.vanilla") version "0.2.1-SNAPSHOT"
-        id("org.cadixdev.licenser") version "0.6.1"
         id("com.github.johnrengelman.shadow") version "7.1.2"
-        id("org.spongepowered.gradle.sponge.dev") version "2.0.2"
+        id("org.spongepowered.gradle.sponge.dev") version "2.1.1"
+        id("net.kyori.indra.licenser.spotless") version "3.0.1"
         id("implementation-structure")
-        id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.5"
+        id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.6"
         id("com.github.ben-manes.versions") version "0.42.0"
     }
 }

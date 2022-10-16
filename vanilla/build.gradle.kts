@@ -129,7 +129,7 @@ val mixinConfigs = spongeImpl.mixinConfigurations
 minecraft {
     runs {
         // Full development environment
-        sequenceOf(8, 11, 16).forEach {
+        sequenceOf(8, 11, 17).forEach {
             server("runJava${it}Server") {
                 args("--nogui", "--launchTarget", "sponge_server_dev")
                 targetVersion(it)
@@ -497,16 +497,12 @@ tasks {
     }
 }
 
-license {
-    properties {
-        this["name"] = "Sponge"
-        this["organization"] = organization
-        this["url"] = projectUrl
-    }
-    header(rootProject.file("HEADER.txt"))
+indraSpotlessLicenser {
+    licenseHeaderFile(rootProject.file("HEADER.txt"))
 
-    include("**/*.java")
-    newLine(false)
+    property("name", "Sponge")
+    property("organization", organization)
+    property("url", projectUrl)
 }
 
 val shadowJar by tasks.existing
