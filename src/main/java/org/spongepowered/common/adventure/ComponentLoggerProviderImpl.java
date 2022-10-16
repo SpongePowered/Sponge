@@ -22,40 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject.plugin;
+package org.spongepowered.common.adventure;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Scopes;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.inject.InjectionPointProvider;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule;
-import org.spongepowered.plugin.PluginContainer;
+import net.kyori.adventure.text.logger.slf4j.ComponentLoggerProvider;
+import net.kyori.adventure.translation.GlobalTranslator;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.LoggerFactory;
 
-/**
- * A module installed for each plugin.
- */
-public final class PluginModule extends AbstractModule {
+import java.util.Locale;
 
-    private final PluginContainer container;
-    private final Class<?> pluginClass;
-
-    public PluginModule(final PluginContainer container, final Class<?> pluginClass) {
-        this.container = container;
-        this.pluginClass = pluginClass;
-    }
+public class ComponentLoggerProviderImpl implements ComponentLoggerProvider {
 
     @Override
-    protected void configure() {
-        this.bind(this.pluginClass).in(Scopes.SINGLETON);
+    public @NotNull ComponentLogger logger(
+        final @NotNull LoggerHelper helper,
+        final @NotNull String name
+    ) {
+        return helper.delegating(LoggerFactory.getLogger(name), ComponentLoggerProviderImpl::serialize); // todo: use ansi here?
+    }
 
-        this.install(new InjectionPointProvider());
-
-        this.bind(PluginContainer.class).toInstance(this.container);
-        this.bind(Logger.class).toInstance(this.container.logger());
-        this.bind(ComponentLogger.class).toProvider(() -> ComponentLogger.logger(this.container.logger().getName())).in(Scopes.SINGLETON);
-
-        this.install(new PluginConfigurationModule());
+    static @NotNull String serialize(final @NotNull Component comp) {
+        final Component translated = GlobalTranslator.render(comp, Locale.getDefault());
+        final StringBuilder result = new StringBuilder();
+        ComponentFlattenerProvider.INSTANCE.flatten(translated, result::append);
+        return result.toString();
     }
 
 }

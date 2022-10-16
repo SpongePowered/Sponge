@@ -221,7 +221,7 @@ dependencies {
     libraries("org.spongepowered:spongeapi:$apiVersion")
     libraries("javax.inject:javax.inject:1") // wat
     libraries("com.zaxxer:HikariCP:2.7.8")
-    libraries("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
+    libraries("org.apache.logging.log4j:log4j-slf4j18-impl:$log4jVersion")
     // libraries(project(commonProject.path)) // todo: this is better, but seems to be pulling in ASM for some reason
     libraries(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
     libraries("net.kyori:adventure-serializer-configurate4")

@@ -167,7 +167,7 @@ dependencies {
     launchConfig("org.spongepowered:spongeapi:$apiVersion")
     launchConfig("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
     launchConfig("org.spongepowered:mixin:$mixinVersion")
-    launchConfig("org.checkerframework:checker-qual:3.13.0")
+    launchConfig("org.checkerframework:checker-qual:$checkerVersion")
     launchConfig("com.google.guava:guava:$guavaVersion") {
         exclude(group = "com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version

@@ -32,6 +32,7 @@ import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.util.UTF8ResourceBundleControl;
@@ -78,12 +79,14 @@ public class ChatTest implements LoadableModule {
 
     private final Game game;
     private final PluginContainer container;
+    private final ComponentLogger richLogger;
     private boolean barVisible;
 
     @Inject
-    ChatTest(final Game game, final PluginContainer container) {
+    ChatTest(final Game game, final PluginContainer container, final ComponentLogger richLogger) {
         this.game = game;
         this.container = container;
+        this.richLogger = richLogger;
     }
 
     @Listener
@@ -158,7 +161,7 @@ public class ChatTest implements LoadableModule {
         .build(), "tellresolve");
     }
 
-    public static class Listeners {
+    public class Listeners {
 
         @Listener
         public void onLogin(final ServerSideConnectionEvent.Join event) {
@@ -168,6 +171,12 @@ public class ChatTest implements LoadableModule {
         @Listener(order = Order.LAST)
         public void onChat(final PlayerChatEvent event, final @Root ServerPlayer player, @GetValue("HEALTH") final double health) {
             ChatTest.LOGGER.info(Component.translatable("chattest.response.chat",
+                                                                              event.message(),
+                                                                              player.require(Keys.DISPLAY_NAME)
+                                                                                      .decorate(TextDecoration.BOLD)
+                                                                                      .colorIfAbsent(NamedTextColor.AQUA))
+                                                               .color(NamedTextColor.DARK_AQUA));
+            ChatTest.this.richLogger.info("Output: {}", Component.translatable("chattest.response.chat",
                                                                               event.message(),
                                                                               player.require(Keys.DISPLAY_NAME)
                                                                                       .decorate(TextDecoration.BOLD)

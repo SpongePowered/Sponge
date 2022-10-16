@@ -164,7 +164,7 @@ public final class VolumeStreamUtils {
         final org.spongepowered.api.world.biome.Biome biome, final Supplier<@Nullable ChunkBiomeContainerAccessor> accessor,
         final Runnable finalizer
     ) {
-        @Nullable final ChunkBiomeContainerAccessor chunkBiomeContainerAccessor = accessor.get();
+        final @Nullable ChunkBiomeContainerAccessor chunkBiomeContainerAccessor = accessor.get();
         if (chunkBiomeContainerAccessor == null) {
             return false;
         }
@@ -206,8 +206,7 @@ public final class VolumeStreamUtils {
         }
     }
 
-    @NonNull
-    public static Stream<Map.Entry<BlockPos, net.minecraft.world.entity.Entity>> getEntitiesFromChunk(
+    public static @NonNull Stream<Map.Entry<BlockPos, net.minecraft.world.entity.Entity>> getEntitiesFromChunk(
         final Vector3i min, final Vector3i max, final LevelChunk chunk
     ) {
         return Arrays.stream(chunk.getEntitySections())
@@ -218,8 +217,7 @@ public final class VolumeStreamUtils {
                 entity.blockPosition(), entity));
     }
 
-    @NonNull
-    public static BiConsumer<UUID, net.minecraft.world.entity.Entity> getOrCloneEntityWithVolume(
+    public static @NonNull BiConsumer<UUID, net.minecraft.world.entity.Entity> getOrCloneEntityWithVolume(
         final boolean shouldCarbonCopy,
         final @MonotonicNonNull ObjectArrayMutableEntityBuffer backingVolume,
         final Level level
@@ -240,8 +238,7 @@ public final class VolumeStreamUtils {
         };
     }
 
-    @NonNull
-    public static BiConsumer<BlockPos, net.minecraft.world.level.block.entity.BlockEntity> getBlockEntityOrCloneToBackingVolume(
+    public static @NonNull BiConsumer<BlockPos, net.minecraft.world.level.block.entity.BlockEntity> getBlockEntityOrCloneToBackingVolume(
         final boolean shouldCarbonCopy, final ObjectArrayMutableBlockEntityBuffer backingVolume, final @Nullable Level level
     ) {
         return shouldCarbonCopy ? (pos, tile) -> {
@@ -310,7 +307,7 @@ public final class VolumeStreamUtils {
         return result;
     }
 
-    public static boolean setBiome(@Nullable ChunkBiomeContainer biomeContainer,
+    public static boolean setBiome(@Nullable final ChunkBiomeContainer biomeContainer,
         final int x, final int y, final int z, final org.spongepowered.api.world.biome.Biome biome
     ) {
         if (biomeContainer == null) {
