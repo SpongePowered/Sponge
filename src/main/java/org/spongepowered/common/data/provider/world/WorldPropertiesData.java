@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.provider.world;
 
-import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelData;
@@ -87,7 +86,7 @@ public final class WorldPropertiesData {
                         .get(h -> (WorldType) (Object) h.bridge$dimensionType())
                         .set((h, v) -> h.bridge$dimensionType((DimensionType) (Object) v, true))
                     .create(Keys.PVP)
-                        .get(h -> h.bridge$pvp().orElseGet(() -> ((DedicatedServer)SpongeCommon.server()).getProperties().pvp))
+                        .get(h -> h.bridge$pvp().orElseGet(() -> SpongeCommon.server().isPvpAllowed()))
                         .set(PrimaryLevelDataBridge::bridge$setPvp)
                     .create(Keys.HARDCORE)
                         .set(PrimaryLevelDataBridge::bridge$hardcore)
