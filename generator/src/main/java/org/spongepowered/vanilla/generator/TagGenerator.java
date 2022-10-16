@@ -66,7 +66,7 @@ public final class TagGenerator implements Generator {
 
     @Override
     public String name() {
-        return "elements of tag registry " + registryName;
+        return "elements of tag registry " + this.registryName;
     }
 
     @Override
@@ -79,7 +79,7 @@ public final class TagGenerator implements Generator {
         clazz.addAnnotation(TagGenerator.SCOPE.registryScopeAnnotation());
 
 
-        final var valueType = ParameterizedTypeName.get(Types.TAG, typeName);
+        final var valueType = ParameterizedTypeName.get(Types.TAG, this.typeName);
         final var fieldType = ParameterizedTypeName.get(Types.DEFAULTED_REGISTRY_REFERENCE, valueType);
         final var factoryMethod = TagGenerator.SCOPE.registryReferenceFactory(this.registryTypeName, valueType);
 

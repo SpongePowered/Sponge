@@ -96,6 +96,7 @@ final class Context {
     /**
      * Write the provided type to a file in the defined base package.
      *
+     * @param relativePackage package relative to the base package
      * @param spec type to write out to file
      * @throws IOException if thrown by javapoet
      */
