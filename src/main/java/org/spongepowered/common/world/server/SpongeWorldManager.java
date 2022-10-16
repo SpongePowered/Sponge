@@ -298,9 +298,10 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey.map(ResourceKey::toString).orElse("inline"));
 
+        final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
         final ServerLevel world;
         try {
-            world = this.createLevel(registryKey, levelStem, worldKey, worldTypeKey.orElse(null));
+            world = this.createLevel(registryKey, levelStem, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e));
         }
@@ -692,6 +693,8 @@ public abstract class SpongeWorldManager implements WorldManager {
                     + "Multi-World support has been disabled and no worlds besides the default world will be loaded.");
         }
 
+        final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
+
         for (final Map.Entry<net.minecraft.resources.ResourceKey<LevelStem>, LevelStem> entry : this.server.getWorldData().worldGenSettings().dimensions().entrySet()) {
             final ResourceKey worldKey = (ResourceKey) (Object) entry.getKey().location();
             final LevelStem template = entry.getValue();
@@ -716,14 +719,14 @@ public abstract class SpongeWorldManager implements WorldManager {
                 final PrimaryLevelData levelData = (PrimaryLevelData) this.server.getWorldData();
                 final List<CustomSpawner> spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(levelData));
 
-                final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), storageSource, levelData, spawners);
+                final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), storageSource, levelData, spawners, chunkStatusListener);
 
                 // Ensure that the world border is registered.
                 world.getWorldBorder().applySettings(levelData.getWorldBorder());
                 this.prepareWorld(world);
             } else {
                 try {
-                    final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey.orElse(null));
+                    final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
                     // Ensure that the world border is registered.
                     world.getWorldBorder().applySettings(((PrimaryLevelData) world.getLevelData()).getWorldBorder());
                     this.prepareWorld(world);
@@ -779,11 +782,12 @@ public abstract class SpongeWorldManager implements WorldManager {
             final net.minecraft.resources.ResourceKey<Level> registryKey,
             final LevelStem levelStem,
             final ResourceKey worldKey,
-            @Nullable final ResourceKey worldTypeKey) throws IOException {
+            @Nullable final ResourceKey worldTypeKey,
+            final ChunkProgressListener chunkStatusListener) throws IOException {
         final String directoryName = this.getDirectoryName(worldKey);
         final LevelStorageSource.LevelStorageAccess storageSource = this.getLevelStorageAccess(worldKey);
         final PrimaryLevelData levelData = this.getOrCreateLevelData(storageSource, levelStem, directoryName);
-        return this.createLevel(registryKey, levelStem, worldKey, worldTypeKey, storageSource, levelData, ImmutableList.of());
+        return this.createLevel(registryKey, levelStem, worldKey, worldTypeKey, storageSource, levelData, ImmutableList.of(), chunkStatusListener);
     }
 
     private ServerLevel createLevel(
@@ -793,7 +797,8 @@ public abstract class SpongeWorldManager implements WorldManager {
             @Nullable final ResourceKey worldTypeKey,
             final LevelStorageSource.LevelStorageAccess storageSource,
             final PrimaryLevelData levelData,
-            final List<CustomSpawner> spawners) {
+            final List<CustomSpawner> spawners,
+            final ChunkProgressListener chunkStatusListener) {
 
         ((PrimaryLevelDataBridge) levelData).bridge$populateFromLevelStem(levelStem);
 
@@ -803,7 +808,6 @@ public abstract class SpongeWorldManager implements WorldManager {
         levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().shouldReportAsModified());
         final long seed = BiomeManager.obfuscateSeed(levelData.worldGenSettings().seed());
 
-        final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
         final Executor executor = ((MinecraftServerAccessor) this.server).accessor$executor();
         final ServerLevel world = new ServerLevel(this.server, executor, storageSource, levelData,
                 registryKey, levelStem, chunkStatusListener, levelData.worldGenSettings().isDebug(), seed, spawners, true);

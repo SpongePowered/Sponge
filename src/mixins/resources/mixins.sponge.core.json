@@ -251,7 +251,9 @@
         "client.player.AbstractClientPlayerMixin",
         "client.server.IntegratedPlayerListMixin",
         "client.server.IntegratedServerMixin",
-        "server.network.MemoryServerHandshakePacketListenerImplMixin"
+        "server.network.MemoryServerHandshakePacketListenerImplMixin",
+        "client.gui.screens.worldselection.CreateWorldScreenMixin",
+        "client.gui.screens.worldselection.WorldOpenFlowsMixin"
     ],
     "server": [
         "server.dedicated.DedicatedServerMixin"
