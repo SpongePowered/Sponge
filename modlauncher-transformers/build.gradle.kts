@@ -11,22 +11,19 @@ eclipse {
 val organization: String by project
 val projectUrl: String by project
 
-license {
-    properties {
-        this["name"] = "Sponge"
-        this["organization"] = organization
-        this["url"] = projectUrl
-    }
-    header(rootProject.file("HEADER.txt"))
+indraSpotlessLicenser {
+    licenseHeaderFile(rootProject.file("HEADER.txt"))
 
-    include("**/*.java")
-    newLine(false)
+    property("name", "Sponge")
+    property("organization", organization)
+    property("url", projectUrl)
 }
 
-val log4jVersion: String by project
-val modlauncherVersion: String by project
 val apiConfigurateVersion: String by project
 val asmVersion: String by project
+val checkerVersion: String by project
+val log4jVersion: String by project
+val modlauncherVersion: String by project
 
 dependencies {
     // AccessWidener transformer
@@ -58,5 +55,5 @@ dependencies {
     }
 
     // And finally, compile only annotations
-    compileOnly("org.checkerframework:checker-qual:3.13.0")
+    compileOnly("org.checkerframework:checker-qual:$checkerVersion")
 }

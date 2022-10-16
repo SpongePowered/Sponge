@@ -141,7 +141,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             try {
                 this.impl$resourcePack = SpongeResourcePack.create(url, hash, Component.empty());
             } catch (final URISyntaxException e) {
-                e.printStackTrace();
+                MinecraftServerMixin.LOGGER.error("Invalid resource pack url", e);
             }
         }
     }

@@ -22,10 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.gradle.impl;
+package org.spongepowered.forge.mixin.core.network;
 
-import org.gradle.api.tasks.Copy;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
 
-public class GenerateResourceTemplates extends Copy {
+@Mixin(FriendlyByteBuf.class)
+public abstract class FriendlyByteBufMixin_Forge implements FriendlyByteBufBridge {
 
+    @Redirect(method = "writeItemStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;writeNbt(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/network/FriendlyByteBuf;"))
+    public FriendlyByteBuf renderItemComponents(final FriendlyByteBuf buf, final CompoundTag tag) {
+        return buf.writeNbt(bridge$renderItemComponents(tag));
+    }
 }

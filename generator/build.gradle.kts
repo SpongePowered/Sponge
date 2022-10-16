@@ -25,7 +25,7 @@ dependencies {
     val forgeFlowerVersion: String by project
     val tinyLogVersion: String by project
     implementation("com.squareup:javapoet:1.13.0")
-    implementation("com.github.javaparser:javaparser-core:3.22.1")
+    implementation("com.github.javaparser:javaparser-core:3.24.4")
     implementation("org.tinylog:tinylog-api:$tinyLogVersion")
     runtimeOnly("org.tinylog:tinylog-impl:$tinyLogVersion")
     runtimeOnly("org.tinylog:slf4j-tinylog:$tinyLogVersion") // todo: doesn't work for some reason?
@@ -34,16 +34,12 @@ dependencies {
     forgeFlower("net.minecraftforge:forgeflower:$forgeFlowerVersion")
 }
 
-license {
-    properties {
-        this["name"] = "Sponge"
-        this["organization"] = organization
-        this["url"] = projectUrl
-    }
-    header(rootProject.file("HEADER.txt"))
+indraSpotlessLicenser {
+    licenseHeaderFile(rootProject.file("HEADER.txt"))
 
-    include("**/*.java")
-    newLine(false)
+    property("name", "Sponge")
+    property("organization", organization)
+    property("url", projectUrl)
 }
 
 val apiBase = rootProject.file("SpongeAPI/src/main/java/")
@@ -59,10 +55,10 @@ tasks.register("generateApiData", JavaExec::class) {
 
     doFirst {
         // Write a template-expanded license header to the temporary file
-        license.header.get().asReader().buffered().use { reader ->
+        indraSpotlessLicenser.licenseHeaderFile().get().asReader().buffered().use { reader ->
             val template = groovy.text.GStringTemplateEngine().createTemplate(reader)
 
-            val propertyMap = (license as ExtensionAware).extra.properties.toMutableMap()
+            val propertyMap = indraSpotlessLicenser.properties().get().toMutableMap()
             propertyMap["name"] = "SpongeAPI"
             val out = template.make(propertyMap)
 

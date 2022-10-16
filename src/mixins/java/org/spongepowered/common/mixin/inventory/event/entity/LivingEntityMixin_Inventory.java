@@ -84,7 +84,7 @@ public abstract class LivingEntityMixin_Inventory extends Entity {
     @Inject(method = "handleEquipmentChanges",
             at = @At(value = "INVOKE", remap = false, target = "Ljava/util/Map;forEach(Ljava/util/function/BiConsumer;)V"))
     protected void inventory$onHandleEquipmentChanges(final Map<EquipmentSlot, ItemStack> map, final CallbackInfo ci) {
-        map.entrySet().removeIf(entry -> {
+        map.entrySet().forEach(entry -> {
             final Slot slotAdapter = this.impl$getSpongeSlot(entry.getKey());
             ItemStack oldStack = null;
             switch (entry.getKey().getType()) {
@@ -95,13 +95,34 @@ public abstract class LivingEntityMixin_Inventory extends Entity {
                     oldStack = this.shadow$getLastArmorItem(entry.getKey());
                     break;
             }
-            return this.impl$throwEquipmentEvent(entry.getKey(), slotAdapter, entry.getValue(), oldStack);
+            entry.setValue(this.impl$callEquipmentEvent(entry.getKey(), slotAdapter, entry.getValue(), oldStack));
         });
     }
 
     @Redirect(method = "updateUsingItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;completeUsingItem()V"))
     protected void inventory$onUpdateUsingItem(final LivingEntity thisEntity) {
         this.shadow$completeUsingItem();
+    }
+
+    private ItemStack impl$callEquipmentEvent(final EquipmentSlot equipmentslottype, final Slot slot, final ItemStack newStack, final ItemStack oldStack) {
+        final ChangeEntityEquipmentEvent event = InventoryEventFactory.callChangeEntityEquipmentEvent((LivingEntity) (Object) this,
+                ItemStackUtil.snapshotOf(oldStack), ItemStackUtil.snapshotOf(newStack), slot);
+        if (event.isCancelled()) {
+            this.shadow$setItemSlot(equipmentslottype, oldStack);
+            return oldStack;
+        }
+        final Transaction<@NonNull ItemStackSnapshot> transaction = event.transaction();
+        if (!transaction.isValid()) {
+            this.shadow$setItemSlot(equipmentslottype, oldStack);
+            return oldStack;
+        }
+        final Optional<ItemStackSnapshot> optional = transaction.custom();
+        if (optional.isPresent()) {
+            final ItemStack custom = ItemStackUtil.fromSnapshotToNative(optional.get());
+            this.shadow$setItemSlot(equipmentslottype, custom);
+            return custom;
+        }
+        return newStack;
     }
 
     private boolean impl$throwEquipmentEvent(final EquipmentSlot equipmentslottype, final Slot slot, final ItemStack newStack, final ItemStack oldStack) {

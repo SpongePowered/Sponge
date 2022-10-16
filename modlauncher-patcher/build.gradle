@@ -13,14 +13,10 @@ tasks.named('jar') {
     
 }
 
-license {
-    properties {
-        name = "Sponge"
-        organization = project.ext.organization
-        url = project.ext.projectUrl
-    }
-    header = rootProject.file("HEADER.txt")
+indraSpotlessLicenser {
+    licenseHeaderFile rootProject.file("HEADER.txt")
 
-    include "**/*.java"
-    newLine false
+    property "name", "Sponge"
+    property "organization", organization
+    property "url", projectUrl
 }

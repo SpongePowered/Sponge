@@ -43,6 +43,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerEntityHealthScaleBridge;
 import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -57,7 +58,7 @@ public abstract class ServerPlayerMixin_HealthScale extends PlayerMixin implemen
     @Shadow public ServerGamePacketListenerImpl connection;
     // @formatter:on
 
-    private Double impl$healthScale = null;
+    private double impl$healthScale = Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
     private float impl$cachedModifiedHealth = -1;
 
     @Inject(method = "doTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getArmorValue()I", ordinal = 1))
@@ -71,16 +72,29 @@ public abstract class ServerPlayerMixin_HealthScale extends PlayerMixin implemen
     }
 
     @Override
-    public void bridge$setHealthScale(final Double scale) {
+    public boolean bridge$setHealthScale(final double scale) {
+        if (scale < 1.0F || scale > Float.MAX_VALUE) {
+            return false;
+        }
+
         this.impl$healthScale = scale;
         this.impl$cachedModifiedHealth = -1;
         this.lastSentHealth = -1.0F;
 
-        if (scale == null) {
-            ((SpongeDataHolderBridge) this).bridge$remove(Keys.HEALTH_SCALE);
-        } else {
-            ((SpongeDataHolderBridge) this).bridge$offer(Keys.HEALTH_SCALE, scale);
-        }
+        ((SpongeDataHolderBridge) this).bridge$offer(Keys.HEALTH_SCALE, scale);
+
+        this.bridge$refreshScaledHealth();
+        return true;
+    }
+
+    @Override
+    public void bridge$resetHealthScale() {
+        this.impl$healthScale = Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
+        this.impl$cachedModifiedHealth = -1;
+        this.lastSentHealth = -1.0F;
+
+        ((SpongeDataHolderBridge) this).bridge$remove(Keys.HEALTH_SCALE);
+
         this.bridge$refreshScaledHealth();
     }
 
@@ -134,7 +148,7 @@ public abstract class ServerPlayerMixin_HealthScale extends PlayerMixin implemen
     }
 
     @Override
-    public Double bridge$getHealthScale() {
+    public double bridge$getHealthScale() {
         return this.impl$healthScale;
     }
 
@@ -169,7 +183,7 @@ public abstract class ServerPlayerMixin_HealthScale extends PlayerMixin implemen
 
     @Override
     public boolean bridge$isHealthScaled() {
-        return this.impl$healthScale != null;
+        return this.impl$healthScale != Constants.Entity.Player.DEFAULT_HEALTH_SCALE;
     }
 
 }

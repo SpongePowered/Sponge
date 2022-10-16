@@ -313,7 +313,7 @@ final class VanillaRegistryLoader {
 
     @SuppressWarnings("UnusedReturnValue")
     private <A, I extends Enum<I> & StringRepresentable> Registry<A> automaticSerializedName(final RegistryType<A> type, final I[] values) {
-        return this.naming(type, values, StringRepresentable::getSerializedName);
+        return this.naming(type, values, val -> val.getSerializedName()); // not using method reference as ECJ bug workaround
     }
 
     @SuppressWarnings("UnusedReturnValue")

@@ -51,6 +51,7 @@
         "server.PlayerAdvancementsMixin",
         "server.ServerFunctionManagerMixin",
         "server.ServerScoreboardMixin",
+        "server.WorldStem_WorldDataSupplierMixin",
         "server.bossevents.CustomBossEventMixin",
         "server.commands.BossBarCommandsMixin",
         "server.commands.DifficultyCommandMixin",

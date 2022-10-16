@@ -95,14 +95,8 @@ public final class ServerPlayerData {
                         .get(ServerPlayerBridge::bridge$getLanguage)
                     .create(Keys.HEALTH_SCALE)
                         .get(ServerPlayerEntityHealthScaleBridge::bridge$getHealthScale)
-                        .setAnd((h, v) -> {
-                            if (v < 1f || v > Float.MAX_VALUE) {
-                                return false;
-                            }
-                            h.bridge$setHealthScale(v);
-                            return true;
-                        })
-                        .delete(b -> b.bridge$setHealthScale(null))
+                        .setAnd(ServerPlayerEntityHealthScaleBridge::bridge$setHealthScale)
+                        .delete(ServerPlayerEntityHealthScaleBridge::bridge$resetHealthScale)
                     .create(Keys.VIEW_DISTANCE)
                         .get(ServerPlayerBridge::bridge$getViewDistance)
                     .create(Keys.SKIN_PARTS)

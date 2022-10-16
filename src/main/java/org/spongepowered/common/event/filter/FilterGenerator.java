@@ -41,6 +41,8 @@ import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V11;
 
 import io.leangen.geantyref.AnnotationFormatException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
@@ -105,6 +107,8 @@ public class FilterGenerator {
 
     public static final boolean FILTER_DEBUG = Boolean.parseBoolean(System.getProperty("sponge.filter.debug", "false"));
     public static final String FILTER_DESCRIPTOR = "(" + Type.getDescriptor(Event.class) + ")[Ljava/lang/Object;";
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public static FilterGenerator getInstance() {
         return Holder.INSTANCE;
@@ -288,8 +292,8 @@ public class FilterGenerator {
             }
             try (final FileOutputStream out = new FileOutputStream(outFile)) {
                 out.write(data);
-            } catch (final IOException ignored) {
-                ignored.printStackTrace();
+            } catch (final IOException e) {
+                FilterGenerator.LOGGER.error("Failed to write class to debug directory", e);
             }
         }
 
