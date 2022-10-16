@@ -5,9 +5,9 @@ plugins {
     `java-library`
     eclipse
     id("org.spongepowered.gradle.vanilla")
-    id("org.cadixdev.licenser")
     id("com.github.johnrengelman.shadow")
     id("org.spongepowered.gradle.sponge.dev") apply false // for version json generation
+    id("net.kyori.indra.licenser.spotless")
     id("implementation-structure")
     id("org.jetbrains.gradle.plugin.idea-ext")
     id("com.github.ben-manes.versions")
@@ -218,16 +218,12 @@ dependencies {
 
 val organization: String by project
 val projectUrl: String by project
-license {
-    properties {
-        this["name"] = "Sponge"
-        this["organization"] = organization
-        this["url"] = projectUrl
-    }
-    header(rootProject.file("HEADER.txt"))
+indraSpotlessLicenser {
+    licenseHeaderFile(rootProject.file("HEADER.txt"))
 
-    include("**/*.java")
-    newLine(false)
+    property("name", "Sponge")
+    property("organization", organization)
+    property("url", projectUrl)
 }
 
 idea {
@@ -254,7 +250,7 @@ allprojects {
     apply(plugin = "org.jetbrains.gradle.plugin.idea-ext")
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
-    apply(plugin = "org.cadixdev.licenser")
+    apply(plugin = "net.kyori.indra.licenser.spotless")
 
     base {
         archivesBaseName = name.toLowerCase(Locale.ENGLISH)

@@ -31,11 +31,8 @@ import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WritableLevelData;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
-import org.spongepowered.api.registry.RegistryReference;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.border.WorldBorder;
@@ -100,7 +97,7 @@ public final class WorldPropertiesData {
                         .get(h -> h.bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC))
                         .set(PrimaryLevelDataBridge::bridge$setSerializationBehavior)
                     .create(Keys.VIEW_DISTANCE)
-                        .get(h -> h.bridge$viewDistance().orElseGet(() -> ((DedicatedServer) SpongeCommon.server()).getProperties().viewDistance))
+                        .get(h -> h.bridge$viewDistance().orElseGet(() -> SpongeCommon.server().getPlayerList().getViewDistance()))
                         .set(PrimaryLevelDataBridge::bridge$setViewDistance)
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> h.bridge$displayName().orElse(null))

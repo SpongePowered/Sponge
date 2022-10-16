@@ -39,11 +39,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerGameModeBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
@@ -82,21 +80,17 @@ public abstract class ServerGamePacketListenerImplMixin_Tracker {
         if (PhaseTracker.getInstance().getPhaseContext().isEmpty()) {
             return actionResult;
         }
+
         final PacketContext<?> context = ((PacketContext<?>) PhaseTracker.getInstance().getPhaseContext());
+        final ItemStack itemStack = ItemStackUtil.toNative(context.getItemUsed());
 
-        // If a plugin or mod has changed the item, avoid restoring
-        if (!context.getInteractItemChanged()) {
-            final ItemStack itemStack = ItemStackUtil.toNative(context.getItemUsed());
-
-            // Only do a restore if something actually changed. The client does an identity check ('==')
-            // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
-            // cancelling item usage (e.g. eating food) that occurs while targeting a block
-            final boolean isInteractionCancelled = ((ServerPlayerGameModeBridge) this.player.gameMode).bridge$isInteractBlockRightClickCancelled();
-            if (!ItemStack.matches(itemStack, this.player.getItemInHand(hand)) && isInteractionCancelled) {
-                PacketPhaseUtil.handlePlayerSlotRestore(this.player, itemStack, hand);
-            }
+        // Only do a restore if the items should stay the same. The client does an identity check ('==')
+        // to determine if it should continue using an itemstack.
+        final boolean isInteractionCancelled = ((ServerPlayerGameModeBridge) this.player.gameMode).bridge$isInteractBlockRightClickCancelled();
+        if (ItemStack.matches(itemStack, this.player.getItemInHand(hand)) && isInteractionCancelled) {
+            PacketPhaseUtil.handlePlayerSlotRestore(this.player, itemStack, hand);
         }
-        context.interactItemChanged(false);
+
         ((ServerPlayerGameModeBridge) this.player.gameMode).bridge$setInteractBlockRightClickCancelled(false);
         return actionResult;
     }

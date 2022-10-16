@@ -22,10 +22,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-/*
- * Credit: MinecraftForge
- * Changes: Minor tweaks, fixed scroll limits able to hit negative
- */
 package org.spongepowered.vanilla.client.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -44,6 +40,10 @@ import net.minecraft.client.renderer.GameRenderer;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Credit: MinecraftForge
+ * Changes: Minor tweaks, fixed scroll limits able to hit negative
+ */
 public abstract class ScrollPanel extends AbstractContainerEventHandler implements Widget {
 
     private final Minecraft client;

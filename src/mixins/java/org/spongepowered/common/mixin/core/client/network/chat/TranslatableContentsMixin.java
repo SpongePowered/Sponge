@@ -24,50 +24,52 @@
  */
 package org.spongepowered.common.mixin.core.client.network.chat;
 
+import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
 
+import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
 
 @Mixin(TranslatableContents.class)
-public abstract class TranslatableComponentMixin {
+public abstract class TranslatableContentsMixin {
 
+    // @formatter:off
     @Shadow @Final private String key;
-    private String impl$lastLocale;
-    private Component impl$translated = (Component) this;
+    @Shadow private List<FormattedText> decomposedParts;
+    // @formatter:on
 
-    @Inject(method = "visit(Lnet/minecraft/network/chat/FormattedText$StyledContentConsumer;Lnet/minecraft/network/chat/Style;)Ljava/util/Optional;", at = @At("HEAD"), cancellable = true)
-    private <T> void impl$translateForRendering(final FormattedText.StyledContentConsumer<T> visitor, final Style style, final CallbackInfoReturnable<Optional<T>> ci) {
-        final String currentLocale = Minecraft.getInstance().options.languageCode;
-        if (!Objects.equals(currentLocale, this.impl$lastLocale)) { // retranslate
-            this.impl$lastLocale = currentLocale;
-            final Locale actualLocale = Locales.of(currentLocale);
+    private Component impl$translated = null;
 
-            // Only do a deep copy if actually necessary
-            if (GlobalTranslator.translator().translate(this.key, actualLocale) != null) {
-                this.impl$translated = NativeComponentRenderer.apply((Component) this, Locales.of(currentLocale));
-            } else {
-                this.impl$translated = (Component) this;
-            }
+    @Inject(method = "decompose()V", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/network/chat/contents/TranslatableContents;decomposedWith:Lnet/minecraft/locale/Language;", shift = At.Shift.AFTER), cancellable = true)
+    private <T> void impl$translateForRendering(final CallbackInfo ci) {
+        final Locale actualLocale = Locales.of(Minecraft.getInstance().options.languageCode);
+        final Component toTranslate = MutableComponent.create((TranslatableContents) (Object) this);
+
+        // Only do a deep copy if actually necessary
+        if (GlobalTranslator.translator().translate(this.key, actualLocale) != null) {
+            this.impl$translated = NativeComponentRenderer.apply(toTranslate, actualLocale);
+        } else {
+            this.impl$translated = toTranslate;
         }
 
         // If the result is a non-translated component, then Adventure found a translation that we should use
         if (!(this.impl$translated.getContents() instanceof TranslatableContents)) {
-            ci.setReturnValue(this.impl$translated.getContents().visit(visitor, style));
+          this.decomposedParts = ImmutableList.of(this.impl$translated);
+          ci.cancel();
         }
     }
 }

@@ -24,10 +24,13 @@
  */
 package org.spongepowered.common.bridge.network;
 
+import net.minecraft.nbt.CompoundTag;
+
 import java.util.Locale;
 
 public interface FriendlyByteBufBridge {
 
     void bridge$setLocale(final Locale locale);
 
+    CompoundTag bridge$renderItemComponents(CompoundTag tag);
 }

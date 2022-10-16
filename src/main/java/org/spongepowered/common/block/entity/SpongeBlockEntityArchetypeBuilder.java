@@ -25,6 +25,8 @@
 package org.spongepowered.common.block.entity;
 
 import net.minecraft.nbt.CompoundTag;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
@@ -50,6 +52,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder<BlockEntityArchetype> implements BlockEntityArchetype.Builder {
 
+    private static final Logger LOGGER = LogManager.getLogger();
     private static final Deque<SpongeBlockEntityArchetypeBuilder> pool = new ConcurrentLinkedDeque<>();
 
     public static SpongeBlockEntityArchetypeBuilder unpooled() {
@@ -99,7 +102,7 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
     public BlockEntityArchetype.Builder state(final BlockState state) {
         final net.minecraft.world.level.block.state.BlockState blockState = (net.minecraft.world.level.block.state.BlockState) state;
         if (!((BlockStateBridge) (blockState)).bridge$hasTileEntity()) {
-            new IllegalArgumentException("BlockState: "+ state + " does not provide TileEntities!").printStackTrace();
+            SpongeBlockEntityArchetypeBuilder.LOGGER.warn("BlockState {} does not provide BlockEntities!", state, new IllegalArgumentException());
         }
         if (this.blockState != state) {
             this.data = null;

@@ -173,7 +173,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
 
     private net.minecraft.network.chat.@Nullable Component impl$connectionMessage;
-    private Locale impl$language = Locales.EN_US;
+    private Locale impl$language = Locales.DEFAULT;
     private Scoreboard impl$scoreboard = Sponge.game().server().serverScoreboard().get();
     @Nullable private Boolean impl$keepInventory = null;
     // Used to restore original item received in a packet after canceling an event
@@ -266,17 +266,21 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Override
     public void bridge$setLanguage(final Locale language) {
+        this.impl$language = language;
+
         // Update locale on Channel, used for sending localized messages
         if (this.connection != null) {
             final Channel channel = ((ConnectionAccessor) this.connection.connection).accessor$channel();
             channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(language);
+
             SpongeAdventure.forEachBossBar(bar -> {
                 if (bar.getPlayers().contains(this)) {
                     this.connection.send(ClientboundBossEventPacket.createUpdateNamePacket(bar));
                 }
             });
+
+            this.containerMenu.broadcastFullState();
         }
-        this.impl$language = language;
     }
 
     @Override

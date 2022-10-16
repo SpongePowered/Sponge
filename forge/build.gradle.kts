@@ -220,7 +220,7 @@ dependencies {
     val libraries = forgeLibrariesConfig.name
     libraries("org.spongepowered:spongeapi:$apiVersion")
     libraries("javax.inject:javax.inject:1") // wat
-    libraries("com.zaxxer:HikariCP:2.6.3")
+    libraries("com.zaxxer:HikariCP:2.7.8")
     libraries("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
     // libraries(project(commonProject.path)) // todo: this is better, but seems to be pulling in ASM for some reason
     libraries(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
@@ -461,16 +461,12 @@ afterEvaluate {
     }
 }
 
-license {
-    properties {
-        this["name"] = "Sponge"
-        this["organization"] = organization
-        this["url"] = projectUrl
-    }
-    header(rootProject.file("HEADER.txt"))
+indraSpotlessLicenser {
+    licenseHeaderFile(rootProject.file("HEADER.txt"))
 
-    include("**/*.java")
-    newLine(false)
+    property("name", "Sponge")
+    property("organization", organization)
+    property("url", projectUrl)
 }
 
 val sourcesJar by tasks.existing

@@ -518,6 +518,9 @@ public final class Constants {
         public static final String ITEM_STORED_ENCHANTMENTS_LIST = "StoredEnchantments";
         public static final String ITEM_DISPLAY = "display";
         public static final String ITEM_LORE = "Lore";
+        public static final String ITEM_NAME = "Name";
+        public static final String ITEM_ORIGINAL_LORE = "SpongeOriginalLore";
+        public static final String ITEM_ORIGINAL_NAME = "SpongeOriginalName";
         public static final String ITEM_ENCHANTMENT_ID = "id";
         public static final String ITEM_ENCHANTMENT_LEVEL = "lvl";
         public static final String ITEM_BREAKABLE_BLOCKS = "CanDestroy";

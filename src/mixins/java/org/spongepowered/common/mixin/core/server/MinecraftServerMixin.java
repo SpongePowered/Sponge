@@ -171,7 +171,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "stopServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;saveAllChunks(ZZZ)Z"))
     private void impl$callUnloadWorldEvents(final CallbackInfo ci) {
-        for(ServerLevel level : this.shadow$getAllLevels()) {
+        for(final ServerLevel level : this.shadow$getAllLevels()) {
             final UnloadWorldEvent unloadWorldEvent = SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerWorld) level);
             SpongeCommon.post(unloadWorldEvent);
         }
@@ -237,7 +237,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             final InheritableConfigHandle<WorldConfig> adapter = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter();
 
             // Sponge start - use our own config
-            boolean log = adapter.get().world.logAutoSave;
+            final boolean log = adapter.get().world.logAutoSave;
 
             // If the server isn't running or we hit Vanilla's save interval or this was triggered
             // by a command, save our configs

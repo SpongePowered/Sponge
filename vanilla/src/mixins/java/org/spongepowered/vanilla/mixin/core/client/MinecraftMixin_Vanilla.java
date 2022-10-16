@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.launch.Launch;
@@ -73,7 +74,7 @@ public abstract class MinecraftMixin_Vanilla implements MinecraftBridge, Vanilla
         try (final InputStream stream = this.getClass().getClassLoader().getResourceAsStream("spongie_icon.png")) {
             WindowUtils.setWindowIcon(window.getWindow(), stream);
         } catch (final IOException e) {
-            e.printStackTrace();
+            SpongeCommon.logger().error("Failed to set window icon", e);
         }
     }
 }

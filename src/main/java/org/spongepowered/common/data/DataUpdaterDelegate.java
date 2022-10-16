@@ -25,10 +25,14 @@
 package org.spongepowered.common.data;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataView;
 
 public final class DataUpdaterDelegate implements DataContentUpdater {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final ImmutableList<DataContentUpdater> updaters;
     private final int from;
@@ -58,11 +62,10 @@ public final class DataUpdaterDelegate implements DataContentUpdater {
             try {
                 updated = updater.update(updated);
             } catch (Exception e) {
-                Exception exception = new RuntimeException("There was error attempting to update some data for the content updater:"
-                                                           +  updater.getClass().getName() + "\nThe original data is being returned, possibly causing "
-                                                           + "issues later on, \nbut the original data should not be lost. Please notify the developer "
-                                                           + "of this exception with the stacktrace.", e);
-                exception.printStackTrace();
+                DataUpdaterDelegate.LOGGER.error("There was error attempting to update some data for the content updater: {}"
+                                                 + "\nThe original data is being returned, possibly causing "
+                                                 + "issues later on, \nbut the original data should not be lost. Please notify the developer "
+                                                 + "of this exception with the stacktrace.", updater.getClass().getName(), e);
                 return copied;
             }
         }

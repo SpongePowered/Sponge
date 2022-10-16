@@ -159,7 +159,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
                     this.containerToResource.put(container, candidate.resource());
                 } catch (final InvalidPluginException e) {
                     failedInstances.put(candidate, "Failed to construct: see stacktrace(s) above this message for details.");
-                    e.printStackTrace();
+                    platform.logger().error("Failed to construct plugin {}", candidate.metadata().id(), e);
                 }
             }
         }

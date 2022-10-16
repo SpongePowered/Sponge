@@ -19,12 +19,14 @@
     "mixins": [
         "CrashReportMixin_Vanilla",
         "brigadier.exceptions.CommandSyntaxExceptionMixin_Vanilla",
+        "network.FriendlyByteBufMixin_Vanilla",
         "server.BootstrapMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",
         "server.level.ServerPlayerMixin_Vanilla",
         "server.network.ServerGamePacketListenerImplMixin_Vanilla",
         "server.network.ServerLoginPacketListenerImpl_1Mixin_Vanilla",
         "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
+        "server.packs.repository.PackRepositoryMixin_Vanilla",
         "world.entity.EntityMixin_Vanilla",
         "world.entity.LivingEntityMixin_Vanilla",
         "world.entity.ai.attributes.DefaultAttributesMixin",
@@ -34,7 +36,8 @@
         "world.level.portal.PortalForcerMixin_Vanilla",
         "world.level.storage.LevelStorageSourceMixin_Vanilla",
         "world.level.block.FireBlockMixin_Vanilla",
-        "server.packs.repository.PackRepositoryMixin_Vanilla"
+        "world.level.portal.PortalForcerMixin_Vanilla",
+        "world.level.storage.LevelStorageSourceMixin_Vanilla"
     ],
     "overwrites": {
         "conformVisibility": true
