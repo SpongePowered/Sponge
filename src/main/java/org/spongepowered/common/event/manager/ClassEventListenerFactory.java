@@ -72,8 +72,11 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
     }
 
     @Override
-    public AnnotatedEventListener create(final Object handle, final ListenerClassVisitor.DiscoveredMethod method) throws Throwable {
-        final MethodHandles.Lookup lookup = this.createLookup(method);
+    public AnnotatedEventListener create(final Object handle, final ListenerClassVisitor.DiscoveredMethod method,
+                                         MethodHandles.@Nullable Lookup lookup) throws Throwable {
+        if (lookup == null) {
+            lookup = this.createLookup(method);
+        }
         return (AnnotatedEventListener) lookup.findConstructor(
             lookup.lookupClass(),
             MethodType.methodType(void.class, method.declaringClass())
