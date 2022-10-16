@@ -250,6 +250,7 @@ allprojects {
     }
 
     plugins.withId("org.spongepowered.gradle.vanilla") {
+        val quiltflowerVersion: String by project
         minecraft {
             version(minecraftVersion)
             injectRepositories(false)
@@ -260,6 +261,10 @@ allprojects {
                     accessWideners(it)
                     parent?.minecraft?.accessWideners(it)
                 }
+        }
+
+        dependencies {
+            forgeFlower("org.quiltmc:quiltflower:$quiltflowerVersion")
         }
     }
 
