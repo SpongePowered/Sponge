@@ -467,7 +467,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Inject(method = "levelEvent", at = @At("HEAD"), cancellable = true)
     private void impl$throwBroadcastEvent(final Player player, final int eventID, final BlockPos pos, final int dataID, CallbackInfo ci) {
-        if(eventID == Constants.WorldEvents.PLAY_RECORD_EVENT && ShouldFire.PLAY_SOUND_EVENT_RECORD) {
+        if(eventID == Constants.WorldEvents.PLAY_RECORD_EVENT && ShouldFire.PLAY_SOUND_EVENT_FROM_JUKEBOX) {
             try (final CauseStackManager.StackFrame frame = Sponge.server().causeStackManager().pushCauseFrame()) {
                 final BlockEntity tileEntity = this.shadow$getBlockEntity(pos);
                 if(tileEntity instanceof JukeboxBlockEntity) {
@@ -482,7 +482,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                             return;
                         }
                         final MusicDisc recordType = recordProperty.get();
-                        final PlaySoundEvent.Record event = SpongeCommonEventFactory.callPlaySoundRecordEvent(frame.currentCause(), jukebox, recordType, dataID);
+                        final PlaySoundEvent.FromJukebox event = SpongeCommonEventFactory.callPlaySoundFromJukeboxEvent(frame.currentCause(), jukebox, recordType, dataID);
                         if (event.isCancelled()) {
                             ci.cancel();
                         }

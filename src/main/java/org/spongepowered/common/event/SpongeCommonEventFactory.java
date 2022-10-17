@@ -726,16 +726,16 @@ public final class SpongeCommonEventFactory {
         return event;
     }
 
-    public static PlaySoundEvent.Record callPlaySoundRecordEvent(final Cause cause, final JukeboxBlockEntity jukebox,
+    public static PlaySoundEvent.FromJukebox callPlaySoundFromJukeboxEvent(final Cause cause, final JukeboxBlockEntity jukebox,
         final MusicDisc recordType, final int data) {
         final Jukebox apiJuke = (Jukebox) jukebox;
         final ServerLocation location = (ServerLocation) apiJuke.location();
-        final PlaySoundEvent.Record
+        final PlaySoundEvent.FromJukebox
             event =
             data == 0 ? SpongeEventFactory
-                .createPlaySoundEventRecordStart(cause, apiJuke, location, recordType, Sound.Source.RECORD, recordType.sound(), 1.0F, 4.0F)
+                .createPlaySoundEventFromJukeboxStart(cause, apiJuke, location, recordType, Sound.Source.RECORD, recordType.sound(), 1.0F, 4.0F)
                       : SpongeEventFactory
-                .createPlaySoundEventRecordStop(cause, apiJuke, location, recordType, Sound.Source.RECORD, recordType.sound(), 1.0F, 4.0F);
+                .createPlaySoundEventFromJukeboxStop(cause, apiJuke, location, recordType, Sound.Source.RECORD, recordType.sound(), 1.0F, 4.0F);
         SpongeCommon.post(event);
         return event;
     }
