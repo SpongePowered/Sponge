@@ -50,10 +50,10 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
 
     private final SpongeSpecialRecipe recipe;
 
-    public SpongeSpecialCraftingRecipeRegistration(ResourceLocation key,
-            BiPredicate<CraftingGridInventory, ServerWorld> biPredicate,
-            Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction,
-            Function<CraftingGridInventory, ItemStack> resultFunction) {
+    public SpongeSpecialCraftingRecipeRegistration(final ResourceLocation key,
+            final BiPredicate<CraftingGridInventory, ServerWorld> biPredicate,
+            final Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction,
+            final Function<CraftingGridInventory, ItemStack> resultFunction) {
         super(key, null, Items.AIR, "");
 
         this.biPredicate = biPredicate;
@@ -70,10 +70,10 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
     }
 
     @Override
-    public void serializeShape(JsonObject json) {
+    public void serializeShape(final JsonObject json) {
     }
 
     @Override
-    public void serializeResult(JsonObject json) {
+    public void serializeResult(final JsonObject json) {
     }
 }

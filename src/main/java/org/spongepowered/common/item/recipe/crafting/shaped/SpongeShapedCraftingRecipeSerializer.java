@@ -54,7 +54,7 @@ import java.util.function.Function;
 public class SpongeShapedCraftingRecipeSerializer extends ShapedRecipe.Serializer {
 
     @Override
-    public ShapedRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
+    public ShapedRecipe fromJson(final ResourceLocation recipeId, final JsonObject json) {
         final String s = GsonHelper.getAsString(json, Constants.Recipe.GROUP, "");
         final JsonObject ingredientKey = GsonHelper.getAsJsonObject(json, Constants.Recipe.SHAPED_INGREDIENTS);
         final Map<String, Ingredient> map = this.deserializeIngredientKey(ingredientKey);
@@ -69,10 +69,10 @@ public class SpongeShapedCraftingRecipeSerializer extends ShapedRecipe.Serialize
         return new SpongeShapedRecipe(recipeId, s, i, j, nonnulllist, spongeStack == null ? itemstack : spongeStack, resultFunction, remainingItemsFunction);
     }
 
-    public Map<String, Ingredient> deserializeIngredientKey(JsonObject json) {
+    public Map<String, Ingredient> deserializeIngredientKey(final JsonObject json) {
         final Map<String, Ingredient> map = Maps.newHashMap();
 
-        for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
+        for (final Map.Entry<String, JsonElement> entry : json.entrySet()) {
             if (entry.getKey().length() != 1) {
                 throw new JsonSyntaxException("Invalid key entry: '" + entry.getKey() + "' is an invalid symbol (must be 1 character only).");
             }
@@ -89,12 +89,12 @@ public class SpongeShapedCraftingRecipeSerializer extends ShapedRecipe.Serialize
     }
 
     @Override
-    public ShapedRecipe fromNetwork(ResourceLocation p_199426_1_, FriendlyByteBuf p_199426_2_) {
+    public ShapedRecipe fromNetwork(final ResourceLocation p_199426_1_, final FriendlyByteBuf p_199426_2_) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 
     @Override
-    public void toNetwork(FriendlyByteBuf p_199427_1_, ShapedRecipe p_199427_2_) {
+    public void toNetwork(final FriendlyByteBuf p_199427_1_, final ShapedRecipe p_199427_2_) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 }

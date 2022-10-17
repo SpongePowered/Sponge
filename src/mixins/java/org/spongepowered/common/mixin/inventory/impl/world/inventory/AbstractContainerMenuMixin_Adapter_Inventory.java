@@ -78,7 +78,7 @@ public abstract class AbstractContainerMenuMixin_Adapter_Inventory implements In
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Lens lensGeneratorBridge$generateLens(SlotLensProvider slotLensProvider) {
+    public Lens lensGeneratorBridge$generateLens(final SlotLensProvider slotLensProvider) {
         if (this.impl$isLensInitialized) {
             return null; // Means that we've tried to generate a lens before, but it was null. And because the lens is null,
             // the generate will try again. So, we stop trying to generate it.
@@ -95,11 +95,11 @@ public abstract class AbstractContainerMenuMixin_Adapter_Inventory implements In
     private final Map<Integer, org.spongepowered.api.item.inventory.Slot> impl$slots = new Int2ObjectArrayMap<>();
 
     @Override
-    public Optional<org.spongepowered.api.item.inventory.Slot> inventoryAdapter$getSlot(int ordinal) {
+    public Optional<org.spongepowered.api.item.inventory.Slot> inventoryAdapter$getSlot(final int ordinal) {
         org.spongepowered.api.item.inventory.Slot slot = this.impl$slots.get(ordinal);
         if (slot == null) {
-            Lens rootLens = this.inventoryAdapter$getRootLens();
-            SlotLens slotLens = rootLens.getSlotLens(this.inventoryAdapter$getFabric(), ordinal);
+            final Lens rootLens = this.inventoryAdapter$getRootLens();
+            final SlotLens slotLens = rootLens.getSlotLens(this.inventoryAdapter$getFabric(), ordinal);
             if (slotLens == null) {
                 return Optional.empty();
             }

@@ -58,7 +58,7 @@ public interface MerchantMixin_API extends Merchant {
     @Nullable
     default MerchantOffers imerchant$getOffers() {
         final MerchantOffers merchantRecipes = new MerchantOffers();
-        for (TradeOffer tradeOffer : this.get(Keys.TRADE_OFFERS).orElse(Collections.emptyList())) {
+        for (final TradeOffer tradeOffer : this.get(Keys.TRADE_OFFERS).orElse(Collections.emptyList())) {
             merchantRecipes.add((MerchantOffer) tradeOffer);
         }
         return merchantRecipes;

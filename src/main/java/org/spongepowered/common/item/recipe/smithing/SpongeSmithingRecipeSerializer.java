@@ -44,13 +44,13 @@ public class SpongeSmithingRecipeSerializer<R extends UpgradeRecipe> implements 
 
     @SuppressWarnings("unchecked")
     @Override
-    public R fromJson(ResourceLocation recipeId, JsonObject json) {
+    public R fromJson(final ResourceLocation recipeId, final JsonObject json) {
         final Ingredient base = IngredientUtil.spongeDeserialize(json.get(Constants.Recipe.SMITHING_BASE_INGREDIENT));
         final Ingredient addition = IngredientUtil.spongeDeserialize(json.get(Constants.Recipe.SMITHING_ADDITION_INGREDIENT));
 
         final Function<Container, ItemStack> resultFunction = IngredientResultUtil.deserializeResultFunction(json);
 
-        ItemStack itemstack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, Constants.Recipe.RESULT));
+        final ItemStack itemstack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, Constants.Recipe.RESULT));
         final ItemStack spongeStack = IngredientResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
 
         return (R) new SpongeSmithingRecipe(recipeId, base, addition, spongeStack == null ? itemstack : spongeStack, resultFunction);
@@ -58,11 +58,12 @@ public class SpongeSmithingRecipeSerializer<R extends UpgradeRecipe> implements 
 
     @SuppressWarnings("unchecked")
     @Override
-    public R fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
+    public R fromNetwork(final ResourceLocation recipeId, final FriendlyByteBuf buffer) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 
-    public void toNetwork(FriendlyByteBuf buffer, R recipe) {
+    @Override
+    public void toNetwork(final FriendlyByteBuf buffer, final R recipe) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 }

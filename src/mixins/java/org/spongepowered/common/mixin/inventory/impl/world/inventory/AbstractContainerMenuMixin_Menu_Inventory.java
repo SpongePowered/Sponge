@@ -55,7 +55,7 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
     @Nullable private SpongeInventoryMenu impl$menu;
 
     @Override
-    public void bridge$setMenu(SpongeInventoryMenu menu) {
+    public void bridge$setMenu(final SpongeInventoryMenu menu) {
         this.impl$menu = menu;
     }
 
@@ -67,14 +67,14 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
     // Called when clicking in an inventory
     // InventoryMenu Callback
     @Inject(method = "doClick", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$onClick(int slotId, int dragType, ClickType clickTypeIn, Player player, CallbackInfo ci) {
+    private void impl$onClick(final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfo ci) {
         final SpongeInventoryMenu menu = this.bridge$getMenu();
         if (menu != null) {
             if (!menu.onClick(slotId, dragType, clickTypeIn, player, (org.spongepowered.api.item.inventory.Container) this)) {
                 ci.cancel();
                 // Accept all changes made by plugin
                 for (int i = 0; i < this.slots.size(); i++) {
-                    Slot slot = this.slots.get(i);
+                    final Slot slot = this.slots.get(i);
                     this.lastSlots.set(i, slot.getItem().copy());
                 }
                 // and update client
@@ -86,8 +86,8 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
     // Called when a Container is closed
     // InventoryMenu Callback and resetting viewed and menu state
     @Inject(method = "removed", at = @At(value = "HEAD"))
-    private void impl$onOnContainerClosed(Player player, CallbackInfo ci) {
-        SpongeInventoryMenu menu = this.bridge$getMenu();
+    private void impl$onOnContainerClosed(final Player player, final CallbackInfo ci) {
+        final SpongeInventoryMenu menu = this.bridge$getMenu();
         if (menu != null) {
             menu.onClose(player, (org.spongepowered.api.item.inventory.Container) this);
         }
@@ -132,7 +132,7 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
     }
 
     @Override
-    public boolean bridge$isReadonlyMenu(Slot slot) {
+    public boolean bridge$isReadonlyMenu(final Slot slot) {
         return this.impl$menu != null && this.impl$menu.isReadOnly() && slot.container == this.impl$menu.inventory();
     }
 

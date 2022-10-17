@@ -42,8 +42,8 @@ public abstract class BrewingStandBlockEntityMixin_API extends BaseContainerBloc
     // @formatter:off
     @Shadow private NonNullList<ItemStack> items;
 
-    @Shadow private static void shadow$doBrew(Level param0, BlockPos param1, NonNullList<ItemStack> param2) {};
-    @Shadow private static boolean shadow$isBrewable(NonNullList<ItemStack> param0) {
+    @Shadow private static void shadow$doBrew(final Level param0, final BlockPos param1, final NonNullList<ItemStack> param2) {};
+    @Shadow private static boolean shadow$isBrewable(final NonNullList<ItemStack> param0) {
         return false;
     }
     // @formatter:on

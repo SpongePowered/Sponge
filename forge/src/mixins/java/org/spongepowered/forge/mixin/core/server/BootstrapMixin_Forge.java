@@ -34,10 +34,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeLifecycle;
-import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.inject.SpongeGuice;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.forge.hook.ForgeEventHooks;
 import org.spongepowered.forge.launch.ForgeLaunch;
 
 @Mixin(Bootstrap.class)

@@ -240,7 +240,6 @@ dependencies {
     val apiGsonVersion: String by project
     val apiGuavaVersion: String by project
     val apiPluginSpiVersion: String by project
-    val forgeFlowerVersion: String by project
     val forgeAutoRenamingToolVersion: String by project
     val jlineVersion: String by project
     val log4jVersion: String by project
@@ -345,9 +344,6 @@ dependencies {
             exclude(group = "org.spongepowered")
         }
     }
-
-    // Decompiler
-    forgeFlower("net.minecraftforge:forgeflower:$forgeFlowerVersion")
 }
 
 val vanillaManifest = the<JavaPluginConvention>().manifest {

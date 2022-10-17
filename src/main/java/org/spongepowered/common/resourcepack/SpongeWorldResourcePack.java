@@ -38,22 +38,22 @@ public final class SpongeWorldResourcePack extends SpongeResourcePack {
     private final URI uri;
     public static final String LEVEL_PACK_PROTOCOL = "level://";
 
-    public SpongeWorldResourcePack(final String levelUri, final @Nullable String hash, Component component) {
+    public SpongeWorldResourcePack(final String levelUri, final @Nullable String hash, final Component component) {
         super(hash, component);
         this.path = levelUri.substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length());
         try {
             this.uri = URI.create(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL + URLEncoder.encode(this.path, "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw new AssertionError(e);
         }
     }
 
-    public SpongeWorldResourcePack(final URI levelUri, final @Nullable String hash, Component component) {
+    public SpongeWorldResourcePack(final URI levelUri, final @Nullable String hash, final Component component) {
         super(hash, component);
-        String path = levelUri.toString().substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length());
+        final String path = levelUri.toString().substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length());
         try {
             this.path = URLDecoder.decode(path, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             throw new AssertionError(e);
         }
         this.uri = levelUri;

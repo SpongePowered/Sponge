@@ -46,7 +46,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 public final class InteractAtEntityPacketState extends BasicPacketState {
 
     @Override
-    public boolean isPacketIgnored(Packet<?> packetIn, ServerPlayer packetPlayer) {
+    public boolean isPacketIgnored(final Packet<?> packetIn, final ServerPlayer packetPlayer) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
         final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget((ServerLevel) packetPlayer.level);
@@ -54,7 +54,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(ServerPlayer playerMP, Packet<?> packet, BasicPacketContext context) {
+    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet, final BasicPacketContext context) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packet;
         final ServerboundInteractPacket_InteractionAtLocationActionAccessor accessor = (ServerboundInteractPacket_InteractionAtLocationActionAccessor) ((ServerboundInteractPacketAccessor) useEntityPacket).accessor$action();
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getItemInHand(accessor.accessor$hand()));
@@ -66,7 +66,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public void unwind(BasicPacketContext context) {
+    public void unwind(final BasicPacketContext context) {
         final ServerPlayer player = context.getPacketPlayer();
 
         final ServerboundInteractPacket useEntityPacket = context.getPacket();

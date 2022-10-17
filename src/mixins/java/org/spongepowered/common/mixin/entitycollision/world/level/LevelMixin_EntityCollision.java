@@ -88,7 +88,7 @@ public abstract class LevelMixin_EntityCollision implements AutoCloseable, Level
         if (this.shadow$isClientSide() || entities == null) {
             return;
         }
-        if (entity instanceof EntityTypeTest<?, ?> test && (Player.class.isAssignableFrom(
+        if (entity instanceof final EntityTypeTest<?, ?> test && (Player.class.isAssignableFrom(
             test.getBaseClass()) || ItemEntity.class == test.getBaseClass())) {
             return;
         }

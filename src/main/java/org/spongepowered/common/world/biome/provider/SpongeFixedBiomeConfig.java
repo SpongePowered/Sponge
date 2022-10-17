@@ -47,7 +47,7 @@ public final class SpongeFixedBiomeConfig extends AbstractBiomeProviderConfig im
     public static final class FactoryImpl implements Factory {
 
         @Override
-        public FixedBiomeConfig biome(RegistryReference<Biome> biome) {
+        public FixedBiomeConfig biome(final RegistryReference<Biome> biome) {
             return new SpongeFixedBiomeConfig(biome);
         }
     }

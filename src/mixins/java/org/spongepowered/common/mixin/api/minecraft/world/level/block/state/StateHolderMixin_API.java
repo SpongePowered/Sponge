@@ -62,34 +62,34 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
     // @formatter:on
 
     @SuppressWarnings("unchecked")
-    private <ApiT extends Comparable<ApiT>, T extends Comparable<?>> ApiT api$mapToApi(T value) {
-        if (value instanceof Direction.Axis axis) {
+    private <ApiT extends Comparable<ApiT>, T extends Comparable<?>> ApiT api$mapToApi(final T value) {
+        if (value instanceof final Direction.Axis axis) {
             return (ApiT) AxisUtil.getFor(axis);
         }
-        if (value instanceof Direction dir) {
+        if (value instanceof final Direction dir) {
             return (ApiT) DirectionUtil.getFor(dir);
         }
-        if (value instanceof BedPart bedPart) {
+        if (value instanceof final BedPart bedPart) {
             return (ApiT) PortionTypeUtil.getFor(bedPart);
         }
-        if (value instanceof DoubleBlockHalf half) {
+        if (value instanceof final DoubleBlockHalf half) {
             return (ApiT) PortionTypeUtil.getFor(half);
         }
         return (ApiT) value;
     }
 
-    private <ApiT extends Comparable<ApiT>, T extends Comparable<T>, V extends T> V api$mapFromApi(StateProperty<ApiT> stateProperty, ApiT value) {
-        if (value instanceof Axis axis) {
+    private <ApiT extends Comparable<ApiT>, T extends Comparable<T>, V extends T> V api$mapFromApi(final StateProperty<ApiT> stateProperty, final ApiT value) {
+        if (value instanceof final Axis axis) {
             return (V) AxisUtil.getFor(axis);
         }
-        if (value instanceof org.spongepowered.api.util.Direction dir) {
+        if (value instanceof final org.spongepowered.api.util.Direction dir) {
             final V mappedValue = (V) DirectionUtil.getFor(dir);
             if (mappedValue == null) {
                 throw new UnsupportedOperationException("Unsupported Direction " + dir);
             }
             return mappedValue;
         }
-        if (value instanceof PortionType portion) {
+        if (value instanceof final PortionType portion) {
             final V mappedValue;
             if (stateProperty.equals(BlockStateProperties.BED_PART)) {
                 mappedValue = (V) PortionTypeUtil.getBedPartFor(portion);
@@ -109,7 +109,7 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
     }
 
     @Override
-    public <T extends Comparable<T>> Optional<T> stateProperty(StateProperty<T> stateProperty) {
+    public <T extends Comparable<T>> Optional<T> stateProperty(final StateProperty<T> stateProperty) {
         if (!this.shadow$hasProperty((Property<?>) stateProperty)) {
             return Optional.empty();
         }
@@ -118,12 +118,12 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
     }
 
     @Override
-    public Optional<StateProperty<?>> findStateProperty(String name) {
+    public Optional<StateProperty<?>> findStateProperty(final String name) {
         return this.stateProperties().stream().filter(p -> p.name().equals(name)).findFirst();
     }
 
     @Override
-    public <T extends Comparable<T>, V extends T> Optional<S> withStateProperty(StateProperty<T> stateProperty, V value) {
+    public <T extends Comparable<T>, V extends T> Optional<S> withStateProperty(final StateProperty<T> stateProperty, final V value) {
         if (!this.shadow$hasProperty((Property<?>) stateProperty)) {
             return Optional.empty();
         }
@@ -131,7 +131,7 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
     }
 
     @Override
-    public <T extends Comparable<T>> Optional<S> cycleStateProperty(StateProperty<T> stateProperty) {
+    public <T extends Comparable<T>> Optional<S> cycleStateProperty(final StateProperty<T> stateProperty) {
         if (!this.shadow$hasProperty((Property) stateProperty)) {
             return Optional.empty();
         }
@@ -140,11 +140,11 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
     }
 
     @Override
-    public <T extends Cycleable<T>> Optional<S> cycleValue(Key<? extends Value<T>> key) {
-        Optional<T> optionalValue = this.get(key);
+    public <T extends Cycleable<T>> Optional<S> cycleValue(final Key<? extends Value<T>> key) {
+        final Optional<T> optionalValue = this.get(key);
         if (optionalValue.isPresent()) {
             if (optionalValue.get() instanceof Cycleable) {
-                T next = optionalValue.get().cycleNext();
+                final T next = optionalValue.get().cycleNext();
                 return this.with(key, next);
             }
         }

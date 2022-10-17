@@ -22,16 +22,12 @@ configurations.configureEach {
 }
 
 dependencies {
-    val forgeFlowerVersion: String by project
     val tinyLogVersion: String by project
     implementation("com.squareup:javapoet:1.13.0")
     implementation("com.github.javaparser:javaparser-core:3.24.4")
     implementation("org.tinylog:tinylog-api:$tinyLogVersion")
     runtimeOnly("org.tinylog:tinylog-impl:$tinyLogVersion")
     runtimeOnly("org.tinylog:slf4j-tinylog:$tinyLogVersion") // todo: doesn't work for some reason?
-
-    // Decompiler
-    forgeFlower("net.minecraftforge:forgeflower:$forgeFlowerVersion")
 }
 
 indraSpotlessLicenser {

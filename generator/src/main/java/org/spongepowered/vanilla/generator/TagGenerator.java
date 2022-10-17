@@ -89,7 +89,7 @@ public final class TagGenerator implements Generator {
                         "return $T.of($T.$L, $N);",
                         Types.TAG,
                         Types.REGISTRY_TYPES,
-                        registryTypeName.toUpperCase(Locale.ROOT),
+                        this.registryTypeName.toUpperCase(Locale.ROOT),
                         locationParam
                 ).build();
 

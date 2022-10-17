@@ -64,7 +64,7 @@ public abstract class DropperBlockMixin_Inventory {
             if (itemstack1.getCount() == itemstack.getCount() - 1) {
                 final TrackedInventoryBridge capture = InventoryUtil.forCapture(dispensertileentity);
                 final Inventory sourceInv = ((Inventory) dispensertileentity);
-                SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
+                final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
                 InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
             }
         }
@@ -85,7 +85,7 @@ public abstract class DropperBlockMixin_Inventory {
             if (itemstack1.getCount() == itemstack.getCount() - 1) {
                 final TrackedInventoryBridge capture = InventoryUtil.forCapture(dispensertileentity);
                 final Inventory sourceInv = ((Inventory) dispensertileentity);
-                SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
+                final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
                 final Direction enumfacing = worldIn.getBlockState(pos).getValue(DispenserBlock.FACING);
                 final BlockPos blockpos = pos.relative(enumfacing);
                 final Container iinventory = HopperBlockEntityAccessor.invoker$getContainerAt(worldIn, blockpos.getX(), blockpos.getY(), blockpos.getZ());

@@ -83,7 +83,7 @@ public abstract class FluidMixin_API implements FluidType {
     }
 
     @Override
-    public boolean is(Tag<FluidType> tag) {
+    public boolean is(final Tag<FluidType> tag) {
         return this.builtInRegistryHolder.is((TagKey<Fluid>) (Object) tag);
     }
 }

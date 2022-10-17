@@ -67,7 +67,7 @@ public final class SpongeNoiseGeneratorConfig {
         }
 
         @Override
-        public NoiseGeneratorConfig.Builder surfaceRule(SurfaceRule rule) {
+        public NoiseGeneratorConfig.Builder surfaceRule(final SurfaceRule rule) {
             this.surfaceRule = rule;
             return this;
         }
@@ -80,7 +80,7 @@ public final class SpongeNoiseGeneratorConfig {
         }
 
         @Override
-        public NoiseGeneratorConfig.Builder mobGeneration(boolean mobGeneration) {
+        public NoiseGeneratorConfig.Builder mobGeneration(final boolean mobGeneration) {
             this.disableMobGeneration = !mobGeneration;
             return this;
         }
@@ -98,7 +98,7 @@ public final class SpongeNoiseGeneratorConfig {
         }
 
         @Override
-        public NoiseGeneratorConfig.Builder randomSource(boolean useLegacyRandomSource) {
+        public NoiseGeneratorConfig.Builder randomSource(final boolean useLegacyRandomSource) {
             this.legacyRandomSource = useLegacyRandomSource;
             return this;
         }

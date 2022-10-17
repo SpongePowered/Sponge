@@ -30,7 +30,6 @@ import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.portal.PortalTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.portal.PortalLogic;
 
 // PortalLogic matches signatures for ITeleporter when appropriate,
