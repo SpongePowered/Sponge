@@ -27,7 +27,6 @@ package org.spongepowered.common;
 import com.google.common.base.MoreObjects;
 import net.minecraft.SharedConstants;
 import org.spongepowered.api.MinecraftVersion;
-import org.spongepowered.common.util.Constants;
 
 import java.util.OptionalInt;
 

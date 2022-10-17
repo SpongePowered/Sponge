@@ -82,7 +82,7 @@ public final class BlockStatePropertyImpl {
 
     public static class BooleanFactoryImpl implements BooleanStateProperty.Factory {
 
-        @Override 
+        @Override
         public BooleanStateProperty of(String name) {
             return (BooleanStateProperty) BlockStatePropertyImpl.properties().get(name);
         }

@@ -25,9 +25,9 @@
 package org.spongepowered.common.service.server;
 
 import com.google.common.collect.ImmutableList;
-import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;

@@ -53,14 +53,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.commands.CommandSourceStackAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
-import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.service.server.permission.SpongePermissions;
 import org.spongepowered.common.util.VecHelper;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 @Mixin(CommandSourceStack.class)

@@ -36,8 +36,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.player.PlayerPhase;
-import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
-import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 
 @Mixin(PlayerList.class)
 public class PlayerListMixin_Tracker {

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.network.channel.raw;
 
+import net.minecraft.network.protocol.Packet;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.channel.ChannelBuf;
@@ -32,9 +33,9 @@ import org.spongepowered.api.network.channel.raw.RawDataChannel;
 import org.spongepowered.api.network.channel.raw.handshake.RawHandshakeDataChannel;
 import org.spongepowered.api.network.channel.raw.handshake.RawHandshakeDataRequestHandler;
 import org.spongepowered.api.network.channel.raw.handshake.RawHandshakeDataRequestResponse;
+import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.PacketSender;
-import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.network.channel.SpongeChannel;
 import org.spongepowered.common.network.channel.TransactionResult;
 import org.spongepowered.common.network.channel.TransactionStore;
@@ -44,7 +45,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import net.minecraft.network.protocol.Packet;
 
 @SuppressWarnings("unchecked")
 public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {

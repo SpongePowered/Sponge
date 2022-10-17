@@ -28,11 +28,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
-import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
-import org.spongepowered.common.util.Constants;
-
-import java.util.function.Function;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -42,6 +37,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
+import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
+import org.spongepowered.common.util.Constants;
+
+import java.util.function.Function;
 
 /**
  * Custom ShapelessRecipe.Serializer with support for:

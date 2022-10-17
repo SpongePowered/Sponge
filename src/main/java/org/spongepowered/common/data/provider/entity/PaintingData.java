@@ -24,13 +24,19 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.network.protocol.game.ClientboundAddPaintingPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.decoration.Motive;
+import net.minecraft.world.entity.decoration.Painting;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ArtType;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
-import org.spongepowered.common.accessor.world.entity.decoration.HangingEntityAccessor;
 import org.spongepowered.common.accessor.server.level.ChunkMap_TrackedEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.decoration.HangingEntityAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.launch.Launch;
@@ -38,12 +44,6 @@ import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.network.protocol.game.ClientboundAddPaintingPacket;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.decoration.Motive;
-import net.minecraft.world.entity.decoration.Painting;
 
 public final class PaintingData {
 

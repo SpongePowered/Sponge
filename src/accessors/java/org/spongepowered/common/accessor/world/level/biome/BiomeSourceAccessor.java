@@ -24,15 +24,13 @@
  */
 package org.spongepowered.common.accessor.world.level.biome;
 
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.List;
 import java.util.Set;
-
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeSource;
 
 @Mixin(BiomeSource.class)
 public interface BiomeSourceAccessor {

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;

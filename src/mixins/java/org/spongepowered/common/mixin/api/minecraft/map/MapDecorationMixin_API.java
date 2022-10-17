@@ -36,9 +36,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
 import org.spongepowered.common.map.decoration.SpongeMapDecorationType;
-import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.math.vector.Vector2i;
 
 import javax.annotation.Nullable;

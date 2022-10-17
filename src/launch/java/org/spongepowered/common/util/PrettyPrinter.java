@@ -38,6 +38,7 @@ import org.spongepowered.common.util.PrettyPrinter.IVariableWidthEntry;
 import org.spongepowered.common.util.PrettyPrinter.KeyValue;
 import org.spongepowered.common.util.PrettyPrinter.Row;
 import org.spongepowered.common.util.PrettyPrinter.Table;
+
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -389,7 +390,7 @@ public class PrettyPrinter {
     }
 
     /**
-     * Minimum allowed width 
+     * Minimum allowed width
      */
     private static final int MIN_WIDTH = 40;
 
@@ -413,7 +414,7 @@ public class PrettyPrinter {
     private final List<Object> lines = new ArrayList<Object>();
 
     /**
-     * Table 
+     * Table
      */
     private Table table;
 
@@ -626,7 +627,7 @@ public class PrettyPrinter {
     /**
      * Add elements of the array to the output, one per line
      *
-     * @param array Array of objects to print 
+     * @param array Array of objects to print
      * @return fluent interface
      */
     public PrettyPrinter add(final Object[] array) {

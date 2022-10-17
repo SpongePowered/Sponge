@@ -25,12 +25,12 @@
 package org.spongepowered.common.inject;
 
 import com.google.common.base.MoreObjects;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class SpongeInjectionPoint implements AnnotatedElement {
 

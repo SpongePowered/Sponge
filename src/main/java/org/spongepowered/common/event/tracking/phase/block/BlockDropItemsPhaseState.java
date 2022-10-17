@@ -24,15 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
-
-import net.minecraft.world.entity.Entity;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;

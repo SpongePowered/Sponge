@@ -25,11 +25,9 @@
 package org.spongepowered.common.world.biome.provider;
 
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -60,7 +58,7 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
         return this.biomes;
     }
 
-    
+
     public static final class BuilderImpl implements Builder {
 
         public final List<AttributedBiome> biomes = new ArrayList<>();

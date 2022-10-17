@@ -24,12 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
-import org.spongepowered.api.block.entity.carrier.chest.Chest;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.asm.mixin.Mixin;
-
-import java.util.Optional;
-import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ChestBlock;
@@ -37,6 +31,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
+import org.spongepowered.api.block.entity.carrier.chest.Chest;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.Optional;
+import java.util.Set;
 
 @Mixin(ChestBlockEntity.class)
 public abstract class ChestBlockEntityMixin_API extends RandomizableContainerBlockEntityMixin_API<Chest> implements Chest {
@@ -79,4 +79,3 @@ public abstract class ChestBlockEntityMixin_API extends RandomizableContainerBlo
     }
 
 }
-

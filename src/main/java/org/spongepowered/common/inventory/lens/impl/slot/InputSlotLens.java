@@ -39,7 +39,7 @@ public class InputSlotLens extends FilteringSlotLens {
     public InputSlotLens(SlotLens lens, ItemStackFilter filter, Class<? extends Inventory> adapterType) {
         super(lens, filter, adapterType);
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public Slot getAdapter(Fabric fabric, Inventory parent) {

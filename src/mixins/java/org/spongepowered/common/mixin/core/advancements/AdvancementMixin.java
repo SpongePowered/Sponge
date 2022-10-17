@@ -53,7 +53,6 @@ import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 import org.spongepowered.common.hooks.PlatformHooks;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,6 +61,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 @Mixin(Advancement.class)
 public abstract class AdvancementMixin implements AdvancementBridge {

@@ -25,7 +25,6 @@
 package org.spongepowered.vanilla.mixin.core;
 
 import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
 import net.minecraft.SystemReport;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Final;

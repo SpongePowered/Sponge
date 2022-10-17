@@ -44,9 +44,7 @@ import org.spongepowered.common.util.CommandUtil;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Pattern;
 
 public abstract class AbstractArgumentParser<T> implements ArgumentParser<T>, SuggestionProvider<CommandSourceStack>, ValueParameter<T> {
 

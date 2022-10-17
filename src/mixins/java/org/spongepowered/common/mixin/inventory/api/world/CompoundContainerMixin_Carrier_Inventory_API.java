@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world;
 
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.Container;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -40,8 +42,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.world.CompoundContainer;
-import net.minecraft.world.Container;
 
 @Mixin(CompoundContainer.class)
 public abstract class CompoundContainerMixin_Carrier_Inventory_API implements MultiBlockCarrier {

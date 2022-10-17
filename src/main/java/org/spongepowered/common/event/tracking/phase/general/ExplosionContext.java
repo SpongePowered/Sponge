@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Explosion;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.accessor.world.level.ExplosionAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
-
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Explosion;
 
 public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext> {
 
@@ -57,12 +56,12 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         }
         return this;
     }
-    
+
     public ExplosionContext explosion(final Explosion explosion) {
         this.explosion = explosion;
         return this;
     }
-    
+
     public Explosion getExplosion() {
         return this.explosion;
     }

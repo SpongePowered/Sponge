@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.ai.goal;
 
+import net.minecraft.world.entity.ai.goal.BreedGoal;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -38,7 +39,6 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.entity.ai.goal.BreedGoal;
 
 @Mixin(BreedGoal.class)
 public abstract class BreedGoalMixin {

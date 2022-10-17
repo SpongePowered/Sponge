@@ -27,8 +27,8 @@ package org.spongepowered.common.data.value;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.SetValue;
-import org.spongepowered.common.util.CopyHelper;
 import org.spongepowered.common.data.key.SpongeKey;
+import org.spongepowered.common.util.CopyHelper;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

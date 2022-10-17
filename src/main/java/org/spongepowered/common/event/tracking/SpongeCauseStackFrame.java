@@ -26,11 +26,10 @@ package org.spongepowered.common.event.tracking;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKey;
-
 
 import java.util.Map;
 import java.util.Objects;

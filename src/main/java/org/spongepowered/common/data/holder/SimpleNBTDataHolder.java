@@ -48,12 +48,12 @@ public final class SimpleNBTDataHolder implements DataCompoundHolder, SpongeMuta
         return this.compound;
     }
 
-    @Override 
+    @Override
     public void data$setCompound(final CompoundTag compound) {
         this.compound = compound;
     }
 
-    @Override 
+    @Override
     public NBTDataType data$getNBTDataType() {
         return this.dataType;
     }

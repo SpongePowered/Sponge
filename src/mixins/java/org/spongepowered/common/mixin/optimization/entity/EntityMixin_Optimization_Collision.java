@@ -30,11 +30,7 @@ import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 
 @Mixin(value = Entity.class, priority = 1500)
 public abstract class EntityMixin_Optimization_Collision {

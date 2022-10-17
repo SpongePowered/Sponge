@@ -91,11 +91,12 @@ import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(LivingEntity.class)

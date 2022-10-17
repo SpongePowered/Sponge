@@ -25,12 +25,12 @@
 package org.spongepowered.common.applaunch.config.core;
 
 import com.google.common.collect.ImmutableSet;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Set;
 

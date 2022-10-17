@@ -32,7 +32,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Optional;
 import java.util.OptionalInt;
 
 @Mixin(MapIndex.class)

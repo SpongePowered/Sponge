@@ -78,4 +78,3 @@ public abstract class BaseConfig implements Config {
             .build();
     }
 }
-

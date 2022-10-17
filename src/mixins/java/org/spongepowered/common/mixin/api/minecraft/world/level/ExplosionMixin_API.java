@@ -24,18 +24,19 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.entity.explosive.Explosive;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.level.ExplosionBridge;
 
-import javax.annotation.Nullable;
-import net.minecraft.world.entity.Entity;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.level.Explosion.class)
 public abstract class ExplosionMixin_API implements Explosion {

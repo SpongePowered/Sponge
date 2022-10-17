@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.entity.projectile;
 
+import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
@@ -32,7 +33,6 @@ import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.Optional;
 import java.util.function.Supplier;
-import net.minecraft.world.entity.LivingEntity;
 
 public class SimpleEntityLaunchLogic<P extends Projectile> implements ProjectileLogic<P> {
 

@@ -26,16 +26,15 @@ package org.spongepowered.common.effect.record;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
+import net.minecraft.world.item.RecordItem;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.common.accessor.world.item.RecordItemAccessor;
 import org.spongepowered.math.vector.Vector3i;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
-import net.minecraft.world.item.RecordItem;
 
 public final class SpongeMusicDisc implements MusicDisc {
 

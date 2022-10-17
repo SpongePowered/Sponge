@@ -38,13 +38,14 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
 import org.spongepowered.api.network.status.Favicon;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import javax.imageio.ImageIO;
 
 public class SpongeFavicon implements Favicon {
 

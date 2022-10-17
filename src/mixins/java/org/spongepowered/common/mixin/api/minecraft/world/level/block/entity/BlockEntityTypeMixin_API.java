@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.asm.mixin.Mixin;

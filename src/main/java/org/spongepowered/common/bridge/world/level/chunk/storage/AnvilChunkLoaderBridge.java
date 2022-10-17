@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.bridge.world.level.chunk.storage;
 
-import java.nio.file.Path;
 import net.minecraft.world.level.Level;
+
+import java.nio.file.Path;
 
 public interface AnvilChunkLoaderBridge {
 

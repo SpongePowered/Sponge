@@ -28,7 +28,10 @@ import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalAddress;
+import net.minecraft.network.Connection;
+import net.minecraft.network.PacketListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
@@ -47,9 +50,6 @@ import java.net.UnknownHostException;
 import java.util.Set;
 
 import javax.annotation.Nullable;
-import net.minecraft.network.Connection;
-import net.minecraft.network.PacketListener;
-import net.minecraft.network.protocol.Packet;
 
 @Mixin(Connection.class)
 public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet<?>> implements ConnectionBridge {

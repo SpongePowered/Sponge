@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -43,6 +42,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 
 /**
  * Basic implementation of {@link PermissionDescription}. Can only be used in

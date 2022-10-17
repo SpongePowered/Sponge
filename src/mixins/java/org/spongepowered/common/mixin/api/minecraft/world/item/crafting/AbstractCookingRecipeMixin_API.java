@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
@@ -36,9 +39,6 @@ import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Optional;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.item.crafting.Ingredient;
 
 @Mixin(AbstractCookingRecipe.class)
 public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {

@@ -187,5 +187,3 @@ public abstract class ServerPlayerMixin_HealthScale extends PlayerMixin implemen
     }
 
 }
-
-

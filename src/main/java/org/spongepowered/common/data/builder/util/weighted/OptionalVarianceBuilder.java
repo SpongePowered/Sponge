@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.builder.util.weighted;
 
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.api.data.persistence.DataView;
+
 import java.util.Optional;
 
 public final class OptionalVarianceBuilder extends AbstractDataBuilder<VariableAmount.OptionalAmount> {

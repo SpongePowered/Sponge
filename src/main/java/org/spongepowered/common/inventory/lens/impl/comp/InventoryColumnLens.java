@@ -34,7 +34,7 @@ public class InventoryColumnLens extends Inventory2DLens {
     public InventoryColumnLens(int base, int height, int stride, int xBase, int yBase, SlotLensProvider slots) {
         this(base, height, stride, xBase, yBase, InventoryColumnAdapter.class, slots);
     }
-    
+
     public InventoryColumnLens(int base, int height, int stride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
         super(base, 1, height, stride, xBase, yBase, adapterType, slots);
     }
@@ -43,5 +43,5 @@ public class InventoryColumnLens extends Inventory2DLens {
     public Inventory getAdapter(Fabric fabric, Inventory parent) {
         return new InventoryColumnAdapter(fabric, this, parent);
     }
-    
+
 }

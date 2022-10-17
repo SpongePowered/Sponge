@@ -40,7 +40,7 @@ public abstract class EntityMixin_Vanilla implements EntityBridge {
     // @formatter:off
     @Shadow public Level level;
     // @formatter:on
-    
+
     /**
      * @author dualspiral - 19th December 2020 - 1.16.4
      * @reason Overwrite to redirect call to

@@ -33,7 +33,6 @@ import net.minecraft.tags.Tag;
 import org.apache.commons.io.FileUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.registry.RegistryType;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.datapack.tag.TagSerializedObject;
 
 import java.io.BufferedReader;

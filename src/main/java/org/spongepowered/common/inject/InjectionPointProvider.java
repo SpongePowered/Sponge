@@ -32,6 +32,7 @@ import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProvisionListener;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
@@ -39,7 +40,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.List;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Allows injecting the {@link SpongeInjectionPoint} in {@link Provider}s.

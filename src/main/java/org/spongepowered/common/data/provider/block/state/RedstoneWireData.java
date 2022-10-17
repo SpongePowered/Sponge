@@ -25,6 +25,10 @@
 package org.spongepowered.common.data.provider.block.state;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.RedstoneSide;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.util.Direction;
@@ -35,10 +39,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.world.level.block.RedStoneWireBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.block.state.properties.RedstoneSide;
 
 public final class RedstoneWireData {
 

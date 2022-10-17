@@ -24,15 +24,16 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
 import org.spongepowered.api.block.entity.EnchantmentTable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
+
 import java.util.Set;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
 
 @Mixin(EnchantmentTableBlockEntity.class)
 public abstract class EnchantmentTableBlockEntityMixin_API extends BlockEntityMixin_API implements EnchantmentTable {

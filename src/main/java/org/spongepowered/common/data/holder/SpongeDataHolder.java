@@ -88,7 +88,7 @@ public interface SpongeDataHolder extends DataHolder {
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     default boolean supports(final Key<?> key) {
-    	// XX: JDT cannot infer this cast
+        // XX: JDT cannot infer this cast
         return (boolean) this.impl$apply((Key) key, (p, d) -> true, () -> false);
     }
 

@@ -26,12 +26,9 @@ package org.spongepowered.common.mixin.core.world.level.levelgen;
 
 import static net.minecraft.world.level.levelgen.WorldGenSettings.makeDefaultOverworld;
 
-import net.minecraft.core.Holder;
-import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
@@ -79,7 +76,7 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
         if (BootstrapProperties.worldGenSettings == null) {
             BootstrapProperties.worldGenSettings = (WorldGenSettings) (Object) this;
         }
-        
+
         if (BootstrapProperties.worldGenSettings == (Object) this) {
             return registry.get(registryKey);
         }

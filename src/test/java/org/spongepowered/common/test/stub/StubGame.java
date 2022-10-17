@@ -42,9 +42,10 @@ import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
 import org.spongepowered.common.test.stub.registry.StubRegistryHolder;
 
-import javax.inject.Singleton;
 import java.nio.file.Path;
 import java.util.Locale;
+
+import javax.inject.Singleton;
 
 @Singleton
 public class StubGame extends StubRegistryHolder implements Game {

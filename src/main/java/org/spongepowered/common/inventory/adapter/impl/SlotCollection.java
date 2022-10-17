@@ -33,17 +33,17 @@ import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.DelegatingLens;
-import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.List;
 
 public class SlotCollection {
-    
+
     private Inventory parent;
 
     private final Fabric fabric;
-    
+
     private final List<Slot> slots;
 
     private SlotCollection(Inventory parent, Fabric fabric, Lens lens, SlotLensProvider slots) {
@@ -51,7 +51,7 @@ public class SlotCollection {
         this.fabric = fabric;
         this.slots = this.traverseSpanningTree(fabric, lens, ImmutableList.<Slot>builder()).build();
     }
-    
+
     @SuppressWarnings("rawtypes")
     private Builder<Slot> traverseSpanningTree(Fabric fabric, Lens lens, Builder<Slot> list) {
         if (lens instanceof SlotLens) {

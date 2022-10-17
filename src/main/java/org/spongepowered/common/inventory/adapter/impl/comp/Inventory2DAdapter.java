@@ -46,7 +46,7 @@ public class Inventory2DAdapter extends BasicInventoryAdapter implements Invento
         super(fabric, root, parent);
         this.lens2d = root;
     }
-    
+
     public SlotLens getSlotLens(int x, int y) {
         return this.getSlotLens(Vector2i.from(x, y));
     }

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Explosion.BlockInteraction;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
@@ -37,9 +39,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.accessor.world.entity.projectile.ProjectileAccessor;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 import org.spongepowered.common.bridge.world.entity.projectile.WitherSkullBridge;
-import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
@@ -47,9 +49,6 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
-
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Explosion.BlockInteraction;
 
 @Mixin(net.minecraft.world.entity.projectile.WitherSkull.class)
 public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin implements WitherSkullBridge, ExplosiveBridge {

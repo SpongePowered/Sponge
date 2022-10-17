@@ -46,7 +46,6 @@ import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.SeedUtil;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory {

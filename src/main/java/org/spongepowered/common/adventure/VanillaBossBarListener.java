@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.adventure;
 
-import java.util.Set;
-import java.util.function.Function;
-
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
@@ -34,6 +31,9 @@ import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.BossEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.Set;
+import java.util.function.Function;
 
 public final class VanillaBossBarListener implements BossBar.Listener {
     private final ServerBossEvent vanilla;

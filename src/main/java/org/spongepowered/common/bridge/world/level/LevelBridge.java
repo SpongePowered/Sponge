@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.world.level;
 
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -34,7 +33,6 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.Collection;
 import java.util.function.Predicate;
 
 public interface LevelBridge {

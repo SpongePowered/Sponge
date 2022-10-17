@@ -40,7 +40,7 @@ public final class UpdateWorldRendererEffect implements ProcessingSideEffect {
     }
 
     UpdateWorldRendererEffect() {}
-    
+
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag, final int limit

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.common.accessor.world.level.block.entity.BeaconBlockEntityAccessor;
@@ -31,8 +33,6 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 
 public final class BeaconData {
 

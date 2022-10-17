@@ -27,8 +27,8 @@ package org.spongepowered.common.command.registrar.tree.builder;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.SharedSuggestionProvider;
-import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 import org.spongepowered.common.command.brigadier.tree.ForcedRedirectArgumentSuggestionNode;
 
 public abstract class ArgumentCommandTreeNode<T extends CommandTreeNode<T>>

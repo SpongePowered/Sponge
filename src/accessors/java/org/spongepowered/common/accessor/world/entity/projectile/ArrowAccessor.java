@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.accessor.world.entity.projectile;
 
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.projectile.Arrow;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Set;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.projectile.Arrow;
 
 @Mixin(Arrow.class)
 public interface ArrowAccessor {

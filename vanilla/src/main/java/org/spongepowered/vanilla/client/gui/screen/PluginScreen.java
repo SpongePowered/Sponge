@@ -29,7 +29,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TextComponent;
@@ -40,7 +39,6 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.client.gui.widget.MetadataPanel;
 import org.spongepowered.vanilla.client.gui.widget.list.PluginSelectionList;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;

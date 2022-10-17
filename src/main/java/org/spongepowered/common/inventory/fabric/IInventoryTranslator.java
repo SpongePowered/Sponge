@@ -25,11 +25,11 @@
 package org.spongepowered.common.inventory.fabric;
 
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 
 import java.util.Collection;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
 
 /**
  * Provides {@link Fabric} access to an {@link Container}

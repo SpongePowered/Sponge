@@ -38,7 +38,6 @@ import org.spongepowered.plugin.builtin.jvm.JVMKeys;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;

@@ -27,7 +27,6 @@ package org.spongepowered.common.entity.living.human;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
-import com.mojang.serialization.Lifecycle;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;

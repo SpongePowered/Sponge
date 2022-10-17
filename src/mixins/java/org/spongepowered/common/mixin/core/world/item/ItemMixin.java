@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.world.item;
 
+import net.minecraft.world.item.Item;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.item.ItemBridge;
 
 import java.util.StringJoiner;
-import net.minecraft.world.item.Item;
 
 @Mixin(Item.class)
 public abstract class ItemMixin implements ItemBridge {

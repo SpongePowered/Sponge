@@ -42,7 +42,6 @@ import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
-import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryEvent;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryValueEvent;
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;

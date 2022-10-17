@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.projectile.Arrow;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.accessor.world.entity.projectile.ArrowAccessor;
@@ -31,8 +33,6 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.Set;
 import java.util.stream.Collectors;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.projectile.Arrow;
 
 public final class ArrowData {
 

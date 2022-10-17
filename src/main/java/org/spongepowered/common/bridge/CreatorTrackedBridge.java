@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.bridge;
 
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.applaunch.config.common.ModuleCategory;
@@ -32,8 +34,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.Optional;
 import java.util.UUID;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * An optionally implemented interface to bridge getting the

@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,9 +35,6 @@ import org.spongepowered.common.inventory.fabric.Fabric;
 
 import java.util.Collection;
 import java.util.Collections;
-import net.minecraft.world.Container;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
 
 @Mixin(Slot.class)
 public abstract class SlotMixin_Fabric_Inventory implements Fabric, InventoryBridge {

@@ -25,12 +25,16 @@
 package org.spongepowered.common.service.server.ban;
 
 import com.google.inject.Singleton;
+import net.minecraft.server.players.IpBanList;
+import net.minecraft.server.players.IpBanListEntry;
+import net.minecraft.server.players.StoredUserEntry;
+import net.minecraft.server.players.UserBanList;
+import net.minecraft.server.players.UserBanListEntry;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.ban.Ban;
+import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.players.IpBanListAccessor;
@@ -46,12 +50,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-
-import net.minecraft.server.players.IpBanList;
-import net.minecraft.server.players.IpBanListEntry;
-import net.minecraft.server.players.StoredUserEntry;
-import net.minecraft.server.players.UserBanList;
-import net.minecraft.server.players.UserBanListEntry;
 
 /**
  * The default implementation of {@link BanService}.

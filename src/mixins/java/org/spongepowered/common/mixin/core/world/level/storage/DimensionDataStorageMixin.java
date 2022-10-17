@@ -37,7 +37,6 @@ import org.spongepowered.common.data.DataUtil;
 
 import java.io.File;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 @Mixin(DimensionDataStorage.class)
 public abstract class DimensionDataStorageMixin {

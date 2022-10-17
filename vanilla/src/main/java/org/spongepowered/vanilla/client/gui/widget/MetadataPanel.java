@@ -42,7 +42,6 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.client.gui.screen.PluginScreen;
 import org.spongepowered.vanilla.util.Bounds;
 
-import javax.annotation.Nullable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -53,6 +52,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 public final class MetadataPanel extends ScrollPanel implements NarratableEntry {
 

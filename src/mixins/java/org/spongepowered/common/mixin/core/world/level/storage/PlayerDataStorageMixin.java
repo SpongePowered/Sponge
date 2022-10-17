@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.world.level.storage;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -39,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.util.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,10 +50,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.storage.PlayerDataStorage;
-import org.spongepowered.common.util.FileUtil;
 
 @Mixin(PlayerDataStorage.class)
 public abstract class PlayerDataStorageMixin {

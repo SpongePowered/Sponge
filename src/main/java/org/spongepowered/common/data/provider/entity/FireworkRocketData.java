@@ -32,8 +32,8 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.projectile.FireworkRocketEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.FireworkUtil;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.FireworkUtil;
 import org.spongepowered.common.util.SpongeTicks;
 
 public final class FireworkRocketData {

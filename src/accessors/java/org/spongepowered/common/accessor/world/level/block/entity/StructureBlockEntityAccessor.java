@@ -57,5 +57,5 @@ public interface StructureBlockEntityAccessor {
     @Accessor("integrity") float accessor$integrity();
 
     @Accessor("seed") long accessor$seed();
-    
+
 }

@@ -57,4 +57,3 @@ public class SpongeQueryBuilder implements Query.Builder {
         return this;
     }
 }
-

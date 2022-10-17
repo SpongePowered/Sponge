@@ -27,6 +27,11 @@ package org.spongepowered.common.item.recipe.stonecutting;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -43,11 +48,6 @@ import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.util.Collections;
 import java.util.function.Function;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 
 public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, StoneCutterRecipe.Builder> implements
         StoneCutterRecipe.Builder, StoneCutterRecipe.Builder.ResultStep, StoneCutterRecipe.Builder.EndStep {

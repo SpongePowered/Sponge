@@ -39,8 +39,8 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.accessor.world.scores.ScoreboardAccessor;
-import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
+import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 
 import java.util.Collection;

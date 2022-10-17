@@ -141,12 +141,12 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
         this.impl$uuid = mapStorage.requestUUID(this.impl$mapId);
     }
 
-    @Override 
+    @Override
     public CompoundTag data$getCompound() {
         return this.impl$nbt;
     }
 
-    @Override 
+    @Override
     public void data$setCompound(final CompoundTag nbt) {
         this.impl$nbt = nbt;
     }

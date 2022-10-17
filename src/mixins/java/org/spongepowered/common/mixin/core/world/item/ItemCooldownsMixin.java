@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.item;
 
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemCooldowns;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,8 +37,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.item.ItemCooldownsBridge;
 
 import java.util.Map;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemCooldowns;
 
 @Mixin(ItemCooldowns.class)
 public abstract class ItemCooldownsMixin implements ItemCooldownsBridge {

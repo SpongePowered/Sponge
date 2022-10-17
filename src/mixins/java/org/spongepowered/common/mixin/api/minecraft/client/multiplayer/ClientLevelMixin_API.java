@@ -25,13 +25,10 @@
 package org.spongepowered.common.mixin.api.minecraft.client.multiplayer;
 
 import com.google.common.collect.ImmutableList;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.entity.LevelEntityGetter;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.client.ClientPlayer;
 import org.spongepowered.api.world.client.ClientLocation;
@@ -45,11 +42,9 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelMixin_API extends LevelMixin_API<ClientWorld, ClientLocation> implements org.spongepowered.api.world.client.ClientWorld {

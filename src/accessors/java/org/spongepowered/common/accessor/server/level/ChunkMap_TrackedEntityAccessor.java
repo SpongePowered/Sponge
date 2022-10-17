@@ -25,13 +25,12 @@
 package org.spongepowered.common.accessor.server.level;
 
 import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-
-import java.util.List;
-import java.util.Set;
-import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import java.util.Set;
 
 @Mixin(targets = "net/minecraft/server/level/ChunkMap$TrackedEntity")
 public interface ChunkMap_TrackedEntityAccessor {

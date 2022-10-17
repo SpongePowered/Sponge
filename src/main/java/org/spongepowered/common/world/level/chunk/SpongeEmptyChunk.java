@@ -161,17 +161,17 @@ public final class SpongeEmptyChunk implements WorldChunk {
         throw this.emptyChunkError();
     }
 
-    @Override 
+    @Override
     public VolumeStream<WorldChunk, Biome> biomeStream(Vector3i min, Vector3i max, StreamOptions options) {
         throw this.emptyChunkError();
     }
 
-    @Override 
+    @Override
     public boolean setBiome(int x, int y, int z, Biome biome) {
         throw this.emptyChunkError();
     }
 
-    @Override 
+    @Override
     public BlockState block(int x, int y, int z) {
         throw this.emptyChunkError();
     }
@@ -181,7 +181,7 @@ public final class SpongeEmptyChunk implements WorldChunk {
         throw this.emptyChunkError();
     }
 
-    @Override 
+    @Override
     public int highestYAt(int x, int z) {
         throw this.emptyChunkError();
     }

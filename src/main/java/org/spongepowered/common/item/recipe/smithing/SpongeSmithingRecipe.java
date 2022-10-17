@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.item.recipe.smithing;
 
-import java.util.function.Function;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.UpgradeRecipe;
+
+import java.util.function.Function;
 
 public class SpongeSmithingRecipe extends UpgradeRecipe {
 

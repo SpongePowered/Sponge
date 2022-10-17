@@ -831,5 +831,3 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         this.bridge$refreshScaledHealth();
     }
 }
-
-

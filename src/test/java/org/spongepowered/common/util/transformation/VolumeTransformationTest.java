@@ -66,7 +66,6 @@ import org.spongepowered.common.test.stub.StubModule;
 import org.spongepowered.common.test.stub.block.StubBlock;
 import org.spongepowered.common.test.stub.block.StubState;
 import org.spongepowered.common.test.stub.registry.StubRegistryFactory;
-import org.spongepowered.common.test.stub.registry.StubRegistryHolder;
 import org.spongepowered.common.test.stub.registry.StubbedRegistry;
 import org.spongepowered.common.test.stub.util.StubMirror;
 import org.spongepowered.common.test.stub.util.StubRotations;

@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.fixer;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

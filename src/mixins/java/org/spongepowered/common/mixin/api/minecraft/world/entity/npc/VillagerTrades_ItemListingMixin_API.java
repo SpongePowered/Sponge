@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.npc;
 
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.item.trading.MerchantOffer;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.npc.VillagerTrades;
-import net.minecraft.world.item.trading.MerchantOffer;
 import java.util.Random;
+
+import javax.annotation.Nullable;
 
 @Mixin(VillagerTrades.ItemListing.class)
 public interface VillagerTrades_ItemListingMixin_API extends TradeOfferGenerator {

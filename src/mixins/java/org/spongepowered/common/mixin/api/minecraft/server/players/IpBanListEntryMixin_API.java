@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.server.players;
 
+import net.minecraft.server.players.IpBanListEntry;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.ban.BanTypes;
@@ -31,7 +32,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.server.players.IpBanListEntryBridge;
 
 import java.net.InetAddress;
-import net.minecraft.server.players.IpBanListEntry;
 
 @Mixin(IpBanListEntry.class)
 public abstract class IpBanListEntryMixin_API extends BanListEntryMixin_API<String> implements Ban.IP {

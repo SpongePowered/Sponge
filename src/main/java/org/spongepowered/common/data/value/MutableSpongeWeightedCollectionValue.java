@@ -29,8 +29,8 @@ import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.util.weighted.TableEntry;
 import org.spongepowered.api.util.weighted.UnmodifiableWeightedTable;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.common.util.CopyHelper;
 import org.spongepowered.common.data.key.SpongeKey;
+import org.spongepowered.common.util.CopyHelper;
 
 import java.util.List;
 import java.util.Random;

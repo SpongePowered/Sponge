@@ -35,7 +35,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.SeedUtil;
 
-import java.util.Objects;
 
 @Mixin(WorldGenSettings.class)
 @Implements(@Interface(iface = WorldGenerationConfig.class, prefix = "worldGenerationConfig$", remap = Remap.NONE))

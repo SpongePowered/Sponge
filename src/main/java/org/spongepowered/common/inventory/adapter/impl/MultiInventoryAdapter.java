@@ -27,8 +27,8 @@ package org.spongepowered.common.inventory.adapter.impl;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.lens.impl.QueryLens;
 import org.spongepowered.common.inventory.fabric.CompoundFabric;
+import org.spongepowered.common.inventory.lens.impl.QueryLens;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -26,9 +26,11 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.block.state;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.value.Value;
@@ -39,17 +41,14 @@ import org.spongepowered.api.util.Cycleable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
+import org.spongepowered.common.util.AxisUtil;
+import org.spongepowered.common.util.DirectionUtil;
+import org.spongepowered.common.util.PortionTypeUtil;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import net.minecraft.world.level.block.state.StateHolder;
-import net.minecraft.world.level.block.state.properties.Property;
-import org.spongepowered.common.util.AxisUtil;
-import org.spongepowered.common.util.DirectionUtil;
-import org.spongepowered.common.util.PortionTypeUtil;
 
 @Mixin(StateHolder.class)
 public abstract class StateHolderMixin_API<S extends State<S>, C> implements State<S>, SpongeImmutableDataHolder<S> {

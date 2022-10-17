@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.effect.potion;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.world.effect.MobEffect;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -44,7 +44,6 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.world.effect.MobEffect;
 
 @DefaultQualifier(NonNull.class)
 public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> implements PotionEffect.Builder {

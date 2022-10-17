@@ -56,7 +56,6 @@ import org.spongepowered.common.server.BootstrapProperties;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {

@@ -26,23 +26,23 @@ package org.spongepowered.common.advancement.criterion;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.util.Mth;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreCriterionProgress;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.CriterionEvent;
-import org.spongepowered.api.event.Cause;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
+import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.time.Instant;
 import java.util.Optional;
-import net.minecraft.util.Mth;
 
 public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, ImplementationBackedCriterionProgress {
 

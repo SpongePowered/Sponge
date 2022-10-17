@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.world.entity.animal.Fox;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.FoxType;
 import org.spongepowered.common.accessor.world.entity.animal.FoxAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.Optional;
-import net.minecraft.world.entity.animal.Fox;
 
 public final class FoxData {
 

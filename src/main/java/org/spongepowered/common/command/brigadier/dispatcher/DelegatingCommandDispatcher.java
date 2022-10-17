@@ -35,12 +35,12 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import net.minecraft.commands.CommandSourceStack;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import net.minecraft.commands.CommandSourceStack;
 
 public final class DelegatingCommandDispatcher extends CommandDispatcher<CommandSourceStack> {
     private final BrigadierCommandRegistrar brigadier;

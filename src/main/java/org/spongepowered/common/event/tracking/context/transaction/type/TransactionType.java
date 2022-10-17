@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.type;
 
-import org.spongepowered.api.event.Event;
-import org.spongepowered.common.event.tracking.PhaseContext;
-
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.Collection;
 import java.util.Objects;

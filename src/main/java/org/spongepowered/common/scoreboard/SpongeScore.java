@@ -30,9 +30,8 @@ import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.common.accessor.world.scores.ObjectiveAccessor;
 import org.spongepowered.common.accessor.world.scores.ScoreAccessor;
-import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.world.scores.ScoreBridge;
 import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
+import org.spongepowered.common.bridge.world.scores.ScoreBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;

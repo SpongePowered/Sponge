@@ -33,7 +33,7 @@ import org.spongepowered.common.inventory.lens.impl.slot.EquipmentSlotLens;
 import java.util.function.Predicate;
 
 public class EquipmentSlotAdapter extends FilteringSlotAdapter implements EquipmentSlot {
-    
+
     protected final EquipmentSlotLens equipmentSlot;
 
     public EquipmentSlotAdapter(Fabric fabric, EquipmentSlotLens lens, Inventory parent) {

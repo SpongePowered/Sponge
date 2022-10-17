@@ -29,20 +29,20 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
-import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
-import org.spongepowered.common.AbstractResourceKeyed;
-import org.spongepowered.common.command.registrar.tree.builder.RangeCommandTreeNode;
-
-import java.util.function.BiFunction;
 import net.minecraft.commands.synchronization.ArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.DoubleArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.FloatArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.IntegerArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.LongArgumentSerializer;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
+import org.spongepowered.common.AbstractResourceKeyed;
+import org.spongepowered.common.command.registrar.tree.builder.RangeCommandTreeNode;
+
+import java.util.function.BiFunction;
 
 public final class SpongeRangeCommandTreeNodeType<N extends Number> extends AbstractResourceKeyed implements CommandTreeNodeType<CommandTreeNode.@NonNull Range<@NonNull N>> {
 

@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.inventory.impl.world.entity;
 
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,9 +43,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fabric, InventoryBridge, LensGeneratorBridge {
