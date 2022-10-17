@@ -33,9 +33,7 @@ import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.command.sponge.SpongeCommand;
 import org.spongepowered.common.data.holder.SpongeDataHolder;
-import org.spongepowered.common.mixin.api.minecraft.tags.TagKeyMixin_API;
 
 import java.util.Collection;
 

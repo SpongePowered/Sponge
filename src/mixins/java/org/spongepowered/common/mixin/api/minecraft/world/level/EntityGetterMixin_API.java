@@ -36,13 +36,14 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
 
 @Mixin(EntityGetter.class)
 public interface EntityGetterMixin_API extends EntityVolume {

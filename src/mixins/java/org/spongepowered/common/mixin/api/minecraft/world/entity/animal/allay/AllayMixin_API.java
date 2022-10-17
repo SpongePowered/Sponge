@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.allay;
 
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Allay;
-import org.spongepowered.api.entity.living.animal.frog.Frog;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.PathfinderMobMixin_API;
 

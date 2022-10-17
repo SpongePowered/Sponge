@@ -53,7 +53,6 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Optional;
 
 @Plugin("particletest")
 public final class ParticleTest {

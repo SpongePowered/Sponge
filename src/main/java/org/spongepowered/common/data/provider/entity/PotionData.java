@@ -24,6 +24,11 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -31,11 +36,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.stream.Collectors;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.projectile.ThrownPotion;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
 
 public final class PotionData {
 

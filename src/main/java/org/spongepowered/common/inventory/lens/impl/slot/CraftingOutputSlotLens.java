@@ -35,7 +35,7 @@ public class CraftingOutputSlotLens extends OutputSlotLens {
     public CraftingOutputSlotLens(SlotLens lens, ItemStackFilter filter) {
         super(lens, filter, CraftingOutputAdapter.class);
     }
-    
+
     @Override
     public Slot getAdapter(Fabric fabric, Inventory parent) {
         return new CraftingOutputAdapter(fabric, this, parent);

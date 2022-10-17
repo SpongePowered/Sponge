@@ -25,8 +25,6 @@
 package org.spongepowered.test.pack;
 
 import com.google.inject.Inject;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.apache.logging.log4j.Logger;
@@ -48,6 +46,9 @@ import org.spongepowered.api.resource.pack.PackContents;
 import org.spongepowered.api.resource.pack.PackType;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 @Plugin("packtest")
 public final class PackTest {

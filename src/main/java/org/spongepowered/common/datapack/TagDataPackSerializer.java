@@ -39,7 +39,7 @@ public final class TagDataPackSerializer<T extends Taggable<T>> extends JsonData
 
     @Override
     protected JsonElement transformSerialized(final Path file, final TagTemplate<T> entry, final JsonElement serialized) throws IOException{
-        JsonElement toWrite = serialized;
+        final JsonElement toWrite = serialized;
         /* TODO support merging
         if (Files.exists(file) && !((SpongeTagTemplate) entry).replace()) {
             final JsonObject jsonObject;

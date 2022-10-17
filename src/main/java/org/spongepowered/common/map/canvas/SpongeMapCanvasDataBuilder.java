@@ -28,8 +28,8 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.map.MapCanvas;
-import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MapUtil;
 
 import java.util.Objects;
 import java.util.Optional;

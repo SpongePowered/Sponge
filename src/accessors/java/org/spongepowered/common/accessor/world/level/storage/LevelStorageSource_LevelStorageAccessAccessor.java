@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.accessor.world.level.storage;
 
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-
-import net.minecraft.world.level.storage.LevelStorageSource;
 
 @Mixin(LevelStorageSource.LevelStorageAccess.class)
 public interface LevelStorageSource_LevelStorageAccessAccessor {

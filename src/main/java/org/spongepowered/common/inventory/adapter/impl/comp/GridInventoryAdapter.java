@@ -42,9 +42,9 @@ import org.spongepowered.math.vector.Vector2i;
 import java.util.Optional;
 
 public class GridInventoryAdapter extends Inventory2DAdapter implements GridInventory {
-    
+
     protected final GridInventoryLens gridLens;
-    
+
     public GridInventoryAdapter(Fabric fabric, GridInventoryLens root) {
         this(fabric, root, null);
     }
@@ -53,7 +53,7 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
         super(fabric, root, parent);
         this.gridLens = root;
     }
-    
+
     @Override
     public int columns() {
         return this.lens2d.getWidth();

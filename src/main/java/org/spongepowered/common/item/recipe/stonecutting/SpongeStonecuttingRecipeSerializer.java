@@ -25,11 +25,6 @@
 package org.spongepowered.common.item.recipe.stonecutting;
 
 import com.google.gson.JsonObject;
-import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
-import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
-import org.spongepowered.common.util.Constants;
-
-import java.util.function.Function;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -39,12 +34,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SingleItemRecipe;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
+import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
+import org.spongepowered.common.util.Constants;
+
+import java.util.function.Function;
 
 public class SpongeStonecuttingRecipeSerializer<R extends SingleItemRecipe> implements RecipeSerializer<R> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public R fromJson(ResourceLocation recipeId, JsonObject json) {
+    public R fromJson(final ResourceLocation recipeId, final JsonObject json) {
         final String group = GsonHelper.getAsString(json, Constants.Recipe.GROUP, "");
         final Ingredient ingredient = IngredientUtil.spongeDeserialize(json.get(Constants.Recipe.STONECUTTING_INGREDIENT));
 
@@ -62,11 +62,12 @@ public class SpongeStonecuttingRecipeSerializer<R extends SingleItemRecipe> impl
 
     @SuppressWarnings("unchecked")
     @Override
-    public R fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
+    public R fromNetwork(final ResourceLocation recipeId, final FriendlyByteBuf buffer) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 
-    public void toNetwork(FriendlyByteBuf buffer, R recipe) {
+    @Override
+    public void toNetwork(final FriendlyByteBuf buffer, final R recipe) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 }

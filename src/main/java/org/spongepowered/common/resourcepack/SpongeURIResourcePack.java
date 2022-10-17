@@ -25,10 +25,10 @@
 package org.spongepowered.common.resourcepack;
 
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 
 public final class SpongeURIResourcePack extends SpongeResourcePack {
@@ -36,13 +36,13 @@ public final class SpongeURIResourcePack extends SpongeResourcePack {
     private final URI uri;
     private final String name;
 
-    public SpongeURIResourcePack(URI uri, @Nullable String hash, Component component) {
+    public SpongeURIResourcePack(final URI uri, final @Nullable String hash, final Component component) {
         super(hash, component);
         this.uri = uri;
         this.name = this.getName0();
     }
 
-    public SpongeURIResourcePack(String uri, @Nullable String hash, Component component) throws URISyntaxException {
+    public SpongeURIResourcePack(final String uri, final @Nullable String hash, final Component component) throws URISyntaxException {
         this(new URI(uri), hash, component);
     }
 

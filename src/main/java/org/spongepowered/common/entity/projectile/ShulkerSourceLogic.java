@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.entity.projectile;
 
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.ShulkerBullet;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.golem.Shulker;
 import org.spongepowered.api.entity.projectile.Projectile;
 
 import java.util.Optional;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.projectile.ShulkerBullet;
 
 public final class ShulkerSourceLogic implements ProjectileSourceLogic<Shulker> {
 

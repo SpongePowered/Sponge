@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.mixin.optimization.world.server;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
@@ -33,10 +37,6 @@ import org.spongepowered.common.mixin.optimization.world.level.LevelReaderMixin_
 
 import java.util.Optional;
 import java.util.stream.Stream;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 
 @Mixin(value = ServerLevel.class, priority = 1500)
 public abstract class ServerWorldMixin_Optimization_Collision implements LevelReaderMixin_Optimization_Collision {

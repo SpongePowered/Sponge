@@ -60,5 +60,3 @@ public abstract class ServerPlayer_ContainerListenerMixin  implements ContainerL
         }
     }
 }
-
-

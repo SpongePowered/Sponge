@@ -24,7 +24,11 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ProfessionType;
 import org.spongepowered.api.data.type.VillagerType;
@@ -33,10 +37,6 @@ import org.spongepowered.common.accessor.world.entity.npc.AbstractVillagerAccess
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.stream.Collectors;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.item.trading.MerchantOffer;
-import net.minecraft.world.item.trading.MerchantOffers;
 
 public final class VillagerData {
 

@@ -25,8 +25,8 @@
 package org.spongepowered.common.util;
 
 import net.minecraft.world.entity.player.Player;
-import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 
 public final class ExperienceHolderUtil {
 

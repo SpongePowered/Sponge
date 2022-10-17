@@ -27,19 +27,18 @@ package org.spongepowered.common.item.enchantment;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
+import net.minecraft.Util;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.random.WeightedRandom;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import net.minecraft.Util;
-import net.minecraft.util.random.WeightedRandom;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 public final class SpongeRandomEnchantmentListBuilder implements Enchantment.RandomListBuilder {
@@ -54,37 +53,37 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
     private final RandomSource randomSource = RandomSource.create();
 
     @Override
-    public Enchantment.RandomListBuilder seed(int seed) {
+    public Enchantment.RandomListBuilder seed(final int seed) {
         this.seed = seed;
         return this;
     }
 
     @Override
-    public Enchantment.RandomListBuilder option(int option) {
+    public Enchantment.RandomListBuilder option(final int option) {
         this.option = option;
         return this;
     }
 
     @Override
-    public Enchantment.RandomListBuilder level(int level) {
+    public Enchantment.RandomListBuilder level(final int level) {
         this.level = level;
         return this;
     }
 
     @Override
-    public Enchantment.RandomListBuilder treasure(boolean treasure) {
+    public Enchantment.RandomListBuilder treasure(final boolean treasure) {
         this.treasure = treasure;
         return this;
     }
 
     @Override
-    public Enchantment.RandomListBuilder fixedPool(List<Enchantment> pool) {
+    public Enchantment.RandomListBuilder fixedPool(final List<Enchantment> pool) {
         this.pool = pool;
         return this;
     }
 
     @Override
-    public Enchantment.RandomListBuilder item(ItemStack item) {
+    public Enchantment.RandomListBuilder item(final ItemStack item) {
         this.item = item;
         return this;
     }
@@ -98,7 +97,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
         if (this.pool == null || this.pool.isEmpty()) {
             checkNotNull(this.item, "The item cannot be null");
             this.randomSource.setSeed(this.seed + this.option);
-            enchantments = EnchantmentHelper.selectEnchantment(randomSource,
+            enchantments = EnchantmentHelper.selectEnchantment(this.randomSource,
                                         ItemStackUtil.toNative(this.item), this.level, this.treasure);
 
 
@@ -113,7 +112,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
     /**
      * See {@link EnchantmentHelper#selectEnchantment}
      */
-    private List<EnchantmentInstance> basedOfFixedPool(RandomSource randomIn, List<Enchantment> pool) {
+    private List<EnchantmentInstance> basedOfFixedPool(final RandomSource randomIn, final List<Enchantment> pool) {
         final List<EnchantmentInstance> list = Lists.<EnchantmentInstance>newArrayList();
 
         final List<EnchantmentInstance> list1 = SpongeRandomEnchantmentListBuilder.toNative(pool);
@@ -140,11 +139,11 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
         return list;
     }
 
-    public static List<Enchantment> fromNative(List<EnchantmentInstance> list) {
+    public static List<Enchantment> fromNative(final List<EnchantmentInstance> list) {
         return list.stream().map(data -> Enchantment.of(((EnchantmentType) data.enchantment), data.level)).collect(Collectors.toList());
     }
 
-    public static List<EnchantmentInstance> toNative(List<Enchantment> list) {
+    public static List<EnchantmentInstance> toNative(final List<Enchantment> list) {
         return list.stream().map(ench ->
                 new EnchantmentInstance(((net.minecraft.world.item.enchantment.Enchantment) ench.type()), ench.level())
         ).collect(Collectors.toList());

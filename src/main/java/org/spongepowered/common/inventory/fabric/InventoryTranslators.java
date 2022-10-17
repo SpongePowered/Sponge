@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.inventory.fabric;
 
+import net.minecraft.world.Container;
+
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.world.Container;
 
 public class InventoryTranslators {
     private static final Map<Class<?>, InventoryTranslator<?>> fabricTranslators = new HashMap<>();

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Mob;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -34,11 +36,9 @@ import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.function.Predicate;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.Mob;
 
 public class EquipmentSlotLens extends FilteringSlotLens {
-    
+
     private final Predicate<EquipmentType> equipmentTypeFilter;
 
     public EquipmentSlotLens(Lens parent, SlotLens lens, EquipmentType type) {
@@ -57,7 +57,7 @@ public class EquipmentSlotLens extends FilteringSlotLens {
     public Predicate<EquipmentType> getEquipmentTypeFilter() {
         return this.equipmentTypeFilter;
     }
-    
+
     @Override
     public Slot getAdapter(Fabric fabric, Inventory parent) {
         return new EquipmentSlotAdapter(fabric, this, parent);

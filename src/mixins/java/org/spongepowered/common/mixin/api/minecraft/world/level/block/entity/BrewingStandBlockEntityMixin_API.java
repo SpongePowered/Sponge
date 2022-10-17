@@ -28,13 +28,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 import org.spongepowered.api.block.entity.carrier.BrewingStand;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Set;
-import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
-import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BrewingStandBlockEntity.class)
 public abstract class BrewingStandBlockEntityMixin_API extends BaseContainerBlockEntityMixin_API implements BrewingStand {
@@ -42,8 +42,8 @@ public abstract class BrewingStandBlockEntityMixin_API extends BaseContainerBloc
     // @formatter:off
     @Shadow private NonNullList<ItemStack> items;
 
-    @Shadow private static void shadow$doBrew(Level param0, BlockPos param1, NonNullList<ItemStack> param2) {};
-    @Shadow private static boolean shadow$isBrewable(NonNullList<ItemStack> param0) {
+    @Shadow private static void shadow$doBrew(final Level param0, final BlockPos param1, final NonNullList<ItemStack> param2) {};
+    @Shadow private static boolean shadow$isBrewable(final NonNullList<ItemStack> param0) {
         return false;
     }
     // @formatter:on

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.decoration;
 
+import net.minecraft.world.damagesource.DamageSource;
 import org.spongepowered.api.entity.hanging.ItemFrame;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -36,8 +37,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.ArrayList;
-
-import net.minecraft.world.damagesource.DamageSource;
 
 @Mixin(net.minecraft.world.entity.decoration.ItemFrame.class)
 public abstract class ItemFrameMixin extends HangingEntityMixin {

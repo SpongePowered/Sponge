@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.world.dragon;
 
+import net.minecraft.world.level.dimension.end.EndDragonFight;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.Objects;
-
-import net.minecraft.world.level.dimension.end.EndDragonFight;
 
 @SuppressWarnings("unchecked")
 public abstract class DragonContext<D extends DragonContext<D>> extends PhaseContext<D> {

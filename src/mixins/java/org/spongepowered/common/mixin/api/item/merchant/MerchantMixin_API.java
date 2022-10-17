@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.item.merchant;
 
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.item.merchant.Merchant;
@@ -32,13 +36,9 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
-import javax.annotation.Nullable;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.trading.MerchantOffer;
-import net.minecraft.world.item.trading.MerchantOffers;
-import net.minecraft.world.level.Level;
 import java.util.Collections;
+
+import javax.annotation.Nullable;
 
 @Mixin(value = Merchant.class)
 @Implements(@Interface(iface = net.minecraft.world.item.trading.Merchant.class, prefix = "imerchant$"))
@@ -58,7 +58,7 @@ public interface MerchantMixin_API extends Merchant {
     @Nullable
     default MerchantOffers imerchant$getOffers() {
         final MerchantOffers merchantRecipes = new MerchantOffers();
-        for (TradeOffer tradeOffer : this.get(Keys.TRADE_OFFERS).orElse(Collections.emptyList())) {
+        for (final TradeOffer tradeOffer : this.get(Keys.TRADE_OFFERS).orElse(Collections.emptyList())) {
             merchantRecipes.add((MerchantOffer) tradeOffer);
         }
         return merchantRecipes;

@@ -26,8 +26,11 @@ package org.spongepowered.common.event.manager;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.common.event.SpongeEventListener;
+
+import java.lang.invoke.MethodHandles;
 
 public abstract class AnnotatedEventListener implements SpongeEventListener<Event> {
 
@@ -44,7 +47,8 @@ public abstract class AnnotatedEventListener implements SpongeEventListener<Even
 
     public interface Factory {
 
-        AnnotatedEventListener create(Object handle, ListenerClassVisitor.DiscoveredMethod method) throws Throwable;
+        AnnotatedEventListener create(Object handle, ListenerClassVisitor.DiscoveredMethod method,
+                                      MethodHandles.@Nullable Lookup lookup) throws Throwable;
 
     }
 

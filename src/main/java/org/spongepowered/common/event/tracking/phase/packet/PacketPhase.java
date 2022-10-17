@@ -29,8 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
@@ -55,7 +53,6 @@ import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.network.protocol.game.ServerboundTeleportToEntityPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundInteractPacketAccessor;
@@ -71,9 +68,9 @@ import org.spongepowered.common.event.tracking.phase.packet.inventory.CloseWindo
 import org.spongepowered.common.event.tracking.phase.packet.inventory.CreativeInventoryPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DoubleClickInventoryState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DropInventoryState;
+import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemInsideWindowState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemOutsideWindowState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemWithHotkeyState;
-import org.spongepowered.common.event.tracking.phase.packet.inventory.DropItemInsideWindowState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.EnchantItemPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.MiddleInventoryClickState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.OpenInventoryState;

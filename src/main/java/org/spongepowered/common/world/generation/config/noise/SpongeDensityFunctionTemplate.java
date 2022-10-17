@@ -40,7 +40,6 @@ import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.world.generation.config.noise.DensityFunctionTemplate;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -48,7 +47,7 @@ import java.util.function.Function;
 
 public record SpongeDensityFunctionTemplate(ResourceKey key, DensityFunction representedFunction, DataPack<DensityFunctionTemplate> pack) implements DensityFunctionTemplate {
 
-    @Override 
+    @Override
     public org.spongepowered.api.world.generation.config.noise.DensityFunction densityFunction() {
         return (org.spongepowered.api.world.generation.config.noise.DensityFunction) this.representedFunction;
     }

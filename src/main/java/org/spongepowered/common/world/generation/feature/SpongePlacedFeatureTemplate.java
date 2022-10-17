@@ -47,7 +47,6 @@ import org.spongepowered.api.world.generation.feature.PlacedFeatureTemplate;
 import org.spongepowered.api.world.generation.feature.PlacementModifier;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;

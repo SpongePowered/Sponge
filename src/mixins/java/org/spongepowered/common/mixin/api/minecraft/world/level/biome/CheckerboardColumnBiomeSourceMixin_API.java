@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
 import org.spongepowered.api.ResourceKey;

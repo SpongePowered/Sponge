@@ -35,9 +35,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.entity.ai.GoalBridge;
 import org.spongepowered.common.registry.provider.GoalTypeProvider;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 @Mixin(Goal.class)
 public abstract class GoalMixin implements GoalBridge {

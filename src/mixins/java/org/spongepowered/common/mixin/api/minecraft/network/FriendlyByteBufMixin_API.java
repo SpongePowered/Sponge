@@ -30,6 +30,8 @@ import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.asm.mixin.Implements;
@@ -46,8 +48,6 @@ import java.io.IOException;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 
 @Mixin(FriendlyByteBuf.class)
 @Implements(@Interface(iface = ChannelBuf.class, prefix = "cbuf$", remap = Remap.NONE))

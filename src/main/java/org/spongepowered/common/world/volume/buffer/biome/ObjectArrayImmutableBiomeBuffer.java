@@ -74,7 +74,7 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
     /**
      * Gets the native biome for the position, resolving virtual biomes to
      * persisted types if needed.
-     * 
+     *
      * @param x The X position
      * @param y The Y position
      * @param z The X position

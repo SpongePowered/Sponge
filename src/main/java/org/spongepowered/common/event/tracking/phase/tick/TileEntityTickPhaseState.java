@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
-
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.entity.SpawnType;

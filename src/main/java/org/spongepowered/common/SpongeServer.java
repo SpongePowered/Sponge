@@ -37,7 +37,7 @@ public interface SpongeServer extends SpongeEngine, Server {
 
     @Override
     ServerScheduler scheduler();
-    
+
     @Override
     SpongeWorldManager worldManager();
 

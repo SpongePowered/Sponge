@@ -63,7 +63,7 @@ public final class InventoryData {
 
     private static Component findDisplayName(Inventory inventory) {
         if (inventory instanceof Container) {
-            for (Inventory viewed : ((Container) inventory).viewed()) {
+            for (final Inventory viewed : ((Container) inventory).viewed()) {
                 inventory = viewed;
                 break;
             }

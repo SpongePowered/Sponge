@@ -43,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConfig implements MultiNoiseBiomeConfig {
@@ -60,7 +59,6 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
         return this.biomes;
     }
 
-    
     public static final class BuilderImpl implements Builder {
 
         public final List<AttributedBiome> biomes = new ArrayList<>();
@@ -78,9 +76,9 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
         }
 
         public Builder addMcBiomes(final Climate.ParameterList<Holder<net.minecraft.world.level.biome.Biome>> biomes) {
-            for (var pair : biomes.values()) {
+            for (final var pair : biomes.values()) {
                 final ResourceKey key = RegistryTypes.BIOME.keyFor(Sponge.server(), (Biome) (Object) pair.getSecond().value());
-                var biome = RegistryTypes.BIOME.referenced(key);
+                final var biome = RegistryTypes.BIOME.referenced(key);
                 this.biomes.add(AttributedBiome.of(biome, (BiomeAttributes) (Object) pair.getFirst()));
             }
             return this;
@@ -128,13 +126,13 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
 
         @Override
         public MultiNoiseBiomeConfig nether() {
-            var biomeSource = (MultiNoiseBiomeSourceAccessor) MultiNoiseBiomeSource.Preset.NETHER.biomeSource((Registry<net.minecraft.world.level.biome.Biome>) Sponge.server().registry(RegistryTypes.BIOME));
+            final var biomeSource = (MultiNoiseBiomeSourceAccessor) MultiNoiseBiomeSource.Preset.NETHER.biomeSource((Registry<net.minecraft.world.level.biome.Biome>) Sponge.server().registry(RegistryTypes.BIOME));
             return new BuilderImpl().addMcBiomes(biomeSource.accessor$parameters()).build();
         }
 
         @Override
         public MultiNoiseBiomeConfig overworld() {
-            var biomeSource = (MultiNoiseBiomeSourceAccessor) MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource((Registry) Sponge.server().registry(RegistryTypes.BIOME));
+            final var biomeSource = (MultiNoiseBiomeSourceAccessor) MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource((Registry) Sponge.server().registry(RegistryTypes.BIOME));
             return new BuilderImpl().addMcBiomes(biomeSource.accessor$parameters()).build();
         }
     }

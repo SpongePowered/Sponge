@@ -89,35 +89,35 @@ public final class WorldTest {
 
         event.register(this.plugin, Command.builder().addParameters(CommonParameters.LOCATION_ONLINE_ONLY, portalTypeParameter)
                      .permission(this.plugin.metadata().id() + ".command.portal.create")
-                     .executor(context -> createPortal(context, portalTypeParameter)).build(), "cp", "createportal")
+                     .executor(context -> this.createPortal(context, portalTypeParameter)).build(), "cp", "createportal")
              .register(this.plugin, Command.builder().addParameters(optPlayerParameter, CommonParameters.LOCATION_ONLINE_ONLY, portalTypeParameter)
                      .permission(this.plugin.metadata().id() + ".command.portal.use")
-                     .executor(context -> useportal(context, optPlayerParameter, portalTypeParameter)).build(), "up", "useportal")
+                     .executor(context -> this.useportal(context, optPlayerParameter, portalTypeParameter)).build(), "up", "useportal")
              .register(this.plugin, Command.builder().addParameters(optPlayerParameter, worldTypeParameter)
                      .permission(this.plugin.metadata().id() + ".command.environment.change")
-                     .executor(context -> changeEnvironement(context, optPlayerParameter, worldTypeParameter)).build(), "ce", "changeenvironment")
+                     .executor(context -> this.changeEnvironement(context, optPlayerParameter, worldTypeParameter)).build(), "ce", "changeenvironment")
              .register(this.plugin, Command.builder().addParameters(CommonParameters.WORLD, worldTypeParameter)
                      .permission(this.plugin.metadata().id() + ".command.worldtype.change")
-                     .executor(context -> changeworldType(context, worldTypeParameter)).build(), "cwt", "changeworldtype")
+                     .executor(context -> this.changeworldType(context, worldTypeParameter)).build(), "cwt", "changeworldtype")
              .register(this.plugin, Command.builder().addParameters(optPlayerParameter, optWorldParameter, optPositionParameter)
                      .permission(this.plugin.metadata().id() + ".command.location.change")
-                     .executor(context -> changelocation(context, optPlayerParameter, optWorldParameter, optPositionParameter)).build(), "cl", "changelocation")
+                     .executor(context -> this.changelocation(context, optPlayerParameter, optWorldParameter, optPositionParameter)).build(), "cl", "changelocation")
              .register(this.plugin, Command.builder().addParameter(worldKeyParameter)
                      .permission(this.plugin.metadata().id() + ".command.world.load")
-                     .executor(context -> loadWorld(context, worldKeyParameter)).build(), "lw", "loadworld")
+                     .executor(context -> this.loadWorld(context, worldKeyParameter)).build(), "lw", "loadworld")
              .register(this.plugin, Command.builder().addParameters(worldKeyParameter, worldTypeParameter)
                      .permission(this.plugin.metadata().id() + ".command.world.create")
-                     .executor(context -> createWorld(context, worldKeyParameter, worldTypeParameter)).build(), "cw", "createworld")
+                     .executor(context -> this.createWorld(context, worldKeyParameter, worldTypeParameter)).build(), "cw", "createworld")
              .register(this.plugin, Command.builder().addParameter(CommonParameters.WORLD)
                      .executor(this::unloadWorld).build(), "uw", "unloadworld")
              .register(this.plugin, Command.builder().addParameters(worldKeyParameter, copyWorldKeyParameter)
-                     .executor(context -> copyWorld(context, worldKeyParameter, copyWorldKeyParameter)).build(), "cpw", "copyworld")
+                     .executor(context -> this.copyWorld(context, worldKeyParameter, copyWorldKeyParameter)).build(), "cpw", "copyworld")
              .register(this.plugin, Command.builder().addParameters(worldKeyParameter, moveWorldKeyParameter)
-                     .executor(context -> moveWorld(context, worldKeyParameter, moveWorldKeyParameter)).build(), "mw", "moveworld")
+                     .executor(context -> this.moveWorld(context, worldKeyParameter, moveWorldKeyParameter)).build(), "mw", "moveworld")
              .register(this.plugin, Command.builder().addParameters(worldKeyParameter)
-                     .executor(context -> deleteWorld(context, worldKeyParameter)).build(), "dw", "deleteworld")
+                     .executor(context -> this.deleteWorld(context, worldKeyParameter)).build(), "dw", "deleteworld")
              .register(this.plugin, Command.builder().addParameter(optPlayerParameter)
-                     .executor(context -> whereami(context, optPlayerParameter)) .build(), "wai", "whereami")
+                     .executor(context -> this.whereami(context, optPlayerParameter)) .build(), "wai", "whereami")
              .register(this.plugin, Command.builder()
                      .executor(this::worldTypes).build(), "worldtypes")
             .register(this.plugin, Command.builder()
@@ -282,9 +282,9 @@ public final class WorldTest {
 
 
 
-    private CommandResult worldTypes(CommandContext commandContext) {
+    private CommandResult worldTypes(final CommandContext commandContext) {
         final Optional<ServerPlayer> optPlayer = commandContext.cause().first(ServerPlayer.class);
-        for (WorldType wt : WorldTypes.registry().stream().toList()) {
+        for (final WorldType wt : WorldTypes.registry().stream().toList()) {
             final WorldTypeTemplate template = WorldTypeTemplate.builder().fromValue(wt).key(ResourceKey.of(this.plugin, "test")).build();
             final DataContainer dataContainer = template.toContainer();
             optPlayer.ifPresent(player -> player.sendMessage(Component.text(template.key().toString())));
@@ -293,17 +293,17 @@ public final class WorldTest {
                 System.out.println(DataFormats.JSON.get().write(dataContainer));
                 final WorldTypeTemplate rebuiltTemplate = WorldTypeTemplate.builder().fromDataPack(dataContainer)
                         .key(ResourceKey.of(this.plugin, "custom" + template.key().value())).build();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 e.printStackTrace();
             }
         }
         return CommandResult.success();
     }
 
-    private CommandResult worldTemplates(CommandContext commandContext) {
+    private CommandResult worldTemplates(final CommandContext commandContext) {
         final DataPackManager dm = Sponge.server().dataPackManager();
         final List<ResourceKey> templates = dm.list(DataPacks.WORLD);
-        for (ResourceKey key : templates) {
+        for (final ResourceKey key : templates) {
 
             try {
                 final Optional<WorldTemplate> template = dm.load(DataPacks.WORLD, key).join();
@@ -312,7 +312,7 @@ public final class WorldTest {
                 } else {
                     System.out.println(key + " (no template)");
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 System.err.println(key + " " + e.getMessage());
             }
 

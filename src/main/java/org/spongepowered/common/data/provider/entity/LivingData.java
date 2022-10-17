@@ -77,7 +77,7 @@ public final class LivingData {
                     .create(Keys.AUTO_SPIN_ATTACK_TICKS)
                         .get(h -> Ticks.of(((LivingEntityAccessor)h).accessor$autoSpinAttackTicks()))
                         .setAnd((h, v) -> {
-                            if (h instanceof Player p) {
+                            if (h instanceof final Player p) {
                                 p.startAutoSpinAttack((int) v.ticks());
                                 return true;
                             }

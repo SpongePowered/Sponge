@@ -25,7 +25,10 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.flat;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryReference;
@@ -39,9 +42,6 @@ import org.spongepowered.common.SpongeCommon;
 
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.core.Registry;
-import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
-import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 
 @Mixin(FlatLevelGeneratorSettings.class)
 public abstract class FlatLevelGeneratorSettingsMixin_API implements FlatGeneratorConfig {
@@ -69,7 +69,7 @@ public abstract class FlatLevelGeneratorSettingsMixin_API implements FlatGenerat
         final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
         return RegistryKey.of(RegistryTypes.BIOME, (ResourceKey) (Object) registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.shadow$getBiome().value())).asReference();
     }
-    
+
     @Override
     public boolean performDecoration() {
         return this.decoration;

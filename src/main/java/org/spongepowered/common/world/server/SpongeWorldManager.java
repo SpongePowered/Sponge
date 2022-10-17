@@ -163,7 +163,7 @@ public abstract class SpongeWorldManager implements WorldManager {
     @Override
     public Optional<Path> worldDirectory(final ResourceKey key) {
         Objects.requireNonNull(key, "key");
-        
+
         Path directory = this.getDirectory(key);
         if (Files.notExists(directory)) {
             return Optional.empty();
@@ -199,7 +199,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                     if (namespacedDirectory.equals(valueDirectory)) {
                         continue;
                     }
-                    
+
                     worldKeys.add(ResourceKey.of(namespacedDirectory.getFileName().toString(), valueDirectory.getFileName().toString()));
                 }
             }

@@ -31,7 +31,6 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.key.SpongeKey;
 
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 import java.util.random.RandomGenerator;
 

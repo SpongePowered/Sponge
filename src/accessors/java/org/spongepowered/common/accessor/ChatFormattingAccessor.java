@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.accessor;
 
+import net.minecraft.ChatFormatting;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-
-import net.minecraft.ChatFormatting;
 
 @Mixin(ChatFormatting.class)
 public interface ChatFormattingAccessor {

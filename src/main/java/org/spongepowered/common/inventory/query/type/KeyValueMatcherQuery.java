@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.data.value.Value;
@@ -39,7 +40,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 
 @SuppressWarnings("unchecked")
 public final class KeyValueMatcherQuery<T> extends SpongeQuery {

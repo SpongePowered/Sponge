@@ -24,20 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ExperienceOrb;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.cause.entity.SpongeSpawnTypes;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class EntityPhaseState<E extends EntityContext<E>> extends PooledPhaseState<E> implements IPhaseState<E> {
 
@@ -54,5 +44,3 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> extends Poole
     }
 
 }
-
-

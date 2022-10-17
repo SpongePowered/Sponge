@@ -40,7 +40,6 @@ import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.server.rcon.RconConsoleSourceBridge;
 
-import java.util.UUID;
 
 @Mixin(RconConsoleSource.class)
 public abstract class RconConsoleSourceMixin implements CommandSourceProviderBridge, SubjectBridge, RconConsoleSourceBridge {

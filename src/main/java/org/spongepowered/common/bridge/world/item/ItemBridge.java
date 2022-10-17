@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.bridge.world.item;
 
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.DataManipulator.Mutable;
 
 import java.util.List;
-import net.minecraft.world.item.ItemStack;
 
 public interface ItemBridge {
 

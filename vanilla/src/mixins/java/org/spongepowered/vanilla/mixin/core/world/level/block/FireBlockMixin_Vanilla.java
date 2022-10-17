@@ -36,7 +36,6 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 
-import java.util.Random;
 
 @Mixin(FireBlock.class)
 public class FireBlockMixin_Vanilla {

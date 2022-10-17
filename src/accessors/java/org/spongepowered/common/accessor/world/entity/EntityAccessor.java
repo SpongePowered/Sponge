@@ -42,7 +42,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Optional;
-import java.util.Random;
 
 @Mixin(Entity.class)
 public interface EntityAccessor {

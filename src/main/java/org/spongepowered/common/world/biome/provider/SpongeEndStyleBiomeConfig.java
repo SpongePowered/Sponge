@@ -30,8 +30,6 @@ import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.server.BootstrapProperties;
 
 import java.util.Objects;
 
@@ -72,7 +70,7 @@ public final class SpongeEndStyleBiomeConfig extends AbstractBiomeProviderConfig
     public RegistryReference<Biome> barrensBiome() {
         return this.barrensBiome;
     }
-    
+
     public static final class BuilderImpl implements Builder {
 
         public RegistryReference<Biome> endBiome, highlandsBiome, midlandsBiome, islandsBiome, barrensBiome;

@@ -25,10 +25,10 @@
 package org.spongepowered.common.inventory.lens.impl.minecraft.container;
 
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.inventory.property.KeyValuePair;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+import org.spongepowered.common.inventory.property.KeyValuePair;
 
 import java.util.Collections;
 import java.util.List;

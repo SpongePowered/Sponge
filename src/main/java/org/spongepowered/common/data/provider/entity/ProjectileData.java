@@ -28,7 +28,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class ProjectileData {

@@ -30,11 +30,11 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
+import net.minecraft.commands.CommandSourceStack;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
 import java.util.Objects;
-import net.minecraft.commands.CommandSourceStack;
 
 public final class SpongeFlagLiteralCommandNode extends SpongeLiteralCommandNode {
 

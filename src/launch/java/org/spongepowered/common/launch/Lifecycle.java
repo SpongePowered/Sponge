@@ -29,7 +29,6 @@ import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Server;
 
-import java.nio.file.Path;
 
 /**
  * Represents the core series of calls Sponge needs to make when the platform is starting up

@@ -25,6 +25,7 @@
 package org.spongepowered.common.command.brigadier.tree;
 
 import com.mojang.brigadier.tree.CommandNode;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import net.minecraft.commands.CommandSourceStack;
 
 public final class UnsortedNodeHolder {
 

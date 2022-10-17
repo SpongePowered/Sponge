@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.world.volume.buffer.block;
 
+import net.minecraft.util.Mth;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;
-import net.minecraft.util.Mth;
 
 /**
  * Basically a fixed length list of non negative numbers/ids.

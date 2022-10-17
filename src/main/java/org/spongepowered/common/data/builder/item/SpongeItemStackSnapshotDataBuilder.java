@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.builder.item;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.nbt.CompoundTag;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
@@ -43,8 +44,6 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
-
-import net.minecraft.nbt.CompoundTag;
 
 public final class SpongeItemStackSnapshotDataBuilder extends AbstractDataBuilder<ItemStackSnapshot> implements DataBuilder<ItemStackSnapshot> {
 

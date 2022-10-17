@@ -41,8 +41,6 @@ import org.spongepowered.api.world.generation.config.noise.Noise;
 import org.spongepowered.api.world.generation.config.noise.NoiseTemplate;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
-import org.spongepowered.common.world.generation.structure.SpongeStructureTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;

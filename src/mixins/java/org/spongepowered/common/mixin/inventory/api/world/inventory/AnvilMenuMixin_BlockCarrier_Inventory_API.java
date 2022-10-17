@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.inventory;
 
-import org.spongepowered.api.world.server.ServerLocation;
 import net.minecraft.world.inventory.AnvilMenu;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.accessor.world.inventory.ItemCombinerMenuAccessor;

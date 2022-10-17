@@ -73,10 +73,10 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
     }
 
     @Override
-    public void serializeShape(JsonObject json) {
+    public void serializeShape(final JsonObject json) {
     }
 
     @Override
-    public void serializeResult(JsonObject json) {
+    public void serializeResult(final JsonObject json) {
     }
 }

@@ -35,7 +35,7 @@ import org.spongepowered.common.inventory.lens.impl.comp.CraftingInventoryLens;
 public class CraftingInventoryAdapter extends BasicInventoryAdapter implements CraftingInventory {
 
     protected final CraftingInventoryLens craftingLens;
-    
+
     private CraftingGridInventory craftingGrid;
     private CraftingOutput result;
 

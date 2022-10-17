@@ -26,6 +26,9 @@ package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.core.NonNullList;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,13 +36,9 @@ import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.fabric.Fabric;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
 
 @Mixin(AbstractContainerMenu.class)
 public abstract class AbstractContainerMenuMixin_Fabric_Inventory implements Fabric, InventoryBridge {
@@ -53,8 +52,8 @@ public abstract class AbstractContainerMenuMixin_Fabric_Inventory implements Fab
     @Override
     public Collection<InventoryBridge> fabric$allInventories() {
         if (this.all == null) {
-            ImmutableSet.Builder<InventoryBridge> builder = ImmutableSet.builder();
-            for (Slot slot : this.slots) {
+            final ImmutableSet.Builder<InventoryBridge> builder = ImmutableSet.builder();
+            for (final Slot slot : this.slots) {
                 if (slot.container != null) {
                     builder.add((InventoryBridge) slot.container);
                 }
@@ -65,7 +64,7 @@ public abstract class AbstractContainerMenuMixin_Fabric_Inventory implements Fab
     }
 
     @Override
-    public InventoryBridge fabric$get(int index) {
+    public InventoryBridge fabric$get(final int index) {
         if (this.slots.isEmpty()) {
             return null; // Somehow we got an empty container
         }
@@ -73,12 +72,12 @@ public abstract class AbstractContainerMenuMixin_Fabric_Inventory implements Fab
     }
 
     @Override
-    public ItemStack fabric$getStack(int index) {
+    public ItemStack fabric$getStack(final int index) {
         return this.shadow$getSlot(index).getItem();
     }
 
     @Override
-    public void fabric$setStack(int index, ItemStack stack) {
+    public void fabric$setStack(final int index, final ItemStack stack) {
         this.shadow$getSlot(index).set(stack);
     }
 
@@ -95,7 +94,7 @@ public abstract class AbstractContainerMenuMixin_Fabric_Inventory implements Fab
 
     @Override
     public void fabric$clear() {
-        for (Slot slot : this.slots) {
+        for (final Slot slot : this.slots) {
             slot.set(ItemStack.EMPTY);
         }
     }

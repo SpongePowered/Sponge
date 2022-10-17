@@ -120,7 +120,7 @@ public abstract class HopperBlockEntityMixin_Inventory {
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack1.isEmpty()) {
             // Capture Insert in Origin
             final TrackedInventoryBridge capture = InventoryUtil.forCapture(var3);
-            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) var3, i, itemStack);
+            final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) var3, i, itemStack);
             // Call event
             InventoryEventFactory.callTransferPost(capture, (Inventory) iInventory, InventoryUtil.toInventory(iInventory), itemStack, sourceSlotTransaction);
         }
@@ -138,13 +138,13 @@ public abstract class HopperBlockEntityMixin_Inventory {
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack2.isEmpty()) {
             // Capture Insert in Origin
             final TrackedInventoryBridge capture = InventoryUtil.forCapture(hopper);
-            SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);
+            final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);
             // Call event
             InventoryEventFactory.callTransferPost(capture, InventoryUtil.toInventory(iInventory), InventoryUtil.toInventory(hopper), itemStack1, sourceSlotTransaction);
         }
 
         // Ignore all container transactions in affected inventories
-        if (hopper instanceof ViewableInventoryBridge bridge) {
+        if (hopper instanceof final ViewableInventoryBridge bridge) {
             try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER)) {
                 context.buildAndSwitch();
                 for (final ServerPlayer player : bridge.viewableBridge$getViewers()) {
@@ -152,7 +152,7 @@ public abstract class HopperBlockEntityMixin_Inventory {
                 }
             }
         }
-        if (iInventory instanceof ViewableInventoryBridge bridge) {
+        if (iInventory instanceof final ViewableInventoryBridge bridge) {
             try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER)) {
                 context.buildAndSwitch();
                 for (final ServerPlayer player : bridge.viewableBridge$getViewers()) {

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.frog;
 
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.living.animal.frog.Frog;
 import org.spongepowered.api.entity.living.animal.frog.Tadpole;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.animal.AbstractFishMixin_API;

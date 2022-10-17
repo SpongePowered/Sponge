@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.block;
 
+import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.Key;
@@ -34,7 +35,6 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import net.minecraft.world.level.block.Block;
 
 /**
  * A quasi interface to mix into every possible {@link Block} such that their

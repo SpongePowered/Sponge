@@ -28,11 +28,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
-import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
-import org.spongepowered.common.util.Constants;
-
-import java.util.function.Function;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -42,6 +37,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
+import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
+import org.spongepowered.common.util.Constants;
+
+import java.util.function.Function;
 
 /**
  * Custom ShapelessRecipe.Serializer with support for:
@@ -53,7 +53,7 @@ import net.minecraft.world.item.crafting.ShapelessRecipe;
 public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Serializer {
 
     @Override
-    public ShapelessRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
+    public ShapelessRecipe fromJson(final ResourceLocation recipeId, final JsonObject json) {
         final String s = GsonHelper.getAsString(json, Constants.Recipe.GROUP, "");
         final NonNullList<Ingredient> nonnulllist = this.readIngredients(GsonHelper.getAsJsonArray(json, Constants.Recipe.SHAPELESS_INGREDIENTS));
         if (nonnulllist.isEmpty()) {
@@ -69,9 +69,9 @@ public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Ser
         return new SpongeShapelessRecipe(recipeId, s, spongeStack == null ? itemstack : spongeStack, nonnulllist, resultFunction, remainingItemsFunction);
     }
 
-    private NonNullList<Ingredient> readIngredients(JsonArray json) {
+    private NonNullList<Ingredient> readIngredients(final JsonArray json) {
         final NonNullList<Ingredient> nonnulllist = NonNullList.create();
-        for (JsonElement element : json) {
+        for (final JsonElement element : json) {
             final Ingredient ingredient = IngredientUtil.spongeDeserialize(element);
             if (!ingredient.isEmpty()) {
                 nonnulllist.add(ingredient);
@@ -81,12 +81,12 @@ public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Ser
     }
 
     @Override
-    public ShapelessRecipe fromNetwork(ResourceLocation p_199426_1_, FriendlyByteBuf p_199426_2_) {
+    public ShapelessRecipe fromNetwork(final ResourceLocation p_199426_1_, final FriendlyByteBuf p_199426_2_) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 
     @Override
-    public void toNetwork(FriendlyByteBuf p_199427_1_, ShapelessRecipe p_199427_2_) {
+    public void toNetwork(final FriendlyByteBuf p_199427_1_, final ShapelessRecipe p_199427_2_) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 }

@@ -108,7 +108,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
         return SpongeCommon.server().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
     }
 
-    private Holder<Biome> biomeHolder(RegistryReference<org.spongepowered.api.world.biome.Biome> biome) {
+    private Holder<Biome> biomeHolder(final RegistryReference<org.spongepowered.api.world.biome.Biome> biome) {
         return this.registry().getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) biome.location()));
     }
 }

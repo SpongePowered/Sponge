@@ -32,10 +32,9 @@ import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResu
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.FilteringSlotLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import java.util.function.Predicate;
 
 public class FilteringSlotAdapter extends SlotAdapter implements FilteringSlot {
-    
+
     protected final FilteringSlotLens filteringSlot;
 
     public FilteringSlotAdapter(Fabric fabric, FilteringSlotLens lens, Inventory parent) {

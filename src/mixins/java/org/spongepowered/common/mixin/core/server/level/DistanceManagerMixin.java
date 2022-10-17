@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.server.level;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.DistanceManager;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.util.Mth;
@@ -52,8 +51,6 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Mixin(DistanceManager.class)

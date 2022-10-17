@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.entity.player;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class ClientType {
     private static final Map<String, ClientType> lookup = new HashMap<>();

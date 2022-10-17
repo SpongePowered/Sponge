@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.bridge.explosives;
 
-import java.util.Optional;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Optional;
 
 
 public interface ExplosiveBridge {

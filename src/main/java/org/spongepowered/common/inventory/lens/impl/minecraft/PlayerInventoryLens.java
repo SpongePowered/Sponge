@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl.minecraft;
 
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -44,7 +45,6 @@ import org.spongepowered.common.inventory.property.KeyValuePair;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public class PlayerInventoryLens extends AbstractLens {
 

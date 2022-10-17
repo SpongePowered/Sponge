@@ -24,6 +24,15 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.level.block;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.BlockSourceImpl;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.DropperBlock;
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,16 +45,6 @@ import org.spongepowered.common.accessor.world.level.block.entity.HopperBlockEnt
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSourceImpl;
-import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraft.world.level.block.DropperBlock;
-import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 
 @Mixin(DropperBlock.class)
@@ -65,7 +64,7 @@ public abstract class DropperBlockMixin_Inventory {
             if (itemstack1.getCount() == itemstack.getCount() - 1) {
                 final TrackedInventoryBridge capture = InventoryUtil.forCapture(dispensertileentity);
                 final Inventory sourceInv = ((Inventory) dispensertileentity);
-                SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
+                final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
                 InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
             }
         }
@@ -86,7 +85,7 @@ public abstract class DropperBlockMixin_Inventory {
             if (itemstack1.getCount() == itemstack.getCount() - 1) {
                 final TrackedInventoryBridge capture = InventoryUtil.forCapture(dispensertileentity);
                 final Inventory sourceInv = ((Inventory) dispensertileentity);
-                SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
+                final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
                 final Direction enumfacing = worldIn.getBlockState(pos).getValue(DispenserBlock.FACING);
                 final BlockPos blockpos = pos.relative(enumfacing);
                 final Container iinventory = HopperBlockEntityAccessor.invoker$getContainerAt(worldIn, blockpos.getX(), blockpos.getY(), blockpos.getZ());

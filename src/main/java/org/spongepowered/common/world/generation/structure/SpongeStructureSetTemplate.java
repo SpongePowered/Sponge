@@ -155,4 +155,3 @@ public record SpongeStructureSetTemplate(ResourceKey key, StructureSet represent
         }
     }
 }
-

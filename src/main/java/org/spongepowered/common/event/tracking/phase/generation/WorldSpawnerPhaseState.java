@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-
-import net.minecraft.world.entity.Entity;
 
 import java.util.function.Supplier;
 

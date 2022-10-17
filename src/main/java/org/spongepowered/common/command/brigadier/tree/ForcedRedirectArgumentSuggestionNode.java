@@ -29,10 +29,10 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
+import net.minecraft.commands.SharedSuggestionProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
-import net.minecraft.commands.SharedSuggestionProvider;
 
 public final class ForcedRedirectArgumentSuggestionNode<T> extends ArgumentCommandNode<SharedSuggestionProvider, T> implements ForcedRedirectNode {
 
@@ -77,4 +77,3 @@ public final class ForcedRedirectArgumentSuggestionNode<T> extends ArgumentComma
     }
 
 }
-

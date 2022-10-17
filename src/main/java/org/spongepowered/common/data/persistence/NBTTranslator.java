@@ -30,16 +30,6 @@ import static org.spongepowered.api.data.persistence.DataQuery.of;
 
 import com.google.common.collect.Lists;
 import io.leangen.geantyref.TypeToken;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.DataQuery;
-import org.spongepowered.api.data.persistence.DataSerializable;
-import org.spongepowered.api.data.persistence.DataTranslator;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.common.util.Constants;
-
-import java.util.List;
-import java.util.Map;
 import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
@@ -53,6 +43,16 @@ import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.ShortTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataSerializable;
+import org.spongepowered.api.data.persistence.DataTranslator;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.common.util.Constants;
+
+import java.util.List;
+import java.util.Map;
 
 public final class NBTTranslator implements DataTranslator<CompoundTag> {
 

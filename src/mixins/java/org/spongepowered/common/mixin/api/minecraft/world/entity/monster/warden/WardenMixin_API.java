@@ -25,10 +25,8 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster.warden;
 
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.living.animal.frog.Frog;
 import org.spongepowered.api.entity.living.monster.Warden;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.animal.AnimalMixin_API;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.monster.MonsterMixin_API;
 
 import java.util.Set;

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
@@ -32,7 +33,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Set;
-import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
 public abstract class AbstractFurnaceBlockEntityMixin_API extends BaseContainerBlockEntityMixin_API implements FurnaceBlockEntity {

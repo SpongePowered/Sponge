@@ -26,7 +26,6 @@ package org.spongepowered.vanilla.bridge.server.packs.repository;
 
 import net.minecraft.server.packs.repository.Pack;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.PluginResource;
 
 public interface PackRepositoryBridge_Vanilla {
 

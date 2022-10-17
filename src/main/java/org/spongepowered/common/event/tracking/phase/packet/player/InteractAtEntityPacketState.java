@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
@@ -40,14 +43,10 @@ import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerboundInteractPacket;
-import net.minecraft.server.level.ServerPlayer;
-
 public final class InteractAtEntityPacketState extends BasicPacketState {
 
     @Override
-    public boolean isPacketIgnored(Packet<?> packetIn, ServerPlayer packetPlayer) {
+    public boolean isPacketIgnored(final Packet<?> packetIn, final ServerPlayer packetPlayer) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
         final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget((ServerLevel) packetPlayer.level);
@@ -55,7 +54,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(ServerPlayer playerMP, Packet<?> packet, BasicPacketContext context) {
+    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet, final BasicPacketContext context) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packet;
         final ServerboundInteractPacket_InteractionAtLocationActionAccessor accessor = (ServerboundInteractPacket_InteractionAtLocationActionAccessor) ((ServerboundInteractPacketAccessor) useEntityPacket).accessor$action();
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getItemInHand(accessor.accessor$hand()));
@@ -67,7 +66,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public void unwind(BasicPacketContext context) {
+    public void unwind(final BasicPacketContext context) {
         final ServerPlayer player = context.getPacketPlayer();
 
         final ServerboundInteractPacket useEntityPacket = context.getPacket();

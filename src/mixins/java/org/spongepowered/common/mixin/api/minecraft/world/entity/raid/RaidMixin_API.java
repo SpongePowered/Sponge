@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.raid;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.kyori.adventure.bossbar.BossBar;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.world.entity.raid.Raid;
@@ -44,8 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 @Mixin(Raid.class)
 public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {

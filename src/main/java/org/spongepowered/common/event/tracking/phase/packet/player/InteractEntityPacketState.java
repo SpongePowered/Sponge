@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
@@ -32,7 +35,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundInteractPacketAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundInteractPacket_InteractionActionAccessor;
-import org.spongepowered.common.accessor.network.protocol.game.ServerboundInteractPacket_InteractionAtLocationActionAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -40,14 +42,10 @@ import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerboundInteractPacket;
-import net.minecraft.server.level.ServerPlayer;
-
 public final class InteractEntityPacketState extends BasicPacketState {
 
     @Override
-    public boolean isPacketIgnored(Packet<?> packetIn, ServerPlayer packetPlayer) {
+    public boolean isPacketIgnored(final Packet<?> packetIn, final ServerPlayer packetPlayer) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
         final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget((ServerLevel) packetPlayer.level);
@@ -55,9 +53,9 @@ public final class InteractEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(ServerPlayer player, Packet<?> packet, BasicPacketContext context) {
+    public void populateContext(final ServerPlayer player, final Packet<?> packet, final BasicPacketContext context) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packet;
-        net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget((ServerLevel) player.level);
+        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget((ServerLevel) player.level);
         if (entity != null) {
             final ServerboundInteractPacket_InteractionActionAccessor accessor = (ServerboundInteractPacket_InteractionActionAccessor) ((ServerboundInteractPacketAccessor) useEntityPacket).accessor$action();
             final ItemStack stack = ItemStackUtil.cloneDefensive(player.getItemInHand(accessor.accessor$hand()));
@@ -71,7 +69,7 @@ public final class InteractEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public void unwind(BasicPacketContext phaseContext) {
+    public void unwind(final BasicPacketContext phaseContext) {
 
         final ServerPlayer player = phaseContext.getPacketPlayer();
         final ServerboundInteractPacket useEntityPacket = phaseContext.getPacket();

@@ -41,7 +41,6 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Pla
 import org.spongepowered.common.network.packet.ChangeViewerEnvironmentPacket;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
 import org.spongepowered.common.world.portal.PortalLogic;
-import org.spongepowered.vanilla.mixin.core.world.entity.EntityMixin_Vanilla;
 import org.spongepowered.vanilla.mixin.core.world.entity.LivingEntityMixin_Vanilla;
 
 import javax.annotation.Nullable;

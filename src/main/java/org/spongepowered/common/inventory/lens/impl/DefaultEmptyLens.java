@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl;
 
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -36,7 +37,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.world.item.ItemStack;
 
 public class DefaultEmptyLens implements Lens {
 
@@ -100,7 +100,7 @@ public class DefaultEmptyLens implements Lens {
         return true;
     }
 
-    
+
     @Override
     public Lens getParent() {
         return null;

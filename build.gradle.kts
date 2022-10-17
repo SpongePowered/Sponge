@@ -145,8 +145,6 @@ val mixins by sourceSets.registering {
 }
 
 dependencies {
-    val forgeFlowerVersion: String by project
-
     // api
     api("org.spongepowered:spongeapi:$apiVersion")
 
@@ -211,9 +209,6 @@ dependencies {
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
     testImplementation("org.mockito:mockito-inline:$mockitoVersion")
-
-    // Decompiler
-    forgeFlower("net.minecraftforge:forgeflower:$forgeFlowerVersion")
 }
 
 val organization: String by project
@@ -257,6 +252,7 @@ allprojects {
     }
 
     plugins.withId("org.spongepowered.gradle.vanilla") {
+        val quiltflowerVersion: String by project
         minecraft {
             version(minecraftVersion)
             injectRepositories(false)
@@ -267,6 +263,10 @@ allprojects {
                     accessWideners(it)
                     parent?.minecraft?.accessWideners(it)
                 }
+        }
+
+        dependencies {
+            forgeFlower("org.quiltmc:quiltflower:$quiltflowerVersion")
         }
     }
 
@@ -300,6 +300,23 @@ allprojects {
         isPreserveFileTimestamps = false
         isReproducibleFileOrder = true
     }
+
+    spotless {
+        java {
+            toggleOffOn("@formatter:off", "@formatter:on")
+            endWithNewline()
+            indentWithSpaces(4)
+            trimTrailingWhitespace()
+            removeUnusedImports()
+            importOrderFile(rootProject.file("SpongeAPI/extra/eclipse/sponge_eclipse.importorder"))
+        }
+        kotlinGradle {
+            endWithNewline()
+            indentWithSpaces(4)
+            trimTrailingWhitespace()
+        }
+    }
+
     val spongeSnapshotRepo: String? by project
     val spongeReleaseRepo: String? by project
     tasks {

@@ -27,6 +27,7 @@ package org.spongepowered.common.event.cause.entity.damage;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
@@ -37,7 +38,6 @@ import org.spongepowered.common.accessor.world.entity.item.FallingBlockEntityAcc
 import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 
 import java.lang.ref.WeakReference;
-import net.minecraft.world.entity.item.FallingBlockEntity;
 
 public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBuilder<FallingBlockDamageSource, FallingBlockDamageSource.Builder> implements FallingBlockDamageSource.Builder {
 

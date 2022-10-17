@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.accessor.world.entity.animal;
 
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.animal.Fox;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -31,8 +33,6 @@ import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Optional;
 import java.util.UUID;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.world.entity.animal.Fox;
 
 @Mixin(Fox.class)
 public interface FoxAccessor {

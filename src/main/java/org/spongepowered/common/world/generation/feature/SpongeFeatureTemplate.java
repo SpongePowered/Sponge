@@ -42,7 +42,6 @@ import org.spongepowered.api.world.generation.feature.FeatureTemplate;
 import org.spongepowered.api.world.generation.feature.FeatureType;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
-import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.io.IOException;
 import java.util.Objects;

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.ai.goal;
 
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.Goal.Flag;
 import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.living.Agent;
@@ -33,8 +35,6 @@ import org.spongepowered.common.bridge.world.entity.ai.GoalBridge;
 
 import java.util.EnumSet;
 import java.util.Optional;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.Goal.Flag;
 
 @SuppressWarnings("unchecked")
 @Mixin(Goal.class)

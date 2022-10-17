@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.raid;
 
+import net.minecraft.world.entity.raid.Raid;
+import net.minecraft.world.entity.raid.Raider;
 import org.spongepowered.api.raid.RaidWave;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,8 +39,6 @@ import org.spongepowered.common.raid.SpongeRaidWave;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.world.entity.raid.Raid;
-import net.minecraft.world.entity.raid.Raider;
 
 @Mixin(Raid.class)
 public abstract class RaidMixin implements RaidBridge {

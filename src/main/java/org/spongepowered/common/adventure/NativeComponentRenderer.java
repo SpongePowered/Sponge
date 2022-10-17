@@ -33,6 +33,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.text.AttributedCharacterIterator;
 import java.text.MessageFormat;
 import java.util.List;
@@ -84,7 +85,7 @@ public abstract class NativeComponentRenderer<C> {
     protected abstract @Nullable MessageFormat translate(final @NonNull String key, final @NonNull C context);
 
     public Component render(@NonNull MutableComponent component, final @NonNull C context) {
-        if (component.getContents() instanceof TranslatableContents contents) {
+        if (component.getContents() instanceof final TranslatableContents contents) {
             component = this.renderTranslatable(component, contents, context);
         } else {
             this.renderSiblings(component, context);

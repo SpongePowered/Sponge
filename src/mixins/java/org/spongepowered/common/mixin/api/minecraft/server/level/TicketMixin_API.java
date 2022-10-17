@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.minecraft.server.level;
 
 import net.minecraft.server.level.Ticket;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.server.TicketBridge;
 
 @Mixin(Ticket.class)
 public abstract class TicketMixin_API<T> implements org.spongepowered.api.world.server.Ticket<T> {

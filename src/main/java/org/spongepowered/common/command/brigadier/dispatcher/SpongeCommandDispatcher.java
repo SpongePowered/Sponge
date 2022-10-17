@@ -319,7 +319,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                         final CommandCause cause = (CommandCause) ctx.getSource();
                         try {
                             return this.commandManager.processCommand(cause, mapping.get(), command, args).result();
-                        } catch (CommandException e) {
+                        } catch (final CommandException e) {
                             return this.commandManager.handleException(originalCommand, originalArgs, cause, e, command, args);
                         }
                     });

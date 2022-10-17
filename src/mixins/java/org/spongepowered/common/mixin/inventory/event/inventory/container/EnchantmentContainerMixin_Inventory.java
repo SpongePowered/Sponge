@@ -53,7 +53,6 @@ import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
-import java.util.Random;
 
 @Mixin(value = EnchantmentMenu.class)
 public abstract class EnchantmentContainerMixin_Inventory {

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.item.recipe.ingredient;
 
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -33,8 +35,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 
 public class SpongeIngredient extends Ingredient {
 

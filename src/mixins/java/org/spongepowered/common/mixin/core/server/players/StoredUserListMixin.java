@@ -24,18 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.server.players;
 
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.server.players.StoredUserList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.io.File;
 import java.util.List;
-import net.minecraft.server.players.StoredUserList;
 
 @Mixin(StoredUserList.class)
 public abstract class StoredUserListMixin {

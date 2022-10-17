@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 
 @Mixin(BeaconBlockEntity.class)
 public abstract class BeaconBlockEntityMixin extends BlockEntityMixin {

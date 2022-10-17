@@ -25,7 +25,6 @@
 package org.spongepowered.common.tag;
 
 import org.spongepowered.api.datapack.DataPack;
-import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.api.tag.Taggable;
 

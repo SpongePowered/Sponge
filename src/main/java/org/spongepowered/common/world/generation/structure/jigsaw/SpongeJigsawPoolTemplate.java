@@ -55,7 +55,7 @@ import java.util.function.Function;
 
 public record SpongeJigsawPoolTemplate(ResourceKey key, StructureTemplatePool representedJigsawPool, DataPack<JigsawPoolTemplate> pack) implements JigsawPoolTemplate {
 
-    @Override 
+    @Override
     public JigsawPool jigsawPool() {
         return (JigsawPool) this.representedJigsawPool;
     }
@@ -161,4 +161,3 @@ public record SpongeJigsawPoolTemplate(ResourceKey key, StructureTemplatePool re
         }
     }
 }
-

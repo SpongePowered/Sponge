@@ -30,7 +30,7 @@ import org.spongepowered.common.entity.player.ClientType;
 public interface MinecraftBridge {
 
     IntegratedServer bridge$getTemporaryIntegratedServer();
-    
+
     void bridge$setTemporaryIntegratedServer(IntegratedServer server);
 
     ClientType bridge$getClientType();

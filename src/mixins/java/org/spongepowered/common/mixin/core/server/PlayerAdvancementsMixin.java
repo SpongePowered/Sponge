@@ -31,8 +31,6 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.players.PlayerList;
 import org.spongepowered.api.Sponge;

@@ -25,15 +25,15 @@
 package org.spongepowered.common.item.merchant;
 
 import net.minecraft.util.RandomSource;
-import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.item.merchant.TradeOfferGenerator;
-
-import java.util.Objects;
-import java.util.StringJoiner;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.trading.MerchantOffer;
+import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.util.RandomProvider;
+
+import java.util.Objects;
+import java.util.StringJoiner;
 
 public final class TradeOfferGeneratorWrapper implements VillagerTrades.ItemListing, TradeOfferGenerator {
 
@@ -44,7 +44,7 @@ public final class TradeOfferGeneratorWrapper implements VillagerTrades.ItemList
     }
 
     @Override
-    public MerchantOffer getOffer(Entity trader, RandomSource rand) {
+    public MerchantOffer getOffer(final Entity trader, final RandomSource rand) {
         return (MerchantOffer) this.generator.apply((org.spongepowered.api.entity.Entity) trader, (RandomProvider.Source) rand);
     }
 

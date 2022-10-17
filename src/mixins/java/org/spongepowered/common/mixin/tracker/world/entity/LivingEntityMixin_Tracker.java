@@ -30,7 +30,6 @@ import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -48,7 +47,6 @@ import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
 import javax.annotation.Nullable;
-import java.util.Random;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {

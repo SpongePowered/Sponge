@@ -125,7 +125,7 @@ val vanillaAppLaunch by sourceSets.register("applaunch") {
     spongeImpl.applyNamedDependencyOnOutput(commonProject, main.get(), this, project, this.runtimeOnlyConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.runtimeOnlyConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, vanillaMain, this, project, this.runtimeOnlyConfigurationName)
-    
+
     configurations.named(runtimeClasspathConfigurationName) {
         extendsFrom(vanillaLibrariesConfig.get())
         extendsFrom(mlpatcherConfig.get())
@@ -240,7 +240,6 @@ dependencies {
     val apiGsonVersion: String by project
     val apiGuavaVersion: String by project
     val apiPluginSpiVersion: String by project
-    val forgeFlowerVersion: String by project
     val forgeAutoRenamingToolVersion: String by project
     val jlineVersion: String by project
     val log4jVersion: String by project
@@ -284,9 +283,9 @@ dependencies {
 
     val bootstrapLibraries = vanillaBootstrapLibrariesConfig.name
     val libraries = vanillaLibrariesConfig.name
-    
+
     // Libraries only needed on the TCL (during main game lifecycle)
-    
+
     libraries("org.spongepowered:spongeapi:$apiVersion")
     libraries(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
     libraries("net.kyori:adventure-serializer-configurate4")
@@ -295,10 +294,10 @@ dependencies {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    
+
     // Databases
     libraries("com.zaxxer:HikariCP:2.6.3")
-    
+
     // Libraries needed during applaunch phase and runtime
     bootstrapLibraries("net.minecrell:terminalconsoleappender:1.3.0")
     bootstrapLibraries("org.jline:jline-terminal:$jlineVersion")
@@ -345,9 +344,6 @@ dependencies {
             exclude(group = "org.spongepowered")
         }
     }
-
-    // Decompiler
-    forgeFlower("net.minecraftforge:forgeflower:$forgeFlowerVersion")
 }
 
 val vanillaManifest = the<JavaPluginConvention>().manifest {

@@ -44,7 +44,6 @@ import org.spongepowered.common.mixin.tracker.world.entity.player.PlayerMixin_Tr
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin_Tracker extends PlayerMixin_Tracker {

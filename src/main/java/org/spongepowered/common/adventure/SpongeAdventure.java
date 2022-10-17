@@ -99,7 +99,6 @@ import org.spongepowered.common.bridge.adventure.ComponentBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.util.MissingImplementationException;
 
 import java.io.IOException;
 import java.util.ArrayList;

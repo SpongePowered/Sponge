@@ -26,6 +26,7 @@ package org.spongepowered.common.util;
 
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.DataFixerBuilder;
+
 import java.util.concurrent.Executor;
 
 /**

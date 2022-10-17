@@ -26,15 +26,12 @@ package org.spongepowered.common.mixin.core.world.level.dimension;
 
 import com.mojang.serialization.Codec;
 import net.kyori.adventure.text.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.registry.RegistryKey;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

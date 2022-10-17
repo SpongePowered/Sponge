@@ -5,3 +5,4 @@
 
 a5629f7ee7c1b85b3c3ad173d80f5adb56e3c8fd # remap MCP -> official class names
 6b60267a2735954c2eb66d1e4dce9bed28e388f6 # rename bridges MCP -> official class names
+ae86a5c88c543c1ddbe6f26c7665499148e3ebc2 # correct import order

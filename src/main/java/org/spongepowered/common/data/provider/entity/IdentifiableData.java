@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Identifiable;
@@ -33,7 +34,6 @@ import org.spongepowered.common.entity.player.SpongeUserData;
 
 import java.time.Instant;
 import java.util.UUID;
-import net.minecraft.server.level.ServerPlayer;
 
 public final class IdentifiableData {
 

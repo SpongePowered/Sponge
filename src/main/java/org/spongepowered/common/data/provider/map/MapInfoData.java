@@ -40,10 +40,10 @@ import org.spongepowered.math.vector.Vector2i;
 
 public final class MapInfoData {
 
-	private MapInfoData() {
-	}
+    private MapInfoData() {
+    }
 
-	// @formatter:off
+    // @formatter:off
 	public static void register(final DataProviderRegistrator registrator) {
 		// todo: does this want to become immutable?
 		registrator.asMutable(MapItemSavedData.class)

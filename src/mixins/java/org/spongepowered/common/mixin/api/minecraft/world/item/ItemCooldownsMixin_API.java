@@ -26,6 +26,8 @@ package org.spongepowered.common.mixin.api.minecraft.world.item;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemCooldowns;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Final;
@@ -35,9 +37,6 @@ import org.spongepowered.common.accessor.world.item.ItemCooldowns_CooldownInstan
 import org.spongepowered.common.bridge.world.item.ItemCooldownsBridge;
 
 import java.util.*;
-
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemCooldowns;
 
 @Mixin(ItemCooldowns.class)
 public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.entity.living.player.CooldownTracker {

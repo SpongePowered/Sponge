@@ -61,7 +61,6 @@ import org.spongepowered.common.event.tracking.context.transaction.EffectTransac
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 
 @Mixin(Entity.class)

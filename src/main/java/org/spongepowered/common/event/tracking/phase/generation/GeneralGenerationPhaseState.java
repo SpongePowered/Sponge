@@ -25,14 +25,13 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import com.google.common.base.Objects;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 
 /**
  * A generalized generation phase state. Used for entering populator world generation,

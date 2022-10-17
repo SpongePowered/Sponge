@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.accessor.commands.arguments.selector.options;
 
+import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Map;
-import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
 
 @Mixin(EntitySelectorOptions.class)
 public interface EntitySelectorOptionsAccessor {

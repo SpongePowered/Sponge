@@ -25,7 +25,6 @@
 package org.spongepowered.common.accessor.world.level;
 
 import net.minecraft.util.random.SimpleWeightedRandomList;
-import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.SpawnData;
 import org.spongepowered.asm.mixin.Mixin;

@@ -34,7 +34,6 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
-import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;

@@ -28,6 +28,5 @@
 @DefaultQualifier(NonNull.class)
 package org.spongepowered.common.event.tracking.phase.block;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;

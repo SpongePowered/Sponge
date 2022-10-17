@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.adventure;
 
-import java.util.function.Consumer;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.function.Consumer;
 
 @SuppressWarnings("UnstableApiUsage") // permitted provider
 public final class GsonComponentSerializerProviderImpl implements GsonComponentSerializer.Provider {

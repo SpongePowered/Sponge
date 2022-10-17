@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
+import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import org.spongepowered.api.block.entity.StructureBlock;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
-import net.minecraft.world.level.block.entity.StructureBlockEntity;
 
 @Mixin(StructureBlockEntity.class)
 public abstract class StructureBlockEntityMixin_API extends BlockEntityMixin_API implements StructureBlock {

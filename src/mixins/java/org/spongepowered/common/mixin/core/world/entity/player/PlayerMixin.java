@@ -87,10 +87,11 @@ import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.ExperienceHolderUtil;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.entity.player.Player.class)
 public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBridge, GameProfileHolderBridge {

@@ -26,12 +26,12 @@ package org.spongepowered.common.mixin.ipforward.network;
 
 import com.mojang.authlib.properties.Property;
 import io.netty.channel.SimpleChannelInboundHandler;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.network.ConnectionBridge_IpForward;
 
 import java.util.UUID;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.Packet;
 
 @Mixin(Connection.class)
 public abstract class ConnectionMixin_IpForward extends SimpleChannelInboundHandler<Packet<?>> implements ConnectionBridge_IpForward {

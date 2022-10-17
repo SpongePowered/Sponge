@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.util.raytrace;
 
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -34,7 +35,6 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 import java.util.function.Predicate;
-import net.minecraft.world.phys.Vec3;
 
 public final class SpongeBlockRayTrace extends AbstractSpongeRayTrace<@NonNull LocatableBlock> {
 

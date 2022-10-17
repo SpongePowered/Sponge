@@ -27,8 +27,6 @@ package org.spongepowered.common.bridge.advancements;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 
 import java.util.List;

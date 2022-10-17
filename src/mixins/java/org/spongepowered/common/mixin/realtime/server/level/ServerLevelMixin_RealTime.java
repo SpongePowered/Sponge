@@ -33,9 +33,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.mixin.realtime.world.level.LevelMixin_RealTime;
-import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin_RealTime extends LevelMixin_RealTime implements RealTimeTrackingBridge {

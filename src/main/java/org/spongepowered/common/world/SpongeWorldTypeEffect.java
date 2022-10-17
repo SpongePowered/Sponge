@@ -25,7 +25,6 @@
 package org.spongepowered.common.world;
 
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
-import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.common.AbstractResourceKeyed;

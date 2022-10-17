@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.ai.attributes;
 
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import org.spongepowered.api.entity.attribute.Attribute;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.attribute.AttributeOperation;
@@ -40,7 +41,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 
 @Mixin(AttributeInstance.class)
 @Implements(@Interface(iface = Attribute.class, prefix = "attribute$", remap = Remap.NONE))

@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.util;
 
-import java.util.Objects;
-import java.util.Optional;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.math.vector.Vector3d;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public final class SpongeAABB implements AABB {
     private final Vector3d min;

@@ -133,7 +133,7 @@ public abstract class StructureTemplateMixin_API implements Schematic, SpongeArc
         final List<StructureTemplate.StructureBlockInfo> blockInfos = this.palettes.iterator().next().blocks();
         return blockInfos.stream().filter(info -> info.nbt != null).collect(Collectors.toMap(info -> info.pos, info -> info.nbt));
     }
-    
+
     @Override
     public Optional<BlockEntityArchetype> blockEntityArchetype(final int x, final int y, final int z) {
         final BlockPos pos = new BlockPos(x, y, z);
@@ -150,7 +150,7 @@ public abstract class StructureTemplateMixin_API implements Schematic, SpongeArc
         return Optional.empty();
     }
 
-    @Override 
+    @Override
     public Map<Vector3i, BlockEntityArchetype> blockEntityArchetypes() {
         final Map<BlockPos, CompoundTag> nbtMap = this.api$buildBlockNbtMap();
         return this.api$buildBlockStateMap().entrySet().stream().filter(e -> e.getValue().hasBlockEntity())
@@ -206,12 +206,12 @@ public abstract class StructureTemplateMixin_API implements Schematic, SpongeArc
         }).filter(Objects::nonNull);
     }
 
-    @Override 
+    @Override
     public Collection<EntityArchetype> entityArchetypes() {
         return this.api$buildEntityArchetypeList().map(EntityArchetypeEntry::archetype).toList();
     }
 
-    @Override 
+    @Override
     public Collection<EntityArchetypeEntry> entityArchetypesByPosition() {
         return this.api$buildEntityArchetypeList().toList();
     }
@@ -234,20 +234,20 @@ public abstract class StructureTemplateMixin_API implements Schematic, SpongeArc
         return new SpongeVolumeStream<>(stateStream, () -> this);
     }
 
-    @Override 
+    @Override
     public Stream<EntityArchetypeEntry> entitiesByPosition() {
         return this.api$buildEntityArchetypeList();
     }
 
     // Biome
 
-    @Override 
+    @Override
     public Biome biome(final int x, final int y, final int z) {
         // TODO default biome?
         return null;
     }
 
-    @Override 
+    @Override
     public VolumeStream<ArchetypeVolume, Biome> biomeStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
         // TODO biomes are not available here?
         return new SpongeVolumeStream<>(Stream.empty(), () -> this);
@@ -261,7 +261,7 @@ public abstract class StructureTemplateMixin_API implements Schematic, SpongeArc
         return blockInfos.stream().collect(Collectors.toMap(info -> info.pos, info -> info.state));
     }
 
-    @Override 
+    @Override
     public BlockState block(final int x, final int y, final int z) {
         // TODO default state?
         return (BlockState) this.api$buildBlockStateMap().get(new BlockPos(x, y, z));
@@ -277,7 +277,7 @@ public abstract class StructureTemplateMixin_API implements Schematic, SpongeArc
         return (FluidState) (Object) blockState.getFluidState();
     }
 
-    @Override 
+    @Override
     public VolumeStream<ArchetypeVolume, BlockState> blockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
         final Vector3i blockMin = this.min();
         final Vector3i blockMax = this.max();

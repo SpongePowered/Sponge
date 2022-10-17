@@ -25,10 +25,10 @@
 package org.spongepowered.common.serialization;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.Util;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.stream.IntStream;
-import net.minecraft.Util;
 
 public final class MathCodecs {
 

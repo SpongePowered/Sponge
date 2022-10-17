@@ -45,7 +45,6 @@ import org.spongepowered.common.event.tracking.phase.world.dragon.DragonPhase;
 import org.spongepowered.common.event.tracking.phase.world.dragon.SpawnDragonContext;
 
 import java.util.List;
-import java.util.Random;
 
 @Mixin(EndDragonFight.class)
 public abstract class EndDragonFightMixin_Tracker {

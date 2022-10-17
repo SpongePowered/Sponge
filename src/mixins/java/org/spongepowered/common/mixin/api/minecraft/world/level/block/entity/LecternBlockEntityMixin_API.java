@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
+import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import org.spongepowered.api.block.entity.Lectern;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
@@ -31,7 +32,6 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.world.level.block.entity.LecternBlockEntity;
 
 @Mixin(LecternBlockEntity.class)
 public abstract class LecternBlockEntityMixin_API extends BlockEntityMixin_API implements Lectern, ViewableInventory {

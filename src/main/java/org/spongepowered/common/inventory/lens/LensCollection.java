@@ -31,10 +31,10 @@ import java.util.List;
 import java.util.Map;
 
 public interface LensCollection {
-    
+
     /**
      * Gets the lens at the specified index in this collection
-     * 
+     *
      * @param index
      * @return
      */
@@ -45,7 +45,7 @@ public interface LensCollection {
     /**
      * Get all the properties for the specified lens (if contained in this
      * collection).
-     * 
+     *
      * @param lens the lens to fetch
      * @return collection of properties for the specified slot when viewed
      *      through this lens
@@ -54,7 +54,7 @@ public interface LensCollection {
 
     /**
      * A strongly-typed {@link java.util.Collection#contains}.
-     * 
+     *
      * @param lens
      * @return
      */
@@ -65,7 +65,7 @@ public interface LensCollection {
      * that it checks that the <em>supplied</em> collection contains all of the
      * members of <em>this</em> lens (eg. that this lens collection is a subset
      * of the supplied collection).
-     * 
+     *
      * @param c Collection to inspect
      * @return
      */

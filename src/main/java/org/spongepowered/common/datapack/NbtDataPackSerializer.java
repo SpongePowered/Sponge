@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.datapack;
 
-import com.google.gson.JsonElement;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.datapack.DataPackEntry;
 import org.spongepowered.common.SpongeCommon;

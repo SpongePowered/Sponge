@@ -37,7 +37,6 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -242,7 +241,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     }
 
     // ContextSource
-    
+
     @Override
     public Context context() {
         if (this.api$context == null) {

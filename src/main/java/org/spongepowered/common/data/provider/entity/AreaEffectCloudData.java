@@ -29,8 +29,8 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.accessor.world.entity.AreaEffectCloudAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.PotionEffectUtil;
 import org.spongepowered.common.util.MissingImplementationException;
+import org.spongepowered.common.util.PotionEffectUtil;
 import org.spongepowered.common.util.SpongeTicks;
 
 public final class AreaEffectCloudData {

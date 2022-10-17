@@ -28,8 +28,8 @@ import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
 
 public final class MapInfoDataProviders extends DataProviderRegistratorBuilder {
 
-	@Override
-	protected void registerProviders() {
-		MapInfoData.register(this.registrator);
-	}
+    @Override
+    protected void registerProviders() {
+        MapInfoData.register(this.registrator);
+    }
 }

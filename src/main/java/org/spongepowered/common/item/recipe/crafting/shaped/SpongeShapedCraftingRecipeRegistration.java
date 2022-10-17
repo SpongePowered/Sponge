@@ -26,6 +26,14 @@ package org.spongepowered.common.item.recipe.crafting.shaped;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
@@ -35,14 +43,6 @@ import org.spongepowered.common.util.Constants;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 
 public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistration {
 
@@ -57,10 +57,10 @@ public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistra
     private final Function<CraftingContainer, ItemStack> resultFunction;
     private final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction;
 
-    public SpongeShapedCraftingRecipeRegistration(ResourceLocation key, RecipeSerializer<?> serializer, String group, List<String> pattern,
-            Map<Character, Ingredient> ingredients, ItemStack spongeResult, Function<CraftingContainer, ItemStack> resultFunction,
-            Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
-            DataPack<RecipeRegistration> pack) {
+    public SpongeShapedCraftingRecipeRegistration(final ResourceLocation key, final RecipeSerializer<?> serializer, final String group, final List<String> pattern,
+            final Map<Character, Ingredient> ingredients, final ItemStack spongeResult, final Function<CraftingContainer, ItemStack> resultFunction,
+            final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
+            final DataPack<RecipeRegistration> pack) {
         super(key, serializer, spongeResult.getItem(), group, pack);
         this.result = spongeResult.getItem();
         this.count = spongeResult.getCount();
@@ -72,7 +72,7 @@ public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistra
     }
 
     @Override
-    public void serializeShape(JsonObject json) {
+    public void serializeShape(final JsonObject json) {
         final JsonArray jsonarray = new JsonArray();
         this.pattern.forEach(jsonarray::add);
         json.add(Constants.Recipe.SHAPED_PATTERN, jsonarray);
@@ -82,7 +82,7 @@ public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistra
     }
 
     @Override
-    public void serializeResult(JsonObject json) {
+    public void serializeResult(final JsonObject json) {
         final JsonObject result = new JsonObject();
         result.addProperty(Constants.Recipe.ITEM, Registry.ITEM.getKey(this.result).toString());
         if (this.count > 1) {

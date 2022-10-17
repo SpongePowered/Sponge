@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.accessor.world.level.chunk.LevelChunkAccessor;

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory;
 
+import net.minecraft.world.WorldlyContainer;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -37,7 +38,6 @@ import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.Arrays;
-import net.minecraft.world.WorldlyContainer;
 
 public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
 

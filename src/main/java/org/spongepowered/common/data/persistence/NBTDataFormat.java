@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.persistence;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.DataView;
@@ -34,8 +36,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtIo;
 
 public final class NBTDataFormat implements DataFormat {
 

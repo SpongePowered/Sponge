@@ -24,18 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.impl;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
-import org.spongepowered.common.bridge.world.inventory.LensGeneratorBridge;
-import org.spongepowered.common.entity.player.SpongeUserInventory;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.custom.CustomInventory;
-import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-
-import javax.annotation.Nullable;
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -50,6 +38,18 @@ import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.LensGeneratorBridge;
+import org.spongepowered.common.entity.player.SpongeUserInventory;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.custom.CustomInventory;
+import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
+import javax.annotation.Nullable;
 
 /**
  * Mixin into all known vanilla {@link Container} and {@link AbstractContainerMenu}

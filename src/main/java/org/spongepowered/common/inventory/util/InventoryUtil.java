@@ -24,6 +24,12 @@
  */
 package org.spongepowered.common.inventory.util;
 
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.properties.ChestType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -49,13 +55,6 @@ import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Optional;
-
-import net.minecraft.world.CompoundContainer;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.level.block.ChestBlock;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import net.minecraft.world.level.block.state.properties.ChestType;
 
 public final class InventoryUtil {
 

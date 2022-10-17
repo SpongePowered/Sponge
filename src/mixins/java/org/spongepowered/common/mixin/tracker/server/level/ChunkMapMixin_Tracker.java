@@ -49,7 +49,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import java.util.List;
 
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin_Tracker {

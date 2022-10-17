@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.ai.goal;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import org.spongepowered.api.entity.ai.goal.Goal;
 import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
@@ -38,8 +40,6 @@ import org.spongepowered.common.bridge.world.entity.ai.goal.GoalSelectorBridge;
 
 import java.util.List;
 import java.util.Set;
-import net.minecraft.world.entity.ai.goal.GoalSelector;
-import net.minecraft.world.entity.ai.goal.WrappedGoal;
 
 @Mixin(GoalSelector.class)
 public abstract class GoalSelectorMixin_API<O extends Agent> implements GoalExecutor<O> {

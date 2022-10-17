@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.monster;
 
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,10 +36,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.monster.EnderMan;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(targets = "net/minecraft/world/entity/monster/EnderMan$EndermanTakeBlockGoal")
 public abstract class EnderMan_EndermanTakeBlockGoalMixin extends Goal {

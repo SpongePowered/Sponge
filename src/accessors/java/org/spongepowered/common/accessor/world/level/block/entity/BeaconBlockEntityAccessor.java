@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.accessor.world.level.block.entity;
 
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.Set;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 
 @Mixin(BeaconBlockEntity.class)
 public interface BeaconBlockEntityAccessor {

@@ -26,12 +26,12 @@ package org.spongepowered.common.util.metric;
 
 import com.google.inject.Singleton;
 import io.leangen.geantyref.TypeToken;
-import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.config.metrics.MetricsConfig;
+import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Map;

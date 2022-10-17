@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.util;
 
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.entity.Entity;
 
 @Mixin(value = net.minecraft.world.damagesource.IndirectEntityDamageSource.class)
 public abstract class IndirectEntityDamageSourceMixin_API extends EntityDamageSourceMixin_API implements IndirectEntityDamageSource {

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.nbt;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,13 +33,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Map;
 
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import org.spongepowered.common.util.PrettyPrinter;
 
 /**
  * @author Zidane - Minecraft 1.14.4

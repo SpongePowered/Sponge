@@ -27,11 +27,12 @@ package org.spongepowered.common.service.server.ban;
 import static org.spongepowered.common.util.NetworkUtil.LOCAL_ADDRESS;
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.minecraft.server.players.IpBanList;
+import net.minecraft.server.players.IpBanListEntry;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.ban.Ban;
-import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.common.util.BanUtil;
 import org.spongepowered.common.util.NetworkUtil;
 
@@ -43,9 +44,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import net.minecraft.server.players.IpBanList;
-import net.minecraft.server.players.IpBanListEntry;
 
 /**
  * Redirects all calls to the {@link BanService}.

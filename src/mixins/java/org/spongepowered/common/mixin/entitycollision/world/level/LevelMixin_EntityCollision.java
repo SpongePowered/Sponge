@@ -32,7 +32,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.phys.AABB;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockType;
@@ -89,7 +88,7 @@ public abstract class LevelMixin_EntityCollision implements AutoCloseable, Level
         if (this.shadow$isClientSide() || entities == null) {
             return;
         }
-        if (entity instanceof EntityTypeTest<?, ?> test && (Player.class.isAssignableFrom(
+        if (entity instanceof final EntityTypeTest<?, ?> test && (Player.class.isAssignableFrom(
             test.getBaseClass()) || ItemEntity.class == test.getBaseClass())) {
             return;
         }

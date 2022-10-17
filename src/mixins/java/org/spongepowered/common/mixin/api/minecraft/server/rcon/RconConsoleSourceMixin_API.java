@@ -40,7 +40,6 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.rcon.RconConsoleSourceBridge;
 
 import java.net.InetSocketAddress;
-import java.util.UUID;
 
 @Mixin(RconConsoleSource.class)
 public abstract class RconConsoleSourceMixin_API implements RconConsoleSourceBridge, RconConnection {

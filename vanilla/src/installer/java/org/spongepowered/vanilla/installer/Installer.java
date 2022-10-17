@@ -31,7 +31,6 @@ import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.objectmapping.meta.NodeResolver;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 

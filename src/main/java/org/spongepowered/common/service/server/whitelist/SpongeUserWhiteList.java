@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.service.server.whitelist;
 
+import net.minecraft.server.players.UserWhiteList;
+import net.minecraft.server.players.UserWhiteListEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
@@ -33,9 +35,6 @@ import org.spongepowered.common.profile.SpongeGameProfile;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import net.minecraft.server.players.UserWhiteList;
-import net.minecraft.server.players.UserWhiteListEntry;
 
 /**
  * Redirects all calls to whitelist to the {@link WhitelistService}.

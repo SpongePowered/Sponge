@@ -120,7 +120,6 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
@@ -134,6 +133,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
 
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin implements PlayerListBridge {

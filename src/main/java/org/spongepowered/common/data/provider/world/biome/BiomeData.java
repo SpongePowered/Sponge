@@ -34,7 +34,6 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityCategory;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.biome.ambient.ParticleConfig;
 import org.spongepowered.api.world.biome.ambient.SoundConfig;
 import org.spongepowered.api.world.biome.climate.Precipitation;

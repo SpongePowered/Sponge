@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;

@@ -81,7 +81,7 @@ public abstract class MobEffectInstanceMixin_API implements PotionEffect {
     @Override
     public DataContainer toContainer() {
         final ResourceKey key = (ResourceKey) (Object) Registry.MOB_EFFECT.getKey((MobEffect) this.type());
-        
+
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Item.Potions.POTION_TYPE, key)

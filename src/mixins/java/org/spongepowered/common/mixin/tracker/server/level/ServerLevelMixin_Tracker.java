@@ -107,7 +107,6 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Chun
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.TileEntityPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.tracker.world.level.LevelMixin_Tracker;
 import org.spongepowered.common.util.Constants;

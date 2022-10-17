@@ -25,10 +25,8 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.vehicle;
 
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.entity.living.animal.Allay;
 import org.spongepowered.api.entity.vehicle.ChestBoat;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.PathfinderMobMixin_API;
 
 import java.util.Set;
 

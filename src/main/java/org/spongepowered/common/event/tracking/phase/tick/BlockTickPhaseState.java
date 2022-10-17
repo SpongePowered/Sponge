@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.world.BlockChange;
-
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.world.BlockChange;
 
 class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> {
 

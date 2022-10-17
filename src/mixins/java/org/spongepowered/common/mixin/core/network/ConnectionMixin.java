@@ -29,8 +29,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalAddress;
 import io.netty.util.concurrent.Future;
+import net.minecraft.network.Connection;
+import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
@@ -53,9 +56,6 @@ import java.net.UnknownHostException;
 import java.util.Set;
 
 import javax.annotation.Nullable;
-import net.minecraft.network.Connection;
-import net.minecraft.network.PacketListener;
-import net.minecraft.network.protocol.Packet;
 
 @Mixin(Connection.class)
 public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet<?>> implements ConnectionBridge {
@@ -119,18 +119,19 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         try {
             this.impl$virtualHost = new InetSocketAddress(InetAddress.getByAddress(host,
                     ((InetSocketAddress) this.channel.localAddress()).getAddress().getAddress()), port);
-        } catch (UnknownHostException e) {
+        } catch (final UnknownHostException e) {
             this.impl$virtualHost = InetSocketAddress.createUnresolved(host, port);
         }
     }
 
+    @Override
     @Nullable
     public Component bridge$getKickReason() {
         return this.impl$kickReason;
     }
 
     @Override
-    public void bridge$setKickReason(Component component) {
+    public void bridge$setKickReason(final Component component) {
         this.impl$kickReason = component;
     }
 
@@ -146,7 +147,7 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
 
     @Inject(method = "lambda$doSendPacket$8", at = @At(value = "INVOKE", target = "Lio/netty/util/concurrent/Future;isSuccess()Z"))
     public void impl$onPacketSent(final PacketSendListener $$0x, final Future $$1x, final CallbackInfo ci) {
-        if ($$0x instanceof PacketSender.SpongePacketSendListener spongeListener) {
+        if ($$0x instanceof final PacketSender.SpongePacketSendListener spongeListener) {
             spongeListener.accept($$1x);
         }
     }
