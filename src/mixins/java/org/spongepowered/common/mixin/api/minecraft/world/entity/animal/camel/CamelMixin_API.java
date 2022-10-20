@@ -22,33 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level.levelgen;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.camel;
 
-import net.minecraft.core.Registry;
-import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.entity.animal.camel.Camel;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBridge;
+import org.spongepowered.common.mixin.api.minecraft.world.entity.animal.horse.AbstractHorseMixin_API;
 
-@Mixin(WorldGenSettings.class)
-public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
+@Mixin(Camel.class)
+public abstract class CamelMixin_API extends AbstractHorseMixin_API implements org.spongepowered.api.entity.living.animal.horse.Camel {
 
-    // @formatter:off
-    @Shadow @Final private long seed;
-    @Shadow @Final private boolean generateStructures;
-    @Shadow @Final private boolean generateBonusChest;
-    @Shadow @Final private Registry<LevelStem> dimensions;
-    // @formatter:on
-
-    @Override
-    public WorldGenSettings bridge$copy() {
-        return new WorldGenSettings(this.seed, this.generateStructures, this.generateBonusChest, this.dimensions);
-    }
-
-    @Override
-    public WorldGenSettings bridge$withSeed(final long customSeed) {
-        return new WorldGenSettings(customSeed, this.generateStructures, this.generateBonusChest, this.dimensions);
-    }
 }

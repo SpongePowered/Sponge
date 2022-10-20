@@ -24,34 +24,42 @@
  */
 package org.spongepowered.common.registry;
 
-import com.mojang.serialization.Lifecycle;
-import net.minecraft.core.Holder;
-import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.function.BiConsumer;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-public final class CallbackRegistry<T> extends MappedRegistry<T> {
+public final class ProxiedRegistryAccess implements RegistryAccess {
 
-    private final BiConsumer<ResourceKey<T>, T> callback;
-    private boolean callbackEnabled;
+    private final RegistryAccess access;
+    private final Map<ResourceKey<? extends Registry<?>>, Registry<?>> overrides;
 
-    public CallbackRegistry(final ResourceKey<? extends Registry<T>> key, final Lifecycle lifecycle, final BiConsumer<ResourceKey<T>, T> callback) {
-        super(key, lifecycle);
-        this.callback = callback;
+    public ProxiedRegistryAccess(final RegistryAccess access, final Map<ResourceKey<? extends Registry<?>>, Registry<?>> overrides) {
+        this.access = access;
+        this.overrides = Map.copyOf(overrides);
     }
 
     @Override
-    public Holder<T> register(final ResourceKey<T> key, final T instance, final Lifecycle lifecycle) {
-        final Holder<T> value = super.register(key, instance, lifecycle);
-        if (this.callbackEnabled) {
-            this.callback.accept(key, instance);
+    @SuppressWarnings("unchecked")
+    public <E> Optional<Registry<E>> registry(final ResourceKey<? extends Registry<? extends E>> var1) {
+        final @Nullable Registry<?> override = this.overrides.get(var1);
+        if (override != null) {
+            return Optional.of((Registry<E>) override);
         }
-        return value;
+        return this.access.registry(var1);
     }
 
-    public void setCallbackEnabled(final boolean callbackEnabled) {
-        this.callbackEnabled = callbackEnabled;
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Override
+    public Stream<RegistryEntry<?>> registries() {
+        return Stream.concat(
+            this.access.registries().filter(entry -> !this.overrides.containsKey(entry.key())),
+            (Stream<RegistryEntry<?>>) (Stream) this.overrides.entrySet().stream().map(entry -> new RegistryAccess.RegistryEntry(entry.getKey(), entry.getValue()))
+        );
     }
+
 }

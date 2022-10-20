@@ -26,6 +26,7 @@ package org.spongepowered.common.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import org.spongepowered.api.block.BlockState;
 
@@ -42,7 +43,7 @@ public final class BlockStateSerializerDeserializer {
     public static Optional<BlockState> deserialize(final String string) {
         final String state = Objects.requireNonNull(string, "Id cannot be null!").toLowerCase(Locale.ENGLISH);
         try {
-            final BlockStateParser.BlockResult result = BlockStateParser.parseForBlock(Registry.BLOCK, state, true);
+            final BlockStateParser.BlockResult result = BlockStateParser.parseForBlock(HolderLookup.forRegistry(Registry.BLOCK), state, true);
             return Optional.of((BlockState) result.blockState());
         } catch (final CommandSyntaxException e) {
             return Optional.empty();

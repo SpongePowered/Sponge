@@ -93,7 +93,7 @@ class RegistryEntriesValidator<V> implements Generator {
         final var primaryTypeDeclaration = compilationUnit.getPrimaryType()
             .orElseThrow(() -> new IllegalStateException("Could not find primary type for registry type " + this.targetClassSimpleName));
 
-        Registry<V> registry = ctx.registries().ownedRegistry(this.registry).orElse(null);
+        Registry<V> registry = ctx.registries().registry(this.registry).orElse(null);
         if (registry == null) {
             registry = (Registry<V>) Registry.REGISTRY.get(this.registry.location());
             if (registry == null) {

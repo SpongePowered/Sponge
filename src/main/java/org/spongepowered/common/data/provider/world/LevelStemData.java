@@ -44,7 +44,7 @@ public final class LevelStemData {
         registrator
                 .asImmutable(LevelStem.class)
                     .create(Keys.WORLD_TYPE)
-                        .get(h -> (WorldType) (Object) h.typeHolder().value())
+                        .get(h -> (WorldType) (Object) h.type().value())
                     .create(Keys.CHUNK_GENERATOR)
                         .get(h -> (ChunkGenerator) h.generator())
                 .asImmutable(LevelStemBridge.class)

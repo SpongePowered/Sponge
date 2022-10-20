@@ -29,6 +29,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 
@@ -39,10 +40,10 @@ public class SpongeShapedRecipe extends ShapedRecipe {
     private final Function<CraftingContainer, ItemStack> resultFunction;
     private final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction;
 
-    public SpongeShapedRecipe(ResourceLocation idIn, String groupIn, int recipeWidthIn, int recipeHeightIn, NonNullList<Ingredient> recipeItemsIn,
+    public SpongeShapedRecipe(ResourceLocation idIn, String groupIn, final CraftingBookCategory category, int recipeWidthIn, int recipeHeightIn, NonNullList<Ingredient> recipeItemsIn,
             ItemStack recipeOutputIn, Function<CraftingContainer, ItemStack> resultFunction,
             Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction) {
-        super(idIn, groupIn, recipeWidthIn, recipeHeightIn, recipeItemsIn, recipeOutputIn);
+        super(idIn, groupIn, category, recipeWidthIn, recipeHeightIn, recipeItemsIn, recipeOutputIn);
         this.resultFunction = resultFunction;
         this.remainingItemsFunction = remainingItemsFunction;
     }

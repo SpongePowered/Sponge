@@ -27,6 +27,7 @@ package org.spongepowered.common.item.recipe.cooking;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 
@@ -36,8 +37,8 @@ public class SpongeSmokingRecipe extends SmokingRecipe {
 
     private final Function<Container, ItemStack> resultFunction;
 
-    public SpongeSmokingRecipe(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction) {
-        super(id, group, ingredient, result, experience, cookingTime);
+    public SpongeSmokingRecipe(final ResourceLocation id, final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction) {
+        super(id, group, category, ingredient, result, experience, cookingTime);
         this.resultFunction = resultFunction;
     }
 

@@ -27,6 +27,7 @@ package org.spongepowered.common.item.recipe.crafting.custom;
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -53,6 +54,7 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
     private final SpongeSpecialRecipe recipe;
 
     public SpongeSpecialCraftingRecipeRegistration(ResourceLocation key,
+            final CraftingBookCategory category,
             BiPredicate<CraftingGridInventory, ServerWorld> biPredicate,
             Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction,
             Function<CraftingGridInventory, ItemStack> resultFunction,
@@ -63,8 +65,12 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
         this.remainingItemsFunction = remainingItemsFunction;
         this.resultFunction = resultFunction;
 
-        this.recipe = new SpongeSpecialRecipe(key, this.biPredicate, this.remainingItemsFunction, this.resultFunction);
+        this.recipe = new SpongeSpecialRecipe(key, category, this.biPredicate, this.remainingItemsFunction, this.resultFunction);
         SpongeSpecialCraftingRecipeRegistration.RECIPES.put(key, this.recipe);
+    }
+
+    public static SpongeSpecialRecipe get(final ResourceLocation location, final CraftingBookCategory category) {
+        return SpongeSpecialCraftingRecipeRegistration.RECIPES.get(location); // TOGO: category?
     }
 
     @Override

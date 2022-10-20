@@ -28,6 +28,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.BlastingRecipe;
+import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.function.Function;
@@ -36,8 +37,8 @@ public class SpongeBlastingRecipe extends BlastingRecipe {
 
     private final Function<Container, ItemStack> resultFunction;
 
-    public SpongeBlastingRecipe(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction) {
-        super(id, group, ingredient, result, experience, cookingTime);
+    public SpongeBlastingRecipe(final ResourceLocation id, final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction) {
+        super(id, group, category, ingredient, result, experience, cookingTime);
         this.resultFunction = resultFunction;
     }
 

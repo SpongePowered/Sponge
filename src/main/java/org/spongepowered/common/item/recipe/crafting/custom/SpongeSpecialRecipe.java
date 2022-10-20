@@ -28,6 +28,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
@@ -50,10 +51,11 @@ public final class SpongeSpecialRecipe extends CustomRecipe {
     private final Function<CraftingGridInventory, org.spongepowered.api.item.inventory.ItemStack> resultFunction;
 
     public SpongeSpecialRecipe(ResourceLocation idIn,
+            CraftingBookCategory category,
             BiPredicate<CraftingGridInventory, ServerWorld> biPredicate,
             Function<CraftingGridInventory, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction,
             Function<CraftingGridInventory, org.spongepowered.api.item.inventory.ItemStack> resultFunction) {
-        super(idIn);
+        super(idIn, category);
         this.biPredicate = biPredicate;
         this.remainingItemsFunction = remainingItemsFunction;
         this.resultFunction = resultFunction;

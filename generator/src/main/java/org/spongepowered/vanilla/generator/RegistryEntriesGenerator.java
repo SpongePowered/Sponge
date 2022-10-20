@@ -117,15 +117,15 @@ class RegistryEntriesGenerator<V> implements Generator {
         clazz.addAnnotation(Types.suppressWarnings("unused"));
 
         final RegistryScope scopeType;
-        Registry<V> registry = ctx.registries().ownedRegistry(this.registry).orElse(null);
+        Registry<V> registry = (Registry<V>) Registry.REGISTRY.get(this.registry.location());
         if (registry == null) {
-            registry = (Registry<V>) Registry.REGISTRY.get(this.registry.location());
+            registry = ctx.registries().registry(this.registry).orElse(null);
             if (registry == null) {
                 throw new IllegalArgumentException("Unknown registry " + this.registry);
             }
-            scopeType = this.scopeOverride != null ? this.scopeOverride : RegistryScope.GAME;
-        } else {
             scopeType = this.scopeOverride != null ? this.scopeOverride : RegistryScope.WORLD;
+        } else {
+            scopeType = this.scopeOverride != null ? this.scopeOverride : RegistryScope.GAME;
         }
 
         clazz.addAnnotation(scopeType.registryScopeAnnotation());

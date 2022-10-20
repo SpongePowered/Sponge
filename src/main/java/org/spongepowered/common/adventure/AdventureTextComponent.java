@@ -114,7 +114,7 @@ public class AdventureTextComponent implements net.minecraft.network.chat.Compon
 
     @Override
     public ComponentContents getContents() {
-        if (this.wrapped instanceof TextComponent tc) {
+        if (this.wrapped instanceof final TextComponent tc) {
             return new LiteralContents(tc.content());
         } else {
             return this.deepConverted().getContents();

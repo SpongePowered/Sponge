@@ -139,7 +139,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     public CommandCause bridge$withCurrentCause() {
         // Cause is set in ctor.
         return (CommandCause) CommandSourceStackAccessor.invoker$new(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel,
-                this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor, this.signingContext, TaskChainer.IMMEDIATE);
+                this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor);
     }
 
     /*

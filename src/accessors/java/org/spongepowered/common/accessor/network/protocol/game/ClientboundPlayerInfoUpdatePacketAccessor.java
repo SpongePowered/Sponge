@@ -22,36 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry;
+package org.spongepowered.common.accessor.network.protocol.game;
 
-import com.mojang.serialization.Lifecycle;
-import net.minecraft.core.Holder;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.function.BiConsumer;
+import java.util.List;
 
-public final class CallbackRegistry<T> extends MappedRegistry<T> {
+@Mixin(ClientboundPlayerInfoUpdatePacket.class)
+public interface ClientboundPlayerInfoUpdatePacketAccessor {
 
-    private final BiConsumer<ResourceKey<T>, T> callback;
-    private boolean callbackEnabled;
+    @Accessor("entries") @Mutable void accessor$entries(final List<ClientboundPlayerInfoUpdatePacket.Entry> entries);
 
-    public CallbackRegistry(final ResourceKey<? extends Registry<T>> key, final Lifecycle lifecycle, final BiConsumer<ResourceKey<T>, T> callback) {
-        super(key, lifecycle);
-        this.callback = callback;
-    }
-
-    @Override
-    public Holder<T> register(final ResourceKey<T> key, final T instance, final Lifecycle lifecycle) {
-        final Holder<T> value = super.register(key, instance, lifecycle);
-        if (this.callbackEnabled) {
-            this.callback.accept(key, instance);
-        }
-        return value;
-    }
-
-    public void setCallbackEnabled(final boolean callbackEnabled) {
-        this.callbackEnabled = callbackEnabled;
-    }
 }

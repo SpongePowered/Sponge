@@ -31,10 +31,11 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.RemoteChatSession;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket.PlayerUpdate;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -71,6 +72,7 @@ import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoUpdatePacketAccessor;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
@@ -83,6 +85,7 @@ import org.spongepowered.common.util.SpongeTicks;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -382,7 +385,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         return true;
     }
 
-    public void removeFromTabListDelayed(final @Nullable ServerPlayer player, final ClientboundPlayerInfoPacket removePacket) {
+    public void removeFromTabListDelayed(final @Nullable ServerPlayer player, final ClientboundPlayerInfoRemovePacket removePacket) {
         final int delay = SpongeGameConfigs.getForWorld(this.level).get().entity.human.tabListRemoveDelay;
         final Runnable removeTask = () -> this.pushPackets(player, removePacket);
         if (delay == 0) {
@@ -420,9 +423,8 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     private void respawnOnClient() {
-        this.pushPackets(new ClientboundRemoveEntitiesPacket(this.getId()), this.createPlayerListPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER));
+        this.pushPackets(new ClientboundRemoveEntitiesPacket(this.getId()), this.createPlayerListPacket(EnumSet.allOf(ClientboundPlayerInfoUpdatePacket.Action.class)));
         this.pushPackets(this.getAddEntityPacket());
-        this.removeFromTabListDelayed(null, this.createPlayerListPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER));
     }
 
     /**
@@ -445,7 +447,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
      */
     public void untrackFrom(final ServerPlayer player) {
         this.playerPacketMap.remove(player.getUUID());
-        player.connection.send(this.createPlayerListPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER));
+        player.connection.send(new ClientboundPlayerInfoRemovePacket(List.of(this.uuid)));
     }
 
     /**
@@ -470,15 +472,14 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     /**
-     * Creates a {@link ClientboundPlayerInfoPacket} packet with the given action.
+     * Creates a {@link ClientboundPlayerInfoUpdatePacket} packet with the given action.
      *
-     * @param action The action to apply on the tab list
+     * @param actions The action to apply on the tab list
      * @return A new tab list packet
      */
-    public ClientboundPlayerInfoPacket createPlayerListPacket(final ClientboundPlayerInfoPacket.Action action) {
-        final ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket(action);
-        packet.getEntries()
-                .add(new PlayerUpdate(this.fakeProfile, 0, GameType.DEFAULT_MODE, this.getDisplayName(), null));
+    public ClientboundPlayerInfoUpdatePacket createPlayerListPacket(final EnumSet<ClientboundPlayerInfoUpdatePacket.Action> actions) {
+        final ClientboundPlayerInfoUpdatePacket packet = new ClientboundPlayerInfoUpdatePacket(actions, List.of());
+        ((ClientboundPlayerInfoUpdatePacketAccessor) packet).accessor$entries(List.of(new ClientboundPlayerInfoUpdatePacket.Entry(this.uuid, this.fakeProfile, false, 0, GameType.DEFAULT_MODE, this.getDisplayName(), RemoteChatSession.Data.UNVERIFIED)));
         return packet;
     }
 

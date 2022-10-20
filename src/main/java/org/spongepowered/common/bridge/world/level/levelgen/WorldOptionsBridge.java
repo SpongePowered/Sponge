@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.bridge.world.level.levelgen;
 
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.WorldOptions;
 
-public interface WorldGenSettingsBridge {
+public interface WorldOptionsBridge {
 
-    WorldGenSettings bridge$copy();
-
-    WorldGenSettings bridge$withSeed(long customSeed);
+    WorldOptions bridge$withSeed(long customSeed);
 }

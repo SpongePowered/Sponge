@@ -34,6 +34,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
@@ -41,6 +42,7 @@ import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -55,6 +57,7 @@ public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Ser
     @Override
     public ShapelessRecipe fromJson(final ResourceLocation recipeId, final JsonObject json) {
         final String s = GsonHelper.getAsString(json, Constants.Recipe.GROUP, "");
+        final CraftingBookCategory category = Objects.requireNonNullElse(CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, Constants.Recipe.CATEGORY)), CraftingBookCategory.MISC);
         final NonNullList<Ingredient> nonnulllist = this.readIngredients(GsonHelper.getAsJsonArray(json, Constants.Recipe.SHAPELESS_INGREDIENTS));
         if (nonnulllist.isEmpty()) {
             throw new JsonParseException("No ingredients for shapeless recipe");
@@ -66,7 +69,7 @@ public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Ser
         final ItemStack spongeStack = IngredientResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
         final Function<CraftingContainer, ItemStack> resultFunction = IngredientResultUtil.deserializeResultFunction(json);
         final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction = IngredientResultUtil.deserializeRemainingItemsFunction(json);
-        return new SpongeShapelessRecipe(recipeId, s, spongeStack == null ? itemstack : spongeStack, nonnulllist, resultFunction, remainingItemsFunction);
+        return new SpongeShapelessRecipe(recipeId, s, category, spongeStack == null ? itemstack : spongeStack, nonnulllist, resultFunction, remainingItemsFunction);
     }
 
     private NonNullList<Ingredient> readIngredients(final JsonArray json) {

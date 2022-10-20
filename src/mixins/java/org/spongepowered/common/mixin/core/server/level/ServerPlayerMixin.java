@@ -35,7 +35,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.OutgoingPlayerChatMessage;
+import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
@@ -768,7 +768,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Inject(method = "sendChatMessage", cancellable = true, at = @At("HEAD"))
-    public void sendMessage(final OutgoingPlayerChatMessage $$0, final boolean $$1, final ChatType.Bound $$2, final CallbackInfo ci) {
+    public void sendMessage(final OutgoingChatMessage $$0, final boolean $$1, final ChatType.Bound $$2, final CallbackInfo ci) {
         if (this.impl$isFake) {
             // Don't bother sending messages to fake players
             ci.cancel();

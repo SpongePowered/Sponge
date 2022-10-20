@@ -56,6 +56,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -92,7 +93,7 @@ public final class SpongeDataPackManager implements DataPackManager {
         final PackRepository packRepo = this.server.getPackRepository();
         final List<String> toReload = new ArrayList<>(packRepo.getSelectedIds());
         packRepo.reload();
-        final List<String> disabled = this.server.getWorldData().getDataPackConfig().getDisabled();
+        final List<String> disabled = this.server.getWorldData().getDataConfiguration().dataPacks().getDisabled();
         for (final String available : packRepo.getAvailableIds()) {
             if (!disabled.contains(available) && !toReload.contains(available)) {
                 toReload.add(available);
@@ -180,7 +181,7 @@ public final class SpongeDataPackManager implements DataPackManager {
             try (InputStream inputStream = resource.get().open()) {
                 final T deserialized = packSerializer.deserialize(implPack, inputStream, key);
                 return CompletableFuture.completedFuture(Optional.ofNullable(deserialized));
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 return FutureUtil.completedWithException(ex);
             }
         }
@@ -192,7 +193,7 @@ public final class SpongeDataPackManager implements DataPackManager {
                 // TODO this is actually blocking
                 final T deserialized = packSerializer.deserialize(implPack, file, key);
                 return CompletableFuture.completedFuture(Optional.ofNullable(deserialized));
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 return FutureUtil.completedWithException(ex);
             }
         }
@@ -213,6 +214,7 @@ public final class SpongeDataPackManager implements DataPackManager {
         return Files.deleteIfExists(file);
     }
 
+    @Override
     public void copy(final DataPack<?> pack, final ResourceKey from, final ResourceKey to) throws IOException {
         this.copy(pack, from, pack, to);
     }
@@ -227,6 +229,7 @@ public final class SpongeDataPackManager implements DataPackManager {
         Files.copy(fileFrom, fileto, StandardCopyOption.REPLACE_EXISTING);
     }
 
+    @Override
     public void move(final DataPack<?> pack, final ResourceKey from, final ResourceKey to) throws IOException {
         this.move(pack, from, pack, to);
     }
@@ -272,14 +275,15 @@ public final class SpongeDataPackManager implements DataPackManager {
     @Override
     public <T extends DataPackEntry<T>> Map<DataPack<T>, Collection<ResourceKey>> find(final DataPackType<T> packType) {
         final ResourceManager manager = this.server.getResourceManager();
-        Map<String, List<ResourceLocation>> resources = new HashMap<>();
-        Map<String, String> descriptions = new HashMap<>();
+        final Map<String, List<ResourceLocation>> resources = new HashMap<>();
+        final Map<String, String> descriptions = new HashMap<>();
         final SpongeDataPackType<JsonElement, T> typeImpl = (SpongeDataPackType<JsonElement, T>) packType;
         manager.listPacks().forEach(pack -> {
-            final String packName = pack.getName();
+            final String packName = pack.packId();
             descriptions.computeIfAbsent(packName, k -> this.packDescription(pack));
             for (final String namespace : pack.getNamespaces(PackType.SERVER_DATA)) {
-                final Collection<ResourceLocation> locs = pack.getResources(PackType.SERVER_DATA, namespace, typeImpl.dir(), loc -> true);
+                final Collection<ResourceLocation> locs = new HashSet<>();
+                pack.listResources(PackType.SERVER_DATA, namespace, typeImpl.dir(), (loc, stream) -> locs.add(loc));
                 if (!locs.isEmpty()) {
                     resources.computeIfAbsent(packName, k -> new ArrayList<>()).addAll(locs);
                 }
@@ -309,13 +313,13 @@ public final class SpongeDataPackManager implements DataPackManager {
 
     private String packDescription(final PackResources pack) {
         try {
-            return pack.getMetadataSection(PackMetadataSection.SERIALIZER).getDescription().getString();
-        } catch (IOException e) {
+            return pack.getMetadataSection(PackMetadataSection.TYPE).getDescription().getString();
+        } catch (final IOException e) {
             return "N/A";
         }
     }
 
-    private static ResourceKey keyFor(Path namespaceDir, Path file) {
+    private static ResourceKey keyFor(final Path namespaceDir, final Path file) {
         final String namespace = namespaceDir.getFileName().toString();
         final String value = FilenameUtils.removeExtension(file.getFileName().toString());
         return ResourceKey.of(namespace, value);

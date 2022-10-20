@@ -121,7 +121,7 @@
         "world.entity.vehicle.BoatAccessor",
         "world.entity.vehicle.MinecartFurnaceAccessor",
         "world.food.FoodDataAccessor",
-        "world.gen.WorldGenSettingsAccessor",
+        "world.level.levelgen.WorldOptionsAccessor",
         "world.inventory.AbstractContainerMenuAccessor",
         "world.inventory.AbstractFurnaceMenuAccessor",
         "world.inventory.BeaconMenuAccessor",
@@ -204,7 +204,8 @@
         "world.level.biome.OverworldBiomeBuilderAccessor",
         "world.level.levelgen.NoiseSettingsAccessor",
         "world.level.levelgen.structure.pools.StructureTemplatePoolAccessor",
-        "world.level.biome.MobSpawnSettings_MobSpawnCostAccessor"
+        "world.level.biome.MobSpawnSettings_MobSpawnCostAccessor",
+        "network.protocol.game.ClientboundPlayerInfoUpdatePacketAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"

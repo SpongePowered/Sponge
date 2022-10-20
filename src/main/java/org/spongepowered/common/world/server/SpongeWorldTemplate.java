@@ -85,7 +85,7 @@ import java.util.Optional;
 public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack<WorldTemplate> pack) implements WorldTemplate, SpongeDataHolder {
 
     public static final Codec<LevelStem> CODEC = RecordCodecBuilder.create(
-            ($$0) -> $$0.group(DimensionType.CODEC.fieldOf("type").forGetter(LevelStem::typeHolder),
+            ($$0) -> $$0.group(DimensionType.CODEC.fieldOf("type").forGetter(LevelStem::type),
                             net.minecraft.world.level.chunk.ChunkGenerator.CODEC.fieldOf("generator").forGetter(LevelStem::generator))
                     .apply($$0, $$0.stable(LevelStem::new)));
 
@@ -132,7 +132,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         return LevelStem.CODEC.parse(ops, pack).getOrThrow(false, e -> {});
     }
 
-    public static WorldTemplate decode(final DataPack<WorldTemplate> pack, ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
+    public static WorldTemplate decode(final DataPack<WorldTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
         final LevelStem stem = SpongeWorldTemplate.decodeStem(packEntry, registryAccess);
         return new SpongeWorldTemplate(key, stem, pack);
     }
@@ -146,7 +146,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
                 biomeSource.addProperty("type", "minecraft:multi_noise");
                 biomeSource.addProperty("preset", "minecraft:overworld");
             }
-        } catch (Exception ignored) {
+        } catch (final Exception ignored) {
         }
     }
 
@@ -162,13 +162,13 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
             final DataContainer container = DataFormats.JSON.get().read(serialized.toString());
             container.set(Queries.CONTENT_VERSION, this.contentVersion());
             return container;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalStateException("Could not read deserialized LevelStem:\n" + serialized, e);
         }
     }
 
     public static JsonElement serialize(final WorldTemplate s, final RegistryAccess registryAccess) {
-        if (s instanceof SpongeWorldTemplate t) {
+        if (s instanceof final SpongeWorldTemplate t) {
             final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
             return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(ops, t.levelStem).getOrThrow(false, e -> {
             });
@@ -227,7 +227,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         }
 
         @Override
-        public Builder fromDataPack(DataView pack) throws IOException {
+        public Builder fromDataPack(final DataView pack) throws IOException {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
             final LevelStem levelStem = SpongeWorldTemplate.decodeStem(json, SpongeCommon.server().registryAccess());
             return this.from(levelStem);
@@ -235,7 +235,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         }
 
         @Override
-        public Builder from(ServerWorld world) {
+        public Builder from(final ServerWorld world) {
             this.from(world.properties());
             this.data.set(Keys.CHUNK_GENERATOR, world.generator());
             return this;
@@ -248,8 +248,8 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         }
 
         @Override
-        public Builder from(ServerWorldProperties properties) {
-            PrimaryLevelDataBridge bridge = (PrimaryLevelDataBridge) properties;
+        public Builder from(final ServerWorldProperties properties) {
+            final PrimaryLevelDataBridge bridge = (PrimaryLevelDataBridge) properties;
             this.key = properties.key();
             properties.displayName().ifPresent(name -> this.data.set(Keys.DISPLAY_NAME, name));
             this.data.set(Keys.WORLD_TYPE, properties.worldType());
@@ -272,7 +272,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
             return this;
         }
 
-        private Builder from(LevelStem levelStem) {
+        private Builder from(final LevelStem levelStem) {
             this.data.set(((DataHolder) (Object) levelStem).getValues());
             return this;
         }

@@ -226,21 +226,21 @@ public final class SpongeAdventure {
         if (component instanceof final ScoreComponent $this) {
             return net.minecraft.network.chat.Component.score($this.name(), $this.objective());
         }
-        if (component instanceof SelectorComponent $this) {
+        if (component instanceof final SelectorComponent $this) {
             return net.minecraft.network.chat.Component.selector($this.pattern(), SpongeAdventure.asVanillaOpt($this.separator()));
         }
         if (component instanceof NBTComponent<?, ?>) {
-            if (component instanceof BlockNBTComponent $this) {
+            if (component instanceof final BlockNBTComponent $this) {
                 return net.minecraft.network.chat.Component.nbt($this.nbtPath(), $this.interpret(),
                         SpongeAdventure.asVanillaOpt($this.separator()),
                         new BlockDataSource($this.pos().asString()));
             }
-            if (component instanceof EntityNBTComponent $this) {
+            if (component instanceof final EntityNBTComponent $this) {
                 return net.minecraft.network.chat.Component.nbt($this.nbtPath(), $this.interpret(),
                         SpongeAdventure.asVanillaOpt($this.separator()),
                         new EntityDataSource($this.selector()));
             }
-            if (component instanceof StorageNBTComponent $this) {
+            if (component instanceof final StorageNBTComponent $this) {
                 return net.minecraft.network.chat.Component.nbt($this.nbtPath(), $this.interpret(),
                         SpongeAdventure.asVanillaOpt($this.separator()),
                         new StorageDataSource(SpongeAdventure.asVanilla($this.storage())));
@@ -251,7 +251,7 @@ public final class SpongeAdventure {
 
     // no caching
     public static Component asAdventure(final net.minecraft.network.chat.Component component) {
-        if (component instanceof AdventureTextComponent ac) {
+        if (component instanceof final AdventureTextComponent ac) {
             return ac.wrapped();
         }
 
@@ -266,33 +266,33 @@ public final class SpongeAdventure {
         return builder.build();
     }
 
-    private static ComponentBuilder<?, ?> asAdventureBuilder(ComponentContents contents) {
-        if (contents instanceof LiteralContents lc) {
+    private static ComponentBuilder<?, ?> asAdventureBuilder(final ComponentContents contents) {
+        if (contents instanceof final LiteralContents lc) {
             return Component.text().content(lc.text());
         }
-        if (contents instanceof TranslatableContents tc) {
+        if (contents instanceof final TranslatableContents tc) {
             final List<Component> argList = Arrays.stream(tc.getArgs())
-                    .map(arg -> arg instanceof net.minecraft.network.chat.Component argComponent ?
+                    .map(arg -> arg instanceof final net.minecraft.network.chat.Component argComponent ?
                                     SpongeAdventure.asAdventure(argComponent) : Component.text(arg.toString())).toList();
             return Component.translatable().key(tc.getKey()).args(argList);
         }
-        if (contents instanceof KeybindContents kc) {
+        if (contents instanceof final KeybindContents kc) {
             return Component.keybind().keybind(kc.getName());
         }
-        if (contents instanceof ScoreContents sc) {
+        if (contents instanceof final ScoreContents sc) {
             return Component.score().name(sc.getName()).objective(sc.getObjective());
         }
-        if (contents instanceof SelectorContents sc) {
+        if (contents instanceof final SelectorContents sc) {
             return Component.selector().pattern(sc.getPattern())
                                               .separator(SpongeAdventure.asAdventure(sc.getSeparator()));
         }
-        if (contents instanceof NbtContents nc) {
+        if (contents instanceof final NbtContents nc) {
             NBTComponentBuilder<?, ?> nbtBuilder;
-            if (nc.getDataSource() instanceof BlockDataSource ds) {
+            if (nc.getDataSource() instanceof final BlockDataSource ds) {
                 nbtBuilder = Component.blockNBT().pos(BlockNBTComponent.Pos.fromString(ds.posPattern()));
-            } else if (nc.getDataSource() instanceof EntityDataSource ds) {
+            } else if (nc.getDataSource() instanceof final EntityDataSource ds) {
                 nbtBuilder = Component.entityNBT().selector(ds.selectorPattern());
-            } else if (nc.getDataSource() instanceof StorageDataSource ds) {
+            } else if (nc.getDataSource() instanceof final StorageDataSource ds) {
                 nbtBuilder = Component.storageNBT().storage(SpongeAdventure.asAdventure(ds.id()));
             } else {
                 throw new UnsupportedOperationException("Cannot convert NBTContents with DataSource " + nc.getDataSource().getClass());

@@ -599,6 +599,7 @@ public final class Constants {
 
         public static final String RESULT = "result";
         public static final String ITEM = "item";
+        public static final String CATEGORY = "category";
         public static final String COUNT = "count";
 
         public static final String SPONGE_RESULT = "sponge:result";

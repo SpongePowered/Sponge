@@ -34,6 +34,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import org.spongepowered.common.accessor.world.item.crafting.ShapedRecipeAccessor;
@@ -42,6 +43,7 @@ import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -56,6 +58,7 @@ public class SpongeShapedCraftingRecipeSerializer extends ShapedRecipe.Serialize
     @Override
     public ShapedRecipe fromJson(final ResourceLocation recipeId, final JsonObject json) {
         final String s = GsonHelper.getAsString(json, Constants.Recipe.GROUP, "");
+        final CraftingBookCategory category = Objects.requireNonNullElse(CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, Constants.Recipe.CATEGORY)), CraftingBookCategory.MISC);
         final JsonObject ingredientKey = GsonHelper.getAsJsonObject(json, Constants.Recipe.SHAPED_INGREDIENTS);
         final Map<String, Ingredient> map = this.deserializeIngredientKey(ingredientKey);
         final String[] astring = ShapedRecipeAccessor.invoker$shrink(ShapedRecipeAccessor.invoker$patternFromJson(GsonHelper.getAsJsonArray(json, Constants.Recipe.SHAPED_PATTERN)));
@@ -66,7 +69,7 @@ public class SpongeShapedCraftingRecipeSerializer extends ShapedRecipe.Serialize
         final ItemStack spongeStack = IngredientResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
         final Function<CraftingContainer, ItemStack> resultFunction = IngredientResultUtil.deserializeResultFunction(json);
         final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction = IngredientResultUtil.deserializeRemainingItemsFunction(json);
-        return new SpongeShapedRecipe(recipeId, s, i, j, nonnulllist, spongeStack == null ? itemstack : spongeStack, resultFunction, remainingItemsFunction);
+        return new SpongeShapedRecipe(recipeId, s, category, i, j, nonnulllist, spongeStack == null ? itemstack : spongeStack, resultFunction, remainingItemsFunction);
     }
 
     public Map<String, Ingredient> deserializeIngredientKey(final JsonObject json) {

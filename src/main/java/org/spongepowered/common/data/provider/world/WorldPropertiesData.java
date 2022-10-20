@@ -80,7 +80,7 @@ public final class WorldPropertiesData {
                     .create(Keys.WORLD_DIFFICULTY)
                         .set((h, v) -> h.setDifficulty((net.minecraft.world.Difficulty) (Object) v))
                     .create(Keys.WORLD_GEN_CONFIG)
-                        .get(h -> (WorldGenerationConfig) h.worldGenSettings())
+                        .get(h -> (WorldGenerationConfig) h.worldGenOptions())
                 .asMutable(PrimaryLevelDataBridge.class)
                     .create(Keys.WORLD_TYPE)
                         .get(h -> (WorldType) (Object) h.bridge$dimensionType())

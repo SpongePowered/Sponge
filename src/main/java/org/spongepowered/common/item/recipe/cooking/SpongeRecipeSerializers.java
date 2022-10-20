@@ -30,7 +30,7 @@ import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleRecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import org.spongepowered.common.item.recipe.crafting.custom.SpongeSpecialCraftingRecipeRegistration;
@@ -50,7 +50,7 @@ public interface SpongeRecipeSerializers {
     RecipeSerializer<?> SPONGE_STONECUTTING = register("stonecutting", new SpongeStonecuttingRecipeSerializer<>());
     SpongeCookingRecipeSerializer<SmokingRecipe> SPONGE_SMOKING = register("smoking", new SpongeCookingRecipeSerializer.Smoking());
 
-    SimpleRecipeSerializer<?> SPONGE_SPECIAL = register("special", new SimpleRecipeSerializer<>(SpongeSpecialCraftingRecipeRegistration.RECIPES::get));
+    SimpleCraftingRecipeSerializer<?> SPONGE_SPECIAL = register("special", new SimpleCraftingRecipeSerializer<>(SpongeSpecialCraftingRecipeRegistration::get));
 
     static <S extends RecipeSerializer<T>, T extends Recipe<?>> S register(final String spongeName, final S recipeSerializer) {
         return (S)(Registry.<RecipeSerializer<?>>register(Registry.RECIPE_SERIALIZER, new ResourceLocation("sponge", spongeName).toString(), recipeSerializer));

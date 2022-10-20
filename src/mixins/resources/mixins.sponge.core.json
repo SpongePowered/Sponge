@@ -223,7 +223,7 @@
         "world.level.dimension.LevelStemMixin",
         "world.level.entity.PersistentEntitySectionManagerMixin",
         "world.level.levelgen.NoiseGeneratorSettingsMixin",
-        "world.level.levelgen.WorldGenSettingsMixin",
+        "world.level.levelgen.WorldOptionsMixin",
         "world.level.levelgen.flat.FlatLayerInfoMixin",
         "world.level.levelgen.structure.LegacyStructureDataHandlerMixin",
         "world.level.portal.PortalShapeMixin",

@@ -35,6 +35,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
@@ -43,6 +44,7 @@ import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 // Custom Serializer with support for:
@@ -59,6 +61,7 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
     @Override
     public R fromJson(final ResourceLocation recipeId, final JsonObject json) {
         final String group = GsonHelper.getAsString(json, Constants.Recipe.GROUP, "");
+        final CookingBookCategory category = Objects.requireNonNullElse(CookingBookCategory.CODEC.byName(GsonHelper.getAsString(json, Constants.Recipe.CATEGORY)), CookingBookCategory.MISC);
         final JsonElement jsonelement = GsonHelper.isArrayNode(json, Constants.Recipe.COOKING_INGREDIENT) ? GsonHelper.getAsJsonArray(json, Constants.Recipe.COOKING_INGREDIENT) : GsonHelper.getAsJsonObject(json, Constants.Recipe.COOKING_INGREDIENT);
         final Ingredient ingredient = IngredientUtil.spongeDeserialize(jsonelement);
         final String result = GsonHelper.getAsString(json, Constants.Recipe.RESULT);
@@ -68,10 +71,10 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
         final Function<Container, ItemStack> resultFunction = IngredientResultUtil.deserializeResultFunction(json);
         final float exp = GsonHelper.getAsFloat(json, Constants.Recipe.COOKING_EXP, 0.0F);
         final int cookTime = GsonHelper.getAsInt(json, Constants.Recipe.COOKING_TIME, this.defaultCookingTime);
-        return this.create(recipeId, group, ingredient, spongeStack == null ? itemstack : spongeStack, exp, cookTime, resultFunction);
+        return this.create(recipeId, group, category, ingredient, spongeStack == null ? itemstack : spongeStack, exp, cookTime, resultFunction);
     }
 
-    protected abstract R create(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result,
+    protected abstract R create(final ResourceLocation id, final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result,
                                 final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction);
 
     @Override
@@ -91,9 +94,9 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
         }
 
         @Override
-        protected SmeltingRecipe create(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result,
+        protected SmeltingRecipe create(final ResourceLocation id, final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result,
                                        final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction) {
-            return new SpongeFurnaceRecipe(id, group, ingredient, result, experience, cookingTime, resultFunction);
+            return new SpongeFurnaceRecipe(id, group, category, ingredient, result, experience, cookingTime, resultFunction);
         }
     }
 
@@ -104,9 +107,9 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
         }
 
         @Override
-        protected BlastingRecipe create(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result,
+        protected BlastingRecipe create(final ResourceLocation id, final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result,
                                         final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction) {
-            return new SpongeBlastingRecipe(id, group, ingredient, result, experience, cookingTime, resultFunction);
+            return new SpongeBlastingRecipe(id, group, category, ingredient, result, experience, cookingTime, resultFunction);
         }
     }
 
@@ -117,9 +120,9 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
         }
 
         @Override
-        protected SmokingRecipe create(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result,
+        protected SmokingRecipe create(final ResourceLocation id, final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result,
                                        final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction) {
-            return new SpongeSmokingRecipe(id, group, ingredient, result, experience, cookingTime, resultFunction);
+            return new SpongeSmokingRecipe(id, group, category, ingredient, result, experience, cookingTime, resultFunction);
         }
     }
 
@@ -130,9 +133,9 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
         }
 
         @Override
-        protected CampfireCookingRecipe create(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result,
+        protected CampfireCookingRecipe create(final ResourceLocation id, final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result,
                                                final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction) {
-            return new SpongeCampfireCookingRecipe(id, group, ingredient, result, experience, cookingTime, resultFunction);
+            return new SpongeCampfireCookingRecipe(id, group, category, ingredient, result, experience, cookingTime, resultFunction);
         }
     }
 

@@ -32,6 +32,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
@@ -47,19 +48,19 @@ import net.minecraft.world.entity.npc.CatSpawner;
 import net.minecraft.world.entity.npc.WanderingTraderSpawner;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
-import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.ForcedChunksSavedData;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.PatrolSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
-import net.minecraft.world.level.levelgen.presets.WorldPresets;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.storage.CommandStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -89,7 +90,7 @@ import org.spongepowered.common.accessor.world.level.storage.LevelStorageSource_
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
-import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBridge;
+import org.spongepowered.common.bridge.world.level.levelgen.WorldOptionsBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
@@ -277,7 +278,7 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         // First find a loaded level-stem / To load based on a datapack load using the WorldTemplate instead
         final net.minecraft.resources.ResourceKey<LevelStem> rKey = net.minecraft.resources.ResourceKey.create(Registry.LEVEL_STEM_REGISTRY, (ResourceLocation) (Object) key);
-        final LevelStem levelStem = this.server.getWorldData().worldGenSettings().dimensions().get(rKey);
+        final LevelStem levelStem = this.server.registryAccess().registryOrThrow(Registry.LEVEL_STEM_REGISTRY).get(rKey);
         if (levelStem != null) {
             return this.loadWorld0(registryKey, levelStem);
         }
@@ -294,7 +295,7 @@ public abstract class SpongeWorldManager implements WorldManager {
 
     private CompletableFuture<ServerWorld> loadWorld0(final net.minecraft.resources.ResourceKey<Level> registryKey, final LevelStem levelStem) {
         final ResourceKey worldKey = (ResourceKey) (Object) registryKey.location();
-        final DimensionType dimensionType = levelStem.typeHolder().value();
+        final DimensionType dimensionType = levelStem.type().value();
         final Optional<ResourceKey> worldTypeKey = this.worldTypeKey(dimensionType);
 
         MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey.map(ResourceKey::toString).orElse("inline"));
@@ -335,7 +336,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                 difficulty == null ? defaultLevelData.getDifficulty() : difficulty,
                 commands == null ? defaultLevelData.getAllowCommands() : commands,
                 new GameRules(),
-                defaultLevelData.getDataPackConfig());
+                defaultLevelData.getDataConfiguration());
     }
 
     @Override
@@ -398,7 +399,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         try {
             final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
             try {
-                levelData = this.loadLevelData(defaultLevelData.getDataPackConfig(), storageSource);
+                levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), storageSource);
             } catch (final Exception ex) {
                 return FutureUtil.completedWithException(ex);
             }
@@ -696,7 +697,10 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
 
-        for (final Map.Entry<net.minecraft.resources.ResourceKey<LevelStem>, LevelStem> entry : this.server.getWorldData().worldGenSettings().dimensions().entrySet()) {
+        for (final Map.Entry<net.minecraft.resources.ResourceKey<LevelStem>, LevelStem> entry : this.server.registryAccess()
+            .registryOrThrow(Registry.LEVEL_STEM_REGISTRY)
+            .entrySet()) {
+
             final ResourceKey worldKey = (ResourceKey) (Object) entry.getKey().location();
             final LevelStem template = entry.getValue();
             final LevelStemBridge templateBridge = (LevelStemBridge) (Object) template;
@@ -706,7 +710,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                 continue;
             }
 
-            final DimensionType dimensionType = template.typeHolder().value();
+            final DimensionType dimensionType = template.type().value();
             final Optional<ResourceKey> worldTypeKey = this.worldTypeKey(dimensionType);
 
             if (!isDefaultWorld && !templateBridge.bridge$loadOnStartup()) {
@@ -754,30 +758,29 @@ public abstract class SpongeWorldManager implements WorldManager {
 
     private PrimaryLevelData getOrCreateLevelData(final LevelStorageSource.LevelStorageAccess storageSource, final LevelStem levelStem, final String directoryName) {
         final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
-        @Nullable PrimaryLevelData levelData = this.loadLevelData(defaultLevelData.getDataPackConfig(), storageSource);
+        @Nullable PrimaryLevelData levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), storageSource);
         if (levelData != null) {
             return levelData;
         }
 
         if (this.server.isDemo()) {
-            return new PrimaryLevelData(MinecraftServer.DEMO_SETTINGS, WorldPresets.demoSettings(this.server.registryAccess()), Lifecycle.stable());
+            return new PrimaryLevelData(MinecraftServer.DEMO_SETTINGS, WorldOptions.DEMO_OPTIONS, PrimaryLevelData.SpecialWorldProperty.NONE, Lifecycle.stable());
         }
 
         final LevelSettings levelSettings = this.createLevelSettings(defaultLevelData, levelStem, directoryName);
         final Long customSeed = ((LevelStemBridge) (Object) levelStem).bridge$seed();
         if (customSeed != null) {
-            final WorldGenSettings generationSettings = ((WorldGenSettingsBridge) defaultLevelData.worldGenSettings()).bridge$withSeed(customSeed);
+            final WorldGenSettings generationSettings = ((WorldOptionsBridge) defaultLevelData.worldGenOptions()).bridge$withSeed(customSeed);
             // TODO generateStructures?
             // TODO bonusChest?
             return new PrimaryLevelData(levelSettings, generationSettings, Lifecycle.stable());
         }
-        final WorldGenSettings generationSettings = ((WorldGenSettingsBridge) defaultLevelData.worldGenSettings()).bridge$copy();
-        return new PrimaryLevelData(levelSettings, generationSettings, Lifecycle.stable());
+        return new PrimaryLevelData(levelSettings, defaultLevelData.worldGenOptions(), Lifecycle.stable());
     }
 
     @Nullable
-    private PrimaryLevelData loadLevelData(final DataPackConfig datapackConfig, final LevelStorageSource.LevelStorageAccess storageSource) {
-        return (PrimaryLevelData) storageSource.getDataTag(SpongeWorldManager.bootstrapOps, datapackConfig, Lifecycle.stable());
+    private PrimaryLevelData loadLevelData(final RegistryAccess access, final WorldDataConfiguration datapackConfig, final LevelStorageSource.LevelStorageAccess storageSource) {
+        return (PrimaryLevelData) storageSource.getDataTag(SpongeWorldManager.bootstrapOps, datapackConfig, access.registryOrThrow(Registry.LEVEL_STEM_REGISTRY), Lifecycle.stable()).getFirst();
     }
 
     private ServerLevel createLevel(
@@ -809,11 +812,11 @@ public abstract class SpongeWorldManager implements WorldManager {
         ((PrimaryLevelDataBridge) levelData).bridge$configAdapter(configAdapter);
 
         levelData.setModdedInfo(this.server.getServerModName(), this.server.getModdedStatus().shouldReportAsModified());
-        final long seed = BiomeManager.obfuscateSeed(levelData.worldGenSettings().seed());
+        final long seed = BiomeManager.obfuscateSeed(levelData.worldGenOptions().seed());
 
         final Executor executor = ((MinecraftServerAccessor) this.server).accessor$executor();
         final ServerLevel world = new ServerLevel(this.server, executor, storageSource, levelData,
-                registryKey, levelStem, chunkStatusListener, levelData.worldGenSettings().isDebug(), seed, spawners, true);
+                registryKey, levelStem, chunkStatusListener, levelData.isDebugWorld(), seed, spawners, true);
         this.worlds.put(registryKey, world);
 
         return world;
@@ -843,15 +846,15 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         if (!isInitialized) {
             try {
-                final boolean isDebugGeneration = levelData.worldGenSettings().isDebug();
+                final boolean isDebugGeneration = levelData.isDebugWorld();
                 final boolean hasSpawnAlready = levelDataBridge.bridge$customSpawnPosition();
                 if (!hasSpawnAlready) {
                     if (isDefaultWorld || levelDataBridge.bridge$performsSpawnLogic()) {
-                        MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenSettings().generateBonusChest(), isDebugGeneration);
+                        MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenOptions().generateBonusChest(), isDebugGeneration);
                     } else if (Level.END.equals(world.dimension())) {
                         levelData.setSpawn(ServerLevel.END_SPAWN_POINT, 0);
                     }
-                } else if (levelData.worldGenSettings().generateBonusChest()) {
+                } else if (levelData.worldGenOptions().generateBonusChest()) {
                     final BlockPos pos = new BlockPos(levelData.getXSpawn(), levelData.getYSpawn(), levelData.getZSpawn());
                     MiscOverworldFeatures.BONUS_CHEST.value().place(world, world.getChunkSource().getGenerator(), world.random, pos);
                 }

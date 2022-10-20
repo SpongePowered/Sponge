@@ -30,7 +30,9 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.chat.RemoteChatSession;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundTabListPacket;
 import net.minecraft.world.level.GameType;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -38,12 +40,14 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
+import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoUpdatePacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -136,17 +140,17 @@ public final class SpongeTabList implements TabList {
         return this;
     }
 
-    private void addEntry(final ClientboundPlayerInfoPacket.PlayerUpdate entry) {
-        final GameProfile profile = entry.getProfile();
+    private void addEntry(final ClientboundPlayerInfoUpdatePacket.Entry entry) {
+        final GameProfile profile = entry.profile();
         if (!this.entries.containsKey(profile.getId())) {
-            final net.minecraft.network.chat.Component displayName = entry.getDisplayName();
+            final net.minecraft.network.chat.@Nullable Component displayName = entry.displayName();
             this.addEntry(new SpongeTabListEntry(
                     this,
                     SpongeGameProfile.of(profile),
                     displayName == null ? null : SpongeAdventure.asAdventure(displayName),
-                    entry.getLatency(),
-                    (GameMode) (Object) entry.getGameMode(),
-                    entry.getProfilePublicKey()
+                    entry.latency(),
+                    (GameMode) (Object) entry.gameMode(),
+                    entry.chatSession().profilePublicKey()
             ), false);
         }
     }
@@ -160,7 +164,7 @@ public final class SpongeTabList implements TabList {
         }
 
         if (prev == null) {
-            this.sendUpdate(entry, ClientboundPlayerInfoPacket.Action.ADD_PLAYER);
+            this.sendUpdate(entry, EnumSet.allOf(ClientboundPlayerInfoUpdatePacket.Action.class));
         }
     }
 
@@ -170,7 +174,7 @@ public final class SpongeTabList implements TabList {
 
         final TabListEntry entry = this.entries.remove(uniqueId);
         if (entry != null) {
-            this.sendUpdate(entry, ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER);
+            this.player.connection.send(new ClientboundPlayerInfoRemovePacket(List.of(entry.profile().uniqueId())));
             return Optional.of(entry);
         }
         return Optional.empty();
@@ -180,15 +184,15 @@ public final class SpongeTabList implements TabList {
      * Send an entry update.
      *
      * @param entry The entry to update
-     * @param action The update action to perform
+     * @param actions The update action to perform
      */
     @SuppressWarnings("ConstantConditions")
-    void sendUpdate(final TabListEntry entry, final ClientboundPlayerInfoPacket.Action action) {
-        final ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket(action, new ArrayList<>());
-        final ClientboundPlayerInfoPacket.PlayerUpdate data = new ClientboundPlayerInfoPacket.PlayerUpdate(SpongeGameProfile.toMcProfile(entry.profile()),
-            entry.latency(), (GameType) (Object) entry.gameMode(),
-            entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null, ((SpongeTabListEntry)entry).profilePublicKey());
-        packet.getEntries().add(data);
+    void sendUpdate(final TabListEntry entry, final EnumSet<ClientboundPlayerInfoUpdatePacket.Action> actions) {
+        final ClientboundPlayerInfoUpdatePacket packet = new ClientboundPlayerInfoUpdatePacket(actions, List.of());
+        final ClientboundPlayerInfoUpdatePacket.Entry data = new ClientboundPlayerInfoUpdatePacket.Entry(entry.profile().uniqueId(), SpongeGameProfile.toMcProfile(entry.profile()),
+            true, entry.latency(), (GameType) (Object) entry.gameMode(),
+            entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null, RemoteChatSession.Data.UNVERIFIED /* ((SpongeTabListEntry)entry).profilePublicKey()*/); // TODO: pass through proper key
+        ((ClientboundPlayerInfoUpdatePacketAccessor) packet).accessor$entries(List.of(data));
         this.player.connection.send(packet);
     }
 
@@ -201,30 +205,27 @@ public final class SpongeTabList implements TabList {
      * @param packet The packet to process
      */
     @SuppressWarnings("ConstantConditions")
-    public void updateEntriesOnSend(final ClientboundPlayerInfoPacket packet) {
-        for (final ClientboundPlayerInfoPacket.PlayerUpdate update : packet.getEntries()) {
-            final ClientboundPlayerInfoPacket.Action action = packet.getAction();
-            if (action == ClientboundPlayerInfoPacket.Action.ADD_PLAYER) {
+    public void updateEntriesOnSend(final ClientboundPlayerInfoUpdatePacket packet) {
+        final EnumSet<ClientboundPlayerInfoUpdatePacket.Action> actions = packet.actions();
+        for (final ClientboundPlayerInfoUpdatePacket.Entry update : packet.entries()) {
+            if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)) {
                 // If an entry with the same id exists nothing will be done
                 this.addEntry(update);
-            } else if (action == ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER) {
-                this.removeEntry(update.getProfile().getId());
-            } else {
-                this.entry(update.getProfile().getId()).ifPresent(entry -> {
-                    if (action == ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME) {
-                        ((SpongeTabListEntry) entry).updateWithoutSend();
-                        entry.setDisplayName(update.getDisplayName() == null ? null : SpongeAdventure.asAdventure(update.getDisplayName()));
-                    } else if (action == ClientboundPlayerInfoPacket.Action.UPDATE_LATENCY) {
-                        ((SpongeTabListEntry) entry).updateWithoutSend();
-                        entry.setLatency(update.getLatency());
-                    } else if (action == ClientboundPlayerInfoPacket.Action.UPDATE_GAME_MODE) {
-                        ((SpongeTabListEntry) entry).updateWithoutSend();
-                        entry.setGameMode((GameMode) (Object) update.getGameMode());
-                    } else {
-                        throw new IllegalArgumentException("unknown packet action: " + action);
-                    }
-                });
             }
+
+            this.entry(update.profileId()).ifPresent(entry -> {
+                if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME)) {
+                    ((SpongeTabListEntry) entry).updateWithoutSend();
+                    entry.setDisplayName(update.displayName() == null ? null : SpongeAdventure.asAdventure(update.displayName()));
+                }
+                if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LATENCY)) {
+                    ((SpongeTabListEntry) entry).updateWithoutSend();
+                    entry.setLatency(update.latency());
+                } else if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE)) {
+                    ((SpongeTabListEntry) entry).updateWithoutSend();
+                    entry.setGameMode((GameMode) (Object) update.gameMode());
+                }
+            });
         }
     }
 

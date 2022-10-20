@@ -52,6 +52,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -67,10 +68,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
-import org.spongepowered.common.accessor.world.gen.WorldGenSettingsAccessor;
+import org.spongepowered.common.accessor.world.level.levelgen.WorldOptionsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
-import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBridge;
+import org.spongepowered.common.bridge.world.level.levelgen.WorldOptionsBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
@@ -351,19 +352,19 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
 
     @Redirect(method = "setTagData", at = @At(value = "INVOKE", remap = false, target = "Lcom/mojang/serialization/Codec;encodeStart(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", ordinal = 0))
     private DataResult<Object> impl$ignorePluginDimensionsWhenWritingWorldGenSettings(final Codec codec, final DynamicOps<Object> ops, final Object input) {
-        WorldGenSettings dimensionGeneratorSettings = (WorldGenSettings) input;
+        final WorldDimensions dims = ((WorldGenSettings) input).dimensions();
         // Sub levels will have an empty dimensions registry so it is an easy toggle off
-        if (dimensionGeneratorSettings.dimensions().entrySet().size() == 0) {
+        if (dims.dimensions().entrySet().size() == 0) {
             return codec.encodeStart(ops, dimensionGeneratorSettings);
         }
-        dimensionGeneratorSettings = ((WorldGenSettingsBridge) input).bridge$copy();
-        final MappedRegistry<LevelStem> registry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), null);
-        ((org.spongepowered.api.registry.Registry<LevelStem>) (Object) dimensionGeneratorSettings.dimensions()).streamEntries().forEach(entry -> {
+        dimensionGeneratorSettings = ((WorldOptionsBridge) input).bridge$copy();
+        final MappedRegistry<LevelStem> registry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
+        ((org.spongepowered.api.registry.Registry<LevelStem>) (Object) dimensionGeneratorSettings.dimensions().dimensions()).streamEntries().forEach(entry -> {
             if (Constants.MINECRAFT.equals(entry.key().namespace())) {
                 ((org.spongepowered.api.registry.Registry<LevelStem>) (Object) registry).register(entry.key(), entry.value());
             }
         });
-        ((WorldGenSettingsAccessor) dimensionGeneratorSettings).accessor$dimensions(registry);
+        ((WorldOptionsAccessor) (Object) dimensionGeneratorSettings).accessor$dimensions(registry);
         return codec.encodeStart(ops, dimensionGeneratorSettings);
     }
 

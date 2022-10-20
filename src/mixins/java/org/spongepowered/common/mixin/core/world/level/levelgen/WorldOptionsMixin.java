@@ -22,36 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry;
+package org.spongepowered.common.mixin.core.world.level.levelgen;
 
-import com.mojang.serialization.Lifecycle;
-import net.minecraft.core.Holder;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.WorldOptions;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.level.levelgen.WorldOptionsBridge;
 
-import java.util.function.BiConsumer;
+@Mixin(WorldOptions.class)
+public abstract class WorldOptionsMixin implements WorldOptionsBridge {
 
-public final class CallbackRegistry<T> extends MappedRegistry<T> {
-
-    private final BiConsumer<ResourceKey<T>, T> callback;
-    private boolean callbackEnabled;
-
-    public CallbackRegistry(final ResourceKey<? extends Registry<T>> key, final Lifecycle lifecycle, final BiConsumer<ResourceKey<T>, T> callback) {
-        super(key, lifecycle);
-        this.callback = callback;
-    }
+    // @formatter:off
+    @Shadow @Final private long seed;
+    @Shadow @Final private boolean generateStructures;
+    @Shadow @Final private boolean generateBonusChest;
+    // @formatter:on
 
     @Override
-    public Holder<T> register(final ResourceKey<T> key, final T instance, final Lifecycle lifecycle) {
-        final Holder<T> value = super.register(key, instance, lifecycle);
-        if (this.callbackEnabled) {
-            this.callback.accept(key, instance);
-        }
-        return value;
-    }
-
-    public void setCallbackEnabled(final boolean callbackEnabled) {
-        this.callbackEnabled = callbackEnabled;
+    public WorldOptions bridge$withSeed(final long customSeed) {
+        return new WorldGenSettings(customSeed, this.generateStructures, this.generateBonusChest, this.dimensions);
     }
 }

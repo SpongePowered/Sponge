@@ -58,8 +58,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
             (ResourceKey) (Object) new ResourceLocation("minecraft", "root"),
             new MappedRegistry<>(
                 net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) RegistryRoots.MINECRAFT),
-                Lifecycle.experimental(),
-                null
+                Lifecycle.experimental()
             )
         );
         final ResourceLocation sponge = new ResourceLocation("sponge", "root");
@@ -70,8 +69,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
                     sponge,
                     sponge
                 ),
-                Lifecycle.stable(),
-                null
+                Lifecycle.stable()
             )
         );
     }
@@ -82,10 +80,9 @@ public final class RegistryHolderLogic implements RegistryHolder {
         final WritableRegistry root = (WritableRegistry) this.roots.get(new ResourceLocation("minecraft", "root"));
         // Add the dynamic registries. These are server-scoped in Vanilla
 
-        for (final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<?>> entry : RegistryAccess.REGISTRIES.keySet()) {
-            final net.minecraft.core.Registry<?> registry = dynamicAccess.registryOrThrow((net.minecraft.resources.ResourceKey) (Object) entry);
-            root.register(entry, registry, Lifecycle.stable());
-        }
+        dynamicAccess.registries().forEach(entry -> {
+            root.register(entry.key(), entry.value(), Lifecycle.stable());
+        });
     }
 
     public void setRootMinecraftRegistry(final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> rootRegistry) {
@@ -150,7 +147,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
             final @Nullable BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback) {
         if (callback == null) {
             return (key) -> {
-                final MappedRegistry<T> reg = new MappedRegistry<>(key, Lifecycle.stable(), null);
+                final MappedRegistry<T> reg = new MappedRegistry<>(key, Lifecycle.stable());
                 ((WritableRegistryBridge<T>)reg).bridge$setDynamic(isDynamic);
                 return reg;
             };
@@ -187,12 +184,20 @@ public final class RegistryHolderLogic implements RegistryHolder {
         if (defaultValues != null) {
             final WritableRegistry<T> mr = (WritableRegistry<T>) registry;
             defaultValues.forEach((vk, vi, vv) -> {
-                mr.registerOrOverride(
-                        vi,
+                if (vi.isPresent()) {
+                    mr.registerMapping(
+                        vi.getAsInt(),
                         net.minecraft.resources.ResourceKey.create(key, (ResourceLocation) (Object) vk),
                         vv,
                         Lifecycle.stable()
-                );
+                    );
+                } else {
+                    mr.register(
+                        net.minecraft.resources.ResourceKey.create(key, (ResourceLocation) (Object) vk),
+                        vv,
+                        Lifecycle.stable()
+                    );
+                }
             });
         }
         ((WritableRegistry) root).register(key, registry, Lifecycle.stable());

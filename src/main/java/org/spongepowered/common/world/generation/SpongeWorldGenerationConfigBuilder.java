@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.world.generation;
 
-import com.mojang.serialization.Lifecycle;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.Registry;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.gen.WorldGenSettingsAccessor;
+import org.spongepowered.common.accessor.world.level.levelgen.WorldOptionsAccessor;
 import org.spongepowered.common.util.SeedUtil;
 
 import java.util.Objects;
@@ -66,7 +63,7 @@ public final class SpongeWorldGenerationConfigBuilder implements WorldGeneration
 
     @Override
     public WorldGenerationConfig.Builder reset() {
-        final WorldGenSettings defaultSettings = SpongeCommon.server().getWorldData().worldGenSettings();
+        final WorldOptions defaultSettings = SpongeCommon.server().getWorldData().worldGenOptions();
         this.seed = defaultSettings.seed();
         this.generateFeatures = defaultSettings.generateStructures();
         this.generateBonusChest = defaultSettings.generateBonusChest();
@@ -83,7 +80,7 @@ public final class SpongeWorldGenerationConfigBuilder implements WorldGeneration
 
     @Override
     public WorldGenerationConfig build() {
-        return (WorldGenerationConfig) WorldGenSettingsAccessor.invoker$new(this.seed, this.generateFeatures,
-            this.generateBonusChest, new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable(), null), Optional.empty());
+        return (WorldGenerationConfig) WorldOptionsAccessor.invoker$new(this.seed, this.generateFeatures,
+            this.generateBonusChest,  Optional.empty());
     }
 }

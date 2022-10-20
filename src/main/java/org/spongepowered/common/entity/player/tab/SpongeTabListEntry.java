@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -38,6 +38,7 @@ import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.profile.GameProfile;
 
+import java.util.EnumSet;
 import java.util.Optional;
 
 
@@ -46,15 +47,16 @@ import java.util.Optional;
  */
 public final class SpongeTabListEntry implements TabListEntry {
 
-    private SpongeTabList list;
+    private final SpongeTabList list;
     private final GameProfile profile;
     private @Nullable Component displayName;
     private int latency;
     private GameMode gameMode;
     private boolean updateWithoutSend;
-    private ProfilePublicKey.Data profilePublicKey;
+    private final ProfilePublicKey.Data profilePublicKey;
 
-    public SpongeTabListEntry(TabList list, GameProfile profile, @Nullable Component displayName, int latency, GameMode gameMode,
+    public SpongeTabListEntry(
+        final TabList list, final GameProfile profile, @Nullable final Component displayName, final int latency, final GameMode gameMode,
             final ProfilePublicKey.Data profilePublicKey) {
         checkState(list instanceof SpongeTabList, "list is not a SpongeTabList");
         this.list = (SpongeTabList) list;
@@ -81,9 +83,9 @@ public final class SpongeTabListEntry implements TabListEntry {
     }
 
     @Override
-    public TabListEntry setDisplayName(@Nullable Component displayName) {
+    public TabListEntry setDisplayName(@Nullable final Component displayName) {
         this.displayName = displayName;
-        this.sendUpdate(ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME);
+        this.sendUpdate(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME);
         return this;
     }
 
@@ -93,9 +95,9 @@ public final class SpongeTabListEntry implements TabListEntry {
     }
 
     @Override
-    public TabListEntry setLatency(int latency) {
+    public TabListEntry setLatency(final int latency) {
         this.latency = latency;
-        this.sendUpdate(ClientboundPlayerInfoPacket.Action.UPDATE_LATENCY);
+        this.sendUpdate(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LATENCY);
         return this;
     }
 
@@ -105,17 +107,17 @@ public final class SpongeTabListEntry implements TabListEntry {
     }
 
     @Override
-    public TabListEntry setGameMode(GameMode gameMode) {
+    public TabListEntry setGameMode(final GameMode gameMode) {
         this.gameMode = checkNotNull(gameMode, "game mode");
-        this.sendUpdate(ClientboundPlayerInfoPacket.Action.UPDATE_GAME_MODE);
+        this.sendUpdate(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE);
         return this;
     }
 
     public ProfilePublicKey.Data profilePublicKey() {
-        return profilePublicKey;
+        return this.profilePublicKey;
     }
 
-    private void sendUpdate(ClientboundPlayerInfoPacket.Action action) {
+    private void sendUpdate(final ClientboundPlayerInfoUpdatePacket.Action action) {
         // We may be updating our values, so we don't want to send any updates
         // since that will result in a continuous loop.
         if (this.updateWithoutSend) {
@@ -123,7 +125,7 @@ public final class SpongeTabListEntry implements TabListEntry {
             return;
         }
 
-        this.list.sendUpdate(this, action);
+        this.list.sendUpdate(this, EnumSet.of(action));
     }
 
     /**
@@ -134,7 +136,7 @@ public final class SpongeTabListEntry implements TabListEntry {
     }
 
     @Override
-    public boolean equals(@Nullable Object other) {
+    public boolean equals(@Nullable final Object other) {
         if (this == other) {
             return true;
         }
@@ -143,7 +145,7 @@ public final class SpongeTabListEntry implements TabListEntry {
             return false;
         }
 
-        TabListEntry that = (TabListEntry) other;
+        final TabListEntry that = (TabListEntry) other;
         return Objects.equal(this.profile.uniqueId(), that.profile().uniqueId());
     }
 

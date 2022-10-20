@@ -25,14 +25,12 @@
 package org.spongepowered.common.accessor.commands;
 
 import com.mojang.brigadier.ResultConsumer;
-import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.TaskChainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -46,8 +44,8 @@ import javax.annotation.Nullable;
 public interface CommandSourceStackAccessor {
 
     @Invoker("<init>")
-    static CommandSourceStack invoker$new(CommandSource $$0, Vec3 $$1, Vec2 $$2, ServerLevel $$3, int $$4, String $$5, Component $$6, MinecraftServer $$7, @Nullable
-            Entity $$8, boolean $$9, @Nullable ResultConsumer<CommandSourceStack> $$10, EntityAnchorArgument.Anchor $$11, CommandSigningContext $$12, TaskChainer $$13) {
+    static CommandSourceStack invoker$new(final CommandSource $$0, final Vec3 $$1, final Vec2 $$2, final ServerLevel $$3, final int $$4, final String $$5, final Component $$6, final MinecraftServer $$7, @Nullable final
+            Entity $$8, final boolean $$9, @Nullable final ResultConsumer<CommandSourceStack> $$10, final EntityAnchorArgument.Anchor $$11) {
         throw new UntransformedInvokerError();
     }
 

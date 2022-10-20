@@ -25,6 +25,7 @@
 package org.spongepowered.common.item.recipe.crafting.custom;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -80,7 +81,8 @@ public final class SpongeSpecialCraftingRecipeBuilder extends AbstractResourceKe
     @Override
     public RecipeRegistration build0() {
         final ResourceLocation resourceLocation = (ResourceLocation) (Object) this.key;
-        return new SpongeSpecialCraftingRecipeRegistration(resourceLocation, this.biPredicate, this.remainingItemsFunction, this.resultFunction, this.pack);
+        // TODO: support categories
+        return new SpongeSpecialCraftingRecipeRegistration(resourceLocation, CraftingBookCategory.MISC, this.biPredicate, this.remainingItemsFunction, this.resultFunction, this.pack);
     }
 
     @Override

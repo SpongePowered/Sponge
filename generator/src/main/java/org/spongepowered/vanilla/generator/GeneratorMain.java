@@ -31,19 +31,21 @@ import com.squareup.javapoet.WildcardTypeName;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.commands.Commands.CommandSelection;
+import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.DataPackConfig;
 import org.tinylog.Logger;
 
@@ -122,40 +124,55 @@ public final class GeneratorMain {
         // Load resource packs, see WorldStem.load
         // and call to WorldStem.load in net.minecraft.server.Main
         // We don't currently try to load any datapacks here
-        final var packRepository = new PackRepository(PackType.SERVER_DATA, new ServerPacksSource());
-        MinecraftServer.configurePackRepository(packRepository, DataPackConfig.DEFAULT, /* safeMode = */ false);
+        final var packRepository = new PackRepository(new ServerPacksSource());
+        MinecraftServer.configurePackRepository(packRepository, DataPackConfig.DEFAULT, /* safeMode = */ false, FeatureFlags.DEFAULT_FLAGS);
         final CloseableResourceManager resourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, packRepository.openAllSelected());
 
-        final RegistryAccess.Writable registriesBuilder = RegistryAccess.builtinCopy();
-        // Load the registry contents -- we don't need the result here, since we don't have any level data to read
-        RegistryOps.createAndLoad(NbtOps.INSTANCE, registriesBuilder, resourceManager);
-        final RegistryAccess.Frozen registries = registriesBuilder.freeze();
+        // WorldLoader.load
+        final LayeredRegistryAccess<RegistryLayer> staticRegistries = RegistryLayer.createRegistryAccess();
+        final LayeredRegistryAccess<RegistryLayer> withWorldgen = staticRegistries.replaceFrom(
+            RegistryLayer.WORLDGEN,
+            RegistryDataLoader.load(resourceManager, staticRegistries.getAccessForLoading(RegistryLayer.WORLDGEN), RegistryDataLoader.WORLDGEN_REGISTRIES)
+        );
+        final LayeredRegistryAccess<RegistryLayer> withDimensions = withWorldgen.replaceFrom(
+            RegistryLayer.DIMENSIONS,
+            RegistryDataLoader.load(resourceManager, staticRegistries.getAccessForLoading(RegistryLayer.DIMENSIONS), RegistryDataLoader.DIMENSION_REGISTRIES)
+        );
 
+
+        final RegistryAccess.Frozen compositeRegistries = withDimensions.getAccessForLoading(RegistryLayer.RELOADABLE);
         final var resourcesFuture = ReloadableServerResources.loadResources(
             resourceManager,
-            registries,
+            compositeRegistries,
+            packRepository.getRequestedFeatureFlags(),
             CommandSelection.ALL,
             2, // functionPermissionLevel
             Util.backgroundExecutor(), // prepareExecutor
             Runnable::run // applyExecutor
-        );
+        ).whenComplete((result, ex) -> {
+            if (ex != null) {
+                resourceManager.close();
+            }
+        }).thenApply(resources -> {
+            resources.updateRegistryTags(compositeRegistries);
+            return resources;
+        });
 
         Logger.info("Datapack load initiated");
 
         final ReloadableServerResources resources;
         try {
             resources = resourcesFuture.get();
-        } catch (InterruptedException | ExecutionException ex) {
+        } catch (final InterruptedException | ExecutionException ex) {
             Logger.error(ex, "Failed to load registries/datapacks");
             System.exit(1);
             throw new RuntimeException();
         }
 
         Logger.info("Datapack load complete");
-        resources.updateRegistryTags(registries);
 
         return Pair.of(
-            registries,
+            compositeRegistries,
             resources
         );
     }
