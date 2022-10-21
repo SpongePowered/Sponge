@@ -24,15 +24,45 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public final class EntityCollisionState extends EntityPhaseState<BasicEntityContext> {
 
     @Override
     protected BasicEntityContext createNewContext() {
-        return new BasicEntityContext(this);
+        return new BasicEntityContext(this).addEntityCaptures();
     }
 
     @Override
     public boolean isCollision() {
         return true;
+    }
+
+    @Override
+    public void unwind(BasicEntityContext context) {
+        context.getCapturedItemsSupplier()
+            .acceptAndClearIfNotEmpty(items -> {
+                final List<Entity> entities = items.stream()
+                    .map(entity -> (Entity) entity)
+                    .collect(Collectors.toList());
+                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
+                SpongeCommonEventFactory.callDropItemCustom(entities, context);
+            });
+        TrackingUtil.processBlockCaptures(context);
+        context.getCapturedEntitySupplier()
+                .acceptAndClearIfNotEmpty(mc -> {
+                    final List<Entity> entities = new ArrayList<>(mc);
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
+                    SpongeCommonEventFactory.callSpawnEntityCustom(entities, context);
+                });
     }
 }
