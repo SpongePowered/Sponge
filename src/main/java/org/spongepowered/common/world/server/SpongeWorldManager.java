@@ -30,7 +30,6 @@ import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
