@@ -240,7 +240,8 @@
         "world.scores.ScoreMixin",
         "world.ticks.LevelTicksMixin",
         "world.ticks.ScheduledTickMixin",
-        "network.chat.ChatTypeMixin"
+        "network.chat.ChatTypeMixin",
+        "server.WorldLoaderMixin"
     ],
     "client": [
         "client.MinecraftMixin",

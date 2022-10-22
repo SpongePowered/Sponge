@@ -34,6 +34,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.CompoundTagArgument;
@@ -43,9 +44,11 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
 import net.minecraft.commands.arguments.UuidArgument;
+import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec2Argument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
@@ -55,6 +58,7 @@ import net.minecraft.commands.synchronization.brigadier.FloatArgumentInfo;
 import net.minecraft.commands.synchronization.brigadier.IntegerArgumentInfo;
 import net.minecraft.commands.synchronization.brigadier.LongArgumentInfo;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
@@ -137,6 +141,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
@@ -277,6 +282,7 @@ import org.spongepowered.common.inventory.query.type.ReverseQuery;
 import org.spongepowered.common.inventory.query.type.SlotLensQuery;
 import org.spongepowered.common.inventory.query.type.TypeQuery;
 import org.spongepowered.common.inventory.query.type.UnionQuery;
+import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.map.color.SpongeMapColorType;
 import org.spongepowered.common.map.color.SpongeMapShade;
 import org.spongepowered.common.map.decoration.SpongeMapDecorationBannerType;
@@ -892,11 +898,12 @@ public final class SpongeRegistryLoaders {
     }
 
     @SuppressWarnings("ConstantConditions")
-    public static RegistryLoader<ValueParameter<?>> valueParameter() {
+    public static RegistryLoader<ValueParameter<?>> valueParameter(final RegistryAccess.Frozen registryAccess) {
+        final CommandBuildContext cbCtx = new CommandBuildContext(registryAccess);
         return RegistryLoader.of(l -> {
             l.add(ResourceKeyedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
             l.add(ResourceKeyedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);
-            //l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> ClientNativeArgumentParser.createConverter(k, BlockStateArgument.block(null), /* TODO */ (reader, cause, state) -> (BlockState) state.getState()));
+            l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> ClientNativeArgumentParser.createConverter(k, BlockStateArgument.block(cbCtx), (reader, cause, state) -> (BlockState) state.getState()));
             l.add(ResourceKeyedValueParameters.BOOLEAN, k -> ClientNativeArgumentParser.createIdentity(k, BoolArgumentType.bool()));
             l.add(ResourceKeyedValueParameters.COLOR, SpongeColorValueParameter::new);
             l.add(ResourceKeyedValueParameters.DATA_CONTAINER, SpongeDataContainerValueParameter::new);
@@ -907,7 +914,7 @@ public final class SpongeRegistryLoaders {
             l.add(ResourceKeyedValueParameters.GAME_PROFILE, SpongeGameProfileValueParameter::new);
             l.add(ResourceKeyedValueParameters.INTEGER, k -> ClientNativeArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
             l.add(ResourceKeyedValueParameters.IP, SpongeIPAddressValueParameter::new);
-            //l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(null), /* TODO */ (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
+            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(cbCtx), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
             l.add(ResourceKeyedValueParameters.LOCATION, SpongeServerLocationValueParameter::new);
             l.add(ResourceKeyedValueParameters.LONG, k -> ClientNativeArgumentParser.createIdentity(k, LongArgumentType.longArg()));
             l.add(ResourceKeyedValueParameters.MANY_ENTITIES, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities((CommandSourceStack) cause).stream().map(x -> (Entity) x).collect(Collectors.toList())));

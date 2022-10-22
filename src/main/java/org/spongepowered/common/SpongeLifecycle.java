@@ -29,6 +29,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
@@ -111,6 +112,12 @@ public final class SpongeLifecycle implements Lifecycle {
 
         this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
         this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
+    }
+
+    @Override
+    public void establishGlobalRegistries(final RegistryAccess.Frozen registryAccess) {
+        // TODO check if everything can be moved here
+        SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder) this.game, registryAccess);
     }
 
     @Override

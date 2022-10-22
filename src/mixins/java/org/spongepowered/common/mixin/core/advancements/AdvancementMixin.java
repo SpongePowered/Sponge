@@ -161,7 +161,8 @@ public abstract class AdvancementMixin implements AdvancementBridge {
 
     @Override
     public void bridge$setCriterion(final AdvancementCriterion criterion) {
-        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
+        // TODO this gets initially called on the "main" thread during RegisterDataPackValueEvent<AdvancementTemplate>
+        //  checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         this.impl$criterion = criterion;
     }
 

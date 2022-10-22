@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import net.minecraft.core.RegistryAccess;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.economy.Currency;
@@ -37,7 +38,6 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.BAN_TYPE, SpongeRegistryLoaders.banType());
         holder.createRegistry(SpongeRegistryTypes.TRACKER_TRANSACTION_TYPE, SpongeRegistryLoaders.blockTransactionTypes());
         holder.createRegistry(RegistryTypes.BODY_PART, SpongeRegistryLoaders.bodyPart());
-        holder.createRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, SpongeRegistryLoaders.valueParameter());
         holder.createRegistry(RegistryTypes.CLICK_TYPE, SpongeRegistryLoaders.clickType());
         holder.createRegistry(RegistryTypes.CHUNK_REGENERATE_FLAG, SpongeRegistryLoaders.chunkRegenerateFlag());
         holder.createRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, SpongeRegistryLoaders.clientCompletionKey());
@@ -89,5 +89,9 @@ public final class SpongeRegistries {
     }
 
     public static void registerServerRegistries(final RegistryHolder holder) {
+    }
+
+    public static void registerGlobalRegistries(final SpongeRegistryHolder holder, final RegistryAccess.Frozen registryAccess) {
+        holder.createRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, SpongeRegistryLoaders.valueParameter(registryAccess));
     }
 }

@@ -30,6 +30,7 @@ import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
@@ -86,6 +87,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.level.storage.LevelStorageSource_LevelStorageAccessAccessor;
+import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBridge;
@@ -717,6 +719,7 @@ public abstract class SpongeWorldManager implements WorldManager {
             if (isDefaultWorld) {
                 final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) this.server).accessor$storageSource();
                 final PrimaryLevelData levelData = (PrimaryLevelData) this.server.getWorldData();
+                ((ResourceKeyBridge) levelData).bridge$setKey(((ResourceKey) (Object) registryKey.location()));
                 final List<CustomSpawner> spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(levelData));
 
                 final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), storageSource, levelData, spawners, chunkStatusListener);
@@ -787,6 +790,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final String directoryName = this.getDirectoryName(worldKey);
         final LevelStorageSource.LevelStorageAccess storageSource = this.getLevelStorageAccess(worldKey);
         final PrimaryLevelData levelData = this.getOrCreateLevelData(storageSource, levelStem, directoryName);
+        ((ResourceKeyBridge) levelData).bridge$setKey(worldKey);
         return this.createLevel(registryKey, levelStem, worldKey, worldTypeKey, storageSource, levelData, ImmutableList.of(), chunkStatusListener);
     }
 

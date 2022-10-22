@@ -25,6 +25,7 @@
 package org.spongepowered.common.launch;
 
 import com.google.inject.Injector;
+import net.minecraft.core.RegistryAccess;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Server;
@@ -46,6 +47,8 @@ public interface Lifecycle {
     void callRegisterBuilderEvent();
 
     void establishGlobalRegistries();
+
+    void establishGlobalRegistries(RegistryAccess.Frozen registryAccess);
 
     void establishDataProviders();
 
@@ -76,4 +79,5 @@ public interface Lifecycle {
     void callStoppingEngineEvent(Engine engine);
 
     void callStoppedGameEvent();
+
 }
