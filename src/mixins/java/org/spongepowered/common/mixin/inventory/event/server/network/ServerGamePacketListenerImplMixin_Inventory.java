@@ -107,7 +107,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (EffectTransactor ignored = transactor.logClickContainer(menu, packet.getSlotNum(), packet.getButtonNum(), packet.getClickType(), this.player)) {
-            if (menu instanceof MenuBridge) {
+            if (player.isSpectator() && menu instanceof MenuBridge) {
                 final SpongeInventoryMenu spongeMenu = ((MenuBridge) menu).bridge$getMenu();
                 if (spongeMenu != null) {
                     spongeMenu.onClick(packet.getSlotNum(), packet.getButtonNum(), packet.getClickType(), this.player, ((Container) menu));
