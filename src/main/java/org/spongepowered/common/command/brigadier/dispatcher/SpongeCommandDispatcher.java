@@ -309,7 +309,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
 
                 command = preEvent.command();
                 args = preEvent.arguments();
-                reader = new SpongeStringReader(command + " " + args);
+                reader = new SpongeStringReader(command + (args.isEmpty() ? "" : " " + args));
             }
 
             final Optional<CommandMapping> mapping = this.commandManager.commandMapping(command);
