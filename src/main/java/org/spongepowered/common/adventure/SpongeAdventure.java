@@ -267,7 +267,7 @@ public final class SpongeAdventure {
     }
 
     private static ComponentBuilder<?, ?> asAdventureBuilder(ComponentContents contents) {
-        if (contents instanceof LiteralContents<?> lc) {
+        if (contents instanceof LiteralContents lc) {
             return Component.text().content(lc.text());
         }
         if (contents instanceof TranslatableContents tc) {
