@@ -310,7 +310,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     public void simulateChat(final Component message, final Cause cause) {
         Objects.requireNonNull(message, "message");
         Objects.requireNonNull(cause, "cause");
-        final PlayerChatEvent.Decorate event = SpongeEventFactory.createPlayerChatEventDecorate(cause, message, message, this);
+        final PlayerChatEvent.Decorate event = SpongeEventFactory.createPlayerChatEventDecorate(cause, message, message, Optional.of(this));
         if (!SpongeCommon.post(event)) {
             final net.minecraft.network.chat.Component decoratedMessage = SpongeAdventure.asVanilla(event.message());
             final ChatType.Bound boundType = ChatType.bind(ChatType.CHAT, this.server.registryAccess(), this.getName());
