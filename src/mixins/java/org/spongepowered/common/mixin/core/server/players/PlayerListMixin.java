@@ -656,10 +656,12 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final ChatType.Bound boundChatType;
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
-            frame.pushCause($$2);
+            if ($$2 != null) {
+                frame.pushCause($$2);
+            }
 
             final PlayerChatEvent.Submit event = SpongeEventFactory.createPlayerChatEventSubmit(frame.currentCause(), content, content, chatType,
-                    Optional.empty(), (ServerPlayer) $$2, sender, Optional.ofNullable(target), isTrusted);
+                    Optional.empty(), Optional.ofNullable((ServerPlayer) $$2), sender, Optional.ofNullable(target), isTrusted);
             if (SpongeCommon.post(event)) {
                 return; // Do nothing when canceled or audience removed
             }

@@ -51,6 +51,7 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -71,6 +72,7 @@ import org.spongepowered.test.LoadableModule;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 @Plugin("chattest")
@@ -205,9 +207,10 @@ public class ChatTest implements LoadableModule {
             } else if (event instanceof final PlayerChatEvent.Submit submitEvent) {
 
                 submitEvent.setChatType(ChatTypes.key(INVERTED_CHAT_ORDER));
+                final Optional<Component> optPlayerName = event.player().flatMap(p -> p.get(Keys.DISPLAY_NAME));
                 final TextComponent name = Component.text("Prefix", NamedTextColor.RED)
                         .append(Component.text(" | ", NamedTextColor.GOLD))
-                        .append(event.player().displayName().get().color(NamedTextColor.DARK_GREEN));
+                        .append(optPlayerName.orElse(Component.text("N/A")).color(NamedTextColor.DARK_GREEN));
                 submitEvent.setSender(name);
             }
         }
