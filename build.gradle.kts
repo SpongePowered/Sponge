@@ -304,6 +304,7 @@ allprojects {
             indentWithSpaces(4)
             trimTrailingWhitespace()
             importOrderFile(rootProject.file("SpongeAPI/extra/eclipse/sponge_eclipse.importorder"))
+            targetExclude("build/generated/**/*") // exclude generated content
         }
         if (project.name != "generator") { // removeUnusedImports parses with the javac version used by Gradle, so generator can fail to parse
             java {
