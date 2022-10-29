@@ -33,7 +33,9 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
@@ -137,6 +139,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -165,6 +168,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public double yo;
     @Shadow public double zo;
     @Shadow private int remainingFireTicks;
+    @Shadow protected UUID uuid;
 
     @Shadow protected abstract void shadow$unsetRemoved();
     @Shadow public abstract void shadow$setRemoved(Entity.RemovalReason reason);
@@ -937,8 +941,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     for (final ServerPlayer entityPlayerMP : trackerAccessor.accessor$seenBy()) {
                         entityPlayerMP.connection.send(new ClientboundRemoveEntitiesPacket(this.shadow$getId()));
                         if ((Entity) (Object) this instanceof ServerPlayer) {
-                            entityPlayerMP.connection.send(
-                                new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, (ServerPlayer) (Object) this));
+                            entityPlayerMP.connection.send(new ClientboundPlayerInfoRemovePacket(List.of(this.uuid)));
                         }
                     }
                 } else {
@@ -949,7 +952,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                             continue;
                         }
                         if ((Entity) (Object) this instanceof ServerPlayer) {
-                            final Packet<?> packet = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, (ServerPlayer) (Object) this);
+                            final Packet<?> packet = new ClientboundAddPlayerPacket((ServerPlayer) (Object) this);
                             entityPlayerMP.connection.send(packet);
                         }
                         trackerAccessor.accessor$updatePlayer(entityPlayerMP);

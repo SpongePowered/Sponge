@@ -31,9 +31,9 @@ import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -59,12 +59,11 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
     protected final String group;
     protected final DataPack<RecipeRegistration> pack;
 
-    public SpongeRecipeRegistration(final ResourceLocation key, final RecipeSerializer<?> serializer, final Item resultItem, final String group, final DataPack<RecipeRegistration> pack) {
+    public SpongeRecipeRegistration(final ResourceLocation key, final RecipeSerializer<?> serializer, final Item resultItem, final String group, final DataPack<RecipeRegistration> pack, final RecipeCategory recipeCategory) {
         this.key = key;
         this.serializer = serializer;
         this.pack = pack;
-        final CreativeModeTab itemGroup = resultItem.getItemCategory();
-        this.advancementId = new ResourceLocation(key.getNamespace(), "recipes/" + (itemGroup == null ? "uncategorized" : itemGroup.getRecipeFolderName()) + "/" + key.getPath());
+        this.advancementId = new ResourceLocation(key.getNamespace(), "recipes/" + recipeCategory.getFolderName() + "/" + key.getPath());
         this.advancementBuilder
                 .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(key))
                 .rewards(AdvancementRewards.Builder.recipe(key));

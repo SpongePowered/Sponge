@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -61,6 +62,8 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
     private final NonNullList<Ingredient> ingredients = NonNullList.create();
     private String group;
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
+
+    private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
 
     @Override
     public ResultStep addIngredients(ItemType... ingredients) {
@@ -138,7 +141,8 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
         final ItemStack resultStack = ItemStackUtil.toNative(this.result);
         final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(resultStack, this.resultFunction, this.remainingItemsFunction,
                 this.ingredients, RecipeSerializer.SHAPELESS_RECIPE, SpongeRecipeSerializers.SPONGE_CRAFTING_SHAPELESS);
-        return new SpongeShapelessCraftingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredients, resultStack, this.resultFunction, this.remainingItemsFunction, this.pack);
+        return new SpongeShapelessCraftingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredients, resultStack, this.resultFunction, this.remainingItemsFunction, this.pack,
+                this.recipeCategory);
     }
 
     @Override

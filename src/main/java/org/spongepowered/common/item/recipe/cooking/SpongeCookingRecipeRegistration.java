@@ -26,6 +26,7 @@ package org.spongepowered.common.item.recipe.cooking;
 
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
@@ -56,8 +57,8 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration {
     public SpongeCookingRecipeRegistration(final ResourceLocation key, final RecipeSerializer<?> serializer,
                                            final String group, final Ingredient ingredient, final float experience, final Ticks cookingTime,
                                            final ItemStack spongeResult, final Function<Container, ItemStack> resultFunction,
-                                           final DataPack<RecipeRegistration> pack) {
-        super(key, serializer, spongeResult.getItem(), group, pack);
+                                           final DataPack<RecipeRegistration> pack, final RecipeCategory category) {
+        super(key, serializer, spongeResult.getItem(), group, pack, category);
         this.ingredient = ingredient;
         this.result = spongeResult.getItem();
         this.experience = experience;

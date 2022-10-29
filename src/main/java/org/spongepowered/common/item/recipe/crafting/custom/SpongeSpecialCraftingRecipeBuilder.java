@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.recipe.crafting.custom;
 
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import org.spongepowered.api.datapack.DataPack;
@@ -46,6 +47,8 @@ public final class SpongeSpecialCraftingRecipeBuilder extends AbstractResourceKe
     private Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction;
     private Function<CraftingGridInventory, ItemStack> resultFunction;
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
+
+    private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
 
     @Override
     public ResultStep matching(BiPredicate<CraftingGridInventory, ServerWorld> biPredicate) {
@@ -82,7 +85,7 @@ public final class SpongeSpecialCraftingRecipeBuilder extends AbstractResourceKe
     public RecipeRegistration build0() {
         final ResourceLocation resourceLocation = (ResourceLocation) (Object) this.key;
         // TODO: support categories
-        return new SpongeSpecialCraftingRecipeRegistration(resourceLocation, CraftingBookCategory.MISC, this.biPredicate, this.remainingItemsFunction, this.resultFunction, this.pack);
+        return new SpongeSpecialCraftingRecipeRegistration(resourceLocation, CraftingBookCategory.MISC, this.biPredicate, this.remainingItemsFunction, this.resultFunction, this.pack, this.recipeCategory);
     }
 
     @Override

@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import net.minecraft.core.NonNullList;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -71,6 +72,8 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
 
     private String group;
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
+
+    private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
 
     @Override
     public AisleStep aisle(final String... aisle) {
@@ -205,7 +208,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
         final net.minecraft.world.item.ItemStack resultStack = ItemStackUtil.toNative(this.result);
         final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(resultStack, this.resultFunction, this.remainingItemsFunction, ingredientsMap,
                 RecipeSerializer.SHAPED_RECIPE, SpongeRecipeSerializers.SPONGE_CRAFTING_SHAPED);
-        return new SpongeShapedCraftingRecipeRegistration((ResourceLocation)(Object) key, serializer, this.group, this.aisle, ingredientsMap, resultStack, this.resultFunction, this.remainingItemsFunction, this.pack);
+        return new SpongeShapedCraftingRecipeRegistration((ResourceLocation)(Object) key, serializer, this.group, this.aisle, ingredientsMap, resultStack, this.resultFunction, this.remainingItemsFunction, this.pack, this.recipeCategory);
     }
 
     @Override

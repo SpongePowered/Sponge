@@ -27,6 +27,7 @@ package org.spongepowered.common.item.recipe.smithing;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
@@ -60,6 +61,8 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
     private Function<Container, net.minecraft.world.item.ItemStack> resultFunction;
     private @Nullable String group;
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
+
+    private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
 
     @Override
     public AdditionStep base(ItemType ingredient) {
@@ -128,7 +131,7 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
         final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(result, this.resultFunction, null, Arrays.asList(this.base, this.addition),
                 RecipeSerializer.SMITHING, SpongeRecipeSerializers.SPONGE_SMITHING);
 
-        return new SpongeSmithingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.base, this.addition, result, this.resultFunction, this.pack);
+        return new SpongeSmithingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.base, this.addition, result, this.resultFunction, this.pack, this.recipeCategory);
     }
 
     @Override

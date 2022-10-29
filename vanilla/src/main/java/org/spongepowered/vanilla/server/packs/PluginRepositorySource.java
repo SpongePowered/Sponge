@@ -24,6 +24,8 @@
  */
 package org.spongepowered.vanilla.server.packs;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.PackSource;
@@ -50,7 +52,7 @@ public final class PluginRepositorySource implements RepositorySource {
     }
 
     @Override
-    public void loadPacks(final Consumer<Pack> callback, final Pack.PackConstructor constructor) {
+    public void loadPacks(final Consumer<Pack> callback) {
         final VanillaPluginManager pluginManager = (VanillaPluginManager) Launch.instance().pluginManager();
 
         // For each plugin, we create a pack. That pack might be empty.
@@ -70,7 +72,8 @@ public final class PluginRepositorySource implements RepositorySource {
             }
 
             final PluginPackResources packResources = new PluginPackResources(id, pluginContainer, fileSystemSupplier);
-            final Pack pack = Pack.create(id, true, () -> packResources, constructor, Pack.Position.BOTTOM, PackSource.DEFAULT);
+            final Pack.ResourcesSupplier packSupplier = name -> packResources;
+            final Pack pack = Pack.create(id, Component.literal(id), true, packSupplier, Pack.readPackInfo(id, packSupplier), PackType.SERVER_DATA, Pack.Position.BOTTOM, false, PackSource.DEFAULT);
             ((PackRepositoryBridge_Vanilla) this.repository).bridge$registerResourcePack(pluginContainer, pack);
             callback.accept(pack);
         }

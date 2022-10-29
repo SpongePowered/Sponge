@@ -28,6 +28,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
@@ -57,8 +58,8 @@ public class SpongeShapelessCraftingRecipeRegistration extends SpongeRecipeRegis
     public SpongeShapelessCraftingRecipeRegistration(final ResourceLocation key, final RecipeSerializer<?> serializer, final String group,
             final List<Ingredient> ingredients, final ItemStack spongeResult, final Function<CraftingContainer, ItemStack> resultFunction,
             final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
-            final DataPack<RecipeRegistration> pack) {
-        super(key, serializer, spongeResult.getItem(), group, pack);
+            final DataPack<RecipeRegistration> pack, final RecipeCategory category) {
+        super(key, serializer, spongeResult.getItem(), group, pack, category);
         this.ingredients = ingredients;
 
         this.count = spongeResult.getCount();

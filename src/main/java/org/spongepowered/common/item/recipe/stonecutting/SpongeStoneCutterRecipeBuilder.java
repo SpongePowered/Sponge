@@ -27,6 +27,7 @@ package org.spongepowered.common.item.recipe.stonecutting;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
@@ -59,6 +60,8 @@ public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedB
     private Function<Container, net.minecraft.world.item.ItemStack> resultFunction;
     private @Nullable String group;
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
+
+    private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
 
     @Override
     public ResultStep ingredient(ItemType ingredient) {
@@ -115,7 +118,7 @@ public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedB
         final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(result, this.resultFunction, null, Collections.singleton(this.ingredient),
                 RecipeSerializer.STONECUTTER, SpongeRecipeSerializers.SPONGE_STONECUTTING);
 
-        return new SpongeStonecuttingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredient, result, this.resultFunction, this.pack);
+        return new SpongeStonecuttingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredient, result, this.resultFunction, this.pack, this.recipeCategory);
     }
 
     @Override

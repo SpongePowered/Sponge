@@ -24,14 +24,15 @@
  */
 package org.spongepowered.vanilla.server.packs;
 
+import net.minecraft.FileUtil;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.ResourcePackFileNotFoundException;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
+import net.minecraft.server.packs.resources.IoSupplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
@@ -43,9 +44,9 @@ import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -53,54 +54,54 @@ import java.util.stream.Collectors;
 
 public final class PluginPackResources extends AbstractPackResources {
 
-    private final String name;
     private final PluginContainer container;
     private final PackMetadataSection metadata;
     private final @Nullable Supplier<FileSystem> fileSystem;
+    private final File file;
 
     public PluginPackResources(final String name, final PluginContainer container, final @Nullable Supplier<FileSystem> fileSystem) {
-        super(new File("sponge_plugin_pack"));
-        this.name = name;
+        super(name);
+        this.file = new File("sponge_plugin_pack");
         this.container = container;
         this.metadata = new PackMetadataSection(Component.literal("Plugin Resources"), 6);
         this.fileSystem = fileSystem;
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public IoSupplier<InputStream> getRootResource(final String... var1) {
+        final String rawPath = String.join("/", var1);
+        return this.getResource(rawPath);
     }
 
-    @Override
-    protected InputStream getResource(final String rawPath) throws IOException {
-        return this.container.openResource(URI.create(rawPath)).orElseThrow(() -> new ResourcePackFileNotFoundException(this.file, rawPath));
-    }
-
-    @Override
-    protected boolean hasResource(final String rawPath) {
-        try {
-            return this.container.locateResource(URI.create(rawPath)).isPresent();
-        } catch (final Exception e) {
-            return false;
+    private IoSupplier<InputStream> getResource(final String rawPath) {
+        final Optional<URI> uri = this.container.locateResource(URI.create(rawPath));
+        if (uri.isEmpty()) {
+            return null;
         }
+        return () -> uri.get().toURL().openStream();
     }
 
     @Override
-    public Collection<ResourceLocation> getResources(PackType type, String namespace, String path, Predicate<ResourceLocation> fileNameValidator) {
+    public IoSupplier<InputStream> getResource(final PackType type, final ResourceLocation loc) {
+        return this.getResource(String.format(Locale.ROOT, "%s/%s/%s", type.getDirectory(), loc.getNamespace(), loc.getPath()));
+    }
 
+    @Override
+    public void listResources(final PackType type, final String namespace, final String path, final ResourceOutput out) {
         try {
             final Path root = this.typeRoot(type);
             final Path namespaceDir = root.resolve(namespace).toAbsolutePath();
-            return Files.walk(namespaceDir)
+            Files.walk(namespaceDir)
                     .filter(Files::isRegularFile)
                     .filter(s -> !s.getFileName().toString().endsWith(".mcmeta"))
                     .map(namespaceDir::relativize)
                     .map(Object::toString)
-                    .filter(p -> filterValidPath(namespace, p, fileNameValidator))
+// TODO filter needed?                   .filter(p -> filterValidPath(namespace, p, fileNameValidator))
                     .map(s -> new ResourceLocation(namespace, s))
-                    .collect(Collectors.toList());
-        } catch (final IOException e) {
-            return Collections.emptyList();
+                    .forEach(loc -> {
+                        out.accept(loc, this.getResource(type, loc));
+                    });
+        } catch (final IOException ignored) {
         }
     }
 

@@ -26,6 +26,7 @@ package org.spongepowered.common.item.recipe.stonecutting;
 
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
@@ -53,8 +54,8 @@ public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistrati
 
     public SpongeStonecuttingRecipeRegistration(ResourceLocation key, RecipeSerializer<?> serializer, String group, Ingredient ingredient,
             ItemStack spongeResult, Function<Container, ItemStack> resultFunction,
-            DataPack<RecipeRegistration> pack) {
-        super(key, serializer, spongeResult.getItem(), group, pack);
+            DataPack<RecipeRegistration> pack, final RecipeCategory category) {
+        super(key, serializer, spongeResult.getItem(), group, pack, category);
         this.ingredient = ingredient;
         this.result = spongeResult.getItem();
         this.count = spongeResult.getCount();

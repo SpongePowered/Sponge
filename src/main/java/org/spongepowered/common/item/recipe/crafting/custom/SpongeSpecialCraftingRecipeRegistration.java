@@ -25,6 +25,7 @@
 package org.spongepowered.common.item.recipe.crafting.custom;
 
 import com.google.gson.JsonObject;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
@@ -58,8 +59,8 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
             BiPredicate<CraftingGridInventory, ServerWorld> biPredicate,
             Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction,
             Function<CraftingGridInventory, ItemStack> resultFunction,
-            DataPack<RecipeRegistration> pack) {
-        super(key, null, Items.AIR, "", pack);
+            DataPack<RecipeRegistration> pack, final RecipeCategory recipeCategory) {
+        super(key, null, Items.AIR, "", pack, recipeCategory);
 
         this.biPredicate = biPredicate;
         this.remainingItemsFunction = remainingItemsFunction;

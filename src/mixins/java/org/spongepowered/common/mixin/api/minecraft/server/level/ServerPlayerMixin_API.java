@@ -37,7 +37,6 @@ import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.ChatMessageContent;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
@@ -308,6 +307,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public void simulateChat(final Component message, final Cause cause) {
+        // TODO maybe deprecate & remove this as we cannot fake player messages anymore
         Objects.requireNonNull(message, "message");
         Objects.requireNonNull(cause, "cause");
         final PlayerChatEvent.Decorate event = SpongeEventFactory.createPlayerChatEventDecorate(cause, message, message, Optional.of(this));
@@ -315,7 +315,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             final net.minecraft.network.chat.Component decoratedMessage = SpongeAdventure.asVanilla(event.message());
             final ChatType.Bound boundType = ChatType.bind(ChatType.CHAT, this.server.registryAccess(), this.getName());
             final var thisPlayer = (net.minecraft.server.level.ServerPlayer) (Object) this;
-            this.server.getPlayerList().broadcastChatMessage(PlayerChatMessage.system(new ChatMessageContent(decoratedMessage.getString(), decoratedMessage)), thisPlayer, boundType);
+            this.server.getPlayerList().broadcastChatMessage(PlayerChatMessage.system(decoratedMessage.getString()), thisPlayer, boundType);
         }
     }
 

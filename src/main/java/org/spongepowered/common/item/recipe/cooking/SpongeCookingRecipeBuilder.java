@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.recipe.cooking;
 
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
@@ -62,6 +63,8 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
     private @Nullable Ticks cookingTime;
     private @Nullable String group;
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
+
+    private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
 
     @Override
     public ResultStep ingredient(final org.spongepowered.api.item.recipe.crafting.Ingredient ingredient) {
@@ -180,7 +183,7 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
         }
 
         return new SpongeCookingRecipeRegistration((ResourceLocation) (Object) this.key, serializer, this.group,
-                this.ingredient, this.experience, this.cookingTime, this.result, this.resultFunction, this.pack);
+                this.ingredient, this.experience, this.cookingTime, this.result, this.resultFunction, this.pack, this.recipeCategory);
     }
 
 }

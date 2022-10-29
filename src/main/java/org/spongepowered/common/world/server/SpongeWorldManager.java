@@ -770,12 +770,13 @@ public abstract class SpongeWorldManager implements WorldManager {
         final LevelSettings levelSettings = this.createLevelSettings(defaultLevelData, levelStem, directoryName);
         final Long customSeed = ((LevelStemBridge) (Object) levelStem).bridge$seed();
         if (customSeed != null) {
-            final WorldGenSettings generationSettings = ((WorldOptionsBridge) defaultLevelData.worldGenOptions()).bridge$withSeed(customSeed);
+
+            final WorldOptions generationSettings = ((WorldOptionsBridge) defaultLevelData.worldGenOptions()).bridge$withSeed(customSeed);
             // TODO generateStructures?
             // TODO bonusChest?
-            return new PrimaryLevelData(levelSettings, generationSettings, Lifecycle.stable());
+            return new PrimaryLevelData(levelSettings, generationSettings, PrimaryLevelData.SpecialWorldProperty.NONE, Lifecycle.stable());
         }
-        return new PrimaryLevelData(levelSettings, defaultLevelData.worldGenOptions(), Lifecycle.stable());
+        return new PrimaryLevelData(levelSettings, defaultLevelData.worldGenOptions(), PrimaryLevelData.SpecialWorldProperty.NONE, Lifecycle.stable());
     }
 
     @Nullable

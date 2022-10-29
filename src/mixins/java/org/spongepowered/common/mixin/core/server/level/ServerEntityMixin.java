@@ -25,7 +25,8 @@
 package org.spongepowered.common.mixin.core.server.level;
 
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
@@ -48,6 +49,7 @@ import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -116,11 +118,11 @@ public abstract class ServerEntityMixin {
             return;
         }
         // Adds the GameProfile to the client
-        consumer.accept(human.createPlayerListPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER));
+        consumer.accept(human.getAddEntityPacket());
         // Actually spawn the human (a player)
         consumer.accept((Packet<?>) spawnPacket);
         // Remove from tab list
-        final ClientboundPlayerInfoPacket removePacket = human.createPlayerListPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER);
+        final ClientboundPlayerInfoRemovePacket removePacket = new ClientboundPlayerInfoRemovePacket(List.of(human.getUUID()));
         if (human.canRemoveFromListImmediately()) {
             consumer.accept(removePacket);
         } else {
