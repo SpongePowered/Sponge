@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.server.packs;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.resources.IoSupplier;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.resource.Resource;
@@ -41,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -52,16 +54,16 @@ import java.util.stream.Collectors;
 public interface PackResourcesMixin_API extends PackContents {
 
     // @formatter:off
-    @Shadow String shadow$getName();
-    @Shadow InputStream shadow$getResource(net.minecraft.server.packs.PackType var1, ResourceLocation var2) throws IOException;
-    @Shadow boolean shadow$hasResource(net.minecraft.server.packs.PackType var1, ResourceLocation var2);
-    @Shadow Collection<ResourceLocation> shadow$getResources(net.minecraft.server.packs.PackType var1, String var2, String var3, Predicate<ResourceLocation> var4);
+    @Shadow String shadow$packId();
+    @Shadow IoSupplier<InputStream> shadow$getResource(net.minecraft.server.packs.PackType var1, ResourceLocation var2) throws IOException;
     @Shadow Set<String> shadow$getNamespaces(net.minecraft.server.packs.PackType var1);
+    @Shadow void shadow$listResources(net.minecraft.server.packs.PackType var1, String var2, String var3, PackResources.ResourceOutput var4);
+
     // @formatter:on
 
     @Override
     default String name() {
-        return this.shadow$getName();
+        return this.shadow$packId();
     }
 
     @Override
@@ -80,19 +82,24 @@ public interface PackResourcesMixin_API extends PackContents {
 
     @Nullable
     default Resource api$createResource(final PackType root, final ResourcePath path) throws IOException {
-        return new SpongeResource(Objects.requireNonNull(path, "path"),
-                this.shadow$getResource((net.minecraft.server.packs.PackType) (Object) Objects.requireNonNull(root, "root"),
-                    (ResourceLocation) (Object) path.key()));
+        final net.minecraft.server.packs.PackType packType = (net.minecraft.server.packs.PackType) (Object) Objects.requireNonNull(root, "root");
+        final ResourceLocation loc = (ResourceLocation) (Object) Objects.requireNonNull(path, "path").key();
+        final IoSupplier<InputStream> ioSupplier = this.shadow$getResource(packType, loc);
+        return new SpongeResource(path, ioSupplier.get());
     }
 
     @Override
     default Collection<ResourcePath> paths(final PackType root, final String namespace, final String prefix, final Predicate<ResourceKey> filter) {
         Objects.requireNonNull(filter, "filter");
         final net.minecraft.server.packs.PackType packType = (net.minecraft.server.packs.PackType) (Object) Objects.requireNonNull(root, "root");
-        final Collection<ResourceLocation> resources = this.shadow$getResources(packType,
-                                                       Objects.requireNonNull(namespace, "namespace"),
-                                                       Objects.requireNonNull(prefix, "prefix"),
-                                                       loc -> filter.test((ResourceKey) (Object) loc));
+
+        final Collection<ResourceLocation> resources = new HashSet<>();
+        this.shadow$listResources(packType, Objects.requireNonNull(namespace, "namespace"),
+                Objects.requireNonNull(prefix, "prefix"), (loc, stream) -> {
+                    if (filter.test((ResourceKey) (Object) loc)) {
+                        resources.add(loc);
+                    }
+                });
 
         return resources.stream()
             .map(r -> new SpongeResourcePath((ResourceKey) (Object) r))
@@ -101,8 +108,14 @@ public interface PackResourcesMixin_API extends PackContents {
 
     @Override
     default boolean exists(final PackType root, final ResourcePath path) {
-        return this.shadow$hasResource((net.minecraft.server.packs.PackType) (Object) Objects.requireNonNull(root, "root"),
-            (ResourceLocation) (Object) Objects.requireNonNull(path, "path").key());
+        try {
+            final net.minecraft.server.packs.PackType packType = (net.minecraft.server.packs.PackType) (Object) Objects.requireNonNull(root, "root");
+            final ResourceLocation loc = (ResourceLocation) (Object) Objects.requireNonNull(path, "path").key();
+            final IoSupplier<InputStream> ioSupplier = this.shadow$getResource(packType, loc);
+            return ioSupplier != null;
+        } catch (IOException ignored) {
+            return false;
+        }
     }
 
     @Override

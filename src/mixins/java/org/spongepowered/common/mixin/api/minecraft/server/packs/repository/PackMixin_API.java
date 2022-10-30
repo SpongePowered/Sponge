@@ -35,13 +35,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 
-import java.util.function.Supplier;
-
 @Mixin(Pack.class)
 public abstract class PackMixin_API implements org.spongepowered.api.resource.pack.Pack {
 
     // @formatter:off
-    @Shadow @Final private Supplier<PackResources> supplier;
     @Shadow @Final private net.minecraft.network.chat.Component title;
     @Shadow @Final private net.minecraft.network.chat.Component description;
 
@@ -51,6 +48,8 @@ public abstract class PackMixin_API implements org.spongepowered.api.resource.pa
     @Shadow public abstract boolean shadow$isFixedPosition();
     // @formatter:on
 
+    @Shadow public abstract PackResources shadow$open();
+
     @Override
     public String id() {
         return this.shadow$getId();
@@ -58,7 +57,7 @@ public abstract class PackMixin_API implements org.spongepowered.api.resource.pa
 
     @Override
     public PackContents contents() {
-        return (PackContents) this.supplier.get();
+        return (PackContents) this.shadow$open();
     }
 
     @Override
