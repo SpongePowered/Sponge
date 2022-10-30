@@ -29,6 +29,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.flag.FeatureFlagSet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -41,13 +42,12 @@ import java.util.concurrent.Executor;
 public abstract class WorldLoaderMixin {
 
     @Redirect(method = "load", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/ReloadableServerResources;loadResources(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess$Frozen;Lnet/minecraft/commands/Commands$CommandSelection;ILjava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;"))
-    private static CompletableFuture<ReloadableServerResources> impl$onLoadResources(final ResourceManager $$0, final RegistryAccess.Frozen $$1, final Commands.CommandSelection $$2,
-            final int $$3,
-            final Executor $$4, final Executor $$5) {
+            target = "Lnet/minecraft/server/ReloadableServerResources;loadResources(Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess$Frozen;Lnet/minecraft/world/flag/FeatureFlagSet;Lnet/minecraft/commands/Commands$CommandSelection;ILjava/util/concurrent/Executor;Ljava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;"))
+    private static CompletableFuture<ReloadableServerResources> impl$onLoadResources(final ResourceManager $$0, final RegistryAccess.Frozen $$1,
+            final FeatureFlagSet $$2, final Commands.CommandSelection $$3, final int $$4, final Executor $$5, final Executor $$6) {
         final var lifecycle = Launch.instance().lifecycle();
         lifecycle.establishGlobalRegistries($$1);
-        return ReloadableServerResources.loadResources($$0, $$1, $$2, $$3, $$4, $$5);
+        return ReloadableServerResources.loadResources($$0, $$1, $$2, $$3, $$4, $$5, $$6);
     }
 
 }

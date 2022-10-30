@@ -27,11 +27,9 @@ package org.spongepowered.common.world.generation;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.level.levelgen.WorldOptionsAccessor;
 import org.spongepowered.common.util.SeedUtil;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public final class SpongeWorldGenerationConfigBuilder implements WorldGenerationConfig.Builder {
 
@@ -80,7 +78,6 @@ public final class SpongeWorldGenerationConfigBuilder implements WorldGeneration
 
     @Override
     public WorldGenerationConfig build() {
-        return (WorldGenerationConfig) WorldOptionsAccessor.invoker$new(this.seed, this.generateFeatures,
-            this.generateBonusChest,  Optional.empty());
+        return (WorldGenerationConfig) new WorldOptions(this.seed, this.generateFeatures, this.generateBonusChest);
     }
 }

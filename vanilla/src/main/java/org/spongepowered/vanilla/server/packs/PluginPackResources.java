@@ -24,7 +24,6 @@
  */
 package org.spongepowered.vanilla.server.packs;
 
-import net.minecraft.FileUtil;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;

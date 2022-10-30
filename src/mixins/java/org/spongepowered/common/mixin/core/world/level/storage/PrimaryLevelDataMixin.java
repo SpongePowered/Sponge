@@ -28,14 +28,9 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.Lifecycle;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.Registry;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
@@ -52,8 +47,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.levelgen.WorldDimensions;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
@@ -64,14 +57,10 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
-import org.spongepowered.common.accessor.world.level.levelgen.WorldOptionsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
-import org.spongepowered.common.bridge.world.level.levelgen.WorldOptionsBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
@@ -282,7 +271,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public void bridge$populateFromLevelStem(final LevelStem dimension) {
         final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) dimension;
-        this.impl$dimensionType = dimension.typeHolder().value();
+        this.impl$dimensionType = dimension.type().value();
         this.impl$displayName = levelStemBridge.bridge$displayName();
         final Difficulty difficulty = levelStemBridge.bridge$difficulty();
         final GameType gameType = levelStemBridge.bridge$gameMode();
@@ -299,7 +288,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
                 difficulty == null ? this.settings.difficulty() : difficulty,
                 isHardcore == null ? this.settings.hardcore() : isHardcore,
                 this.settings.gameRules(),
-                this.settings.getDataPackConfig());
+                this.settings.getDataConfiguration());
 
         final Vector3i spawnPos = levelStemBridge.bridge$spawnPosition();
         if (spawnPos != null) {
@@ -350,6 +339,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         return (ServerLevelData) SpongeCommon.server().getLevel(Level.OVERWORLD).getLevelData();
     }
 
+    /* TODO dimensions got moved somewhere else
     @Redirect(method = "setTagData", at = @At(value = "INVOKE", remap = false, target = "Lcom/mojang/serialization/Codec;encodeStart(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", ordinal = 0))
     private DataResult<Object> impl$ignorePluginDimensionsWhenWritingWorldGenSettings(final Codec codec, final DynamicOps<Object> ops, final Object input) {
         final WorldDimensions dims = ((WorldGenSettings) input).dimensions();
@@ -367,6 +357,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         ((WorldOptionsAccessor) (Object) dimensionGeneratorSettings).accessor$dimensions(registry);
         return codec.encodeStart(ops, dimensionGeneratorSettings);
     }
+    */
 
     void impl$updateWorldForDifficultyChange(final ServerLevel world, final boolean isLocked) {
         if (world == null) {
@@ -436,12 +427,12 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
 
     @Override
     public void bridge$hardcore(final boolean hardcore) {
-        this.settings = new LevelSettings(this.settings.levelName(), this.settings.gameType(), hardcore, this.settings.difficulty(), this.settings.allowCommands(), this.settings.gameRules(), this.settings.getDataPackConfig());
+        this.settings = new LevelSettings(this.settings.levelName(), this.settings.gameType(), hardcore, this.settings.difficulty(), this.settings.allowCommands(), this.settings.gameRules(), this.settings.getDataConfiguration());
     }
 
     @Override
     public void bridge$allowCommands(final boolean commands) {
-        this.settings = new LevelSettings(this.settings.levelName(), this.settings.gameType(), this.settings.allowCommands(), this.settings.difficulty(), commands, this.settings.gameRules(), this.settings.getDataPackConfig());
+        this.settings = new LevelSettings(this.settings.levelName(), this.settings.gameType(), this.settings.allowCommands(), this.settings.difficulty(), commands, this.settings.gameRules(), this.settings.getDataConfiguration());
     }
 
     @Override

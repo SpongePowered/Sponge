@@ -61,6 +61,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.material.MaterialColor;
@@ -392,16 +393,18 @@ public final class SpongeRegistryLoaders {
         )));
     }
 
-    private static ArgumentType<?> argumentTypeFromKey(ResourceKey key) {
+    private static ArgumentType<?> argumentTypeFromKey(ResourceKey key, CommandBuildContext ctx) {
         final ArgumentTypeInfo<?,?> argumentTypeInfo = Registry.COMMAND_ARGUMENT_TYPE.get((ResourceLocation) (Object) key);
         if (argumentTypeInfo instanceof SingletonArgumentInfo<?> s) {
-            return s.unpack(null).instantiate(null);
+            return s.unpack(null).instantiate(ctx);
         }
         throw new IllegalArgumentException(key.asString());
     }
 
-    public static RegistryLoader<CommandTreeNodeType<?>> clientCompletionKey() {
-        final Function<ResourceKey, ArgumentType<?>> fn = SpongeRegistryLoaders::argumentTypeFromKey;
+    public static RegistryLoader<CommandTreeNodeType<?>> clientCompletionKey(final RegistryAccess.Frozen registryAccess) {
+        final CommandBuildContext cbCtx = new CommandBuildContext(registryAccess, FeatureFlagSet.of());
+        // TODO check ArgumentTypeInfos
+        final Function<ResourceKey, ArgumentType<?>> fn = key -> SpongeRegistryLoaders.argumentTypeFromKey(key, cbCtx);
         return RegistryLoader.of(l -> {
             l.add(CommandTreeNodeTypes.ANGLE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.BLOCK_POS, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
@@ -415,20 +418,20 @@ public final class SpongeRegistryLoaders {
             l.add(CommandTreeNodeTypes.DOUBLE, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new DoubleArgumentInfo()));
             l.add(CommandTreeNodeTypes.ENTITY, SpongeEntityCommandTreeNodeType::new);
             l.add(CommandTreeNodeTypes.ENTITY_ANCHOR, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.ENTITY_SUMMON, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            // TODO fix me l.add(CommandTreeNodeTypes.ENTITY_SUMMON, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.FLOAT, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new FloatArgumentInfo()));
             l.add(CommandTreeNodeTypes.FLOAT_RANGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.FUNCTION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.GAME_PROFILE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.INTEGER, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new IntegerArgumentInfo()));
             l.add(CommandTreeNodeTypes.INT_RANGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.ITEM_ENCHANTMENT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            // l.add(CommandTreeNodeTypes.ITEM_ENCHANTMENT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             // TODO NPE in fn l.add(CommandTreeNodeTypes.ITEM_PREDICATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.ITEM_SLOT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             // TODO NPE in fn l.add(CommandTreeNodeTypes.ITEM_STACK, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.LONG, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new LongArgumentInfo()));
             l.add(CommandTreeNodeTypes.MESSAGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.MOB_EFFECT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+//            l.add(CommandTreeNodeTypes.MOB_EFFECT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.NBT_COMPOUND_TAG, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.NBT_PATH, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.NBT_TAG, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
@@ -899,7 +902,7 @@ public final class SpongeRegistryLoaders {
 
     @SuppressWarnings("ConstantConditions")
     public static RegistryLoader<ValueParameter<?>> valueParameter(final RegistryAccess.Frozen registryAccess) {
-        final CommandBuildContext cbCtx = new CommandBuildContext(registryAccess);
+        final CommandBuildContext cbCtx = new CommandBuildContext(registryAccess, FeatureFlagSet.of());
         return RegistryLoader.of(l -> {
             l.add(ResourceKeyedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
             l.add(ResourceKeyedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);

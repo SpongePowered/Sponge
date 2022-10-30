@@ -83,6 +83,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     @Shadow @Final private EntityAnchorArgument.Anchor anchor;
     @Shadow @Final private CommandSigningContext signingContext;
 
+    @Shadow @Final private TaskChainer chatMessageChainer;
     private Cause impl$cause;
     @Nullable private Supplier<String> impl$potentialPermissionNode = null;
 
@@ -139,7 +140,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     public CommandCause bridge$withCurrentCause() {
         // Cause is set in ctor.
         return (CommandCause) CommandSourceStackAccessor.invoker$new(this.source, this.worldPosition, this.rotation, this.level, this.permissionLevel,
-                this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor);
+                this.textName, this.displayName, this.server, this.entity, this.silent, this.consumer, this.anchor, this.signingContext, this.chatMessageChainer);
     }
 
     /*

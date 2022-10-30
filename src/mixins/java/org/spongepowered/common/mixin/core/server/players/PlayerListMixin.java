@@ -33,23 +33,19 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
-import net.minecraft.network.chat.ChatMessageContent;
-import net.minecraft.network.chat.ChatSender;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.MessageSigner;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.UserBanList;
@@ -125,6 +121,7 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -154,12 +151,14 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow public abstract MinecraftServer shadow$getServer();
     @Shadow @Nullable public abstract CompoundTag shadow$load(net.minecraft.server.level.ServerPlayer playerIn);
     @Shadow public abstract boolean shadow$canBypassPlayerLimit(com.mojang.authlib.GameProfile param0);
-    @Shadow protected abstract boolean verifyChatTrusted(final PlayerChatMessage $$0, final ChatSender $$1);
+    @Shadow protected abstract boolean verifyChatTrusted(final PlayerChatMessage $$0);
     @Shadow public abstract void placeNewPlayer(final Connection $$0, final net.minecraft.server.level.ServerPlayer $$1);
     @Shadow protected abstract void shadow$broadcastChatMessage(final PlayerChatMessage $$0, final Predicate<net.minecraft.server.level.ServerPlayer> $$1,
-        @Nullable final net.minecraft.server.level.ServerPlayer $$2, final ChatSender $$3, final ChatType.Bound $$4);
+        @Nullable final net.minecraft.server.level.ServerPlayer $$2, final ChatType.Bound $$4);
     // @formatter:on
 
+
+    @Shadow public abstract void broadcastSystemMessage(final net.minecraft.network.chat.Component $$0, final boolean $$1);
 
     private boolean impl$isGameMechanicRespawn = false;
     private boolean impl$isDuringSystemMessageEvent = false;
@@ -421,13 +420,12 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         method = "placeNewPlayer",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"
+            target = "Lnet/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket;createPlayerInitializing(Ljava/util/Collection;)Lnet/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket;"
         ),
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Ljava/util/List;size()I",
-                remap = false
+                target = "Lnet/minecraft/server/level/ServerPlayer;sendServerStatus(Lnet/minecraft/network/protocol/status/ServerStatus;)V"
             ),
             to = @At(
                 value = "INVOKE",
@@ -435,18 +433,10 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             )
         )
     )
-    private void impl$onlySendAddPlayerForUnvanishedPlayers(final ServerGamePacketListenerImpl connection, final Packet<?> packet) {
-        final ClientboundPlayerInfoPacket playerInfoPacket = (ClientboundPlayerInfoPacket) packet;
-
-        // size is always 1
-        final VanishableBridge p = (VanishableBridge) this.playersByUUID.get(playerInfoPacket.getEntries().get(0).getProfile().getId());
-
+    private ClientboundPlayerInfoUpdatePacket impl$onlySendAddPlayerForUnvanishedPlayers(final Collection<net.minecraft.server.level.ServerPlayer> $$0) {
         // Effectively, don't notify new players of vanished players
-        if (p.bridge$vanishState().invisible()) {
-            return;
-        }
-
-        connection.send(packet);
+        final List<net.minecraft.server.level.ServerPlayer> vanishFiltered = $$0.stream().filter(p -> !((VanishableBridge) p).bridge$isInvisible()).toList();
+        return ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(vanishFiltered);
     }
 
     @Inject(method = "placeNewPlayer", at = @At(value = "RETURN"))
@@ -627,26 +617,28 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         this.impl$isDuringSystemMessageEvent = false;
     }
 
-    @Redirect(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatSender;Lnet/minecraft/network/chat/ChatType$Bound;)V"))
+    @Redirect(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V"))
     private void impl$onBroadcastChatMessage1(final PlayerList instance, final PlayerChatMessage $$0,
-            final Predicate<net.minecraft.server.level.ServerPlayer> $$1, final net.minecraft.server.level.ServerPlayer $$2, final ChatSender $$3,
+            final Predicate<net.minecraft.server.level.ServerPlayer> $$1, final net.minecraft.server.level.ServerPlayer $$2,
             final ChatType.Bound $$4) {
-        this.impl$onBroadcastChatMessage($$0, $$1, $$2, $$3, $$4);
+        this.impl$onBroadcastChatMessage($$0, $$1, $$2, $$4);
     }
 
-    @Redirect(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/network/chat/ChatType$Bound;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatSender;Lnet/minecraft/network/chat/ChatType$Bound;)V"))
+    @Redirect(method = "broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Lnet/minecraft/commands/CommandSourceStack;Lnet/minecraft/network/chat/ChatType$Bound;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;Ljava/util/function/Predicate;Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/network/chat/ChatType$Bound;)V"))
     private void impl$onBroadcastChatMessage2(final PlayerList instance, final PlayerChatMessage $$0,
-            final Predicate<net.minecraft.server.level.ServerPlayer> $$1, final net.minecraft.server.level.ServerPlayer $$2, final ChatSender $$3,
+            final Predicate<net.minecraft.server.level.ServerPlayer> $$1, final net.minecraft.server.level.ServerPlayer $$2,
             final ChatType.Bound $$4) {
-        this.impl$onBroadcastChatMessage($$0, $$1, $$2, $$3, $$4);
+        this.impl$onBroadcastChatMessage($$0, $$1, $$2, $$4);
     }
 
     private void impl$onBroadcastChatMessage(final PlayerChatMessage $$0, final Predicate<net.minecraft.server.level.ServerPlayer> $$1,
-            final net.minecraft.server.level.ServerPlayer $$2, final ChatSender $$3, final ChatType.Bound $$4) {
+            final net.minecraft.server.level.ServerPlayer $$2, final ChatType.Bound $$4) {
 
-        final boolean isTrusted = this.verifyChatTrusted($$0, $$3);
+        final boolean isTrusted = this.verifyChatTrusted($$0);
 
-        final Component content = SpongeAdventure.asAdventure($$0.serverContent());
+        final Component content = SpongeAdventure.asAdventure($$0.decoratedContent());
         final Component sender = SpongeAdventure.asAdventure($$4.name());
         final Component target = $$4.targetName() == null ? null : SpongeAdventure.asAdventure($$4.targetName());
         final Registry<ChatType> chatTypeRegistry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
@@ -672,13 +664,13 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             if (!isTrusted && event.message() != event.originalMessage()) {
                 final net.minecraft.network.chat.Component customMessage = SpongeAdventure.asVanilla(event.message());
                 // TODO does this work?
-                var systemMessage = PlayerChatMessage.unsigned(MessageSigner.system(), new ChatMessageContent(customMessage.getString(), customMessage));
-                this.shadow$broadcastChatMessage(systemMessage, filter, $$2, $$3, boundChatType);
+                var systemMessage = PlayerChatMessage.system(customMessage.getString()).withUnsignedContent(customMessage);
+                this.shadow$broadcastChatMessage(systemMessage, filter, $$2, boundChatType);
                 return;
             }
         }
 
-        this.shadow$broadcastChatMessage($$0, filter, $$2, $$3, boundChatType);
+        this.shadow$broadcastChatMessage($$0, filter, $$2, boundChatType);
     }
 
 }

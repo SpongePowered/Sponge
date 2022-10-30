@@ -32,14 +32,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 @Mixin(ChunkGenerator.class)
 public abstract class ChunkGeneratorMixin_API implements org.spongepowered.api.world.generation.ChunkGenerator {
 
     // @formatter:off
     @Shadow public abstract net.minecraft.world.level.biome.BiomeSource shadow$getBiomeSource();
-    @Shadow public abstract Stream<Holder<StructureSet>> shadow$possibleStructureSets();
+    @Shadow public abstract List<Holder<StructureSet>> shadow$possibleStructureSets();
     // @formatter:on
 
     @Override
@@ -49,7 +48,7 @@ public abstract class ChunkGeneratorMixin_API implements org.spongepowered.api.w
 
     @Override
     public List<org.spongepowered.api.world.generation.structure.StructureSet> structureSets() {
-        return this.shadow$possibleStructureSets().map(Holder::value)
+        return this.shadow$possibleStructureSets().stream().map(Holder::value)
                 .map(org.spongepowered.api.world.generation.structure.StructureSet.class::cast).toList();
     }
 }

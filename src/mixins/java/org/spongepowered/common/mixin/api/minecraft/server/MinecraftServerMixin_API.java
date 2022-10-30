@@ -33,6 +33,8 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.Services;
@@ -42,6 +44,8 @@ import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.levelgen.WorldDimensions;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
@@ -133,6 +137,9 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
 
     @Shadow @Final protected LevelStorageSource.LevelStorageAccess storageSource;
+
+    @Shadow public abstract RegistryAccess.Frozen registryAccess();
+
     private Iterable<? extends Audience> audiences;
     private ServerScheduler api$scheduler;
     private SpongeTeleportHelper api$teleportHelper;
@@ -153,7 +160,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
         this.api$playerDataHandler = new SpongePlayerDataManager(this);
         this.api$teleportHelper = new SpongeTeleportHelper();
         this.api$mapStorage = new SpongeMapStorage();
-        this.api$registryHolder = new RegistryHolderLogic($$3.registryAccess());
+        this.api$registryHolder = new RegistryHolderLogic($$3.registries().compositeAccess());
         this.api$userManager = new SpongeUserManager((MinecraftServer) (Object) this);
 
         this.api$dataPackManager = new SpongeDataPackManager((MinecraftServer) (Object) this, this.storageSource.getLevelPath(LevelResource.DATAPACK_DIR));
@@ -263,7 +270,13 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
     @Override
     public WorldGenerationConfig worldGenerationConfig() {
-        return (WorldGenerationConfig) this.shadow$getWorldData().worldGenSettings();
+        final WorldData data = this.shadow$getWorldData();
+
+        // TODO check if this is correct
+        final WorldGenSettings wgenSettings = new WorldGenSettings(data.worldGenOptions(),
+                new WorldDimensions(this.registryAccess().registryOrThrow(Registry.LEVEL_STEM_REGISTRY)));
+
+        return (WorldGenerationConfig) (Object) wgenSettings;
     }
 
     @Override

@@ -24,25 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.client.gui.screens.worldselection;
 
-import com.mojang.serialization.DynamicOps;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryOps;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 
 @Mixin(CreateWorldScreen.class)
 public abstract class CreateWorldScreenMixin {
 
-    @Redirect(method = "lambda$tryApplyNewDataPacks$18",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess$Writable;Lnet/minecraft/server/packs/resources/ResourceManager;)Lnet/minecraft/resources/RegistryOps;"))
-    private RegistryOps<Tag> impl$captureBootstrapOps(DynamicOps<Tag> $$0, RegistryAccess.Writable $$1, ResourceManager $$2) {
-        final RegistryOps<Tag> ops = RegistryOps.createAndLoad($$0, $$1, $$2);
-        SpongeWorldManager.bootstrapOps = ops;
-        return ops;
-    }
 }

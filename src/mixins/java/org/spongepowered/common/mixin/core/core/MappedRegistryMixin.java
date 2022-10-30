@@ -40,9 +40,9 @@ import org.spongepowered.common.registry.SpongeRegistryType;
 @Mixin(MappedRegistry.class)
 public abstract class MappedRegistryMixin<T> extends WritableRegistryMixin<T> {
 
-    @Inject(method = "registerMapping(ILnet/minecraft/resources/ResourceKey;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;Z)Lnet/minecraft/core/Holder;", at = @At("TAIL"))
+    @Inject(method = "registerMapping", at = @At("TAIL"))
     private void impl$cacheRegistryEntry(final int p_243537_1_, final net.minecraft.resources.ResourceKey<T> p_243537_2_, final T p_243537_3_,
-            final Lifecycle p_243537_4_, final boolean p_243537_5_, final CallbackInfoReturnable<Holder<T>> cir) {
+            final Lifecycle p_243537_4_, final CallbackInfoReturnable<Holder<T>> cir) {
 
         final net.minecraft.resources.ResourceKey<? extends Registry<T>> resourceKey = this.shadow$key();
         final ResourceKey root = (ResourceKey) (Object) ((ResourceKeyAccessor<T>) resourceKey).accessor$registryName();

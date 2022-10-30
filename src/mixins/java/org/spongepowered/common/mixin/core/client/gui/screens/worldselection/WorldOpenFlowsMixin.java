@@ -29,7 +29,6 @@ import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -39,9 +38,9 @@ import org.spongepowered.common.world.server.SpongeWorldManager;
 public abstract class WorldOpenFlowsMixin {
 
     @Redirect(method = "lambda$loadWorldStem$1",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess$Writable;Lnet/minecraft/server/packs/resources/ResourceManager;)Lnet/minecraft/resources/RegistryOps;"))
-    private static RegistryOps<Tag> impl$captureBootstrapOps(DynamicOps<Tag> $$0, RegistryAccess.Writable $$1, ResourceManager $$2) {
-        final RegistryOps<Tag> ops = RegistryOps.createAndLoad($$0, $$1, $$2);
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/resources/RegistryOps;"))
+    private static RegistryOps<Tag> impl$captureBootstrapOps(final DynamicOps<Tag> $$0, final RegistryAccess $$1) {
+        final RegistryOps<Tag> ops = RegistryOps.create($$0, $$1);
         SpongeWorldManager.bootstrapOps = ops;
         return ops;
     }

@@ -91,6 +91,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     @Inject(method = "handleAcceptedLogin", cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;", ordinal = 0))
     public void impl$onHandleAcceptedLogin(final CallbackInfo ci, final ProfilePublicKey playerProfilePublicKey) {
+        // TODO fix this
         if (true) {
             return;
         }
@@ -142,7 +143,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                     final ServerPlayer var1 = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
                     if (var1 != null) {
                         this.state = ServerLoginPacketListenerImpl.State.DELAY_ACCEPT;
-                        this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, playerProfilePublicKey);
+                        // TODO broken this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, playerProfilePublicKey);
                     } else {
                         // Sponge start - Also send the channel registrations using the minecraft channel, for compatibility
                         final ServerSideConnection connection = (ServerSideConnection) this;
@@ -150,8 +151,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                         // Sponge end
 
                         try {
-                            this.server.getPlayerList()
-                                    .placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile, playerProfilePublicKey));
+                            // TODO broken this.server.getPlayerList().placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile, playerProfilePublicKey));
                             // invalidate just to be sure there is no user cached for the online player anymore
                             Sponge.server().userManager().removeFromCache(this.gameProfile.getId());
                         } catch (final Exception e) {

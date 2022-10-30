@@ -32,8 +32,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
@@ -938,10 +936,11 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             final ChunkMap_TrackedEntityAccessor trackerAccessor = ((ChunkMapAccessor) ((ServerWorld) this.level).chunkManager()).accessor$entityMap().get(this.shadow$getId());
             if (trackerAccessor != null && this.impl$visibilityTicks % 4 == 0) {
                 if (this.bridge$vanishState().invisible()) {
+                    final ClientboundPlayerInfoRemovePacket packet = new ClientboundPlayerInfoRemovePacket(List.of(this.uuid));
                     for (final ServerPlayer entityPlayerMP : trackerAccessor.accessor$seenBy()) {
                         entityPlayerMP.connection.send(new ClientboundRemoveEntitiesPacket(this.shadow$getId()));
                         if ((Entity) (Object) this instanceof ServerPlayer) {
-                            entityPlayerMP.connection.send(new ClientboundPlayerInfoRemovePacket(List.of(this.uuid)));
+                            entityPlayerMP.connection.send(packet);
                         }
                     }
                 } else {
@@ -951,8 +950,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                         if ((Entity) (Object) this == entityPlayerMP) {
                             continue;
                         }
-                        if ((Entity) (Object) this instanceof ServerPlayer) {
-                            final Packet<?> packet = new ClientboundAddPlayerPacket((ServerPlayer) (Object) this);
+                        if ((Entity) (Object) this instanceof ServerPlayer player) {
+                            final ClientboundPlayerInfoUpdatePacket packet = ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(player));
                             entityPlayerMP.connection.send(packet);
                         }
                         trackerAccessor.accessor$updatePlayer(entityPlayerMP);

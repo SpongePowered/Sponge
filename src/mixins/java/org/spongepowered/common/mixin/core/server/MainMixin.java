@@ -29,7 +29,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.Main;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,9 +42,9 @@ import java.nio.file.Path;
 @Mixin(Main.class)
 public abstract class MainMixin {
 
-    @Redirect(method = "lambda$main$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess$Writable;Lnet/minecraft/server/packs/resources/ResourceManager;)Lnet/minecraft/resources/RegistryOps;"))
-    private static RegistryOps<Tag> impl$captureBootstrapOps(DynamicOps<Tag> $$0, RegistryAccess.Writable $$1, ResourceManager $$2) {
-        final RegistryOps<Tag> ops = RegistryOps.createAndLoad($$0, $$1, $$2);
+    @Redirect(method = "lambda$main$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/resources/RegistryOps;"))
+    private static RegistryOps<Tag> impl$captureBootstrapOps(final DynamicOps<Tag> $$0, final RegistryAccess $$1) {
+        final RegistryOps<Tag> ops = RegistryOps.create($$0, $$1);
         SpongeWorldManager.bootstrapOps = ops;
         return ops;
     }

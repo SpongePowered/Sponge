@@ -25,8 +25,9 @@
 package org.spongepowered.common.mixin.core.server.dedicated;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.storage.PlayerDataStorage;
@@ -44,9 +45,9 @@ import org.spongepowered.common.service.server.permission.SpongePermissionServic
 @Mixin(DedicatedPlayerList.class)
 public abstract class DedicatedPlayerListMixin extends PlayerList {
 
-    public DedicatedPlayerListMixin(final MinecraftServer server, final RegistryAccess.Frozen registryHolder,
+    public DedicatedPlayerListMixin(final MinecraftServer server, final LayeredRegistryAccess<RegistryLayer> registryAccess,
                                     final PlayerDataStorage playerIo, final int maxPlayers) {
-        super(server, registryHolder, playerIo, maxPlayers);
+        super(server, registryAccess, playerIo, maxPlayers);
     }
 
     @Inject(method = "isWhiteListed", at = @At("HEAD"), cancellable = true)

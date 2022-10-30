@@ -36,6 +36,6 @@ public interface EntitySelectorOptions_OptionAccessor {
 
     @Accessor("modifier") EntitySelectorOptions.Modifier accessor$modifier();
 
-    @Accessor("predicate") Predicate<EntitySelectorParser> accessor$predicate();
+    @Accessor("canUse") Predicate<EntitySelectorParser> accessor$canUse();
 
 }

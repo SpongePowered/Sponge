@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.level.levelgen;
 
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,6 +41,6 @@ public abstract class WorldOptionsMixin implements WorldOptionsBridge {
 
     @Override
     public WorldOptions bridge$withSeed(final long customSeed) {
-        return new WorldGenSettings(customSeed, this.generateStructures, this.generateBonusChest, this.dimensions);
+        return new WorldOptions(customSeed, this.generateStructures, this.generateBonusChest);
     }
 }

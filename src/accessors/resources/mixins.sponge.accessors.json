@@ -121,7 +121,6 @@
         "world.entity.vehicle.BoatAccessor",
         "world.entity.vehicle.MinecartFurnaceAccessor",
         "world.food.FoodDataAccessor",
-        "world.level.levelgen.WorldOptionsAccessor",
         "world.inventory.AbstractContainerMenuAccessor",
         "world.inventory.AbstractFurnaceMenuAccessor",
         "world.inventory.BeaconMenuAccessor",

@@ -365,7 +365,7 @@
         "minecraft.world.level.levelgen.NoiseBasedChunkGeneratorMixin_API",
         "minecraft.world.level.levelgen.NoiseGeneratorSettingsMixin_API",
         "minecraft.world.level.levelgen.NoiseSettingsMixin_API",
-        "minecraft.world.level.levelgen.WorldGenSettingsMixin_API",
+        "minecraft.world.level.levelgen.WorldOptionsMixin_API",
         "minecraft.world.level.levelgen.structure.StructureMixin_API",
         "minecraft.world.level.levelgen.flat.FlatLayerInfoMixin_API",
         "minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettingsMixin_API",
