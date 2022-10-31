@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -65,6 +66,14 @@ public interface SpongeRegistryHolder extends RegistryHolder {
 
     default <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final RegistryLoader<T> loader) {
         return this.createRegistry(type, loader, false);
+    }
+
+    default <T> org.spongepowered.api.registry.Registry<T> createAndFreezeRegistry(final RegistryType<T> type, final RegistryLoader<T> loader) {
+        final org.spongepowered.api.registry.Registry<T> registry = this.createRegistry(type, loader, false);
+        if (registry instanceof MappedRegistry<?> toFreeze) {
+            toFreeze.freeze();
+        }
+        return registry;
     }
 
     default <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final RegistryLoader<T> loader,

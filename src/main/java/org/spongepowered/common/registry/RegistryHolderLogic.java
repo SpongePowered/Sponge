@@ -206,4 +206,8 @@ public final class RegistryHolderLogic implements RegistryHolder {
         }
         return (Registry<T>) registry;
     }
+
+    public void freezeSpongeRegistries() {
+        this.roots.get(RegistryRoots.SPONGE).freeze();
+    }
 }

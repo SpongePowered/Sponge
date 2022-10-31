@@ -53,6 +53,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
+import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
 import org.spongepowered.common.registry.SpongeRegistries;
@@ -110,14 +111,19 @@ public final class SpongeLifecycle implements Lifecycle {
 
         SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder) this.game);
 
-        this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
-        this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
+
     }
 
     @Override
     public void establishGlobalRegistries(final RegistryAccess.Frozen registryAccess) {
         // TODO check if everything can be moved here
         SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder) this.game, registryAccess);
+
+        final RegistryHolderLogic registryHolderLogic = ((SpongeRegistryHolder) this.game).registryHolder();
+        registryHolderLogic.freezeSpongeRegistries();
+
+        this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
+        this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
     }
 
     @Override
