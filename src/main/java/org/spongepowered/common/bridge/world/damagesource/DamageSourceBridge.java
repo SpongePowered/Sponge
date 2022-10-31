@@ -40,11 +40,5 @@ public interface DamageSourceBridge {
 
     void bridge$setHotFloorSource();
 
-    void bridge$setFallingBlockSource();
-
-    void bridge$setAnvilSource();
-
-    void bridge$setFallingStalactite();
-
     void bridge$setCactusSource();
 }

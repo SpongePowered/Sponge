@@ -191,7 +191,7 @@ public final class SpongeTabList implements TabList {
         final ClientboundPlayerInfoUpdatePacket packet = new ClientboundPlayerInfoUpdatePacket(actions, List.of());
         final ClientboundPlayerInfoUpdatePacket.Entry data = new ClientboundPlayerInfoUpdatePacket.Entry(entry.profile().uniqueId(), SpongeGameProfile.toMcProfile(entry.profile()),
             true, entry.latency(), (GameType) (Object) entry.gameMode(),
-            entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null, RemoteChatSession.Data.UNVERIFIED /* ((SpongeTabListEntry)entry).profilePublicKey()*/); // TODO: pass through proper key
+            entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null, null /* ((SpongeTabListEntry)entry).profilePublicKey()*/); // TODO: pass through proper key
         ((ClientboundPlayerInfoUpdatePacketAccessor) packet).accessor$entries(List.of(data));
         this.player.connection.send(packet);
     }

@@ -52,11 +52,14 @@ public abstract class TitleScreenMixin_Vanilla extends Screen {
             .findFirst();
         realmsButton.ifPresent(b -> {
             b.setWidth(98);
-            b.x = this.width / 2 + 2;
+            b.setX(this.width / 2 + 2);
         });
 
         // Plugins Button
-        this.addRenderableWidget(new Button(this.width / 2 - 100, realmsButton.map(b -> b.y).orElse(0), 98, 20, Component.literal("Plugins"),
-            b -> this.minecraft.setScreen(new PluginScreen(this))));
+        this.addRenderableWidget(Button.builder(Component.literal("Plugins"),
+                        b -> this.minecraft.setScreen(new PluginScreen(this)))
+                .pos(this.width / 2 - 100, realmsButton.map(b -> b.getY()).orElse(0))
+                .size(98, 20)
+                .build());
     }
 }

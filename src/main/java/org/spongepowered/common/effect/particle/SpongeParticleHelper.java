@@ -134,7 +134,7 @@ public final class SpongeParticleHelper {
             // This particle type supports a color option.
             final Color color = effect.optionOrDefault(ParticleOptions.COLOR).get();
             final double scale = effect.optionOrDefault(ParticleOptions.SCALE).get();
-            final DustParticleOptions particleData = new DustParticleOptions(new com.mojang.math.Vector3f(
+            final DustParticleOptions particleData = new DustParticleOptions(new org.joml.Vector3f(
                 (float) color.red() / 255,
                 (float) color.green() / 255,
                 (float) color.blue() / 255),

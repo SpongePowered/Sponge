@@ -55,7 +55,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     private final BiConsumer<CauseStackManager.StackFrame, ExplosionContext> EXPLOSION_MODIFIER =
         super.getFrameModifier().andThen((frame, context) -> {
             final Explosion explosion = context.getExplosion();
-            final @Nullable LivingEntity placedBy = explosion.getSourceMob();
+            final @Nullable LivingEntity placedBy = explosion.getIndirectSourceEntity();
             if (placedBy != null) {
                 if (placedBy instanceof CreatorTrackedBridge) {
                     ((CreatorTrackedBridge) placedBy).tracker$getCreatorUUID()

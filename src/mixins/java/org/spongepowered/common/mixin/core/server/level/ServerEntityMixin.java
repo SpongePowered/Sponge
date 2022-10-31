@@ -151,17 +151,18 @@ public abstract class ServerEntityMixin {
         return set;
     }
 
-    @Redirect(method = "sendDirtyEntityData", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket"))
-    private ClientboundSetEntityDataPacket impl$createSpoofedPacket(final int entityId, final SynchedEntityData dataManager, final boolean p_i46917_3_) {
+    @Redirect(method = "sendDirtyEntityData", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/syncher/SynchedEntityData;packDirty()Ljava/util/List;"))
+    private List<SynchedEntityData.DataValue<?>> impl$createSpoofedPacket(final SynchedEntityData entityData) {
         if (!(this.entity instanceof ServerPlayerBridge && ((ServerPlayerBridge) this.entity).bridge$isHealthScaled())) {
-            return new ClientboundSetEntityDataPacket(entityId, dataManager, p_i46917_3_);
+            return entityData.packDirty();
         }
+
         final float scaledHealth = ((ServerPlayerBridge) this.entity).bridge$getInternalScaledHealth();
-        final Float actualHealth = dataManager.get(LivingEntityAccessor.accessor$DATA_HEALTH_ID());
-        dataManager.set(LivingEntityAccessor.accessor$DATA_HEALTH_ID(), scaledHealth);
-        final ClientboundSetEntityDataPacket spoofed = new ClientboundSetEntityDataPacket(entityId, dataManager, p_i46917_3_);
-        dataManager.set(LivingEntityAccessor.accessor$DATA_HEALTH_ID(), actualHealth);
-        return spoofed;
+        final Float actualHealth = entityData.get(LivingEntityAccessor.accessor$DATA_HEALTH_ID());
+        entityData.set(LivingEntityAccessor.accessor$DATA_HEALTH_ID(), scaledHealth);
+        final List<SynchedEntityData.DataValue<?>> packed = entityData.packDirty();
+        entityData.set(LivingEntityAccessor.accessor$DATA_HEALTH_ID(), actualHealth);
+        return packed;
     }
 
 }

@@ -98,8 +98,11 @@ public final class PluginScreen extends Screen {
         this.addRenderableWidget(this.searchField);
 
         // Add the 'Done' button
-        this.addRenderableWidget(new Button(this.width / 2 - 50, this.height - 40, 100, 20, Component.translatable(I18n.get("gui.done")),
-            (p_214323_1_) -> Minecraft.getInstance().setScreen(this.previousScreen)));
+        this.addRenderableWidget(Button.builder(Component.translatable(I18n.get("gui.done")),
+                        b -> Minecraft.getInstance().setScreen(this.previousScreen))
+                .pos(this.width / 2 - 50, this.height - 40)
+                .size(100, 20)
+                .build());
     }
 
     @Override
