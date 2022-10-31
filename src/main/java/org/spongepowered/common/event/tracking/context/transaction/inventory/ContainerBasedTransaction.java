@@ -99,7 +99,9 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
         @Nullable final GameTransaction<@NonNull ?> parent
     ) {
         return Optional.of((context, frame) -> {
-            frame.pushCause(this.menu);
+            if (!frame.currentCause().all().contains(this.menu)) {
+                frame.pushCause(this.menu);
+            }
         });
     }
 
