@@ -62,7 +62,7 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends net.minecra
     }
 
     public void setIndirectSource(final Entity entity) {
-        ((IndirectEntityDamageSourceAccessor) this).accessor$owner(entity);
+        ((IndirectEntityDamageSourceAccessor) this).accessor$cause(entity);
     }
 
 

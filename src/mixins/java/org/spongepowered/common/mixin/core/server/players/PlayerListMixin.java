@@ -151,14 +151,10 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow public abstract MinecraftServer shadow$getServer();
     @Shadow @Nullable public abstract CompoundTag shadow$load(net.minecraft.server.level.ServerPlayer playerIn);
     @Shadow public abstract boolean shadow$canBypassPlayerLimit(com.mojang.authlib.GameProfile param0);
-    @Shadow protected abstract boolean verifyChatTrusted(final PlayerChatMessage $$0);
-    @Shadow public abstract void placeNewPlayer(final Connection $$0, final net.minecraft.server.level.ServerPlayer $$1);
+    @Shadow protected abstract boolean shadow$verifyChatTrusted(final PlayerChatMessage $$0);
     @Shadow protected abstract void shadow$broadcastChatMessage(final PlayerChatMessage $$0, final Predicate<net.minecraft.server.level.ServerPlayer> $$1,
         @Nullable final net.minecraft.server.level.ServerPlayer $$2, final ChatType.Bound $$4);
     // @formatter:on
-
-
-    @Shadow public abstract void broadcastSystemMessage(final net.minecraft.network.chat.Component $$0, final boolean $$1);
 
     private boolean impl$isGameMechanicRespawn = false;
     private boolean impl$isDuringSystemMessageEvent = false;
@@ -636,7 +632,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private void impl$onBroadcastChatMessage(final PlayerChatMessage $$0, final Predicate<net.minecraft.server.level.ServerPlayer> $$1,
             final net.minecraft.server.level.ServerPlayer $$2, final ChatType.Bound $$4) {
 
-        final boolean isTrusted = this.verifyChatTrusted($$0);
+        final boolean isTrusted = this.shadow$verifyChatTrusted($$0);
 
         final Component content = SpongeAdventure.asAdventure($$0.decoratedContent());
         final Component sender = SpongeAdventure.asAdventure($$4.name());

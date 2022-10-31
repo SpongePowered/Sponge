@@ -56,7 +56,7 @@ public final class ChannelTest {
         this.plugin = plugin;
     }
 
-    @Listener
+//    @Listener
     private void onRegisterChannel(final RegisterChannelEvent event) {
         this.channel = event.register(ResourceKey.of("channeltest", "default"), PacketChannel.class);
         this.channel.register(PrintTextPacket.class, 0)
@@ -95,7 +95,7 @@ public final class ChannelTest {
                 });
     }
 
-    @Listener
+//    @Listener
     private void onConnectionHandshake(final ServerSideConnectionEvent.Handshake event) {
         this.plugin.logger().info("Starting handshake phase.");
         final PingPacket pingPacket1 = new PingPacket(123);
@@ -163,12 +163,12 @@ public final class ChannelTest {
                 });
     }
 
-    @Listener
+//    @Listener
     private void onConnectionLogin(final ServerSideConnectionEvent.Login event) {
         this.plugin.logger().info("Player \"" + event.profile().name().orElse("unknown") + "\" is logging in.");
     }
 
-    @Listener
+//    @Listener
     private void onConnectionJoin(final ServerSideConnectionEvent.Join event) {
         this.plugin.logger().info("Player \"" + event.player().name() + "\" joined.");
 

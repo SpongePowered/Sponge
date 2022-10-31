@@ -32,6 +32,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(IndirectEntityDamageSource.class)
 public interface IndirectEntityDamageSourceAccessor {
 
-    @Accessor("owner") void accessor$owner(final Entity owner);
+    @Accessor("cause") void accessor$cause(final Entity cause);
 
 }

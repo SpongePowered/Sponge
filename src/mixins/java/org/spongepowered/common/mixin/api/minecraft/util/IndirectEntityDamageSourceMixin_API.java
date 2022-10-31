@@ -36,12 +36,12 @@ import javax.annotation.Nullable;
 public abstract class IndirectEntityDamageSourceMixin_API extends EntityDamageSourceMixin_API implements IndirectEntityDamageSource {
 
     // @formatter:off
-    @Shadow @Final @Nullable private Entity owner;
+    @Shadow @Final @Nullable private Entity cause;
     // @formatter:on
 
     @Override
     public org.spongepowered.api.entity.Entity indirectSource() {
-        return (org.spongepowered.api.entity.Entity) this.owner;
+        return (org.spongepowered.api.entity.Entity) this.cause;
     }
 
 }

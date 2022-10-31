@@ -150,7 +150,7 @@ public final class SpongeTabList implements TabList {
                     displayName == null ? null : SpongeAdventure.asAdventure(displayName),
                     entry.latency(),
                     (GameMode) (Object) entry.gameMode(),
-                    entry.chatSession().profilePublicKey()
+                    entry.chatSession() == null ? null : entry.chatSession().profilePublicKey()
             ), false);
         }
     }
@@ -189,9 +189,11 @@ public final class SpongeTabList implements TabList {
     @SuppressWarnings("ConstantConditions")
     void sendUpdate(final TabListEntry entry, final EnumSet<ClientboundPlayerInfoUpdatePacket.Action> actions) {
         final ClientboundPlayerInfoUpdatePacket packet = new ClientboundPlayerInfoUpdatePacket(actions, List.of());
+
+        final RemoteChatSession.Data chatSessionData = ((SpongeTabListEntry) entry).profilePublicKey() == null ? null : new RemoteChatSession.Data(entry.profile().uuid(), ((SpongeTabListEntry) entry).profilePublicKey());
+        final net.minecraft.network.chat.Component displayName = entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null;
         final ClientboundPlayerInfoUpdatePacket.Entry data = new ClientboundPlayerInfoUpdatePacket.Entry(entry.profile().uniqueId(), SpongeGameProfile.toMcProfile(entry.profile()),
-            true, entry.latency(), (GameType) (Object) entry.gameMode(),
-            entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null, null /* ((SpongeTabListEntry)entry).profilePublicKey()*/); // TODO: pass through proper key
+            true, entry.latency(), (GameType) (Object) entry.gameMode(), displayName, chatSessionData);
         ((ClientboundPlayerInfoUpdatePacketAccessor) packet).accessor$entries(List.of(data));
         this.player.connection.send(packet);
     }

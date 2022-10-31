@@ -49,7 +49,7 @@ import javax.annotation.Nullable;
 public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSourceMixin {
 
     // @formatter:on
-    @Shadow @Final @Mutable @Nullable private Entity owner;
+    @Shadow @Final @Mutable @Nullable private Entity cause;
 
     @Shadow @Nullable public abstract Entity shadow$getDirectEntity();
     // @formatter:off
@@ -63,10 +63,10 @@ public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSource
             this.impl$creatorUUID = mcEntity instanceof CreatorTrackedBridge
                          ? ((CreatorTrackedBridge) mcEntity).tracker$getCreatorUUID().orElse(null)
                          : null;
-            if (this.owner == null && this.impl$creatorUUID != null) {
+            if (this.cause == null && this.impl$creatorUUID != null) {
                 final ServerPlayer player = SpongeCommon.server().getPlayerList().getPlayer(this.impl$creatorUUID);
                 if (player != null) {
-                    this.owner = player;
+                    this.cause = player;
                 }
             }
         }
