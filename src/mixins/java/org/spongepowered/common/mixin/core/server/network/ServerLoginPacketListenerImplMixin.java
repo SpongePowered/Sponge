@@ -90,7 +90,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
      */
     @Inject(method = "handleAcceptedLogin", cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;", ordinal = 0))
-    public void impl$onHandleAcceptedLogin(final CallbackInfo ci, final ProfilePublicKey playerProfilePublicKey) {
+    public void impl$onHandleAcceptedLogin(final CallbackInfo ci) {
         // TODO fix this
         if (true) {
             return;

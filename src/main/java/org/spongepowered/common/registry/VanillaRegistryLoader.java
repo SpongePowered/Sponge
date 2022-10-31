@@ -29,6 +29,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.core.FrontAndTop;
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.Difficulty;
@@ -181,12 +182,7 @@ final class VanillaRegistryLoader {
             map.put(EquipmentSlot.OFFHAND, "off_hand");
         });
         this.knownName(RegistryTypes.FOX_TYPE, Fox.Type.values(), Fox.Type::getName);
-        this.manualName(RegistryTypes.GAME_MODE, GameType.values(), map -> {
-            map.put(GameType.SURVIVAL, GameType.SURVIVAL.getName());
-            map.put(GameType.CREATIVE, GameType.CREATIVE.getName());
-            map.put(GameType.ADVENTURE, GameType.ADVENTURE.getName());
-            map.put(GameType.SPECTATOR, GameType.SPECTATOR.getName());
-        });
+        this.knownName(RegistryTypes.GAME_MODE, GameType.values(), GameType::getName);
         this.automaticName(RegistryTypes.HAND_PREFERENCE, HumanoidArm.values());
         this.automaticName(RegistryTypes.HAND_TYPE, InteractionHand.values());
         this.automaticSerializedName(RegistryTypes.INSTRUMENT_TYPE, NoteBlockInstrument.values());
@@ -373,7 +369,7 @@ final class VanillaRegistryLoader {
         if (values != byName.size()) {
             throw new IllegalStateException(type.location() + " in " + type.root() + " is has value mismatch: " + values + " / " + byName.size());
         }
-        return this.holder.createRegistry(type, () -> {
+        final Registry<A> registry = this.holder.createRegistry(type, () -> {
             final Map<ResourceKey, A> map = new HashMap<>();
             for (final Map.Entry<I, String> value : byName.entrySet()) {
                 final String rawId = value.getValue();
@@ -387,6 +383,10 @@ final class VanillaRegistryLoader {
             }
             return map;
         }, false);
+        if (registry instanceof MappedRegistry<?> toFreeze) {
+            toFreeze.freeze();
+        }
+        return registry;
     }
 
     @SuppressWarnings("unused")
