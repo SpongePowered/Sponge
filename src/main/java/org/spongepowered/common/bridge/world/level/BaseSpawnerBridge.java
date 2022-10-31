@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.bridge.world.level;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.SpawnData;
+
 public interface BaseSpawnerBridge {
 
     int bridge$getSpawnDelay();
@@ -43,4 +47,6 @@ public interface BaseSpawnerBridge {
     int bridge$getActivatingRangeFromPlayer();
 
     int bridge$getSpawnRange();
+
+    void bridge$setNextSpawnData(Level level, BlockPos blockPos, SpawnData spawnData);
 }

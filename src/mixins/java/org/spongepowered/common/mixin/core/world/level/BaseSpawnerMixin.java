@@ -24,10 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world.level;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.SpawnData;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -46,7 +49,11 @@ public abstract class BaseSpawnerMixin implements BaseSpawnerBridge {
     @Shadow private int maxNearbyEntities;
     @Shadow private int requiredPlayerRange;
     @Shadow private int spawnRange;
+
+    @Shadow protected abstract void shadow$setNextSpawnData(@Nullable final Level $$0, final BlockPos $$1, final SpawnData $$2);
+
     // @formatter:on
+
 
     @Override
     public int bridge$getSpawnDelay() {
@@ -91,6 +98,11 @@ public abstract class BaseSpawnerMixin implements BaseSpawnerBridge {
     @Override
     public int bridge$getSpawnRange() {
         return this.spawnRange;
+    }
+
+    @Override
+    public void bridge$setNextSpawnData(final Level level, final BlockPos blockPos, final SpawnData spawnData) {
+        this.shadow$setNextSpawnData(level, blockPos, spawnData);
     }
 
     @Redirect(method = "isNearPlayer",

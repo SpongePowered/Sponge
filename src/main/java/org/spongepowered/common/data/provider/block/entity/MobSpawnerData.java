@@ -43,6 +43,7 @@ import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.accessor.world.level.BaseSpawnerAccessor;
 import org.spongepowered.common.accessor.world.level.block.entity.SpawnerBlockEntityAccessor;
+import org.spongepowered.common.bridge.world.level.BaseSpawnerBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
@@ -120,7 +121,7 @@ public final class MobSpawnerData {
             compound.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
         }
 
-        entity.getSpawner().setNextSpawnData(entity.getLevel(), entity.getBlockPos(), new SpawnData(compound, Optional.empty()));
+        ((BaseSpawnerBridge) entity.getSpawner()).bridge$setNextSpawnData(entity.getLevel(), entity.getBlockPos(), new SpawnData(compound, Optional.empty()));
     }
 
     private static WeightedTable<EntityArchetype> getEntities(final BaseSpawner logic) {
