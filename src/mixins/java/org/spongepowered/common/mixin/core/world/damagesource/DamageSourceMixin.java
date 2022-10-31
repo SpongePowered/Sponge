@@ -63,10 +63,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     @Shadow @Final @Mutable public static DamageSource IN_FIRE;
     @Shadow @Final @Mutable public static DamageSource LIGHTNING_BOLT;
     @Shadow @Final @Mutable public static DamageSource HOT_FLOOR;
-    @Shadow @Final @Mutable public static DamageSource ANVIL;
-    @Shadow @Final @Mutable public static DamageSource FALLING_BLOCK;
     @Shadow @Final @Mutable public static DamageSource CACTUS;
-    @Shadow @Final @Mutable public static DamageSource FALLING_STALACTITE;
 
     @Shadow @Final public String msgId;
 
@@ -96,7 +93,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
         if (explosion != null) {
             final Entity entity = ((ExplosionAccessor) explosion).accessor$source();
             if (entity != null && !((LevelBridge) ((ExplosionAccessor) explosion).accessor$level()).bridge$isFake()) {
-                if (explosion.getSourceMob() == null && entity instanceof CreatorTrackedBridge) {
+                if (explosion.getIndirectSourceEntity() == null && entity instanceof CreatorTrackedBridge) {
                     // check creator
                     final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) entity;
                     creatorBridge.tracker$getCreatorUUID()
@@ -143,21 +140,6 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
     @Override
     public void bridge$setHotFloorSource() {
         DamageSourceMixin.HOT_FLOOR = (DamageSource) (Object) this;
-    }
-
-    @Override
-    public void bridge$setFallingBlockSource() {
-        DamageSourceMixin.FALLING_BLOCK = (DamageSource) (Object) this;
-    }
-
-    @Override
-    public void bridge$setAnvilSource() {
-        DamageSourceMixin.ANVIL = (DamageSource) (Object) this;
-    }
-
-    @Override
-    public void bridge$setFallingStalactite() {
-        DamageSourceMixin.FALLING_STALACTITE = (DamageSource) (Object) this;
     }
 
     @Override

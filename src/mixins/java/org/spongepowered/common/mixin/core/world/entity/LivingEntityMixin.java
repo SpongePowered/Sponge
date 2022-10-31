@@ -210,8 +210,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStack helmet = this.shadow$getItemBySlot(EquipmentSlot.HEAD);
             // We still sanity check if a mod is calling to damage the entity with an anvil or falling block
             // without using our mixin redirects in EntityFallingBlockMixin.
-            if ((damageSource instanceof FallingBlockDamageSource) || damageSource == DamageSource.ANVIL
-                    || damageSource == DamageSource.FALLING_BLOCK && !helmet.isEmpty()) {
+            if ((damageSource instanceof FallingBlockDamageSource || damageSource.isDamageHelmet()) && !helmet.isEmpty()) {
                 helmet.hurtAndBreak((int) (event.baseDamage() * 4.0F + this.random.nextFloat() * event.baseDamage() * 2.0F),
                         (LivingEntity) (Object) this, (entity) -> entity.broadcastBreakEvent(EquipmentSlot.HEAD)
                 );
