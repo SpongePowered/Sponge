@@ -35,6 +35,7 @@ import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Range;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
+import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.registry.provider.DimensionEffectProvider;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
@@ -87,6 +88,9 @@ public final class WorldTypeData {
                         .get(DimensionTypeAccessor::accessor$ambientLight)
                     .create(Keys.FIXED_TIME)
                         .get(WorldTypeData::fixedTime)
+                .asImmutable(DimensionTypeBridge.class)
+                    .create(Keys.CREATE_DRAGON_FIGHT)
+                        .get(DimensionTypeBridge::bridge$createDragonFight)
         ;
 
     }

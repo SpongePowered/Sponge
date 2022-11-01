@@ -51,6 +51,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.material.Fluid;
@@ -83,6 +84,7 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -99,6 +101,7 @@ import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
+import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
 import org.spongepowered.common.event.ShouldFire;
@@ -137,6 +140,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Shadow @Final private MinecraftServer server;
 
     @Shadow public abstract void levelEvent(@org.jetbrains.annotations.Nullable Player $$0, int $$1, BlockPos $$2, int $$3);
+    @Shadow @Final @Mutable @Nullable private EndDragonFight dragonFight;
+
     // @formatter:on
 
 
@@ -160,6 +165,16 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         this.impl$prevWeather = ((ServerWorld) this).weather();
         ((LevelTicksBridge<?>) this.blockTicks).bridge$setGameTimeSupplier(this.levelData::getGameTime);
         ((LevelTicksBridge<?>) this.fluidTicks).bridge$setGameTimeSupplier(this.levelData::getGameTime);
+
+        final Boolean createDragonFight = ((DimensionTypeBridge) (Object) this.shadow$dimensionType()).bridge$createDragonFight();
+        if (createDragonFight != null) {
+            if (createDragonFight) {
+                final long seed = $$0.getWorldData().worldGenSettings().seed();
+                this.dragonFight = new EndDragonFight((ServerLevel) (Object) this, seed, $$0.getWorldData().endDragonFightData());
+            } else {
+                this.dragonFight = null;
+            }
+        }
     }
 
     @Redirect(method = "getSeed", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/WorldData;worldGenSettings()Lnet/minecraft/world/level/levelgen/WorldGenSettings;"))

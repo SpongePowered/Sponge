@@ -60,6 +60,7 @@ import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
@@ -109,7 +110,7 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
 
     public static final class BuilderImpl extends AbstractDataPackEntryBuilder<WorldType, WorldTypeTemplate, Builder> implements WorldTypeTemplate.Builder {
 
-        private static DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(WorldType.class);
+        private static DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(DimensionType.class);
 
         private DataManipulator.Mutable manipulator = DataManipulator.mutableOf();
 
@@ -124,7 +125,7 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
 
         @Override
         public <V> WorldTypeTemplate.Builder add(final Key<? extends Value<V>> key, final V value) {
-            if (!PROVIDER_LOOKUP.getProvider(key).isSupported(Biome.class)) {
+            if (!PROVIDER_LOOKUP.getProvider(key).isSupported(DimensionType.class)) {
                 throw new IllegalArgumentException(key + " is not supported for world types");
             }
             this.manipulator.set(key, value);
@@ -179,9 +180,10 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
             final boolean hasRaids = this.manipulator.require(Keys.HAS_RAIDS);
             final int monsterSpawnBlockLightLimit = this.manipulator.getOrElse(Keys.SPAWN_LIGHT_LIMIT, 0);
             final Range<Integer> lightRange = this.manipulator.getOrElse(Keys.SPAWN_LIGHT_RANGE, Range.intRange(0, 7));
+            final boolean createDragonFight = this.manipulator.getOrElse(Keys.CREATE_DRAGON_FIGHT, false);
             final UniformInt monsterSpawnLightTest = UniformInt.of(lightRange.min(), lightRange.max());
 
-            // final boolean createDragonFight = this.manipulator.require(Keys.CREATE_DRAGON_FIGHT);
+            final SpongeDimensionTypes.SpongeDataSection spongeData = new SpongeDimensionTypes.SpongeDataSection(createDragonFight);
             try {
 
                 final DimensionType dimensionType =
@@ -193,6 +195,9 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
                                 (ResourceLocation) (Object) effect.key(),
                                 ambientLighting,
                                 new DimensionType.MonsterSettings(piglinSafe, hasRaids, monsterSpawnLightTest, monsterSpawnBlockLightLimit));
+                if ((Object) dimensionType instanceof DimensionTypeBridge bridge) {
+                    bridge.bridge$decorateData(spongeData);
+                }
                 return new SpongeWorldTypeTemplate(this.key, dimensionType, this.pack);
             } catch (IllegalStateException e) { // catch and rethrow minecraft internal exception
                 throw new IllegalStateException(String.format("Template '%s' was not valid!", this.key), e);
