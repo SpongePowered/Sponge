@@ -392,61 +392,67 @@ public final class SpongeRegistryLoaders {
         )));
     }
 
-    private static ArgumentType<?> argumentTypeFromKey(ResourceKey key) {
+    private static ArgumentType<?> argumentTypeFromKey(ResourceKey key, CommandBuildContext ctx) {
         final ArgumentTypeInfo<?,?> argumentTypeInfo = Registry.COMMAND_ARGUMENT_TYPE.get((ResourceLocation) (Object) key);
         if (argumentTypeInfo instanceof SingletonArgumentInfo<?> s) {
-            return s.unpack(null).instantiate(null);
+            return s.unpack(null).instantiate(ctx);
         }
         throw new IllegalArgumentException(key.asString());
     }
 
-    public static RegistryLoader<CommandTreeNodeType<?>> clientCompletionKey() {
-        final Function<ResourceKey, ArgumentType<?>> fn = SpongeRegistryLoaders::argumentTypeFromKey;
+    public static RegistryLoader<CommandTreeNodeType<?>> clientCompletionKey(final RegistryAccess.Frozen registryAccess) {
+        final CommandBuildContext ctx = new CommandBuildContext(registryAccess);
+        final Function<ResourceKey, ArgumentType<?>> fn = k -> SpongeRegistryLoaders.argumentTypeFromKey(k, ctx);
         return RegistryLoader.of(l -> {
-            l.add(CommandTreeNodeTypes.ANGLE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.BLOCK_POS, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            // TODO NPE in fn l.add(CommandTreeNodeTypes.BLOCK_PREDICATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            // TODO NPE in fn l.add(CommandTreeNodeTypes.BLOCK_STATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.BOOL, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.COLOR, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.COLUMN_POS, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.COMPONENT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.DIMENSION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.DOUBLE, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new DoubleArgumentInfo()));
-            l.add(CommandTreeNodeTypes.ENTITY, SpongeEntityCommandTreeNodeType::new);
-            l.add(CommandTreeNodeTypes.ENTITY_ANCHOR, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.ENTITY_SUMMON, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.FLOAT, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new FloatArgumentInfo()));
-            l.add(CommandTreeNodeTypes.FLOAT_RANGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.FUNCTION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.GAME_PROFILE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.DOUBLE, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new DoubleArgumentInfo()));
             l.add(CommandTreeNodeTypes.INTEGER, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new IntegerArgumentInfo()));
-            l.add(CommandTreeNodeTypes.INT_RANGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.ITEM_ENCHANTMENT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            // TODO NPE in fn l.add(CommandTreeNodeTypes.ITEM_PREDICATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.ITEM_SLOT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            // TODO NPE in fn l.add(CommandTreeNodeTypes.ITEM_STACK, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.LONG, k -> SpongeRangeCommandTreeNodeType.createFrom(k, new LongArgumentInfo()));
+            l.add(CommandTreeNodeTypes.STRING, SpongeStringCommandTreeNodeType::new);
+            l.add(CommandTreeNodeTypes.ENTITY, SpongeEntityCommandTreeNodeType::new);
+            l.add(CommandTreeNodeTypes.GAME_PROFILE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.BLOCK_POS, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.COLUMN_POS, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.VEC3, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.VEC2, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.BLOCK_STATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.BLOCK_PREDICATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.ITEM_STACK, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.ITEM_PREDICATE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.COLOR, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.COMPONENT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.MESSAGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.MOB_EFFECT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.NBT_COMPOUND_TAG, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.NBT_PATH, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.NBT_TAG, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.NBT_PATH, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.OBJECTIVE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.OBJECTIVE_CRITERIA, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.OPERATION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.PARTICLE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.RESOURCE_LOCATION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.ANGLE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.ROTATION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.SCORE_HOLDER, k -> new SpongeAmountCommandTreeNodeType(k, ScoreHolderArgument.scoreHolder(), ScoreHolderArgument.scoreHolders()));
             l.add(CommandTreeNodeTypes.SCOREBOARD_SLOT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.STRING, SpongeStringCommandTreeNodeType::new);
+            l.add(CommandTreeNodeTypes.SCORE_HOLDER, k -> new SpongeAmountCommandTreeNodeType(k, ScoreHolderArgument.scoreHolder(), ScoreHolderArgument.scoreHolders()));
             l.add(CommandTreeNodeTypes.SWIZZLE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.TEAM, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.ITEM_SLOT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.RESOURCE_LOCATION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.MOB_EFFECT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.FUNCTION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.ENTITY_ANCHOR, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.INT_RANGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.FLOAT_RANGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.ITEM_ENCHANTMENT, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.ENTITY_SUMMON, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.DIMENSION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.TIME, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+// TODO API           l.add(CommandTreeNodeTypes.RESOURCE_OR_TAG, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+// TODO API           l.add(CommandTreeNodeTypes.RESOURCE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+// TODO API           l.add(CommandTreeNodeTypes.TEMPLATE_MIRROR, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+// TODO API           l.add(CommandTreeNodeTypes.TEMPLATE_ROTATION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.UUID, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.VEC2, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.VEC3, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+
         });
     }
 
