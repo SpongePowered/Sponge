@@ -42,9 +42,14 @@ import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.tag.BlockTypeTags;
 import org.spongepowered.api.util.RandomProvider;
+import org.spongepowered.api.util.Range;
 import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.WorldType;
+import org.spongepowered.api.world.WorldTypeEffects;
+import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.Biome;
@@ -101,9 +106,36 @@ public final class WorldGenTest {
                         .addChild(this.chunkGenTest.chunkGenCmd(), "chunkgen")
                         .addChild(Command.builder().executor(this::createRandomWorld).build(), "createrandomworld", "crw")
                         .addChild(Command.builder().executor(this::world).build(), "world")
+                        .addChild(Command.builder().executor(this::worldType).build(), "worldtype")
                         .build()
                 ,"wgentest")
         ;
+    }
+
+    private CommandResult worldType(final CommandContext commandContext) {
+        final WorldTypeTemplate.Builder builder = WorldTypeTemplate.builder()
+                .add(Keys.WORLD_TYPE_EFFECT, WorldTypeEffects.OVERWORLD)
+                .add(Keys.SCORCHING, true)
+                .add(Keys.NATURAL_WORLD_TYPE, false)
+                .add(Keys.COORDINATE_MULTIPLIER, 128d)
+                .add(Keys.HAS_SKYLIGHT, false)
+                .add(Keys.HAS_CEILING, false)
+                .add(Keys.PIGLIN_SAFE, true)
+                .add(Keys.BEDS_USABLE, false)
+                .add(Keys.RESPAWN_ANCHOR_USABLE, false)
+                .add(Keys.INFINIBURN, BlockTypeTags.WOOL)
+                .add(Keys.WORLD_FLOOR, 0)
+                .add(Keys.HAS_RAIDS, false)
+                .add(Keys.WORLD_HEIGHT, 2000)
+                .add(Keys.WORLD_LOGICAL_HEIGHT, 2000)
+                .add(Keys.SPAWN_LIGHT_LIMIT, 5)
+                .add(Keys.SPAWN_LIGHT_RANGE, Range.intRange(5, 10))
+                .add(Keys.AMBIENT_LIGHTING, 0.5f)
+                .add(Keys.CREATE_DRAGON_FIGHT, true)
+                .key(ResourceKey.of(this.plugin, "customworldtype"));
+        final WorldTypeTemplate template = builder.build();
+        Sponge.server().dataPackManager().save(template);
+        return CommandResult.success();
     }
 
     private CommandResult world(CommandContext commandContext) {
@@ -213,10 +245,11 @@ public final class WorldGenTest {
         ).toList();
 
         final MultiNoiseBiomeConfig biomeCfg = MultiNoiseBiomeConfig.builder().addBiomes(attributedBiomes).build();
+        final Optional<WorldType> customworldtype = WorldTypes.registry().findValue(ResourceKey.of(this.plugin, "customworldtype"));
         final WorldTemplate customTemplate = WorldTemplate.builder()
                 .from(WorldTemplate.overworld())
                 .key(worldKey)
-                .add(Keys.WORLD_TYPE, WorldTypes.OVERWORLD.get())
+                .add(Keys.WORLD_TYPE, customworldtype.orElse(WorldTypes.OVERWORLD.get()))
                 .add(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.NONE)
                 .add(Keys.IS_LOAD_ON_STARTUP, false)
                 .add(Keys.PERFORM_SPAWN_LOGIC, true)

@@ -32,4 +32,6 @@ public interface DimensionTypeBridge {
     DimensionType bridge$decorateData(SpongeDimensionTypes.SpongeDataSection data);
 
     SpongeDimensionTypes.SpongeDataSection bridge$createData();
+
+    Boolean bridge$createDragonFight();
 }

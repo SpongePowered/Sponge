@@ -44,7 +44,7 @@ public abstract class CombineMapsCodec<A, B> extends MapCodec<A> {
     private final BiFunction<A, B, A> decodeAction;
     private final Function<A, B> encodeAction;
 
-    public <T> CombineMapsCodec(final Codec<A> first, final Codec<B> second, final BiFunction<A, B, A> decodeAction, Function<A, B> encodeAction) {
+    public CombineMapsCodec(final Codec<A> first, final Codec<B> second, final BiFunction<A, B, A> decodeAction, Function<A, B> encodeAction) {
         this.first = ((MapCodecCodec<A>) first).codec();
         this.second = second;
         this.decodeAction = decodeAction;

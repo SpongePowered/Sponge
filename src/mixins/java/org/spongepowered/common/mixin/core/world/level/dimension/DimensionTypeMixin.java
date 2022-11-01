@@ -24,11 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.world.level.dimension;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.world.server.SpongeDimensionTypes;
 
@@ -39,6 +44,8 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
 
     // @formatter:off
     // @formatter:on
+
+    @Nullable private Boolean impl$createDragonFight;
 
     /**
      * @author zidane
@@ -52,14 +59,22 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
 
     @Override
     public DimensionType bridge$decorateData(final SpongeDimensionTypes.SpongeDataSection data) {
-//        this.createDragonFight = data.createDragonFight();
-        // TODO how to dragonfight in 1.19?
+        this.impl$createDragonFight = data.createDragonFight();
         return (DimensionType) (Object) this;
     }
 
     @Override
     public SpongeDimensionTypes.SpongeDataSection bridge$createData() {
-        return new SpongeDimensionTypes.SpongeDataSection(false);
+        return new SpongeDimensionTypes.SpongeDataSection(this.impl$createDragonFight != null && this.impl$createDragonFight);
     }
 
+    @Override
+    public Boolean bridge$createDragonFight() {
+        return this.impl$createDragonFight;
+    }
+
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ExtraCodecs;catchDecoderException(Lcom/mojang/serialization/Codec;)Lcom/mojang/serialization/Codec;"))
+    private static Codec<DimensionType> impl$onWrapCodec(final Codec<DimensionType> codec) {
+        return ExtraCodecs.catchDecoderException(SpongeDimensionTypes.injectCodec(codec));
+    }
 }
