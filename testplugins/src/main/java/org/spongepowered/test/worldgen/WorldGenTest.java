@@ -34,6 +34,7 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -92,6 +93,7 @@ public final class WorldGenTest {
 
     @Listener
     private void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+        final Parameter.Value<String> stringParam = Parameter.string().key("string").build();
         event.register(this.plugin,
                 Command.builder()
                         .addChild(this.featureTest.featureCmd(), "feature")
@@ -106,10 +108,24 @@ public final class WorldGenTest {
                         .addChild(this.chunkGenTest.chunkGenCmd(), "chunkgen")
                         .addChild(Command.builder().executor(this::createRandomWorld).build(), "createrandomworld", "crw")
                         .addChild(Command.builder().executor(this::world).build(), "world")
+                        .addChild(Command.builder().addParameter(stringParam).executor(commandContext -> this.seededWorld(commandContext, stringParam)).build(), "seededworld")
                         .addChild(Command.builder().executor(this::worldType).build(), "worldtype")
                         .build()
                 ,"wgentest")
         ;
+    }
+
+    private CommandResult seededWorld(final CommandContext ctx, final Parameter.Value<String> stringParam) {
+        final String seed = ctx.one(stringParam).orElse("random");
+        final WorldTemplate template =
+                WorldTemplate.builder().from(WorldTemplate.overworld()).add(Keys.SEED, (long) seed.hashCode())
+                        .key(ResourceKey.of(this.plugin, seed))
+                        .add(Keys.IS_LOAD_ON_STARTUP, false)
+                        .add(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.NONE)
+                        .build();
+        final Optional<ServerPlayer> optPlayer = ctx.cause().first(ServerPlayer.class);
+        Sponge.server().worldManager().loadWorld(template).thenAccept(w -> optPlayer.ifPresent(player -> WorldTest.transportToWorld(player, w)));
+        return CommandResult.success();
     }
 
     private CommandResult worldType(final CommandContext commandContext) {
