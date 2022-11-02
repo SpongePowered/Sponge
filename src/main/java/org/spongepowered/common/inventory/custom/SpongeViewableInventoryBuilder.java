@@ -25,7 +25,9 @@
 package org.spongepowered.common.inventory.custom;
 
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
@@ -44,12 +46,12 @@ import net.minecraft.world.inventory.HopperMenu;
 import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.LecternMenu;
 import net.minecraft.world.inventory.LoomMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.ShulkerBoxMenu;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.SmokerMenu;
 import net.minecraft.world.inventory.StonecutterMenu;
-import net.minecraft.world.item.trading.Merchant;
 import org.apache.commons.lang3.Validate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Carrier;
@@ -59,6 +61,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.LensCreator;
 import org.spongepowered.common.inventory.lens.impl.DefaultEmptyLens;
@@ -101,10 +104,10 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
 
     @Override
     public BuildingStep type(ContainerType type) {
-        Validate.isTrue(SpongeViewableInventoryBuilder.containerTypeInfo.containsKey(type), "Container Type cannot be used for this: " + type);
+        Validate.isTrue(SpongeViewableInventoryBuilder.containerTypeInfo().containsKey(type), "Container Type cannot be used for this: " + type);
         this.type = type;
         this.slotDefinitions = new HashMap<>();
-        this.info = SpongeViewableInventoryBuilder.containerTypeInfo.get(type);
+        this.info = SpongeViewableInventoryBuilder.containerTypeInfo().get(type);
         return this;
     }
 
@@ -255,12 +258,12 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
         }
 
         this.finalProvider = new LensRegistrar.BasicSlotLensProvider(this.info.size);
-        this.finalLens = SpongeViewableInventoryBuilder.containerTypeInfo.get(this.type).lensCreator.createLens(this.finalProvider);
+        this.finalLens = SpongeViewableInventoryBuilder.containerTypeInfo().get(this.type).lensCreator.createLens(this.finalProvider);
         return this;
     }
 
     @Override
-    public ViewableInventory build() {
+    public ViewableInventory.Custom build() {
         if (this.plugin == null) {
             throw new IllegalStateException("Plugin has not been set on this builder!");
         }
@@ -270,12 +273,12 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
             this.finalInventories = Arrays.asList(inventory);
         }
 
-        final ViewableCustomInventory inventory = new ViewableCustomInventory(this.plugin, this.type, SpongeViewableInventoryBuilder.containerTypeInfo
+        final ViewableCustomInventory inventory = new ViewableCustomInventory(this.plugin, this.type, SpongeViewableInventoryBuilder.containerTypeInfo()
                 .get(this.type), this.info.size, this.finalLens, this.finalProvider, this.finalInventories, this.identity, this.carrier);
         if (this.slotDefinitions.isEmpty()) {
             inventory.vanilla();
         }
-        return ((ViewableInventory) inventory);
+        return ((ViewableInventory.Custom) inventory);
     }
 
     public ViewableInventory.Builder reset() {
@@ -309,81 +312,75 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
         }
     }
 
-    private static Map<ContainerType, ContainerTypeInfo> containerTypeInfo = new HashMap<>();
+    private static Map<ContainerType, ContainerTypeInfo> containerTypeInfo;
 
-    static
-    {
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_3X3.get(),
-                ContainerTypeInfo.ofGrid(3, 3,
-                        (id, i, p, vi) -> new DispenserMenu(id, i, vi)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X1.get(),
-                ContainerTypeInfo.ofGrid(9, 1,
-                        (id, i, p, vi) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x1, id, i, vi, 1)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X2.get(),
-                ContainerTypeInfo.ofGrid(9, 2,
-                        (id, i, p, vi) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x2, id, i, vi, 2)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X3.get(),
-                ContainerTypeInfo.ofGrid(9, 3,
-                        (id, i, p, vi) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x3, id, i, vi, 3)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X4.get(),
-                ContainerTypeInfo.ofGrid(9, 4,
-                        (id, i, p, vi) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x4, id, i, vi, 4)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X5.get(),
-                ContainerTypeInfo.ofGrid(9, 5,
-                        (id, i, p, vi) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x5, id, i, vi, 5)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X6.get(),
-                ContainerTypeInfo.ofGrid(9, 6,
-                        (id, i, p, vi) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x6, id, i, vi, 6)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.HOPPER.get(),
-                ContainerTypeInfo.ofGrid(5, 1,
-                        (id, i, p, vi) -> new HopperMenu(id, i, vi)));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.SHULKER_BOX.get(), // Container prevents ShulkerBoxes in Shulkerboxes
-                ContainerTypeInfo.ofGrid(9, 3,
-                        (id, i, p, vi) -> new ShulkerBoxMenu(id, i, vi)));
+    public static void register(final DefaultedRegistryReference<ContainerType> ref, final ContainerTypeInfo info) {
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ref.get(), info);
+    }
+
+
+    public static Map<ContainerType, ContainerTypeInfo> containerTypeInfo() {
+        if (SpongeViewableInventoryBuilder.containerTypeInfo != null) {
+            return SpongeViewableInventoryBuilder.containerTypeInfo;
+        }
+        SpongeViewableInventoryBuilder.containerTypeInfo = new HashMap<>();
+        SpongeViewableInventoryBuilder.register(ContainerTypes.GENERIC_3X3,
+                ContainerTypeInfo.ofGrid(3, 3, (id, i, p, vi) -> new DispenserMenu(id, i, vi)));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.GENERIC_9X1,
+                ContainerTypeInfo.ofGrid(9, 1, (id, i, p, vi) -> new ChestMenu(MenuType.GENERIC_9x1, id, i, vi, 1)));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.GENERIC_9X2,
+                ContainerTypeInfo.ofGrid(9, 2, (id, i, p, vi) -> new ChestMenu(MenuType.GENERIC_9x2, id, i, vi, 2)));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.GENERIC_9X3,
+                ContainerTypeInfo.ofGrid(9, 3, (id, i, p, vi) -> ChestMenu.threeRows(id, i, vi)));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.GENERIC_9X4,
+                ContainerTypeInfo.ofGrid(9, 4, (id, i, p, vi) -> new ChestMenu(MenuType.GENERIC_9x4, id, i, vi, 4)));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.GENERIC_9X5,
+                ContainerTypeInfo.ofGrid(9, 5, (id, i, p, vi) -> new ChestMenu(MenuType.GENERIC_9x5, id, i, vi, 5)));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.GENERIC_9X6,
+                ContainerTypeInfo.ofGrid(9, 6, (id, i, p, vi) -> ChestMenu.sixRows(id, i, vi)));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.HOPPER,
+                ContainerTypeInfo.ofGrid(5, 1, (id, i, p, vi) -> new HopperMenu(id, i, vi)));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.SHULKER_BOX, // Container prevents ShulkerBoxes in Shulkerboxes
+                ContainerTypeInfo.ofGrid(9, 3, (id, i, p, vi) -> new ShulkerBoxMenu(id, i, vi)));
 
         // With IntArray data - data is synced with Container - but not ticked as the TileEntity do that normally
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.BLAST_FURNACE.get(),
-                ContainerTypeInfo.of(FurnaceInventoryLens::new, 3,4,
-                        (id, i, p, vi) -> new BlastFurnaceMenu(id, i, vi, vi.getData())));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.BREWING_STAND.get(),
-                ContainerTypeInfo.of(BrewingStandInventoryLens::new, 5,2,
-                        (id, i, p, vi) -> new BrewingStandMenu(id, i, vi, vi.getData())));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.FURNACE.get(),
-                ContainerTypeInfo.of(FurnaceInventoryLens::new, 3,4,
-                        (id, i, p, vi) -> new FurnaceMenu(id, i, vi, vi.getData())));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.LECTERN.get(),
-                ContainerTypeInfo.of(1, 1,
-                        (id, i, p, vi) -> new LecternMenu(id, vi, vi.getData())));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.SMOKER.get(),
-                ContainerTypeInfo.of(3, 4,
-                        (id, i, p, vi) -> new SmokerMenu(id, i, vi, vi.getData())));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.BLAST_FURNACE,
+                ContainerTypeInfo.of(FurnaceInventoryLens::new, 3,4, (id, i, p, vi) -> new BlastFurnaceMenu(id, i, vi, vi.getData())));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.BREWING_STAND,
+                ContainerTypeInfo.of(BrewingStandInventoryLens::new, 5,2, (id, i, p, vi) -> new BrewingStandMenu(id, i, vi, vi.getData())));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.FURNACE,
+                ContainerTypeInfo.of(FurnaceInventoryLens::new, 3,4, (id, i, p, vi) -> new FurnaceMenu(id, i, vi, vi.getData())));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.LECTERN,
+                ContainerTypeInfo.of(1, 1, (id, i, p, vi) -> new LecternMenu(id, vi, vi.getData())));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.SMOKER,
+                ContainerTypeInfo.of(3, 4, (id, i, p, vi) -> new SmokerMenu(id, i, vi, vi.getData())));
 
         // Containers with internal Inventory
         // TODO how to handle internal Container inventories?
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.ANVIL.get(), // 3 internal slots
-                ContainerTypeInfo.of(0,
-                        (id, i, p, vi) -> new AnvilMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.BEACON.get(), // 1 internal slot
-                ContainerTypeInfo.of( 3,
-                        (id, i, p, vi) -> new BeaconMenu(id, i, vi.getData(), SpongeViewableInventoryBuilder.toPos(p))));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.CARTOGRAPHY_TABLE.get(),  // 2 internal slots
-                ContainerTypeInfo.of( 0,
-                        (id, i, p, vi) -> new CartographyTableMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.CRAFTING.get(), // 3x3+1 10 internal slots
-                ContainerTypeInfo.of( 0,
-                        (id, i, p, vi) -> new CraftingMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.ENCHANTMENT.get(), // 3 internal slot
-                ContainerTypeInfo.of( 0,
-                        (id, i, p, vi) -> new EnchantmentMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GRINDSTONE.get(), // 2 internal slot
-                ContainerTypeInfo.of( 0,
-                        (id, i, p, vi) -> new GrindstoneMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.LOOM.get(), // 3 internal slot
-                ContainerTypeInfo.of( 0,
-                        (id, i, p, vi) -> new LoomMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
-        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.STONECUTTER.get(), // 1 internal slot
-                ContainerTypeInfo.of( 0,
-                        (id, i, p, vi) -> new StonecutterMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.ANVIL, // 3 internal slots
+                ContainerTypeInfo.of(0, (id, i, p, vi) -> new AnvilMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.BEACON, // 1 internal slot
+                ContainerTypeInfo.of( 3, (id, i, p, vi) -> new BeaconMenu(id, i, vi.getData(), SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.CARTOGRAPHY_TABLE,  // 2 internal slots
+                ContainerTypeInfo.of( 0, (id, i, p, vi) -> new CartographyTableMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.CRAFTING, // 3x3+1 10 internal slots
+                ContainerTypeInfo.of( 0, (id, i, p, vi) -> new CraftingMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.ENCHANTMENT, // 3 internal slot
+                ContainerTypeInfo.of( 0, (id, i, p, vi) -> new EnchantmentMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.GRINDSTONE, // 2 internal slot
+                ContainerTypeInfo.of( 0, (id, i, p, vi) -> new GrindstoneMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.LOOM, // 3 internal slot
+                ContainerTypeInfo.of( 0, (id, i, p, vi) -> new LoomMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.register(ContainerTypes.STONECUTTER, // 1 internal slot
+                ContainerTypeInfo.of( 0, (id, i, p, vi) -> new StonecutterMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+
+        SpongeViewableInventoryBuilder.register(ContainerTypes.MERCHANT, ContainerTypeInfo.of(sp -> new DefaultEmptyLens(), 0, 0,
+                (id, i, p, vi) -> {
+                    final Villager merchant = new Villager(EntityType.VILLAGER, p.level);
+                    merchant.setPos(p.position());
+                    merchant.setVillagerData(merchant.getVillagerData().setLevel(5));
+                    return new MerchantMenu(id, i, vi.applyTradeOffers(merchant));
+                }));
 
         // Containers that need additional Info to construct
 
@@ -395,18 +392,7 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
         ContainerTypeInfo.of(0, 0,
                 (id, i, p, vi) -> new HorseInventoryMenu(id, i, vi, horse));
 
-        // TODO ContainerTypes.MERCHANT
-        // IMerchant is used to
-        // create the internal MerchantInventory (3 slots)
-        // create the MerchantResultSlot
-        // used to check if player is customer
-        // trigger sound (casted to Entity when !world().isClientSide) !!!
-        // reset customer on close
-        // when closing and !world().isClientSide drop items back into world !!!
-        // getOffers
-        Merchant merchant = null;
-        ContainerTypeInfo.of(0, 0,
-                (id, i, p, vi) -> new MerchantMenu(id, i, merchant));
+        return SpongeViewableInventoryBuilder.containerTypeInfo;
     }
 
     private static ContainerLevelAccess toPos(Player p) {

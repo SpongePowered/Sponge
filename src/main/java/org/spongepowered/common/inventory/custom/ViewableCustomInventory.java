@@ -29,10 +29,15 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.world.item.trading.Merchant;
+import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.MerchantOffers;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.plugin.PluginContainer;
@@ -43,7 +48,7 @@ import java.util.Set;
 import java.util.UUID;
 
 // TODO how to do ticking for "fake" furnace type inventories?
-public class ViewableCustomInventory extends CustomInventory implements MenuProvider {
+public class ViewableCustomInventory extends CustomInventory implements MenuProvider, SpongeMutableDataHolder {
 
     private final ContainerType type;
     private final SpongeViewableInventoryBuilder.ContainerTypeInfo info;
@@ -51,6 +56,7 @@ public class ViewableCustomInventory extends CustomInventory implements MenuProv
 
     private final Set<Player> viewers = new HashSet<>();
     private final SimpleContainerData data;
+    @Nullable private List<TradeOffer> tradeOffers;
 
     public ViewableCustomInventory(final PluginContainer plugin, final ContainerType type,
             final SpongeViewableInventoryBuilder.ContainerTypeInfo info, final int size, final Lens lens, final SlotLensProvider provider,
@@ -95,5 +101,21 @@ public class ViewableCustomInventory extends CustomInventory implements MenuProv
     @Override
     public Component getDisplayName() {
         return Component.literal("ViewableCustomInventory");
+    }
+
+    public List<TradeOffer> tradeOffers() {
+        return this.tradeOffers;
+    }
+
+    public Merchant applyTradeOffers(Merchant merchant) {
+        final MerchantOffers offers = merchant.getOffers();
+        if (this.tradeOffers != null) {
+            this.tradeOffers.forEach(offer -> offers.add((MerchantOffer) offer));
+        }
+        return merchant;
+    }
+
+    public void tradeOffers(final List<TradeOffer> tradeOffers) {
+        this.tradeOffers = tradeOffers;
     }
 }
