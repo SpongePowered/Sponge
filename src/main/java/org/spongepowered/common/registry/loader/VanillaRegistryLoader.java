@@ -90,14 +90,10 @@ import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.minecraft.world.ticks.TickPriority;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
-import org.spongepowered.api.advancement.criteria.trigger.Triggers;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
-import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.Registry;
-import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.criteria.Criteria;
@@ -268,64 +264,9 @@ public final class VanillaRegistryLoader {
     }
 
     private static RegistryLoader<Trigger<?>> trigger() {
-        return RegistryLoader.of(l -> {
-            l.add(Triggers.AVOID_VIBRATION, k -> (Trigger) CriteriaTriggers.AVOID_VIBRATION);
-            l.add(Triggers.ALLAY_DROP_ITEM_ON_BLOCK, k -> (Trigger) CriteriaTriggers.ALLAY_DROP_ITEM_ON_BLOCK);
-            l.add(Triggers.BAD_OMEN, k -> (Trigger) CriteriaTriggers.BAD_OMEN);
-            l.add(Triggers.BEE_NEST_DESTROYED, k -> (Trigger) CriteriaTriggers.BEE_NEST_DESTROYED);
-            l.add(Triggers.BRED_ANIMALS, k -> (Trigger) CriteriaTriggers.BRED_ANIMALS);
-            l.add(Triggers.BREWED_POTION, k -> (Trigger) CriteriaTriggers.BREWED_POTION);
-            l.add(Triggers.CHANGED_DIMENSION, k -> (Trigger) CriteriaTriggers.CHANGED_DIMENSION);
-            l.add(Triggers.CHANNELED_LIGHTNING, k -> (Trigger) CriteriaTriggers.CHANNELED_LIGHTNING);
-            l.add(Triggers.CONSTRUCT_BEACON, k -> (Trigger) CriteriaTriggers.CONSTRUCT_BEACON);
-            l.add(Triggers.CONSUME_ITEM, k -> (Trigger) CriteriaTriggers.CONSUME_ITEM);
-            l.add(Triggers.CURED_ZOMBIE_VILLAGER, k -> (Trigger) CriteriaTriggers.CURED_ZOMBIE_VILLAGER);
-            l.add(Triggers.EFFECTS_CHANGED, k -> (Trigger) CriteriaTriggers.EFFECTS_CHANGED);
-            l.add(Triggers.ENCHANTED_ITEM, k -> (Trigger) CriteriaTriggers.ENCHANTED_ITEM);
-            l.add(Triggers.ENTER_BLOCK, k -> (Trigger) CriteriaTriggers.ENTER_BLOCK);
-            l.add(Triggers.ENTITY_HURT_PLAYER, k -> (Trigger) CriteriaTriggers.ENTITY_HURT_PLAYER);
-            l.add(Triggers.ENTITY_KILLED_PLAYER, k -> (Trigger) CriteriaTriggers.ENTITY_KILLED_PLAYER);
-            l.add(Triggers.FILLED_BUCKET, k -> (Trigger) CriteriaTriggers.FILLED_BUCKET);
-            l.add(Triggers.FISHING_ROD_HOOKED, k -> (Trigger) CriteriaTriggers.FISHING_ROD_HOOKED);
-            l.add(Triggers.GENERATE_LOOT, k -> (Trigger) CriteriaTriggers.GENERATE_LOOT);
-            l.add(Triggers.HONEY_BLOCK_SIDE, k -> (Trigger) CriteriaTriggers.HONEY_BLOCK_SLIDE);
-            l.add(Triggers.IMPOSSIBLE, k -> (Trigger) CriteriaTriggers.IMPOSSIBLE);
-            l.add(Triggers.INVENTORY_CHANGED, k -> (Trigger) CriteriaTriggers.INVENTORY_CHANGED);
-            l.add(Triggers.ITEM_DURABILITY_CHANGED, k -> (Trigger) CriteriaTriggers.ITEM_DURABILITY_CHANGED);
-            l.add(Triggers.ITEM_PICKED_UP_BY_ENTITY, k -> (Trigger) CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_ENTITY);
-            l.add(Triggers.ITEM_PICKED_UP_BY_PLAYER, k -> (Trigger) CriteriaTriggers.THROWN_ITEM_PICKED_UP_BY_PLAYER);
-            l.add(Triggers.ITEM_USED_ON_BLOCK, k -> (Trigger) CriteriaTriggers.ITEM_USED_ON_BLOCK);
-            l.add(Triggers.KILLED_BY_CROSSBOW, k -> (Trigger) CriteriaTriggers.KILLED_BY_CROSSBOW);
-            l.add(Triggers.KILL_MOB_NEAR_SCULK_CATALYST, k -> (Trigger) CriteriaTriggers.KILL_MOB_NEAR_SCULK_CATALYST);
-            l.add(Triggers.LEVITATION, k -> (Trigger) CriteriaTriggers.LEVITATION);
-            l.add(Triggers.LIGHTNING_STRIKE, k -> (Trigger) CriteriaTriggers.LIGHTNING_STRIKE);
-            l.add(Triggers.LOCATION, k -> (Trigger) CriteriaTriggers.LOCATION);
-            l.add(Triggers.NETHER_TRAVEL, k -> (Trigger) CriteriaTriggers.NETHER_TRAVEL);
-            l.add(Triggers.PLACED_BLOCK, k -> (Trigger) CriteriaTriggers.PLACED_BLOCK);
-            l.add(Triggers.PLAYER_HURT_ENTITY, k -> (Trigger) CriteriaTriggers.PLAYER_HURT_ENTITY);
-            l.add(Triggers.PLAYER_INTERACTED_WITH_ENTITY, k -> (Trigger) CriteriaTriggers.PLAYER_INTERACTED_WITH_ENTITY);
-            l.add(Triggers.PLAYER_KILLED_ENTITY, k -> (Trigger) CriteriaTriggers.PLAYER_KILLED_ENTITY);
-            l.add(Triggers.RAID_WIN, k -> (Trigger) CriteriaTriggers.RAID_WIN);
-            l.add(Triggers.RIDE_ENTITY_IN_LAVA_TRIGGER, k -> (Trigger) CriteriaTriggers.RIDE_ENTITY_IN_LAVA_TRIGGER);
-            l.add(Triggers.RECIPE_UNLOCKED, k -> (Trigger) CriteriaTriggers.RECIPE_UNLOCKED);
-            l.add(Triggers.SHOT_CROSSBOW, k -> (Trigger) CriteriaTriggers.SHOT_CROSSBOW);
-            l.add(Triggers.SLEPT_IN_BED, k -> (Trigger) CriteriaTriggers.SLEPT_IN_BED);
-            l.add(Triggers.START_RIDING_TRIGGER, k -> (Trigger) CriteriaTriggers.START_RIDING_TRIGGER);
-            l.add(Triggers.SUMMONED_ENTITY, k -> (Trigger) CriteriaTriggers.SUMMONED_ENTITY);
-            l.add(Triggers.TAME_ANIMAL, k -> (Trigger) CriteriaTriggers.TAME_ANIMAL);
-            l.add(Triggers.TARGET_BLOCK_HIT, k -> (Trigger) CriteriaTriggers.TARGET_BLOCK_HIT);
-            l.add(Triggers.TICK, k -> (Trigger) CriteriaTriggers.TICK);
-            l.add(Triggers.USED_ENDER_EYE, k -> (Trigger) CriteriaTriggers.USED_ENDER_EYE);
-            l.add(Triggers.USED_TOTEM, k -> (Trigger) CriteriaTriggers.USED_TOTEM);
-            l.add(Triggers.USING_ITEM, k -> (Trigger) CriteriaTriggers.USING_ITEM);
-            l.add(Triggers.VILLAGER_TRADE, k -> (Trigger) CriteriaTriggers.TRADE);
-            final DefaultedRegistryReference<Trigger<?>> dummyKey =
-                    RegistryKey.of(RegistryTypes.TRIGGER, ResourceKey.sponge("dummy")).asDefaultedReference(Sponge::game);
-            l.add(dummyKey, k -> (Trigger) (Object) SpongeDummyTrigger.DUMMY_TRIGGER);
-            final DefaultedRegistryReference<Trigger<?>> scoreKey =
-                    RegistryKey.of(RegistryTypes.TRIGGER, ResourceKey.sponge("score")).asDefaultedReference(Sponge::game);
-            l.add(scoreKey, k -> (Trigger) (Object) SpongeScoreTrigger.SCORE_TRIGGER);
-        });
+        final var loadMe1 = SpongeDummyTrigger.DUMMY_TRIGGER; // register sponge trigger
+        final var loadMe2 =   SpongeScoreTrigger.SCORE_TRIGGER; // register sponge trigger
+        return RegistryLoader.of(l -> CriteriaTriggers.all().forEach(trigger -> l.add(((ResourceKey) (Object) trigger.getId()), (Trigger<?>) trigger)));
     }
 
     // The following methods are named for clarity above.

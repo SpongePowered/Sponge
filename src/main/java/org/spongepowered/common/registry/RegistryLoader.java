@@ -59,6 +59,13 @@ public final class RegistryLoader<T> extends InitialRegistryData<T> {
         return this;
     }
 
+
+    public RegistryLoader<T> add(final ResourceKey key, final T value) {
+        this.values.put(key, value);
+        return this;
+    }
+
+
     public RegistryLoader<T> add(final int id, final RegistryKey<? extends T> key, final Supplier<? extends T> supplier) {
         return this.add0(id, key, supplier.get());
     }
