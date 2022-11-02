@@ -34,6 +34,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.inventory.custom.CustomInventory;
+import org.spongepowered.common.inventory.custom.ViewableCustomInventory;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 
 public final class InventoryData {
@@ -57,7 +58,12 @@ public final class InventoryData {
                                 return ((CustomInventory) h).getIdentity();
                             }
                             return null;
-                        });
+                        })
+                .asMutable(ViewableCustomInventory.class)
+                    .create(Keys.TRADE_OFFERS)
+                        .get(ViewableCustomInventory::tradeOffers)
+                        .set(ViewableCustomInventory::tradeOffers);
+
     }
     // @formatter:on
 

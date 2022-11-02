@@ -74,7 +74,8 @@
         "impl.world.inventory.PlayerEnderChestContainerMixin_MenuProvider_Inventory",
         "impl.world.inventory.SlotMixin_Fabric_Inventory",
         "impl.world.inventory.SlotMixin_Lens_Inventory",
-        "impl.world.level.block.entity.CampfireBlockEntityMixin_Fabric_Inventory"
+        "impl.world.level.block.entity.CampfireBlockEntityMixin_Fabric_Inventory",
+        "api.inventory.type.ViewableCustomInventoryMixin_API"
     ],
     "injectors": {
         "defaultRequire": 0

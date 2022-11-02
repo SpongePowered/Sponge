@@ -35,6 +35,9 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.data.type.HorseColors;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.living.animal.horse.Horse;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
@@ -67,6 +70,7 @@ import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
+import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.math.vector.Vector2i;
@@ -75,6 +79,7 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Plugin("inventorytest")
@@ -91,7 +96,35 @@ public final class InventoryTest implements LoadableModule {
     public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Command.Builder builder = Command.builder();
         builder.addChild(Command.builder().executor(this::enderchest).build(), "ender");
+        builder.addChild(Command.builder().executor(this::villager).build(), "villager");
+        builder.addChild(Command.builder().executor(this::horse).build(), "horse");
         event.register(this.plugin, builder.build(), "inventorytest");
+    }
+
+    private CommandResult villager(final CommandContext commandContext) {
+        final ServerPlayer player = commandContext.cause().first(ServerPlayer.class).orElse(null);
+        if (player == null) {
+            return CommandResult.error(Component.text("Must be run ingame by a player"));
+        }
+        final ViewableInventory.Custom merchant = ViewableInventory.builder().type(ContainerTypes.MERCHANT).completeStructure().plugin(this.plugin).build();
+        merchant.offer(Keys.TRADE_OFFERS, List.of(TradeOffer.builder()
+                .firstBuyingItem(ItemStack.of(ItemTypes.DIAMOND, 1))
+                .sellingItem(ItemStack.of(ItemTypes.EMERALD)).build()));
+        player.openInventory(merchant);
+        return CommandResult.success();
+    }
+
+    private CommandResult horse(final CommandContext commandContext) {
+        final ServerPlayer player = commandContext.cause().first(ServerPlayer.class).orElse(null);
+        if (player == null) {
+            return CommandResult.error(Component.text("Must be run ingame by a player"));
+        }
+        final Horse horse = player.world().createEntity(EntityTypes.HORSE.get(), player.position());
+        horse.offer(Keys.HORSE_COLOR, HorseColors.BLACK.get());
+        horse.offer(Keys.IS_TAMED, true);
+        player.world().spawnEntity(horse); // TODO can this work without spawning the horse?
+        player.openInventory(horse.inventory());
+        return CommandResult.success();
     }
 
     private CommandResult enderchest(CommandContext commandContext) {

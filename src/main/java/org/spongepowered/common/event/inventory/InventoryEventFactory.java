@@ -234,27 +234,22 @@ public class InventoryEventFactory {
 
         Optional<ViewableInventory> viewable = inventory.asViewable();
         if (viewable.isPresent()) {
-            if (viewable.get() instanceof MenuProvider) {
-                MenuProvider namedContainerProvider = (MenuProvider) viewable.get();
+            if (viewable.get() instanceof MenuProvider namedContainerProvider) {
                 if (displayName != null) {
                     namedContainerProvider = new SimpleMenuProvider(namedContainerProvider, SpongeAdventure.asVanilla(displayName));
                 }
-                player.openMenu(namedContainerProvider);
-            } else if (viewable.get() instanceof CarriedInventory) {
-                Optional carrier = ((CarriedInventory) viewable.get()).carrier();
-                if (carrier.get() instanceof AbstractHorse) {
-                    player.openHorseInventory(((AbstractHorse) carrier.get()), ((Container) viewable.get()));
+                final OptionalInt containerId = player.openMenu(namedContainerProvider);
+                if (containerId.isPresent() && player.containerMenu instanceof MerchantMenu merchantMenu) {
+                    player.sendMerchantOffers(containerId.getAsInt(), merchantMenu.getOffers(), 0, 0, false, false);
                 }
-
-            } else if (viewable.get() instanceof Merchant) {
-                Merchant merchant = (Merchant) viewable.get();
+            } else if (viewable.get() instanceof Merchant merchant) {
                 net.minecraft.network.chat.Component display = null;
                 int level = 0;
-                if (merchant instanceof Villager) {
-                    display = ((Villager) merchant).getDisplayName();
-                    level = ((Villager) merchant).getVillagerData().getLevel();
-                } else if (merchant instanceof WanderingTrader) {
-                    display = ((WanderingTrader) merchant).getDisplayName();
+                if (merchant instanceof Villager villager) {
+                    display = villager.getDisplayName();
+                    level = villager.getVillagerData().getLevel();
+                } else if (merchant instanceof WanderingTrader trader) {
+                    display = trader.getDisplayName();
                     level = 1;
                 }
                 if (displayName != null) {
@@ -266,6 +261,8 @@ public class InventoryEventFactory {
                     player.sendMerchantOffers(containerId.getAsInt(), merchant.getOffers(), level, merchant.getVillagerXp(), merchant.showProgressBar(), merchant.canRestock());
                 }
             }
+        } else if (inventory instanceof CarriedInventory<?> carriedInventory && carriedInventory.carrier().orElse(null) instanceof AbstractHorse horse) {
+            horse.openCustomInventoryScreen(player);
         }
 
         container = player.containerMenu;
