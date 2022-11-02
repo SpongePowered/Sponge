@@ -50,6 +50,8 @@ import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.item.FireworkRocketItem;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.DataPackConfig;
 import org.tinylog.Logger;
 
@@ -194,10 +196,24 @@ public final class GeneratorMain {
                 "CRITERIA"
             ),
             new EnumEntriesValidator<>(
+                 "item",
+                 "FireworkShapes",
+                  FireworkRocketItem.Shape.class,
+                 "getName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
                  "entity",
                  "EntityCategories",
                  MobCategory.class,
                  "getName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "item",
+                 "ItemRarities",
+                 Rarity.class,
+                 "name",
                  "sponge"
             ),
             new EnumEntriesValidator<>(

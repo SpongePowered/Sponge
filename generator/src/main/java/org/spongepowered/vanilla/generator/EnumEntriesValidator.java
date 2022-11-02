@@ -110,7 +110,11 @@ class EnumEntriesValidator<V> implements Generator {
         for (final Object f : map) {
             final String name;
             try {
-                name = (String) f.getClass().getDeclaredMethod(this.keyFunction).invoke(f);
+                if (this.keyFunction.equals("name")) {
+                    name = ((String) Enum.class.getMethod("name").invoke(f)).toLowerCase();
+                } else {
+                    name = (String) f.getClass().getDeclaredMethod(this.keyFunction).invoke(f);
+                }
             } catch (Exception e) {
                 throw new IllegalStateException("Failed to name for enum field in class " + this.clazz.getName(), e);
             }
