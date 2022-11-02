@@ -48,6 +48,7 @@ import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.DataPackConfig;
 import org.tinylog.Logger;
 
@@ -190,6 +191,13 @@ public final class GeneratorMain {
                 "Triggers",
                 CriteriaTriggers.class,
                 "CRITERIA"
+            ),
+            new EnumEntriesValidator<>(
+                 "entity",
+                 "EntityCategories",
+                 MobCategory.class,
+                 "getName",
+                 "sponge"
             ),
             new RegistryEntriesGenerator<>(
                 "data.type",
