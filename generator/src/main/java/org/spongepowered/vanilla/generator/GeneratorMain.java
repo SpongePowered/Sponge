@@ -30,6 +30,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.WildcardTypeName;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.Commands.CommandSelection;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -101,6 +102,7 @@ public final class GeneratorMain {
         boolean failed = false;
         for (final Generator generator : GeneratorMain.generators(context)) {
             try {
+                Logger.info("Generating {}", generator.name());
                 generator.generate(context);
             } catch (final Exception ex) {
                 Logger.error(ex, "An unexpected error occurred while generating {} data", generator.name());
@@ -165,6 +167,12 @@ public final class GeneratorMain {
         // We are starting out by just generating Vanilla registry-backed catalogs
         // Enum-backed (automatically-named) catalogs can be added later as necessary
         return List.of(
+            new MapEntriesValidator<>(
+                "advancement.criteria.trigger",
+                "Triggers",
+                CriteriaTriggers.class,
+                "CRITERIA"
+            ),
             new RegistryEntriesGenerator<>(
                 "data.type",
                 "ArtTypes",
