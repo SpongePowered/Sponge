@@ -53,7 +53,8 @@ public abstract class EndDragonFightMixin_Tracker {
     @Shadow protected abstract EnderDragon shadow$createNewDragon();
     // @formatter:on
 
-    @Redirect(method = "spawnNewGateway(Lnet/minecraft/core/BlockPos;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/feature/ConfiguredFeature;place(Lnet/minecraft/world/level/WorldGenLevel;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/util/RandomSource;Lnet/minecraft/core/BlockPos;)Z"))
+    @Redirect(method = "lambda$spawnNewGateway$1",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/levelgen/feature/ConfiguredFeature;place(Lnet/minecraft/world/level/WorldGenLevel;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/util/RandomSource;Lnet/minecraft/core/BlockPos;)Z"))
     private boolean tracker$switchToFeatureState(final ConfiguredFeature configuredFeature, final WorldGenLevel worldIn, final ChunkGenerator generator,
         final RandomSource rand, final BlockPos pos
     ) {
