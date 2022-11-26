@@ -32,6 +32,7 @@ import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.event.HoverEventSource;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -58,6 +59,7 @@ import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.hooks.PlatformHooks;
@@ -171,7 +173,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
     @Override
     public DataContainer toContainer() {
-        final ResourceKey key = (ResourceKey) (Object) Registry.ITEM.getKey((Item) this.itemStack$type());
+        final ResourceKey key = (ResourceKey) (Object) SpongeCommon.vanillaRegistry(Registries.ITEM).getKey((Item) this.itemStack$type());
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.ItemStack.TYPE, key)
@@ -223,7 +225,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Override
     public @NotNull HoverEvent<HoverEvent.ShowItem> asHoverEvent(@NotNull final UnaryOperator<HoverEvent.ShowItem> op) {
         final HoverEvent.ShowItem event = HoverEvent.ShowItem.of(
-            SpongeAdventure.asAdventure(Registry.ITEM.getKey(this.shadow$getItem())),
+            SpongeAdventure.asAdventure(SpongeCommon.vanillaRegistry(Registries.ITEM).getKey(this.shadow$getItem())),
             this.shadow$getCount(),
             SpongeAdventure.asBinaryTagHolder(this.shadow$getTag())
         );

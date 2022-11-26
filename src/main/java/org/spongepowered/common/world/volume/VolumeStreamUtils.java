@@ -28,7 +28,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
@@ -502,12 +502,7 @@ public final class VolumeStreamUtils {
         final Vector3i size = max.sub(min).add(1, 1 ,1);
         final @MonotonicNonNull ObjectArrayMutableBiomeBuffer backingVolume;
         if (shouldCarbonCopy) {
-            final Registry<Biome> biomeRegistry;
-            if (reader instanceof Level) {
-                biomeRegistry = ((Level) reader).registryAccess().registry(Registry.BIOME_REGISTRY).get();
-            } else {
-                biomeRegistry = BuiltinRegistries.BIOME;
-            }
+            final Registry<Biome> biomeRegistry = reader.registryAccess().registryOrThrow(Registries.BIOME);
             backingVolume = new ObjectArrayMutableBiomeBuffer(min, size, VolumeStreamUtils.nativeToSpongeRegistry(biomeRegistry));
         } else {
             backingVolume = null;

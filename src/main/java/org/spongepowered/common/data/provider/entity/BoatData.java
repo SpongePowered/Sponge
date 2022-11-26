@@ -48,8 +48,8 @@ public final class BoatData {
         registrator
                 .asMutable(Boat.class)
                     .create(Keys.BOAT_TYPE)
-                        .get(h -> ((BoatType) (Object) h.getBoatType()))
-                        .set((h, v) -> h.setType((Boat.Type) (Object) v))
+                        .get(h -> ((BoatType) (Object) h.getVariant()))
+                        .set((h, v) -> h.setVariant((Boat.Type) (Object) v))
                 .asMutable(BoatAccessor.class)
                     .create(Keys.IS_IN_WATER)
                         .get(h -> h.accessor$status() == Boat.Status.IN_WATER)

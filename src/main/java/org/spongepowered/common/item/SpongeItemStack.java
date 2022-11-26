@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -229,7 +230,7 @@ public final class SpongeItemStack  {
             checkNotNull(blockSnapshot, "The snapshot was null!");
             this.reset();
             final BlockType blockType = blockSnapshot.state().type();
-            final ResourceLocation blockTypeKey = Registry.BLOCK.getKey((Block) blockType);
+            final ResourceLocation blockTypeKey = SpongeCommon.vanillaRegistry(Registries.BLOCK).getKey((Block) blockType);
             final Optional<ItemType> itemType = blockType.item();
             this.itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockTypeKey)));
             this.quantity(1);
@@ -257,7 +258,7 @@ public final class SpongeItemStack  {
         public ItemStack.Builder fromBlockState(final BlockState blockState) {
             Objects.requireNonNull(blockState, "blockState");
             final BlockType blockType = blockState.type();
-            final ResourceLocation blockTypeKey = Registry.BLOCK.getKey((Block) blockType);
+            final ResourceLocation blockTypeKey = SpongeCommon.vanillaRegistry(Registries.BLOCK).getKey((Block) blockType);
             this.itemType(blockType.item().orElseThrow(() -> new IllegalArgumentException("Missing valid ItemType for BlockType: " + blockTypeKey)));
             blockState.getValues().forEach(this::add);
             return this;

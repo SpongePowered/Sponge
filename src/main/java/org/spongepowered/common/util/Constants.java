@@ -37,11 +37,13 @@ import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -77,6 +79,7 @@ import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -863,7 +866,7 @@ public final class Constants {
 
         public static final class Parrot {
 
-            public static final Supplier<ParrotType> DEFAULT_TYPE = ParrotTypes.RED_AND_BLUE;
+            public static final Supplier<ParrotType> DEFAULT_TYPE = ParrotTypes.RED_BLUE;
         }
 
         public static final class Player {
@@ -1063,9 +1066,8 @@ public final class Constants {
                 final CompoundTag compound = list.getCompound(i);
                 final short enchantmentId = compound.getShort(Item.ITEM_ENCHANTMENT_ID);
                 final short level = compound.getShort(Item.ITEM_ENCHANTMENT_LEVEL);
-
-                final EnchantmentType enchantmentType =
-                        (EnchantmentType) Registry.ENCHANTMENT.byId(enchantmentId);
+                final Registry<net.minecraft.world.item.enchantment.Enchantment> enchantmentRegistry = SpongeCommon.vanillaRegistry(Registries.ENCHANTMENT);
+                final EnchantmentType enchantmentType = (EnchantmentType) enchantmentRegistry.byId(enchantmentId);
                 if (enchantmentType == null) {
                     continue;
                 }

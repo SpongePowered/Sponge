@@ -44,7 +44,7 @@ public abstract class LargeFireballMixin_API extends FireballMixin_API implement
     @Override
     public void detonate() {
         final boolean flag = this.shadow$getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
-        final Explosion.BlockInteraction mode = flag ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
+        final Explosion.BlockInteraction mode = flag ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.KEEP;
         ((LargeFireballBridge) this).bridge$throwExplosionEventAndExplode(this.shadow$getCommandSenderWorld(), null, this.shadow$getX(),
                 this.shadow$getY(), this.shadow$getZ(), this.explosionPower, flag, mode);
         this.shadow$discard();

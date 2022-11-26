@@ -30,6 +30,7 @@ import com.mojang.serialization.JsonOps;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
@@ -127,7 +128,7 @@ public record SpongeStructureSetTemplate(ResourceKey key, StructureSet represent
 
         @Override
         public Builder add(final Structure structure, final int weight) {
-            final Registry<net.minecraft.world.level.levelgen.structure.Structure> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.STRUCTURE_REGISTRY);
+            final Registry<net.minecraft.world.level.levelgen.structure.Structure> registry = SpongeCommon.vanillaRegistry(Registries.STRUCTURE);
             final var mcStructure = (net.minecraft.world.level.levelgen.structure.Structure) structure;
             Holder<net.minecraft.world.level.levelgen.structure.Structure> holder;
             try {

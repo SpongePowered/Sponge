@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.entity.vehicle;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
+import net.minecraft.world.level.Explosion.BlockInteraction;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.api.event.CauseStackManager;
@@ -142,13 +143,13 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
     )
     @Nullable
     private net.minecraft.world.level.Explosion impl$useSpongeExplosion(final net.minecraft.world.level.Level world, final Entity entityIn,
-        final double xIn, final double yIn, final double zIn, final float explosionRadius, final net.minecraft.world.level.Explosion.BlockInteraction modeIn) {
+        final double xIn, final double yIn, final double zIn, final float explosionRadius, final BlockInteraction modeIn) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(ServerLocation.of((ServerWorld) world, xIn, yIn, zIn))
                 .sourceExplosive((TNTMinecart) this)
                 .radius(this.impl$explosionRadius != null ? this.impl$explosionRadius : explosionRadius)
-                .shouldPlaySmoke(modeIn.ordinal() > net.minecraft.world.level.Explosion.BlockInteraction.NONE.ordinal())
-                .shouldBreakBlocks(modeIn.ordinal() > net.minecraft.world.level.Explosion.BlockInteraction.NONE.ordinal()))
+                .shouldPlaySmoke(modeIn.ordinal() > BlockInteraction.KEEP.ordinal())
+                .shouldBreakBlocks(modeIn.ordinal() > BlockInteraction.KEEP.ordinal()))
                 .orElseGet(() -> {
                             this.impl$detonationCancelled = true;
                             return null;

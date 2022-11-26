@@ -25,7 +25,9 @@
 package org.spongepowered.common.world.teleport;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -33,6 +35,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.state.StateContainer;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.common.TeleportHelperCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
@@ -58,30 +61,31 @@ public final class ConfigTeleportHelperFilter implements TeleportHelperFilter {
     }
 
     private static void updateCacheIfNecessary() {
+        final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
         if (ConfigTeleportHelperFilter.floorBlockTypes == null) {
             final TeleportHelperCategory teleportHelperCat = SpongeConfigs.getCommon().get().teleportHelper;
             ConfigTeleportHelperFilter.floorBlockTypes = teleportHelperCat.unsafeFloorBlocks.stream()
                     .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
-                    .map(x -> (BlockType) Registry.BLOCK.get((ResourceLocation) (Object) x))
+                    .map(x -> (BlockType) blockRegistry.get((ResourceLocation) (Object) x))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             ConfigTeleportHelperFilter.floorBlockStates = teleportHelperCat.unsafeFloorBlocks.stream()
                     .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
-                    .map(x -> Registry.BLOCK.getOptional((ResourceLocation) (Object) x).map(b -> (BlockType) b)
+                    .map(x -> blockRegistry.getOptional((ResourceLocation) (Object) x).map(b -> (BlockType) b)
                             .map(StateContainer::defaultState).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             ConfigTeleportHelperFilter.bodyBlockTypes = teleportHelperCat.unsafeBlockBlocks.stream()
                     .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
-                    .map(x -> (BlockType) Registry.BLOCK.get((ResourceLocation) (Object) x))
+                    .map(x -> (BlockType) blockRegistry.get((ResourceLocation) (Object) x))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             ConfigTeleportHelperFilter.bodyBlockStates = teleportHelperCat.unsafeBlockBlocks.stream()
                     .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
-                    .map(x -> Registry.BLOCK.getOptional((ResourceLocation) (Object) x).map(b -> (BlockType) b)
+                    .map(x -> blockRegistry.getOptional((ResourceLocation) (Object) x).map(b -> (BlockType) b)
                             .map(StateContainer::defaultState).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());

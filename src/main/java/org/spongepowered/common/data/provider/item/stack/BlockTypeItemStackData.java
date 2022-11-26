@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -32,7 +33,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.registry.SpongeRegistries;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NBTCollectors;
 import org.spongepowered.common.util.NBTStreams;
@@ -68,10 +71,11 @@ public final class BlockTypeItemStackData {
         if (list.isEmpty()) {
             return null;
         }
+        final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
         return NBTStreams.toStrings(list)
                 .map(ResourceLocation::tryParse)
                 .filter(Objects::nonNull)
-                .map(key -> (BlockType) Registry.BLOCK.getOptional(key).orElse(null))
+                .map(key -> (BlockType) blockRegistry.getOptional(key).orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
@@ -82,9 +86,10 @@ public final class BlockTypeItemStackData {
             return true;
         }
 
+        final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
         final CompoundTag tag = stack.getOrCreateTag();
         final ListTag list = value.stream()
-                .map(type -> Registry.BLOCK.getKey((Block) type).toString())
+                .map(type -> blockRegistry.getKey((Block) type).toString())
                 .collect(NBTCollectors.toStringTagList());
         tag.put(nbtKey, list);
         return true;

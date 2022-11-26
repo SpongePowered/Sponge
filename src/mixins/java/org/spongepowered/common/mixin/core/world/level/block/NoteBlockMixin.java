@@ -74,9 +74,10 @@ public abstract class NoteBlockMixin extends BlockMixin {
 
         final MappedRegistry<NotePitch> registry =
                 (MappedRegistry<NotePitch>) (Object) Sponge.game().registry(RegistryTypes.NOTE_PITCH);
+        // TODO byStateAbove
         final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBlockEvent(
                 PhaseTracker.getCauseStackManager().currentCause(), (ServerWorld) worldIn, pos,
-                NoteBlockInstrument.byState(state).getSoundEvent(), instrumentType, registry.byId(param), pitch);
+                NoteBlockInstrument.byStateBelow(state).getSoundEvent(), instrumentType, registry.byId(param), pitch);
         if (event.isCancelled()) {
             callbackInfo.setReturnValue(true);
         }

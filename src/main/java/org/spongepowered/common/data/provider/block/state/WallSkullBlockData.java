@@ -25,12 +25,14 @@
 package org.spongepowered.common.data.provider.block.state;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.WallSkullBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.block.AbstractSkullBlockAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
@@ -63,14 +65,15 @@ public final class WallSkullBlockData {
                             }
                             final SkullBlock.Type type = ((AbstractSkullBlockAccessor) block).accessor$type();
                             // Find the ground/wall pair based on the skull type
+                            final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
                             final Pair pair = wallAndGroundPairs.computeIfAbsent(type, type1 -> {
-                                final SkullBlock groundBlock = (SkullBlock) Registry.BLOCK.stream()
+                                final SkullBlock groundBlock = (SkullBlock) blockRegistry.stream()
                                         .filter(b -> b instanceof SkullBlock && ((AbstractSkullBlockAccessor) b).accessor$type() == type)
                                         .findFirst().orElse(null);
                                 if (groundBlock == null) {
                                     return null;
                                 }
-                                final WallSkullBlock wallBlock = (WallSkullBlock) Registry.BLOCK.stream()
+                                final WallSkullBlock wallBlock = (WallSkullBlock) blockRegistry.stream()
                                         .filter(b -> b instanceof WallSkullBlock && ((AbstractSkullBlockAccessor) b).accessor$type() == type)
                                         .findFirst().orElse(null);
                                 if (wallBlock == null) {

@@ -27,6 +27,8 @@ package org.spongepowered.common;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.minecraft.SharedConstants;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -91,6 +93,10 @@ public final class SpongeCommon {
 
     public static MinecraftServer server() {
         return (MinecraftServer) Sponge.server();
+    }
+
+    public static <E> Registry<E> vanillaRegistry(ResourceKey<? extends Registry<? extends E>> key) {
+        return SpongeCommon.server().registryAccess().registryOrThrow(key);
     }
 
     public static ServerScheduler serverScheduler() {

@@ -49,6 +49,7 @@ import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec2Argument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
@@ -59,11 +60,12 @@ import net.minecraft.commands.synchronization.brigadier.IntegerArgumentInfo;
 import net.minecraft.commands.synchronization.brigadier.LongArgumentInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.phys.Vec2;
@@ -106,8 +108,6 @@ import org.spongepowered.api.data.type.MatterType;
 import org.spongepowered.api.data.type.MatterTypes;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
-import org.spongepowered.api.data.type.ParrotType;
-import org.spongepowered.api.data.type.ParrotTypes;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.SkinPart;
@@ -247,8 +247,6 @@ import org.spongepowered.common.data.type.SpongeHorseStyle;
 import org.spongepowered.common.data.type.SpongeLlamaType;
 import org.spongepowered.common.data.type.SpongeMatterType;
 import org.spongepowered.common.data.type.SpongeNotePitch;
-import org.spongepowered.common.data.type.SpongeParrotType;
-import org.spongepowered.common.data.type.SpongeRabbitType;
 import org.spongepowered.common.data.type.SpongeSkinPart;
 import org.spongepowered.common.economy.SpongeAccountDeletionResultType;
 import org.spongepowered.common.economy.SpongeTransactionType;
@@ -393,8 +391,9 @@ public final class SpongeRegistryLoaders {
         )));
     }
 
-    private static ArgumentType<?> argumentTypeFromKey(ResourceKey key, CommandBuildContext ctx) {
-        final ArgumentTypeInfo<?,?> argumentTypeInfo = Registry.COMMAND_ARGUMENT_TYPE.get((ResourceLocation) (Object) key);
+    private static ArgumentType<?> argumentTypeFromKey(ResourceKey key, CommandBuildContext ctx, final RegistryAccess.Frozen registryAccess) {
+
+        final ArgumentTypeInfo<?,?> argumentTypeInfo = registryAccess.registryOrThrow(Registries.COMMAND_ARGUMENT_TYPE).get((ResourceLocation) (Object) key);
         if (argumentTypeInfo instanceof SingletonArgumentInfo<?> s) {
             return s.unpack(null).instantiate(ctx);
         }
@@ -402,9 +401,9 @@ public final class SpongeRegistryLoaders {
     }
 
     public static RegistryLoader<CommandTreeNodeType<?>> clientCompletionKey(final RegistryAccess.Frozen registryAccess) {
-        final CommandBuildContext cbCtx = new CommandBuildContext(registryAccess, FeatureFlagSet.of());
+        final CommandBuildContext cbCtx = CommandBuildContext.configurable(registryAccess, FeatureFlagSet.of());
         // TODO check ArgumentTypeInfos
-        final Function<ResourceKey, ArgumentType<?>> fn = key -> SpongeRegistryLoaders.argumentTypeFromKey(key, cbCtx);
+        final Function<ResourceKey, ArgumentType<?>> fn = key -> SpongeRegistryLoaders.argumentTypeFromKey(key, cbCtx, registryAccess);
         return RegistryLoader.of(l -> {
             l.add(CommandTreeNodeTypes.ANGLE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.BLOCK_POS, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
@@ -724,16 +723,6 @@ public final class SpongeRegistryLoaders {
         });
     }
 
-    public static RegistryLoader<ParrotType> parrotType() {
-        return RegistryLoader.of(l -> {
-            l.add(1, ParrotTypes.BLUE, SpongeParrotType::new);
-            l.add(2, ParrotTypes.GREEN, SpongeParrotType::new);
-            l.add(4, ParrotTypes.GREY, SpongeParrotType::new);
-            l.add(0, ParrotTypes.RED_AND_BLUE, SpongeParrotType::new);
-            l.add(3, ParrotTypes.YELLOW_AND_BLUE, SpongeParrotType::new);
-        });
-    }
-
     public static RegistryLoader<ParticleOption<?>> particleOption() {
         return RegistryLoader.of(l -> {
             l.add(ParticleOptions.BLOCK_STATE, k -> new SpongeParticleOption<>(BlockState.class));
@@ -790,18 +779,6 @@ public final class SpongeRegistryLoaders {
         });
     }
 
-    public static RegistryLoader<RabbitType> rabbitType() {
-        return RegistryLoader.of(l -> {
-            l.add(2, RabbitTypes.BLACK, SpongeRabbitType::new);
-            l.add(3, RabbitTypes.BLACK_AND_WHITE, SpongeRabbitType::new);
-            l.add(0, RabbitTypes.BROWN, SpongeRabbitType::new);
-            l.add(4, RabbitTypes.GOLD, SpongeRabbitType::new);
-            l.add(99, RabbitTypes.KILLER, SpongeRabbitType::new);
-            l.add(5, RabbitTypes.SALT_AND_PEPPER, SpongeRabbitType::new);
-            l.add(1, RabbitTypes.WHITE, SpongeRabbitType::new);
-        });
-    }
-
     public static RegistryLoader<ResolveOperation> resolveOperation() {
         return RegistryLoader.of(l -> {
             l.add(ResolveOperations.CONTEXTUAL_COMPONENTS, SpongeResolveOperation::newContextualComponents);
@@ -811,7 +788,7 @@ public final class SpongeRegistryLoaders {
 
     public static RegistryLoader<SelectorSortAlgorithm> selectorSortAlgorithm() {
         return RegistryLoader.of(l -> {
-            l.add(SelectorSortAlgorithms.ORDER_ARBITRARY, k -> new SpongeSelectorSortAlgorithm(EntitySelectorParser.ORDER_ARBITRARY));
+            l.add(SelectorSortAlgorithms.ORDER_ARBITRARY, k -> new SpongeSelectorSortAlgorithm(EntitySelector.ORDER_ARBITRARY));
             l.add(SelectorSortAlgorithms.ORDER_FURTHEST, k -> new SpongeSelectorSortAlgorithm(EntitySelectorParser.ORDER_FURTHEST));
             l.add(SelectorSortAlgorithms.ORDER_NEAREST, k -> new SpongeSelectorSortAlgorithm(EntitySelectorParser.ORDER_NEAREST));
             l.add(SelectorSortAlgorithms.ORDER_RANDOM, k -> new SpongeSelectorSortAlgorithm(EntitySelectorParser.ORDER_RANDOM));
@@ -902,7 +879,7 @@ public final class SpongeRegistryLoaders {
 
     @SuppressWarnings("ConstantConditions")
     public static RegistryLoader<ValueParameter<?>> valueParameter(final RegistryAccess.Frozen registryAccess) {
-        final CommandBuildContext cbCtx = new CommandBuildContext(registryAccess, FeatureFlagSet.of());
+        final CommandBuildContext cbCtx = CommandBuildContext.simple(registryAccess, FeatureFlagSet.of());
         return RegistryLoader.of(l -> {
             l.add(ResourceKeyedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
             l.add(ResourceKeyedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);
@@ -1111,9 +1088,10 @@ public final class SpongeRegistryLoaders {
         });
     }
 
-    public static RegistryLoader<FlatGeneratorConfig> flatGeneratorConfig() {
+    public static RegistryLoader<FlatGeneratorConfig> flatGeneratorConfig(RegistryAccess registryAccess) {
+        final Registry<FlatLevelGeneratorPreset> registry = registryAccess.registryOrThrow(Registries.FLAT_LEVEL_GENERATOR_PRESET);
         return RegistryLoader.of(l -> {
-            for (final var entry : BuiltinRegistries.FLAT_LEVEL_GENERATOR_PRESET.entrySet()) {
+            for (final var entry : registry.entrySet()) {
                 l.add(RegistryKey.of(RegistryTypes.FLAT_GENERATOR_CONFIG, (ResourceKey) (Object) entry.getKey().location()), () -> (FlatGeneratorConfig) entry.getValue().settings());
             }
         });

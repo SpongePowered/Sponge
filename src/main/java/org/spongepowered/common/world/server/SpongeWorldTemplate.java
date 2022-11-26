@@ -35,6 +35,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
@@ -288,12 +289,12 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
 
         @NotNull
         private static Holder<DimensionType> dimensionTypeHolder(final WorldType worldType) {
-            final Registry<DimensionType> dimensionTypeRegistry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+            final Registry<DimensionType> dimensionTypeRegistry = SpongeCommon.server().registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
             final ResourceLocation key = dimensionTypeRegistry.getKey((DimensionType) (Object) worldType);
             if (key == null) {
                 return Holder.direct((DimensionType) (Object) worldType);
             }
-            return dimensionTypeRegistry.getHolderOrThrow(net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_TYPE_REGISTRY, key));
+            return dimensionTypeRegistry.getHolderOrThrow(net.minecraft.resources.ResourceKey.create(Registries.DIMENSION_TYPE, key));
         }
 
     }

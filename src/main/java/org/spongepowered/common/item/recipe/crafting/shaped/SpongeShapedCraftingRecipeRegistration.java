@@ -28,6 +28,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -37,6 +38,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
@@ -85,7 +87,8 @@ public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistra
     @Override
     public void serializeResult(final JsonObject json) {
         final JsonObject result = new JsonObject();
-        result.addProperty(Constants.Recipe.ITEM, Registry.ITEM.getKey(this.result).toString());
+        final Registry<Item> itemRegistry = SpongeCommon.vanillaRegistry(Registries.ITEM);
+        result.addProperty(Constants.Recipe.ITEM, itemRegistry.getKey(this.result).toString());
         if (this.count > 1) {
             result.addProperty(Constants.Recipe.COUNT, this.count);
         }

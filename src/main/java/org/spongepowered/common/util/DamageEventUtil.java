@@ -26,6 +26,7 @@ package org.spongepowered.common.util;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -60,6 +61,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
@@ -237,7 +239,8 @@ public final class DamageEventUtil {
             final String id = enchantmentCompounds.getCompound(i).getString("id");
             final int enchantmentLevel = enchantmentCompounds.getCompound(i).getInt("lvl");
 
-            final Enchantment enchantment = Registry.ENCHANTMENT.get(new ResourceLocation(id));
+            final Registry<net.minecraft.world.item.enchantment.Enchantment> enchantmentRegistry = SpongeCommon.vanillaRegistry(Registries.ENCHANTMENT);
+            final Enchantment enchantment = enchantmentRegistry.get(new ResourceLocation(id));
             if (enchantment != null) {
                 enchantments.computeIfAbsent(enchantment, k -> new ArrayList<>()).add(enchantmentLevel);
             }

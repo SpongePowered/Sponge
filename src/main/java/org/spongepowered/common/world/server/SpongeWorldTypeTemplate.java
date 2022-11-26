@@ -31,6 +31,7 @@ import com.mojang.serialization.JsonOps;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -136,8 +137,7 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
             this.manipulator = DataManipulator.mutableOf();
             this.key = null;
             this.pack = DataPacks.WORLD_TYPE;
-            final DimensionType defaultOverworld =
-                    SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(BuiltinDimensionTypes.OVERWORLD);
+            final DimensionType defaultOverworld = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).get(BuiltinDimensionTypes.OVERWORLD);
             this.fromValue((WorldType) (Object) defaultOverworld);
             return this;
         }

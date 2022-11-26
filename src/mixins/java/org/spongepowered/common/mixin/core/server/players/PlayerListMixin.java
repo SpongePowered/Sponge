@@ -31,6 +31,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
@@ -637,7 +638,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final Component content = SpongeAdventure.asAdventure($$0.decoratedContent());
         final Component sender = SpongeAdventure.asAdventure($$4.name());
         final Component target = $$4.targetName() == null ? null : SpongeAdventure.asAdventure($$4.targetName());
-        final Registry<ChatType> chatTypeRegistry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.CHAT_TYPE_REGISTRY);
+        final Registry<ChatType> chatTypeRegistry = SpongeCommon.vanillaRegistry(Registries.CHAT_TYPE);
         final var chatType = RegistryTypes.CHAT_TYPE.defaultReferenced((org.spongepowered.api.ResourceKey) (Object) chatTypeRegistry.getKey($$4.chatType()));
 
         final Predicate<net.minecraft.server.level.ServerPlayer> filter;
@@ -653,7 +654,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             if (SpongeCommon.post(event)) {
                 return; // Do nothing when canceled or audience removed
             }
-            boundChatType = ChatType.bind(ResourceKey.create(Registry.CHAT_TYPE_REGISTRY, (ResourceLocation) (Object) event.chatType().location()),
+            boundChatType = ChatType.bind(ResourceKey.create(Registries.CHAT_TYPE, (ResourceLocation) (Object) event.chatType().location()),
                     this.server.registryAccess(), SpongeAdventure.asVanilla(event.sender())).withTargetName(event.target().map(SpongeAdventure::asVanilla).orElse(null));
 
             filter = event.filter().map(f -> $$1.and((Predicate) f)).orElse($$1);

@@ -43,8 +43,8 @@ public final class CallbackRegistry<T> extends MappedRegistry<T> {
     }
 
     @Override
-    public Holder<T> register(final ResourceKey<T> key, final T instance, final Lifecycle lifecycle) {
-        final Holder<T> value = super.register(key, instance, lifecycle);
+    public Holder.Reference<T> register(final ResourceKey<T> key, final T instance, final Lifecycle lifecycle) {
+        final Holder.Reference<T> value = super.register(key, instance, lifecycle);
         if (this.callbackEnabled) {
             this.callback.accept(key, instance);
         }

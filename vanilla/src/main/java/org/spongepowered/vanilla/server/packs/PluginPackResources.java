@@ -59,7 +59,7 @@ public final class PluginPackResources extends AbstractPackResources {
     private final File file;
 
     public PluginPackResources(final String name, final PluginContainer container, final @Nullable Supplier<FileSystem> fileSystem) {
-        super(name);
+        super(name, false);
         this.file = new File("sponge_plugin_pack");
         this.container = container;
         this.metadata = new PackMetadataSection(Component.literal("Plugin Resources"), 6);

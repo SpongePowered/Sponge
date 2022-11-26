@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.world.level.block.BambooBlock;
+import net.minecraft.world.level.block.BambooStalkBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -40,10 +40,10 @@ public final class BambooData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
-                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, BambooBlock.AGE))
-                        .get(h -> h.getValue(BambooBlock.STAGE))
-                        .set((h, v) -> BoundedUtil.setInteger(h, v, BambooBlock.STAGE))
-                        .supports(h -> h.getBlock() instanceof BambooBlock);
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, BambooStalkBlock.AGE))
+                        .get(h -> h.getValue(BambooStalkBlock.STAGE))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, BambooStalkBlock.STAGE))
+                        .supports(h -> h.getBlock() instanceof BambooStalkBlock);
     }
     // @formatter:on
 }

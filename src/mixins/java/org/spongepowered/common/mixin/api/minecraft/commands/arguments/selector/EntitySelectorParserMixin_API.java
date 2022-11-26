@@ -35,6 +35,7 @@ import net.minecraft.advancements.critereon.WrappedMinMaxBounds;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
@@ -59,6 +60,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.advancements.critereon.MinMaxBounds_DoublesAccessor;
 import org.spongepowered.common.accessor.advancements.critereon.MinMaxBounds_IntsAccessor;
 import org.spongepowered.common.bridge.commands.arguments.selector.EntitySelectorParserBridge;
@@ -242,7 +244,8 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
 
     @Override
     public Selector.@NonNull Builder addNotEntityType(final @NonNull EntityType<@NonNull ?> type) {
-        final ResourceKey key = (ResourceKey) (Object) Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) type);
+
+        final ResourceKey key = (ResourceKey) (Object) SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE).getKey((net.minecraft.world.entity.EntityType<?>) type);
         this.api$handle("type", "!" + key.asString());
         return this;
     }
@@ -254,7 +257,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
 
     @Override
     public Selector.@NonNull Builder addEntityType(final @NonNull EntityType<@NonNull ?> type, final boolean inherit) {
-        final ResourceKey key = (ResourceKey) (Object) Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) type);
+        final ResourceKey key = (ResourceKey) (Object) SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE).getKey((net.minecraft.world.entity.EntityType<?>) type);
         this.api$handle("type", String.format("%s%s", inherit ? "#" : "", key.asString()));
         return this;
     }
@@ -400,7 +403,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
 
     @Override
     public Selector.@NonNull Builder reset() {
-        this.order = EntitySelectorParser.ORDER_ARBITRARY;
+        this.order = EntitySelector.ORDER_ARBITRARY;
         this.distance = MinMaxBounds.Doubles.ANY;
         this.level = MinMaxBounds.Ints.ANY;
         this.includesEntities = false;

@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.random.SimpleWeightedRandomList;
@@ -41,6 +42,7 @@ import org.spongepowered.api.util.weighted.TableEntry;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.BaseSpawnerAccessor;
 import org.spongepowered.common.accessor.world.level.block.entity.SpawnerBlockEntityAccessor;
 import org.spongepowered.common.bridge.world.level.BaseSpawnerBridge;
@@ -100,8 +102,8 @@ public final class MobSpawnerData {
         final int weight = 1; //((WeighedRandom_WeighedRandomItemAccessor) logic.accessor$nextSpawnData()).accessor$weight();
 
         final String resourceLocation = logic.accessor$nextSpawnData().entityToSpawn().getString(Constants.Entity.ENTITY_TYPE_ID);
-        final EntityType<?> type =
-                Registry.ENTITY_TYPE.getOptional(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
+        final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
+        final EntityType<?> type = entityTypeRegistry.getOptional(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
         final CompoundTag data = logic.accessor$nextSpawnData().entityToSpawn();
 
@@ -131,8 +133,8 @@ public final class MobSpawnerData {
             final CompoundTag nbt = weightedEntity.getData().entityToSpawn();
 
             final String resourceLocation = nbt.getString(Constants.Entity.ENTITY_TYPE_ID);
-            final EntityType<?> type =
-                    Registry.ENTITY_TYPE.getOptional(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
+            final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
+            final EntityType<?> type = entityTypeRegistry.getOptional(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
             final EntityArchetype archetype = SpongeEntityArchetypeBuilder.pooled()
                     .type(type)

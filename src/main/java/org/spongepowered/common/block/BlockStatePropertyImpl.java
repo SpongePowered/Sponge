@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.block;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -32,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.state.BooleanStateProperty;
 import org.spongepowered.api.state.EnumStateProperty;
 import org.spongepowered.api.state.IntegerStateProperty;
+import org.spongepowered.common.SpongeCommon;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -66,7 +67,8 @@ public final class BlockStatePropertyImpl {
         final Map<String, Property<?>> propertyUsages = new HashMap<>();
         final Map<String, Integer> propertyCount = new HashMap<>();
 
-        for (final Block block : Registry.BLOCK) {
+
+        for (final Block block : SpongeCommon.vanillaRegistry(Registries.BLOCK)) {
             for (final Property<?> property : block.defaultBlockState().getProperties()) {
                 String name = vanillaMap.computeIfAbsent(property, p -> {
                     // attempt to handle non-vanilla properties:

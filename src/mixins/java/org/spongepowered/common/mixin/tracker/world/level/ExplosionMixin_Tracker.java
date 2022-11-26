@@ -86,7 +86,7 @@ public abstract class ExplosionMixin_Tracker {
                 (1.0F + (this.level.random.nextFloat() - this.level.random.nextFloat()) * 0.2F) * 0.7F);
         // Sponge End
 
-        final boolean flag = this.blockInteraction != net.minecraft.world.level.Explosion.BlockInteraction.NONE;
+        final boolean flag = this.blockInteraction != Explosion.BlockInteraction.KEEP;
         if (spawnParticles) {
             if (!(this.radius < 2.0F) && (flag || ((ExplosionBridge) this).bridge$getShouldDamageBlocks())) {
                 // Sponge Start - Use WorldServer methods since we prune the explosion packets

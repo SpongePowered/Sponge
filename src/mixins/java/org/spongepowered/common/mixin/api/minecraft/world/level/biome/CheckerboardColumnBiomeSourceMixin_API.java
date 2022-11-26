@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
 import org.spongepowered.api.ResourceKey;
@@ -55,7 +56,7 @@ public abstract class CheckerboardColumnBiomeSourceMixin_API extends BiomeSource
     @Override
     public CheckerboardBiomeConfig config() {
         if (this.api$config == null) {
-            var biomeRegistry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+            var biomeRegistry = SpongeCommon.vanillaRegistry(Registries.BIOME);
             var biomes = this.allowedBiomes.stream().map(Holder::value)
                     .map(biome -> RegistryTypes.BIOME.referenced((ResourceKey) (Object) biomeRegistry.getKey(biome)))
                     .collect(Collectors.toList());

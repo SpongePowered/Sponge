@@ -61,8 +61,6 @@ public final class PluginScreen extends Screen {
 
     @Override
     protected void init() {
-        Minecraft.getInstance().keyboardHandler.setSendRepeatsToGui(true);
-
         final int listHeight = this.height - 122;
         this.selectionList = new PluginSelectionList(this, 4, 58, 175, listHeight, 26);
         this.contentPanel = new MetadataPanel(this.minecraft, this, this.width - this.selectionList.getWidth() - 12, listHeight, 58,

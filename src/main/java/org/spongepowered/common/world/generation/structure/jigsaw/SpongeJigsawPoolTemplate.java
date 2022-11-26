@@ -28,9 +28,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
+import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import org.spongepowered.api.ResourceKey;
@@ -50,7 +50,6 @@ import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 
 public record SpongeJigsawPoolTemplate(ResourceKey key, StructureTemplatePool representedJigsawPool, DataPack<JigsawPoolTemplate> pack) implements JigsawPoolTemplate {
@@ -91,8 +90,7 @@ public record SpongeJigsawPoolTemplate(ResourceKey key, StructureTemplatePool re
 
     public static final class BuilderImpl extends AbstractDataPackEntryBuilder<JigsawPool, JigsawPoolTemplate, Builder> implements Builder {
 
-        private ResourceLocation name;
-        private ResourceLocation fallback;
+        private Holder<StructureTemplatePool> fallback;
         private List<Pair<StructurePoolElement, Integer>> templates;
 
         public BuilderImpl() {
@@ -107,7 +105,6 @@ public record SpongeJigsawPoolTemplate(ResourceKey key, StructureTemplatePool re
         @Override
         public Builder fromValue(final JigsawPool StructureTemplatePool) {
             var mcPool = (StructureTemplatePool) StructureTemplatePool;
-            this.name = mcPool.getName();
             this.fallback = mcPool.getFallback();
             this.templates = new ArrayList<>(((StructureTemplatePoolAccessor) mcPool).accessor$rawTemplates());
             return this;
@@ -128,19 +125,19 @@ public record SpongeJigsawPoolTemplate(ResourceKey key, StructureTemplatePool re
 
         @Override
         public Builder name(final ResourceKey name) {
-            this.name = (ResourceLocation) (Object) name;
+// TODO            this.name = (ResourceLocation) (Object) name;
             return this;
         }
 
         @Override
         public Builder fallback(final RegistryReference<JigsawPool> fallback) {
-            this.fallback = (ResourceLocation) (Object) fallback.location();
+// TODO            this.fallback = (ResourceLocation) (Object) fallback.location();
             return this;
         }
 
         @Override
         public Builder fallback(final JigsawPoolTemplate fallback) {
-            this.fallback = (ResourceLocation) (Object) fallback.key();
+// TODO            this.fallback = (ResourceLocation) (Object) fallback.key();
             return this;
         }
 
@@ -148,16 +145,16 @@ public record SpongeJigsawPoolTemplate(ResourceKey key, StructureTemplatePool re
         public Builder reset() {
             super.reset();
             this.pack = DataPacks.JIGSAW_POOL;
-            this.name = null;
-            this.fallback = new ResourceLocation("empty");
+            // TODO this.name = null;
+            // TODO this.fallback = new ResourceLocation("empty");
             this.templates = new ArrayList<>();
             return this;
         }
 
         @Override
         protected SpongeJigsawPoolTemplate build0() {
-            Objects.requireNonNull(this.name, "name");
-            return new SpongeJigsawPoolTemplate(this.key, new StructureTemplatePool(this.name, this.fallback, this.templates), this.pack);
+            // TODO Objects.requireNonNull(this.name, "name");
+            return new SpongeJigsawPoolTemplate(this.key, new StructureTemplatePool(this.fallback, this.templates), this.pack);
         }
     }
 }

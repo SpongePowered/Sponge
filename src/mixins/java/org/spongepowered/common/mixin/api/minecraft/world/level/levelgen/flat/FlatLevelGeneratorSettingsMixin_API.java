@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.flat;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import org.spongepowered.api.ResourceKey;
@@ -66,8 +67,7 @@ public abstract class FlatLevelGeneratorSettingsMixin_API implements FlatGenerat
 
     @Override
     public RegistryReference<Biome> biome() {
-        final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
-        return RegistryKey.of(RegistryTypes.BIOME, (ResourceKey) (Object) registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.shadow$getBiome().value())).asReference();
+        return RegistryKey.of(RegistryTypes.BIOME, (ResourceKey) (Object) SpongeCommon.vanillaRegistry(Registries.BIOME).getKey(this.shadow$getBiome().value())).asReference();
     }
 
     @Override

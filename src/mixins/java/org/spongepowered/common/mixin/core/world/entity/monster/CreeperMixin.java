@@ -145,8 +145,8 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
                 .location(ServerLocation.of((ServerWorld) world, x, y, z))
                 .sourceExplosive(((Creeper) this))
                 .radius(strength)
-                .shouldPlaySmoke(mode != BlockInteraction.NONE)
-                .shouldBreakBlocks(mode != BlockInteraction.NONE && ((GrieferBridge) this).bridge$canGrief()))
+                .shouldPlaySmoke(mode != BlockInteraction.KEEP)
+                .shouldBreakBlocks(mode != BlockInteraction.KEEP && ((GrieferBridge) this).bridge$canGrief()))
                 .orElseGet(() -> {
                     this.impl$detonationCancelled = true;
                     return null;

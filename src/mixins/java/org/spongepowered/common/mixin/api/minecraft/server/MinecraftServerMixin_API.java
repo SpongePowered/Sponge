@@ -35,6 +35,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.Services;
@@ -274,7 +275,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
         // TODO check if this is correct
         final WorldGenSettings wgenSettings = new WorldGenSettings(data.worldGenOptions(),
-                new WorldDimensions(this.registryAccess().registryOrThrow(Registry.LEVEL_STEM_REGISTRY)));
+                new WorldDimensions(this.registryAccess().registryOrThrow(Registries.LEVEL_STEM)));
 
         return (WorldGenerationConfig) (Object) wgenSettings;
     }

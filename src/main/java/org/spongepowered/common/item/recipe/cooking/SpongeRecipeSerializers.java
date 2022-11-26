@@ -25,6 +25,7 @@
 package org.spongepowered.common.item.recipe.cooking;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
@@ -33,6 +34,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.recipe.crafting.custom.SpongeSpecialCraftingRecipeRegistration;
 import org.spongepowered.common.item.recipe.crafting.shaped.SpongeShapedCraftingRecipeSerializer;
 import org.spongepowered.common.item.recipe.crafting.shapeless.SpongeShapelessCraftingRecipeSerializer;
@@ -53,10 +55,12 @@ public interface SpongeRecipeSerializers {
     SimpleCraftingRecipeSerializer<?> SPONGE_SPECIAL = register("special", new SimpleCraftingRecipeSerializer<>(SpongeSpecialCraftingRecipeRegistration::get));
 
     static <S extends RecipeSerializer<T>, T extends Recipe<?>> S register(final String spongeName, final S recipeSerializer) {
-        return (S)(Registry.<RecipeSerializer<?>>register(Registry.RECIPE_SERIALIZER, new ResourceLocation("sponge", spongeName).toString(), recipeSerializer));
+        final Registry<RecipeSerializer<?>> recipeSerializerRegistry = SpongeCommon.vanillaRegistry(Registries.RECIPE_SERIALIZER);
+        return (S)(Registry.<RecipeSerializer<?>>register(recipeSerializerRegistry, new ResourceLocation("sponge", spongeName).toString(), recipeSerializer));
     }
 
     static <S extends RecipeSerializer<T>, T extends Recipe<?>> S register(final ResourceLocation resourceLocation, final S recipeSerializer) {
-        return (S)(Registry.<RecipeSerializer<?>>register(Registry.RECIPE_SERIALIZER, resourceLocation.toString(), recipeSerializer));
+        final Registry<RecipeSerializer<?>> recipeSerializerRegistry = SpongeCommon.vanillaRegistry(Registries.RECIPE_SERIALIZER);
+        return (S)(Registry.<RecipeSerializer<?>>register(recipeSerializerRegistry, resourceLocation.toString(), recipeSerializer));
     }
 }

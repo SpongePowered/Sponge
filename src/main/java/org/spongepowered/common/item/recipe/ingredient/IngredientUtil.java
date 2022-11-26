@@ -30,6 +30,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
@@ -66,7 +67,7 @@ public class IngredientUtil {
     }
 
     public static org.spongepowered.api.item.recipe.crafting.@Nullable Ingredient of(ResourceKey tagKey) {
-        final TagKey<Item> key = TagKey.create(Registry.ITEM_REGISTRY, (ResourceLocation) (Object) tagKey);
+        final TagKey<Item> key = TagKey.create(Registries.ITEM, (ResourceLocation) (Object) tagKey);
         return IngredientUtil.fromNative(Ingredient.of(key));
     }
 

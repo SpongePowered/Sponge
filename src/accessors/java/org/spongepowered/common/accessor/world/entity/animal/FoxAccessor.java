@@ -45,8 +45,6 @@ public interface FoxAccessor {
         throw new UntransformedAccessorError();
     }
 
-    @Invoker("setFoxType") void invoker$setFoxType(final Fox.Type foxType);
-
     @Invoker("setFaceplanted") void invoker$setFaceplanted(final boolean faceplanted);
 
     @Invoker("isDefending") boolean invoker$isDefending();

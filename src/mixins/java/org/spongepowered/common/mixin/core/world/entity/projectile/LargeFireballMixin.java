@@ -88,8 +88,8 @@ public abstract class LargeFireballMixin extends AbstractHurtingProjectileMixin 
                     .sourceExplosive(((ExplosiveFireball) this))
                     .radius(strength)
                     .canCauseFire(flaming && griefer)
-                    .shouldPlaySmoke(mode != BlockInteraction.NONE && griefer)
-                    .shouldBreakBlocks(mode != BlockInteraction.NONE && griefer));
+                    .shouldPlaySmoke(mode != BlockInteraction.KEEP && griefer)
+                    .shouldBreakBlocks(mode != BlockInteraction.KEEP && griefer));
 
             return ex.orElse(null);
         }

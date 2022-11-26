@@ -26,6 +26,7 @@ package org.spongepowered.common.item.recipe.smithing;
 
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
@@ -35,6 +36,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
@@ -72,7 +74,8 @@ public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration {
     @Override
     public void serializeResult(JsonObject json) {
         final JsonObject item = new JsonObject();
-        item.addProperty(Constants.Recipe.ITEM, Registry.ITEM.getKey(this.result).toString());
+        final Registry<Item> itemRegistry = SpongeCommon.vanillaRegistry(Registries.ITEM);
+        item.addProperty(Constants.Recipe.ITEM, itemRegistry.getKey(this.result).toString());
         json.add(Constants.Recipe.RESULT, item);
 
         if (this.spongeResult != null) {

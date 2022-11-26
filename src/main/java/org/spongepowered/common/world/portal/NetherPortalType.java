@@ -196,8 +196,7 @@ public final class NetherPortalType extends VanillaPortalType {
                 axis = Direction.Axis.X;
                 vector3d = new net.minecraft.world.phys.Vec3(0.5D, 0.0D, 0.0D);
             }
-            return PortalShape.createPortalInfo(serverWorld, result, axis, vector3d,
-                    entity.getDimensions(entity.getPose()), entity.getDeltaMovement(), entity.getYRot(), entity.getXRot());
+            return PortalShape.createPortalInfo(serverWorld, result, axis, vector3d, entity, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot());
         }
 
     }

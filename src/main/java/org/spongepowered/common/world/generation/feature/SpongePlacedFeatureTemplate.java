@@ -30,6 +30,7 @@ import com.mojang.serialization.JsonOps;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
@@ -125,22 +126,22 @@ public record SpongePlacedFeatureTemplate(ResourceKey key, net.minecraft.world.l
 
         @Override
         public Builder feature(final Feature feature) {
-            final Registry<ConfiguredFeature<?, ?>> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY);
+            final Registry<ConfiguredFeature<?, ?>> registry = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_FEATURE);
             final ResourceLocation key = registry.getKey((ConfiguredFeature<?, ?>) (Object) feature);
             if (key == null) {
                 this.feature = Holder.direct((ConfiguredFeature<?, ?>) (Object) feature);
             } else {
-                this.feature = registry.getHolderOrThrow(net.minecraft.resources.ResourceKey.create(Registry.CONFIGURED_FEATURE_REGISTRY, key));
+                this.feature = registry.getHolderOrThrow(net.minecraft.resources.ResourceKey.create(Registries.CONFIGURED_FEATURE, key));
             }
             return this;
         }
 
         @Override
         public Builder feature(final FeatureTemplate feature) {
-            final Registry<ConfiguredFeature<?, ?>> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.CONFIGURED_FEATURE_REGISTRY);
+            final Registry<ConfiguredFeature<?, ?>> registry = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_FEATURE);
             final net.minecraft.resources.ResourceKey<ConfiguredFeature<?, ?>> key =
-                    net.minecraft.resources.ResourceKey.create(Registry.CONFIGURED_FEATURE_REGISTRY, ((ResourceLocation) (Object) feature.key()));
-            this.feature = Holder.Reference.createStandAlone(registry, key);
+                    net.minecraft.resources.ResourceKey.create(Registries.CONFIGURED_FEATURE, ((ResourceLocation) (Object) feature.key()));
+            this.feature = Holder.Reference.createStandAlone(registry.asLookup(), key);
             return this;
         }
 

@@ -30,6 +30,7 @@ import com.google.inject.Singleton;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
@@ -107,7 +108,7 @@ public final class SpongeLifecycle implements Lifecycle {
     @Override
     public void establishGlobalRegistries() {
         // Need to do this here to prevent classloading Registry too early...
-        ((SpongeRegistryHolder) this.game).setRootMinecraftRegistry((Registry<Registry<?>>) Registry.REGISTRY);
+        ((SpongeRegistryHolder) this.game).setRootMinecraftRegistry((Registry<Registry<?>>) BuiltInRegistries.REGISTRY);
 
         SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder) this.game);
 

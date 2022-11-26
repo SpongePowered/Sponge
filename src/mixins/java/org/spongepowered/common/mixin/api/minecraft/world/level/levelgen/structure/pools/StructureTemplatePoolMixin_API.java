@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.struct
 
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
@@ -49,7 +50,7 @@ public abstract class StructureTemplatePoolMixin_API implements JigsawPool {
 
     @Override
     public JigsawPool fallback() {
-        final Registry<StructureTemplatePool> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
+        final Registry<StructureTemplatePool> registry = SpongeCommon.vanillaRegistry(Registries.TEMPLATE_POOL);
         return (JigsawPool) registry.get(this.fallback);
     }
 

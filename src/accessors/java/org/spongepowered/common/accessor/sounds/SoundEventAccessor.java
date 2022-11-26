@@ -22,9 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.accessor.sounds;
 
-import org.spongepowered.api.data.type.ParrotType;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
 
-public final class SpongeParrotType implements ParrotType {
+@Mixin(SoundEvent.class)
+public interface SoundEventAccessor {
+
+    @Invoker("createVariableRangeEvent")
+    static SoundEvent accessor$createVariableRangeEvent(ResourceLocation $$0) {
+        throw new UntransformedAccessorError();
+    }
+
 }

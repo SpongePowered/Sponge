@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level;
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
@@ -79,6 +80,7 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -304,7 +306,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     public void playSound(final Sound sound, final double x, final double y, final double z) {
         // Check if the event is registered (ie has an integer ID)
         final ResourceLocation soundKey = SpongeAdventure.asVanilla(sound.name());
-        final Optional<SoundEvent> event = Registry.SOUND_EVENT.getOptional(soundKey);
+        final Optional<SoundEvent> event = SpongeCommon.vanillaRegistry(Registries.SOUND_EVENT).getOptional(soundKey);
         final SoundSource soundCategory = SpongeAdventure.asVanilla(sound.source());
         if (event.isPresent()) {
             this.shadow$playSound(null,x, y, z, event.get(), soundCategory, sound.volume(), sound.pitch());

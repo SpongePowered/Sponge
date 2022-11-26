@@ -106,8 +106,8 @@ public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin im
                     .sourceExplosive(((WitherSkull) this))
                     .radius(this.impl$explosionRadius)
                     .canCauseFire(flaming)
-                    .shouldPlaySmoke(mode != BlockInteraction.NONE && griefer)
-                    .shouldBreakBlocks(mode != BlockInteraction.NONE && griefer))
+                    .shouldPlaySmoke(mode != BlockInteraction.KEEP && griefer)
+                    .shouldBreakBlocks(mode != BlockInteraction.KEEP && griefer))
                     .orElse(null);
         }
     }

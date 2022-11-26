@@ -28,6 +28,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
@@ -277,6 +278,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     public DataContainer toContainer() {
         final CompoundTag compound = new CompoundTag();
         this.shadow$saveAsPassenger(compound);
+        final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
         final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
@@ -297,7 +299,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 .set(Queries.POSITION_Y, this.scale().y())
                 .set(Queries.POSITION_Z, this.scale().z())
                 .container()
-                .set(Constants.Entity.TYPE, Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) this.type()))
+                .set(Constants.Entity.TYPE, entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type()))
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
         return container;
     }
@@ -350,7 +352,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public HoverEvent<HoverEvent.ShowEntity> asHoverEvent(final UnaryOperator<HoverEvent.ShowEntity> op) {
-        final ResourceLocation entityTypeKey = Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) this.type());
+        final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
+        final ResourceLocation entityTypeKey = entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type());
         return HoverEvent.showEntity(op.apply(HoverEvent.ShowEntity.of((Key) (Object) entityTypeKey, this.uniqueId(), this.displayName().get())));
     }
 

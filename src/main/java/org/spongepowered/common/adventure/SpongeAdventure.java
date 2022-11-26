@@ -64,6 +64,7 @@ import net.kyori.adventure.util.TriState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -84,6 +85,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.BossEvent;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.adventure.ResolveOperation;
@@ -92,6 +95,7 @@ import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.chat.HoverEvent_ItemStackInfoAccessor;
 import org.spongepowered.common.accessor.network.chat.StyleAccessor;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
@@ -474,16 +478,18 @@ public final class SpongeAdventure {
         } else if (action == net.minecraft.network.chat.HoverEvent.Action.SHOW_ENTITY) {
             final net.minecraft.network.chat.HoverEvent.EntityTooltipInfo value = event.getValue(
                 net.minecraft.network.chat.HoverEvent.Action.SHOW_ENTITY);
+            final Registry<EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
             return HoverEvent.showEntity(
-                SpongeAdventure.asAdventure(Registry.ENTITY_TYPE.getKey(value.type)),
+                SpongeAdventure.asAdventure(entityTypeRegistry.getKey(value.type)),
                 value.id,
                 SpongeAdventure.asAdventure(value.name)
             );
         } else if (action == net.minecraft.network.chat.HoverEvent.Action.SHOW_ITEM) {
             final net.minecraft.network.chat.HoverEvent.ItemStackInfo value = event.getValue(
                 net.minecraft.network.chat.HoverEvent.Action.SHOW_ITEM);
+            final Registry<Item> itemRegistry = SpongeCommon.vanillaRegistry(Registries.ITEM);
             return HoverEvent.showItem(
-                SpongeAdventure.asAdventure(Registry.ITEM.getKey(((HoverEvent_ItemStackInfoAccessor) value).accessor$item())),
+                SpongeAdventure.asAdventure(itemRegistry.getKey(((HoverEvent_ItemStackInfoAccessor) value).accessor$item())),
                 ((HoverEvent_ItemStackInfoAccessor) value).accessor$count(),
                 SpongeAdventure.asBinaryTagHolder(((HoverEvent_ItemStackInfoAccessor) value).accessor$tag())
             );
@@ -510,20 +516,22 @@ public final class SpongeAdventure {
             );
         } else if (action == HoverEvent.Action.SHOW_ENTITY) {
             final HoverEvent.ShowEntity value = (HoverEvent.ShowEntity) event.value();
+            final Registry<EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
             return new net.minecraft.network.chat.HoverEvent(
                 net.minecraft.network.chat.HoverEvent.Action.SHOW_ENTITY,
                 new net.minecraft.network.chat.HoverEvent.EntityTooltipInfo(
-                    Registry.ENTITY_TYPE.get(SpongeAdventure.asVanilla(value.type())),
+                    entityTypeRegistry.get(SpongeAdventure.asVanilla(value.type())),
                     value.id(),
                     SpongeAdventure.asVanillaNullable(value.name())
                 )
             );
         } else if (action == HoverEvent.Action.SHOW_ITEM) {
             final HoverEvent.ShowItem value = (HoverEvent.ShowItem) event.value();
+            final Registry<Item> itemRegistry = SpongeCommon.vanillaRegistry(Registries.ITEM);
             return new net.minecraft.network.chat.HoverEvent(
                 net.minecraft.network.chat.HoverEvent.Action.SHOW_ITEM,
                 HoverEvent_ItemStackInfoAccessor.invoker$new(
-                    Registry.ITEM.get(SpongeAdventure.asVanilla(value.item())),
+                    itemRegistry.get(SpongeAdventure.asVanilla(value.item())),
                     value.count(),
                     SpongeAdventure.asVanillaCompound(value.nbt())
                 )

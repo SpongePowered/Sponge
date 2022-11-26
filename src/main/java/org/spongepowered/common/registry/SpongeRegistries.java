@@ -67,11 +67,9 @@ public final class SpongeRegistries {
         holder.createAndFreezeRegistry(RegistryTypes.OPERATION, SpongeRegistryLoaders.operation());
         holder.createAndFreezeRegistry(RegistryTypes.ORIENTATION, SpongeRegistryLoaders.orientation());
         holder.createAndFreezeRegistry(RegistryTypes.PALETTE_TYPE, SpongeRegistryLoaders.paletteType());
-        holder.createAndFreezeRegistry(RegistryTypes.PARROT_TYPE, SpongeRegistryLoaders.parrotType());
         holder.createAndFreezeRegistry(RegistryTypes.PARTICLE_OPTION, SpongeRegistryLoaders.particleOption());
         holder.createAndFreezeRegistry(RegistryTypes.PORTAL_TYPE, SpongeRegistryLoaders.portalType());
         holder.createAndFreezeRegistry(RegistryTypes.QUERY_TYPE, SpongeRegistryLoaders.queryType());
-        holder.createAndFreezeRegistry(RegistryTypes.RABBIT_TYPE, SpongeRegistryLoaders.rabbitType());
         holder.createAndFreezeRegistry(RegistryTypes.RESOLVE_OPERATION, SpongeRegistryLoaders.resolveOperation());
         holder.createAndFreezeRegistry(RegistryTypes.SELECTOR_TYPE, SpongeRegistryLoaders.selectorType());
         holder.createAndFreezeRegistry(RegistryTypes.SELECTOR_SORT_ALGORITHM, SpongeRegistryLoaders.selectorSortAlgorithm());
@@ -86,7 +84,6 @@ public final class SpongeRegistries {
         holder.createAndFreezeRegistry(RegistryTypes.MAP_DECORATION_ORIENTATION, SpongeRegistryLoaders.mapDecorationOrientation());
         holder.createAndFreezeRegistry(RegistryTypes.MAP_DECORATION_TYPE, SpongeRegistryLoaders.mapDecorationType());
         holder.createAndFreezeRegistry(RegistryTypes.MAP_SHADE, SpongeRegistryLoaders.mapShade());
-        holder.createAndFreezeRegistry(RegistryTypes.FLAT_GENERATOR_CONFIG, SpongeRegistryLoaders.flatGeneratorConfig());
         holder.createAndFreezeRegistry(RegistryTypes.NOISE_CONFIG, SpongeRegistryLoaders.noiseConfig());
     }
 
@@ -94,6 +91,7 @@ public final class SpongeRegistries {
     }
 
     public static void registerGlobalRegistries(final SpongeRegistryHolder holder, final RegistryAccess.Frozen registryAccess) {
+        holder.createAndFreezeRegistry(RegistryTypes.FLAT_GENERATOR_CONFIG, SpongeRegistryLoaders.flatGeneratorConfig(registryAccess));
         holder.createAndFreezeRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, SpongeRegistryLoaders.clientCompletionKey(registryAccess));
         holder.createAndFreezeRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, SpongeRegistryLoaders.valueParameter(registryAccess));
     }

@@ -109,8 +109,9 @@ public final class BlockData {
                                 return MatterTypes.SOLID.get();
                             }
                         })
+                    // TODO state above
                     .create(Keys.REPRESENTED_INSTRUMENT)
-                        .get(h -> (InstrumentType) (Object) NoteBlockInstrument.byState(h));
+                        .get(h -> (InstrumentType) (Object) NoteBlockInstrument.byStateBelow(h));
     }
     // @formatter:on
 }

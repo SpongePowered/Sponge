@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -33,6 +34,7 @@ import net.minecraft.world.item.Items;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.common.util.Constants;
@@ -108,13 +110,15 @@ public final class BookPagesItemStackData {
     private static Enchantment enchantmentFromNbt(final CompoundTag compound) {
         final String enchantmentId = compound.getString(Constants.Item.ITEM_ENCHANTMENT_ID);
         final int level = compound.getInt(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
-        final EnchantmentType enchantment = (EnchantmentType) Registry.ENCHANTMENT.getOptional(ResourceLocation.tryParse(enchantmentId)).orElse(null);
+        final Registry<net.minecraft.world.item.enchantment.Enchantment> enchantmentRegistry = SpongeCommon.vanillaRegistry(Registries.ENCHANTMENT);
+        final EnchantmentType enchantment = (EnchantmentType) enchantmentRegistry.getOptional(ResourceLocation.tryParse(enchantmentId)).orElse(null);
         return enchantment == null ? null : new SpongeEnchantment(enchantment, level);
     }
 
     private static CompoundTag enchantmentToNbt(final Enchantment enchantment) {
         final CompoundTag compound = new CompoundTag();
-        final String enchantmentId = String.valueOf(Registry.ENCHANTMENT.getKey((net.minecraft.world.item.enchantment.Enchantment) enchantment.type()));
+        final Registry<net.minecraft.world.item.enchantment.Enchantment> enchantmentRegistry = SpongeCommon.vanillaRegistry(Registries.ENCHANTMENT);
+        final String enchantmentId = String.valueOf(enchantmentRegistry.getKey((net.minecraft.world.item.enchantment.Enchantment) enchantment.type()));
         compound.putString(Constants.Item.ITEM_ENCHANTMENT_ID, enchantmentId);
         compound.putShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, (short) ((byte) enchantment.level()));
         return compound;

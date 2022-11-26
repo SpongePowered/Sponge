@@ -30,6 +30,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -727,11 +728,12 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             final CrashReport crashreport = CrashReport.forThrowable(throwable, "Exception while updating neighbours");
             final CrashReportCategory crashreportcategory = crashreport.addCategory("Block being updated");
             crashreportcategory.setDetail("Source block type", () -> {
+                final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
                 try {
-                    return String.format("ID #%s (%s // %s)", Registry.BLOCK.getKey(blockIn),
+                    return String.format("ID #%s (%s // %s)", blockRegistry.getKey(blockIn),
                         blockIn.getDescriptionId(), blockIn.getClass().getCanonicalName());
                 } catch (final Throwable var2) {
-                    return "ID #" + Registry.BLOCK.getKey(blockIn);
+                    return "ID #" + blockRegistry.getKey(blockIn);
                 }
             });
             CrashReportCategory.populateBlockDetails(crashreportcategory, (ServerLevel) (Object) this, immutableTarget, targetBlockState);

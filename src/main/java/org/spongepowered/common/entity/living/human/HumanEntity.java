@@ -29,6 +29,8 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.RemoteChatSession;
@@ -95,9 +97,9 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 public final class HumanEntity extends PathfinderMob implements TeamMember, RangedAttackMob {
-    public static final ResourceKey<EntityType<?>> KEY = ResourceKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation("sponge", "human"));
-    // TODO registry is already frozen
-    public static final EntityType<HumanEntity> TYPE = Registry.register(Registry.ENTITY_TYPE, HumanEntity.KEY,
+    public static final ResourceKey<EntityType<?>> KEY = ResourceKey.create(Registries.ENTITY_TYPE, new ResourceLocation("sponge", "human"));
+
+    public static final EntityType<HumanEntity> TYPE = Registry.register(BuiltInRegistries.ENTITY_TYPE, HumanEntity.KEY,
         EntityType.Builder.of(HumanEntity::new, MobCategory.MISC)
             .noSave()
             .clientTrackingRange(Constants.Entity.Player.TRACKING_RANGE)

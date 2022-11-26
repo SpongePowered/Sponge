@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.dimension;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -53,7 +54,7 @@ public abstract class DimensionTypeMixin_API implements WorldType, SpongeDataHol
 
     @Nullable
     private ResourceLocation api$location() {
-        final Registry<DimensionType> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY);
+        final Registry<DimensionType> registry = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE);
         return registry.getKey((DimensionType) (Object) this);
     }
 

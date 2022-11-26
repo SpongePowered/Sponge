@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -52,7 +53,7 @@ public abstract class BiomeMixin_API implements Biome, SpongeDataHolder {
 
     @Override
     public boolean is(final Tag<Biome> tag) {
-        final Registry<net.minecraft.world.level.biome.Biome> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+        final Registry<net.minecraft.world.level.biome.Biome> registry = SpongeCommon.vanillaRegistry(Registries.BIOME);
         final Holder.Reference<net.minecraft.world.level.biome.Biome> holder = registry.createIntrusiveHolder((net.minecraft.world.level.biome.Biome) (Object) this);
         return holder.is(((TagKey<net.minecraft.world.level.biome.Biome>) (Object) tag));
     }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.map;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.apache.logging.log4j.LogManager;
@@ -54,7 +54,7 @@ public final class MapInfoData {
 						((MapItemSavedDataBridge)mapData).bridge$updateWholeMap();
 					})
 				.create(Keys.MAP_LOCATION)
-					.get(mapData -> Vector2i.from(mapData.x, mapData.z))
+					.get(mapData -> Vector2i.from(mapData.centerX, mapData.centerZ))
 					.set((mapData, vector2i) -> {
 						((MapItemSavedDataBridge) mapData).bridge$setOrigin(vector2i.x(), vector2i.y(), mapData.scale);
 						mapData.setDirty();
@@ -69,7 +69,7 @@ public final class MapInfoData {
 					.get(mapData -> (int) mapData.scale)
 					.set((mapData, scale) -> {
 						((MapItemSavedDataAccessor) mapData).accessor$scale(scale.byteValue());
-						((MapItemSavedDataBridge) mapData).bridge$setOrigin(mapData.x, mapData.z, mapData.scale);
+						((MapItemSavedDataBridge) mapData).bridge$setOrigin(mapData.centerX, mapData.centerZ, mapData.scale);
 						mapData.setDirty();
 					})
 				.create(Keys.MAP_TRACKS_PLAYERS)
@@ -95,7 +95,7 @@ public final class MapInfoData {
 						return (ResourceKey) (Object) mapData.dimension.location();
 					})
 					.set((mapData, key) -> {
-						((MapItemSavedDataAccessor) mapData).accessor$dimension(net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_REGISTRY, (ResourceLocation) (Object) key));
+						((MapItemSavedDataAccessor) mapData).accessor$dimension(net.minecraft.resources.ResourceKey.create(Registries.DIMENSION, (ResourceLocation) (Object) key));
 						mapData.setDirty();
 					})
 			.asMutable(MapItemSavedDataBridge.class)

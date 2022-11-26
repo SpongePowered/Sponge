@@ -144,7 +144,7 @@ public final class EntityPerformingDropsTransaction extends WorldBasedTransactio
     public void restore(PhaseContext<?> context, HarvestEntityEvent event) {
         this.destroyingEntity.getType()
             .spawn(this.worldSupplier.get(),
-                this.entityTag, null, null, this.destroyingEntity.blockPosition(),
+                this.entityTag, null, this.destroyingEntity.blockPosition(),
             MobSpawnType.COMMAND, false, false);
     }
 

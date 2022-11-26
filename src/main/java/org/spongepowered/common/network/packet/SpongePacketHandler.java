@@ -29,6 +29,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
@@ -98,8 +99,7 @@ public final class SpongePacketHandler {
                         return;
                     }
 
-                    final DimensionType dimensionType =
-                            SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(packet.dimensionLogic);
+                    final DimensionType dimensionType = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).get(packet.dimensionLogic);
                     ((LevelBridge) world).bridge$adjustDimensionLogic(dimensionType);
                 }
         );

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.tracker.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -39,6 +40,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
 import org.spongepowered.common.bridge.world.level.block.TrackableBlockBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
@@ -167,7 +169,7 @@ public abstract class BlockMixin_Tracker implements TrackableBlockBridge, Regist
 
     @Override
     public Registry<Block> bridge$trackerRegistryBacking() {
-        return Registry.BLOCK;
+        return SpongeCommon.vanillaRegistry(Registries.BLOCK);
     }
 
     @Override

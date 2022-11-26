@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.persistence.schematic;
 
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.registries.Registries;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -34,6 +34,7 @@ import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.schematic.PaletteTypes;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.schematic.MutableBimapPalette;
 import org.spongepowered.common.world.schematic.SchematicTranslator;
@@ -100,7 +101,7 @@ public final class SchematicUpdater2_to_3 implements DataContentUpdater {
                 .orElseThrow(() -> new InvalidDataException("Missing value for: " + Constants.Sponge.Schematic.LENGTH));
 
             final Set<DataQuery> biomeKeys = palette.keys(false);
-            final Registry<Biome> biomeRegistry = VolumeStreamUtils.nativeToSpongeRegistry(BuiltinRegistries.BIOME);
+            final Registry<Biome> biomeRegistry = VolumeStreamUtils.nativeToSpongeRegistry(SpongeCommon.vanillaRegistry(Registries.BIOME));
             final MutableBimapPalette<Biome, Biome> biomePalette = new MutableBimapPalette<>(
                 PaletteTypes.BIOME_PALETTE.get(),
                 biomeRegistry,

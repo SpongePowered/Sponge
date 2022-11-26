@@ -42,8 +42,8 @@ public final class CatData {
         registrator
                 .asMutable(Cat.class)
                     .create(Keys.CAT_TYPE)
-                        .get(h -> (CatType) (Object) h.getCatVariant())
-                        .set((h, v) -> h.setCatVariant((CatVariant) (Object) v))
+                        .get(h -> (CatType) (Object) h.getVariant())
+                        .set((h, v) -> h.setVariant((CatVariant) (Object) v))
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) h.getCollarColor())
                         .set((h, v) -> h.setCollarColor((net.minecraft.world.item.DyeColor) (Object) v))

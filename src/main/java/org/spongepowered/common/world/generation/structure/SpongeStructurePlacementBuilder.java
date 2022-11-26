@@ -27,6 +27,7 @@ package org.spongepowered.common.world.generation.structure;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.placement.ConcentricRingsStructurePlacement;
@@ -152,7 +153,7 @@ public class SpongeStructurePlacementBuilder implements StructurePlacement.Build
 
     @Override
     public ConcentricRings preferredBiomes(final Tag<org.spongepowered.api.world.biome.Biome> preferredBiomes) {
-        final Registry<Biome> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+        final Registry<Biome> registry = SpongeCommon.vanillaRegistry(Registries.BIOME);
         this.preferredBiomes = registry.getOrCreateTag((TagKey<Biome>) (Object) preferredBiomes);
         return this;
     }

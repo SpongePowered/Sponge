@@ -29,6 +29,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -37,6 +38,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PickaxeItem;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
@@ -46,6 +48,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.NestedTableEntry;
 import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.item.DiggerItemAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -90,12 +93,13 @@ public final class ItemStackData {
                         })
                     .create(Keys.CAN_HARVEST)
                         .get(h -> {
+                            final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
                             final Item item = h.getItem();
                             if (item instanceof DiggerItemAccessor && !(item instanceof PickaxeItem)) {
-                                return Registry.BLOCK.getTag(((DiggerItemAccessor) item).accessor$blocks()).stream().flatMap(HolderSet.ListBacked::stream).map(Holder::value).map(BlockType.class::cast).collect(Collectors.toSet());
+                                return blockRegistry.getTag(((DiggerItemAccessor) item).accessor$blocks()).stream().flatMap(HolderSet.ListBacked::stream).map(Holder::value).map(BlockType.class::cast).collect(Collectors.toSet());
                             }
 
-                            final Set<BlockType> blockTypes = Registry.BLOCK.stream()
+                            final Set<BlockType> blockTypes = blockRegistry.stream()
                                     .filter(b -> item.isCorrectToolForDrops(b.defaultBlockState()))
                                     .map(BlockType.class::cast)
                                     .collect(Collectors.toUnmodifiableSet());

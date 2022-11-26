@@ -39,7 +39,7 @@ public abstract class WitherSkullMixin_API extends AbstractHurtingProjectileMixi
 
     @Override
     public void detonate() {
-        final Explosion.BlockInteraction mode = this.shadow$getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
+        final Explosion.BlockInteraction mode = this.shadow$getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.KEEP;
         ((WitherSkullBridge) this).bridge$throwExplosionEventAndExplosde(this.shadow$getCommandSenderWorld(), (net.minecraft.world.entity.projectile.WitherSkull) (Object) this,
                 this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), 1.0F, false, mode);
         this.shadow$discard();

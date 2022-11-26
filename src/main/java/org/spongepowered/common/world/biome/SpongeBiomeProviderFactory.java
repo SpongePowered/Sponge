@@ -28,6 +28,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
@@ -59,7 +60,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public ConfigurableBiomeProvider<MultiNoiseBiomeConfig> overworld() {
-        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(this.registry());
+        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(this.registry().asLookup());
     }
 
     @Override
@@ -73,7 +74,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public ConfigurableBiomeProvider<MultiNoiseBiomeConfig> nether() {
-        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.Preset.NETHER.biomeSource(this.registry());
+        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.Preset.NETHER.biomeSource(this.registry().asLookup());
     }
 
     @Override
@@ -89,7 +90,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public ConfigurableBiomeProvider<EndStyleBiomeConfig> end() {
-        return (ConfigurableBiomeProvider<EndStyleBiomeConfig>) new TheEndBiomeSource(this.registry());
+        return (ConfigurableBiomeProvider<EndStyleBiomeConfig>) TheEndBiomeSource.create(this.registry().asLookup());
     }
 
     @Override
@@ -105,10 +106,10 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     }
 
     private Registry<Biome> registry() {
-        return SpongeCommon.server().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+        return SpongeCommon.vanillaRegistry(Registries.BIOME);
     }
 
     private Holder<Biome> biomeHolder(final RegistryReference<org.spongepowered.api.world.biome.Biome> biome) {
-        return this.registry().getHolderOrThrow(ResourceKey.create(Registry.BIOME_REGISTRY, (ResourceLocation) (Object) biome.location()));
+        return this.registry().getHolderOrThrow(ResourceKey.create(Registries.BIOME, (ResourceLocation) (Object) biome.location()));
     }
 }

@@ -41,6 +41,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.animal.Panda;
+import net.minecraft.world.entity.animal.Parrot;
+import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.entity.monster.Phantom;
@@ -181,7 +183,7 @@ final class VanillaRegistryLoader {
             map.put(EquipmentSlot.MAINHAND, "main_hand");
             map.put(EquipmentSlot.OFFHAND, "off_hand");
         });
-        this.knownName(RegistryTypes.FOX_TYPE, Fox.Type.values(), Fox.Type::getName);
+        this.knownName(RegistryTypes.FOX_TYPE, Fox.Type.values(), Fox.Type::getSerializedName);
         this.knownName(RegistryTypes.GAME_MODE, GameType.values(), GameType::getName);
         this.automaticName(RegistryTypes.HAND_PREFERENCE, HumanoidArm.values());
         this.automaticName(RegistryTypes.HAND_TYPE, InteractionHand.values());
@@ -191,7 +193,7 @@ final class VanillaRegistryLoader {
         this.automaticSerializedName(RegistryTypes.JIGSAW_BLOCK_ORIENTATION, FrontAndTop.values());
         this.knownName(RegistryTypes.MOOSHROOM_TYPE, MushroomCow.MushroomType.values(), type -> ((MushroomCow_MushroomTypeAccessor) (Object) type).accessor$type());
         this.knownName(RegistryTypes.OBJECTIVE_DISPLAY_MODE, ObjectiveCriteria.RenderType.values(), ObjectiveCriteria.RenderType::getId);
-        this.knownName(RegistryTypes.PANDA_GENE, Panda.Gene.values(), Panda.Gene::getName);
+        this.knownName(RegistryTypes.PANDA_GENE, Panda.Gene.values(), Panda.Gene::getSerializedName);
         this.automaticName(RegistryTypes.PHANTOM_PHASE, Phantom.AttackPhase.values());
         this.automaticName(RegistryTypes.PICKUP_RULE, AbstractArrow.Pickup.values());
         this.automaticName(RegistryTypes.MIRROR, Mirror.values());
@@ -226,6 +228,8 @@ final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.TEMPERATURE_MODIFIER, Biome.TemperatureModifier.values());
         this.automaticName(RegistryTypes.CARVING_STEP, GenerationStep.Carving.values());
         this.automaticName(RegistryTypes.DECORATION_STEP, GenerationStep.Decoration.values());
+        this.automaticSerializedName(RegistryTypes.PARROT_TYPE, Parrot.Variant.values());
+        this.automaticSerializedName(RegistryTypes.RABBIT_TYPE, Rabbit.Variant.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {
@@ -316,7 +320,7 @@ final class VanillaRegistryLoader {
 
     @SuppressWarnings("UnusedReturnValue")
     private <A, I extends Enum<I> & StringRepresentable> Registry<A> automaticSerializedName(final RegistryType<A> type, final I[] values) {
-        return this.naming(type, values, val -> val.getSerializedName()); // not using method reference as ECJ bug workaround
+        return this.naming(type, values, StringRepresentable::getSerializedName); // not using method reference as ECJ bug workaround
     }
 
     @SuppressWarnings("UnusedReturnValue")

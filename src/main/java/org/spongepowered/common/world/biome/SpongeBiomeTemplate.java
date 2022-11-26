@@ -28,7 +28,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
@@ -207,7 +209,9 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
             spawnerCosts.forEach((type, cost) -> spawnerBuilder.addMobCharge((net.minecraft.world.entity.EntityType<?>) (Object) type, cost.budget(),
                     cost.charge()));
 
-            final BiomeGenerationSettings.Builder generationBuilder = new BiomeGenerationSettings.Builder();
+            final Registry<net.minecraft.world.level.levelgen.placement.PlacedFeature> placedFeatureRegistry = SpongeCommon.vanillaRegistry(Registries.PLACED_FEATURE);
+            final Registry<ConfiguredWorldCarver<?>> configuredWorldCarverRegistry = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_CARVER);
+            final BiomeGenerationSettings.Builder generationBuilder = new BiomeGenerationSettings.Builder(placedFeatureRegistry.asLookup(), configuredWorldCarverRegistry.asLookup());
             features.forEach((step, list) -> list.forEach(feature -> generationBuilder.addFeature((GenerationStep.Decoration) (Object) step,
                     Holder.direct((net.minecraft.world.level.levelgen.placement.PlacedFeature) (Object) feature))));
             carvers.forEach((step, list) -> list.forEach(carver -> generationBuilder.addCarver((GenerationStep.Carving) (Object) step,

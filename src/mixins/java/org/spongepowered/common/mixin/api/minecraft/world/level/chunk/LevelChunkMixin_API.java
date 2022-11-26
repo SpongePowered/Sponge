@@ -26,7 +26,8 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.level.ChunkPos;
@@ -321,9 +322,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
         final Vector3i size = max.sub(min).add(1, 1 ,1);
         final @MonotonicNonNull ObjectArrayMutableBiomeBuffer backingVolume;
         if (shouldCarbonCopy) {
-            final Registry<net.minecraft.world.level.biome.Biome> biomeRegistry = this.level.registryAccess().registry(Registry.BIOME_REGISTRY)
-                .map(wr -> ((Registry<net.minecraft.world.level.biome.Biome>) wr))
-                .orElse(BuiltinRegistries.BIOME);
+            final Registry<net.minecraft.world.level.biome.Biome> biomeRegistry = this.level.registryAccess().registryOrThrow(Registries.BIOME);
             backingVolume = new ObjectArrayMutableBiomeBuffer(min, size, VolumeStreamUtils.nativeToSpongeRegistry(biomeRegistry));
         } else {
             backingVolume = null;

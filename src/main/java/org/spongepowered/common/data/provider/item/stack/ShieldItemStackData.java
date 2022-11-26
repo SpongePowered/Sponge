@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.BannerItem;
@@ -37,6 +38,7 @@ import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NBTCollectors;
@@ -51,7 +53,7 @@ public final class ShieldItemStackData {
     private static final Map<String, BannerPatternShape> SHAPE_BY_HASHNAME = new HashMap<>();
 
     static {
-        Registry.BANNER_PATTERN.stream().forEach(pattern -> ShieldItemStackData.SHAPE_BY_HASHNAME.put(pattern.getHashname(), (BannerPatternShape) (Object) pattern));
+
     }
 
     private ShieldItemStackData() {
@@ -59,6 +61,9 @@ public final class ShieldItemStackData {
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
+        final Registry<BannerPattern> bannerRegistry = SpongeCommon.vanillaRegistry(Registries.BANNER_PATTERN);
+        bannerRegistry.stream().forEach(pattern -> ShieldItemStackData.SHAPE_BY_HASHNAME.put(pattern.getHashname(), (BannerPatternShape) pattern));
+
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.DYE_COLOR)

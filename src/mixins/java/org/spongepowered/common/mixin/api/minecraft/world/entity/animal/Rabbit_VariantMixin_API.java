@@ -22,9 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
 import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.asm.mixin.Mixin;
 
-public final class SpongeRabbitType implements RabbitType {
+@Mixin(net.minecraft.world.entity.animal.Rabbit.Variant.class)
+public abstract class Rabbit_VariantMixin_API implements RabbitType {
+
 }

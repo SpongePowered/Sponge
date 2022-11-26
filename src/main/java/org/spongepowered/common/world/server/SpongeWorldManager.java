@@ -33,6 +33,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
@@ -60,6 +61,7 @@ import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.PatrolSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.WorldOptions;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.storage.CommandStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -276,8 +278,9 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         // First find a loaded level-stem / To load based on a datapack load using the WorldTemplate instead
-        final net.minecraft.resources.ResourceKey<LevelStem> rKey = net.minecraft.resources.ResourceKey.create(Registry.LEVEL_STEM_REGISTRY, (ResourceLocation) (Object) key);
-        final LevelStem levelStem = this.server.registryAccess().registryOrThrow(Registry.LEVEL_STEM_REGISTRY).get(rKey);
+
+        final net.minecraft.resources.ResourceKey<LevelStem> rKey = net.minecraft.resources.ResourceKey.create(Registries.LEVEL_STEM, (ResourceLocation) (Object) key);
+        final LevelStem levelStem = SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM).get(rKey);
         if (levelStem != null) {
             return this.loadWorld0(registryKey, levelStem);
         }
@@ -696,9 +699,7 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
 
-        for (final Map.Entry<net.minecraft.resources.ResourceKey<LevelStem>, LevelStem> entry : this.server.registryAccess()
-            .registryOrThrow(Registry.LEVEL_STEM_REGISTRY)
-            .entrySet()) {
+        for (final Map.Entry<net.minecraft.resources.ResourceKey<LevelStem>, LevelStem> entry : SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM).entrySet()) {
 
             final ResourceKey worldKey = (ResourceKey) (Object) entry.getKey().location();
             final LevelStem template = entry.getValue();
@@ -780,7 +781,7 @@ public abstract class SpongeWorldManager implements WorldManager {
 
     @Nullable
     private PrimaryLevelData loadLevelData(final RegistryAccess access, final WorldDataConfiguration datapackConfig, final LevelStorageSource.LevelStorageAccess storageSource) {
-        return (PrimaryLevelData) storageSource.getDataTag(SpongeWorldManager.bootstrapOps, datapackConfig, access.registryOrThrow(Registry.LEVEL_STEM_REGISTRY), Lifecycle.stable()).getFirst();
+        return (PrimaryLevelData) storageSource.getDataTag(SpongeWorldManager.bootstrapOps, datapackConfig, access.registryOrThrow(Registries.LEVEL_STEM), Lifecycle.stable()).getFirst();
     }
 
     private ServerLevel createLevel(
@@ -856,7 +857,8 @@ public abstract class SpongeWorldManager implements WorldManager {
                     }
                 } else if (levelData.worldGenOptions().generateBonusChest()) {
                     final BlockPos pos = new BlockPos(levelData.getXSpawn(), levelData.getYSpawn(), levelData.getZSpawn());
-                    MiscOverworldFeatures.BONUS_CHEST.value().place(world, world.getChunkSource().getGenerator(), world.random, pos);
+                    final ConfiguredFeature<?, ?> bonusChestFeature = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_FEATURE).get(MiscOverworldFeatures.BONUS_CHEST);
+                    bonusChestFeature.place(world, world.getChunkSource().getGenerator(), world.random, pos);
                 }
                 levelData.setInitialized(true);
                 if (isDebugGeneration) {
@@ -903,7 +905,7 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     private Optional<ResourceKey> worldTypeKey(final DimensionType type) {
-        return Optional.ofNullable(this.server.registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getKey(type)).map(ResourceKey.class::cast);
+        return Optional.ofNullable(SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).getKey(type)).map(ResourceKey.class::cast);
     }
 
     private CompletableFuture<ServerLevel> loadSpawnChunksAsync(final ServerLevel world) {
@@ -1004,7 +1006,7 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     public static net.minecraft.resources.ResourceKey<Level> createRegistryKey(final ResourceKey key) {
-        return net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_REGISTRY, (ResourceLocation) (Object) key);
+        return net.minecraft.resources.ResourceKey.create(Registries.DIMENSION, (ResourceLocation) (Object) key);
     }
 
 

@@ -100,7 +100,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             final net.minecraft.world.level.Explosion.BlockInteraction modeIn, final CallbackInfo ci) {
         // In Vanilla and Forge, 'damagesTerrain' controls both smoke particles and block damage
         // Sponge-created explosions will explicitly set 'impl$shouldBreakBlocks' to its proper value
-        this.impl$shouldBreakBlocks = this.blockInteraction == net.minecraft.world.level.Explosion.BlockInteraction.BREAK || this.blockInteraction == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY;
+        this.impl$shouldBreakBlocks = this.blockInteraction == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY_WITH_DECAY || this.blockInteraction == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY;
         this.impl$shouldDamageEntities = true;
         this.impl$resolution = 16;
         this.impl$randomness = 1.0F;
@@ -112,7 +112,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     private void impl$onConstructed(final Level worldIn, final Entity exploderIn, final DamageSource damageSourceIn, final ExplosionDamageCalculator explosionContextIn, final double xIn, final double yIn, final double zIn, final float sizeIn, final boolean causesFireIn, final net.minecraft.world.level.Explosion.BlockInteraction modeIn, final CallbackInfo ci) {
         // In Vanilla and Forge, 'damagesTerrain' controls both smoke particles and block damage
         // Sponge-created explosions will explicitly set 'impl$shouldBreakBlocks' to its proper value
-        this.impl$shouldBreakBlocks = this.blockInteraction == net.minecraft.world.level.Explosion.BlockInteraction.BREAK || this.blockInteraction == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY;
+        this.impl$shouldBreakBlocks = this.blockInteraction == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY_WITH_DECAY || this.blockInteraction == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY;
         this.impl$shouldDamageEntities = true;
         this.impl$resolution = 16;
         this.impl$randomness = 1.0F;

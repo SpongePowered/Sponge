@@ -1033,7 +1033,7 @@ public final class DataTest  {
 //        this.checkOfferListData(writtenBookStack, Keys.PAGES, Arrays.asList(Component.text("Page 1"), Component.text("Page 2")));
 
         final Entity parrot = world.createEntity(EntityTypes.PARROT.get(), position);
-        this.checkOfferData(parrot, Keys.PARROT_TYPE, ParrotTypes.RED_AND_BLUE.get());
+        this.checkOfferData(parrot, Keys.PARROT_TYPE, ParrotTypes.RED_BLUE.get());
 
 // TODO missing ParticleEffect.Builder registration
 //        this.checkOfferData(areaEffectCloud, Keys.PARTICLE_EFFECT, ParticleEffect.builder().type(ParticleTypes.BUBBLE.get()).build());

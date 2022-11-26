@@ -42,47 +42,25 @@ public final class TropicalFishData {
                 .asMutable(TropicalFish.class)
                     // Fish variant is: size | pattern << 8 | bodyColor << 16 | patternColor << 24
                     .create(Keys.TROPICAL_FISH_SHAPE)
-                        .get(h -> (TropicalFishShape) (Object) TropicalFishData.getType(h))
-                        .set((h, v) -> {
-                            final net.minecraft.world.item.DyeColor baseColor = TropicalFishData.getBaseColor(h);
-                            final net.minecraft.world.item.DyeColor patternColor = TropicalFishData.getPatternColor(h);
-                            h.setVariant(((TropicalFishAccessor.invoker$calculateVariant(((TropicalFish.Pattern) (Object) v), patternColor, baseColor))));
-                        })
+                        .get(h -> (TropicalFishShape) (Object) h.getVariant())
+                        .set((h, v) -> h.setVariant((TropicalFish.Pattern) (Object) v))
                     .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) TropicalFishData.getBaseColor(h))
+                        .get(h -> (DyeColor) (Object) h.getBaseColor())
                         .set((h, v) -> {
-                            final net.minecraft.world.item.DyeColor patternColor = TropicalFishData.getPatternColor(h);
-                            final TropicalFish.Pattern type = TropicalFishData.getType(h);
-                            h.setVariant(((TropicalFishAccessor.invoker$calculateVariant(type, patternColor, (net.minecraft.world.item.DyeColor) (Object) v))));
+                            final net.minecraft.world.item.DyeColor patternColor = h.getPatternColor();
+                            final TropicalFish.Pattern type = h.getVariant();
+                            final int variant = TropicalFishAccessor.invoker$packVariant(type, patternColor, (net.minecraft.world.item.DyeColor) (Object) v);
+                            ((TropicalFishAccessor) h).invoker$setPackedVariant(variant);
                         })
                     .create(Keys.PATTERN_COLOR)
-                        .get(h -> (DyeColor) (Object) TropicalFishData.getPatternColor(h))
+                        .get(h -> (DyeColor) (Object) h.getPatternColor())
                         .set((h, v) -> {
-                            final net.minecraft.world.item.DyeColor baseColor = TropicalFishData.getBaseColor(h);
-                            final TropicalFish.Pattern type = TropicalFishData.getType(h);
-                            h.setVariant(((TropicalFishAccessor.invoker$calculateVariant(type, (net.minecraft.world.item.DyeColor) (Object) v, baseColor))));
+                            final net.minecraft.world.item.DyeColor baseColor = h.getBaseColor();
+                            final TropicalFish.Pattern type = h.getVariant();
+                            final int variant = TropicalFishAccessor.invoker$packVariant(type, (net.minecraft.world.item.DyeColor) (Object) v, baseColor);
+                            ((TropicalFishAccessor) h).invoker$setPackedVariant(variant);
                         });
     }
     // @formatter:on
-
-    private static net.minecraft.world.item.DyeColor getBaseColor(final TropicalFish fishy) {
-        return net.minecraft.world.item.DyeColor.byId((fishy.getVariant() & 16711680) >> 16);
-    }
-
-    private static net.minecraft.world.item.DyeColor getPatternColor(final TropicalFish fishy) {
-        return net.minecraft.world.item.DyeColor.byId((fishy.getVariant() & -16777216) >> 24);
-    }
-
-    private static int getSize(final TropicalFish fishy) {
-        return Math.min(fishy.getVariant() & 255, 1);
-    }
-
-    private static int getPattern(final TropicalFish fishy) {
-        return Math.min(fishy.getVariant() & '\uff00' >> 8, 5);
-    }
-
-    private static TropicalFish.Pattern getType(final TropicalFish fishy) {
-        return TropicalFish.Pattern.values()[TropicalFishData.getSize(fishy) + 6 * TropicalFishData.getPattern(fishy)];
-    }
 
 }

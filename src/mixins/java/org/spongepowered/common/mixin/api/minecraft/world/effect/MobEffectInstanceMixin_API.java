@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.effect;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffect;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -35,6 +36,7 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.Constants;
 
 @Mixin(net.minecraft.world.effect.MobEffectInstance.class)
@@ -80,7 +82,8 @@ public abstract class MobEffectInstanceMixin_API implements PotionEffect {
 
     @Override
     public DataContainer toContainer() {
-        final ResourceKey key = (ResourceKey) (Object) Registry.MOB_EFFECT.getKey((MobEffect) this.type());
+
+        final ResourceKey key = (ResourceKey) (Object) SpongeCommon.vanillaRegistry(Registries.MOB_EFFECT).getKey((MobEffect) this.type());
 
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.contentVersion())

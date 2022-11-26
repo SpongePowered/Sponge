@@ -70,7 +70,6 @@
         "world.entity.animal.AnimalAccessor",
         "world.entity.animal.FoxAccessor",
         "world.entity.animal.MushroomCow_MushroomTypeAccessor",
-        "world.entity.animal.MushroomCowAccessor",
         "world.entity.animal.OcelotAccessor",
         "world.entity.animal.PandaAccessor",
         "world.entity.animal.PigAccessor",
@@ -204,7 +203,8 @@
         "world.level.levelgen.NoiseSettingsAccessor",
         "world.level.levelgen.structure.pools.StructureTemplatePoolAccessor",
         "world.level.biome.MobSpawnSettings_MobSpawnCostAccessor",
-        "network.protocol.game.ClientboundPlayerInfoUpdatePacketAccessor"
+        "network.protocol.game.ClientboundPlayerInfoUpdatePacketAccessor",
+        "sounds.SoundEventAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"

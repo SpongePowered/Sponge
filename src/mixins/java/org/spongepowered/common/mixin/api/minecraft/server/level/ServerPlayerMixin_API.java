@@ -37,6 +37,7 @@ import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
@@ -542,7 +543,8 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        final Optional<SoundEvent> event = Registry.SOUND_EVENT.getOptional(SpongeAdventure.asVanilla(Objects.requireNonNull(sound, "sound").name()));
+
+        final Optional<SoundEvent> event = SpongeCommon.vanillaRegistry(Registries.SOUND_EVENT).getOptional(SpongeAdventure.asVanilla(Objects.requireNonNull(sound, "sound").name()));
         if (event.isPresent()) { // The SoundEntityPacket does not support custom sounds
             final Entity tracked;
             if (emitter == Sound.Emitter.self()) {
@@ -562,7 +564,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             return;
         }
         final ResourceLocation soundLoc = SpongeAdventure.asVanilla(Objects.requireNonNull(sound, "sound").name());
-        final Optional<SoundEvent> event = Registry.SOUND_EVENT.getOptional(soundLoc);
+        final Optional<SoundEvent> event = SpongeCommon.vanillaRegistry(Registries.SOUND_EVENT).getOptional(soundLoc);
         final SoundSource source = SpongeAdventure.asVanilla(sound.source());
         final long random = this.shadow$getLevel().getRandom().nextLong();
         if (event.isPresent()) { // Check if the event is registered

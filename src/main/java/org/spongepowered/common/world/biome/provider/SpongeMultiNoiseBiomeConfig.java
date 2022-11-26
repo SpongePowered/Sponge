@@ -26,6 +26,7 @@ package org.spongepowered.common.world.biome.provider;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -37,6 +38,7 @@ import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.biome.MultiNoiseBiomeSourceAccessor;
 
 import java.util.ArrayList;
@@ -126,13 +128,15 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
 
         @Override
         public MultiNoiseBiomeConfig nether() {
-            final var biomeSource = (MultiNoiseBiomeSourceAccessor) MultiNoiseBiomeSource.Preset.NETHER.biomeSource((Registry<net.minecraft.world.level.biome.Biome>) Sponge.server().registry(RegistryTypes.BIOME));
+            final Registry<net.minecraft.world.level.biome.Biome> biomeRegistry = SpongeCommon.vanillaRegistry(Registries.BIOME);
+            final var biomeSource = (MultiNoiseBiomeSourceAccessor) MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomeRegistry.asLookup());
             return new BuilderImpl().addMcBiomes(biomeSource.accessor$parameters()).build();
         }
 
         @Override
         public MultiNoiseBiomeConfig overworld() {
-            final var biomeSource = (MultiNoiseBiomeSourceAccessor) MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource((Registry) Sponge.server().registry(RegistryTypes.BIOME));
+            final Registry<net.minecraft.world.level.biome.Biome> biomeRegistry = SpongeCommon.vanillaRegistry(Registries.BIOME);
+            final var biomeSource = (MultiNoiseBiomeSourceAccessor) MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(biomeRegistry.asLookup());
             return new BuilderImpl().addMcBiomes(biomeSource.accessor$parameters()).build();
         }
     }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.network.packet;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.network.channel.ChannelBuf;
@@ -39,7 +39,7 @@ public final class ChangeViewerEnvironmentPacket implements Packet {
     }
 
     public ChangeViewerEnvironmentPacket(final DimensionType dimensionType) {
-        this.dimensionLogic = (ResourceLocation) (Object) SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getKey(dimensionType);
+        this.dimensionLogic = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).getKey(dimensionType);
     }
 
     @Override

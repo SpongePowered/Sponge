@@ -27,6 +27,7 @@ package org.spongepowered.common.world.generation.config.flat;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
@@ -135,17 +136,16 @@ public final class SpongeFlatGeneratorConfig {
             if (this.layers.isEmpty()) {
                 throw new IllegalStateException("Flat generation requires at least 1 Layer!");
             }
-            final Registry<Biome>
-                    biomeRegistry = (Registry<Biome>) Sponge.server().registry(RegistryTypes.BIOME);
-            final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
+            final Registry<Biome> biomeRegistry = SpongeCommon.vanillaRegistry(Registries.BIOME);
             final Optional<HolderSet<StructureSet>> defaultStructures = FlatLevelGeneratorSettings.getDefault(
-                    registryAccess.registryOrThrow(Registry.BIOME_REGISTRY),
-                    registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY)
+                    biomeRegistry.asLookup(),
+                    SpongeCommon.vanillaRegistry(Registries.STRUCTURE_SET).asLookup(),
+                    SpongeCommon.vanillaRegistry(Registries.PLACED_FEATURE).asLookup()
             ).structureOverrides();
             return (FlatGeneratorConfig) FlatLevelGeneratorSettingsAccessor.invoker$new(
                     biomeRegistry,
                     defaultStructures, (List<FlatLayerInfo>) (Object) this.layers, this.populateLakes,
-                    this.performDecoration, Optional.of(() -> registryAccess.registryOrThrow(Registry.BIOME_REGISTRY)
+                    this.performDecoration, Optional.of(() -> biomeRegistry
                             .get((ResourceLocation) (Object) this.biome.location())));
         }
     }

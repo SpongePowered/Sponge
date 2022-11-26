@@ -25,10 +25,12 @@
 package org.spongepowered.common.mixin.tracker.world.entity;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.tracker.TrackerCategory;
@@ -58,7 +60,7 @@ public abstract class EntityTypeMixin_Tracker implements RegistryBackedTrackable
 
     @Override
     public Registry<EntityType<?>> bridge$trackerRegistryBacking() {
-        return Registry.ENTITY_TYPE;
+        return SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
     }
 
     @Override

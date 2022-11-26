@@ -24,12 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.core.MappedRegistry;
 import net.minecraft.world.entity.animal.Rabbit;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.RabbitType;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class RabbitData {
@@ -42,15 +39,8 @@ public final class RabbitData {
         registrator
                 .asMutable(Rabbit.class)
                     .create(Keys.RABBIT_TYPE)
-                        .get(h -> {
-                            final int type = h.getRabbitType();
-                            final MappedRegistry<RabbitType> registry = (MappedRegistry<RabbitType>) (Object) Sponge.game().registry(RegistryTypes.RABBIT_TYPE);
-                            return registry.byId(type);
-                        })
-                        .set((h, v) -> {
-                            final MappedRegistry<RabbitType> registry = (MappedRegistry<RabbitType>) (Object) Sponge.game().registry(RegistryTypes.RABBIT_TYPE);
-                            h.setRabbitType(registry.getId(v));
-                        });
+                        .get(h -> (RabbitType) (Object) h.getVariant())
+                        .set((h, v) -> h.setVariant((Rabbit.Variant) (Object) v));
     }
     // @formatter:on
 }

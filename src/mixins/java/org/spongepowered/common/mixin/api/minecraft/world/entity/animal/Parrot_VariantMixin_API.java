@@ -22,15 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.entity.animal;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
 
-import net.minecraft.world.entity.animal.MushroomCow;
+import org.spongepowered.api.data.type.ParrotType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(MushroomCow.class)
-public interface MushroomCowAccessor {
+@Mixin(net.minecraft.world.entity.animal.Parrot.Variant.class)
+public abstract class Parrot_VariantMixin_API implements ParrotType {
 
-    @Invoker("setMushroomType") void invoker$setMushroomType(final MushroomCow.MushroomType mushroomType);
 
 }

@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.core.world.entity.item;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
+import net.minecraft.world.level.Explosion.BlockInteraction;
+import net.minecraft.world.level.Level;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
 import org.spongepowered.api.event.CauseStackManager;
@@ -108,18 +110,18 @@ public abstract class PrimedTntMixin extends EntityMixin implements PrimedTntBri
         method = "explode",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFLnet/minecraft/world/level/Explosion$BlockInteraction;)Lnet/minecraft/world/level/Explosion;"
+            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"
         )
     )
-    private net.minecraft.world.level.Explosion impl$useSpongeExplosion(final net.minecraft.world.level.Level world,
+    private net.minecraft.world.level.Explosion impl$useSpongeExplosion(final Level world,
         final Entity entityIn, final double xIn, final double yIn, final double zIn, final float explosionRadius,
-        final net.minecraft.world.level.Explosion.BlockInteraction modeIn) {
+        final Level.ExplosionInteraction modeIn) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
             .location(ServerLocation.of((ServerWorld) world, xIn, yIn, zIn))
             .sourceExplosive((PrimedTNT) this)
             .radius(this.bridge$explosionRadius)
-            .shouldPlaySmoke(modeIn.ordinal() > net.minecraft.world.level.Explosion.BlockInteraction.NONE.ordinal())
-            .shouldBreakBlocks(modeIn.ordinal() > net.minecraft.world.level.Explosion.BlockInteraction.NONE.ordinal()))
+            .shouldPlaySmoke(modeIn.ordinal() > BlockInteraction.KEEP.ordinal())
+            .shouldBreakBlocks(modeIn.ordinal() > BlockInteraction.KEEP.ordinal()))
             .orElseGet(() -> {
                 ((PrimedTNT) this).offer(Keys.IS_PRIMED, false);
                 return null;

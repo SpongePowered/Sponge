@@ -27,7 +27,7 @@ package org.spongepowered.common.world.schematic;
 import com.mojang.datafixers.DataFixer;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.SharedConstants;
-import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -329,7 +329,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             .orElseThrow(() -> new InvalidDataException("Missing BiomePalette as required by the schematic spec"));
 
         final Set<DataQuery> biomeKeys = biomeMap.keys(false);
-        final Registry<Biome> biomeRegistry = VolumeStreamUtils.nativeToSpongeRegistry(BuiltinRegistries.BIOME);
+        final Registry<Biome> biomeRegistry = VolumeStreamUtils.nativeToSpongeRegistry(SpongeCommon.server().registryAccess().registryOrThrow(Registries.BIOME));
         biomePalette = new MutableBimapPalette<>(
             PaletteTypes.BIOME_PALETTE.get(),
             biomeRegistry,
@@ -454,8 +454,9 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 // should never reach here
             }
 
+
             final Registry<BlockType> blockRegistry = VolumeStreamUtils.nativeToSpongeRegistry(
-                net.minecraft.core.Registry.BLOCK);
+                    SpongeCommon.server().registryAccess().registryOrThrow(Registries.BLOCK));
 
             SchematicTranslator.writePaletteToView(
                 blockData, palette, blockRegistry, Constants.Sponge.Schematic.BLOCK_PALETTE, BlockState::type,
@@ -507,7 +508,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 // Should never reach here.
             }
 
-            final Registry<Biome> biomeRegistry = VolumeStreamUtils.nativeToSpongeRegistry(BuiltinRegistries.BIOME);
+            final Registry<Biome> biomeRegistry = VolumeStreamUtils.nativeToSpongeRegistry(SpongeCommon.server().registryAccess().registryOrThrow(Registries.BIOME));
 
             SchematicTranslator.writePaletteToView(
                 biomeContainer, biomePalette, biomeRegistry, Constants.Sponge.Schematic.BIOME_PALETTE,

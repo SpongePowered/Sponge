@@ -33,9 +33,13 @@ import org.spongepowered.common.UntransformedInvokerError;
 @Mixin(TropicalFish.class)
 public interface TropicalFishAccessor {
 
-    @Invoker("calculateVariant")
-    static int invoker$calculateVariant(final TropicalFish.Pattern size, final DyeColor pattern, final DyeColor bodyColor) {
+    @Invoker("packVariant")
+    static int invoker$packVariant(final TropicalFish.Pattern size, final DyeColor pattern, final DyeColor bodyColor) {
         throw new UntransformedInvokerError();
     }
+
+    @Invoker("setPackedVariant")
+    void invoker$setPackedVariant(final int packedVariant);
+
 
 }
