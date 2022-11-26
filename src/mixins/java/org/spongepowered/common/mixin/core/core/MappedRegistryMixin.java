@@ -28,27 +28,96 @@ import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.WritableRegistry;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
+import org.spongepowered.common.bridge.core.RegistryBridge;
+import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 import org.spongepowered.common.registry.SpongeRegistryEntry;
 import org.spongepowered.common.registry.SpongeRegistryType;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 @Mixin(MappedRegistry.class)
-public abstract class MappedRegistryMixin<T> extends WritableRegistryMixin<T> {
+public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, WritableRegistryBridge<T> {
+
+    @Shadow public abstract Lifecycle lifecycle(final T $$0);
+
+    private RegistryType<T> impl$type;
+    private final Map<ResourceKey, RegistryEntry<T>> impl$entries = new LinkedHashMap<>();
+
+    private boolean impl$isDynamic = true;
+
+    @Override
+    public boolean bridge$isDynamic() {
+        return this.impl$isDynamic;
+    }
+
+    @Override
+    public void bridge$setDynamic(final boolean isDynamic) {
+        this.impl$isDynamic = isDynamic;
+    }
+
+
+    @Inject(method = "<init>(Lnet/minecraft/resources/ResourceKey;Lcom/mojang/serialization/Lifecycle;Z)V", at = @At("TAIL"))
+    private void impl$setType(final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> key,
+            final Lifecycle lifecycle, boolean $$2, final CallbackInfo ci) {
+        this.impl$type = new SpongeRegistryType<T>((ResourceKey) (Object) ((ResourceKeyAccessor) key).accessor$registryName(),
+                (ResourceKey) (Object) key.location());
+    }
+
 
     @Inject(method = "registerMapping", at = @At("TAIL"))
     private void impl$cacheRegistryEntry(final int p_243537_1_, final net.minecraft.resources.ResourceKey<T> p_243537_2_, final T p_243537_3_,
             final Lifecycle p_243537_4_, final CallbackInfoReturnable<Holder<T>> cir) {
 
-        final net.minecraft.resources.ResourceKey<? extends Registry<T>> resourceKey = this.shadow$key();
+        final net.minecraft.resources.ResourceKey<? extends Registry<T>> resourceKey = ((MappedRegistry<T>) (Object) this).key();
         final ResourceKey root = (ResourceKey) (Object) ((ResourceKeyAccessor<T>) resourceKey).accessor$registryName();
         final ResourceKey location = (ResourceKey) (Object) resourceKey.location();
         this.bridge$register(new SpongeRegistryEntry<>(new SpongeRegistryType<>(root, location),
                 (ResourceKey) (Object) p_243537_2_.location(), p_243537_3_));
+    }
+
+    @Override
+    public RegistryType<T> bridge$type() {
+        return this.impl$type;
+    }
+
+    @Override
+    public void bridge$register(final RegistryEntry<T> entry) {
+        this.impl$entries.put(entry.key(), entry);
+    }
+
+    @Override
+    public Optional<RegistryEntry<T>> bridge$get(final ResourceKey resourceKey) {
+        return Optional.ofNullable(this.impl$entries.get(resourceKey));
+    }
+
+    @Override
+    public Stream<RegistryEntry<T>> bridge$streamEntries() {
+        return this.impl$entries.values().stream();
+    }
+
+    @Nullable
+    @Override
+    public RegistryEntry<T> bridge$register(final net.minecraft.resources.ResourceKey<T> key, final T value, final Lifecycle lifecycle) {
+        ((WritableRegistry) this).register(key, value, lifecycle);
+
+        return ((RegistryBridge<T>) this)
+                .bridge$get((org.spongepowered.api.ResourceKey) (Object) key.location())
+                .orElse(null);
     }
 
 }

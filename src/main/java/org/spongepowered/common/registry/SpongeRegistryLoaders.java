@@ -244,7 +244,6 @@ import org.spongepowered.common.data.persistence.SNBTDataFormat;
 import org.spongepowered.common.data.type.SpongeBodyPart;
 import org.spongepowered.common.data.type.SpongeHorseColor;
 import org.spongepowered.common.data.type.SpongeHorseStyle;
-import org.spongepowered.common.data.type.SpongeLlamaType;
 import org.spongepowered.common.data.type.SpongeMatterType;
 import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.data.type.SpongeSkinPart;
@@ -586,15 +585,6 @@ public final class SpongeRegistryLoaders {
         return RegistryLoader.of(l -> {
             l.add(LightTypes.BLOCK, k -> new SpongeLightType(15));
             l.add(LightTypes.SKY, k -> new SpongeLightType(15));
-        });
-    }
-
-    public static RegistryLoader<LlamaType> llamaType() {
-        return RegistryLoader.of(l -> {
-            l.add(2, LlamaTypes.BROWN, SpongeLlamaType::new);
-            l.add(0, LlamaTypes.CREAMY, SpongeLlamaType::new);
-            l.add(3, LlamaTypes.GRAY, SpongeLlamaType::new);
-            l.add(1, LlamaTypes.WHITE, SpongeLlamaType::new);
         });
     }
 

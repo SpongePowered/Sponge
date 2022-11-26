@@ -26,10 +26,11 @@ package org.spongepowered.common.bridge.world.entity.projectile;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface WitherSkullBridge {
 
     @Nullable Explosion bridge$throwExplosionEventAndExplosde(net.minecraft.world.level.Level worldObj, Entity self, double x,
-        double y, double z, float strength, boolean flaming, Explosion.BlockInteraction mode);
+        double y, double z, float strength, boolean flaming, Level.ExplosionInteraction mode);
 }

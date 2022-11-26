@@ -44,6 +44,7 @@ import net.minecraft.world.entity.animal.Panda;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.animal.TropicalFish;
+import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.monster.SpellcasterIllager;
@@ -88,6 +89,8 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.advancement.criteria.trigger.Triggers;
+import org.spongepowered.api.data.type.LlamaType;
+import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
@@ -230,6 +233,7 @@ final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.DECORATION_STEP, GenerationStep.Decoration.values());
         this.automaticSerializedName(RegistryTypes.PARROT_TYPE, Parrot.Variant.values());
         this.automaticSerializedName(RegistryTypes.RABBIT_TYPE, Rabbit.Variant.values());
+        this.automaticSerializedName(RegistryTypes.LLAMA_TYPE, Llama.Variant.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {

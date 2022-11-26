@@ -29,14 +29,11 @@ import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryType;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public interface RegistryBridge<T> {
 
     RegistryType<T> bridge$type();
-
-    void bridge$overrideStream(Supplier<Stream<RegistryEntry<T>>> override);
 
     void bridge$register(final RegistryEntry<T> entry);
 

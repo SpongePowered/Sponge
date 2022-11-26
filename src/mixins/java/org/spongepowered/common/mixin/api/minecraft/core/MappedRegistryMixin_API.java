@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.core;
 
 import net.minecraft.core.HolderSet;
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import org.spongepowered.api.ResourceKey;
@@ -35,10 +36,8 @@ import org.spongepowered.api.registry.ValueNotFoundException;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.core.RegistryBridge;
 
 import java.util.Objects;
@@ -49,20 +48,25 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-@Mixin(net.minecraft.core.Registry.class)
-@Implements(@Interface(iface = Registry.class, prefix = "registry$", remap = Remap.NONE))
-public abstract class RegistryMixin_API<T> implements Registry<T> {
+@Mixin(MappedRegistry.class)
+@Implements(@Interface(iface = Registry.class, prefix = "registry$", remap = Interface.Remap.NONE))
+public abstract class MappedRegistryMixin_API<T> implements Registry<T> {
 
-    // @formatter:off
-    @Shadow public abstract net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> shadow$key();
-    @Shadow @Nullable public abstract ResourceLocation shadow$getKey(T p_177774_1_);
-    @Shadow public abstract Optional<HolderSet.Named<T>> shadow$getTag(TagKey<T> var1);
-    @Shadow public abstract Optional<T> shadow$getOptional(@Nullable net.minecraft.resources.ResourceLocation param0);
-    // @formatter:on
+    private ResourceLocation impl$getKey(final T value) {
+        return ((net.minecraft.core.Registry) this).getKey(value);
+    }
 
-    @Shadow public abstract net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> key();
+    private Optional<T> impl$getOptional(@Nullable ResourceLocation param0) {
+        return ((net.minecraft.core.Registry) this).getOptional(param0);
+    }
 
-    @Shadow public abstract Stream<TagKey<T>> getTagNames();
+    private Optional<HolderSet.Named<T>> impl$getTag(TagKey<T> var1) {
+        return ((net.minecraft.core.Registry) this).getTag(var1);
+    }
+
+    private Stream<TagKey<T>> impl$getTagNames() {
+        return ((net.minecraft.core.Registry) this).getTagNames();
+    }
 
     @Override
     public RegistryType<T> type() {
@@ -73,7 +77,7 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     public ResourceKey valueKey(final T value) {
         Objects.requireNonNull(value, "value");
 
-        final ResourceLocation key = this.shadow$getKey(value);
+        final ResourceLocation key = this.impl$getKey(value);
         if (key == null) {
             throw new IllegalStateException(String.format("No key was found for '%s'!", value));
         }
@@ -81,11 +85,13 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
         return (ResourceKey) (Object) key;
     }
 
+
+
     @Override
     public Optional<ResourceKey> findValueKey(final T value) {
         Objects.requireNonNull(value, "value");
 
-        return Optional.ofNullable(this.shadow$getKey(value)).map(l -> (ResourceKey) (Object) l);
+        return Optional.ofNullable(this.impl$getKey(value)).map(l -> (ResourceKey) (Object) l);
     }
 
     @Override
@@ -95,19 +101,19 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
 
     @Override
     public <V extends T> Optional<V> findValue(final ResourceKey key) {
-        return (Optional<V>) this.shadow$getOptional((ResourceLocation) (Object) Objects.requireNonNull(key, "key"));
+        return (Optional<V>) this.impl$getOptional((ResourceLocation) (Object) Objects.requireNonNull(key, "key"));
     }
 
     @Override
     public <V extends T> V value(final ResourceKey key) {
-        return (V) this.shadow$getOptional((ResourceLocation) (Object) Objects.requireNonNull(key, "key"))
-            .orElseThrow(() -> new ValueNotFoundException(String.format("No value was found for key '%s'!", key)));
+        return (V) this.impl$getOptional((ResourceLocation) (Object) Objects.requireNonNull(key, "key"))
+                .orElseThrow(() -> new ValueNotFoundException(String.format("No value was found for key '%s'!", key)));
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <V extends T> Set<V> taggedValues(final Tag<T> tag) {
-        return this.shadow$getTag((TagKey<T>) (Object) tag).stream()
+        return this.impl$getTag((TagKey<T>) (Object) tag).stream()
                 .flatMap(HolderSet.ListBacked::stream)
                 .map(h -> (V) h.value())
                 .collect(Collectors.toSet());
@@ -116,7 +122,7 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     @Override
     @SuppressWarnings("unchecked")
     public <V extends T> Stream<Tag<V>> tags() {
-        return this.getTagNames().map(Tag.class::cast);
+        return this.impl$getTagNames().map(Tag.class::cast);
     }
 
     @Override
@@ -138,4 +144,5 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     public <V extends T> Optional<RegistryEntry<V>> register(final ResourceKey key, final V value) {
         return Optional.empty();
     }
+
 }

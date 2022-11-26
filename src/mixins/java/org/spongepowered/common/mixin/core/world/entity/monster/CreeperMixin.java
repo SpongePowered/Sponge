@@ -28,6 +28,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Explosion.BlockInteraction;
+import net.minecraft.world.level.Level;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -137,16 +138,16 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
         }
     }
 
-    @Redirect(method = "explodeCreeper", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFLnet/minecraft/world/level/Explosion$BlockInteraction;)Lnet/minecraft/world/level/Explosion;"))
+    @Redirect(method = "explodeCreeper", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"))
     @Nullable
     private net.minecraft.world.level.Explosion impl$useSpongeExplosion(final net.minecraft.world.level.Level world, final Entity self, final double x,
-        final double y, final double z, final float strength, final BlockInteraction mode) {
+        final double y, final double z, final float strength, final Level.ExplosionInteraction mode) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(ServerLocation.of((ServerWorld) world, x, y, z))
                 .sourceExplosive(((Creeper) this))
                 .radius(strength)
-                .shouldPlaySmoke(mode != BlockInteraction.KEEP)
-                .shouldBreakBlocks(mode != BlockInteraction.KEEP && ((GrieferBridge) this).bridge$canGrief()))
+                .shouldPlaySmoke(mode != Level.ExplosionInteraction.NONE)
+                .shouldBreakBlocks(mode != Level.ExplosionInteraction.NONE && ((GrieferBridge) this).bridge$canGrief()))
                 .orElseGet(() -> {
                     this.impl$detonationCancelled = true;
                     return null;

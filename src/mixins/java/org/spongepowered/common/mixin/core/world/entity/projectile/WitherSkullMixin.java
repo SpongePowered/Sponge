@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity.projectile;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion.BlockInteraction;
+import net.minecraft.world.level.Level;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
@@ -84,16 +85,16 @@ public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin im
 
     @Nullable
     @Redirect(method = "onHit", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFZLnet/minecraft/world/level/Explosion$BlockInteraction;)Lnet/minecraft/world/level/Explosion;"))
+            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"))
     public net.minecraft.world.level.Explosion impl$CreateAndProcessExplosionEvent(final net.minecraft.world.level.Level worldObj, final Entity self,
-            final double x, final double y, final double z, final float strength, final boolean flaming, final BlockInteraction mode) {
+            final double x, final double y, final double z, final float strength, final boolean flaming, final Level.ExplosionInteraction mode) {
         return this.bridge$throwExplosionEventAndExplosde(worldObj, self, x, y, z, strength, flaming, mode);
     }
 
     @Override
     public net.minecraft.world.level.Explosion bridge$throwExplosionEventAndExplosde(
             final net.minecraft.world.level.Level worldObj, final Entity self,
-            final double x, final double y, final double z, final float strength, final boolean flaming, final net.minecraft.world.level.Explosion.BlockInteraction mode) {
+            final double x, final double y, final double z, final float strength, final boolean flaming, final Level.ExplosionInteraction mode) {
         final boolean griefer = ((GrieferBridge) this).bridge$canGrief();
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
@@ -106,8 +107,8 @@ public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin im
                     .sourceExplosive(((WitherSkull) this))
                     .radius(this.impl$explosionRadius)
                     .canCauseFire(flaming)
-                    .shouldPlaySmoke(mode != BlockInteraction.KEEP && griefer)
-                    .shouldBreakBlocks(mode != BlockInteraction.KEEP && griefer))
+                    .shouldPlaySmoke(mode != Level.ExplosionInteraction.NONE && griefer)
+                    .shouldBreakBlocks(mode != Level.ExplosionInteraction.NONE && griefer))
                     .orElse(null);
         }
     }

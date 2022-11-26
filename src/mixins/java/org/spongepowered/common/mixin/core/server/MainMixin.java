@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.mojang.serialization.DynamicOps;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
@@ -42,10 +43,10 @@ import java.nio.file.Path;
 @Mixin(Main.class)
 public abstract class MainMixin {
 
-    @Redirect(method = "lambda$main$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/resources/RegistryOps;"))
-    private static RegistryOps<Tag> impl$captureBootstrapOps(final DynamicOps<Tag> $$0, final RegistryAccess $$1) {
-        final RegistryOps<Tag> ops = RegistryOps.create($$0, $$1);
-        SpongeWorldManager.bootstrapOps = ops;
+    @Redirect(method = "lambda$main$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/resources/RegistryOps;"))
+    private static <T> RegistryOps<T> impl$captureBootstrapOps(final DynamicOps<T> $$0, final HolderLookup.Provider $$1) {
+        final RegistryOps<T> ops = RegistryOps.create($$0, $$1);
+        SpongeWorldManager.bootstrapOps = (RegistryOps<Tag>) ops;
         return ops;
     }
 

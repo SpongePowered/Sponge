@@ -44,14 +44,13 @@ import javax.annotation.Nullable;
 public abstract class IngredientMixin_API {
 
     // @formatter:off
-    @Shadow private ItemStack[] itemStacks;
-    @Shadow protected abstract void shadow$dissolve();
+    @Shadow public abstract ItemStack[] shadow$getItems();
     @Shadow public abstract boolean shadow$test(@Nullable ItemStack p_test_1_);
     // @formatter:on
 
+
     public List<org.spongepowered.api.item.inventory.ItemStackSnapshot> ingredient$displayedItems() {
-        this.shadow$dissolve();
-        return Arrays.stream(this.itemStacks).map(ItemStackUtil::snapshotOf).collect(Collectors.toList());
+        return Arrays.stream(this.shadow$getItems()).map(ItemStackUtil::snapshotOf).collect(Collectors.toList());
     }
 
     public boolean ingredient$test(final org.spongepowered.api.item.inventory.ItemStack itemStack) {

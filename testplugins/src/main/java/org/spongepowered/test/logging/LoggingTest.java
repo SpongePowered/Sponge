@@ -44,7 +44,7 @@ public class LoggingTest {
     private void onConstructed(final ConstructPluginEvent event) {
         this.platformLogger.log(
             System.Logger.Level.INFO,
-            "Hello from {} on a platform logger",
+            "Hello from {0} on a platform logger",
             event.plugin().metadata().id()
         );
     }

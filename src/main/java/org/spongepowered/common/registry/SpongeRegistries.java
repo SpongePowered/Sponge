@@ -58,7 +58,6 @@ public final class SpongeRegistries {
         holder.createAndFreezeRegistry(RegistryTypes.HORSE_COLOR, SpongeRegistryLoaders.horseColor());
         holder.createAndFreezeRegistry(RegistryTypes.HORSE_STYLE, SpongeRegistryLoaders.horseStyle());
         holder.createAndFreezeRegistry(RegistryTypes.LIGHT_TYPE, SpongeRegistryLoaders.lightType());
-        holder.createAndFreezeRegistry(RegistryTypes.LLAMA_TYPE, SpongeRegistryLoaders.llamaType());
         holder.createAndFreezeRegistry(RegistryTypes.MATTER_TYPE, SpongeRegistryLoaders.matterType());
         holder.createAndFreezeRegistry(RegistryTypes.MOVEMENT_TYPE, SpongeRegistryLoaders.movementType());
         holder.createAndFreezeRegistry(RegistryTypes.MUSIC_DISC, SpongeRegistryLoaders.musicDisc());

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
@@ -39,7 +40,7 @@ public abstract class WitherSkullMixin_API extends AbstractHurtingProjectileMixi
 
     @Override
     public void detonate() {
-        final Explosion.BlockInteraction mode = this.shadow$getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.KEEP;
+        final Level.ExplosionInteraction mode = this.shadow$getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE;
         ((WitherSkullBridge) this).bridge$throwExplosionEventAndExplosde(this.shadow$getCommandSenderWorld(), (net.minecraft.world.entity.projectile.WitherSkull) (Object) this,
                 this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), 1.0F, false, mode);
         this.shadow$discard();

@@ -28,6 +28,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.ExplosionDamageCalculator;
+import net.minecraft.world.level.Level;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -66,15 +67,16 @@ public abstract class EndCrystalMixin extends EntityMixin implements ExplosiveBr
     @Redirect(method = "hurt",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Explosion$BlockInteraction;)Lnet/minecraft/world/level/Explosion;"
+            target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"
         )
     )
     @Nullable
     private net.minecraft.world.level.Explosion impl$throwEventWithEntity(final net.minecraft.world.level.Level world,
         final Entity entityIn, final DamageSource damageSource, final ExplosionDamageCalculator exDamageCalc, final double xIn, final double yIn, final double zIn, final float explosionRadius,
-            final boolean fire, final net.minecraft.world.level.Explosion.BlockInteraction modeIn) {
+            final boolean fire, final Level.ExplosionInteraction modeIn) {
         // TODO fire?
-        return this.bridge$throwExplosionEventAndExplode(world, entityIn, xIn, yIn, zIn, modeIn.compareTo(net.minecraft.world.level.Explosion.BlockInteraction.DESTROY) <= 0, damageSource);
+        // TODO smoking value correct?
+        return this.bridge$throwExplosionEventAndExplode(world, entityIn, xIn, yIn, zIn, modeIn.compareTo(Level.ExplosionInteraction.TNT) <= 0, damageSource);
     }
 
     @Nullable

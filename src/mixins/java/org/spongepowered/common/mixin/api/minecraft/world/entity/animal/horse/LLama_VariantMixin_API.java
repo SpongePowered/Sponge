@@ -22,13 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.entity.animal.horse;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.horse;
 
 import org.spongepowered.api.data.type.LlamaType;
+import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.asm.mixin.Mixin;
 
-public interface LlamaBridge {
+@Mixin(net.minecraft.world.entity.animal.horse.Llama.Variant.class)
+public abstract class LLama_VariantMixin_API implements LlamaType {
 
-    LlamaType bridge$getLlamaType();
-
-    void bridge$setLlamaType(LlamaType type);
 }

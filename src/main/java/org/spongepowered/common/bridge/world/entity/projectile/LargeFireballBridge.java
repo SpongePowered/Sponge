@@ -32,5 +32,5 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public interface LargeFireballBridge {
 
     @Nullable Explosion bridge$throwExplosionEventAndExplode(Level worldObj, @Nullable Entity nil,
-        double x, double y, double z, float strength, boolean flaming, Explosion.BlockInteraction mode);
+        double x, double y, double z, float strength, boolean flaming, Level.ExplosionInteraction mode);
 }
