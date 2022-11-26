@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -61,7 +62,7 @@ public final class ShieldItemStackData {
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
-        final Registry<BannerPattern> bannerRegistry = SpongeCommon.vanillaRegistry(Registries.BANNER_PATTERN);
+        final Registry<BannerPattern> bannerRegistry = BuiltInRegistries.BANNER_PATTERN;
         bannerRegistry.stream().forEach(pattern -> ShieldItemStackData.SHAPE_BY_HASHNAME.put(pattern.getHashname(), (BannerPatternShape) pattern));
 
         registrator

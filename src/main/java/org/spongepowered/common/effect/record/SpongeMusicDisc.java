@@ -27,13 +27,12 @@ package org.spongepowered.common.effect.record;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.world.item.RecordItem;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.item.RecordItemAccessor;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -50,7 +49,7 @@ public final class SpongeMusicDisc implements MusicDisc {
 
     public SpongeMusicDisc(final RecordItem item) {
         this.item = item;
-        this.id = SpongeCommon.vanillaRegistry(Registries.ITEM).getId(item);
+        this.id = BuiltInRegistries.ITEM.getId(item);
     }
 
     public int getId() {

@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.level.chunk;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeGenerationSettings;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,14 +35,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.level.biome.BiomeSourceBridge;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 @Mixin(ChunkGenerator.class)
 public abstract class ChunkGeneratorMixin {
 
-    @Inject(method = "<init>(Lnet/minecraft/core/Registry;Ljava/util/Optional;Lnet/minecraft/world/level/biome/BiomeSource;Ljava/util/function/Function;)V", at = @At("RETURN"))
-    private void impl$assignGeneratorRefToSource(final Registry $$0, final Optional $$1, final BiomeSource $$2, final Function $$3, final CallbackInfo ci) {
-        ((BiomeSourceBridge) $$2).bridge$setChunkGenerator((ChunkGenerator) (Object) this);
+    @Inject(method = "<init>(Lnet/minecraft/world/level/biome/BiomeSource;Ljava/util/function/Function;)V", at = @At("RETURN"))
+    private void impl$assignGeneratorRefToSource(final BiomeSource $$0, final Function<Holder<Biome>, BiomeGenerationSettings> $$1, final CallbackInfo ci) {
+        ((BiomeSourceBridge) $$0).bridge$setChunkGenerator((ChunkGenerator) (Object) this);
     }
 }

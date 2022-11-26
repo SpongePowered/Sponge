@@ -34,11 +34,11 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class TropicalFish_PatternMixin_API implements TropicalFishShape {
 
     // @formatter:off
-    @Shadow @Final private int base;
+    @Shadow @Final private TropicalFish.Base base;
     // @formatter:on
 
     @Override
     public boolean isLarge() {
-        return this.base == 1;
+        return this.base == TropicalFish.Base.LARGE;
     }
 }

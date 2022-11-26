@@ -70,8 +70,8 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
     // @formatter:off
     @Shadow @Final private static int HALF_MAP_SIZE;
     @Shadow @Final private Map<String, MapDecoration> decorations;
-    @Shadow @Final @Mutable public int x;
-    @Shadow @Final @Mutable public int z;
+    @Shadow @Final @Mutable public int centerX;
+    @Shadow @Final @Mutable public int centerZ;
 
     @Shadow protected abstract void shadow$setColorsDirty(int x, int y);
     // @formatter:on
@@ -156,8 +156,8 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
         final int scaledSize = MapItemSavedDataMixin.MAP_SIZE * (1 << scale);
         final int centerX = Mth.floor((x + MapItemSavedDataMixin.HALF_MAP_SIZE) / (double)scaledSize);
         final int centerZ = Mth.floor((z + MapItemSavedDataMixin.HALF_MAP_SIZE) / (double)scaledSize);
-        this.x = centerX * scaledSize + scaledSize / 2 - 64;
-        this.z = centerZ * scaledSize + scaledSize / 2 - 64;
+        this.centerX = centerX * scaledSize + scaledSize / 2 - 64;
+        this.centerZ = centerZ * scaledSize + scaledSize / 2 - 64;
     }
 
     public void impl$addDecorationToDecorationsMapIfNotExists(final MapDecoration mapDecoration) {

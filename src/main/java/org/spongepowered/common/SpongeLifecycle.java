@@ -124,6 +124,8 @@ public final class SpongeLifecycle implements Lifecycle {
         registryHolderLogic.freezeSpongeRegistries();
 
         this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
+
+        // TODO this is too late now
         this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
     }
 

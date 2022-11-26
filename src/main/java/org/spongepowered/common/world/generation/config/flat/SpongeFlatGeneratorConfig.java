@@ -24,20 +24,22 @@
  */
 package org.spongepowered.common.world.generation.config.flat;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.placement.MiscOverworldPlacements;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryReference;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.common.SpongeCommon;
@@ -137,16 +139,24 @@ public final class SpongeFlatGeneratorConfig {
                 throw new IllegalStateException("Flat generation requires at least 1 Layer!");
             }
             final Registry<Biome> biomeRegistry = SpongeCommon.vanillaRegistry(Registries.BIOME);
+            final HolderLookup.RegistryLookup<PlacedFeature> placedFeatureRegistryLookup = SpongeCommon.vanillaRegistry(Registries.PLACED_FEATURE).asLookup();
             final Optional<HolderSet<StructureSet>> defaultStructures = FlatLevelGeneratorSettings.getDefault(
                     biomeRegistry.asLookup(),
                     SpongeCommon.vanillaRegistry(Registries.STRUCTURE_SET).asLookup(),
-                    SpongeCommon.vanillaRegistry(Registries.PLACED_FEATURE).asLookup()
+                    placedFeatureRegistryLookup
             ).structureOverrides();
+
+
+            final Holder.Reference<Biome> biome =
+                    biomeRegistry.asLookup().getOrThrow(ResourceKey.create(Registries.BIOME, (ResourceLocation) (Object) this.biome.location()));
             return (FlatGeneratorConfig) FlatLevelGeneratorSettingsAccessor.invoker$new(
-                    biomeRegistry,
-                    defaultStructures, (List<FlatLayerInfo>) (Object) this.layers, this.populateLakes,
-                    this.performDecoration, Optional.of(() -> biomeRegistry
-                            .get((ResourceLocation) (Object) this.biome.location())));
+                    defaultStructures,
+                    (List<FlatLayerInfo>) (Object) this.layers,
+                    this.populateLakes,
+                    this.performDecoration,
+                    Optional.of(biome), biome,
+                    placedFeatureRegistryLookup.getOrThrow(MiscOverworldPlacements.LAKE_LAVA_UNDERGROUND),
+                    placedFeatureRegistryLookup.getOrThrow(MiscOverworldPlacements.LAKE_LAVA_SURFACE));
         }
     }
 
