@@ -63,7 +63,7 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
     @Override
     public R fromJson(final ResourceLocation recipeId, final JsonObject json) {
         final String group = GsonHelper.getAsString(json, Constants.Recipe.GROUP, "");
-        final CookingBookCategory category = Objects.requireNonNullElse(CookingBookCategory.CODEC.byName(GsonHelper.getAsString(json, Constants.Recipe.CATEGORY)), CookingBookCategory.MISC);
+        final CookingBookCategory category = Objects.requireNonNullElse(CookingBookCategory.CODEC.byName(GsonHelper.getAsString(json, Constants.Recipe.CATEGORY, null)), CookingBookCategory.MISC);
         final JsonElement jsonelement = GsonHelper.isArrayNode(json, Constants.Recipe.COOKING_INGREDIENT) ? GsonHelper.getAsJsonArray(json, Constants.Recipe.COOKING_INGREDIENT) : GsonHelper.getAsJsonObject(json, Constants.Recipe.COOKING_INGREDIENT);
         final Ingredient ingredient = IngredientUtil.spongeDeserialize(jsonelement);
         final String result = GsonHelper.getAsString(json, Constants.Recipe.RESULT);

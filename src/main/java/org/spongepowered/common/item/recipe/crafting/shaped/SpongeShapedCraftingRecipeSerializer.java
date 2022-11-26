@@ -58,7 +58,7 @@ public class SpongeShapedCraftingRecipeSerializer extends ShapedRecipe.Serialize
     @Override
     public ShapedRecipe fromJson(final ResourceLocation recipeId, final JsonObject json) {
         final String s = GsonHelper.getAsString(json, Constants.Recipe.GROUP, "");
-        final CraftingBookCategory category = Objects.requireNonNullElse(CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, Constants.Recipe.CATEGORY)), CraftingBookCategory.MISC);
+        final CraftingBookCategory category = Objects.requireNonNullElse(CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, Constants.Recipe.CATEGORY, null)), CraftingBookCategory.MISC);
         final JsonObject ingredientKey = GsonHelper.getAsJsonObject(json, Constants.Recipe.SHAPED_INGREDIENTS);
         final Map<String, Ingredient> map = this.deserializeIngredientKey(ingredientKey);
         final String[] astring = ShapedRecipeAccessor.invoker$shrink(ShapedRecipeAccessor.invoker$patternFromJson(GsonHelper.getAsJsonArray(json, Constants.Recipe.SHAPED_PATTERN)));

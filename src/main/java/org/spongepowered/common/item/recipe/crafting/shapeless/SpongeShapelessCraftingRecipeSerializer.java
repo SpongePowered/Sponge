@@ -57,7 +57,7 @@ public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Ser
     @Override
     public ShapelessRecipe fromJson(final ResourceLocation recipeId, final JsonObject json) {
         final String s = GsonHelper.getAsString(json, Constants.Recipe.GROUP, "");
-        final CraftingBookCategory category = Objects.requireNonNullElse(CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, Constants.Recipe.CATEGORY)), CraftingBookCategory.MISC);
+        final CraftingBookCategory category = Objects.requireNonNullElse(CraftingBookCategory.CODEC.byName(GsonHelper.getAsString(json, Constants.Recipe.CATEGORY, null)), CraftingBookCategory.MISC);
         final NonNullList<Ingredient> nonnulllist = this.readIngredients(GsonHelper.getAsJsonArray(json, Constants.Recipe.SHAPELESS_INGREDIENTS));
         if (nonnulllist.isEmpty()) {
             throw new JsonParseException("No ingredients for shapeless recipe");
