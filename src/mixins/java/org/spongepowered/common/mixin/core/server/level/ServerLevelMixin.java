@@ -170,7 +170,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         final Boolean createDragonFight = ((DimensionTypeBridge) (Object) this.shadow$dimensionType()).bridge$createDragonFight();
         if (createDragonFight != null) {
             if (createDragonFight) {
-                final long seed = $$0.getWorldData().worldGenSettings().seed();
+                final long seed = $$0.getWorldData().worldGenOptions().seed();
                 this.dragonFight = new EndDragonFight((ServerLevel) (Object) this, seed, $$0.getWorldData().endDragonFightData());
             } else {
                 this.dragonFight = null;
