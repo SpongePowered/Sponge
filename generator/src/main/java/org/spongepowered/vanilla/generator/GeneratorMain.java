@@ -378,6 +378,13 @@ public final class GeneratorMain {
                 context.relativeClass("data.type", "BannerPatternShape"),
                 Registries.BANNER_PATTERN
             ),
+            new RegistryEntriesGenerator<>(
+                "data.type",
+                "CatTypes",
+                "CAT_TYPE",
+                context.relativeClass("data.type", "CatType"),
+                Registries.CAT_VARIANT
+            ),
             new RegistryEntriesValidator<>(
                 "item.recipe",
                 "RecipeTypes",
