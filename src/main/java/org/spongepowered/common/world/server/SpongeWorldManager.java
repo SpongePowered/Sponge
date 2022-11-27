@@ -25,13 +25,13 @@
 package org.spongepowered.common.world.server;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
@@ -60,6 +60,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.PatrolSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
+import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.storage.CommandStorage;
@@ -781,7 +782,8 @@ public abstract class SpongeWorldManager implements WorldManager {
 
     @Nullable
     private PrimaryLevelData loadLevelData(final RegistryAccess access, final WorldDataConfiguration datapackConfig, final LevelStorageSource.LevelStorageAccess storageSource) {
-        return (PrimaryLevelData) storageSource.getDataTag(SpongeWorldManager.bootstrapOps, datapackConfig, access.registryOrThrow(Registries.LEVEL_STEM), Lifecycle.stable()).getFirst();
+        final Pair<WorldData, WorldDimensions.Complete> dataTag = storageSource.getDataTag(SpongeWorldManager.bootstrapOps, datapackConfig, access.registryOrThrow(Registries.LEVEL_STEM), Lifecycle.stable());
+        return dataTag == null ? null : (PrimaryLevelData) dataTag.getFirst();
     }
 
     private ServerLevel createLevel(
