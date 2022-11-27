@@ -393,6 +393,13 @@ public final class GeneratorMain {
                 context.relativeClass("data.type", "CatType"),
                 Registries.CAT_VARIANT
             ),
+            new RegistryEntriesGenerator<>(
+                "data.type",
+                "FrogTypes",
+                "FROG_TYPE",
+                context.relativeClass("data.type", "FrogType"),
+                Registries.FROG_VARIANT
+            ),
             new RegistryEntriesValidator<>(
                 "item.recipe",
                 "RecipeTypes",
