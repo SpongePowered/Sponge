@@ -49,6 +49,7 @@ import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.Rarity;
@@ -206,6 +207,13 @@ public final class GeneratorMain {
                  "entity",
                  "EntityCategories",
                  MobCategory.class,
+                 "getName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "BoatTypes",
+                 Boat.Type.class,
                  "getName",
                  "sponge"
             ),
