@@ -30,6 +30,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
@@ -117,7 +118,7 @@ class RegistryEntriesGenerator<V> implements Generator {
         clazz.addAnnotation(Types.suppressWarnings("unused"));
 
         final RegistryScope scopeType;
-        Registry<V> registry = (Registry<V>) Registry.REGISTRY.get(this.registry.location());
+        Registry<V> registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(this.registry.location());
         if (registry == null) {
             registry = ctx.registries().registry(this.registry).orElse(null);
             if (registry == null) {

@@ -31,6 +31,7 @@ import com.squareup.javapoet.TypeName;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
@@ -189,11 +190,11 @@ public class BlockStatePropertiesGenerator implements Generator {
         final Map<PropertyType, Map<String, Property<?>>> propertyUsages = new HashMap<>();
         final Map<String, Integer> propertyCount = new HashMap<>();
 
-        for (final Block block : Registry.BLOCK) {
+        for (final Block block : BuiltInRegistries.BLOCK) {
             for (final Property<?> property : block.defaultBlockState().getProperties()) {
                 final var type = PropertyType.ofProperty(property);
                 if (type == null) {
-                    Logger.warn("Unknown property type for state property {} in block {}", property, Registry.BLOCK.getKey(block));
+                    Logger.warn("Unknown property type for state property {} in block {}", property, BuiltInRegistries.BLOCK.getKey(block));
                     continue;
                 }
 

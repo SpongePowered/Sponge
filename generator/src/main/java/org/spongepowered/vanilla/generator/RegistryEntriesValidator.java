@@ -36,6 +36,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.tinylog.Logger;
@@ -95,7 +96,7 @@ class RegistryEntriesValidator<V> implements Generator {
 
         Registry<V> registry = ctx.registries().registry(this.registry).orElse(null);
         if (registry == null) {
-            registry = (Registry<V>) Registry.REGISTRY.get(this.registry.location());
+            registry = (Registry<V>) BuiltInRegistries.REGISTRY.get(this.registry.location());
             if (registry == null) {
                 throw new IllegalArgumentException("Unknown registry " + this.registry);
             }

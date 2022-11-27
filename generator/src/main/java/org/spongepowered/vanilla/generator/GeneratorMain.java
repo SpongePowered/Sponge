@@ -34,6 +34,7 @@ import net.minecraft.commands.Commands.CommandSelection;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
@@ -187,14 +188,14 @@ public final class GeneratorMain {
                 "ArtTypes",
                 "ART_TYPE",
                 context.relativeClass("data.type", "ArtType"),
-                Registry.PAINTING_VARIANT_REGISTRY
+                Registries.PAINTING_VARIANT
             ),
             new RegistryEntriesGenerator<>(
                 "entity.attribute.type",
                 "AttributeTypes",
                 "ATTRIBUTE_TYPE",
                 context.relativeClass("entity.attribute.type", "RangedAttributeType"),
-                Registry.ATTRIBUTE_REGISTRY,
+                Registries.ATTRIBUTE,
                 a -> true, null,
                 context.relativeClass("entity.attribute.type", "AttributeType")
             ),
@@ -203,21 +204,21 @@ public final class GeneratorMain {
                 "Biomes",
                 "BIOME",
                 context.relativeClass("world.biome", "Biome"),
-                Registry.BIOME_REGISTRY
+                Registries.BIOME
             ),
             new RegistryEntriesGenerator<>(
                 "world.generation.carver",
                 "CarverTypes",
                 "CARVER_TYPE",
                 context.relativeClass("world.generation.carver", "CarverType"),
-                Registry.CARVER_REGISTRY
+                Registries.CARVER
             ),
             new RegistryEntriesGenerator<>(
                 "world.generation.carver",
                 "Carvers",
                 "CARVER",
                 context.relativeClass("world.generation.carver", "Carver"),
-                Registry.CONFIGURED_CARVER_REGISTRY,
+                Registries.CONFIGURED_CARVER,
                 a -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
@@ -225,7 +226,7 @@ public final class GeneratorMain {
                 "NoiseGeneratorConfigs",
                 "NOISE_GENERATOR_CONFIG",
                 context.relativeClass("world.generation.config.noise", "NoiseGeneratorConfig"),
-                Registry.NOISE_GENERATOR_SETTINGS_REGISTRY,
+                Registries.NOISE_SETTINGS,
                 a -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
@@ -233,7 +234,7 @@ public final class GeneratorMain {
                 "FlatGeneratorConfigs",
                 "FLAT_GENERATOR_CONFIG",
                 context.relativeClass("world.generation.config.flat", "FlatGeneratorConfig"),
-                Registry.FLAT_LEVEL_GENERATOR_PRESET_REGISTRY,
+                Registries.FLAT_LEVEL_GENERATOR_PRESET,
                 a -> true, RegistryScope.GAME
             ),
             new RegistryEntriesGenerator<>(
@@ -241,7 +242,7 @@ public final class GeneratorMain {
                 "Noises",
                 "NOISE",
                 context.relativeClass("world.generation.config.noise", "Noise"),
-                Registry.NOISE_REGISTRY,
+                Registries.NOISE,
                 a -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
@@ -249,7 +250,7 @@ public final class GeneratorMain {
                 "DensityFunctions",
                 "DENSITY_FUNCTION",
                 context.relativeClass("world.generation.config.noise", "DensityFunction"),
-                Registry.DENSITY_FUNCTION_REGISTRY,
+                Registries.DENSITY_FUNCTION,
                 a -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
@@ -257,19 +258,19 @@ public final class GeneratorMain {
                 "BlockTypes",
                 "BLOCK_TYPE",
                 context.relativeClass("block", "BlockType"),
-                Registry.BLOCK_REGISTRY
+                Registries.BLOCK
             ),
             new RegistryEntriesGenerator<>(
                 "block.entity",
                 "BlockEntityTypes",
                 "BLOCK_ENTITY_TYPE",
                 context.relativeClass("block.entity", "BlockEntityType"),
-                Registry.BLOCK_ENTITY_TYPE_REGISTRY
+                Registries.BLOCK_ENTITY_TYPE
             ),
             new RegistryEntriesValidator<>(
                 "world.chunk",
                 "ChunkStates",
-                Registry.CHUNK_STATUS_REGISTRY
+                Registries.CHUNK_STATUS
             ),
             /*new RegistryEntriesValidator<>( // todo: has special ordering
                 "item.inventory",
@@ -279,12 +280,12 @@ public final class GeneratorMain {
             new RegistryEntriesValidator<>(
                 "item.enchantment",
                 "EnchantmentTypes",
-                Registry.ENCHANTMENT_REGISTRY
+                Registries.ENCHANTMENT
             ),
             new RegistryEntriesValidator<>(
                 "entity",
                 "EntityTypes",
-                Registry.ENTITY_TYPE_REGISTRY,
+                Registries.ENTITY_TYPE,
                 $ -> true,
                 Set.of(new ResourceLocation("sponge", "human")) // Sponge's Human type is an extra addition
             ),
@@ -293,61 +294,61 @@ public final class GeneratorMain {
                 "FluidTypes",
                 "FLUID_TYPE",
                 context.relativeClass("fluid", "FluidType"),
-                Registry.FLUID_REGISTRY
+                Registries.FLUID
             ),
             new RegistryEntriesGenerator<>(
                 "item",
                 "ItemTypes",
                 "ITEM_TYPE",
                 context.relativeClass("item", "ItemType"),
-                Registry.ITEM_REGISTRY
+                Registries.ITEM
             ),
             new RegistryEntriesGenerator<>(
                 "effect.particle",
                 "ParticleTypes",
                 "PARTICLE_TYPE",
                 context.relativeClass("effect.particle", "ParticleType"),
-                Registry.PARTICLE_TYPE_REGISTRY
+                Registries.PARTICLE_TYPE
             ),
             new RegistryEntriesGenerator<>(
                 "item.potion",
                 "PotionTypes",
                 "POTION_TYPE",
                 context.relativeClass("item.potion", "PotionType"),
-                Registry.POTION_REGISTRY
+                Registries.POTION
             ),
             new RegistryEntriesGenerator<>(
                 "effect.potion",
                 "PotionEffectTypes",
                 "POTION_EFFECT_TYPE",
                 context.relativeClass("effect.potion", "PotionEffectType"),
-                Registry.MOB_EFFECT_REGISTRY
+                Registries.MOB_EFFECT
             ),
             new RegistryEntriesGenerator<>(
                 "data.type",
                 "ProfessionTypes",
                 "PROFESSION_TYPE",
                 context.relativeClass("data.type", "ProfessionType"),
-                Registry.VILLAGER_PROFESSION_REGISTRY
+                Registries.VILLAGER_PROFESSION
             ),
             new RegistryEntriesValidator<>(
                 "item.recipe",
                 "RecipeTypes",
-                Registry.RECIPE_TYPE_REGISTRY
+                Registries.RECIPE_TYPE
             ),
             new RegistryEntriesGenerator<>(
                 "effect.sound",
                 "SoundTypes",
                 "SOUND_TYPE",
                 context.relativeClass("effect.sound", "SoundType"),
-                Registry.SOUND_EVENT_REGISTRY
+                Registries.SOUND_EVENT
             ),
             new RegistryEntriesGenerator<>(
                 "statistic",
                 "Statistics",
                 "STATISTIC",
                 context.relativeClass("statistic", "Statistic"),
-                Registry.CUSTOM_STAT_REGISTRY
+                Registries.CUSTOM_STAT
             ),
             /*new RegistryEntriesValidator<>( // TODO: Needs to be updated
                 "statistic",
@@ -359,7 +360,7 @@ public final class GeneratorMain {
                 "Structures",
                 "STRUCTURE",
                 context.relativeClass("world.generation.structure", "Structure"),
-                Registry.STRUCTURE_REGISTRY,
+                Registries.STRUCTURE,
                 $ -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
@@ -367,14 +368,14 @@ public final class GeneratorMain {
                 "StructureTypes",
                 "STRUCTURE_TYPE",
                 context.relativeClass("world.generation.structure", "StructureType"),
-                Registry.STRUCTURE_TYPE_REGISTRY
+                Registries.STRUCTURE_TYPE
             ),
             new RegistryEntriesGenerator<>(
                 "world.generation.structure",
                 "StructureSets",
                 "STRUCTURE_SET",
                 context.relativeClass("world.generation.structure", "StructureSet"),
-                Registry.STRUCTURE_SET_REGISTRY,
+                Registries.STRUCTURE_SET,
                 $ -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
@@ -382,7 +383,7 @@ public final class GeneratorMain {
                 "JigsawPools",
                 "JIGSAW_POOL",
                 context.relativeClass("world.generation.structure.jigsaw", "JigsawPool"),
-                Registry.TEMPLATE_POOL_REGISTRY,
+                Registries.TEMPLATE_POOL,
                 $ -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
@@ -390,7 +391,7 @@ public final class GeneratorMain {
                 "ProcessorLists",
                 "PROCESSOR_LIST",
                 context.relativeClass("world.generation.structure.jigsaw", "ProcessorList"),
-                Registry.PROCESSOR_LIST_REGISTRY,
+                Registries.PROCESSOR_LIST,
                 $ -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
@@ -398,7 +399,7 @@ public final class GeneratorMain {
                 "ProcessorTypes",
                 "PROCESSOR_TYPE",
                 context.relativeClass("world.generation.structure.jigsaw", "ProcessorType"),
-                Registry.STRUCTURE_PROCESSOR_REGISTRY,
+                Registries.STRUCTURE_PROCESSOR,
                 $ -> true, RegistryScope.GAME
             ),
             new RegistryEntriesGenerator<>(
@@ -406,14 +407,14 @@ public final class GeneratorMain {
                 "VillagerTypes",
                 "VILLAGER_TYPE",
                 context.relativeClass("data.type", "VillagerType"),
-                Registry.VILLAGER_TYPE_REGISTRY
+                Registries.VILLAGER_TYPE
             ),
             new RegistryEntriesGenerator<>(
                 "world",
                 "WorldTypes",
                 "WORLD_TYPE",
                 context.relativeClass("world", "WorldType"),
-                Registry.DIMENSION_TYPE_REGISTRY,
+                Registries.DIMENSION_TYPE,
                 $ -> true,
                 RegistryScope.SERVER
             ),
@@ -423,7 +424,7 @@ public final class GeneratorMain {
                     "PlacedFeatures",
                     "PLACED_FEATURE",
                     context.relativeClass("world.generation.feature", "PlacedFeature"),
-                    Registry.PLACED_FEATURE_REGISTRY,
+                    Registries.PLACED_FEATURE,
                     $ -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
@@ -431,7 +432,7 @@ public final class GeneratorMain {
                     "Features",
                     "FEATURE",
                     context.relativeClass("world.generation.feature", "Feature"),
-                    Registry.CONFIGURED_FEATURE_REGISTRY,
+                    Registries.CONFIGURED_FEATURE,
                     $ -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
@@ -439,7 +440,7 @@ public final class GeneratorMain {
                     "FeatureTypes",
                     "FEATURE_TYPE",
                     context.relativeClass("world.generation.feature", "FeatureType"),
-                    Registry.FEATURE_REGISTRY,
+                    Registries.FEATURE,
                     $ -> true, RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
@@ -447,40 +448,40 @@ public final class GeneratorMain {
                     "PlacementModifierTypes",
                     "PLACEMENT_MODIFIER",
                     context.relativeClass("world.generation.feature", "PlacementModifierType"),
-                    Registry.PLACEMENT_MODIFIER_REGISTRY,
+                    Registries.PLACEMENT_MODIFIER_TYPE,
                     $ -> true, RegistryScope.SERVER
             ),
             new TagGenerator(
                     "BLOCK_TYPE",
-                    Registry.BLOCK_REGISTRY,
+                    Registries.BLOCK,
                     context.relativeClass("block", "BlockType"),
                     "tag",
                     "BlockTypeTags"
             ),
             new TagGenerator(
-                "BIOME",
-                Registry.BIOME_REGISTRY,
-                context.relativeClass("world.biome", "Biome"),
-                "tag",
-                "BiomeTags"
+                    "BIOME",
+                    Registries.BIOME,
+                    context.relativeClass("world.biome", "Biome"),
+                    "tag",
+                    "BiomeTags"
             ),
             new TagGenerator(
                     "ITEM_TYPE",
-                    Registry.ITEM_REGISTRY,
+                    Registries.ITEM,
                     context.relativeClass("item", "ItemType"),
                     "tag",
                     "ItemTypeTags"
             ),
             new TagGenerator(
                     "ENTITY_TYPE",
-                    Registry.ENTITY_TYPE_REGISTRY,
+                    Registries.ENTITY_TYPE,
                     ParameterizedTypeName.get(context.relativeClass("entity", "EntityType"), WildcardTypeName.subtypeOf(Object.class)),
                     "tag",
                     "EntityTypeTags"
             ),
             new TagGenerator(
                     "FLUID_TYPE",
-                    Registry.FLUID_REGISTRY,
+                    Registries.FLUID,
                     context.relativeClass("fluid", "FluidType"),
                     "tag",
                     "FluidTypeTags"
