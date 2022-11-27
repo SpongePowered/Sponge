@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry;
+package org.spongepowered.common.registry.loader;
 
 import com.google.common.base.CaseFormat;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -44,7 +44,10 @@ import net.minecraft.world.entity.animal.Panda;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.animal.Rabbit;
 import net.minecraft.world.entity.animal.TropicalFish;
+import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.animal.horse.Markings;
+import net.minecraft.world.entity.animal.horse.Variant;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.monster.SpellcasterIllager;
@@ -82,6 +85,7 @@ import net.minecraft.world.level.block.state.properties.Tilt;
 import net.minecraft.world.level.block.state.properties.WallSide;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.minecraft.world.ticks.TickPriority;
@@ -89,8 +93,6 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.advancement.criteria.trigger.Triggers;
-import org.spongepowered.api.data.type.LlamaType;
-import org.spongepowered.api.data.type.LlamaTypes;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
@@ -107,6 +109,8 @@ import org.spongepowered.common.accessor.world.item.ArmorMaterialsAccessor;
 import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.advancement.criterion.SpongeDummyTrigger;
 import org.spongepowered.common.advancement.criterion.SpongeScoreTrigger;
+import org.spongepowered.common.registry.RegistryLoader;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -115,7 +119,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-final class VanillaRegistryLoader {
+public final class VanillaRegistryLoader {
     private final SpongeRegistryHolder holder;
 
     public static void load(final SpongeRegistryHolder holder) {
@@ -234,6 +238,8 @@ final class VanillaRegistryLoader {
         this.automaticSerializedName(RegistryTypes.PARROT_TYPE, Parrot.Variant.values());
         this.automaticSerializedName(RegistryTypes.RABBIT_TYPE, Rabbit.Variant.values());
         this.automaticSerializedName(RegistryTypes.LLAMA_TYPE, Llama.Variant.values());
+        this.automaticSerializedName(RegistryTypes.HORSE_COLOR, Variant.values());
+        this.automaticName(RegistryTypes.HORSE_STYLE, Markings.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {

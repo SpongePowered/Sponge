@@ -53,8 +53,6 @@ import java.util.stream.Stream;
 @Mixin(MappedRegistry.class)
 public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, WritableRegistryBridge<T> {
 
-    @Shadow public abstract Lifecycle lifecycle(final T $$0);
-
     private RegistryType<T> impl$type;
     private final Map<ResourceKey, RegistryEntry<T>> impl$entries = new LinkedHashMap<>();
 
@@ -108,16 +106,6 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     @Override
     public Stream<RegistryEntry<T>> bridge$streamEntries() {
         return this.impl$entries.values().stream();
-    }
-
-    @Nullable
-    @Override
-    public RegistryEntry<T> bridge$register(final net.minecraft.resources.ResourceKey<T> key, final T value, final Lifecycle lifecycle) {
-        ((WritableRegistry) this).register(key, value, lifecycle);
-
-        return ((RegistryBridge<T>) this)
-                .bridge$get((org.spongepowered.api.ResourceKey) (Object) key.location())
-                .orElse(null);
     }
 
 }

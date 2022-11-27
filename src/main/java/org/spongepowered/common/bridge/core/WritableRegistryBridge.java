@@ -24,16 +24,10 @@
  */
 package org.spongepowered.common.bridge.core;
 
-import com.mojang.serialization.Lifecycle;
-import net.minecraft.resources.ResourceKey;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.registry.RegistryEntry;
-
 public interface WritableRegistryBridge<T> {
 
     boolean bridge$isDynamic();
 
     void bridge$setDynamic(boolean isDynamic);
 
-    @Nullable RegistryEntry<T> bridge$register(final ResourceKey<T> key, final T value, final Lifecycle lifecycle);
 }

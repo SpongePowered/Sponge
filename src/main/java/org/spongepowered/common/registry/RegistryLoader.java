@@ -67,6 +67,10 @@ public final class RegistryLoader<T> extends InitialRegistryData<T> {
         return this.add0(id, key, function.apply(key.location()));
     }
 
+    public <MC> RegistryLoader<T> add(final MC mcType, final RegistryKey<? extends T> key, final Function<MC, ? extends T> function, final Function<MC, Integer> idFunction) {
+        return this.add0(idFunction.apply(mcType), key, function.apply(mcType));
+    }
+
     private RegistryLoader<T> add0(final int id, final RegistryKey<? extends T> key, final T value) {
         this.values.put(key.location(), value);
         if (this.ids == null) {

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.core;
 
+import com.mojang.serialization.Lifecycle;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.resources.ResourceLocation;
@@ -38,7 +40,9 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.core.RegistryBridge;
+import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -51,6 +55,10 @@ import javax.annotation.Nullable;
 @Mixin(MappedRegistry.class)
 @Implements(@Interface(iface = Registry.class, prefix = "registry$", remap = Interface.Remap.NONE))
 public abstract class MappedRegistryMixin_API<T> implements Registry<T> {
+
+    @Shadow public abstract Holder.Reference<T> shadow$register(final net.minecraft.resources.ResourceKey<T> $$0, final T $$1, final Lifecycle $$2);
+
+    @Shadow public abstract net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> shadow$key();
 
     private ResourceLocation impl$getKey(final T value) {
         return ((net.minecraft.core.Registry) this).getKey(value);
@@ -137,11 +145,22 @@ public abstract class MappedRegistryMixin_API<T> implements Registry<T> {
 
     @Override
     public boolean isDynamic() {
+        if (this instanceof WritableRegistryBridge<?> bridge) {
+            return bridge.bridge$isDynamic();
+        }
         return false;
     }
 
     @Override
     public <V extends T> Optional<RegistryEntry<V>> register(final ResourceKey key, final V value) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(value, "value");
+
+        if (this.isDynamic()) {
+            final net.minecraft.resources.ResourceKey<T> mcKey = net.minecraft.resources.ResourceKey.create(this.shadow$key(), (ResourceLocation) (Object) key);
+            this.shadow$register(mcKey, value, Lifecycle.stable());
+            return ((RegistryBridge) this).bridge$get(key);
+        }
         return Optional.empty();
     }
 

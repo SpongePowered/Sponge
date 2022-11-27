@@ -54,7 +54,6 @@ public abstract class MainMixin {
     private static Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
         final Path datapackDir = levelSave.getLevelPath(folderName);
         final var lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishGlobalRegistries();
         lifecycle.establishDataProviders();
         lifecycle.callRegisterDataEvent();
         return datapackDir;

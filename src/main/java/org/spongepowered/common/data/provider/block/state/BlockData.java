@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.block.state;
 
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
@@ -103,7 +104,7 @@ public final class BlockData {
                         .get(h -> {
                             if (h.getBlock() instanceof LiquidBlock) {
                                 return MatterTypes.LIQUID.get();
-                            } else if (h.getMaterial() == Material.AIR) {
+                            } else if (h.getMaterial() == Material.AIR || h.getBlock() instanceof AirBlock) {
                                 return MatterTypes.GAS.get();
                             } else {
                                 return MatterTypes.SOLID.get();

@@ -441,7 +441,9 @@
         "minecraft.world.ticks.TickPriorityMixin_API",
         "service.permission.SubjectMixin_API",
         "world.LocatableBlockMixin_API",
-        "minecraft.world.entity.animal.horse.LLama_VariantMixin_API"
+        "minecraft.world.entity.animal.horse.LLama_VariantMixin_API",
+        "minecraft.world.entity.animal.horse.MarkingsMixin_API",
+        "minecraft.world.entity.animal.horse.VariantMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

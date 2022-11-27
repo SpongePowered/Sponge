@@ -72,7 +72,6 @@ public class IntegrationTestLaunch extends VanillaLaunch {
 
             // Prepare Sponge
             final Lifecycle lifecycle = Launch.instance().lifecycle();
-            lifecycle.establishGlobalRegistries();
             lifecycle.establishDataProviders();
             lifecycle.callRegisterDataEvent();
 

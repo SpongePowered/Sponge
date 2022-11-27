@@ -56,7 +56,6 @@ public abstract class MinecraftMixin_Vanilla implements MinecraftBridge, Vanilla
     @Inject(method = "run", at = @At("HEAD"))
     private void vanilla$establishRegistriesAndStartingEngine(CallbackInfo ci) {
         final Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishGlobalRegistries();
         lifecycle.establishDataProviders();
         lifecycle.callRegisterDataEvent();
 

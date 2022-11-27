@@ -85,6 +85,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
         dynamicAccess.registries().forEach(entry -> {
             root.register(entry.key(), entry.value(), Lifecycle.stable());
         });
+        root.freeze();
     }
 
     public void setRootMinecraftRegistry(final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> rootRegistry) {
@@ -209,7 +210,11 @@ public final class RegistryHolderLogic implements RegistryHolder {
         return (Registry<T>) registry;
     }
 
-    public void freezeSpongeRegistries() {
+    public void freezeSpongeRootRegistry() {
         this.roots.get(RegistryRoots.SPONGE).freeze();
+    }
+
+    public void freezeSpongeDynamicRegistries() {
+        this.roots.get(RegistryRoots.SPONGE).forEach(net.minecraft.core.Registry::freeze);
     }
 }

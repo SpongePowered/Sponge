@@ -22,9 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.type;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.horse;
 
-import org.spongepowered.api.data.type.HorseColor;
+import org.spongepowered.api.data.type.HorseStyle;
+import org.spongepowered.asm.mixin.Mixin;
 
-public final class SpongeHorseColor implements HorseColor {
+@Mixin(net.minecraft.world.entity.animal.horse.Markings.class)
+public abstract class MarkingsMixin_API implements HorseStyle {
+
 }

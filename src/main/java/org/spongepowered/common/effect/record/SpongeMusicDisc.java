@@ -64,6 +64,7 @@ public final class SpongeMusicDisc implements MusicDisc {
     public static ClientboundLevelEventPacket createPacket(final Vector3i position, final @Nullable MusicDisc recordType) {
         checkNotNull(position, "position");
         final BlockPos pos = new BlockPos(position.x(), position.y(), position.z());
+        // see RecordItem.useOn
         return new ClientboundLevelEventPacket(SpongeMusicDisc.EFFECT_ID, pos, recordType == null ? 0 :
                 ((SpongeMusicDisc) recordType).getId(), false);
     }

@@ -31,6 +31,7 @@ import io.leangen.geantyref.TypeToken;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.RegistryLayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
@@ -54,7 +55,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
-import org.spongepowered.common.registry.RegistryHolderLogic;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
 import org.spongepowered.common.registry.SpongeRegistries;
@@ -106,27 +106,39 @@ public final class SpongeLifecycle implements Lifecycle {
     }
 
     @Override
-    public void establishGlobalRegistries() {
-        // Need to do this here to prevent classloading Registry too early...
-        ((SpongeRegistryHolder) this.game).setRootMinecraftRegistry((Registry<Registry<?>>) BuiltInRegistries.REGISTRY);
+    public void establishEarlyGlobalRegistries() {
+        final SpongeRegistryHolder holder = (SpongeRegistryHolder) this.game;
+        holder.setRootMinecraftRegistry((Registry<Registry<?>>) BuiltInRegistries.REGISTRY);
 
-        SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder) this.game);
-
-
+        SpongeRegistries.registerEarlyGlobalRegistries(holder);
     }
 
     @Override
-    public void establishGlobalRegistries(final RegistryAccess.Frozen registryAccess) {
-        // TODO check if everything can be moved here
-        SpongeRegistries.registerGlobalRegistries((SpongeRegistryHolder) this.game, registryAccess);
+    public void establishGlobalRegistries(final RegistryAccess.Frozen registryAccess, final RegistryLayer layer) {
+        final SpongeRegistryHolder holder = (SpongeRegistryHolder) this.game;
 
-        final RegistryHolderLogic registryHolderLogic = ((SpongeRegistryHolder) this.game).registryHolder();
-        registryHolderLogic.freezeSpongeRegistries();
+        switch (layer)
+        {
+            // WORLDGEN ->
+            case DIMENSIONS -> {
+                SpongeRegistries.registerGlobalRegistriesDimensionLayer((SpongeRegistryHolder) this.game, registryAccess);
 
-        this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
+                // Plugin registries
+                this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
 
-        // TODO this is too late now
-        this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
+                // Freeze Sponge Root - Registries are now available
+                holder.registryHolder().freezeSpongeRootRegistry();
+
+            }
+            case RELOADABLE -> {
+
+                // Plugin registry values
+                this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
+
+                // Freeze Dynamic Registries - Values are now available
+                holder.registryHolder().freezeSpongeDynamicRegistries();
+            }
+        }
     }
 
     @Override
@@ -242,4 +254,5 @@ public final class SpongeLifecycle implements Lifecycle {
                 .filter(plugin -> !(plugin instanceof DummyPluginContainer))
                 .collect(Collectors.toList());
     }
+
 }

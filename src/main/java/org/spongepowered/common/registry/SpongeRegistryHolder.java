@@ -68,7 +68,7 @@ public interface SpongeRegistryHolder extends RegistryHolder {
         return this.createRegistry(type, loader, false);
     }
 
-    default <T> org.spongepowered.api.registry.Registry<T> createAndFreezeRegistry(final RegistryType<T> type, final RegistryLoader<T> loader) {
+    default <T> org.spongepowered.api.registry.Registry<T> createFrozenRegistry(final RegistryType<T> type, final RegistryLoader<T> loader) {
         final org.spongepowered.api.registry.Registry<T> registry = this.createRegistry(type, loader, false);
         if (registry instanceof MappedRegistry<?> toFreeze) {
             toFreeze.freeze();

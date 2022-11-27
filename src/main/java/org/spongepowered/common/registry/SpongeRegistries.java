@@ -24,74 +24,97 @@
  */
 package org.spongepowered.common.registry;
 
-import net.minecraft.core.MappedRegistry;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.flag.FeatureFlagSet;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.economy.Currency;
+import org.spongepowered.common.registry.loader.CommandRegistryLoader;
+import org.spongepowered.common.registry.loader.DynamicSpongeRegistryLoader;
+import org.spongepowered.common.registry.loader.SpongeCommonRegistryLoader;
+import org.spongepowered.common.registry.loader.SpongeRegistryLoader;
+import org.spongepowered.common.registry.loader.VanillaRegistryLoader;
 
 public final class SpongeRegistries {
 
-    public static void registerGlobalRegistries(final SpongeRegistryHolder holder) {
+    // During Bootstrap
+    public static void registerEarlyGlobalRegistries(final SpongeRegistryHolder holder) {
+        // Vanilla
         VanillaRegistryLoader.load(holder);
 
-        // TODO holders are never bound when not freezing
-        holder.createRegistry(RegistryTypes.CURRENCY, (RegistryLoader<Currency>) null, true);
-        holder.createRegistry(RegistryTypes.COMMAND_REGISTRAR_TYPE, SpongeRegistryLoaders.commandRegistrarType(), true);
-        holder.createRegistry(RegistryTypes.PLACEHOLDER_PARSER, SpongeRegistryLoaders.placeholderParser(), true);
-        holder.createRegistry(RegistryTypes.TELEPORT_HELPER_FILTER, SpongeRegistryLoaders.teleportHelperFilter(), true);
+        // Internal
+        holder.createFrozenRegistry(SpongeRegistryTypes.TRACKER_TRANSACTION_TYPE, SpongeCommonRegistryLoader.blockTransactionTypes());
+        holder.createFrozenRegistry(SpongeRegistryTypes.VALIDATION_TYPE, SpongeCommonRegistryLoader.validationType());
 
-        holder.createAndFreezeRegistry(RegistryTypes.ACCOUNT_DELETION_RESULT_TYPE, SpongeRegistryLoaders.accountDeletionResultType());
-        holder.createAndFreezeRegistry(RegistryTypes.BAN_TYPE, SpongeRegistryLoaders.banType());
-        holder.createAndFreezeRegistry(SpongeRegistryTypes.TRACKER_TRANSACTION_TYPE, SpongeRegistryLoaders.blockTransactionTypes());
-        holder.createAndFreezeRegistry(RegistryTypes.BODY_PART, SpongeRegistryLoaders.bodyPart());
-        holder.createAndFreezeRegistry(RegistryTypes.CLICK_TYPE, SpongeRegistryLoaders.clickType());
-        holder.createAndFreezeRegistry(RegistryTypes.CHUNK_REGENERATE_FLAG, SpongeRegistryLoaders.chunkRegenerateFlag());
-        holder.createAndFreezeRegistry(RegistryTypes.CLIENT_COMPLETION_TYPE, SpongeRegistryLoaders.clientCompletionType());
-        holder.createAndFreezeRegistry(RegistryTypes.COMMAND_COMPLETION_PROVIDER, SpongeRegistryLoaders.clientSuggestionProvider());
-        holder.createAndFreezeRegistry(RegistryTypes.DAMAGE_TYPE, SpongeRegistryLoaders.damageType());
-        holder.createAndFreezeRegistry(RegistryTypes.DAMAGE_MODIFIER_TYPE, SpongeRegistryLoaders.damageModifierType());
-        holder.createAndFreezeRegistry(RegistryTypes.DISMOUNT_TYPE, SpongeRegistryLoaders.dismountType());
-        holder.createAndFreezeRegistry(RegistryTypes.DISPLAY_SLOT, SpongeRegistryLoaders.displaySlot());
-        holder.createAndFreezeRegistry(RegistryTypes.GOAL_EXECUTOR_TYPE, SpongeRegistryLoaders.goalExecutorType());
-        holder.createAndFreezeRegistry(RegistryTypes.GOAL_TYPE, SpongeRegistryLoaders.goalType());
-        holder.createAndFreezeRegistry(RegistryTypes.HORSE_COLOR, SpongeRegistryLoaders.horseColor());
-        holder.createAndFreezeRegistry(RegistryTypes.HORSE_STYLE, SpongeRegistryLoaders.horseStyle());
-        holder.createAndFreezeRegistry(RegistryTypes.LIGHT_TYPE, SpongeRegistryLoaders.lightType());
-        holder.createAndFreezeRegistry(RegistryTypes.MATTER_TYPE, SpongeRegistryLoaders.matterType());
-        holder.createAndFreezeRegistry(RegistryTypes.MOVEMENT_TYPE, SpongeRegistryLoaders.movementType());
-        holder.createAndFreezeRegistry(RegistryTypes.MUSIC_DISC, SpongeRegistryLoaders.musicDisc());
-        holder.createAndFreezeRegistry(RegistryTypes.NOTE_PITCH, SpongeRegistryLoaders.notePitch());
-        holder.createAndFreezeRegistry(RegistryTypes.OPERATOR, SpongeRegistryLoaders.operator());
-        holder.createAndFreezeRegistry(RegistryTypes.OPERATION, SpongeRegistryLoaders.operation());
-        holder.createAndFreezeRegistry(RegistryTypes.ORIENTATION, SpongeRegistryLoaders.orientation());
-        holder.createAndFreezeRegistry(RegistryTypes.PALETTE_TYPE, SpongeRegistryLoaders.paletteType());
-        holder.createAndFreezeRegistry(RegistryTypes.PARTICLE_OPTION, SpongeRegistryLoaders.particleOption());
-        holder.createAndFreezeRegistry(RegistryTypes.PORTAL_TYPE, SpongeRegistryLoaders.portalType());
-        holder.createAndFreezeRegistry(RegistryTypes.QUERY_TYPE, SpongeRegistryLoaders.queryType());
-        holder.createAndFreezeRegistry(RegistryTypes.RESOLVE_OPERATION, SpongeRegistryLoaders.resolveOperation());
-        holder.createAndFreezeRegistry(RegistryTypes.SELECTOR_TYPE, SpongeRegistryLoaders.selectorType());
-        holder.createAndFreezeRegistry(RegistryTypes.SELECTOR_SORT_ALGORITHM, SpongeRegistryLoaders.selectorSortAlgorithm());
-        holder.createAndFreezeRegistry(RegistryTypes.SKIN_PART, SpongeRegistryLoaders.skinPart());
-        holder.createAndFreezeRegistry(RegistryTypes.SPAWN_TYPE, SpongeRegistryLoaders.spawnType());
-        holder.createAndFreezeRegistry(RegistryTypes.TICKET_TYPE, SpongeRegistryLoaders.ticketType());
-        holder.createAndFreezeRegistry(RegistryTypes.TRANSACTION_TYPE, SpongeRegistryLoaders.transactionType());
-        holder.createAndFreezeRegistry(SpongeRegistryTypes.VALIDATION_TYPE, SpongeRegistryLoaders.validationType());
-        holder.createAndFreezeRegistry(RegistryTypes.WEATHER_TYPE, SpongeRegistryLoaders.weather());
-        holder.createAndFreezeRegistry(RegistryTypes.DATA_FORMAT, SpongeRegistryLoaders.dataFormat());
-        holder.createAndFreezeRegistry(RegistryTypes.MAP_COLOR_TYPE, SpongeRegistryLoaders.mapColorType());
-        holder.createAndFreezeRegistry(RegistryTypes.MAP_DECORATION_ORIENTATION, SpongeRegistryLoaders.mapDecorationOrientation());
-        holder.createAndFreezeRegistry(RegistryTypes.MAP_DECORATION_TYPE, SpongeRegistryLoaders.mapDecorationType());
-        holder.createAndFreezeRegistry(RegistryTypes.MAP_SHADE, SpongeRegistryLoaders.mapShade());
-        holder.createAndFreezeRegistry(RegistryTypes.NOISE_CONFIG, SpongeRegistryLoaders.noiseConfig());
+        // Commands
+        holder.createFrozenRegistry(RegistryTypes.CLIENT_COMPLETION_TYPE, CommandRegistryLoader.clientCompletionType());
+        holder.createFrozenRegistry(RegistryTypes.COMMAND_COMPLETION_PROVIDER, CommandRegistryLoader.clientSuggestionProvider());
+        holder.createFrozenRegistry(RegistryTypes.OPERATOR, CommandRegistryLoader.operator());
+        holder.createFrozenRegistry(RegistryTypes.SELECTOR_TYPE, CommandRegistryLoader.selectorType());
+        holder.createFrozenRegistry(RegistryTypes.SELECTOR_SORT_ALGORITHM, CommandRegistryLoader.selectorSortAlgorithm());
+
+        // other
+        holder.createFrozenRegistry(RegistryTypes.ACCOUNT_DELETION_RESULT_TYPE, SpongeRegistryLoader.accountDeletionResultType());
+        holder.createFrozenRegistry(RegistryTypes.BAN_TYPE, SpongeRegistryLoader.banType());
+        holder.createFrozenRegistry(RegistryTypes.BODY_PART, SpongeRegistryLoader.bodyPart());
+        holder.createFrozenRegistry(RegistryTypes.CLICK_TYPE, SpongeRegistryLoader.clickType());
+        holder.createFrozenRegistry(RegistryTypes.CHUNK_REGENERATE_FLAG, SpongeRegistryLoader.chunkRegenerateFlag());
+        holder.createFrozenRegistry(RegistryTypes.DAMAGE_TYPE, SpongeRegistryLoader.damageType());
+        holder.createFrozenRegistry(RegistryTypes.DAMAGE_MODIFIER_TYPE, SpongeRegistryLoader.damageModifierType());
+        holder.createFrozenRegistry(RegistryTypes.DISMOUNT_TYPE, SpongeRegistryLoader.dismountType());
+        holder.createFrozenRegistry(RegistryTypes.DISPLAY_SLOT, SpongeRegistryLoader.displaySlot());
+        holder.createFrozenRegistry(RegistryTypes.GOAL_EXECUTOR_TYPE, SpongeRegistryLoader.goalExecutorType());
+        holder.createFrozenRegistry(RegistryTypes.GOAL_TYPE, SpongeRegistryLoader.goalType());
+        holder.createFrozenRegistry(RegistryTypes.LIGHT_TYPE, SpongeRegistryLoader.lightType());
+        holder.createFrozenRegistry(RegistryTypes.MATTER_TYPE, SpongeRegistryLoader.matterType());
+        holder.createFrozenRegistry(RegistryTypes.MOVEMENT_TYPE, SpongeRegistryLoader.movementType());
+        holder.createFrozenRegistry(RegistryTypes.MUSIC_DISC, SpongeRegistryLoader.musicDisc());
+        holder.createFrozenRegistry(RegistryTypes.NOTE_PITCH, SpongeRegistryLoader.notePitch());
+        holder.createFrozenRegistry(RegistryTypes.OPERATION, SpongeRegistryLoader.operation());
+        holder.createFrozenRegistry(RegistryTypes.ORIENTATION, SpongeRegistryLoader.orientation());
+        holder.createFrozenRegistry(RegistryTypes.PALETTE_TYPE, SpongeRegistryLoader.paletteType());
+        holder.createFrozenRegistry(RegistryTypes.PARTICLE_OPTION, SpongeRegistryLoader.particleOption());
+        holder.createFrozenRegistry(RegistryTypes.PORTAL_TYPE, SpongeRegistryLoader.portalType());
+        holder.createFrozenRegistry(RegistryTypes.QUERY_TYPE, SpongeRegistryLoader.queryType());
+        holder.createFrozenRegistry(RegistryTypes.RESOLVE_OPERATION, SpongeRegistryLoader.resolveOperation());
+        holder.createFrozenRegistry(RegistryTypes.SKIN_PART, SpongeRegistryLoader.skinPart());
+        holder.createFrozenRegistry(RegistryTypes.SPAWN_TYPE, SpongeRegistryLoader.spawnType());
+        holder.createFrozenRegistry(RegistryTypes.TICKET_TYPE, SpongeRegistryLoader.ticketType());
+        holder.createFrozenRegistry(RegistryTypes.TRANSACTION_TYPE, SpongeRegistryLoader.transactionType());
+        holder.createFrozenRegistry(RegistryTypes.WEATHER_TYPE, SpongeRegistryLoader.weather());
+        holder.createFrozenRegistry(RegistryTypes.DATA_FORMAT, SpongeRegistryLoader.dataFormat());
+        holder.createFrozenRegistry(RegistryTypes.MAP_COLOR_TYPE, SpongeRegistryLoader.mapColorType());
+        holder.createFrozenRegistry(RegistryTypes.MAP_DECORATION_ORIENTATION, SpongeRegistryLoader.mapDecorationOrientation());
+        holder.createFrozenRegistry(RegistryTypes.MAP_DECORATION_TYPE, SpongeRegistryLoader.mapDecorationType());
+        holder.createFrozenRegistry(RegistryTypes.MAP_SHADE, SpongeRegistryLoader.mapShade());
+        holder.createFrozenRegistry(RegistryTypes.NOISE_CONFIG, SpongeRegistryLoader.noiseConfig());
+
+        SpongeRegistries.registerEarlyDynamicRegistries(holder);
+
+
+
+    }
+
+    private static void registerEarlyDynamicRegistries(final SpongeRegistryHolder holder) {
+        holder.createRegistry(RegistryTypes.CURRENCY, (RegistryLoader<Currency>) null, true);
+        holder.createRegistry(RegistryTypes.COMMAND_REGISTRAR_TYPE, CommandRegistryLoader.commandRegistrarType(), true);
+        holder.createRegistry(RegistryTypes.PLACEHOLDER_PARSER, DynamicSpongeRegistryLoader.placeholderParser(), true);
+        holder.createRegistry(RegistryTypes.TELEPORT_HELPER_FILTER, DynamicSpongeRegistryLoader.teleportHelperFilter(), true);
+    }
+
+
+    public static void registerGlobalRegistriesDimensionLayer(final SpongeRegistryHolder holder, final RegistryAccess.Frozen registryAccess) {
+        final RegistryAccess.ImmutableRegistryAccess builtInRegistryAccess = new RegistryAccess.ImmutableRegistryAccess(BuiltInRegistries.REGISTRY.stream().toList());
+        final CommandBuildContext cbCtx = CommandBuildContext.configurable(builtInRegistryAccess, FeatureFlagSet.of());
+        holder.createFrozenRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, CommandRegistryLoader.clientCompletionKey(cbCtx));
+        holder.createFrozenRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, CommandRegistryLoader.valueParameter(cbCtx));
+
+        holder.createFrozenRegistry(RegistryTypes.FLAT_GENERATOR_CONFIG, SpongeRegistryLoader.flatGeneratorConfig(registryAccess));
     }
 
     public static void registerServerRegistries(final RegistryHolder holder) {
     }
 
-    public static void registerGlobalRegistries(final SpongeRegistryHolder holder, final RegistryAccess.Frozen registryAccess) {
-        holder.createAndFreezeRegistry(RegistryTypes.FLAT_GENERATOR_CONFIG, SpongeRegistryLoaders.flatGeneratorConfig(registryAccess));
-        holder.createAndFreezeRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, SpongeRegistryLoaders.clientCompletionKey(registryAccess));
-        holder.createAndFreezeRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, SpongeRegistryLoaders.valueParameter(registryAccess));
-    }
 }
