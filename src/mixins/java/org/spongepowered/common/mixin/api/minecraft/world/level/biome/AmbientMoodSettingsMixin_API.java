@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.biome.AmbientMoodSettings;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -36,7 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class AmbientMoodSettingsMixin_API implements SoundConfig.Mood {
 
     // @formatter:off
-    @Shadow @Final private SoundEvent soundEvent;
+    @Shadow @Final private Holder<SoundEvent> soundEvent;
     @Shadow @Final private int tickDelay;
     @Shadow @Final private int blockSearchExtent;
     @Shadow @Final private double soundPositionOffset;
@@ -44,7 +45,7 @@ public abstract class AmbientMoodSettingsMixin_API implements SoundConfig.Mood {
 
     @Override
     public SoundType sound() {
-        return (SoundType) this.soundEvent;
+        return (SoundType) this.soundEvent.value();
     }
 
     @Override

@@ -79,9 +79,9 @@ public abstract class PlayerMixin_Inventory extends LivingEntityMixin_Inventory 
 
 
     @Redirect(method = "remove", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;removed(Lnet/minecraft/world/entity/player/Player;)V"))
-    protected void inventory$switchToCloseWindowState(final AbstractContainerMenu container, final Player player) {
-        container.removed(player);
+            target = "Lnet/minecraft/world/inventory/InventoryMenu;removed(Lnet/minecraft/world/entity/player/Player;)V"))
+    protected void inventory$switchToCloseWindowState(final InventoryMenu instance, final Player $$0) {
+        instance.removed($$0);
     }
 
     @Redirect(method = "touch", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;playerTouch(Lnet/minecraft/world/entity/player/Player;)V"))

@@ -35,6 +35,7 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -120,7 +121,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     }
 
     @Override
-    protected void inventory$switchToCloseWindowState(final AbstractContainerMenu container, final Player player) {
+    protected void inventory$switchToCloseWindowState(final InventoryMenu container, final Player player) {
         // Corner case where the server is shutting down on the client, the server player is also being killed off.
         if (Sponge.isServerAvailable() && Sponge.isClientAvailable()) {
             container.removed(player);

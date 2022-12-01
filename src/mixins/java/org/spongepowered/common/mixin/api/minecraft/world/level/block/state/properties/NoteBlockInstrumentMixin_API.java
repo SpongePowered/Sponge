@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.state.properties;
 
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import org.spongepowered.api.data.type.InstrumentType;
@@ -35,11 +36,11 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class NoteBlockInstrumentMixin_API implements InstrumentType {
 
     // @formatter:off
-    @Shadow public abstract SoundEvent shadow$getSoundEvent();
+    @Shadow public abstract Holder<SoundEvent> shadow$getSoundEvent();
     // @formatter:on
 
     @Override
     public SoundType sound() {
-        return (SoundType) this.shadow$getSoundEvent();
+        return (SoundType) this.shadow$getSoundEvent().value();
     }
 }

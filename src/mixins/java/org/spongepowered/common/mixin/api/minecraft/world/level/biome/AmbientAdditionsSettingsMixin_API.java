@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.biome;
 
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.biome.AmbientAdditionsSettings;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -36,13 +37,13 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class AmbientAdditionsSettingsMixin_API implements SoundConfig.Additional {
 
     // @formatter:off
-    @Shadow @Final private SoundEvent soundEvent;
+    @Shadow @Final private Holder<SoundEvent> soundEvent;
     @Shadow @Final private double tickChance;
     // @formatter:on
 
     @Override
     public SoundType sound() {
-        return (SoundType) this.soundEvent;
+        return (SoundType) this.soundEvent.value();
     }
 
     @Override

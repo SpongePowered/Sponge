@@ -26,11 +26,11 @@ package org.spongepowered.common.mixin.api.minecraft.world.level;
 
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -315,7 +315,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             final float volume = sound.volume();
             final double radius = volume > 1.0f ? (16.0f * volume) : 16.0d;
             final long random = this.random.nextLong();
-            final ClientboundCustomSoundPacket packet = new ClientboundCustomSoundPacket(soundKey, soundCategory, new net.minecraft.world.phys.Vec3(x, y, z), volume, sound.pitch(), random);
+            final ClientboundSoundPacket packet = new ClientboundSoundPacket(Holder.direct(SoundEvent.createVariableRangeEvent(soundKey)), soundCategory, x, y, z, volume, sound.pitch(), random);
             this.shadow$getServer().getPlayerList().broadcast(null, x, y, z, radius, this.shadow$dimension(), packet);
         }
     }

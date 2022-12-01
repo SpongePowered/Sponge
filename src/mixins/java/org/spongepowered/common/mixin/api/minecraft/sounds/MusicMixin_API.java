@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.sounds;
 
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -36,7 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class MusicMixin_API implements SoundConfig.BackgroundMusic {
 
     // @formatter:off
-    @Shadow @Final private SoundEvent event;
+    @Shadow @Final private Holder<SoundEvent> event;
     @Shadow @Final private int minDelay;
     @Shadow @Final private int maxDelay;
     @Shadow @Final private boolean replaceCurrentMusic;
@@ -44,7 +45,7 @@ public abstract class MusicMixin_API implements SoundConfig.BackgroundMusic {
 
     @Override
     public SoundType sound() {
-        return (SoundType) this.event;
+        return (SoundType) this.event.value();
     }
 
     @Override

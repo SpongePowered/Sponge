@@ -51,9 +51,10 @@ import org.spongepowered.common.mixin.core.block.BlockMixin;
 public abstract class NoteBlockMixin extends BlockMixin {
 
     @SuppressWarnings("ConstantConditions")
-    @Inject(method = "triggerEvent",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"),
+    @Inject(method = "trigge    rEvent",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSeededSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/core/Holder;Lnet/minecraft/sounds/SoundSource;FFJ)V"),
             cancellable = true)
+    // TODO mixin earlier to cancel tuning particles
     private void impl$throwNoteBlockSoundEvent(BlockState state, Level worldIn, BlockPos pos, int id, int param, CallbackInfoReturnable<Boolean> callbackInfo) {
         if (!ShouldFire.PLAY_SOUND_EVENT_NOTE_BLOCK) {
             return;
@@ -77,7 +78,7 @@ public abstract class NoteBlockMixin extends BlockMixin {
         // TODO byStateAbove
         final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBlockEvent(
                 PhaseTracker.getCauseStackManager().currentCause(), (ServerWorld) worldIn, pos,
-                NoteBlockInstrument.byStateBelow(state).getSoundEvent(), instrumentType, registry.byId(param), pitch);
+                NoteBlockInstrument.byStateBelow(state).getSoundEvent().value(), instrumentType, registry.byId(param), pitch);
         if (event.isCancelled()) {
             callbackInfo.setReturnValue(true);
         }

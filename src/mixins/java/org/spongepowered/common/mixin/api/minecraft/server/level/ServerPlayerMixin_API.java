@@ -36,6 +36,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
@@ -43,7 +44,6 @@ import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
-import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
@@ -568,10 +568,10 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         final SoundSource source = SpongeAdventure.asVanilla(sound.source());
         final long random = this.shadow$getLevel().getRandom().nextLong();
         if (event.isPresent()) { // Check if the event is registered
-            this.connection.send(new ClientboundSoundPacket(event.get(), source, x, y, z, sound.volume(), sound.pitch(), random));
+            this.connection.send(new ClientboundSoundPacket(Holder.direct(event.get()), source, x, y, z, sound.volume(), sound.pitch(), random));
         } else { // Otherwise send it as a custom sound
-            final Vec3 vec = new Vec3(x, y, z);
-            this.connection.send(new ClientboundCustomSoundPacket(soundLoc, source, vec, sound.volume(), sound.pitch(), random));
+            final Holder<SoundEvent> holder = Holder.direct(SoundEvent.createVariableRangeEvent(soundLoc));
+            this.connection.send(new ClientboundSoundPacket(holder, source, x, y, z, sound.volume(), sound.pitch(), random));
         }
     }
 

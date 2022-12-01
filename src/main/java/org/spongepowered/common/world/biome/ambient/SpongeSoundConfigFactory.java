@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.biome.ambient;
 
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.biome.AmbientAdditionsSettings;
@@ -35,16 +36,16 @@ public class SpongeSoundConfigFactory implements SoundConfig.Factory {
 
     @Override
     public SoundConfig.Mood ofAmbientMood(final SoundType sound, final int tickDelay, final int searchRadius, final double distanceModifier) {
-        return (SoundConfig.Mood) new AmbientMoodSettings((SoundEvent) sound, tickDelay, searchRadius, distanceModifier);
+        return (SoundConfig.Mood) new AmbientMoodSettings(Holder.direct((SoundEvent) sound), tickDelay, searchRadius, distanceModifier);
     }
 
     @Override
     public SoundConfig.Additional ofAdditional(final SoundType sound, final double tickChance) {
-        return (SoundConfig.Additional) new AmbientAdditionsSettings((SoundEvent) sound, tickChance);
+        return (SoundConfig.Additional) new AmbientAdditionsSettings(Holder.direct((SoundEvent) sound), tickChance);
     }
 
     @Override
     public SoundConfig.BackgroundMusic ofBackroundMusic(final SoundType sound, final int minDelay, final int maxDelay, final boolean replacesCurrent) {
-        return (SoundConfig.BackgroundMusic) new Music((SoundEvent) sound, minDelay, maxDelay, replacesCurrent);
+        return (SoundConfig.BackgroundMusic) new Music(Holder.direct((SoundEvent) sound), minDelay, maxDelay, replacesCurrent);
     }
 }
