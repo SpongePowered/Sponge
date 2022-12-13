@@ -59,6 +59,8 @@ public final class ServerPlayerData {
                     .create(Keys.GAME_MODE)
                         .get(h -> (GameMode) (Object) h.gameMode.getGameModeForPlayer())
                         .set((h, v) -> h.setGameMode((GameType) (Object) v))
+                    .create(Keys.PREVIOUS_GAME_MODE)
+                        .get(h -> (GameMode) (Object) h.gameMode.getPreviousGameModeForPlayer())
                     .create(Keys.SKIN_PROFILE_PROPERTY)
                         .get(h -> {
                             final Collection<Property> properties = h.getGameProfile().getProperties().get(ProfileProperty.TEXTURES);

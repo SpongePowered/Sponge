@@ -89,6 +89,10 @@ public class OffsetFabric implements Fabric {
         this.fabric.fabric$markDirty();
     }
 
+    public Fabric fabric() {
+        return fabric;
+    }
+
     @Override
     public String toString() {
         return this.fabric.toString() + " offset: " + this.offset;

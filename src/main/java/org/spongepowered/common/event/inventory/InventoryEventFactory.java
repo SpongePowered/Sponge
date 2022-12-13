@@ -88,8 +88,7 @@ import java.util.function.Supplier;
 
 public class InventoryEventFactory {
 
-
-    public static boolean callPlayerChangeInventoryPickupPreEvent(final Player player, final ItemEntity itemToPickup) {
+    public static boolean callPlayerInventoryPickupEvent(final Player player, final ItemEntity itemToPickup) {
         final ItemStack stack = itemToPickup.getItem();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
         final ChangeInventoryEvent.Pickup.Pre event =
@@ -103,8 +102,8 @@ public class InventoryEventFactory {
         if (event.custom().isPresent()) {
             final List<ItemStackSnapshot> list = event.custom().get();
             if (list.isEmpty()) {
-                itemToPickup.getItem().setCount(0);
-                return false;
+                stack.setCount(0);
+                return true;
             }
 
             final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
@@ -124,12 +123,24 @@ public class InventoryEventFactory {
             if (!TrackingUtil.processBlockCaptures(context)) {
                 return false;
             }
-            itemToPickup.getItem().setCount(0);
+            stack.setCount(0);
+            return true;
+        } else {
+            final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+            final TransactionalCaptureSupplier transactor = context.getTransactor();
+            final boolean added;
+            try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, PlayerInventoryTransaction.EventCreator.PICKUP)) {
+                added = player.getInventory().add(stack);
+            }
+
+            if (!TrackingUtil.processBlockCaptures(context)) {
+                return false;
+            }
+            return added;
         }
-        return true;
     }
 
-    public static ItemStack callInventoryPickupEvent(final Container inventory, final ItemEntity item, final ItemStack stack) {
+    public static ItemStack callHopperInventoryPickupEvent(final Container inventory, final ItemEntity item, final ItemStack stack) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(inventory);
 

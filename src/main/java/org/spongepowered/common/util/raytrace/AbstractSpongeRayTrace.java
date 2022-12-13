@@ -324,7 +324,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
             throw new IllegalStateException("start cannot be null");
         }
         if (this.end == null && this.direction == null) {
-            throw new IllegalStateException("end cannot be null");
+            throw new IllegalStateException("end or direction needs to be specified");
         }
         if (this.world == null) {
             throw new IllegalStateException("world cannot be null");
