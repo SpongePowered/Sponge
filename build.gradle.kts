@@ -1,3 +1,4 @@
+import org.spongepowered.gradle.vanilla.task.DecompileJarTask
 import java.util.Locale
 
 plugins {
@@ -265,6 +266,10 @@ allprojects {
 
         dependencies {
             forgeFlower("org.quiltmc:quiltflower:$quiltflowerVersion")
+        }
+
+        tasks.named("decompile", DecompileJarTask::class) {
+            extraFernFlowerArgs.put("win", "0")
         }
     }
 
