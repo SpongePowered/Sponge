@@ -21,6 +21,7 @@ pluginManagement {
 
 plugins {
     id("org.spongepowered.gradle.vanilla")
+    id("org.gradle.toolchains.foojay-resolver-convention") version("0.3.0")
 }
 
 dependencyResolutionManagement {
