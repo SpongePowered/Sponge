@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.level.portal;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.portal.PortalShape;
 import net.minecraft.world.phys.Vec3;
@@ -44,9 +44,9 @@ public abstract class PortalShapeMixin {
 
     @Redirect(method = "createPortalInfo", at = @At(value = "NEW", target = "net/minecraft/world/level/portal/PortalInfo"))
     private static PortalInfo impl$createSpongePortalInfo(final Vec3 var1, final Vec3 var2, final float var3, final float var4,
-            final ServerLevel gvar0, final BlockUtil.FoundRectangle gvar1, final Direction.Axis gvar2, final Vec3 gvar3, final EntityDimensions gvar4,
-            final Vec3 gvar5, final float gvar6, final float gvar7) {
-        final Portal portal = NetherPortalType.portalObjectFromRectangle((ServerWorld) gvar0, gvar1);
+        final ServerLevel $$0, final BlockUtil.FoundRectangle $$1, final Direction.Axis $$2,
+        final Vec3 $$3, final Entity $$4, final Vec3 $$5, final float $$6, final float $$7) {
+        final Portal portal = NetherPortalType.portalObjectFromRectangle((ServerWorld) $$0, $$1);
         return new SpongePortalInfo(var1, var2, var3, var4, portal);
     }
 

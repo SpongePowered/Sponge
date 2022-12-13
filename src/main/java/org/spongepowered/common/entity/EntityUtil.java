@@ -28,6 +28,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -97,7 +98,8 @@ public final class EntityUtil {
             // Sponge Start - Allow the platform to handle how dimension changes are sent down
             ((ServerPlayerBridge) player).bridge$sendChangeDimension(toWorld.dimensionTypeRegistration(), toWorld.dimension(), BiomeManager.obfuscateSeed(toWorld.getSeed()),
                     player.gameMode.getGameModeForPlayer(), player.gameMode.getPreviousGameModeForPlayer(),
-                    toWorld.isDebug(), toWorld.isFlat(), true);
+                    toWorld.isDebug(), toWorld.isFlat(), ClientboundRespawnPacket.KEEP_ALL_DATA
+            );
         }
         // Sponge End
         player.connection.send(new ClientboundChangeDifficultyPacket(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));

@@ -536,6 +536,15 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         this.playSound(Objects.requireNonNull(sound, "sound"), this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
     }
 
+    private Holder<SoundEvent> api$resolveEvent(final @NonNull Sound sound) {
+        final ResourceLocation eventId = SpongeAdventure.asVanilla(Objects.requireNonNull(sound, "sound").name());
+        final var soundEventRegistry = SpongeCommon.vanillaRegistry(Registries.SOUND_EVENT);
+        final SoundEvent event = soundEventRegistry.getOptional(eventId)
+                .orElseGet(() -> SoundEvent.createVariableRangeEvent(eventId));
+
+        return soundEventRegistry.wrapAsHolder(event);
+    }
+
     @Override
     public void playSound(final @NonNull Sound sound, final Sound.@NotNull Emitter emitter) {
         Objects.requireNonNull(sound, "sound");
@@ -544,18 +553,23 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             return;
         }
 
-        final Optional<SoundEvent> event = SpongeCommon.vanillaRegistry(Registries.SOUND_EVENT).getOptional(SpongeAdventure.asVanilla(Objects.requireNonNull(sound, "sound").name()));
-        if (event.isPresent()) { // The SoundEntityPacket does not support custom sounds
-            final Entity tracked;
-            if (emitter == Sound.Emitter.self()) {
-                tracked = (Entity) (Object) this;
-            } else if (emitter instanceof org.spongepowered.api.entity.Entity) {
-                tracked = (Entity) emitter;
-            } else {
-                throw new IllegalArgumentException("Specified emitter '" + emitter + "' is not a Sponge Entity or Emitter.self(), was of type '" + emitter.getClass() + "'");
-            }
-            this.connection.send(new ClientboundSoundEntityPacket(event.get(), SpongeAdventure.asVanilla(sound.source()), tracked, sound.volume(), sound.pitch(), tracked.level.getRandom().nextLong()));
+        final Entity tracked;
+        if (emitter == Sound.Emitter.self()) {
+            tracked = (Entity) (Object) this;
+        } else if (emitter instanceof org.spongepowered.api.entity.Entity) {
+            tracked = (Entity) emitter;
+        } else {
+            throw new IllegalArgumentException("Specified emitter '" + emitter + "' is not a Sponge Entity or Emitter.self(), was of type '" + emitter.getClass() + "'");
         }
+
+        this.connection.send(new ClientboundSoundEntityPacket(
+            this.api$resolveEvent(sound),
+            SpongeAdventure.asVanilla(sound.source()),
+            tracked,
+            sound.volume(),
+            sound.pitch(),
+            tracked.level.getRandom().nextLong()
+        ));
     }
 
     @Override
@@ -563,16 +577,10 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        final ResourceLocation soundLoc = SpongeAdventure.asVanilla(Objects.requireNonNull(sound, "sound").name());
-        final Optional<SoundEvent> event = SpongeCommon.vanillaRegistry(Registries.SOUND_EVENT).getOptional(soundLoc);
         final SoundSource source = SpongeAdventure.asVanilla(sound.source());
+        final Holder<SoundEvent> event = this.api$resolveEvent(sound);
         final long random = this.shadow$getLevel().getRandom().nextLong();
-        if (event.isPresent()) { // Check if the event is registered
-            this.connection.send(new ClientboundSoundPacket(Holder.direct(event.get()), source, x, y, z, sound.volume(), sound.pitch(), random));
-        } else { // Otherwise send it as a custom sound
-            final Holder<SoundEvent> holder = Holder.direct(SoundEvent.createVariableRangeEvent(soundLoc));
-            this.connection.send(new ClientboundSoundPacket(holder, source, x, y, z, sound.volume(), sound.pitch(), random));
-        }
+        this.connection.send(new ClientboundSoundPacket(event, source, x, y, z, sound.volume(), sound.pitch(), random));
     }
 
     @Override

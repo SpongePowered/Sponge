@@ -250,7 +250,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     public void bridge$triggerViewDistanceLogic() {
         final ServerLevel world = this.bridge$world();
         if (world != null) {
-            final int actual = this.impl$viewDistance == null ? ((DedicatedServer) SpongeCommon.server()).getProperties().viewDistance : this.impl$viewDistance;
+            final int actual = this.impl$viewDistance == null ? world.getServer().getPlayerList().getViewDistance() : this.impl$viewDistance;
             world.getChunkSource().setViewDistance(actual);
             final ClientboundSetChunkCacheRadiusPacket packet = new ClientboundSetChunkCacheRadiusPacket(actual);
 

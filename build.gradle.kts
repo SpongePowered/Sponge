@@ -31,7 +31,7 @@ val junitVersion: String by project
 val mockitoVersion: String by project
 val checkerVersion: String by project
 
-val commonManifest = the<JavaPluginConvention>().manifest {
+val commonManifest = java.manifest {
     attributes(
         "Specification-Title" to "Sponge",
         "Specification-Vendor" to "SpongePowered",

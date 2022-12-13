@@ -495,7 +495,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         final LevelData levelData = targetWorld.getLevelData();
         this.connection.send(new ClientboundRespawnPacket(targetWorld.dimensionTypeId(), targetWorld.dimension(),
                 BiomeManager.obfuscateSeed(targetWorld.getSeed()), this.gameMode.getGameModeForPlayer(),
-                this.gameMode.getPreviousGameModeForPlayer(), targetWorld.isDebug(), targetWorld.isFlat(), true, this.shadow$getLastDeathLocation()));
+                this.gameMode.getPreviousGameModeForPlayer(), targetWorld.isDebug(), targetWorld.isFlat(), ClientboundRespawnPacket.KEEP_ALL_DATA, this.shadow$getLastDeathLocation()));
         this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         final PlayerList playerlist = this.server.getPlayerList();
         playerlist.sendPlayerPermissionLevel((net.minecraft.server.level.ServerPlayer) (Object) this);

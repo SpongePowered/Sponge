@@ -40,6 +40,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.ChatTypeTemplate;
 import org.spongepowered.api.adventure.ChatTypes;
@@ -59,6 +60,7 @@ import org.spongepowered.api.event.filter.data.GetValue;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.LoadedGameEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.item.ItemTypes;
@@ -104,7 +106,7 @@ public class ChatTest implements LoadableModule {
     }
 
     @Listener
-    private void onLoaded(final LoadedGameEvent event)
+    private void onServerStarted(final StartedEngineEvent<Server> event)
     {
         // TODO register this earlier - static context?
         final ChatTypeTemplate template = ChatTypeTemplate.builder().translationKey("%s by <%s>")

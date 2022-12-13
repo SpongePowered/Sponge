@@ -18,7 +18,7 @@ minecraft {
 }
 
 configurations.configureEach {
-    exclude(group = "org.apache.logging.log4j", module = "log4j-slf4j18-impl")
+    exclude(group = "org.apache.logging.log4j", module = "log4j-slf4j2-impl")
 }
 
 dependencies {
@@ -27,7 +27,7 @@ dependencies {
     implementation("com.github.javaparser:javaparser-core:3.24.4")
     implementation("org.tinylog:tinylog-api:$tinyLogVersion")
     runtimeOnly("org.tinylog:tinylog-impl:$tinyLogVersion")
-    runtimeOnly("org.tinylog:slf4j-tinylog:$tinyLogVersion") // todo: doesn't work for some reason?
+    runtimeOnly("org.tinylog:slf4j-tinylog:$tinyLogVersion")
 }
 
 indraSpotlessLicenser {

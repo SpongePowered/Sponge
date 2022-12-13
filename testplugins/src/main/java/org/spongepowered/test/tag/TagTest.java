@@ -66,6 +66,7 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Plugin("tagtest") //TODO FIX THIS

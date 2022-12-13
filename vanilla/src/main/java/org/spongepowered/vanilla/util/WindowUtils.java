@@ -25,6 +25,9 @@
 package org.spongepowered.vanilla.util;
 
 import com.google.common.io.ByteStreams;
+import com.mojang.blaze3d.platform.MacosUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.server.packs.resources.IoSupplier;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.stb.STBImage;
@@ -40,34 +43,43 @@ public final class WindowUtils {
     /**
      * Credit goes to Forge's ClientVisualization for most of the following:
      */
-    public static void setWindowIcon(final long windowRef, final InputStream stream) {
-        try (final MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer iconWidth = stack.mallocInt(1);
-            IntBuffer iconHeight = stack.mallocInt(1);
-            IntBuffer iconChannels = stack.mallocInt(1);
-            GLFWImage.Buffer glfwImages = GLFWImage.mallocStack(1, stack);
-
-            try {
-                byte[] icon = ByteStreams.toByteArray(stream);
-                ByteBuffer iconBuf = stack.malloc(icon.length);
-                iconBuf.put(icon);
-                iconBuf.position(0);
-                ByteBuffer imgBuffer = STBImage.stbi_load_from_memory(iconBuf, iconWidth, iconHeight, iconChannels, 4);
-                if (imgBuffer == null) {
-                    throw new NullPointerException("Failed to load window icon");
-                }
-
-                glfwImages.position(0);
-                glfwImages.width(iconWidth.get(0));
-                glfwImages.height(iconHeight.get(0));
-                imgBuffer.position(0);
-                glfwImages.pixels(imgBuffer);
-                glfwImages.position(0);
-                GLFW.glfwSetWindowIcon(windowRef, glfwImages);
-                STBImage.stbi_image_free(imgBuffer);
-            } catch (IOException | NullPointerException var29) {
-                System.err.println("Failed to load spongie logo");
+    public static void setWindowIcon(final long windowRef, final IoSupplier<InputStream> stream) {
+        try {
+            if (Minecraft.ON_OSX) {
+                MacosUtil.loadIcon(stream);
+                return;
             }
+
+            try (final InputStream is = stream.get(); final MemoryStack stack = MemoryStack.stackPush()) {
+                IntBuffer iconWidth = stack.mallocInt(1);
+                IntBuffer iconHeight = stack.mallocInt(1);
+                IntBuffer iconChannels = stack.mallocInt(1);
+                GLFWImage.Buffer glfwImages = GLFWImage.mallocStack(1, stack);
+
+                try {
+                    byte[] icon = ByteStreams.toByteArray(is);
+                    ByteBuffer iconBuf = stack.malloc(icon.length);
+                    iconBuf.put(icon);
+                    iconBuf.position(0);
+                    ByteBuffer imgBuffer = STBImage.stbi_load_from_memory(iconBuf, iconWidth, iconHeight, iconChannels, 4);
+                    if (imgBuffer == null) {
+                        throw new NullPointerException("Failed to load window icon");
+                    }
+
+                    glfwImages.position(0);
+                    glfwImages.width(iconWidth.get(0));
+                    glfwImages.height(iconHeight.get(0));
+                    imgBuffer.position(0);
+                    glfwImages.pixels(imgBuffer);
+                    glfwImages.position(0);
+                    GLFW.glfwSetWindowIcon(windowRef, glfwImages);
+                    STBImage.stbi_image_free(imgBuffer);
+                } catch (IOException | NullPointerException var29) {
+                    System.err.println("Failed to load spongie logo");
+                }
+            }
+        } catch (final IOException ex) {
+            System.err.println("Failed to read spongie logo file");
         }
     }
 
