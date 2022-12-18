@@ -238,7 +238,8 @@
         "network.chat.ChatTypeMixin",
         "server.WorldLoaderMixin",
         "registries.BuiltInRegistriesMixin",
-        "adventure.chat.SignedMessageMixin"
+        "adventure.chat.SignedMessageMixin",
+        "world.level.gameevent.vibrations.VibrationListenerMixin"
     ],
     "client": [
         "client.MinecraftMixin",
