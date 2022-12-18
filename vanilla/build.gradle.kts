@@ -259,7 +259,7 @@ dependencies {
     installer("org.spongepowered:configurate-hocon:$apiConfigurateVersion")
     installer("org.spongepowered:configurate-core:$apiConfigurateVersion")
     installer("org.spongepowered:configurate-jackson:$apiConfigurateVersion")
-    installer("net.sf.jopt-simple:jopt-simple:5.0.3")
+    installer("net.sf.jopt-simple:jopt-simple:5.0.4")
     installer("org.tinylog:tinylog-api:$tinyLogVersion")
     installer("org.tinylog:tinylog-impl:$tinyLogVersion")
     // Override ASM versions, and explicitly declare dependencies so ASM is excluded from the manifest.
@@ -336,8 +336,8 @@ dependencies {
         exclude(group = "org.apache.logging.log4j")
     }
     appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
-    appLaunch("com.lmax:disruptor:3.4.2")
-    "applaunchCompileOnly"("org.jetbrains:annotations:22.0.0")
+    appLaunch("com.lmax:disruptor:3.4.4")
+    "applaunchCompileOnly"("org.jetbrains:annotations:23.1.0")
 
     testplugins?.also {
         vanillaAppLaunchRuntime(project(it.path)) {
@@ -346,7 +346,7 @@ dependencies {
     }
 }
 
-val vanillaManifest = the<JavaPluginConvention>().manifest {
+val vanillaManifest = java.manifest {
     attributes(
         "Specification-Title" to "SpongeVanilla",
         "Specification-Vendor" to "SpongePowered",

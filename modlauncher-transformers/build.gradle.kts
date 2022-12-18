@@ -2,7 +2,7 @@ plugins {
     eclipse
     idea
 }
-//// Make sure jar is present for other projects
+// Make sure jar is present for other projects
 eclipse {
     synchronizationTasks(tasks.jar)
 }
@@ -27,7 +27,7 @@ val modlauncherVersion: String by project
 
 dependencies {
     // AccessWidener transformer
-    implementation("net.fabricmc:access-widener:1.0.2") {
+    implementation("net.fabricmc:access-widener:2.1.0") {
         exclude(group="org.apache.logging.log4j")
     }
     // ModLauncher inherited dependencies - strictly should be provided by
@@ -38,7 +38,7 @@ dependencies {
         exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
     }
 
-    compileOnly("net.sf.jopt-simple:jopt-simple:5.0.3")
+    compileOnly("net.sf.jopt-simple:jopt-simple:5.0.4")
     compileOnly("org.ow2.asm:asm-commons:$asmVersion")
     compileOnly("cpw.mods:grossjava9hacks:1.3.3") {
         exclude(group="org.apache.logging.log4j")

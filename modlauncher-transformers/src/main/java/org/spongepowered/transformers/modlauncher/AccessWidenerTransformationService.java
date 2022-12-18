@@ -34,8 +34,8 @@ import cpw.mods.modlauncher.api.TypesafeMap;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 import net.fabricmc.accesswidener.AccessWidener;
+import net.fabricmc.accesswidener.AccessWidenerClassVisitor;
 import net.fabricmc.accesswidener.AccessWidenerReader;
-import net.fabricmc.accesswidener.AccessWidenerVisitor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -142,7 +142,7 @@ public class AccessWidenerTransformationService implements ITransformationServic
         public @NonNull ClassNode transform(final ClassNode input, final ITransformerVotingContext context) {
             AccessWidenerTransformationService.LOGGER.debug("Transforming {}", context.getClassName());
             final ClassNode output = new ClassNode(Opcodes.ASM9);
-            final ClassVisitor visitor = AccessWidenerVisitor.createClassVisitor(Opcodes.ASM9, output, this.widener);
+            final ClassVisitor visitor = AccessWidenerClassVisitor.createClassVisitor(Opcodes.ASM9, output, this.widener);
             input.accept(visitor);
             return output;
         }
