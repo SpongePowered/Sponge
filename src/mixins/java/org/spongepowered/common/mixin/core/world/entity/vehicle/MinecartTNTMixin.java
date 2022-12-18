@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world.entity.vehicle;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
-import net.minecraft.world.level.Explosion.BlockInteraction;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
 import org.spongepowered.api.data.Keys;

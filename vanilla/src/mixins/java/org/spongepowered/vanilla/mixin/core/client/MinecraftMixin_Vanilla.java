@@ -26,9 +26,6 @@ package org.spongepowered.vanilla.mixin.core.client;
 
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.VanillaPackResources;
 import net.minecraft.server.packs.resources.IoSupplier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,7 +33,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.launch.Launch;
@@ -44,7 +40,6 @@ import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.vanilla.client.VanillaClient;
 import org.spongepowered.vanilla.util.WindowUtils;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 @Mixin(Minecraft.class)

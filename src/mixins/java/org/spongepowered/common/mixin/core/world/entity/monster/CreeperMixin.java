@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world.entity.monster;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Explosion.BlockInteraction;
 import net.minecraft.world.level.Level;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.world.explosion.Explosion;

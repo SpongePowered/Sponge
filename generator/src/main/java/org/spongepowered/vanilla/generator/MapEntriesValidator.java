@@ -24,6 +24,8 @@
  */
 package org.spongepowered.vanilla.generator;
 
+import static com.github.javaparser.ast.Modifier.createModifierList;
+
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
@@ -44,8 +46,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
-import static com.github.javaparser.ast.Modifier.createModifierList;
 
 class MapEntriesValidator<V> implements Generator {
 
@@ -187,4 +187,3 @@ class MapEntriesValidator<V> implements Generator {
         };
     }
 }
-

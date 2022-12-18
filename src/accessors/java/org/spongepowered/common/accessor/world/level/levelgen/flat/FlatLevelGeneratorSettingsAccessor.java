@@ -26,7 +26,6 @@ package org.spongepowered.common.accessor.world.level.levelgen.flat;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
@@ -38,7 +37,6 @@ import org.spongepowered.common.UntransformedInvokerError;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 @Mixin(FlatLevelGeneratorSettings.class)
 public interface FlatLevelGeneratorSettingsAccessor {

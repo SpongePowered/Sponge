@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.horse;
 
 import org.spongepowered.api.data.type.LlamaType;
-import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(net.minecraft.world.entity.animal.horse.Llama.Variant.class)

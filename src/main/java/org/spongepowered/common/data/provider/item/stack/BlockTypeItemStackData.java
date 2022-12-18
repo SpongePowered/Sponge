@@ -35,7 +35,6 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.registry.SpongeRegistries;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NBTCollectors;
 import org.spongepowered.common.util.NBTStreams;

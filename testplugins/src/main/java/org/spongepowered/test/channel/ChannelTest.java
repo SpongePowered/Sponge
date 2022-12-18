@@ -26,7 +26,6 @@ package org.spongepowered.test.channel;
 
 import com.google.inject.Inject;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterChannelEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.EngineConnection;

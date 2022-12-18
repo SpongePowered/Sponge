@@ -24,6 +24,8 @@
  */
 package org.spongepowered.vanilla.generator;
 
+import static com.github.javaparser.ast.Modifier.createModifierList;
+
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
@@ -36,17 +38,12 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import net.minecraft.resources.ResourceLocation;
 import org.tinylog.Logger;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-
-import static com.github.javaparser.ast.Modifier.createModifierList;
 
 class EnumEntriesValidator<V> implements Generator {
 
@@ -192,4 +189,3 @@ class EnumEntriesValidator<V> implements Generator {
         };
     }
 }
-

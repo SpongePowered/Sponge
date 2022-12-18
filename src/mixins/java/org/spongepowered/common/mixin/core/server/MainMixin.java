@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.server;
 
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.Main;

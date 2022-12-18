@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.DifficultyInstance;

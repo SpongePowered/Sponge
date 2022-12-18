@@ -26,8 +26,6 @@ package org.spongepowered.common.block;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.common.SpongeCommon;

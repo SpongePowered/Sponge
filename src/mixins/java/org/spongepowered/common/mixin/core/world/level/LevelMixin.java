@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world.level;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;

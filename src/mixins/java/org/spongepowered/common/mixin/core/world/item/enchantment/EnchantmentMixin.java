@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.world.item.enchantment;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.api.ResourceKey;

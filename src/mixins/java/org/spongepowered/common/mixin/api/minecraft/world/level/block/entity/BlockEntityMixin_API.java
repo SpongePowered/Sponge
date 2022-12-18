@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.api.ResourceKey;
