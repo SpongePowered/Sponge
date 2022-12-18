@@ -40,17 +40,21 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
+import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.server.MinecraftServer;
@@ -86,6 +90,7 @@ import org.spongepowered.api.event.block.entity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
+import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -98,6 +103,7 @@ import org.spongepowered.common.accessor.network.protocol.game.ServerboundMoveVe
 import org.spongepowered.common.accessor.server.level.ServerPlayerGameModeAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
+import org.spongepowered.common.bridge.network.protocol.game.ClientboundResourcePackPacketBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
@@ -146,6 +152,8 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
 
     private int impl$ignorePackets;
 
+    @Nullable private ResourcePack impl$lastReceivedPack, impl$lastAcceptedPack;
+
     @Override
     public Connection bridge$getConnection() {
         return this.connection;
@@ -163,6 +171,9 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     private void impl$onClientboundPacketSend(final Packet<?> packet, final PacketSendListener listener, final CallbackInfo ci) {
         if (packet instanceof ClientboundPlayerInfoUpdatePacket infoPacket) {
             ((SpongeTabList) ((ServerPlayer) this.player).tabList()).updateEntriesOnSend(infoPacket);
+        } else if (packet instanceof ClientboundResourcePackPacket) {
+            final ResourcePack pack = ((ClientboundResourcePackPacketBridge) packet).bridge$getSpongePack();
+            this.impl$lastReceivedPack = pack;
         }
     }
 
@@ -513,4 +524,25 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         this.shadow$resetPosition();
     }
 
+    @Inject(method = "handleResourcePackResponse", at = @At("HEAD"))
+    public void impl$handleResourcePackResponse(final ServerboundResourcePackPacket packet, final CallbackInfo callbackInfo) {
+        PacketUtils.ensureRunningOnSameThread(packet, (ServerGamePacketListener) this, this.player.getLevel());
+    }
+
+    @Override
+    public @Nullable ResourcePack bridge$popReceivedResourcePack(final boolean markAccepted) {
+        final ResourcePack pack = this.impl$lastReceivedPack;
+        this.impl$lastReceivedPack = null;
+        if (markAccepted) {
+            this.impl$lastAcceptedPack = pack;
+        }
+        return pack;
+    }
+
+    @Override
+    public @Nullable ResourcePack bridge$popAcceptedResourcePack() {
+        final ResourcePack pack = this.impl$lastAcceptedPack;
+        this.impl$lastAcceptedPack = null;
+        return pack;
+    }
 }

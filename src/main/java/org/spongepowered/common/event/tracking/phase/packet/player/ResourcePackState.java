@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent;
@@ -46,7 +47,7 @@ public final class ResourcePackState extends BasicPacketState {
         final ServerGamePacketListenerImplBridge mixinHandler = (ServerGamePacketListenerImplBridge) connection;
         final ServerboundResourcePackPacket resource = phaseContext.getPacket();
         final ResourcePackStatusEvent.ResourcePackStatus status;
-        final ResourcePack pack;
+        final @Nullable ResourcePack pack;
         switch (resource.getAction()) {
             case ACCEPTED:
                 pack = mixinHandler.bridge$popReceivedResourcePack(true);
@@ -67,11 +68,17 @@ public final class ResourcePackState extends BasicPacketState {
             default:
                 throw new AssertionError();
         }
+
         if (pack == null) {
             return;
         }
-        SpongeCommon.post(
-            SpongeEventFactory.createResourcePackStatusEvent(PhaseTracker.getCauseStackManager().currentCause(), pack, (ServerPlayer) player, status));
+
+        SpongeCommon.post(SpongeEventFactory.createResourcePackStatusEvent(
+                PhaseTracker.getCauseStackManager().currentCause(),
+                pack,
+                (ServerPlayer) player,
+                status
+        ));
     }
 
     @Override

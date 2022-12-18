@@ -30,6 +30,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.common.accessor.world.inventory.CraftingMenuAccessor;
 import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.inventory.fabric.OffsetFabric;
 import org.spongepowered.common.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.property.KeyValuePair;
@@ -59,6 +60,9 @@ public class CraftingGridInventoryLens extends AbstractLens {
 
     @Override
     public Inventory getAdapter(Fabric fabric, Inventory parent) {
+        if (fabric instanceof OffsetFabric) {
+            fabric = ((OffsetFabric) fabric).fabric();
+        }
         if (fabric instanceof CraftingGridInventory) {
             return ((CraftingGridInventory) fabric);
         }
