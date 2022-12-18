@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.network.chat;
 
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.Style;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ChatTypeDecoration;
+import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,11 +46,50 @@ public abstract class ChatTypeMixin_API implements org.spongepowered.api.adventu
 
     // @formatter:on
 
+    @Shadow public abstract ChatType.Bound bind(final Component $$0);
+
+    @Override
+    public @NotNull Bound bind(@NotNull final ComponentLike name, @Nullable final ComponentLike target) {
+        ChatType.Bound ret = this.bind(SpongeAdventure.asVanilla(name.asComponent()));
+        if (target != null) {
+            ret = ret.withTargetName(SpongeAdventure.asVanilla(target.asComponent()));
+        }
+        return (net.kyori.adventure.chat.ChatType.Bound) (Object) ret;
+    }
+
+    @Override
     public String translationKey() {
         return this.chat.translationKey();
     }
 
+    @Override
     public Style style() {
         return SpongeAdventure.asAdventure(this.chat.style());
+    }
+
+    @Mixin(ChatType.Bound.class)
+    public static abstract class BoundMixin_API implements net.kyori.adventure.chat.ChatType.Bound {
+
+        // @formatter:off
+        @Shadow public abstract Component shadow$name();
+        @Shadow public abstract Component shadow$targetName();
+        @Shadow public abstract ChatType shadow$chatType();
+        // @formatter:on
+
+        @Override
+        public net.kyori.adventure.chat.@NotNull ChatType type() {
+            return (net.kyori.adventure.chat.ChatType) (Object) this.shadow$chatType();
+        }
+
+        @Override
+        public net.kyori.adventure.text.@NotNull Component name() {
+            return SpongeAdventure.asAdventure(this.shadow$name());
+        }
+
+        @Override
+        public net.kyori.adventure.text.@Nullable Component target() {
+            return this.shadow$targetName() == null ? null: SpongeAdventure.asAdventure(this.shadow$targetName());
+        }
+
     }
 }

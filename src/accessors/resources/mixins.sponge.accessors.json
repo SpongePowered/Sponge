@@ -204,7 +204,8 @@
         "world.level.levelgen.structure.pools.StructureTemplatePoolAccessor",
         "world.level.biome.MobSpawnSettings_MobSpawnCostAccessor",
         "network.protocol.game.ClientboundPlayerInfoUpdatePacketAccessor",
-        "sounds.SoundEventAccessor"
+        "sounds.SoundEventAccessor",
+        "server.network.ServerGamePacketListenerImplAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"

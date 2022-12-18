@@ -22,15 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.entity.player;
+package org.spongepowered.common.mixin.api.minecraft.network.chat;
 
-import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.chat.SignedMessage;
+import net.minecraft.network.chat.MessageSignature;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Set;
+@Implements(@Interface(iface = SignedMessage.Signature.class, prefix = "signature$", remap = Interface.Remap.NONE))
+@Mixin(MessageSignature.class)
+public abstract class MessageSignatureMixin_API {
 
-public interface ChatVisiblityBridge {
+    // @formatter:off
+    @Shadow public abstract byte[] shadow$bytes();
+    // @formatter:on
 
-    void bridge$setChatTypes(Set<MessageType> types);
+    @Intrinsic
+    public byte[] signature$bytes() {
+        return this.shadow$bytes();
+    }
 
-    Set<MessageType> bridge$getVisibleChatTypes();
 }

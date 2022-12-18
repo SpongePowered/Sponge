@@ -22,28 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.player;
+package org.spongepowered.common.mixin.core.adventure.chat;
 
-import net.kyori.adventure.audience.MessageType;
-import net.minecraft.world.entity.player.ChatVisiblity;
+import net.kyori.adventure.chat.SignedMessage;
+import net.minecraft.network.chat.MessageSignature;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.entity.player.ChatVisiblityBridge;
+import org.spongepowered.asm.mixin.Overwrite;
 
-import java.util.HashSet;
-import java.util.Set;
+@Mixin(SignedMessage.class)
+public interface SignedMessageMixin {
 
-@Mixin(ChatVisiblity.class)
-public abstract class ChatVisiblityMixin implements ChatVisiblityBridge {
-
-    private Set<MessageType> impl$visibleChatTypes = new HashSet<>();
-
-    @Override
-    public void bridge$setChatTypes(final Set<MessageType> types) {
-        this.impl$visibleChatTypes = types;
+    /**
+     * @author zml
+     * @reason make adventure methods produce native implementations
+     */
+    @Overwrite
+    static SignedMessage.@NotNull Signature signature(final byte[] bytes) {
+        return (SignedMessage.Signature) (Object) new MessageSignature(bytes);
     }
 
-    @Override
-    public Set<MessageType> bridge$getVisibleChatTypes() {
-        return this.impl$visibleChatTypes;
-    }
 }

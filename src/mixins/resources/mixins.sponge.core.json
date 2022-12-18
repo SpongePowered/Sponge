@@ -141,7 +141,6 @@
         "world.entity.monster.ZombifiedPiglinMixin",
         "world.entity.npc.AbstractVillagerMixin",
         "world.entity.npc.VillagerMixin",
-        "world.entity.player.ChatVisiblityMixin",
         "world.entity.player.PlayerMixin",
         "world.entity.player.PlayerMixin_Attack_Impl",
         "world.entity.projectile.AbstractArrowMixin",
@@ -238,7 +237,8 @@
         "world.ticks.ScheduledTickMixin",
         "network.chat.ChatTypeMixin",
         "server.WorldLoaderMixin",
-        "registries.BuiltInRegistriesMixin"
+        "registries.BuiltInRegistriesMixin",
+        "adventure.chat.SignedMessageMixin"
     ],
     "client": [
         "client.MinecraftMixin",

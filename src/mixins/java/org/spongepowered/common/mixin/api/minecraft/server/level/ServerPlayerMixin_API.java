@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.server.level;
 
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.chat.SignedMessage;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.permission.PermissionChecker;
@@ -39,10 +40,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
+import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
@@ -93,6 +96,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
@@ -430,6 +434,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
+    @Deprecated
     public void sendMessage(final Identity identity, final Component message, final MessageType type) {
         if (this.impl$isFake) {
             return;
@@ -437,6 +442,43 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         this.shadow$sendSystemMessage(SpongeAdventure.asVanilla(Objects.requireNonNull(message, "message")));
         // TODO chatMessage
         // this.shadow$sendChatMessage(PlayerChatMessage.unsigned(mcMessage), new ChatSender(mcIdentity, name, teamName));
+    }
+
+    @Override
+    public void sendMessage(final @NotNull Component message) {
+        if (this.impl$isFake) {
+            return;
+        }
+        this.shadow$sendSystemMessage(SpongeAdventure.asVanilla(message));
+    }
+
+    @Override
+    public void sendMessage(final @NotNull Component message, final net.kyori.adventure.chat.ChatType.@NotNull Bound boundChatType) {
+        if (this.impl$isFake) {
+            return;
+        }
+        this.connection.sendDisguisedChatMessage(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(this.level.registryAccess(), boundChatType));
+    }
+
+    @Override
+    public void sendMessage(final @NotNull SignedMessage signedMessage, final net.kyori.adventure.chat.ChatType.@NotNull Bound boundChatType) {
+        if (this.impl$isFake) {
+            return;
+        }
+        // TODO: implement once we actually expose a way to get signed messages in-api
+        this.connection.sendDisguisedChatMessage(
+            SpongeAdventure.asVanilla(Objects.requireNonNullElse(signedMessage.unsignedContent(), Component.text(signedMessage.message()))),
+            SpongeAdventure.asVanilla(this.level.registryAccess(), boundChatType)
+        );
+    }
+
+    @Override
+    public void deleteMessage(final SignedMessage.@NotNull Signature signature) {
+        if (this.impl$isFake) {
+            return;
+        }
+        this.connection.send(new ClientboundDeleteChatPacket(((MessageSignature) (Object) signature)
+            .pack(((ServerGamePacketListenerImplAccessor) this.connection).accessor$messageSignatureCache())));
     }
 
     @Override
@@ -568,7 +610,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             tracked,
             sound.volume(),
             sound.pitch(),
-            tracked.level.getRandom().nextLong()
+            sound.seed().orElseGet(() -> tracked.level.getRandom().nextLong())
         ));
     }
 
@@ -579,7 +621,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         }
         final SoundSource source = SpongeAdventure.asVanilla(sound.source());
         final Holder<SoundEvent> event = this.api$resolveEvent(sound);
-        final long random = this.shadow$getLevel().getRandom().nextLong();
+        final long random = sound.seed().orElseGet(() -> this.shadow$getLevel().getRandom().nextLong());
         this.connection.send(new ClientboundSoundPacket(event, source, x, y, z, sound.volume(), sound.pitch(), random));
     }
 

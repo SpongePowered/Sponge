@@ -22,34 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.player;
+package org.spongepowered.common.accessor.server.network;
 
-import net.kyori.adventure.text.Component;
-import net.minecraft.world.entity.player.ChatVisiblity;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.network.chat.MessageSignatureCache;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ChatVisiblity.class)
-public abstract class ChatVisiblityMixin_API implements org.spongepowered.api.entity.living.player.chat.ChatVisibility {
+@Mixin(ServerGamePacketListenerImpl.class)
+public interface ServerGamePacketListenerImplAccessor {
 
-    // @formatter:off
-    @Shadow @Final private String key;
-    // @formatter:on
-
-    @Override
-    public Component asComponent() {
-        return Component.translatable(this.key);
-    }
-
-    @Override
-    public boolean isChatVisible() {
-        return ((Object) this) == ChatVisiblity.FULL;
-    }
-
-    @Override
-    public boolean isSystemVisible() {
-        return ((Object) this) != ChatVisiblity.HIDDEN;
-    }
+    @Accessor("messageSignatureCache")
+    MessageSignatureCache accessor$messageSignatureCache();
 
 }

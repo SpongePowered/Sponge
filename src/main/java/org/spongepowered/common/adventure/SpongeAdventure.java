@@ -81,6 +81,7 @@ import net.minecraft.network.chat.contents.ScoreContents;
 import net.minecraft.network.chat.contents.SelectorContents;
 import net.minecraft.network.chat.contents.StorageDataSource;
 import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.sounds.SoundSource;
@@ -182,6 +183,28 @@ public final class SpongeAdventure {
     // org.spongepowered.common.mixin.core.adventure.KeyMixin
     public static Key asAdventure(final ResourceLocation key) {
         return (Key) (Object) key;
+    }
+
+    // ------------------------
+    // ---- ChatType.Bound ----
+    // ------------------------
+
+    public static ChatType.Bound asVanilla(final RegistryAccess access, final net.kyori.adventure.chat.ChatType.Bound adv) {
+        if ((Object) adv instanceof ChatType.Bound vanilla) {
+            return vanilla;
+        }
+
+        ChatType.Bound vanilla = ChatType.bind(
+            ResourceKey.create(Registries.CHAT_TYPE, SpongeAdventure.asVanilla(adv.type().key())),
+            access,
+            SpongeAdventure.asVanilla(adv.name())
+        );
+
+        if (adv.target() != null) {
+            vanilla = vanilla.withTargetName(SpongeAdventure.asVanilla(adv.target()));
+        }
+
+        return vanilla;
     }
 
     // -------------------

@@ -36,6 +36,7 @@
         "minecraft.map.MapInfoMixin_API",
         "minecraft.network.FriendlyByteBufMixin_API",
         "minecraft.network.chat.ChatTypeMixin_API",
+        "minecraft.network.chat.ChatTypeMixin_API$BoundMixin_API",
         "minecraft.network.protocol.status.ServerStatus_PlayersMixin_API",
         "minecraft.network.protocol.status.ServerStatus_VersionMixin_API",
         "minecraft.network.protocol.status.ServerStatusMixin_API",
@@ -159,10 +160,13 @@
         "minecraft.world.entity.animal.horse.AbstractHorseMixin_API",
         "minecraft.world.entity.animal.horse.DonkeyMixin_API",
         "minecraft.world.entity.animal.horse.HorseMixin_API",
+        "minecraft.world.entity.animal.horse.LLama_VariantMixin_API",
         "minecraft.world.entity.animal.horse.LlamaMixin_API",
+        "minecraft.world.entity.animal.horse.MarkingsMixin_API",
         "minecraft.world.entity.animal.horse.MuleMixin_API",
         "minecraft.world.entity.animal.horse.SkeletonHorseMixin_API",
         "minecraft.world.entity.animal.horse.TraderLlamaMixin_API",
+        "minecraft.world.entity.animal.horse.VariantMixin_API",
         "minecraft.world.entity.animal.horse.ZombieHorseMixin_API",
         "minecraft.world.entity.boss.EnderDragonPartMixin_API",
         "minecraft.world.entity.boss.enderdragon.EndCrystalMixin_API",
@@ -441,9 +445,7 @@
         "minecraft.world.ticks.TickPriorityMixin_API",
         "service.permission.SubjectMixin_API",
         "world.LocatableBlockMixin_API",
-        "minecraft.world.entity.animal.horse.LLama_VariantMixin_API",
-        "minecraft.world.entity.animal.horse.MarkingsMixin_API",
-        "minecraft.world.entity.animal.horse.VariantMixin_API"
+        "minecraft.network.chat.MessageSignatureMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",
