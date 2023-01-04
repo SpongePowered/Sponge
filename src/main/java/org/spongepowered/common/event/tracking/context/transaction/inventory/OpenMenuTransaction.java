@@ -83,13 +83,13 @@ public class OpenMenuTransaction extends GameTransaction<InteractContainerEvent>
 
     @Override
     public void restore(final PhaseContext<@NonNull ?> context, final InteractContainerEvent event) {
-        PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction());
+        PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction(), event.isCancelled());
         this.player.closeContainer();
     }
 
     @Override
     public void postProcessEvent(final PhaseContext<@NonNull ?> context, final InteractContainerEvent event) {
-        PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction());
+        PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction(), event.isCancelled());
     }
 
     @Override

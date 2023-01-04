@@ -97,7 +97,7 @@ public class CloseMenuTransaction extends MenuBasedTransaction<InteractContainer
             // If client closed container we need to reopen it
             this.reopen(this.player, this.menu);
         }
-        PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction());
+        PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction(), event.isCancelled());
         if (event instanceof ChangeInventoryEvent) {
             PacketPhaseUtil.handleSlotRestore(this.player, this.menu, ((ChangeInventoryEvent) event).transactions(), event.isCancelled());
         }
@@ -129,7 +129,7 @@ public class CloseMenuTransaction extends MenuBasedTransaction<InteractContainer
         this.player.containerMenu = this.player.inventoryMenu;
 
         // And restore cursor if needed
-        PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction());
+        PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction(), event.isCancelled());
         if (event instanceof ChangeInventoryEvent) {
             PacketPhaseUtil.handleSlotRestore(this.player, this.menu, ((ChangeInventoryEvent) event).transactions(), event.isCancelled());
         }

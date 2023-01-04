@@ -114,9 +114,9 @@ public final class PacketPhaseUtil {
         }
     }
 
-    public static void handleCursorRestore(final Player player, final Transaction<ItemStackSnapshot> cursorTransaction) {
+    public static void handleCursorRestore(final Player player, final Transaction<ItemStackSnapshot> cursorTransaction, final boolean eventCancelled) {
         final ItemStackSnapshot cursorSnap;
-        if (!cursorTransaction.isValid()) {
+        if (eventCancelled || !cursorTransaction.isValid()) {
             cursorSnap = cursorTransaction.original();
         } else if (cursorTransaction.custom().isPresent()) {
             cursorSnap = cursorTransaction.finalReplacement();
