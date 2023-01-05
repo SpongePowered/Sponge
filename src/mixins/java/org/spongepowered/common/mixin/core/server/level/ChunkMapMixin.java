@@ -124,10 +124,9 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         level.unload(chunk);
 
         for (final Direction dir : Constants.Chunk.CARDINAL_DIRECTIONS) {
-            final Vector3i neighborPos = chunkPos.add(dir.asBlockOffset());
-            final ChunkAccess neighbor = this.level.getChunk(neighborPos.x(), neighborPos.z(), ChunkStatus.EMPTY, false);
-            if (neighbor instanceof LevelChunk) {
-                final int index = DirectionUtil.directionToIndex(dir);
+            final int index = DirectionUtil.directionToIndex(dir);
+            final LevelChunk neighbor = ((LevelChunkBridge) chunk).bridge$getNeighborChunk(index);
+            if (neighbor != null) {
                 final int oppositeIndex = DirectionUtil.directionToIndex(dir.opposite());
                 ((LevelChunkBridge) chunk).bridge$setNeighborChunk(index, null);
                 ((LevelChunkBridge) neighbor).bridge$setNeighborChunk(oppositeIndex, null);
