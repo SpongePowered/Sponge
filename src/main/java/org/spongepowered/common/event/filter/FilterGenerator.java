@@ -47,7 +47,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.IsCancelled;
@@ -144,7 +143,7 @@ public class FilterGenerator {
                 }
             }
         }
-        if (!cancellation && Cancellable.class.isAssignableFrom(parameters[0].clazz())) {
+        if (!cancellation) {
             additional.add(new CancellationEventFilterDelegate(Tristate.FALSE));
         }
 
