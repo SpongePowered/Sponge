@@ -92,9 +92,8 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
 
     @Override
     public <V extends T> V value(final ResourceKey key) {
-        V value = (V) this.shadow$get((ResourceLocation) (Object) Objects.requireNonNull(key, "key"));
-        if (value != null)
-        {
+        final V value = (V) this.shadow$get((ResourceLocation) (Object) Objects.requireNonNull(key, "key"));
+        if (value != null) {
             return value;
         }
 
