@@ -391,15 +391,16 @@ public final class SpongeCommonEventFactory {
             frame.pushCause(entity);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.NATURAL);
 
+            final Vector3d originalToPosition = ((Entity) entity).position();
             final @Nullable Vector3d finalPosition =
                     SpongeCommonEventFactory.callMoveEvent(
                             (Entity) entity,
                             new Vector3d(entity.xOld, entity.yOld, entity.zOld),
-                            new Vector3d(entity.getX(), entity.getY(), entity.getZ()));
+                            originalToPosition);
 
             if (finalPosition == null) {
                 entity.setPos(entity.xOld, entity.yOld, entity.zOld);
-            } else {
+            } else if (!finalPosition.equals(originalToPosition)) {
                 entity.setPos(finalPosition.x(), finalPosition.y(), finalPosition.z());
             }
         }
