@@ -26,6 +26,7 @@ package org.spongepowered.common.item.recipe.stonecutting;
 
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -59,7 +60,7 @@ public class SpongeStonecuttingRecipeSerializer<R extends SingleItemRecipe> impl
 
         final String type = GsonHelper.getAsString(json, Constants.Recipe.RESULT);
         final int count = GsonHelper.getAsInt(json, Constants.Recipe.COUNT);
-        final Registry<Item> itemRegistry = SpongeCommon.vanillaRegistry(Registries.ITEM);
+        final Registry<Item> itemRegistry = BuiltInRegistries.ITEM;
         final ItemStack itemstack = new ItemStack(itemRegistry.get(new ResourceLocation(type)), count);
         return (R) new SpongeStonecuttingRecipe(recipeId, group, ingredient, itemstack, resultFunction);
     }

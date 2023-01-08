@@ -26,6 +26,7 @@ package org.spongepowered.common.item.recipe.cooking;
 
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
@@ -76,7 +77,7 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration {
 
     @Override
     public void serializeResult(final JsonObject json) {
-        final Registry<Item> itemRegistry = SpongeCommon.vanillaRegistry(Registries.ITEM);
+        final Registry<Item> itemRegistry = BuiltInRegistries.ITEM;
         json.addProperty(Constants.Recipe.RESULT, itemRegistry.getKey(this.result).toString());
         // Sponge Recipe
         if (this.spongeResult != null) {

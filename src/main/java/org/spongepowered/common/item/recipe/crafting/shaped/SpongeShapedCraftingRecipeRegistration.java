@@ -28,6 +28,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
@@ -87,7 +88,7 @@ public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistra
     @Override
     public void serializeResult(final JsonObject json) {
         final JsonObject result = new JsonObject();
-        final Registry<Item> itemRegistry = SpongeCommon.vanillaRegistry(Registries.ITEM);
+        final Registry<Item> itemRegistry = BuiltInRegistries.ITEM;
         result.addProperty(Constants.Recipe.ITEM, itemRegistry.getKey(this.result).toString());
         if (this.count > 1) {
             result.addProperty(Constants.Recipe.COUNT, this.count);

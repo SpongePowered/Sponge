@@ -83,15 +83,44 @@ public class SpongeIngredient extends Ingredient {
 
     public static SpongeIngredient spongeFromPredicate(ResourceKey key, Predicate<org.spongepowered.api.item.inventory.ItemStack> predicate, net.minecraft.world.item.ItemStack... exemplaryIngredients) {
         final Predicate<ItemStack> mcPredicate = stack -> predicate.test(ItemStackUtil.fromNative(stack));
-        if (SpongeIngredient.cachedPredicates.put(key.toString(), mcPredicate) != null) {
+        final Predicate<ItemStack> registeredPredicate = SpongeIngredient.cachedPredicates.get(key.toString());
+        if (registeredPredicate instanceof WrappedPredicate wrapped) {
+            wrapped.setPredicate(mcPredicate);
+        } else if (registeredPredicate != null) {
             SpongeCommon.logger().warn(MessageFormat.format("Predicate ingredient registered twice! {} was replaced.", key.toString()));
+        } else {
+            SpongeIngredient.cachedPredicates.put(key.toString(), mcPredicate);
         }
         final SpongePredicateItemList itemList = new SpongePredicateItemList(key.toString(), mcPredicate, exemplaryIngredients);
         return new SpongeIngredient(itemList);
     }
 
     public static Predicate<ItemStack> getCachedPredicate(String id) {
-        return SpongeIngredient.cachedPredicates.get(id);
+
+        return SpongeIngredient.cachedPredicates.computeIfAbsent(id, k -> new WrappedPredicate(id));
+    }
+
+    public static class WrappedPredicate implements Predicate<ItemStack>
+    {
+        private final String key;
+        private Predicate<ItemStack> predicate;
+
+        public WrappedPredicate(String key)
+        {
+            this.key = key;
+        }
+
+        public void setPredicate(final Predicate<ItemStack> predicate) {
+            this.predicate = predicate;
+        }
+
+        @Override
+        public boolean test(final ItemStack itemStack) {
+            if (this.predicate == null) {
+                throw new IllegalStateException(key + " predicate was not registered. Is the plugin loaded?");
+            }
+            return this.predicate.test(itemStack);
+        }
     }
 
 

@@ -26,6 +26,7 @@ package org.spongepowered.common.item.recipe.cooking;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -67,7 +68,7 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
         final Ingredient ingredient = IngredientUtil.spongeDeserialize(jsonelement);
         final String result = GsonHelper.getAsString(json, Constants.Recipe.RESULT);
         final ResourceLocation resourcelocation = new ResourceLocation(result);
-        final ItemStack itemstack = new ItemStack(SpongeCommon.vanillaRegistry(Registries.ITEM).getOptional(resourcelocation).orElseThrow(() -> new IllegalStateException("Item: " + result + " does not exist")));
+        final ItemStack itemstack = new ItemStack(BuiltInRegistries.ITEM.getOptional(resourcelocation).orElseThrow(() -> new IllegalStateException("Item: " + result + " does not exist")));
         final ItemStack spongeStack = IngredientResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
         final Function<Container, ItemStack> resultFunction = IngredientResultUtil.deserializeResultFunction(json);
         final float exp = GsonHelper.getAsFloat(json, Constants.Recipe.COOKING_EXP, 0.0F);
