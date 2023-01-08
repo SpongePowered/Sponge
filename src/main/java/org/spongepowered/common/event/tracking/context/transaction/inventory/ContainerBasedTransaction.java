@@ -143,7 +143,7 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
         if (this.craftingInventory != null) { // Event with Preview transaction on crafting inventory?
             Slot slot = this.craftingInventory.result();
             @Nullable final SlotTransaction preview = this.findPreviewTransaction(this.craftingInventory.result(), slotTransactions);
-            final ItemStackSnapshot previewItem = ItemStackUtil.snapshotOf(this.craftingInventory.peek());
+            final ItemStackSnapshot previewItem = ItemStackUtil.snapshotOf(this.craftingInventory.result().peek());
             if (preview != null) {
                 slot = preview.slot();
                 // Check if preview transaction is correct
@@ -232,7 +232,7 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
 
     protected void handleEventResults(final Player player, final ClickContainerEvent event) {
         PacketPhaseUtil.handleSlotRestore(player, this.menu, event.transactions(), event.isCancelled());
-        PacketPhaseUtil.handleCursorRestore(player, event.cursorTransaction());
+        PacketPhaseUtil.handleCursorRestore(player, event.cursorTransaction(), event.isCancelled());
 
         if (this.entities != null && event instanceof SpawnEntityEvent) {
             EntityUtil.despawnFilteredEntities(this.entities, (SpawnEntityEvent) event);
