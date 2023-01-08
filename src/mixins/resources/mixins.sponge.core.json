@@ -235,11 +235,11 @@
         "world.scores.ScoreMixin",
         "world.ticks.LevelTicksMixin",
         "world.ticks.ScheduledTickMixin",
-        "network.chat.ChatTypeMixin",
         "server.WorldLoaderMixin",
         "registries.BuiltInRegistriesMixin",
         "adventure.chat.SignedMessageMixin",
-        "world.level.gameevent.vibrations.VibrationListenerMixin"
+        "world.level.gameevent.vibrations.VibrationListenerMixin",
+        "resources.RegistryDataLoaderMixin"
     ],
     "client": [
         "client.MinecraftMixin",
