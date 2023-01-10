@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.minecraft.state;
 
 import net.minecraft.world.level.block.state.properties.Property;
 import org.spongepowered.api.state.StateProperty;
-import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -66,7 +65,7 @@ public abstract class PropertyMixin_API<T extends Comparable<T>> implements Stat
 
     @Override
     public Predicate<T> predicate() {
-        return Functional.predicateIn(this.possibleValues());
+        return this.possibleValues()::contains;
     }
 
     @SuppressWarnings("unchecked")

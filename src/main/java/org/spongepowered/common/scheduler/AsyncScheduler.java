@@ -27,13 +27,13 @@ package org.spongepowered.common.scheduler;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.scheduler.ScheduledTask;
-import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -176,7 +176,19 @@ public final class AsyncScheduler extends SpongeScheduler {
     }
 
     public <T> CompletableFuture<T> submit(final Callable<T> callable) {
-        return Functional.asyncFailableFuture(callable, this.executor);
+        return this.asyncFailableFuture(callable, this.executor);
+    }
+
+    private <T> CompletableFuture<T> asyncFailableFuture(Callable<T> call, Executor exec) {
+        final CompletableFuture<T> ret = new CompletableFuture<>();
+        exec.execute(() -> {
+            try {
+                ret.complete(call.call());
+            } catch (Throwable e) {
+                ret.completeExceptionally(e);
+            }
+        });
+        return ret;
     }
 
     public void close() {
