@@ -45,7 +45,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
-import org.spongepowered.api.util.Coerce;
+import org.spongepowered.common.data.builder.Coerce;
 import org.spongepowered.common.registry.provider.KeyProvider;
 
 import java.util.ArrayList;
