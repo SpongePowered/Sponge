@@ -22,25 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler.dev;
+package org.spongepowered.common.launch.command;
 
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
-import org.spongepowered.vanilla.applaunch.handler.VanillaLaunchHandler;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import com.mojang.brigadier.StringReader;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.manager.CommandMapping;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.common.command.sponge.SpongeCommand;
 
-public final class ServerDevLaunchHandler extends VanillaLaunchHandler {
+@Singleton
+public final class TestCommandManager extends SpongeCommandManager {
 
-    @Override
-    public String name() {
-        return AppLaunchTargets.SERVER_DEVELOPMENT.getLaunchTarget();
+    @Inject
+    public TestCommandManager(final Game game, final Provider<SpongeCommand> spongeCommand) {
+        super(game, spongeCommand);
     }
 
     @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLaunch", true, launchClassLoader.getInstance())
-                .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
-                .invoke(null, AppLaunch.pluginPlatform(), Boolean.TRUE, arguments);
+    protected CommandResult processCommand(final CommandCause cause, final CommandMapping mapping, final StringReader original, final String command,
+            final String args) throws Throwable {
+        return mapping.registrar().process(cause, mapping, command, args);
     }
 }

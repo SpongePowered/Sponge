@@ -22,21 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.test;
+package org.spongepowered.common.launch;
 
+import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
+import net.minecraft.server.Bootstrap;
+import org.spongepowered.common.SpongeLifecycle;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
-import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.launch.mapping.SpongeMappingManager;
-import org.spongepowered.common.launch.plugin.SpongePluginManager;
+import org.spongepowered.common.inject.SpongeCommonModule;
+import org.spongepowered.common.launch.inject.TestModule;
+import org.spongepowered.common.launch.plugin.VanillaBasePluginManager;
 import org.spongepowered.plugin.PluginContainer;
 
-public class TestLaunch extends Launch {
-    private final SpongeMappingManager mappingManager = new TestMappingsManager();
+public class TestLaunch extends VanillaBaseLaunch {
 
     protected TestLaunch(final PluginPlatform pluginPlatform) {
-        super(pluginPlatform);
+        super(pluginPlatform, new VanillaBasePluginManager());
     }
 
     @Override
@@ -45,18 +48,8 @@ public class TestLaunch extends Launch {
     }
 
     @Override
-    public SpongePluginManager pluginManager() {
-        return null;
-    }
-
-    @Override
-    public SpongeMappingManager mappingManager() {
-        return this.mappingManager;
-    }
-
-    @Override
     public Stage injectionStage() {
-        return null;
+        return Stage.DEVELOPMENT;
     }
 
     @Override
@@ -66,24 +59,32 @@ public class TestLaunch extends Launch {
 
     @Override
     public Injector createInjector() {
-        return null;
+        return Guice.createInjector(this.injectionStage(), new SpongeCommonModule(), new TestModule());
     }
 
-    static class TestMappingsManager implements SpongeMappingManager {
+    private void startLifecycle() {
+        final SpongeLifecycle lifecycle = this.createInjector().getInstance(SpongeLifecycle.class);
+        this.setLifecycle(lifecycle);
+        lifecycle.establishFactories();
+        lifecycle.establishBuilders();
+        lifecycle.establishGameServices();
+        lifecycle.establishDataKeyListeners();
 
-        @Override
-        public String toRuntimeClassName(final String srcName) {
-            return srcName;
-        }
+        Bootstrap.bootStrap();
+        Bootstrap.validate();
 
-        @Override
-        public String toRuntimeFieldName(final Class<?> owner, final String srcName) {
-            return srcName;
-        }
+        lifecycle.establishGlobalRegistries();
+        lifecycle.establishDataProviders();
+    }
 
-        @Override
-        public String toRuntimeMethodName(final Class<?> owner, final String srcName, final Class<?>... params) {
-            return srcName;
-        }
+    public static void launch() {
+        final TestLaunch launch = new TestLaunch(AppLaunch.pluginPlatform());
+        Launch.setInstance(launch);
+        launch.launchPlatform(new String[0]);
+    }
+
+    @Override
+    protected void performBootstrap(String[] args) {
+        this.startLifecycle();
     }
 }

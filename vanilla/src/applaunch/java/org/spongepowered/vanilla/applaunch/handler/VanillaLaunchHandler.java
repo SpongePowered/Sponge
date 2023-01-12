@@ -24,22 +24,16 @@
  */
 package org.spongepowered.vanilla.applaunch.handler;
 
-import cpw.mods.gross.Java9ClassLoaderUtil;
-import cpw.mods.modlauncher.TransformingClassLoader;
 import cpw.mods.modlauncher.api.ILaunchHandlerService;
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.common.applaunch.handler.VanillaBaseLaunchHandler;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResource;
 import org.spongepowered.plugin.builtin.jvm.locator.ResourceType;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -51,163 +45,32 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
  * The common Sponge {@link ILaunchHandlerService launch handler} for development
  * and production environments.
  */
-public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerService {
-
-    private static final String JAVA_HOME_PATH = System.getProperty("java.home");
-    protected final Logger logger = LogManager.getLogger("launch");
-
-    /**
-     * Classes or packages that mark jar files that should be excluded from the transformation path
-     */
-    protected static final String[] NON_TRANSFORMABLE_PATHS = {
-        "org/spongepowered/asm/", // Mixin (for obvious reasons)
-        // because NIO Paths use different normalization than Instrumentation.appendToSystemClassLoaderSearch()
-        // (NIO uses uppercase URL encoding (ex. %2D), Instrumentation does not (ex. %2d)), this cannot appear in the transformer path at all
-        // This suppresses a warning from LoggerFactory.findPossibleStaticLoggerBinderPathSet
-        "org/slf4j/impl/", // slf4j
-    };
-
-    /**
-     * A list of packages to exclude from the {@link TransformingClassLoader transforming class loader},
-     * to be registered with {@link ITransformingClassLoader#addTargetPackageFilter(Predicate)}.
-     * <p>
-     * Packages should be scoped as tightly as possible - for example {@code "com.google.common."} is
-     * preferred over {@code "com.google."}.
-     * <p>
-     * Packages should always include a trailing full stop - for example if {@code "org.neptune"} was
-     * excluded, classes in {@code "org.neptunepowered"} would also be excluded. The correct usage would
-     * be to exclude {@code "org.neptune."}.
-     */
-    private static final String[] EXCLUDED_PACKAGES = {
-            "org.spongepowered.plugin.",
-            "org.spongepowered.common.applaunch.",
-            "org.spongepowered.vanilla.applaunch.",
-            // configurate 4
-            "io.leangen.geantyref.",
-            "org.spongepowered.configurate.",
-            // terminal console bits
-            "org.jline.",
-            "org.fusesource.",
-            "net.minecrell.terminalconsole.",
-            "org.slf4j.",
-            // Maven artifacts -- specifically for versioning
-            "org.apache.maven.artifact."
-    };
-
-    private static final String[] EXCLUSION_EXCEPTIONS = {
-            "org.spongepowered.configurate.objectmapping.guice.",
-            "org.spongepowered.configurate.yaml.",
-            "org.spongepowered.configurate.gson.",
-            "org.spongepowered.configurate.jackson.",
-            "org.spongepowered.configurate.xml.",
-    };
+public abstract class VanillaLaunchHandler extends VanillaBaseLaunchHandler {
 
     @Override
     public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
         // Specifically requested to be available on the launch loader
         final VanillaPluginPlatform platform = AppLaunch.pluginPlatform();
-        for (final Path path : platform.getStandardEnvironment().blackboard().getOrCreate(VanillaPluginPlatform.EXTRA_TRANSFORMABLE_PATHS, () -> Collections.emptyList())) {
+        for (final Path path : platform.getStandardEnvironment().blackboard().getOrCreate(VanillaPluginPlatform.EXTRA_TRANSFORMABLE_PATHS, Collections::emptyList)) {
             builder.addTransformationPath(path);
         }
 
-        // Plus everything else on the system loader
-        // todo: we might be able to eliminate this at some point, but that causes complications
-        for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
-            try {
-                final URI uri = url.toURI();
-                if (!this.isTransformable(uri)) {
-                    this.logger.debug("Non-transformable system classpath entry: {}", uri);
-                    continue;
-                }
-
-                builder.addTransformationPath(Paths.get(uri));
-                this.logger.debug("Transformable system classpath entry: {}", uri);
-            } catch (final URISyntaxException | IOException ex) {
-                this.logger.error("Failed to add {} to transformation path", url, ex);
-            }
-        }
+        super.configureTransformationClassLoader(builder);
 
         builder.setResourceEnumeratorLocator(this.getResourceLocator());
         builder.setManifestLocator(this.getManifestLocator());
-    }
-
-    protected boolean isTransformable(final URI uri) throws URISyntaxException, IOException {
-        final File file = new File(uri);
-
-        // in Java 8 ONLY, the system classpath contains JVM internals
-        // let's make sure those don't get transformed
-        if (file.getAbsolutePath().startsWith(AbstractVanillaLaunchHandler.JAVA_HOME_PATH)) {
-            return false;
-        }
-
-        if (file.isDirectory()) {
-            for (final String test : AbstractVanillaLaunchHandler.NON_TRANSFORMABLE_PATHS) {
-                if (new File(file, test).exists()) {
-                    return false;
-                }
-            }
-        } else if (file.isFile()) {
-            try (final JarFile jf = new JarFile(new File(uri))) {
-                for (final String test : AbstractVanillaLaunchHandler.NON_TRANSFORMABLE_PATHS) {
-                    if (jf.getEntry(test) != null) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public Callable<Void> launchService(final String[] arguments, final ITransformingClassLoader launchClassLoader) {
-        this.logger.info("Transitioning to Sponge launch, please wait...");
-
-        launchClassLoader.addTargetPackageFilter(klass -> {
-            outer: for (final String pkg : AbstractVanillaLaunchHandler.EXCLUDED_PACKAGES) {
-                if (klass.startsWith(pkg)) {
-                    for (final String exception : AbstractVanillaLaunchHandler.EXCLUSION_EXCEPTIONS) {
-                        if (klass.startsWith(exception)) {
-                            break outer;
-                        }
-                    }
-                    return false;
-                }
-            }
-            return true;
-        });
-        AbstractVanillaLaunchHandler.fixPackageExclusions(launchClassLoader);
-
-        return () -> {
-            this.launchService0(arguments, launchClassLoader);
-            return null;
-        };
-    }
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private static void fixPackageExclusions(final ITransformingClassLoader tcl) {
-        try {
-            final Field prefixField = tcl.getClass().getDeclaredField("SKIP_PACKAGE_PREFIXES");
-            prefixField.setAccessible(true);
-            ((List) prefixField.get(null)).set(1, "__javax__noplswhy.");
-        } catch (NoSuchFieldException | IllegalAccessException ex) {
-            throw new RuntimeException("Failed to fix strange transformer exclusions", ex);
-        }
     }
 
     protected Function<String, Enumeration<URL>> getResourceLocator() {
@@ -304,11 +167,11 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
                             }
                         }
                     }
-                    return AbstractVanillaLaunchHandler.UNKNOWN_MANIFEST;
+                    return VanillaLaunchHandler.UNKNOWN_MANIFEST;
                 });
 
                 try {
-                    if (manifest == AbstractVanillaLaunchHandler.UNKNOWN_MANIFEST) {
+                    if (manifest == VanillaLaunchHandler.UNKNOWN_MANIFEST) {
                         return Optional.ofNullable(((JarURLConnection) connection).getManifest());
                     } else {
                         return manifest;
@@ -320,16 +183,4 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             return Optional.empty();
         };
     }
-
-    /**
-     * Launch the service (Minecraft).
-     * <p>
-     * <strong>Take care</strong> to <strong>ONLY</strong> load classes on the provided
-     * {@link ClassLoader class loader}, which can be retrieved with {@link ITransformingClassLoader#getInstance()}.
-     *
-     * @param arguments The arguments to launch the service with
-     * @param launchClassLoader The transforming class loader to load classes with
-     * @throws Exception This can be any exception that occurs during the launch process
-     */
-    protected abstract void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception;
 }

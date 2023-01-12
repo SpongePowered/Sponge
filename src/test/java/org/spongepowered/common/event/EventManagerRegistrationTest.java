@@ -25,7 +25,6 @@
 package org.spongepowered.common.event;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
@@ -45,14 +44,12 @@ import org.spongepowered.api.event.lifecycle.ProvideServiceEvent;
 import org.spongepowered.api.event.lifecycle.StoppedGameEvent;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
-import org.spongepowered.common.test.TestEventManager;
-import org.spongepowered.common.test.UnitTestExtension;
+import org.spongepowered.common.launch.event.TestEventManager;
 import org.spongepowered.common.util.ReferencedDefinableClassLoader;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.lang.reflect.InvocationTargetException;
 
-@ExtendWith(UnitTestExtension.class)
 public class EventManagerRegistrationTest {
 
     @Test

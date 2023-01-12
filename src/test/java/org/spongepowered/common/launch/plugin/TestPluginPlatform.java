@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.test;
+package org.spongepowered.common.launch.plugin;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +42,7 @@ import java.util.List;
  */
 public class TestPluginPlatform implements PluginPlatform {
 
-    private static final Logger LOGGER = LogManager.getLogger("UnitTestPlatform");
+    private static final Logger LOGGER = LogManager.getLogger("TestPluginPlatform");
 
     private final Path outputDirectory;
     private final Path pluginDirectory;

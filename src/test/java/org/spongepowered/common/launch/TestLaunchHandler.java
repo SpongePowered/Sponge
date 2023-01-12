@@ -22,22 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.test;
+package org.spongepowered.common.launch;
 
-import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
+import cpw.mods.modlauncher.api.ITransformingClassLoader;
+import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.applaunch.handler.VanillaBaseLaunchHandler;
+import org.spongepowered.common.launch.plugin.TestPluginPlatform;
 
-public class UnitTestExtension implements BeforeAllCallback {
+import java.util.Optional;
+
+public class TestLaunchHandler extends VanillaBaseLaunchHandler {
+
     @Override
-    public void beforeAll(final ExtensionContext context) throws Exception {
-        final TestPluginPlatform platform = new TestPluginPlatform();
+    public String name() {
+        return "sponge_client_test";
+    }
+
+    @Override
+    public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
+        super.configureTransformationClassLoader(builder);
+        builder.setManifestLocator(connection -> Optional.empty());
+    }
+
+    @Override
+    protected void launchService0(String[] arguments, ITransformingClassLoader launchClassLoader) throws Exception {
         if (AppLaunch.pluginPlatform() == null) {
+            final TestPluginPlatform platform = new TestPluginPlatform();
             AppLaunch.setPluginPlatform(platform);
-            Launch.setInstance(new TestLaunch(platform));
-            SpongeConfigs.getCommon();
         }
+
+        Class.forName("org.spongepowered.common.launch.TestLaunch", true, launchClassLoader.getInstance()).getMethod("launch").invoke(null);
     }
 }

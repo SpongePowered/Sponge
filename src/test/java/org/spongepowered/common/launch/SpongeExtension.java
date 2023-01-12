@@ -22,9 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.test;
+package org.spongepowered.common.launch;
 
-import org.spongepowered.common.event.manager.SpongeEventManager;
+import org.spongepowered.mij.ModLauncherExtension;
+import org.spongepowered.mij.SharedModLauncher;
 
-public class TestEventManager extends SpongeEventManager {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class SpongeExtension extends ModLauncherExtension {
+    private static final String[] LAUNCHER_ARGS = resolveLauncherArguments();
+
+    private static String[] resolveLauncherArguments() {
+        List<String> args = new ArrayList<>();
+        args.add("--launchTarget");
+        args.add("sponge_client_test");
+        args.addAll(Arrays.asList(System.getProperty("sponge.test.launcherArguments", "").split(" ")));
+        return args.toArray(new String[0]);
+    }
+
+    @Override
+    protected ClassLoader getTransformingClassLoader() {
+        return SharedModLauncher.getTransformingClassLoader(LAUNCHER_ARGS);
+    }
 }

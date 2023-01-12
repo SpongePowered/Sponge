@@ -230,6 +230,7 @@ dependencies {
     val log4jVersion: String by project
     val mixinVersion: String by project
     val modlauncherVersion: String by project
+    val java9hacksVersion: String by project
     val tinyLogVersion: String by project
 
     api(project(":", configuration = "launch"))
@@ -320,7 +321,7 @@ dependencies {
         exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
     }
     appLaunch("org.ow2.asm:asm-commons:$asmVersion")
-    appLaunch("cpw.mods:grossjava9hacks:1.3.3") {
+    appLaunch("cpw.mods:grossjava9hacks:$java9hacksVersion") {
         exclude(group = "org.apache.logging.log4j")
     }
     appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
