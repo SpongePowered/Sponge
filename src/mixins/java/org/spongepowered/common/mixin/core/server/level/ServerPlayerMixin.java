@@ -722,6 +722,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         // Update boss bars
         SpongeAdventure.forEachBossBar(bar -> ((BossEventBridge) bar).bridge$replacePlayer(oldPlayer, (net.minecraft.server.level.ServerPlayer) (Object) this));
+
+        ((ServerPlayerBridge) oldPlayer).bridge$removeScoreboardOnRespawn();
+        ((ServerPlayerBridge) this).bridge$setScoreboardOnRespawn(((ServerPlayer) oldPlayer).scoreboard());
     }
 
     @SuppressWarnings({"ConstantConditions", "UnstableApiUsage"})
