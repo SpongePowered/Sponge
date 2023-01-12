@@ -24,11 +24,11 @@
  */
 package org.spongepowered.vanilla.launch.plugin;
 
-import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.common.launch.plugin.SpongePluginManager;
+import org.spongepowered.common.launch.plugin.VanillaBasePluginManager;
+import org.spongepowered.common.launch.plugin.VanillaDummyPluginContainer;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.InvalidPluginException;
 import org.spongepowered.plugin.PluginCandidate;
@@ -43,52 +43,25 @@ import org.spongepowered.vanilla.launch.plugin.resolver.DependencyResolver;
 import org.spongepowered.vanilla.launch.plugin.resolver.ResolutionResult;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Singleton
-public final class VanillaPluginManager implements SpongePluginManager {
+public final class VanillaPluginManager extends VanillaBasePluginManager {
 
-    private final Map<String, PluginContainer> plugins;
-    private final Map<Object, PluginContainer> instancesToPlugins;
-    private final List<PluginContainer> sortedPlugins;
     private final Map<String, Set<PluginResource>> locatedResources;
     private final Map<PluginContainer, PluginResource> containerToResource;
 
     public VanillaPluginManager() {
-        this.plugins = new Object2ObjectOpenHashMap<>();
-        this.instancesToPlugins = new IdentityHashMap<>();
-        this.sortedPlugins = new ArrayList<>();
         this.locatedResources = new Object2ObjectOpenHashMap<>();
         this.containerToResource = new Object2ObjectOpenHashMap<>();
     }
 
-    @Override
-    public Optional<PluginContainer> fromInstance(final Object instance) {
-        return Optional.ofNullable(this.instancesToPlugins.get(Objects.requireNonNull(instance, "instance")));
-    }
-
-    @Override
-    public Optional<PluginContainer> plugin(final String id) {
-        return Optional.ofNullable(this.plugins.get(Objects.requireNonNull(id, "id")));
-    }
-
-    @Override
-    public Collection<PluginContainer> plugins() {
-        return Collections.unmodifiableCollection(this.sortedPlugins);
-    }
-
-    @SuppressWarnings("unchecked")
     public void loadPlugins(final VanillaPluginPlatform platform) {
         this.locatedResources.putAll(platform.getResources());
 
@@ -165,15 +138,6 @@ public final class VanillaPluginManager implements SpongePluginManager {
 
         resolutionResult.printErrorsIfAny(failedInstances, consequentialFailedInstances, platform.logger());
         platform.logger().info("Loaded plugin(s): {}", this.sortedPlugins.stream().map(p -> p.metadata().id()).collect(Collectors.toList()));
-    }
-
-    public void addPlugin(final PluginContainer plugin) {
-        this.plugins.put(plugin.metadata().id(), Objects.requireNonNull(plugin, "plugin"));
-        this.sortedPlugins.add(plugin);
-
-        if (!(plugin instanceof VanillaDummyPluginContainer)) {
-            this.instancesToPlugins.put(plugin.instance(), plugin);
-        }
     }
 
     public Map<String, Set<PluginResource>> locatedResources() {

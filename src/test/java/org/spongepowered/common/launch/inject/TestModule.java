@@ -22,30 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler.dev;
+package org.spongepowered.common.launch.inject;
 
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
-import org.spongepowered.vanilla.applaunch.handler.VanillaLaunchHandler;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
+import com.google.inject.AbstractModule;
+import org.spongepowered.api.Platform;
+import org.spongepowered.api.event.EventManager;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.common.launch.TestPlatform;
+import org.spongepowered.common.launch.command.TestCommandManager;
+import org.spongepowered.common.launch.event.TestEventManager;
 
-public final class ClientDevLaunchHandler extends VanillaLaunchHandler {
-
+public class TestModule extends AbstractModule {
     @Override
-    protected boolean isDev() {
-        return true;
-    }
-
-    @Override
-    public String name() {
-        return AppLaunchTargets.CLIENT_DEVELOPMENT.getLaunchTarget();
-    }
-
-    @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.ClientLaunch", true, launchClassLoader.getInstance())
-                .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
-                .invoke(null, AppLaunch.pluginPlatform(), Boolean.TRUE, arguments);
+    protected void configure() {
+        this.bind(Platform.class).to(TestPlatform.class);
+        this.bind(EventManager.class).to(TestEventManager.class);
+        this.bind(SpongeCommandManager.class).to(TestCommandManager.class);
     }
 }

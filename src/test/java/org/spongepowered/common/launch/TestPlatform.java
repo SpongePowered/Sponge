@@ -22,30 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler.dev;
+package org.spongepowered.common.launch;
 
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
-import org.spongepowered.vanilla.applaunch.handler.VanillaLaunchHandler;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
-public final class ClientDevLaunchHandler extends VanillaLaunchHandler {
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import org.spongepowered.api.MinecraftVersion;
+import org.spongepowered.common.SpongePlatform;
 
-    @Override
-    protected boolean isDev() {
-        return true;
+import java.util.Map;
+
+@Singleton
+public class TestPlatform extends SpongePlatform {
+
+    @Inject
+    public TestPlatform(final MinecraftVersion minecraftVersion) {
+        super(minecraftVersion);
     }
 
     @Override
-    public String name() {
-        return AppLaunchTargets.CLIENT_DEVELOPMENT.getLaunchTarget();
-    }
-
-    @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.ClientLaunch", true, launchClassLoader.getInstance())
-                .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
-                .invoke(null, AppLaunch.pluginPlatform(), Boolean.TRUE, arguments);
+    public Map<String, Object> asMap() {
+        return this.platformMap;
     }
 }

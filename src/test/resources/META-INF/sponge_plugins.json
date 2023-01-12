@@ -1,0 +1,71 @@
+{
+    "loader": {
+        "name": "java_plain",
+        "version": "1.0"
+    },
+    "license": "MIT",
+    "plugins": [
+        {
+            "id": "minecraft",
+            "name": "Minecraft",
+            "version": "test",
+            "entrypoint": "org.spongepowered.common.launcher.Launcher",
+            "links": {
+                "homepage": "https://www.minecraft.net"
+            },
+            "contributors": [
+                {
+                    "name": "Mojang AB",
+                    "description": "Lead Developer"
+                }
+            ]
+        },
+        {
+            "loader": "java_plain",
+            "id": "spongeapi",
+            "name": "SpongeAPI",
+            "version": "test",
+            "entrypoint": "org.spongepowered.api.Sponge",
+            "description": "The Minecraft API specification",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [
+                {
+                    "name": "SpongePowered",
+                    "description": "Lead Developer"
+                }
+            ]
+        },
+        {
+            "id": "sponge",
+            "name": "Sponge",
+            "version": "test",
+            "entrypoint": "org.spongepowered.common.SpongeCommon",
+            "description": "The common Sponge implementation",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [
+                {
+                    "name": "SpongePowered",
+                    "description": "Lead Developer"
+                }
+            ],
+            "dependencies": [
+                {
+                    "id": "minecraft",
+                    "version": "test"
+                },
+                {
+                    "id": "spongeapi",
+                    "version": "test"
+                }
+            ]
+        }
+    ]
+}

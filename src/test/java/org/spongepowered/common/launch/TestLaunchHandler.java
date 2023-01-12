@@ -22,15 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler.dev;
+package org.spongepowered.common.launch;
 
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
+import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
-import org.spongepowered.vanilla.applaunch.handler.VanillaLaunchHandler;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
+import org.spongepowered.common.applaunch.handler.VanillaBaseLaunchHandler;
+import org.spongepowered.common.launch.plugin.TestPluginPlatform;
 
-public final class ClientDevLaunchHandler extends VanillaLaunchHandler {
+import java.util.Optional;
+
+public class TestLaunchHandler extends VanillaBaseLaunchHandler {
 
     @Override
     protected boolean isDev() {
@@ -39,13 +41,22 @@ public final class ClientDevLaunchHandler extends VanillaLaunchHandler {
 
     @Override
     public String name() {
-        return AppLaunchTargets.CLIENT_DEVELOPMENT.getLaunchTarget();
+        return "sponge_client_test";
     }
 
     @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.ClientLaunch", true, launchClassLoader.getInstance())
-                .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
-                .invoke(null, AppLaunch.pluginPlatform(), Boolean.TRUE, arguments);
+    public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
+        super.configureTransformationClassLoader(builder);
+        builder.setManifestLocator(connection -> Optional.empty());
+    }
+
+    @Override
+    protected void launchService0(String[] arguments, ITransformingClassLoader launchClassLoader) throws Exception {
+        if (AppLaunch.pluginPlatform() == null) {
+            final TestPluginPlatform platform = new TestPluginPlatform();
+            AppLaunch.setPluginPlatform(platform);
+        }
+
+        Class.forName("org.spongepowered.common.launch.TestLaunch", true, launchClassLoader.getInstance()).getMethod("launch").invoke(null);
     }
 }

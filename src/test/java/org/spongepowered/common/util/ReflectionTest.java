@@ -34,12 +34,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.common.test.UnitTestExtension;
+import org.spongepowered.common.launch.SpongeExtension;
 import org.spongepowered.common.test.block.SpongeBlock;
 
 import java.lang.reflect.Method;
 
-@ExtendWith(UnitTestExtension.class)
+@ExtendWith(SpongeExtension.class)
 public class ReflectionTest {
 
     @Test

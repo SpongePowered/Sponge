@@ -22,23 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch.mapping;
+package org.spongepowered.common.launch.event;
 
-import org.spongepowered.common.launch.mapping.SpongeMappingManager;
+import com.google.inject.Singleton;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.event.filter.FilterGenerator;
+import org.spongepowered.common.event.manager.AnnotatedEventListener;
+import org.spongepowered.common.event.manager.ClassEventListenerFactory;
+import org.spongepowered.common.event.manager.SpongeEventManager;
+import org.spongepowered.common.util.DefinableClassLoader;
+import org.spongepowered.plugin.PluginContainer;
 
-public final class VanillaMappingManager implements SpongeMappingManager {
-    @Override
-    public String toRuntimeClassName(final String srcName) {
-        return srcName;
+@Singleton
+public final class TestEventManager extends SpongeEventManager {
+
+    private final @Nullable DefinableClassLoader loader;
+
+    public TestEventManager(final DefinableClassLoader loader) {
+        this.loader = loader;
     }
 
-    @Override
-    public String toRuntimeFieldName(final Class<?> owner, final String srcName) {
-        return srcName;
+    public TestEventManager() {
+        this.loader = null;
     }
 
+
     @Override
-    public String toRuntimeMethodName(final Class<?> owner, final String srcName, final Class<?>... params) {
-        return srcName;
+    protected AnnotatedEventListener.Factory computeFactory(
+        final PluginContainer key
+    ) {
+        return new ClassEventListenerFactory(FilterGenerator::create, this.loader != null ? this.loader.lookup() : SpongeEventManager.OWN_LOOKUP);
     }
 }

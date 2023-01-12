@@ -22,25 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.test;
+package org.spongepowered.common.launch;
 
-import net.minecraft.DetectedVersion;
-import net.minecraft.SharedConstants;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.launch.Launch;
+import org.spongepowered.mij.ModLauncherExtension;
+import org.spongepowered.mij.SharedModLauncher;
 
-public class UnitTestExtension implements BeforeAllCallback {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class SpongeExtension extends ModLauncherExtension {
+    private static final String[] LAUNCHER_ARGS = resolveLauncherArguments();
+
+    private static String[] resolveLauncherArguments() {
+        List<String> args = new ArrayList<>();
+        args.add("--launchTarget");
+        args.add("sponge_client_test");
+        args.addAll(Arrays.asList(System.getProperty("sponge.test.launcherArguments", "").split(" ")));
+        return args.toArray(new String[0]);
+    }
+
     @Override
-    public void beforeAll(final ExtensionContext context) throws Exception {
-        final TestPluginPlatform platform = new TestPluginPlatform();
-        if (AppLaunch.pluginPlatform() == null) {
-            AppLaunch.setPluginPlatform(platform);
-            Launch.setInstance(new TestLaunch(platform));
-            SpongeConfigs.getCommon();
-            SharedConstants.setVersion(DetectedVersion.tryDetectVersion());
-        }
+    protected ClassLoader getTransformingClassLoader() {
+        return SharedModLauncher.getTransformingClassLoader(LAUNCHER_ARGS);
     }
 }

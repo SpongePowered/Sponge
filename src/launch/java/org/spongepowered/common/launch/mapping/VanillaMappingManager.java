@@ -22,30 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler.dev;
+package org.spongepowered.common.launch.mapping;
 
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
-import org.spongepowered.vanilla.applaunch.handler.VanillaLaunchHandler;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
-
-public final class ClientDevLaunchHandler extends VanillaLaunchHandler {
-
+public final class VanillaMappingManager implements SpongeMappingManager {
     @Override
-    protected boolean isDev() {
-        return true;
+    public String toRuntimeClassName(final String srcName) {
+        return srcName;
     }
 
     @Override
-    public String name() {
-        return AppLaunchTargets.CLIENT_DEVELOPMENT.getLaunchTarget();
+    public String toRuntimeFieldName(final Class<?> owner, final String srcName) {
+        return srcName;
     }
 
     @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.ClientLaunch", true, launchClassLoader.getInstance())
-                .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
-                .invoke(null, AppLaunch.pluginPlatform(), Boolean.TRUE, arguments);
+    public String toRuntimeMethodName(final Class<?> owner, final String srcName, final Class<?>... params) {
+        return srcName;
     }
 }

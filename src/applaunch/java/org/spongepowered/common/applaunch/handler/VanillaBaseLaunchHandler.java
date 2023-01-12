@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler;
+package org.spongepowered.common.applaunch.handler;
 
 import cpw.mods.gross.Java9ClassLoaderUtil;
 import cpw.mods.modlauncher.TransformingClassLoader;
@@ -31,43 +31,24 @@ import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResource;
-import org.spongepowered.plugin.builtin.jvm.locator.ResourceType;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.JarURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
 /**
  * The common Sponge {@link ILaunchHandlerService launch handler} for development
  * and production environments.
  */
-public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerService {
+public abstract class VanillaBaseLaunchHandler implements ILaunchHandlerService {
 
     private static final String JAVA_HOME_PATH = System.getProperty("java.home");
     protected final Logger logger = LogManager.getLogger("launch");
@@ -118,18 +99,10 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             "org.spongepowered.configurate.xml.",
     };
 
-    protected boolean isDev() {
-        return false;
-    }
+    protected abstract boolean isDev();
 
     @Override
     public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
-        // Specifically requested to be available on the launch loader
-        final VanillaPluginPlatform platform = AppLaunch.pluginPlatform();
-        for (final Path path : platform.getStandardEnvironment().blackboard().getOrCreate(VanillaPluginPlatform.EXTRA_TRANSFORMABLE_PATHS, () -> Collections.emptyList())) {
-            builder.addTransformationPath(path);
-        }
-
         // Plus everything else on the system loader
         // todo: we might be able to eliminate this at some point, but that causes complications
         if (this.isDev()) {
@@ -148,9 +121,6 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
                 }
             }
         }
-
-        builder.setResourceEnumeratorLocator(this.getResourceLocator());
-        builder.setManifestLocator(this.getManifestLocator());
     }
 
     protected boolean isTransformable(final URI uri) throws URISyntaxException, IOException {
@@ -158,19 +128,19 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
 
         // in Java 8 ONLY, the system classpath contains JVM internals
         // let's make sure those don't get transformed
-        if (file.getAbsolutePath().startsWith(AbstractVanillaLaunchHandler.JAVA_HOME_PATH)) {
+        if (file.getAbsolutePath().startsWith(VanillaBaseLaunchHandler.JAVA_HOME_PATH)) {
             return false;
         }
 
         if (file.isDirectory()) {
-            for (final String test : AbstractVanillaLaunchHandler.NON_TRANSFORMABLE_PATHS) {
+            for (final String test : VanillaBaseLaunchHandler.NON_TRANSFORMABLE_PATHS) {
                 if (new File(file, test).exists()) {
                     return false;
                 }
             }
         } else if (file.isFile()) {
             try (final JarFile jf = new JarFile(new File(uri))) {
-                for (final String test : AbstractVanillaLaunchHandler.NON_TRANSFORMABLE_PATHS) {
+                for (final String test : VanillaBaseLaunchHandler.NON_TRANSFORMABLE_PATHS) {
                     if (jf.getEntry(test) != null) {
                         return false;
                     }
@@ -185,9 +155,9 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
         this.logger.info("Transitioning to Sponge launch, please wait...");
 
         launchClassLoader.addTargetPackageFilter(klass -> {
-            outer: for (final String pkg : AbstractVanillaLaunchHandler.EXCLUDED_PACKAGES) {
+            outer: for (final String pkg : VanillaBaseLaunchHandler.EXCLUDED_PACKAGES) {
                 if (klass.startsWith(pkg)) {
-                    for (final String exception : AbstractVanillaLaunchHandler.EXCLUSION_EXCEPTIONS) {
+                    for (final String exception : VanillaBaseLaunchHandler.EXCLUSION_EXCEPTIONS) {
                         if (klass.startsWith(exception)) {
                             break outer;
                         }
@@ -197,7 +167,7 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             }
             return true;
         });
-        AbstractVanillaLaunchHandler.fixPackageExclusions(launchClassLoader);
+        VanillaBaseLaunchHandler.fixPackageExclusions(launchClassLoader);
 
         return () -> {
             this.launchService0(arguments, launchClassLoader);
@@ -214,117 +184,6 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
         } catch (NoSuchFieldException | IllegalAccessException ex) {
             throw new RuntimeException("Failed to fix strange transformer exclusions", ex);
         }
-    }
-
-    protected Function<String, Enumeration<URL>> getResourceLocator() {
-        return s -> {
-            // Save unnecessary searches of plugin classes for things that are definitely not plugins
-            // In this case: MC and fastutil
-            if (s.startsWith("net/minecraft") || s.startsWith("it/unimi")) {
-                return Collections.emptyEnumeration();
-            }
-
-            final URI asUri;
-            try {
-                asUri = new URI(null, null, s, null);
-            } catch (final URISyntaxException ex) {
-                this.logger.error("Failed to convert resource path {} to a URI", s, ex);
-                return Collections.emptyEnumeration();
-            }
-
-            return new Enumeration<URL>() {
-                final Iterator<Set<PluginResource>> serviceResources = ((VanillaPluginPlatform) AppLaunch.pluginPlatform()).getResources()
-                    .values().iterator();
-                Iterator<PluginResource> resources;
-                URL next = this.computeNext();
-
-                @Override
-                public boolean hasMoreElements() {
-                    return this.next != null;
-                }
-
-                @Override
-                public URL nextElement() {
-                    final URL next = this.next;
-                    if (next == null) {
-                        throw new NoSuchElementException();
-                    }
-                    this.next = this.computeNext();
-                    return next;
-                }
-
-                private URL computeNext() {
-                    while (true) {
-                        if (this.resources != null && !this.resources.hasNext()) {
-                            this.resources = null;
-                        }
-                        if (this.resources == null) {
-                            if (!this.serviceResources.hasNext()) {
-                                return null;
-                            }
-                            this.resources = this.serviceResources.next().iterator();
-                        }
-
-                        if (this.resources.hasNext()) {
-                            final PluginResource resource = this.resources.next();
-                            if (resource instanceof JVMPluginResource) {
-                                if (((JVMPluginResource) resource).type() != ResourceType.JAR) {
-                                    continue;
-                                }
-                            }
-
-                            final Optional<URI> uri = resource.locateResource(asUri);
-                            if (uri.isPresent()) {
-                                try {
-                                    return uri.get().toURL();
-                                } catch (final MalformedURLException ex) {
-                                    throw new RuntimeException(ex);
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-        };
-    }
-
-    private final ConcurrentMap<URL, Optional<Manifest>> manifestCache = new ConcurrentHashMap<>();
-    private static final Optional<Manifest> UNKNOWN_MANIFEST = Optional.of(new Manifest());
-
-    private Function<URLConnection, Optional<Manifest>> getManifestLocator() {
-        return connection -> {
-            if (connection instanceof JarURLConnection) {
-                final URL jarFileUrl = ((JarURLConnection) connection).getJarFileURL();
-                final Optional<Manifest> manifest =  this.manifestCache.computeIfAbsent(jarFileUrl, key -> {
-                    for (final Set<PluginResource> resources : ((VanillaPluginPlatform) AppLaunch.pluginPlatform()).getResources().values()) {
-                        for (final PluginResource resource : resources) {
-                            if (resource instanceof JVMPluginResource) {
-                                final JVMPluginResource jvmResource = (JVMPluginResource) resource;
-                                try {
-                                    if (jvmResource.type() == ResourceType.JAR && ((JVMPluginResource) resource).path().toAbsolutePath().normalize().equals(Paths.get(key.toURI()).toAbsolutePath().normalize())) {
-                                        return jvmResource.manifest();
-                                    }
-                                } catch (final URISyntaxException ex) {
-                                    this.logger.error("Failed to load manifest from jar {}: ", key, ex);
-                                }
-                            }
-                        }
-                    }
-                    return AbstractVanillaLaunchHandler.UNKNOWN_MANIFEST;
-                });
-
-                try {
-                    if (manifest == AbstractVanillaLaunchHandler.UNKNOWN_MANIFEST) {
-                        return Optional.ofNullable(((JarURLConnection) connection).getManifest());
-                    } else {
-                        return manifest;
-                    }
-                } catch (final IOException ex) {
-                    this.logger.error("Failed to load manifest from jar {}: ", jarFileUrl, ex);
-                }
-            }
-            return Optional.empty();
-        };
     }
 
     /**

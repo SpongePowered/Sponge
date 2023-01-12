@@ -22,33 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.test;
+package org.spongepowered.common.launch.command;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.event.filter.FilterGenerator;
-import org.spongepowered.common.event.manager.AnnotatedEventListener;
-import org.spongepowered.common.event.manager.ClassEventListenerFactory;
-import org.spongepowered.common.event.manager.SpongeEventManager;
-import org.spongepowered.common.util.DefinableClassLoader;
-import org.spongepowered.plugin.PluginContainer;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.manager.CommandMapping;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.common.command.sponge.SpongeCommand;
 
-public class TestEventManager extends SpongeEventManager {
+@Singleton
+public final class TestCommandManager extends SpongeCommandManager {
 
-    private final @Nullable DefinableClassLoader loader;
-
-    public TestEventManager(final DefinableClassLoader loader) {
-        this.loader = loader;
+    @Inject
+    public TestCommandManager(final Game game, final Provider<SpongeCommand> spongeCommand) {
+        super(game, spongeCommand);
     }
-
-    public TestEventManager() {
-        this.loader = null;
-    }
-
 
     @Override
-    protected AnnotatedEventListener.Factory computeFactory(
-        final PluginContainer key
-    ) {
-        return new ClassEventListenerFactory(FilterGenerator::create, this.loader != null ? this.loader.lookup() : SpongeEventManager.OWN_LOOKUP);
+    public CommandResult processCommand(final CommandCause cause, final CommandMapping mapping, final String command,
+            final String args) throws CommandException {
+        return mapping.registrar().process(cause, mapping, command, args);
     }
 }

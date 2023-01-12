@@ -27,6 +27,7 @@ val apiPluginSpiVersion: String by project
 val asmVersion: String by project
 val log4jVersion: String by project
 val modlauncherVersion: String by project
+val java9hacksVersion: String by project
 val mixinVersion: String by project
 val junitVersion: String by project
 val mockitoVersion: String by project
@@ -45,6 +46,9 @@ val commonManifest = java.manifest {
     System.getenv()["GIT_COMMIT"]?.apply { attributes("Git-Commit" to this) }
     System.getenv()["GIT_BRANCH"]?.apply { attributes("Git-Branch" to this) }
 }
+
+val superclassConfigs = spongeImpl.getNamedConfigurations("superClassChanges")
+val mixinConfigs = spongeImpl.mixinConfigurations
 
 tasks {
     jar {
@@ -73,6 +77,16 @@ tasks {
 
     test {
         useJUnitPlatform()
+
+        if (JavaVersion.current().isJava11Compatible) {
+            jvmArgs(
+                    "--add-exports=java.base/sun.security.util=ALL-UNNAMED",
+                    "--add-opens=java.base/java.util.jar=ALL-UNNAMED"
+            )
+        }
+
+        val launcherArgs = mixinConfigs.map { "--mixin.config $it" } + superclassConfigs.map { "--superclass_change.config $it" }
+        systemProperty("sponge.test.launcherArguments", launcherArgs.joinToString(" "))
     }
 
     check {
@@ -104,6 +118,7 @@ val mixinsConfig by configurations.register("mixins") {
 
 // create the sourcesets
 val main by sourceSets
+val test by sourceSets
 
 val applaunch by sourceSets.registering {
     spongeImpl.applyNamedDependencyOnOutput(project, this, main, project, main.implementationConfigurationName)
@@ -140,6 +155,7 @@ val mixins by sourceSets.registering {
     spongeImpl.applyNamedDependencyOnOutput(project, applaunch.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, accessors.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, main, this, project, this.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(project, this, test, project, test.implementationConfigurationName)
     configurations.named(implementationConfigurationName) {
         extendsFrom(mixinsConfig)
     }
@@ -199,6 +215,14 @@ dependencies {
     applaunchConfig("org.apache.logging.log4j:log4j-core:$log4jVersion")
     applaunchConfig("org.apache.logging.log4j:log4j-jpl:$log4jVersion")
 
+    applaunchConfig("cpw.mods:modlauncher:$modlauncherVersion") {
+        exclude(group = "org.apache.logging.log4j")
+        exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
+    }
+    applaunchConfig("cpw.mods:grossjava9hacks:$java9hacksVersion") {
+        exclude(group = "org.apache.logging.log4j")
+    }
+
     mixinsConfig(sourceSets.named("main").map { it.output })
     add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 
@@ -210,6 +234,13 @@ dependencies {
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
     testImplementation("org.mockito:mockito-inline:$mockitoVersion")
+
+    testImplementation("org.spongepowered:modlauncher-injector-junit:1.0.0-SNAPSHOT")
+    testImplementation("cpw.mods:modlauncher:$modlauncherVersion") {
+        exclude(group = "org.apache.logging.log4j")
+        exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
+    }
+    testImplementation("org.spongepowered:mixin:$mixinVersion")
 }
 
 val organization: String by project
