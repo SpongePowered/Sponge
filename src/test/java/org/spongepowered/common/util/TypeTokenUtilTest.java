@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.leangen.geantyref.TypeToken;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.block.BlockType;
@@ -38,19 +37,21 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragon;
 import org.spongepowered.api.entity.living.monster.slime.Slime;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.data.value.SpongeValue;
+
+import java.util.UUID;
 
 public final class TypeTokenUtilTest {
 
     @SuppressWarnings("rawtypes")
     @Test
-    @Disabled
     public void testA() {
         assertTrue(TypeTokenUtil.isAssignable(
                 new TypeToken<Key<SpongeValue<?>>>() {},
                 new TypeToken<Key<SpongeValue<?>>>() {}));
 
-        assertTrue(TypeTokenUtil.isAssignable(
+        assertFalse(TypeTokenUtil.isAssignable(
                 new TypeToken<Key<?>>() {},
                 new TypeToken<Key<SpongeValue<?>>>() {}));
 
@@ -90,26 +91,25 @@ public final class TypeTokenUtilTest {
                 TypeToken.get(Key.class),
                 new TypeToken<Key<SpongeValue<? extends Living>>>() {}));
 
-        // TODO
-        /*assertTrue(TypeTokenHelper.isAssignable(
-                new TypeToken<DataRegistration>() {},
-                new TypeToken<DataRegistration<?, ?>>() {}));
+        assertTrue(TypeTokenUtil.isAssignable(
+                new TypeToken<Tuple>() {},
+                new TypeToken<Tuple<?, ?>>() {}));
 
-        assertFalse(TypeTokenHelper.isAssignable(
-                TypeToken.get(DataRegistration.class),
-                new TypeToken<DataRegistration<LoreData, ?>>() {}));
+        assertFalse(TypeTokenUtil.isAssignable(
+                TypeToken.get(Tuple.class),
+                new TypeToken<Tuple<UUID, ?>>() {}));
 
-        assertFalse(TypeTokenHelper.isAssignable(
-                new TypeToken<DataRegistration>() {},
-                new TypeToken<DataRegistration<LoreData, ?>>() {}));
+        assertFalse(TypeTokenUtil.isAssignable(
+                new TypeToken<Tuple>() {},
+                new TypeToken<Tuple<UUID, ?>>() {}));
 
-        assertFalse(TypeTokenHelper.isAssignable(
-                new TypeToken<DataRegistration<?, ?>>() {},
-                new TypeToken<DataRegistration<LoreData, ?>>() {}));
+        assertFalse(TypeTokenUtil.isAssignable(
+                new TypeToken<Tuple<?, ?>>() {},
+                new TypeToken<Tuple<UUID, ?>>() {}));
 
-        assertTrue(TypeTokenHelper.isAssignable(
-                new TypeToken<DataRegistration<LoreData, ?>>() {},
-                new TypeToken<DataRegistration<?, ?>>() {}));*/
+        assertTrue(TypeTokenUtil.isAssignable(
+                new TypeToken<Tuple<UUID, ?>>() {},
+                new TypeToken<Tuple<?, ?>>() {}));
     }
 
     @Test

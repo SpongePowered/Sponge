@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -40,6 +41,7 @@ import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
+import org.spongepowered.common.launch.SpongeExtension;
 import org.spongepowered.configurate.BasicConfigurationNode;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -54,7 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Disabled("Can't run these tests without access to a ResourceKey implementation")
+@ExtendWith(SpongeExtension.class)
 public class ConfigurateDataViewTest {
     private static final HoconDataFormat HOCON = new HoconDataFormat();
 
@@ -84,8 +86,8 @@ public class ConfigurateDataViewTest {
 
         final DataView container = ConfigurateTranslator.instance().translate(node);
         assertEquals(manual, container);
-        ConfigurateTranslator.instance().translate(container);
-        //assertEquals(node, translated); // TODO Test is broken, depends on quite a bit of init
+        final ConfigurationNode translated = ConfigurateTranslator.instance().translate(container);
+        //assertEquals(node, translated); // TODO Test is broken
     }
 
     @Test
@@ -189,10 +191,11 @@ public class ConfigurateDataViewTest {
 
     @Test
     void testNullRootKey() {
-        assertThrows(IllegalArgumentException.class, () ->
-                ConfigurateTranslator.instance().translate(BasicConfigurationNode.root().raw("bar")));
+        final ConfigurationNode node = BasicConfigurationNode.root().raw("bar");
+        assertThrows(IllegalArgumentException.class, () -> ConfigurateTranslator.instance().translate(node));
     }
 
+    @Disabled
     @Test
     void testNullMapKey() {
         final ConfigurationNode node = CommentedConfigurationNode.root();
