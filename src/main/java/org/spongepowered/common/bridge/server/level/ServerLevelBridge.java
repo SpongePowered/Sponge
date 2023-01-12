@@ -26,11 +26,9 @@ package org.spongepowered.common.bridge.server.level;
 
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.progress.ChunkProgressListener;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.math.vector.Vector3d;
 
 public interface ServerLevelBridge {
 
@@ -41,10 +39,6 @@ public interface ServerLevelBridge {
     boolean bridge$isLoaded();
 
     CustomBossEvents bridge$getBossBarManager();
-
-    void bridge$updateRotation(Entity entityIn);
-
-    void bridge$addEntityRotationUpdate(Entity entity, Vector3d rotation);
 
     void bridge$triggerExplosion(Explosion explosion);
 

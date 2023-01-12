@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -116,7 +115,6 @@ import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
@@ -141,7 +139,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     private LevelStorageSource.LevelStorageAccess impl$levelSave;
     private CustomBossEvents impl$bossBarManager;
     private ChunkProgressListener impl$chunkStatusListener;
-    private Map<Entity, Vector3d> impl$rotationUpdates;
     private Weather impl$prevWeather;
     private boolean impl$isManualSave = false;
     private long impl$preTickTime = 0L;
@@ -153,7 +150,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                                      final CallbackInfo ci) {
         this.impl$levelSave = p_i241885_3_;
         this.impl$chunkStatusListener = p_i241885_7_;
-        this.impl$rotationUpdates = new Object2ObjectOpenHashMap<>();
         this.impl$prevWeather = ((ServerWorld) this).weather();
     }
 
@@ -211,21 +207,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
 
         return this.impl$bossBarManager;
-    }
-
-    @Override
-    public void bridge$addEntityRotationUpdate(final net.minecraft.world.entity.Entity entity, final Vector3d rotation) {
-        this.impl$rotationUpdates.put(entity, rotation);
-    }
-
-    @Override
-    public void bridge$updateRotation(final net.minecraft.world.entity.Entity entityIn) {
-        final Vector3d rotationUpdate = this.impl$rotationUpdates.get(entityIn);
-        if (rotationUpdate != null) {
-            entityIn.xRot = (float) rotationUpdate.x();
-            entityIn.yRot = (float) rotationUpdate.y();
-        }
-        this.impl$rotationUpdates.remove(entityIn);
     }
 
     @Override
