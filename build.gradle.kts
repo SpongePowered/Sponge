@@ -5,6 +5,7 @@ plugins {
     `maven-publish`
     `java-library`
     eclipse
+    jacoco
     id("org.spongepowered.gradle.vanilla")
     id("com.github.johnrengelman.shadow")
     id("org.spongepowered.gradle.sponge.dev") apply false // for version json generation
@@ -86,6 +87,12 @@ tasks {
 
         val launcherArgs = mixinConfigs.map { "--mixin.config $it" } + superclassConfigs.map { "--superclass_change.config $it" }
         systemProperty("sponge.test.launcherArguments", launcherArgs.joinToString(" "))
+
+        finalizedBy(jacocoTestReport)
+    }
+
+    jacocoTestReport {
+        dependsOn(test)
     }
 
     check {

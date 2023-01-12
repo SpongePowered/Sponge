@@ -76,7 +76,7 @@ public final class ListenerChecker {
                         ListenerChecker.LOGGER.error("Error setting field {} to true", field.getName(), e);
                     }
                 }
-            } else {
+            } else if (!field.isSynthetic()) {
                 throw new IllegalStateException(String.format("ShouldFire field %s must be public and static!", field));
             }
         }
