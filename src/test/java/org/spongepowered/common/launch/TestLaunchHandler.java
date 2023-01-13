@@ -31,6 +31,7 @@ import org.spongepowered.common.applaunch.handler.VanillaBaseLaunchHandler;
 import org.spongepowered.common.launch.plugin.TestPluginPlatform;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 public class TestLaunchHandler extends VanillaBaseLaunchHandler {
 
@@ -48,6 +49,12 @@ public class TestLaunchHandler extends VanillaBaseLaunchHandler {
     public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
         super.configureTransformationClassLoader(builder);
         builder.setManifestLocator(connection -> Optional.empty());
+    }
+
+    @Override
+    public Callable<Void> launchService(String[] arguments, ITransformingClassLoader launchClassLoader) {
+        launchClassLoader.addTargetPackageFilter(s -> !s.startsWith("org.mockito."));
+        return super.launchService(arguments, launchClassLoader);
     }
 
     @Override
