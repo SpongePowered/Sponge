@@ -38,6 +38,8 @@ public class SpongeExtension extends ModLauncherExtension {
         List<String> args = new ArrayList<>();
         args.add("--launchTarget");
         args.add("sponge_client_test");
+        args.add("--mixin.config");
+        args.add("mixins.sponge.test.json");
         args.addAll(Arrays.asList(System.getProperty("sponge.test.launcherArguments", "").split(" ")));
         return args.toArray(new String[0]);
     }

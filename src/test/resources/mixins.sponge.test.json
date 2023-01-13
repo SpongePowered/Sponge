@@ -1,14 +1,11 @@
 {
     "required": true,
-    "minVersion": "0.7",
+    "minVersion": "0.8",
     "package": "org.spongepowered.common.launch.mixin",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
-    "mixinPriority": 11111,
+    "priority": 11111,
     "mixins": [
-        "ItemMixin_Test",
-        "SchematicTranslatorMixin_Test",
-        "SpongeImplHooksMixin_Test"
     ],
     "injectors": {
         "defaultRequire": 1
