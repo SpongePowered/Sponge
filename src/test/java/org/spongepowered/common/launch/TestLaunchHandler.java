@@ -53,7 +53,7 @@ public class TestLaunchHandler extends VanillaBaseLaunchHandler {
 
     @Override
     public Callable<Void> launchService(String[] arguments, ITransformingClassLoader launchClassLoader) {
-        launchClassLoader.addTargetPackageFilter(s -> !s.startsWith("org.mockito."));
+        launchClassLoader.addTargetPackageFilter(s -> !s.startsWith("org.mockito.") && !s.startsWith("org.junit."));
         return super.launchService(arguments, launchClassLoader);
     }
 
