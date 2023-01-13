@@ -48,7 +48,7 @@ public final class ShouldFire {
     public static boolean INTERACT_ITEM_EVENT_PRIMARY = false;
 
     public static boolean SPAWN_ENTITY_EVENT = false;
-//    public static boolean SPAWN_ENTITY_EVENT_CHUNK_LOAD = false;
+    public static boolean SPAWN_ENTITY_EVENT_PRE = false;
     public static boolean SPAWN_ENTITY_EVENT_CUSTOM = false;
 
     public static boolean CHANGE_BLOCK_EVENT = false;
