@@ -47,6 +47,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -57,6 +58,7 @@ import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.ticks.LevelTicks;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -518,6 +520,29 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             return;
         }
         manager.add(pos, type);
+    }
+
+    @Inject(
+        method = "tick",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/level/ServerLevel;emptyTime:I",
+            opcode = Opcodes.PUTFIELD,
+            shift = At.Shift.AFTER
+        )
+    )
+    private void impl$unloadBlockEntities(final BooleanSupplier param0, final CallbackInfo ci) {
+        /*
+         * This code fixes block entity memory leak when the level hasn't online players
+         * and forced chunks. For the first 300 ticks the level can still clean up removed
+         * block entities on its own (ticks are performed for block entities). After it
+         * this mixin code is responsible for the subsequent unloading of block entities.
+         * Such a memory leak occurs when a plugin writes a lot of blocks, but the level
+         * is without players.
+         */
+        if (this.emptyTime >= 300 && !this.blockEntityTickers.isEmpty()) {
+            this.blockEntityTickers.removeIf(TickingBlockEntity::isRemoved);
+        }
     }
 
     @Override
