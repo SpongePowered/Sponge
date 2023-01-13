@@ -541,7 +541,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
          * is without players.
          */
         if (this.emptyTime >= 300 && !this.blockEntityTickers.isEmpty()) {
-            blockEntityTickers.removeIf(TickingBlockEntity::isRemoved);
+            this.blockEntityTickers.removeIf(TickingBlockEntity::isRemoved);
         }
     }
 
