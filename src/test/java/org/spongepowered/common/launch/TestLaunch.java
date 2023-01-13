@@ -27,37 +27,38 @@ package org.spongepowered.common.launch;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.CrashReport;
+import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.commands.Commands;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.Bootstrap;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerResources;
+import net.minecraft.server.Services;
+import net.minecraft.server.WorldLoader;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
 import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.level.progress.LoggerChunkProgressListener;
-import net.minecraft.server.packs.repository.FolderRepositorySource;
 import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.repository.ServerPacksSource;
-import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.util.datafix.DataFixers;
-import net.minecraft.world.level.DataPackConfig;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.WorldDataConfiguration;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.WorldDimensions;
+import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
-import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.util.file.DeleteFileVisitor;
 import org.spongepowered.common.SpongeCommon;
@@ -67,7 +68,7 @@ import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.launch.inject.TestModule;
 import org.spongepowered.common.launch.plugin.VanillaBasePluginManager;
-import org.spongepowered.common.server.BootstrapProperties;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.net.Proxy;
@@ -106,6 +107,8 @@ public class TestLaunch extends VanillaBaseLaunch {
      * Lifecycle events are removed because there is no plugin that will listen to them.
      */
     private void bootstrapSponge() {
+        SharedConstants.tryDetectVersion();
+
         // Sponge init
         final SpongeLifecycle lifecycle = this.createInjector().getInstance(SpongeLifecycle.class);
         this.setLifecycle(lifecycle);
@@ -142,47 +145,45 @@ public class TestLaunch extends VanillaBaseLaunch {
             Files.walkFileTree(serverDir, DeleteFileVisitor.INSTANCE);
         }
 
-        final RegistryAccess.RegistryHolder registries = RegistryAccess.builtin();
         final Path propertiesFile = Paths.get("server.properties");
-        final DedicatedServerSettings settings = new DedicatedServerSettings(registries, propertiesFile);
-        final DedicatedServerProperties properties = settings.getProperties();
+        final DedicatedServerSettings settings = new DedicatedServerSettings(propertiesFile);
+        final DedicatedServerProperties props = settings.getProperties();
 
-        // Sponge
-        BootstrapProperties.init(properties.worldGenSettings, properties.gamemode, properties.difficulty,
-                properties.pvp, properties.hardcore, true, properties.viewDistance, registries);
-
-        final YggdrasilAuthenticationService authService = new YggdrasilAuthenticationService(Proxy.NO_PROXY);
-        final MinecraftSessionService sessionService = authService.createMinecraftSessionService();
-        final GameProfileRepository profileRepo = authService.createProfileRepository();
-        final GameProfileCache profileCache = new GameProfileCache(profileRepo, serverDir.resolve(MinecraftServer.USERID_CACHE_FILE.getName()).toFile());
-
+        final Services services = Services.create(new YggdrasilAuthenticationService(Proxy.NO_PROXY), serverDir.toFile());
         final LevelStorageSource storageSource = LevelStorageSource.createDefault(serverDir);
-        final LevelStorageSource.LevelStorageAccess mainStorageAccess = storageSource.createAccess(properties.levelName);
+        final LevelStorageSource.LevelStorageAccess storageAccess = storageSource.createAccess(props.levelName);
 
         // Sponge
         final org.spongepowered.common.launch.Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishGlobalRegistries();
         lifecycle.establishDataProviders();
 
-        final PackRepository packRepo = new PackRepository(new ServerPacksSource(), new FolderRepositorySource(mainStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR).toFile(), PackSource.WORLD));
-        final DataPackConfig dataPackConfig = MinecraftServer.configurePackRepository(packRepo, DataPackConfig.DEFAULT, true);
+        final PackRepository packRepo = ServerPacksSource.createPackRepository(storageAccess.getLevelPath(LevelResource.DATAPACK_DIR));
+        final WorldDataConfiguration dataConfig = new WorldDataConfiguration(props.initialDataPackConfiguration, FeatureFlags.DEFAULT_FLAGS);
+        final WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepo, dataConfig, false, true);
+        final WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(packConfig, Commands.CommandSelection.DEDICATED, props.functionPermissionLevel);
 
-        final ServerResources resources = ServerResources.loadResources(packRepo.openAllSelected(), Commands.CommandSelection.DEDICATED,
-                properties.functionPermissionLevel, Util.backgroundExecutor(), Runnable::run).get();
-        resources.updateGlobals();
+        final WorldStem worldStem = Util.blockUntilDone((executor) -> {
+            return WorldLoader.load(initConfig, (context) -> {
+                final Registry<LevelStem> stemRegistry = context.datapackDimensions().registryOrThrow(Registries.LEVEL_STEM);
+                final RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, context.datapackWorldgen());
 
-        final RegistryReadOps<Tag> worldSettingsAdapter = RegistryReadOps.create(NbtOps.INSTANCE, resources.getResourceManager(), registries);
+                // Sponge
+                SpongeWorldManager.bootstrapOps = ops;
 
-        // Sponge
-        BootstrapProperties.worldSettingsAdapter(worldSettingsAdapter);
-        BootstrapProperties.setIsNewLevel(true);
+                final LevelSettings levelSettings = new LevelSettings(props.levelName, props.gamemode, props.hardcore, props.difficulty, false,
+                        new GameRules(), context.dataConfiguration());
+                final WorldOptions worldOptions = props.worldOptions;
+                final WorldDimensions worldDimensionsBuilder = props.createDimensions(context.datapackWorldgen());
 
-        final LevelSettings levelSettings = new LevelSettings(properties.levelName, properties.gamemode, properties.hardcore,
-                properties.difficulty, false, new GameRules(), dataPackConfig);
-        final WorldData worldData = new PrimaryLevelData(levelSettings, properties.worldGenSettings, Lifecycle.stable());
+                final WorldDimensions.Complete worldDimensions = worldDimensionsBuilder.bake(stemRegistry);
+                final Lifecycle serializationLifecycle = worldDimensions.lifecycle().add(context.datapackWorldgen().allRegistriesLifecycle());
+                return new WorldLoader.DataLoadOutput<>(new PrimaryLevelData(levelSettings, worldOptions, worldDimensions.specialWorldProperty(),
+                        serializationLifecycle), worldDimensions.dimensionsRegistryAccess());
+            }, WorldStem::new, Util.backgroundExecutor(), executor);
+        }).get();
 
-        final DedicatedServer server = new DedicatedServer(Thread.currentThread(), registries, mainStorageAccess, packRepo, resources, worldData,
-                settings, DataFixers.getDataFixer(), sessionService, profileRepo, profileCache, LoggerChunkProgressListener::new);
+        final DedicatedServer server = new DedicatedServer(Thread.currentThread(), storageAccess, packRepo, worldStem,
+                settings, DataFixers.getDataFixer(), services, LoggerChunkProgressListener::new);
 
         // Sponge
         SpongeCommon.game().setServer((Server) server);
