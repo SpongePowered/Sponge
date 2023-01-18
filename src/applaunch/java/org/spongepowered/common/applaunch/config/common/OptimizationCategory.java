@@ -50,6 +50,14 @@ public final class OptimizationCategory {
     @Comment("Uses theosib's redstone algorithms to completely overhaul the way redstone works.")
     public final EigenRedstoneCategory eigenRedstone = new EigenRedstoneCategory();
 
+    @Setting(value = "bell-leak-fix")
+    @Comment("Bells will store references of nearby entities when rang.\n"
+            + "The entity list is never cleared, thus leaking memory until\n"
+            + "the chunk is unloaded. Since the entity list is reused if the\n"
+            + "bell is rang again within 60 ticks, this provides an option to\n"
+            + "clear the list if it is not needed anymore.")
+    public boolean bellLeak = true;
+
     @Setting("faster-thread-checks")
     @Comment("If 'true', allows for Sponge to make better assumptions on single threaded\n"
                + "operations with relation to various checks for server threaded operations.\n"

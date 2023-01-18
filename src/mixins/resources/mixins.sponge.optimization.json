@@ -5,6 +5,7 @@
     "mixins": [
         "general.DataFixersMixin_Optimization_LazyDFU",
         "entity.EntityMixin_Optimization_Collision",
-        "world.entity.TamableAnimalMixin_Optimization_Owner"
+        "world.entity.TamableAnimalMixin_Optimization_Owner",
+        "world.level.block.entity.BellBlockEntityMixin_Optimization_BellLeak"
     ]
 }
