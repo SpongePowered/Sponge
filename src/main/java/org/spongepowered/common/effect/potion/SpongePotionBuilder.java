@@ -88,7 +88,7 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
         final int amplifier = container.getInt(Constants.Item.Potions.POTION_AMPLIFIER).get();
         final boolean ambience = container.getBoolean(Constants.Item.Potions.POTION_AMBIANCE).get();
         final boolean particles = container.getBoolean(Constants.Item.Potions.POTION_SHOWS_PARTICLES).get();
-        final boolean showsIcon = container.getBoolean(Constants.Item.Potions.POTION_SHOWS_ICON).get();
+        final boolean showsIcon = container.getBoolean(Constants.Item.Potions.POTION_SHOWS_ICON).orElse(true);
         final PotionEffect.Builder builder = new SpongePotionBuilder();
 
         return Optional.of(builder.potionType(optional.get())
