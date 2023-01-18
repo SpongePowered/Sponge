@@ -86,7 +86,6 @@
         "server.players.IpBanListEntryMixin",
         "server.players.PlayerListMixin",
         "server.players.StoredUserEntryMixin",
-        "server.players.StoredUserListMixin",
         "server.rcon.RconConsoleSourceMixin",
         "server.rcon.thread.QueryThreadGs4Mixin",
         "server.rcon.thread.RconClientMixin",
