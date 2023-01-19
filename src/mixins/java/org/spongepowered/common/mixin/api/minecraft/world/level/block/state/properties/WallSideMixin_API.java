@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.state.properties;
 
-import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.WallSide;
-import org.spongepowered.api.data.type.AttachmentSurface;
 import org.spongepowered.api.data.type.WallConnectionState;
 import org.spongepowered.asm.mixin.Mixin;
 

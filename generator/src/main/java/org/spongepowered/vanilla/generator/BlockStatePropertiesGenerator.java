@@ -129,7 +129,7 @@ public class BlockStatePropertiesGenerator implements Generator {
         vanillaEnumTypeMapping.put(StructureMode.class, BlockStatePropertiesGenerator.inDataTypePkg("StructureMode"));
         vanillaEnumTypeMapping.put(PistonType.class, BlockStatePropertiesGenerator.inDataTypePkg("PistonType"));
         vanillaEnumTypeMapping.put(BambooLeaves.class, BlockStatePropertiesGenerator.inDataTypePkg("BambooLeavesType"));
-        vanillaEnumTypeMapping.put(WallSide.class, BlockStatePropertiesGenerator.inDataTypePkg("WallType"));
+        vanillaEnumTypeMapping.put(WallSide.class, BlockStatePropertiesGenerator.inDataTypePkg("WallConnectionState"));
         vanillaEnumTypeMapping.put(RailShape.class, BlockStatePropertiesGenerator.inDataTypePkg("RailDirection"));
         vanillaEnumTypeMapping.put(AttachFace.class, BlockStatePropertiesGenerator.inDataTypePkg("AttachmentSurface"));
         vanillaEnumTypeMapping.put(Tilt.class, BlockStatePropertiesGenerator.inDataTypePkg("Tilt"));
