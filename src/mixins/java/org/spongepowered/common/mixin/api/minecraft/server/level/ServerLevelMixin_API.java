@@ -55,6 +55,7 @@ import org.spongepowered.api.scheduler.ScheduledUpdateList;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.WorldSaveMode;
 import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.generation.ChunkGenerator;
@@ -196,10 +197,11 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     }
 
     @Override
-    public boolean save() throws IOException {
+    public boolean save(final WorldSaveMode worldSaveMode) throws IOException {
         final SerializationBehavior behavior = ((PrimaryLevelDataBridge) this.serverLevelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
         ((ServerLevelBridge) this).bridge$setManualSave(true);
-        this.shadow$save(null, false, false);
+        final boolean flush = worldSaveMode.equals(WorldSaveMode.SAVE_AND_FLUSH);
+        this.shadow$save(null, flush, false);
         return !behavior.equals(SerializationBehavior.NONE);
     }
 
