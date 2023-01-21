@@ -307,6 +307,10 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Overwrite
     public void save(@Nullable final ProgressListener progress, final boolean flush, final boolean skipSave) {
 
+        final boolean isManualSave = this.impl$isManualSave;
+
+        this.impl$isManualSave = false;
+
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
 
         if (Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPre(currentCause, ((ServerWorld) this)))) {
@@ -346,17 +350,12 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                 progress.progressStage(new TranslatableComponent("menu.savingChunks"));
             }
 
-            final boolean canAutomaticallySave = !this.impl$isManualSave && behavior == SerializationBehavior.AUTOMATIC;
-            final boolean canManuallySave = this.impl$isManualSave && behavior == SerializationBehavior.MANUAL;
-
-            if (canAutomaticallySave || canManuallySave) {
+            if (behavior == SerializationBehavior.AUTOMATIC || (isManualSave && behavior == SerializationBehavior.MANUAL)) {
                 chunkProvider.save(flush);
             }
 
             Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPost(currentCause, ((ServerWorld) this)));
         }
-
-        this.impl$isManualSave = false;
     }
 
     @Inject(method = "tick",
