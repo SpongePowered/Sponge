@@ -33,7 +33,6 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.Motive;
 import net.minecraft.world.entity.decoration.Painting;
-import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.item.ItemStack;
@@ -61,6 +60,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.entity.MobAccessor;
+import org.spongepowered.common.accessor.world.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
@@ -195,7 +195,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         // Some entities need to have non-null fields (and the easiest way to
         // set them is to use the more specialised constructor).
         if (type == net.minecraft.world.entity.EntityType.FALLING_BLOCK) {
-            entity = FallingBlockEntity.fall(thisWorld, new BlockPos(x, y, z), Blocks.SAND.defaultBlockState());
+            entity = FallingBlockEntityAccessor.invoker$new(thisWorld, x, y, z, Blocks.SAND.defaultBlockState());
         }
         if (type == net.minecraft.world.entity.EntityType.ITEM) {
             entity = new ItemEntity(thisWorld, x, y, z, new ItemStack(Blocks.STONE));
