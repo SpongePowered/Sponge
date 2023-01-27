@@ -27,7 +27,6 @@ package org.spongepowered.vanilla.applaunch.handler;
 import cpw.mods.modlauncher.api.ILaunchHandlerService;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.applaunch.handler.VanillaBaseLaunchHandler;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResource;
 import org.spongepowered.plugin.builtin.jvm.locator.ResourceType;

@@ -27,8 +27,6 @@ package org.spongepowered.vanilla.launch.plugin;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.common.launch.plugin.VanillaBasePluginManager;
-import org.spongepowered.common.launch.plugin.VanillaDummyPluginContainer;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.InvalidPluginException;
 import org.spongepowered.plugin.PluginCandidate;

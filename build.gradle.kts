@@ -16,6 +16,7 @@ plugins {
 }
 
 val commonProject = project
+val vanillaProject = project(":SpongeVanilla")
 val apiVersion: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
@@ -168,6 +169,14 @@ val mixins by sourceSets.registering {
     }
 }
 
+vanillaProject.afterEvaluate {
+    val vanillaAppLaunchBase = vanillaProject.sourceSets.named("applaunch-base")
+    val vanillaLaunch = vanillaProject.sourceSets.named("launch")
+
+    spongeImpl.applyNamedDependencyOnOutput(vanillaProject, vanillaAppLaunchBase.get(), test, commonProject, test.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(vanillaProject, vanillaLaunch.get(), test, commonProject, test.implementationConfigurationName)
+}
+
 dependencies {
     // api
     api("org.spongepowered:spongeapi:$apiVersion")
@@ -222,14 +231,6 @@ dependencies {
     applaunchConfig("org.apache.logging.log4j:log4j-core:$log4jVersion")
     applaunchConfig("org.apache.logging.log4j:log4j-jpl:$log4jVersion")
 
-    applaunchConfig("cpw.mods:modlauncher:$modlauncherVersion") {
-        exclude(group = "org.apache.logging.log4j")
-        exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
-    }
-    applaunchConfig("cpw.mods:grossjava9hacks:$java9hacksVersion") {
-        exclude(group = "org.apache.logging.log4j")
-    }
-
     mixinsConfig(sourceSets.named("main").map { it.output })
     add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 
@@ -246,6 +247,9 @@ dependencies {
     testImplementation("cpw.mods:modlauncher:$modlauncherVersion") {
         exclude(group = "org.apache.logging.log4j")
         exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
+    }
+    testRuntimeOnly("cpw.mods:grossjava9hacks:$java9hacksVersion") {
+        exclude(group = "org.apache.logging.log4j")
     }
     testImplementation("org.spongepowered:mixin:$mixinVersion")
 }
