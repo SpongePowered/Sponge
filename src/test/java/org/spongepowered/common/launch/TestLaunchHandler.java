@@ -34,6 +34,11 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class TestLaunchHandler extends VanillaBaseLaunchHandler {
+    private static final String[] EXCLUDED_PACKAGES = {
+            "org.mockito.",
+            "org.junit.",
+            "org.jacoco.",
+    };
 
     @Override
     protected boolean isDev() {
@@ -53,7 +58,14 @@ public class TestLaunchHandler extends VanillaBaseLaunchHandler {
 
     @Override
     public Callable<Void> launchService(String[] arguments, ITransformingClassLoader launchClassLoader) {
-        launchClassLoader.addTargetPackageFilter(s -> !s.startsWith("org.mockito.") && !s.startsWith("org.junit."));
+        launchClassLoader.addTargetPackageFilter(klass -> {
+            for (final String pkg : TestLaunchHandler.EXCLUDED_PACKAGES) {
+                if (klass.startsWith(pkg)) {
+                    return false;
+                }
+            }
+            return true;
+        });
         return super.launchService(arguments, launchClassLoader);
     }
 
