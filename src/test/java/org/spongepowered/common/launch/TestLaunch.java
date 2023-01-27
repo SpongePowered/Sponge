@@ -66,9 +66,10 @@ import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.launch.inject.TestModule;
-import org.spongepowered.common.launch.plugin.VanillaBasePluginManager;
 import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.vanilla.launch.VanillaBaseLaunch;
+import org.spongepowered.vanilla.launch.plugin.VanillaBasePluginManager;
 
 import java.net.Proxy;
 import java.nio.file.Files;

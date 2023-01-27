@@ -22,16 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package org.spongepowered.vanilla.launch;
 
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.mapping.SpongeMappingManager;
-import org.spongepowered.common.launch.mapping.VanillaMappingManager;
-import org.spongepowered.common.launch.plugin.VanillaBasePluginManager;
-import org.spongepowered.common.launch.plugin.VanillaDummyPluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.builtin.MetadataContainer;
 import org.spongepowered.plugin.metadata.builtin.MetadataParser;
+import org.spongepowered.vanilla.launch.mapping.VanillaMappingManager;
+import org.spongepowered.vanilla.launch.plugin.VanillaBasePluginManager;
+import org.spongepowered.vanilla.launch.plugin.VanillaDummyPluginContainer;
 
 import java.io.IOException;
 import java.io.InputStreamReader;

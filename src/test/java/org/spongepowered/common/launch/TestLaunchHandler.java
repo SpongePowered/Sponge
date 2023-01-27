@@ -27,8 +27,8 @@ package org.spongepowered.common.launch;
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.applaunch.handler.VanillaBaseLaunchHandler;
 import org.spongepowered.common.launch.plugin.TestPluginPlatform;
+import org.spongepowered.vanilla.applaunch.handler.VanillaBaseLaunchHandler;
 
 import java.util.Optional;
 import java.util.concurrent.Callable;

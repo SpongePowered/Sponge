@@ -22,7 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch.mapping;
+package org.spongepowered.vanilla.launch.mapping;
+
+import org.spongepowered.common.launch.mapping.SpongeMappingManager;
 
 public final class VanillaMappingManager implements SpongeMappingManager {
     @Override

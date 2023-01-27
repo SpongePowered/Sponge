@@ -31,7 +31,6 @@ import com.google.inject.Module;
 import com.google.inject.Stage;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
-import org.spongepowered.common.launch.VanillaBaseLaunch;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.launch.inject.SpongeVanillaModule;
