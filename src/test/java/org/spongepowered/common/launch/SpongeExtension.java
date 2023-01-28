@@ -24,9 +24,15 @@
  */
 package org.spongepowered.common.launch;
 
+import org.junit.jupiter.api.extension.TestInstantiationException;
+import org.spongepowered.api.util.file.DeleteFileVisitor;
+import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.common.launch.plugin.TestPluginPlatform;
 import org.spongepowered.mij.ModLauncherExtension;
 import org.spongepowered.mij.SharedModLauncher;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,6 +52,21 @@ public class SpongeExtension extends ModLauncherExtension {
 
     @Override
     protected ClassLoader getTransformingClassLoader() {
+        if (AppLaunch.pluginPlatform() == null) {
+            final TestPluginPlatform platform = new TestPluginPlatform();
+
+            // Delete existing files to ensure consistency between runs
+            if (Files.exists(platform.baseDirectory())) {
+                try {
+                    Files.walkFileTree(platform.baseDirectory(), DeleteFileVisitor.INSTANCE);
+                } catch (final IOException e) {
+                    throw new TestInstantiationException("Failed to delete directory " + platform.baseDirectory(), e);
+                }
+            }
+
+            AppLaunch.setPluginPlatform(platform);
+        }
+
         return SharedModLauncher.getTransformingClassLoader(LAUNCHER_ARGS);
     }
 }

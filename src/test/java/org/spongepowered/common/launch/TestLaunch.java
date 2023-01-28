@@ -59,7 +59,6 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.util.file.DeleteFileVisitor;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.applaunch.AppLaunch;
@@ -72,7 +71,6 @@ import org.spongepowered.vanilla.launch.VanillaBaseLaunch;
 import org.spongepowered.vanilla.launch.plugin.VanillaBasePluginManager;
 
 import java.net.Proxy;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -136,12 +134,7 @@ public class TestLaunch extends VanillaBaseLaunch {
         Bootstrap.validate();
 
         // This simplified startup avoids as much as possible writing to the disk but there are still a few files
-        final Path serverDir = Paths.get("run", "unit_tests");
-
-        // Delete existing files to ensure consistency between runs
-        if (Files.exists(serverDir)) {
-            Files.walkFileTree(serverDir, DeleteFileVisitor.INSTANCE);
-        }
+        final Path serverDir = AppLaunch.pluginPlatform().baseDirectory();
 
         final RegistryAccess.RegistryHolder registries = RegistryAccess.builtin();
         final Path propertiesFile = Paths.get("server.properties");

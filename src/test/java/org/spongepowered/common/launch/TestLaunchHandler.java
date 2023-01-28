@@ -26,8 +26,6 @@ package org.spongepowered.common.launch;
 
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.launch.plugin.TestPluginPlatform;
 import org.spongepowered.vanilla.applaunch.handler.VanillaBaseLaunchHandler;
 
 import java.util.Optional;
@@ -66,11 +64,6 @@ public class TestLaunchHandler extends VanillaBaseLaunchHandler {
 
     @Override
     protected void launchService0(String[] arguments, ITransformingClassLoader launchClassLoader) throws Exception {
-        if (AppLaunch.pluginPlatform() == null) {
-            final TestPluginPlatform platform = new TestPluginPlatform();
-            AppLaunch.setPluginPlatform(platform);
-        }
-
         Class.forName("org.spongepowered.common.launch.TestLaunch", true, launchClassLoader.getInstance()).getMethod("launch").invoke(null);
     }
 }

@@ -29,8 +29,8 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 
-import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,15 +44,12 @@ public class TestPluginPlatform implements PluginPlatform {
 
     private static final Logger LOGGER = LogManager.getLogger("TestPluginPlatform");
 
-    private final Path outputDirectory;
-    private final Path pluginDirectory;
+    private final Path baseDirectory;
+    private final Path modsDirectory;
 
     public TestPluginPlatform() {
-        final ClassLoader classLoader = this.getClass().getClassLoader();
-        final String directory = classLoader.getResource(".").getFile();
-        final File file = new File(directory);
-        this.outputDirectory = file.toPath();
-        this.pluginDirectory = new File(file, "plugins").toPath();
+        this.baseDirectory = Paths.get("run", "unit_tests");
+        this.modsDirectory = baseDirectory.resolve("mods");
     }
 
     @Override
@@ -72,7 +69,7 @@ public class TestPluginPlatform implements PluginPlatform {
 
     @Override
     public Path baseDirectory() {
-        return this.outputDirectory;
+        return this.baseDirectory;
     }
 
     @Override
@@ -82,7 +79,7 @@ public class TestPluginPlatform implements PluginPlatform {
 
     @Override
     public List<Path> pluginDirectories() {
-        return Collections.singletonList(this.pluginDirectory);
+        return Collections.singletonList(this.modsDirectory);
     }
 
     @Override
