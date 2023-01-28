@@ -31,6 +31,7 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -48,6 +49,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
     Supplier<? extends ResourceKey> world;
     Supplier<? extends Vector3i> position;
     Supplier<? extends ServerWorld> worldReference;
+    Supplier<? extends FluidState> fluidState;
 
     public SpongeLocatableBlockBuilder() {
         super(LocatableBlock.class, 1);
@@ -61,9 +63,17 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
     }
 
     @Override
+    public SpongeLocatableBlockBuilder fluid(final FluidState fluid) {
+        Objects.requireNonNull(fluid, "FluidState cannot be null!");
+        this.fluidState = () -> fluid;
+        return this;
+    }
+
+    @Override
     public SpongeLocatableBlockBuilder location(final ServerLocation location) {
         Objects.requireNonNull(location, "LocationBridge cannot be null!");
         this.blockState = location::block;
+        this.fluidState = location::fluid;
         this.position = location::blockPosition;
         this.world = () -> location.world().key();
         final WeakReference<ServerWorld> worldRef = new WeakReference<>(location.world());

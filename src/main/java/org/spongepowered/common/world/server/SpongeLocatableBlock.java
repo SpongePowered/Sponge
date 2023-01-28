@@ -37,6 +37,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -53,6 +54,7 @@ import java.util.function.Function;
 public final class SpongeLocatableBlock implements LocatableBlock {
 
     private final BlockState blockState;
+    private final FluidState fluidState;
     private final ResourceKey world;
     private final Vector3i position;
     private final WeakReference<ServerWorld> worldRef;
@@ -63,6 +65,7 @@ public final class SpongeLocatableBlock implements LocatableBlock {
         this.position = checkNotNull(builder.position.get(), "position");
         this.world = checkNotNull(builder.world.get(), "world");
         this.worldRef = new WeakReference<>(checkNotNull(builder.worldReference.get(), "reference"));
+        this.fluidState = Objects.requireNonNull(builder.fluidState.get(), "fluidstate");
     }
 
     SpongeLocatableBlock(final ServerWorld world, final int x, final int y, final int z) {
@@ -70,11 +73,17 @@ public final class SpongeLocatableBlock implements LocatableBlock {
         this.worldRef = new WeakReference<>(world);
         this.position = new Vector3i(x, y, z);
         this.blockState = world.block(x, y, z);
+        this.fluidState = world.fluid(x, y, z);
     }
 
     @Override
     public BlockState blockState() {
         return this.blockState;
+    }
+
+    @Override
+    public FluidState fluidState() {
+        return this.fluidState;
     }
 
     @Override
