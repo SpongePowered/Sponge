@@ -125,7 +125,6 @@ val mixinsConfig by configurations.register("mixins") {
 
 // create the sourcesets
 val main by sourceSets
-val test by sourceSets
 
 val applaunch by sourceSets.registering {
     spongeImpl.applyNamedDependencyOnOutput(project, this, main, project, main.implementationConfigurationName)
@@ -162,12 +161,18 @@ val mixins by sourceSets.registering {
     spongeImpl.applyNamedDependencyOnOutput(project, applaunch.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, accessors.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, main, this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(project, this, test, project, test.implementationConfigurationName)
     configurations.named(implementationConfigurationName) {
         extendsFrom(mixinsConfig)
     }
 }
 
+val test by sourceSets.named("test") {
+    spongeImpl.applyNamedDependencyOnOutput(project, mixins.get(), this, project, this.implementationConfigurationName)
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(applaunchConfig)
+        extendsFrom(launchConfig)
+    }
+}
 vanillaProject.afterEvaluate {
     val vanillaAppLaunchBase = vanillaProject.sourceSets.named("applaunch-base")
     val vanillaLaunch = vanillaProject.sourceSets.named("launch")
@@ -249,7 +254,8 @@ dependencies {
     testRuntimeOnly("cpw.mods:grossjava9hacks:$java9hacksVersion") {
         exclude(group = "org.apache.logging.log4j")
     }
-    testImplementation("org.spongepowered:mixin:$mixinVersion")
+    testRuntimeOnly(project(":modlauncher-transformers"))
+    testRuntimeOnly("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
 }
 
 val organization: String by project
