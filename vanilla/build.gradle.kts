@@ -405,6 +405,7 @@ tasks {
     val vanillaAppLaunchJar by registering(Jar::class) {
         archiveClassifier.set("applaunch")
         manifest.from(vanillaManifest)
+        from(vanillaAppLaunchBase.output)
         from(vanillaAppLaunch.output)
     }
     val vanillaLaunchJar by registering(Jar::class) {
@@ -503,6 +504,7 @@ tasks {
         from(vanillaInstaller.output)
         from(vanillaInstallerJava8.output)
         from(vanillaInstallerJava9.output)
+        from(vanillaAppLaunchBase.output)
         from(vanillaAppLaunch.output)
         from(vanillaLaunch.output)
         from(vanillaMixins.output)
