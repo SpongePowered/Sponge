@@ -395,6 +395,7 @@ tasks {
     val vanillaAppLaunchJar by registering(Jar::class) {
         archiveClassifier.set("applaunch")
         manifest.from(vanillaManifest)
+        from(vanillaAppLaunchBase.output)
         from(vanillaAppLaunch.output)
     }
     val vanillaLaunchJar by registering(Jar::class) {
@@ -490,6 +491,7 @@ tasks {
         from(vanillaInstallerJava9.output) {
             into("META-INF/versions/9/")
         }
+        from(vanillaAppLaunchBase.output)
         from(vanillaAppLaunch.output)
         from(vanillaLaunch.output)
         from(vanillaMixins.output)
