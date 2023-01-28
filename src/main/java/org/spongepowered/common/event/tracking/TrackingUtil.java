@@ -254,7 +254,7 @@ public final class TrackingUtil {
             .world(apiWorld)
             .position(pos.getX(), pos.getY(), pos.getZ())
             .state((BlockState) blockState)
-                .fluid((org.spongepowered.api.fluid.FluidState) fluidState)
+            .fluid((org.spongepowered.api.fluid.FluidState) fluidState)
             .build();
         final FluidTickContext phaseContext = TickPhase.Tick.FLUID.createPhaseContext(PhaseTracker.SERVER)
             .source(locatable)
