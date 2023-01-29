@@ -214,7 +214,7 @@ public final class TrackingUtil {
             }
         }
 
-        final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world(apiWorld).position(pos.getX(), pos.getY(), pos.getZ()).state((BlockState)block).build();
+        final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world(apiWorld).position(pos.getX(), pos.getY(), pos.getZ()).block((BlockState)block).build();
         final BlockTickContext phaseContext = TickPhase.Tick.BLOCK.createPhaseContext(PhaseTracker.SERVER).source(locatable);
 
         // We have to associate any notifiers in case of scheduled block updates from other sources
@@ -251,7 +251,7 @@ public final class TrackingUtil {
         final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
             .world(apiWorld)
             .position(pos.getX(), pos.getY(), pos.getZ())
-            .state((BlockState) blockState)
+            .block((BlockState) blockState)
             .fluid((org.spongepowered.api.fluid.FluidState) (Object) fluidState)
             .build();
         final FluidTickContext phaseContext = TickPhase.Tick.FLUID.createPhaseContext(PhaseTracker.SERVER)
@@ -293,7 +293,7 @@ public final class TrackingUtil {
         final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
                                              .world(apiWorld)
                                              .position(pos.getX(), pos.getY(), pos.getZ())
-                                             .state((BlockState) state)
+                                             .block((BlockState) state)
                                              .build();
         final BlockTickContext phaseContext = TickPhase.Tick.RANDOM_BLOCK.createPhaseContext(PhaseTracker.SERVER).source(locatable);
 
@@ -329,7 +329,7 @@ public final class TrackingUtil {
         final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
             .world(apiWorld)
             .position(pos.getX(), pos.getY(), pos.getZ())
-            .state((BlockState) state.createLegacyBlock())
+            .block((BlockState) state.createLegacyBlock())
             .build();
         final FluidTickContext phaseContext = TickPhase.Tick.RANDOM_FLUID.createPhaseContext(PhaseTracker.SERVER)
             .source(locatable)

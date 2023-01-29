@@ -64,7 +64,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
                                            .source(new SpongeLocatableBlockBuilder()
                                                .world((ServerWorld) serverWorld)
                                                .position(pos.getX(), pos.getY(), pos.getZ())
-                                               .state((BlockState) newState)
+                                               .block((BlockState) newState)
                                                .build())) {
             if (context != null) {
                 context.buildAndSwitch();
@@ -94,7 +94,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
                         .source(new SpongeLocatableBlockBuilder()
                                 .world((ServerWorld) worldIn)
                                 .position(pos.getX(), pos.getY(), pos.getZ())
-                                .state((BlockState) state)
+                                .block((BlockState) state)
                                 .build())) {
                     context.buildAndSwitch();
                     Block.dropResources(state, worldIn, pos);

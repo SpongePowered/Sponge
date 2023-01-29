@@ -100,7 +100,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         final Player player = PhaseTracker.getCauseStackManager().currentCause().first(Player.class).get();
         final BlockState state = ((ServerWorld) mixinWorldServer).block(pos.getX(), pos.getY(), pos.getZ());
         final LocatableBlock locatable =
-                new SpongeLocatableBlockBuilder().world((ServerWorld) mixinWorldServer).position(pos.getX(), pos.getY(), pos.getZ()).state(state).build();
+                new SpongeLocatableBlockBuilder().world((ServerWorld) mixinWorldServer).position(pos.getX(), pos.getY(), pos.getZ()).block(state).build();
 
         blockEvent.bridge$setTickingLocatable(locatable);
         blockEvent.bridge$setSourceUserUUID(player.uniqueId());

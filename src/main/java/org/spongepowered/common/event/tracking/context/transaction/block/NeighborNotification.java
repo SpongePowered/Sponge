@@ -85,7 +85,7 @@ public final class NeighborNotification extends WorldBasedTransaction<NotifyNeig
             final LocatableBlock locatableBlock = new SpongeLocatableBlockBuilder()
                 .world(this.serverWorld)
                 .position(this.sourcePos.getX(), this.sourcePos.getY(), this.sourcePos.getZ())
-                .state((org.spongepowered.api.block.BlockState) this.original)
+                .block((org.spongepowered.api.block.BlockState) this.original)
                 .build();
             this.locatableBlock = () -> locatableBlock;
             return locatableBlock;

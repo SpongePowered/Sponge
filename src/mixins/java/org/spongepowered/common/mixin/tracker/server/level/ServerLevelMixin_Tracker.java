@@ -307,7 +307,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 final LocatableBlock locatable = new SpongeLocatableBlockBuilder()
                     .world((org.spongepowered.api.world.server.ServerWorld) this)
                     .position(pos.getX(), pos.getY(), pos.getZ())
-                    .state((org.spongepowered.api.block.BlockState) state)
+                    .block((org.spongepowered.api.block.BlockState) state)
                     .build();
                 blockEvent.bridge$setTickingLocatable(locatable);
             }

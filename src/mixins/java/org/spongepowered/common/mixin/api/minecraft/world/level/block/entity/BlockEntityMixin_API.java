@@ -165,7 +165,7 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
             this.api$LocatableBlock = new SpongeLocatableBlockBuilder()
                 .world((ServerWorld) this.level)
                 .position(this.shadow$getBlockPos().getX(), this.shadow$getBlockPos().getY(), this.shadow$getBlockPos().getZ())
-                .state(blockState)
+                .block(blockState)
                 .build();
         }
 

@@ -147,32 +147,32 @@ public final class SpongeLocatableBlock implements LocatableBlock {
 
     @Override
     public <E> Optional<LocatableBlock> transform(final Key<? extends Value<E>> key, final Function<E, E> function) {
-        return this.blockState.transform(key, function).map(state -> LocatableBlock.builder().from(this).state(state).build());
+        return this.blockState.transform(key, function).map(state -> LocatableBlock.builder().from(this).block(state).build());
     }
 
     @Override
     public <E> Optional<LocatableBlock> with(final Key<? extends Value<E>> key, final E value) {
-        return this.blockState.with(key, value).map(state -> LocatableBlock.builder().from(this).state(state).build());
+        return this.blockState.with(key, value).map(state -> LocatableBlock.builder().from(this).block(state).build());
     }
 
     @Override
     public Optional<LocatableBlock> with(final Value<?> value) {
-        return this.blockState.with(value).map(state -> LocatableBlock.builder().from(this).state(state).build());
+        return this.blockState.with(value).map(state -> LocatableBlock.builder().from(this).block(state).build());
     }
 
     @Override
     public Optional<LocatableBlock> without(final Key<?> key) {
-        return this.blockState.without(key).map(state -> LocatableBlock.builder().from(this).state(state).build());
+        return this.blockState.without(key).map(state -> LocatableBlock.builder().from(this).block(state).build());
     }
 
     @Override
     public LocatableBlock withRawData(final DataView container) throws InvalidDataException {
-        return LocatableBlock.builder().from(this).state(this.blockState.withRawData(container)).build();
+        return LocatableBlock.builder().from(this).block(this.blockState.withRawData(container)).build();
     }
 
     @Override
     public LocatableBlock mergeWith(final LocatableBlock that, final MergeFunction function) {
-        return LocatableBlock.builder().from(this).state(this.blockState.mergeWith(that.blockState(), function)).build();
+        return LocatableBlock.builder().from(this).block(this.blockState.mergeWith(that.blockState(), function)).build();
     }
 
     @Override

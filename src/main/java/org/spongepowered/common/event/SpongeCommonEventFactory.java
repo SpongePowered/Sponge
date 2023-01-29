@@ -178,7 +178,7 @@ public final class SpongeCommonEventFactory {
     ) {
         final boolean extending = (eventId == 0);
         final net.minecraft.core.Direction direction = blockstate.getValue(DirectionalBlock.FACING);
-        final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((ServerWorld) world).state((BlockState) blockstate).position(pos.getX(), pos.getY(), pos.getZ()).build();
+        final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((ServerWorld) world).block((BlockState) blockstate).position(pos.getX(), pos.getY(), pos.getZ()).build();
 
         // Sets toss out duplicate values (even though there shouldn't be any)
         final HashSet<ServerLocation> locations = new HashSet<>();

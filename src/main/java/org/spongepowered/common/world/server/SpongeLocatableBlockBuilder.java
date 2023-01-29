@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.server;
 
+import net.minecraft.world.level.material.Fluids;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -56,7 +57,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
     }
 
     @Override
-    public SpongeLocatableBlockBuilder state(final BlockState blockState) {
+    public SpongeLocatableBlockBuilder block(final BlockState blockState) {
         Objects.requireNonNull(blockState, "BlockState cannot be null!");
         this.blockState = () -> blockState;
         return this;
@@ -156,7 +157,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
                 .map(world -> new SpongeLocatableBlockBuilder()
                         .position(x, y, z)
                         .world(world)
-                        .state(blockState)
+                        .block(blockState)
                         .build()
         );
 
