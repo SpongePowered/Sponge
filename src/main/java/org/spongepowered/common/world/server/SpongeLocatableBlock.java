@@ -194,19 +194,21 @@ public final class SpongeLocatableBlock implements LocatableBlock {
         }
         final SpongeLocatableBlock that = (SpongeLocatableBlock) o;
         return com.google.common.base.Objects.equal(this.blockState, that.blockState) &&
+               com.google.common.base.Objects.equal(this.fluidState, that.fluidState) &&
                com.google.common.base.Objects.equal(this.position, that.position) &&
                com.google.common.base.Objects.equal(this.world, that.world);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.blockState, this.position, this.world);
+        return Objects.hash(this.blockState, this.fluidState, this.position, this.world);
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
             .add("blockState", this.blockState)
+            .add("fluidstate", this.fluidState)
             .add("world", this.world)
             .add("position", this.position)
             .toString();
