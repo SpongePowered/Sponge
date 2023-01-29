@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world.server;
 
-import net.minecraft.world.level.material.Fluids;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
