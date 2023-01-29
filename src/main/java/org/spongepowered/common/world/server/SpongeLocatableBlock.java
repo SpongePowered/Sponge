@@ -65,7 +65,11 @@ public final class SpongeLocatableBlock implements LocatableBlock {
         this.position = checkNotNull(builder.position.get(), "position");
         this.world = checkNotNull(builder.world.get(), "world");
         this.worldRef = new WeakReference<>(checkNotNull(builder.worldReference.get(), "reference"));
-        this.fluidState = Objects.requireNonNull(builder.fluidState.get(), "fluidstate");
+        if (builder.fluidState != null) {
+            this.fluidState = Objects.requireNonNull(builder.fluidState.get(), "fluidstate");
+        } else {
+            this.fluidState = Objects.requireNonNull(this.blockState.fluidState(), "fluidstate");
+        }
     }
 
     SpongeLocatableBlock(final ServerWorld world, final int x, final int y, final int z) {
