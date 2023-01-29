@@ -63,7 +63,7 @@ public class FluidTickContext extends LocationBasedTickContext<FluidTickContext>
         return this;
     }
 
-    public FluidTickContext fluid(final FluidState fluidState) {
+    public FluidTickContext fluid(FluidState fluidState) {
         this.tickingBlock = fluidState;
         return this;
     }
