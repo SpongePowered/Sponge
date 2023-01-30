@@ -198,6 +198,7 @@
         "world.level.border.WorldBorderAccessor",
         "world.level.chunk.ChunkBiomeContainerAccessor",
         "world.level.chunk.LevelChunkAccessor",
+        "world.level.chunk.storage.ChunkStorageAccessor",
         "world.level.dimension.DimensionTypeAccessor",
         "world.level.levelgen.NoiseGeneratorSettingsAccessor",
         "world.level.levelgen.flat.FlatLayerInfoAccessor",
