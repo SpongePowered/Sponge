@@ -211,9 +211,8 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     @Inject(method = "handleHello(Lnet/minecraft/network/protocol/login/ServerboundHelloPacket;)V",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;state:Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;",
-            opcode = Opcodes.PUTFIELD,
-            ordinal = 1),
+            target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;READY_TO_ACCEPT:Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;",
+            opcode = Opcodes.GETSTATIC),
         cancellable = true)
     private void impl$fireAuthEventOffline(final CallbackInfo ci) {
         // Move this check up here, so that the UUID isn't null when we fire the event
