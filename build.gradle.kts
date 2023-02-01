@@ -248,7 +248,7 @@ dependencies {
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
     testImplementation("org.mockito:mockito-inline:$mockitoVersion")
 
-    testImplementation("org.spongepowered:modlauncher-injector-junit:1.0.0-SNAPSHOT")
+    testImplementation("org.spongepowered:modlauncher-injector-junit:1.0.0")
     testImplementation("cpw.mods:modlauncher:$modlauncherVersion") {
         exclude(group = "org.apache.logging.log4j")
         exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
