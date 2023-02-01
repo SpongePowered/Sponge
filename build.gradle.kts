@@ -5,7 +5,7 @@ plugins {
     `maven-publish`
     `java-library`
     eclipse
-    jacoco
+    id("net.smoofyuniverse.jacoco-offline") version "1.0.0"
     id("org.spongepowered.gradle.vanilla")
     id("com.github.johnrengelman.shadow")
     id("org.spongepowered.gradle.sponge.dev") apply false // for version json generation
@@ -89,10 +89,18 @@ tasks {
         val launcherArgs = mixinConfigs.map { "--mixin.config $it" } + superclassConfigs.map { "--superclass_change.config $it" }
         systemProperty("sponge.test.launcherArguments", launcherArgs.joinToString(" "))
 
+        extensions.configure(net.smoofyuniverse.testing.jacoco.plugins.JacocoTaskExtension::class) {
+            offline.set(true)
+        }
         finalizedBy(jacocoTestReport)
     }
 
+    jacocoTestOfflineInstrumentation {
+        sourceSets(applaunch.get(), launch.get())
+    }
+
     jacocoTestReport {
+        sourceSets(applaunch.get(), launch.get())
         dependsOn(test)
     }
 
