@@ -115,6 +115,15 @@ public class WorldCategory extends ConfigCategory {
             + "areas for more items. Setting to a negative value is not supported!")
     private double itemMergeRadius = 2.5D;
 
+    @Setting(value = "xp-merge-radius", comment = ""
+            + "The defined merge radius for XP Orb entities such that when two orbs are\n"
+            + "within the defined radius of each other, they will attempt to merge.\n"
+            + "Usually, the default radius is set to 0 in Vanilla, however, for performance reasons\n"
+            + "5.0 is generally acceptable.\n"
+            + "Note: Increasing the radius higher could cause performance degradation\n"
+            + "Setting to a negative value is not supported!")
+    private double xpOrbMergeRadius = 5.0D;
+
     @Setting(value = "weather-thunder", comment = "If 'true', thunderstorms will be initiated in supported biomes.")
     private boolean weatherThunder = true;
 
@@ -230,6 +239,10 @@ public class WorldCategory extends ConfigCategory {
 
     public double getItemMergeRadius() {
         return this.itemMergeRadius;
+    }
+
+    public double getXpOrbMergeRadius() {
+        return this.xpOrbMergeRadius;
     }
 
     public boolean getWeatherThunder() {

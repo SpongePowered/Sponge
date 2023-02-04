@@ -100,6 +100,8 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
     private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<OptimizationCategory, Boolean >> builder()
             .put("org.spongepowered.common.mixin.optimization.SpongeImplHooksMixin_Item_Pre_Merge",
                     OptimizationCategory::doDropsPreMergeItemDrops)
+            .put("org.spongepowered.common.mixin.optimization.entity.EntityXPOrbMixin_Merge",
+                    OptimizationCategory::doXPOrbsMerge)
             .put("org.spongepowered.common.mixin.optimization.enchantment.EnchantmentHelperMixin_No_Source_Leak",
                     OptimizationCategory::useEnchantmentHelperFix)
             .put("org.spongepowered.common.mixin.optimization.block.BlockRedstoneWireMixin_Eigen", EIGEN_ONLY)

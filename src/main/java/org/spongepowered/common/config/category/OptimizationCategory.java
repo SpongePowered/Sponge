@@ -41,6 +41,11 @@ public class OptimizationCategory extends ConfigCategory {
             + "in which case, the items will flow right through without being merged.")
     private boolean preItemDropMerge = false;
 
+    @Setting(value = "xp-orb-merge", comment = ""
+            + "If 'true', xp orbs are merged together to avoid\n"
+            + "having to process extra xp orb entities.")
+    private boolean xpOrbMerge = false;
+
     @Setting(value = "cache-tameable-owners", comment = ""
             + "Caches tameable entities owners to avoid constant lookups against data watchers.\n"
             + "If mods cause issues, disable this.")
@@ -173,6 +178,15 @@ public class OptimizationCategory extends ConfigCategory {
     public boolean doDropsPreMergeItemDrops() {
         return this.preItemDropMerge;
     }
+
+    /**
+     * This defines whether xp orb entities merge together as one entity or spawn as separate entities.
+     * @return Whether xp merging is enabled
+     */
+    public boolean doXPOrbsMerge() {
+        return this.xpOrbMerge;
+    }
+
 
     public boolean useCacheTameableOwners() {
         return this.cacheTameableOwners;

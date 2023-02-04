@@ -24,36 +24,51 @@
  */
 package org.spongepowered.common.mixin.optimization.entity;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.world.WorldInfoBridge;
 
 import java.util.List;
 
 @Mixin(EntityXPOrb.class)
 public abstract class EntityXPOrbMixin_Merge {
+    /**
+     * A simple cached value of the merge radius for this xp orb.
+     * Since the value is configurable, the first time searching for
+     * other xp orbs, this value is cached.
+     */
+    private double cachedRadius = -1;
+
     @Shadow
     private int xpValue;
 
-    @Redirect(method = "<init>(Lnet/minecraft/world/World;DDDI)V", at = @At("RETURN"))
-    private void constructorEnd(World worldIn, double x, double y, double z, int expValue, CallbackInfo info) {
-        final List<EntityXPOrb> nearbyOrbs = worldIn.getEntitiesWithinAABB(EntityXPOrb.class, new AxisAlignedBB(x + 6, y + 2, z + 6, x - 6, y - 2, z + 6));
+    @Inject(method = "<init>(Lnet/minecraft/world/World;DDDI)V", at = @At("RETURN"))
+    private void onConstructed(World worldIn, double x, double y, double z, int expValue, CallbackInfo callbackInfo) {
+        if (this.cachedRadius == -1) {
+            final double configRadius = ((WorldInfoBridge) worldIn.getWorldInfo()).bridge$getConfigAdapter().getConfig().getWorld().getXpOrbMergeRadius();
+            this.cachedRadius = configRadius < 0 ? 0 : configRadius;
+        }
+
+        final EntityXPOrb self = (EntityXPOrb) (Object) this;
+        final List<EntityXPOrb> nearbyOrbs = worldIn.getEntitiesWithinAABB(EntityXPOrb.class, self.getEntityBoundingBox().grow(cachedRadius, 0.0, cachedRadius), Entity::isEntityAlive);
         if (!nearbyOrbs.isEmpty()) {
-            int combinedXP = expValue;
+            int combinedXP = 0;
             for (EntityXPOrb entityXPOrb : nearbyOrbs) {
-                if (this.equals(entityXPOrb)) continue;
-                if (entityXPOrb.isEntityAlive()) {
-                    expValue += entityXPOrb.getXpValue();
-                    entityXPOrb.setDead();
+                if (self.getUniqueID().equals(entityXPOrb.getUniqueID())) {
+                    continue;
                 }
+
+                combinedXP += entityXPOrb.getXpValue();
+                entityXPOrb.setDead();
             }
 
-            this.xpValue = combinedXP;
+            this.xpValue = combinedXP + expValue;
         }
     }
 }
