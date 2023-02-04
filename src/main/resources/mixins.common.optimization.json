@@ -15,6 +15,7 @@
         "entity.EntityMixinTameable_Cached_Owner",
         "entity.EntityTrackerEntryMixin_MapOptimization",
         "entity.item.EntityItemFrameMixin_MapOptimization",
+        "entity.EntityXPOrbMixin_Merge",
         "item.ItemMapMixin_MapOptimization",
         "network.play.server.SPacketChunkDataMixin_Async_Lighting",
         "pathfinding.PathNavigateMixin_ChunkLoadOptimizations",
