@@ -292,11 +292,19 @@ public class SpongeCommonEventFactory {
     }
 
     public static boolean callSpawnEntity(final List<Entity> entities, final PhaseContext<?> context) {
+        return SpongeCommonEventFactory.callSpawnEntity(entities, context, false);
+    }
+
+    public static boolean callSpawnEntity(final List<Entity> entities, final PhaseContext<?> context, final boolean forPlayer) {
         Sponge.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
         try {
             final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
+                if (forPlayer) {
+                    // No processing should occur here, we're done as far as this event is concerned.
+                    return true;
+                }
                 for (Entity entity : event.getEntities()) {
                     if (entity instanceof Projectile) {
                         LaunchProjectileEvent launchProjectileEvent =
