@@ -32,6 +32,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
@@ -115,6 +116,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -699,11 +701,9 @@ public abstract class SpongeWorldManager implements WorldManager {
         }
 
         final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
-
-        for (final Map.Entry<net.minecraft.resources.ResourceKey<LevelStem>, LevelStem> entry : SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM).entrySet()) {
-
-            final ResourceKey worldKey = (ResourceKey) (Object) entry.getKey().location();
-            final LevelStem template = entry.getValue();
+        var registry = SpongeCommon.vanillaRegistry(Registries.LEVEL_STEM);
+        for (LevelStem template : registry) {
+            final ResourceKey worldKey = (ResourceKey) (Object) registry.getKey(template);
             final LevelStemBridge templateBridge = (LevelStemBridge) (Object) template;
 
             final boolean isDefaultWorld = DefaultWorldKeys.DEFAULT.equals(worldKey);

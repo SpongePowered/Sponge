@@ -338,26 +338,6 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         return (ServerLevelData) SpongeCommon.server().getLevel(Level.OVERWORLD).getLevelData();
     }
 
-    /* TODO dimensions got moved somewhere else
-    @Redirect(method = "setTagData", at = @At(value = "INVOKE", remap = false, target = "Lcom/mojang/serialization/Codec;encodeStart(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", ordinal = 0))
-    private DataResult<Object> impl$ignorePluginDimensionsWhenWritingWorldGenSettings(final Codec codec, final DynamicOps<Object> ops, final Object input) {
-        final WorldDimensions dims = ((WorldGenSettings) input).dimensions();
-        // Sub levels will have an empty dimensions registry so it is an easy toggle off
-        if (dims.dimensions().entrySet().size() == 0) {
-            return codec.encodeStart(ops, dimensionGeneratorSettings);
-        }
-        dimensionGeneratorSettings = ((WorldOptionsBridge) input).bridge$copy();
-        final MappedRegistry<LevelStem> registry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
-        ((org.spongepowered.api.registry.Registry<LevelStem>) (Object) dimensionGeneratorSettings.dimensions().dimensions()).streamEntries().forEach(entry -> {
-            if (Constants.MINECRAFT.equals(entry.key().namespace())) {
-                ((org.spongepowered.api.registry.Registry<LevelStem>) (Object) registry).register(entry.key(), entry.value());
-            }
-        });
-        ((WorldOptionsAccessor) (Object) dimensionGeneratorSettings).accessor$dimensions(registry);
-        return codec.encodeStart(ops, dimensionGeneratorSettings);
-    }
-    */
-
     void impl$updateWorldForDifficultyChange(final ServerLevel world, final boolean isLocked) {
         if (world == null) {
             return;

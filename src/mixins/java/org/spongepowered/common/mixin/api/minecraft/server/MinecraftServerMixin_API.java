@@ -270,13 +270,12 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
     @Override
     public WorldGenerationConfig worldGenerationConfig() {
-        final WorldData data = this.shadow$getWorldData();
+        final WorldData overworldData = this.shadow$getWorldData();
 
-        // TODO check if this is correct
-        final WorldGenSettings wgenSettings = new WorldGenSettings(data.worldGenOptions(),
+        final WorldGenSettings settings = new WorldGenSettings(overworldData.worldGenOptions(),
                 new WorldDimensions(this.registryAccess().registryOrThrow(Registries.LEVEL_STEM)));
 
-        return (WorldGenerationConfig) (Object) wgenSettings;
+        return (WorldGenerationConfig) (Object) settings;
     }
 
     @Override

@@ -240,7 +240,8 @@
         "registries.BuiltInRegistriesMixin",
         "adventure.chat.SignedMessageMixin",
         "world.level.gameevent.vibrations.VibrationListenerMixin",
-        "resources.RegistryDataLoaderMixin"
+        "resources.RegistryDataLoaderMixin",
+        "world.level.levelgen.WorldDimensionsMixin"
     ],
     "client": [
         "client.MinecraftMixin",
