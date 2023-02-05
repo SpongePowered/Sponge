@@ -108,8 +108,6 @@ import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.portal.PortalTypes;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;
-import org.spongepowered.api.world.server.TicketType;
-import org.spongepowered.api.world.server.TicketTypes;
 import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.common.accessor.world.level.levelgen.NoiseSettingsAccessor;
@@ -158,13 +156,11 @@ import org.spongepowered.common.map.color.SpongeMapShade;
 import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
 import org.spongepowered.common.registry.RegistryLoader;
 import org.spongepowered.common.util.SpongeOrientation;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeChunkRegenerateFlag;
 import org.spongepowered.common.world.portal.EndPortalType;
 import org.spongepowered.common.world.portal.NetherPortalType;
 import org.spongepowered.common.world.portal.UnknownPortalType;
 import org.spongepowered.common.world.schematic.SpongePaletteType;
-import org.spongepowered.common.world.server.SpongeTicketType;
 import org.spongepowered.common.world.weather.SpongeWeatherType;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -487,14 +483,6 @@ public final class SpongeRegistryLoader {
                 SpawnTypes.WEATHER,
                 SpawnTypes.WORLD_SPAWNER
         ));
-    }
-
-    public static RegistryLoader<TicketType<?>> ticketType() {
-        return RegistryLoader.of(l -> {
-            l.add(TicketTypes.STANDARD, k -> new SpongeTicketType<Vector3i>("standard", Comparator.comparingLong(x -> VecHelper.toChunkPos(x).toLong()), 1));
-            l.add(TicketTypes.PORTAL, k -> (TicketType<?>) net.minecraft.server.level.TicketType.PORTAL);
-            l.add(TicketTypes.POST_TELEPORT, k -> (TicketType<?>) net.minecraft.server.level.TicketType.POST_TELEPORT);
-        });
     }
 
     public static RegistryLoader<TransactionType> transactionType() {

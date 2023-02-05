@@ -26,12 +26,16 @@ package org.spongepowered.common.accessor.server.level;
 
 import net.minecraft.server.level.TicketType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
+
+import java.util.Comparator;
 
 @Mixin(TicketType.class)
-public interface TicketTypeAccessor {
+public interface TicketTypeAccessor<T> {
 
-    @Accessor("name")
-    String accessor$name();
-
+    @Invoker("<init>")
+    static <T> TicketType<T> accessor$createInstance(final String name, final Comparator<T> comparator, final long lifetime) {
+        throw new UntransformedInvokerError();
+    }
 }

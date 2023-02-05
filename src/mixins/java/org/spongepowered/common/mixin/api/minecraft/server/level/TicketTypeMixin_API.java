@@ -35,13 +35,19 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class TicketTypeMixin_API<T> implements TicketType<T> {
 
     // @formatter:off
+    @Shadow @Final private String name;
     @Shadow @Final private long timeout;
+
     // @formatter:on
+
+    @Override
+    public String name() {
+        return this.name;
+    }
 
     @Override
     @NonNull
     public Ticks lifetime() {
         return Ticks.of(this.timeout);
     }
-
 }
