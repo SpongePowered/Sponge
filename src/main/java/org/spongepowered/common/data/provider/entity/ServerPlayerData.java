@@ -25,9 +25,18 @@
 package org.spongepowered.common.data.provider.entity;
 
 import com.mojang.authlib.properties.Property;
+import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
+import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
+import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stat;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.biome.BiomeManager;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibilities;
@@ -45,6 +54,8 @@ import org.spongepowered.common.profile.SpongeProfileProperty;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class ServerPlayerData {
@@ -68,6 +79,10 @@ public final class ServerPlayerData {
                                 return null;
                             }
                             return new SpongeProfileProperty(properties.iterator().next());
+                        })
+                        .set((h ,v) -> {
+                            h.getGameProfile().getProperties().replaceValues(ProfileProperty.TEXTURES, Collections.singletonList(((SpongeProfileProperty)v).asProperty()));
+                            ServerPlayerData.resendProfile(h);
                         })
                     .create(Keys.SPECTATOR_TARGET)
                         .get(h -> (Entity) h.getCamera())
@@ -111,4 +126,42 @@ public final class ServerPlayerData {
         SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Player.HEALTH_SCALE, Keys.HEALTH_SCALE.key(), Keys.HEALTH_SCALE);
     }
     // @formatter:on
+
+    private static void resendProfile(final ServerPlayer h) {
+        // TODO handle vanished
+
+        // should work without this on ServerSideConnectionEvent.Login
+        if (h.level.getEntity(h.getId()) == h && !h.isRemoved()) {
+            // Remove Entity
+            h.getLevel().getChunkSource().removeEntity(h);
+            // Remove from TabList
+            h.getServer().getPlayerList().broadcastAll(new ClientboundPlayerInfoRemovePacket(List.of(h.getUUID())));
+            // Add back to TabList
+            h.getServer().getPlayerList().broadcastAll(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(h)));
+            // Add Entity
+            h.getLevel().getChunkSource().addEntity(h);
+            // Reconnect local player
+            h.connection.send(new ClientboundRespawnPacket(
+                    h.level.dimensionTypeId(),
+                    h.level.dimension(),
+                    BiomeManager.obfuscateSeed(h.getLevel().getSeed()),
+                    h.gameMode.getGameModeForPlayer(),
+                    h.gameMode.getPreviousGameModeForPlayer(),
+                    h.getLevel().isDebug(),
+                    h.getLevel().isFlat(),
+                    (byte) 0,
+                    h.getLastDeathLocation()));
+            // tp - just in case
+            h.connection.teleport(h.getX(), h.getY(), h.getZ(), h.getYRot(), h.getXRot());
+            // resend remaining player data... (see ServerPlayer#changeDimension)
+            h.connection.send(new ClientboundChangeDifficultyPacket(h.getLevel().getLevelData().getDifficulty(), h.getLevel().getLevelData().isDifficultyLocked()));
+            h.connection.send(new ClientboundPlayerAbilitiesPacket(h.getAbilities()));
+            h.getServer().getPlayerList().sendAllPlayerInfo(h);
+            for(MobEffectInstance $$6 : h.getActiveEffects()) {
+                h.connection.send(new ClientboundUpdateMobEffectPacket(h.getId(), $$6));
+            }
+            h.connection.send(new ClientboundSetExperiencePacket(h.experienceProgress, h.totalExperience, h.experienceLevel));
+
+        }
+    }
 }

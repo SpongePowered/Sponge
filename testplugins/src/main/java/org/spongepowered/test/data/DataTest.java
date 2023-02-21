@@ -41,6 +41,7 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
@@ -97,6 +98,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShapes;
 import org.spongepowered.api.item.ItemRarities;
@@ -106,6 +108,8 @@ import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Color;
@@ -143,6 +147,8 @@ public final class DataTest  {
         this.plugin = plugin;
     }
 
+    private String mimic;
+
     @Listener
     private void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(this.plugin, Command.builder()
@@ -153,6 +159,40 @@ public final class DataTest  {
                 })
                 .build()
         , "datatest");
+
+        final Parameter.Value<String> mimicParameter = Parameter.string().key("mimic_username").optional().build();
+        event.register(this.plugin, Command
+                        .builder()
+                        .addParameter(mimicParameter)
+                        .executor(context -> {
+                            final ServerPlayer player = context.cause().first(ServerPlayer.class).get();
+                            final String mimicUsername = context.requireOne(mimicParameter);
+                            this.setPlayerSkin(player, mimicUsername);
+                            return CommandResult.success();
+                        })
+                        .build()
+                , "mimic"
+        );
+        event.register(this.plugin, Command
+                        .builder()
+                        .addParameter(mimicParameter)
+                        .executor(context -> {
+                            final ServerPlayer player = context.cause().first(ServerPlayer.class).get();
+                            this.mimic = context.requireOne(mimicParameter);
+                            player.kick();
+                            return CommandResult.success();
+                        })
+                        .build()
+                , "mimickick"
+        );
+    }
+
+    @Listener
+    public void onLogin(ServerSideConnectionEvent.Login event) {
+        if (this.mimic != null) {
+            this.setPlayerSkin(event.user(), this.mimic);
+            this.mimic = null;
+        }
     }
 
 
@@ -1410,5 +1450,13 @@ public final class DataTest  {
             value = RegistryTypes.ITEM_TYPE.keyFor(Sponge.game(), ((ItemStack) holder).type()).value();
         }
         return String.format("%s[%s]", holder.getClass().getSimpleName(), value);
+    }
+
+    public void setPlayerSkin(final DataHolder.Mutable player, final String mimicUsername)
+    {
+        final GameProfile profile = Sponge.server().gameProfileManager().profile(mimicUsername).join();
+        final Optional<ProfileProperty> skinProperty =
+                profile.properties().stream().filter(prop -> prop.name().equals(ProfileProperty.TEXTURES)).findFirst();
+        player.offer(Keys.SKIN_PROFILE_PROPERTY, skinProperty.get());
     }
 }
