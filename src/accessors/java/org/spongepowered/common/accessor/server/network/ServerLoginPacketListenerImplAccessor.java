@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.server.network;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.network.Connection;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -37,4 +38,5 @@ public interface ServerLoginPacketListenerImplAccessor {
     @Accessor("state") void accessor$state(ServerLoginPacketListenerImpl.State state);
 
     @Accessor("gameProfile") void accessor$gameProfile(final GameProfile profile);
+    @Accessor("connection") Connection accessor$connection();
 }

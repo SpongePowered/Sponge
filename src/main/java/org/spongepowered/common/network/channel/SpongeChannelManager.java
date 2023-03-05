@@ -44,6 +44,7 @@ import org.spongepowered.api.network.channel.packet.basic.BasicPacketChannel;
 import org.spongepowered.api.network.channel.raw.RawDataChannel;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
@@ -181,7 +182,7 @@ public final class SpongeChannelManager implements ChannelManager {
             return;
         }
 
-        ((ConnectionBridge) ((ServerLoginPacketListenerImpl) connection).connection).bridge$setClientType(clientType);
+        ((ConnectionBridge) ((ServerGamePacketListenerImplAccessor) connection).accessor$connection()).bridge$setClientType(clientType);
     }
 
     /**

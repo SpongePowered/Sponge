@@ -110,6 +110,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.ConnectionAccessor;
+import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
@@ -267,7 +268,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         // Update locale on Channel, used for sending localized messages
         if (this.connection != null) {
-            final Channel channel = ((ConnectionAccessor) this.connection.connection).accessor$channel();
+            final Channel channel = ((ConnectionAccessor) ((ServerGamePacketListenerImplAccessor) this.connection).accessor$connection()).accessor$channel();
             channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(language);
 
             SpongeAdventure.forEachBossBar(bar -> {
