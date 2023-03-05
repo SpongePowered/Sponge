@@ -223,7 +223,7 @@ public abstract class MobMixin extends LivingEntityMixin {
         }
 
         // Sponge Start - Throw our event and handle appropriately
-        final DamageSource damageSource = DamageSource.mobAttack((Mob) (Object) this);
+        final DamageSource damageSource = this.level.damageSources().mobAttack((Mob) (Object) this);
         PhaseTracker.getCauseStackManager().pushCause(damageSource);
         final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.entity.Entity) targetEntity,
             originalFunctions, knockbackModifier, originalBaseDamage);

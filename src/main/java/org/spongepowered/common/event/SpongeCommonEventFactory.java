@@ -34,7 +34,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
@@ -494,14 +493,8 @@ public final class SpongeCommonEventFactory {
         Optional<UUID> sourceCreator = Optional.empty();
         final boolean messageCancelled = false;
 
-        if (source instanceof EntityDamageSource) {
-            final EntityDamageSource damageSource = (EntityDamageSource) source;
-            if (damageSource.getDirectEntity() instanceof CreatorTrackedBridge) {
-                final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) damageSource.getDirectEntity();
-                if (creatorBridge != null) {
-                    sourceCreator = creatorBridge.tracker$getCreatorUUID();
-                }
-            }
+        if (source.getDirectEntity() instanceof CreatorTrackedBridge creatorBridge) {
+            sourceCreator = creatorBridge.tracker$getCreatorUUID();
         }
 
         originalMessage = SpongeAdventure.asAdventure(entity.getCombatTracker().getDeathMessage());

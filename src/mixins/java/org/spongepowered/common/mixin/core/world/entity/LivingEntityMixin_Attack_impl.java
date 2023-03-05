@@ -30,7 +30,6 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -59,12 +58,10 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
 
     //@formatter:off
     @Shadow private DamageSource lastDamageSource;
-    @Shadow public float animationSpeed;
     @Shadow protected float lastHurt;
     @Shadow protected int noActionTime;
     @Shadow public int hurtDuration;
     @Shadow public int hurtTime;
-    @Shadow public float hurtDir;
     @Shadow protected int lastHurtByPlayerTime;
     @Shadow @javax.annotation.Nullable protected Player lastHurtByPlayer;
     @Shadow private long lastDamageStamp;
@@ -89,9 +86,6 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
     @Shadow public abstract void shadow$indicateDamage(final double $$0, final double $$1);
 
     // @formatter:on
-
-
-    @Shadow protected abstract void playHurtSound(final DamageSource $$0);
 
     /**
      * @author bloodmc - November 22, 2015
@@ -237,8 +231,6 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
                     }
                 }
             }
-
-            this.hurtDir = 0.0F;
 
             if (isNotInvulnerable) {
                 if (isBlocked) {

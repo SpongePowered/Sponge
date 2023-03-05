@@ -28,6 +28,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -46,10 +47,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.level.block.entity.CampfireBlockEntityBridge;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
-import org.spongepowered.common.util.MinecraftBlockDamageSource;
 
 import java.util.Optional;
 
@@ -58,25 +57,17 @@ public abstract class CampfireBlockMixin extends BlockMixin {
 
 
     @Redirect(method = "entityInside",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"
-            )
-    )
-    private boolean impl$spongeRedirectForFireDamage(final Entity self, final DamageSource source, final float damage,
-            final BlockState blockState, final Level world, final BlockPos blockPos, final Entity entity) {
-        if (self.level.isClientSide) { // Short Circuit
-            return self.hurt(source, damage);
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSources;inFire()Lnet/minecraft/world/damagesource/DamageSource;"))
+    private DamageSource impl$spongeRedirectForFireDamage(final DamageSources instance, final BlockState blockState, final Level world, final BlockPos blockPos, final Entity entity) {
+        final DamageSource source = instance.inFire();
+        if (world.isClientSide) { // Short Circuit
+            return source;
         }
-        try {
-            final ServerLocation location = ServerLocation.of((ServerWorld) world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
-            final DamageSource fire = MinecraftBlockDamageSource.ofFire("inFire", location, true);
-            ((DamageSourceBridge) fire).bridge$setFireSource();
-            return self.hurt(DamageSource.IN_FIRE, damage);
-        } finally {
-            // Since "source" is already the DamageSource.IN_FIRE object, we can re-use it to re-assign.
-            ((DamageSourceBridge) source).bridge$setFireSource();
-        }
+        final ServerLocation location = ServerLocation.of((ServerWorld) world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
+        var blockSource = org.spongepowered.api.event.cause.entity.damage.source.DamageSource.builder()
+                .from((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source).block(location)
+                .block(location.createSnapshot()).build();
+        return (DamageSource) blockSource;
     }
 
     @Inject(method = "use", locals = LocalCapture.CAPTURE_FAILEXCEPTION, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;placeFood(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;I)Z"))

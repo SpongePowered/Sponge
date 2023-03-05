@@ -76,8 +76,6 @@ import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
-import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
@@ -145,7 +143,6 @@ import org.spongepowered.common.event.cause.entity.SpongeMovementType;
 import org.spongepowered.common.event.cause.entity.SpongeSpawnType;
 import org.spongepowered.common.event.cause.entity.SpongeSpawnTypes;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageModifierType;
-import org.spongepowered.common.event.cause.entity.damage.SpongeDamageType;
 import org.spongepowered.common.inventory.menu.handler.SpongeClickType;
 import org.spongepowered.common.inventory.query.SpongeOneParamQueryType;
 import org.spongepowered.common.inventory.query.SpongeQueryTypes;
@@ -248,29 +245,6 @@ public final class SpongeRegistryLoader {
                 ClickTypes.SHIFT_CLICK_LEFT,
                 ClickTypes.SHIFT_CLICK_RIGHT
         )));
-    }
-
-    // TODO Minecraft 1.16.4+ - These are not right, someone needs to look into this...
-    public static RegistryLoader<DamageType> damageType() {
-        return RegistryLoader.of(l -> {
-            // TODO based on DamageSource
-            l.add(DamageTypes.ATTACK, k -> new SpongeDamageType("attack"));
-            l.add(DamageTypes.CONTACT, k -> new SpongeDamageType("contact"));
-            l.add(DamageTypes.CUSTOM, k -> new SpongeDamageType("custom"));
-            l.add(DamageTypes.DROWN, k -> new SpongeDamageType("drown"));
-            l.add(DamageTypes.DRYOUT, k -> new SpongeDamageType("dryout"));
-            l.add(DamageTypes.EXPLOSIVE, k -> new SpongeDamageType("explosive"));
-            l.add(DamageTypes.FALL, k -> new SpongeDamageType("fall"));
-            l.add(DamageTypes.FIRE, k -> new SpongeDamageType("inFire"));
-            l.add(DamageTypes.GENERIC, k -> new SpongeDamageType("generic"));
-            l.add(DamageTypes.HUNGER, k -> new SpongeDamageType("starve"));
-            l.add(DamageTypes.MAGIC, k -> new SpongeDamageType("magic"));
-            l.add(DamageTypes.MAGMA, k -> new SpongeDamageType("magma"));
-            l.add(DamageTypes.PROJECTILE, k -> new SpongeDamageType("projectile"));
-            l.add(DamageTypes.SUFFOCATE, k -> new SpongeDamageType("inWall"));
-            l.add(DamageTypes.SWEEPING_ATTACK, k -> new SpongeDamageType("sweeping_attack"));
-            l.add(DamageTypes.VOID, k -> new SpongeDamageType("outOfWorld"));
-        });
     }
 
     public static RegistryLoader<DamageModifierType> damageModifierType() {

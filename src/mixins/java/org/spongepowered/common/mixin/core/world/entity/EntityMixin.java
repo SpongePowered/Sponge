@@ -31,6 +31,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
@@ -45,7 +46,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
@@ -106,7 +106,6 @@ import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
@@ -124,7 +123,6 @@ import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DamageEventUtil;
-import org.spongepowered.common.util.MinecraftBlockDamageSource;
 import org.spongepowered.common.util.ReflectionUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.NetherPortalType;
@@ -909,18 +907,16 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         if (this.level.isClientSide) { // Short circuit
             return entity.hurt(source, damage);
         }
-        try {
-            final AABB bb = this.shadow$getBoundingBox().inflate(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
-            final ServerLocation location = DamageEventUtil.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
-                block.getMaterial() == Material.LAVA || block.getBlock() instanceof LavaCauldronBlock);
-            final DamageSource lava = MinecraftBlockDamageSource.ofFire("lava", location, false);
-            ((DamageSourceBridge) lava).bridge$setLava(); // Bridge to bypass issue with using accessor mixins within mixins
-            return entity.hurt(DamageSource.LAVA, damage);
-        } finally {
-            // Since "source" is already the DamageSource.LAVA object, we can simply re-use it here.
-            ((DamageSourceBridge) source).bridge$setLava();
+        final AABB bb = this.shadow$getBoundingBox().inflate(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
+        final ServerLocation location = DamageEventUtil.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
+            block.getMaterial() == Material.LAVA || block.getBlock() instanceof LavaCauldronBlock);
+        if (location != null) {
+            var blockSource = org.spongepowered.api.event.cause.entity.damage.source.DamageSource.builder()
+                    .from((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source).block(location)
+                    .block(location.createSnapshot()).build();
+            return entity.hurt((DamageSource) blockSource, damage);
         }
-
+        return entity.hurt(source, damage);
     }
 
 
@@ -1234,13 +1230,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         if (!this.level.isClientSide) {
             return entity.hurt(source, damage);
         }
-        try {
-            final EntityDamageSource lightning = new EntityDamageSource("lightningBolt", lightningBolt);
-            ((DamageSourceBridge) lightning).bridge$setLightningSource();
-            return entity.hurt(DamageSource.LIGHTNING_BOLT, damage);
-        } finally {
-            ((DamageSourceBridge) source).bridge$setLightningSource();
-        }
+        var entitySource = new DamageSource(source.typeHolder(), lightningBolt);
+        return entity.hurt(entitySource, damage);
     }
 
     @Inject(method = "getFireImmuneTicks", at = @At(value = "HEAD"), cancellable = true)

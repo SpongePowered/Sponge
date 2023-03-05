@@ -24,13 +24,19 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.damagesource;
 
+import net.minecraft.core.Holder;
+import net.minecraft.world.phys.Vec3;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
 
@@ -43,7 +49,8 @@ public abstract class DamageSourceMixin_API implements DamageSource {
     @Shadow @Final @Nullable private net.minecraft.world.entity.Entity directEntity;
 
     @Shadow @Final @Nullable private net.minecraft.world.entity.Entity causingEntity;
-
+    @Shadow @Final private Holder<net.minecraft.world.damagesource.DamageType> type;
+    @Shadow @Final @Nullable private Vec3 damageSourcePosition;
     // @formatter:on
 
     @Override
@@ -57,8 +64,28 @@ public abstract class DamageSourceMixin_API implements DamageSource {
     }
 
     @Override
+    public boolean doesAffectCreative() {
+        // TODO ?
+    }
+
+    @Override
+    public Optional<ServerLocation> location() {
+        return Optional.ofNullable(((DamageSourceBridge) this).bridge$blockLocation());
+    }
+
+    @Override
+    public Optional<BlockSnapshot> blockSnapshot() {
+        return Optional.ofNullable(((DamageSourceBridge) this).bridge$blockSnapshot());
+    }
+
+    @Override
+    public Optional<Vector3d> position() {
+        return Optional.ofNullable(VecHelper.toVector3d(this.damageSourcePosition));
+    }
+
+    @Override
     public DamageType type() {
-        return ((DamageSourceBridge) this).bridge$getDamageType();
+        return (DamageType) (Object) this.type.value();
     }
 
 }

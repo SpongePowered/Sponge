@@ -61,7 +61,7 @@ public final class SpongeRegistries {
         holder.createFrozenRegistry(RegistryTypes.BODY_PART, SpongeRegistryLoader.bodyPart());
         holder.createFrozenRegistry(RegistryTypes.CLICK_TYPE, SpongeRegistryLoader.clickType());
         holder.createFrozenRegistry(RegistryTypes.CHUNK_REGENERATE_FLAG, SpongeRegistryLoader.chunkRegenerateFlag());
-        holder.createFrozenRegistry(RegistryTypes.DAMAGE_TYPE, SpongeRegistryLoader.damageType());
+        holder.createFrozenRegistry(RegistryTypes.DAMAGE_TYPE, SpongeRegistryLoader.damageType()); // TODO this is a vanilla registry now
         holder.createFrozenRegistry(RegistryTypes.DAMAGE_MODIFIER_TYPE, SpongeRegistryLoader.damageModifierType());
         holder.createFrozenRegistry(RegistryTypes.DISMOUNT_TYPE, SpongeRegistryLoader.dismountType());
         holder.createFrozenRegistry(RegistryTypes.DISPLAY_SLOT, SpongeRegistryLoader.displaySlot());

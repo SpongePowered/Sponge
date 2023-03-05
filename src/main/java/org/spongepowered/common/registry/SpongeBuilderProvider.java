@@ -68,11 +68,7 @@ import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
-import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.fluid.FluidStack;
 import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.fluid.FluidState;
@@ -180,12 +176,7 @@ import org.spongepowered.common.entity.ai.goal.builtin.creature.target.SpongeFin
 import org.spongepowered.common.entity.attribute.SpongeAttributeModifierBuilder;
 import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
 import org.spongepowered.common.event.SpongeEventContextKeyBuilder;
-import org.spongepowered.common.event.cause.entity.damage.SpongeBlockDamageSourceBuilder;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSourceBuilder;
-import org.spongepowered.common.event.cause.entity.damage.SpongeDamageType;
-import org.spongepowered.common.event.cause.entity.damage.SpongeEntityDamageSourceBuilder;
-import org.spongepowered.common.event.cause.entity.damage.SpongeFallingBlockDamgeSourceBuilder;
-import org.spongepowered.common.event.cause.entity.damage.SpongeIndirectEntityDamageSourceBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStateBuilder;
@@ -295,12 +286,8 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(Objective.Builder.class, SpongeObjective.Builder::new)
                 .register(Team.Builder.class, SpongeTeamBuilder::new)
                 .register(Scoreboard.Builder.class, SpongeScoreboardBuilder::new)
-                .register(DamageType.Builder.class, SpongeDamageType.BuilderImpl::new)
+                .register(DamageType.Builder.class, SpongeDamageType.BuilderImpl::new) // TODO new data pack builder
                 .register(DamageSource.Builder.class, SpongeDamageSourceBuilder::new)
-                .register(EntityDamageSource.Builder.class, SpongeEntityDamageSourceBuilder::new)
-                .register(IndirectEntityDamageSource.Builder.class, SpongeIndirectEntityDamageSourceBuilder::new)
-                .register(FallingBlockDamageSource.Builder.class, SpongeFallingBlockDamgeSourceBuilder::new)
-                .register(BlockDamageSource.Builder.class, SpongeBlockDamageSourceBuilder::new)
                 .register(Explosion.Builder.class, SpongeExplosionBuilder::new)
                 .register(BlockState.Builder.class, SpongeBlockStateBuilder::new)
                 .register(BlockSnapshot.Builder.class, SpongeBlockSnapshot.BuilderImpl::unpooled)

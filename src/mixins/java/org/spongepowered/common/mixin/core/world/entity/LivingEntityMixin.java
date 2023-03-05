@@ -30,6 +30,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
@@ -47,6 +48,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
+import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
@@ -56,7 +58,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.SleepingEvent;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
-import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.UseItemStackEvent;
@@ -210,7 +211,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStack helmet = this.shadow$getItemBySlot(EquipmentSlot.HEAD);
             // We still sanity check if a mod is calling to damage the entity with an anvil or falling block
             // without using our mixin redirects in EntityFallingBlockMixin.
-            if ((damageSource instanceof FallingBlockDamageSource || damageSource.isDamageHelmet()) && !helmet.isEmpty()) {
+            if ((damageSource.getDirectEntity() instanceof FallingBlock || damageSource.is(DamageTypeTags.DAMAGES_HELMET)) && !helmet.isEmpty()) {
                 helmet.hurtAndBreak((int) (event.baseDamage() * 4.0F + this.random.nextFloat() * event.baseDamage() * 2.0F),
                         (LivingEntity) (Object) this, (entity) -> entity.broadcastBreakEvent(EquipmentSlot.HEAD)
                 );
@@ -221,7 +222,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             if (shieldFunction.isPresent()) {
                 this.shadow$hurtCurrentlyUsedShield((float) event.baseDamage());
                 hurtStack = true;
-                if (!damageSource.isProjectile()) {
+                if (!damageSource.is(DamageTypeTags.IS_PROJECTILE)) {
                     final Entity entity = damageSource.getDirectEntity();
 
                     if (entity instanceof LivingEntity) {
@@ -231,7 +232,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             }
 
             // Armor
-            if (!damageSource.isBypassArmor() && armorFunction.isPresent()) {
+            if (!damageSource.is(DamageTypeTags.BYPASSES_ARMOR) && armorFunction.isPresent()) {
                 this.shadow$hurtArmor(damageSource, (float) event.baseDamage());
                 hurtStack = true;
             }

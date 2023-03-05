@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.cause.entity.damage;
 
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
 
 public final class SpongeDamageSources {
 
@@ -36,10 +35,9 @@ public final class SpongeDamageSources {
     public static final DamageSource IGNORED;
 
     static {
-        DamageSourceAccessor damageSource = ((DamageSourceAccessor)DamageSourceAccessor.invoker$new("ignored"));
-        damageSource.invoker$bypassInvul();
-        damageSource.invoker$bypassArmor();
-        damageSource.invoker$bypassMagic();
+        // TODO register sponge ignored damage type
+        // with bypass invul/armor/magic
+        net.minecraft.world.damagesource.DamageSource damageSource = new net.minecraft.world.damagesource.DamageSource();
         IGNORED = (DamageSource) damageSource;
     }
 

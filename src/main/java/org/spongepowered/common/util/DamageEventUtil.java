@@ -29,10 +29,10 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -48,6 +48,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
@@ -55,8 +56,6 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
-import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -64,6 +63,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -92,7 +92,7 @@ public final class DamageEventUtil {
 
     @SuppressWarnings("ConstantConditions")
     public static Optional<DamageFunction> createHardHatModifier(final LivingEntity living, final DamageSource damageSource) {
-        if ((damageSource instanceof FallingBlockDamageSource) && !living.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+        if (damageSource.getDirectEntity() instanceof FallingBlock && !living.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
             final DamageModifier modifier = DamageModifier.builder()
                     // TODO - Event Context Key for Helmet
                     .cause(Cause.of(EventContext.empty(), ((ItemStack) (Object) living.getItemBySlot(EquipmentSlot.HEAD)).createSnapshot()))
@@ -104,7 +104,7 @@ public final class DamageEventUtil {
     }
 
     public static Optional<DamageFunction> createArmorModifiers(final LivingEntity living, final DamageSource damageSource) {
-        if (damageSource.isBypassArmor()) {
+        if (damageSource.is(DamageTypeTags.BYPASSES_ARMOR)) {
             return Optional.empty();
         }
 
@@ -125,7 +125,9 @@ public final class DamageEventUtil {
     public static Optional<DamageFunction> createResistanceModifier(final LivingEntity living, final DamageSource damageSource) {
         final PotionEffect effect = ((PotionEffect) living.getEffect(MobEffects.DAMAGE_RESISTANCE));
 
-        if (!damageSource.isBypassMagic() && effect != null && damageSource != DamageSource.OUT_OF_WORLD) {
+        if (effect != null &&
+            !damageSource.is(DamageTypeTags.BYPASSES_EFFECTS) &&
+            !damageSource.is(DamageTypeTags.BYPASSES_RESISTANCE)) {
             return Optional.of(new DamageFunction(DamageModifier.builder()
                     .cause(Cause.of(EventContext.empty(), effect))
                     .type(DamageModifierTypes.DEFENSIVE_POTION_EFFECT)
@@ -135,7 +137,7 @@ public final class DamageEventUtil {
     }
 
     public static Optional<List<DamageFunction>> createEnchantmentModifiers(final LivingEntity living, final DamageSource damageSource) {
-        if (damageSource.isBypassMagic()) {
+        if (damageSource.is(DamageTypeTags.BYPASSES_ENCHANTMENTS)) {
             return Optional.empty();
         }
         final Iterable<net.minecraft.world.item.ItemStack> inventory = living.getArmorSlots();
@@ -205,15 +207,13 @@ public final class DamageEventUtil {
      * a {@link CauseStackManager.StackFrame} reference to push onto the stack.
      */
     public static void generateCauseFor(final DamageSource damageSource, final CauseStackManager.StackFrame frame) {
-        if (damageSource instanceof EntityDamageSource) {
-            final net.minecraft.world.entity.Entity source = damageSource.getEntity();
-            if (!(source instanceof Player) && source instanceof CreatorTrackedBridge) {
-                final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) source;
+        if (damageSource.getDirectEntity() instanceof org.spongepowered.api.entity.Entity entity) {
+            if (!(entity instanceof Player) && entity instanceof CreatorTrackedBridge creatorBridge) {
                 creatorBridge.tracker$getCreatorUUID().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
                 creatorBridge.tracker$getNotifierUUID().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
             }
-        } else if (damageSource instanceof BlockDamageSource) {
-            final ServerLocation location = ((BlockDamageSource) damageSource).location();
+        } else if (((DamageSourceBridge) damageSource).bridge$blockLocation() != null) {
+            final ServerLocation location = ((DamageSourceBridge) damageSource).bridge$blockLocation();
             final BlockPos blockPos = VecHelper.toBlockPos(location);
             final LevelChunkBridge chunkBridge = (LevelChunkBridge) ((net.minecraft.world.level.Level) location.world()).getChunkAt(blockPos);
             chunkBridge.bridge$getBlockCreatorUUID(blockPos).ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
