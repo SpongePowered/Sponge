@@ -24,52 +24,60 @@
  */
 package org.spongepowered.common.util;
 
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.damagesource.DamageSources;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 
 public final class SpongeDamageSourceFactory implements DamageSource.Factory {
 
+    private final DamageSources damageSources;
+
+    public SpongeDamageSourceFactory(final RegistryAccess registryAccess) {
+        this.damageSources = new DamageSources(registryAccess);;
+    }
+
     @Override
     public DamageSource drowning() {
-        return (DamageSource) net.minecraft.world.damagesource.DamageSource.DROWN;
+        return (DamageSource) this.damageSources.drown();
     }
 
     @Override
     public DamageSource dryout() {
-        return (DamageSource) net.minecraft.world.damagesource.DamageSource.DRY_OUT;
+        return (DamageSource) this.damageSources.dryOut();
     }
 
     @Override
     public DamageSource falling() {
-        return (DamageSource) net.minecraft.world.damagesource.DamageSource.FALL;
+        return (DamageSource) this.damageSources.fall();
     }
 
     @Override
     public DamageSource fireTick() {
-        return (DamageSource) net.minecraft.world.damagesource.DamageSource.ON_FIRE;
+        return (DamageSource) this.damageSources.onFire();
     }
 
     @Override
     public DamageSource generic() {
-        return (DamageSource) net.minecraft.world.damagesource.DamageSource.GENERIC;
+        return (DamageSource) this.damageSources.generic();
     }
 
     @Override
     public DamageSource magic() {
-        return (DamageSource) net.minecraft.world.damagesource.DamageSource.MAGIC;
+        return (DamageSource) this.damageSources.magic();
     }
 
     @Override
     public DamageSource starvation() {
-        return (DamageSource) net.minecraft.world.damagesource.DamageSource.STARVE;
+        return (DamageSource) this.damageSources.starve();
     }
 
     @Override
     public DamageSource voidSource() {
-        return (DamageSource) net.minecraft.world.damagesource.DamageSource.OUT_OF_WORLD;
+        return (DamageSource) this.damageSources.outOfWorld();
     }
 
     @Override
     public DamageSource wither() {
-        return (DamageSource) net.minecraft.world.damagesource.DamageSource.WITHER;
+        return (DamageSource) this.damageSources.wither();
     }
 }

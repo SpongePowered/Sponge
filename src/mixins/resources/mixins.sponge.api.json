@@ -73,7 +73,7 @@
         "minecraft.stats.StatMixin_API",
         "minecraft.stats.StatTypeMixin_API",
         "minecraft.tags.TagKeyMixin_API",
-        "minecraft.util.DamageSourceMixin_API",
+        "minecraft.world.damagesource.DamageSourceMixin_API",
         "minecraft.util.EntityDamageSourceMixin_API",
         "minecraft.util.IndirectEntityDamageSourceMixin_API",
         "minecraft.util.RandomSourceMixin_API",
@@ -445,7 +445,9 @@
         "minecraft.world.ticks.TickPriorityMixin_API",
         "service.permission.SubjectMixin_API",
         "world.LocatableBlockMixin_API",
-        "minecraft.network.chat.MessageSignatureMixin_API"
+        "minecraft.network.chat.MessageSignatureMixin_API",
+        "minecraft.world.damagesource.DamageTypeMixin_API",
+        "minecraft.world.damagesource.DamageScalingMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

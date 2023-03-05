@@ -22,26 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.util;
+package org.spongepowered.common.mixin.api.minecraft.world.damagesource;
 
-import net.minecraft.world.entity.Entity;
-import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
+import net.minecraft.world.damagesource.DamageEffects;
+import org.spongepowered.api.event.cause.entity.damage.DamageEffect;
+import org.spongepowered.api.event.cause.entity.damage.DamageScaling;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.tag.Tag;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
+import java.util.Set;
 
-@Mixin(value = net.minecraft.world.damagesource.IndirectEntityDamageSource.class)
-public abstract class IndirectEntityDamageSourceMixin_API extends EntityDamageSourceMixin_API implements IndirectEntityDamageSource {
+@Mixin(value = net.minecraft.world.damagesource.DamageType.class)
+public abstract class DamageTypeMixin_API implements DamageType {
 
     // @formatter:off
-    @Shadow @Final @Nullable private Entity cause;
+    @Shadow @Final private String msgId;
+    @Shadow @Final private float exhaustion;
+    @Shadow @Final private net.minecraft.world.damagesource.DamageScaling scaling;
+    @Shadow @Final private DamageEffects effects;
+
     // @formatter:on
 
+
     @Override
-    public org.spongepowered.api.entity.Entity indirectSource() {
-        return (org.spongepowered.api.entity.Entity) this.cause;
+    public String name() {
+        return this.msgId;
     }
 
+    @Override
+    public double exhaustion() {
+        return this.exhaustion;
+    }
+
+    @Override
+    public DamageScaling scaling() {
+        return (DamageScaling) (Object) this.scaling;
+    }
+
+    @Override
+    public DamageEffect effect() {
+        return (DamageEffect) (Object) this.effects;
+    }
+
+    @Override
+    public boolean is(final Tag<DamageType> tag) {
+        final Set<DamageType> matchingTypes = RegistryTypes.DAMAGE_TYPE.get().taggedValues(tag);
+        return matchingTypes.contains(this);
+    }
 }

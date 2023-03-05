@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.world.damagesource;
 
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -50,5 +51,9 @@ public interface DamageSourceAccessor {
     @Invoker("bypassMagic") DamageSource invoker$bypassMagic();
 
     @Invoker("setIsFire") DamageSource invoker$setIsFire();
+
+    @Accessor("directEntity") @Mutable void accessor$entity(final Entity entity);
+
+    @Accessor("causingEntity") void accessor$cause(final Entity cause);
 
 }

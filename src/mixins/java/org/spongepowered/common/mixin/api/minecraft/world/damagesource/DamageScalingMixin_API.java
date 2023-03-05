@@ -22,26 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.util;
+package org.spongepowered.common.mixin.api.minecraft.world.damagesource;
 
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.event.cause.entity.damage.DamageScaling;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
-
-@Mixin(value = net.minecraft.world.damagesource.EntityDamageSource.class)
-public abstract class EntityDamageSourceMixin_API extends DamageSourceMixin_API implements EntityDamageSource {
+@Mixin(value = net.minecraft.world.damagesource.DamageScaling.class)
+public abstract class DamageScalingMixin_API implements DamageScaling {
 
     // @formatter:off
-    @Shadow @Final @Nullable protected net.minecraft.world.entity.Entity entity;
+
+
     // @formatter:on
 
-    @Override
-    public Entity source() {
-        return ((Entity) this.entity);
-    }
 
 }
