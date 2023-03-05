@@ -64,7 +64,7 @@ public final class ArmorItemStackData {
                     .create(Keys.EQUIPMENT_TYPE)
                         .get(h -> {
                             if (h.getItem() instanceof ArmorItem) {
-                                switch (((ArmorItem) h.getItem()).getSlot()) {
+                                switch (((ArmorItem) h.getItem()).getEquipmentSlot()) {
                                     case FEET:
                                         return EquipmentTypes.FEET.get();
                                     case LEGS:
