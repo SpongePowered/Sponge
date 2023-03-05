@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 import static org.spongepowered.common.inventory.util.InventoryUtil.toNativeInventory;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -38,6 +39,7 @@ import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -50,8 +52,8 @@ import javax.annotation.Nonnull;
 public interface RecipeMixin_API<C extends Container> extends Recipe {
 
     // @formatter:off
-    @Shadow ItemStack shadow$assemble(C inv);
-    @Shadow net.minecraft.world.item.ItemStack shadow$getResultItem();
+    @Shadow ItemStack shadow$assemble(C inv, RegistryAccess registryAccess);
+    @Shadow net.minecraft.world.item.ItemStack shadow$getResultItem(RegistryAccess registryAccess);
     @Shadow ResourceLocation shadow$getId();
     @Shadow boolean shadow$isSpecial();
     @Shadow boolean shadow$matches(C inv, net.minecraft.world.level.Level worldIn);
@@ -63,7 +65,7 @@ public interface RecipeMixin_API<C extends Container> extends Recipe {
     @Nonnull
     @Override
     default ItemStackSnapshot exemplaryResult() {
-        return ItemStackUtil.snapshotOf(this.shadow$getResultItem());
+        return ItemStackUtil.snapshotOf(this.shadow$getResultItem(SpongeCommon.server().registryAccess()));
     }
 
     @Override
@@ -74,7 +76,7 @@ public interface RecipeMixin_API<C extends Container> extends Recipe {
     @Nonnull
     @Override
     default ItemStackSnapshot result(@Nonnull final Inventory inv) {
-        return ItemStackUtil.snapshotOf(this.shadow$assemble(toNativeInventory(inv)));
+        return ItemStackUtil.snapshotOf(this.shadow$assemble(toNativeInventory(inv), SpongeCommon.server().registryAccess()));
     }
 
     @Nonnull

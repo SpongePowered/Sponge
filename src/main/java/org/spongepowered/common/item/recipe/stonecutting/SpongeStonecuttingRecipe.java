@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.recipe.stonecutting;
 
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -42,19 +43,19 @@ public class SpongeStonecuttingRecipe extends StonecutterRecipe {
     }
 
     @Override
-    public ItemStack assemble(Container p_77572_1_) {
+    public ItemStack assemble(final Container container, final RegistryAccess $$1) {
         if (this.resultFunction != null) {
-            return this.resultFunction.apply(p_77572_1_);
+            return this.resultFunction.apply(container);
         }
-        return super.assemble(p_77572_1_);
+        return super.assemble(container, $$1);
     }
 
     @Override
-    public ItemStack getResultItem() {
+    public ItemStack getResultItem(final RegistryAccess $$1) {
         if (this.resultFunction != null) {
             return ItemStack.EMPTY;
         }
-        return super.getResultItem();
+        return super.getResultItem($$1);
     }
 
 }

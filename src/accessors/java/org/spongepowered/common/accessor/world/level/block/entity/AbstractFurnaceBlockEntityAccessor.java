@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.world.level.block.entity;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
@@ -60,7 +61,7 @@ public interface AbstractFurnaceBlockEntityAccessor {
     @Accessor("quickCheck")  RecipeManager.CachedCheck<Container, ? extends AbstractCookingRecipe> accessor$quickCheck();
 
     @Invoker("canBurn")
-    static boolean invoker$canBurn(@Nullable final Recipe<?> var0, final NonNullList<ItemStack> var1, final int var2) {
+    static boolean invoker$canBurn(final RegistryAccess registryAccess, @Nullable final Recipe<?> var0, final NonNullList<ItemStack> var1, final int var2) {
         throw new UntransformedInvokerError();
     }
 

@@ -31,16 +31,16 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.LegacyUpgradeRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
-import net.minecraft.world.item.crafting.UpgradeRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.function.Function;
 
-public class SpongeSmithingRecipeSerializer<R extends UpgradeRecipe> implements RecipeSerializer<R> {
+public class SpongeSmithingRecipeSerializer<R extends LegacyUpgradeRecipe> implements RecipeSerializer<R> {
 
     @SuppressWarnings("unchecked")
     @Override
