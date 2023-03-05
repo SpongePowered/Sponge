@@ -41,11 +41,11 @@ public final class JukeBoxData {
         registrator
                 .asMutable(JukeboxBlockEntity.class)
                     .create(Keys.ITEM_STACK_SNAPSHOT)
-                        .get(h -> h.getRecord().isEmpty() ? null : ItemStackUtil.snapshotOf(h.getRecord()))
+                        .get(h -> h.getItem(0).isEmpty() ? null : ItemStackUtil.snapshotOf(h.getItem(0)))
                         .setAnd((h, v) -> {
                             final ItemStack record = ItemStackUtil.fromSnapshotToNative(v);
                             if (record.getItem() instanceof RecordItem) {
-                                h.setRecord(record);
+                                h.setItem(0, record);
                                 return true;
                             }
                             if (record.isEmpty()) {
