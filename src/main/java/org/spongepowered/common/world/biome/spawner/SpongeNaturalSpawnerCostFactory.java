@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.world.biome.spawner;
 
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import org.spongepowered.api.world.biome.spawner.NaturalSpawnCost;
-import org.spongepowered.common.accessor.world.level.biome.MobSpawnSettings_MobSpawnCostAccessor;
 
 public class SpongeNaturalSpawnerCostFactory implements NaturalSpawnCost.Factory {
 
     @Override
     public NaturalSpawnCost of(final double budget, final double charge) {
-        return (NaturalSpawnCost) MobSpawnSettings_MobSpawnCostAccessor.invoker$new(budget, charge);
+        return (NaturalSpawnCost) (Object) new MobSpawnSettings.MobSpawnCost(budget, charge);
     }
 }

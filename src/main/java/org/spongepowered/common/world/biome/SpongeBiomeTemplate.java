@@ -162,7 +162,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
 
         @Override
         protected BiomeTemplate build0() {
-            final var precipitation = this.manipulator.require(Keys.PRECIPITATION);
+            final var precipitation = this.manipulator.require(Keys.HAS_PRECIPITATION);
             final Double temperature = this.manipulator.require(Keys.BIOME_TEMPERATURE);
             final Double downfall = this.manipulator.require(Keys.HUMIDITY);
             final var temperatureModifier = this.manipulator.getOrElse(Keys.TEMPERATURE_MODIFIER, TemperatureModifiers.NONE.get());
@@ -218,7 +218,7 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
                     Holder.direct((ConfiguredWorldCarver<?>) (Object) carver))));
 
             final Biome.BiomeBuilder vanillaBuilder = new Biome.BiomeBuilder()
-                    .precipitation((Biome.Precipitation) (Object) precipitation)
+                    .hasPrecipitation(precipitation)
                     .temperature(temperature.floatValue())
                     .downfall(downfall.floatValue())
                     .temperatureAdjustment((Biome.TemperatureModifier) (Object) temperatureModifier)

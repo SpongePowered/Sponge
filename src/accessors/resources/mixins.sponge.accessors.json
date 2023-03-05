@@ -147,7 +147,6 @@
         "world.level.LevelSettingsAccessor",
         "world.level.NaturalSpawner_SpawnStateAccessor",
         "world.level.NaturalSpawnerAccessor",
-        "world.level.biome.BiomeSourceAccessor",
         "world.level.biome.MultiNoiseBiomeSourceAccessor",
         "world.level.biome.TheEndBiomeSourceAccessor",
         "world.level.block.AbstractSkullBlockAccessor",
@@ -198,7 +197,6 @@
         "world.level.biome.OverworldBiomeBuilderAccessor",
         "world.level.levelgen.NoiseSettingsAccessor",
         "world.level.levelgen.structure.pools.StructureTemplatePoolAccessor",
-        "world.level.biome.MobSpawnSettings_MobSpawnCostAccessor",
         "network.protocol.game.ClientboundPlayerInfoUpdatePacketAccessor",
         "sounds.SoundEventAccessor",
         "server.network.ServerGamePacketListenerImplAccessor"

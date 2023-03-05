@@ -69,10 +69,13 @@ public final class BiomeData {
                 .asImmutable(Biome.class)
                     .create(Keys.BIOME_TEMPERATURE)
                         .get(h -> (double) h.getBaseTemperature())
-                    .create(Keys.HUMIDITY)
-                        .get(h -> (double) h.getDownfall())
                     .create(Keys.PRECIPITATION)
-                        .get(h -> (Precipitation) (Object) h.getPrecipitation())
+                        .get(h -> (Precipitation) (Object) (h.hasPrecipitation() ?
+                                                            h.getBaseTemperature() >= 0.15F ? Biome.Precipitation.RAIN
+                                                                                            : Biome.Precipitation.SNOW
+                                                                                 : Biome.Precipitation.NONE))
+                    .create(Keys.HAS_PRECIPITATION)
+                        .get(Biome::hasPrecipitation)
                     .create(Keys.CARVERS)
                         .get(BiomeData::carvers)
                     .create(Keys.FEATURES)
@@ -104,6 +107,8 @@ public final class BiomeData {
                     .create(Keys.AMBIENT_PARTICLE)
                         .get(h -> h.getSpecialEffects().getAmbientParticleSettings().map(ParticleConfig.class::cast).orElse(null))
                 .asImmutable(BiomeAccessor.class)
+                    .create(Keys.HUMIDITY)
+                        .get(h -> (double) h.accessor$climateSettings().downfall())
                     .create(Keys.TEMPERATURE_MODIFIER)
                         .get(h -> (TemperatureModifier) (Object) ((Biome_ClimateSettingsAccessor) (Object) h.accessor$climateSettings()).accessor$temperatureModifier())
         ;
@@ -164,6 +169,6 @@ public final class BiomeData {
         final var costs = ((MobSpawnSettingsAccessor) biome.getMobSettings()).accessor$mobSpawnCosts();
         return costs.entrySet().stream()
                         .collect(Collectors.toMap(e -> (EntityType<?>) e.getKey(),
-                                                  e -> (NaturalSpawnCost) e.getValue()));
+                                                  e -> (NaturalSpawnCost) (Object) e.getValue()));
     }
 }
