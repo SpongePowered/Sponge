@@ -519,8 +519,18 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
+    public static double getAverage(long[] $$0) {
+        long $$1 = 0L;
+
+        for(long $$2 : $$0) {
+            $$1 += $$2;
+        }
+
+        return (double)$$1 / (double)$$0.length;
+    }
+
     private TextComponent.Builder appendTickTime(final long[] tickTimes, final TextComponent.Builder builder) {
-        final double averageTickTime = Mth.average(tickTimes) * 1.0E-6D;
+        final double averageTickTime = getAverage(tickTimes) * 1.0E-6D;
         final double tps = Math.min(1000.0 / (averageTickTime), 20);
         builder.append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(tps), this.tpsColor(tps)))
           .append(Component.text(" (", NamedTextColor.GRAY)
