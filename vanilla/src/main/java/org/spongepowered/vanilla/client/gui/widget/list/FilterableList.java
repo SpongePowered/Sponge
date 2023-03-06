@@ -178,11 +178,6 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
         return (P) this;
     }
 
-    // Because private
-    private int getRowBottom(final int p_getRowBottom_1_) {
-        return this.getRowTop(p_getRowBottom_1_) + this.itemHeight;
-    }
-
     public int getRowHeight() {
         return this.itemHeight;
     }
