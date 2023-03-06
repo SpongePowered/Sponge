@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.util;
 
+import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.datafixers.DataFixerBuilder;
 
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -40,9 +42,9 @@ public class LazyDataFixerBuilder extends DataFixerBuilder {
         super(dataVersion);
     }
 
-
     @Override
-    public DataFixer buildOptimized(Executor executor) {
-        return super.buildOptimized(NO_OP_EXECUTOR);
+    public DataFixer buildOptimized(final Set<DSL.TypeReference> requiredTypes, final Executor executor) {
+        return super.buildOptimized(requiredTypes, NO_OP_EXECUTOR);
+
     }
 }
