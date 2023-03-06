@@ -816,7 +816,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 destinationPosition = new Vector3d(x, y, z);
             }
             // Sponge end
-            final ChunkPos chunkpos = new ChunkPos(new BlockPos(destinationPosition.x(), destinationPosition.y(), destinationPosition.z()));
+            final ChunkPos chunkpos = new ChunkPos(new BlockPos(destinationPosition.floorX(), destinationPosition.floorY(), destinationPosition.floorZ()));
             ((net.minecraft.server.level.ServerLevel)this.level).getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 0,
                     this.shadow$getId());
             this.level.getChunk(chunkpos.x, chunkpos.z);
@@ -971,10 +971,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             // We had a collision! Try to find the colliding block
             // TODO this is not 100% accurate as the collision happens with the bb potentially colliding with multiple blocks
             // TODO maybe actually check for blocks in bb?
-            BlockPos pos = new BlockPos(this.position.add(originalMove));
+            Vec3 pos0 = this.position.add(originalMove);
+            BlockPos pos = new BlockPos((int) pos0.x, (int) pos0.y, (int) pos0.z);
             if (this.blockPosition.equals(pos)) {
                 // retry with bigger move for entities with big bounding box - e.g. minecart
-                pos = new BlockPos(this.position.add(originalMove.normalize()));
+                pos0 = this.position.add(originalMove.normalize());
+                pos = new BlockPos((int) pos0.x, (int) pos0.y, (int) pos0.z);
             }
             final BlockState state = this.level.getBlockState(pos);
             final org.spongepowered.api.util.Direction dir = org.spongepowered.api.util.Direction.closest(new Vector3d(originalMove.x, originalMove.y, originalMove.z));

@@ -65,6 +65,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
@@ -142,7 +143,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     @Shadow private double vehicleFirstGoodZ;
     @Shadow private int chatSpamTickCount;
 
-    @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch, Set<ClientboundPlayerPositionPacket.RelativeArgument> relativeArguments);
+    @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch, Set<RelativeMovement> relativeArguments);
     @Shadow protected abstract CompletableFuture<List<FilteredText>> shadow$filterTextPacket(final List<String> $$0);
     @Shadow public abstract void shadow$resetPosition();
     @Shadow public abstract void send(final Packet<?> $$0);
@@ -294,7 +295,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
                     (float) originalToRotation.x(), (float) originalToRotation.y());
             this.shadow$teleport(fromPosition.x(), fromPosition.y(), fromPosition.z(),
                     (float) toRotation.x(), (float) toRotation.y(),
-                    EnumSet.of(ClientboundPlayerPositionPacket.RelativeArgument.X_ROT, ClientboundPlayerPositionPacket.RelativeArgument.Y_ROT));
+                    EnumSet.of(RelativeMovement.X_ROT, RelativeMovement.Y_ROT));
             ci.cancel();
             return;
         }
@@ -308,7 +309,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
                     (float) originalToRotation.x(), (float) originalToRotation.y());
             this.shadow$teleport(toPosition.x(), toPosition.y(), toPosition.z(),
                     (float) toRotation.x(), (float) toRotation.y(),
-                    EnumSet.allOf(ClientboundPlayerPositionPacket.RelativeArgument.class));
+                    EnumSet.allOf(RelativeMovement.class));
             ci.cancel();
         }
     }
@@ -316,7 +317,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     @Inject(
             method = "handleMoveVehicle",
             cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getControllingPassenger()Lnet/minecraft/world/entity/Entity;")
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;getControllingPassenger()Lnet/minecraft/world/entity/LivingEntity;")
     )
     private void impl$handleVehicleMoveEvent(final ServerboundMoveVehiclePacket param0, final CallbackInfo ci) {
         final ServerboundMoveVehiclePacketAccessor packet = (ServerboundMoveVehiclePacketAccessor) param0;

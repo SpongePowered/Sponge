@@ -31,13 +31,13 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.data.Keys;
@@ -208,7 +208,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         if (((Entity) (Object) this) instanceof ServerPlayer && ((ServerPlayer) (Object) this).connection != null) {
             // Force an update, this also set the rotation in this entity
             ((ServerPlayer) (Object) this).connection.teleport(this.position().x(), this.position().y(),
-                    this.position().z(), (float) rotation.y(), (float) rotation.x(), EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class));
+                    this.position().z(), (float) rotation.y(), (float) rotation.x(), EnumSet.noneOf(RelativeMovement.class));
         } else {
             if (!this.shadow$getCommandSenderWorld().isClientSide) { // We can't set the rotation update on client worlds.
                 ((ServerLevelBridge) this.world()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);

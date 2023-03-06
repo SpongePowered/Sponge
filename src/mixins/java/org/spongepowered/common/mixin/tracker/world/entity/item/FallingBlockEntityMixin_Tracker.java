@@ -83,7 +83,7 @@ public abstract class FallingBlockEntityMixin_Tracker extends EntityMixin_Tracke
 //            cancellable = true
 //    )
     private void tracker$handleBlockCapture(final CallbackInfo ci) {
-        final BlockPos pos = new BlockPos(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
+        final BlockPos pos = new BlockPos((int) this.shadow$getX(), (int) this.shadow$getY(), (int) this.shadow$getZ());
         // So, there's two cases here: either the world is not cared for, or the
         // ChangeBlockEvent is not being listened to. If it's not being listened to,
         // we need to specifically just proceed as normal.

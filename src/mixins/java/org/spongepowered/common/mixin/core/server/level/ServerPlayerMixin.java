@@ -427,7 +427,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
                 player.setYHeadRot((float) actualYaw);
 
-                final ChunkPos chunkpos = new ChunkPos(new BlockPos(actualX, actualY, actualZ));
+                final ChunkPos chunkpos = new ChunkPos(new BlockPos((int) actualX, (int) actualY, (int) actualZ));
                 world.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 1, player.getId());
             } else {
                 final ChangeEntityWorldEvent.Pre preEvent = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre(player, world);
@@ -526,7 +526,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             // Sponge: From Forge - only enter this branch if the teleporter indicated that we should
             // create end platforms and we're in the end (vanilla only has the second condition)
         } else if (createEndPlatform && targetWorld.dimension() == Level.END) {
-            this.shadow$createEndPlatform(targetWorld, new BlockPos(portalinfo.pos));
+            this.shadow$createEndPlatform(targetWorld, new BlockPos((int) portalinfo.pos.x, (int) portalinfo.pos.y, (int) portalinfo.pos.z));
         }
 
         // This is standard vanilla processing
