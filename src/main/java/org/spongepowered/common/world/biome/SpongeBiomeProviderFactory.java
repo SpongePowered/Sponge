@@ -37,6 +37,7 @@ import net.minecraft.world.level.biome.Climate.ParameterList;
 import net.minecraft.world.level.biome.Climate.ParameterPoint;
 import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.biome.AttributedBiome;
@@ -47,7 +48,6 @@ import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
 import org.spongepowered.api.world.biome.provider.FixedBiomeProvider;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.level.biome.MultiNoiseBiomeSourceAccessor;
 import org.spongepowered.common.accessor.world.level.biome.TheEndBiomeSourceAccessor;
 
 import java.util.ArrayList;
@@ -60,7 +60,9 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public ConfigurableBiomeProvider<MultiNoiseBiomeConfig> overworld() {
-        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(this.registry().asLookup());
+        final var registry = SpongeCommon.vanillaRegistry(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+        final var holder = registry.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD);
+        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.createFromPreset(holder);
     }
 
     @Override
@@ -69,12 +71,14 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
         for (final AttributedBiome attributedBiome : config.attributedBiomes()) {
             climateParams.add(Pair.of((ParameterPoint) (Object) attributedBiome.attributes(), this.biomeHolder(attributedBiome.biome())));
         }
-        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSourceAccessor.invoker$new(new ParameterList<>(climateParams));
+        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.createFromList(new ParameterList<>(climateParams));
     }
 
     @Override
     public ConfigurableBiomeProvider<MultiNoiseBiomeConfig> nether() {
-        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.Preset.NETHER.biomeSource(this.registry().asLookup());
+        final var registry = SpongeCommon.vanillaRegistry(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+        final var holder = registry.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER);
+        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.createFromPreset(holder);
     }
 
     @Override

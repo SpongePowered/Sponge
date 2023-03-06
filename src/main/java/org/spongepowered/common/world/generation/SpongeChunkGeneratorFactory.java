@@ -30,6 +30,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
@@ -69,16 +70,19 @@ public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory
 
     @Override
     public ConfigurableChunkGenerator<NoiseGeneratorConfig> overworld() {
-        var biomeRegistry = SpongeCommon.vanillaRegistry(Registries.BIOME);
         var noiseGeneratorSettingsRegistry = SpongeCommon.vanillaRegistry(Registries.NOISE_SETTINGS);
-        return this.noiseBasedChunkGenerator(MultiNoiseBiomeSource.Preset.OVERWORLD.biomeSource(biomeRegistry.asLookup()), noiseGeneratorSettingsRegistry.getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD));
+        final var registry = SpongeCommon.vanillaRegistry(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+        final var holder = registry.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD);
+        final var biomeSource = MultiNoiseBiomeSource.createFromPreset(holder);
+        return this.noiseBasedChunkGenerator(biomeSource, noiseGeneratorSettingsRegistry.getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD));
     }
 
     @Override
     public ConfigurableChunkGenerator<NoiseGeneratorConfig> theNether() {
-        var biomeRegistry = SpongeCommon.vanillaRegistry(Registries.BIOME);
         var noiseGeneratorSettingsRegistry = SpongeCommon.vanillaRegistry(Registries.NOISE_SETTINGS);
-        var biomeSource = MultiNoiseBiomeSource.Preset.NETHER.biomeSource(biomeRegistry.asLookup());
+        final var registry = SpongeCommon.vanillaRegistry(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
+        final var holder = registry.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER);
+        final var biomeSource = MultiNoiseBiomeSource.createFromPreset(holder);
         return this.noiseBasedChunkGenerator(biomeSource, noiseGeneratorSettingsRegistry.getHolderOrThrow(NoiseGeneratorSettings.NETHER));
     }
 

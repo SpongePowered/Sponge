@@ -131,7 +131,7 @@ public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConf
         @Override
         public MultiNoiseBiomeConfig nether() {
             final var registry = SpongeCommon.vanillaRegistry(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST);
-            final var holder = registry.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.OVERWORLD);
+            final var holder = registry.getHolderOrThrow(MultiNoiseBiomeSourceParameterLists.NETHER);
             final var biomeSource = (MultiNoiseBiomeSourceAccessor) MultiNoiseBiomeSource.createFromPreset(holder);
             return new BuilderImpl().addMcBiomes(biomeSource.accessor$parameters()).build();
         }
