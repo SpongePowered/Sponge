@@ -39,8 +39,6 @@
         "network.chat.StyleMixin",
         "network.chat.TranslatableContentsMixin",
         "network.protocol.game.ClientboundResourcePackPacketMixin",
-        "network.protocol.status.ClientboundStatusResponsePacketMixin",
-        "network.protocol.status.ServerStatusMixin",
         "network.syncher.EntityDataAccessorMixin",
         "network.syncher.SynchedEntityDataMixin",
         "server.MainMixin",

@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.network.status;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.network.protocol.status.ServerStatus;
@@ -35,80 +38,188 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.server.ClientPingServerEvent;
+import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.network.status.StatusClient;
-import org.spongepowered.api.network.status.StatusResponse;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.NetworkUtil;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-public final class SpongeStatusResponse {
+import javax.imageio.ImageIO;
 
-    private SpongeStatusResponse() {
+public final class SpongeStatusResponse implements ClientPingServerEvent.Response {
+
+    private net.minecraft.network.chat.Component description;
+    private SpongeStatusPlayers players;
+    private boolean hiddenPlayers;
+    private ServerStatus.Version version;
+    private ServerStatus.Favicon favicon;
+    private final boolean enforcesSecureChat;
+
+
+    private SpongeStatusResponse(ServerStatus status) {
+        this.description = status.description();
+        this.players = new SpongeStatusPlayers(status.players().orElse(null));
+        this.hiddenPlayers = false;
+        this.version = status.version().orElse(null);
+        this.favicon = status.favicon().orElse(null);
+        this.enforcesSecureChat = status.enforcesSecureChat();
     }
 
-    public static @Nullable ServerStatus post(final MinecraftServer server, final StatusClient client) {
-        return SpongeStatusResponse.call(SpongeStatusResponse.create(server), client);
+    public final static class SpongeStatusPlayers implements ClientPingServerEvent.Response.Players {
+
+        private int max;
+        private int online;
+        private final List<GameProfile> profiles = new ArrayList<>();
+
+        public SpongeStatusPlayers(final ServerStatus.Players players) {
+            if (players == null) {
+                this.max = -1;
+                this.online = 0;
+            } else {
+                this.max = players.max();
+                this.online = players.online();
+                players.sample().forEach(profile -> this.profiles.add(SpongeGameProfile.of(profile)));
+            }
+        }
+
+        public int max() {
+            return max;
+        }
+
+        public int online() {
+            return online;
+        }
+
+        @Override
+        public List<org.spongepowered.api.profile.GameProfile> profiles() {
+            return profiles;
+        }
+
+        @Override
+        public void setOnline(final int online) {
+            this.online = online;
+        }
+
+        @Override
+        public void setMax(final int max) {
+            this.max = max;
+        }
+
+        public ServerStatus.Players toVanilla() {
+            return new ServerStatus.Players(this.max, this.online, this.profiles.stream().map(SpongeGameProfile::toMcProfile).toList());
+        }
     }
 
-    public static @Nullable ServerStatus postLegacy(final MinecraftServer server, final InetSocketAddress address, final MinecraftVersion version,
+    @Override
+    public void setDescription(final Component description) {
+        this.description = SpongeAdventure.asVanilla(checkNotNull(description, "description"));
+    }
+
+    @Override
+    public Component description() {
+        return SpongeAdventure.asAdventure(this.description);
+    }
+
+    @Override
+    public Optional<Players> players() {
+        return Optional.ofNullable(this.players);
+    }
+
+    @Override
+    public void setHidePlayers(final boolean hide) {
+        this.hiddenPlayers = hide;
+    }
+
+    @Override
+    public void setFavicon(@Nullable final Favicon favicon) {
+        if (favicon == null) {
+            this.favicon = null;
+            return;
+        }
+        final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(favicon.image(), "PNG", bytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        this.favicon = new ServerStatus.Favicon(bytes.toByteArray());
+    }
+
+    @Override
+    public MinecraftVersion version() {
+        return (MinecraftVersion) (Object) this.version;
+    }
+
+    @Override
+    public Optional<Favicon> favicon() {
+        return Optional.ofNullable((Favicon) (Object) this.favicon);
+    }
+
+    private ServerStatus toVanilla() {
+        return new ServerStatus(this.description,
+                Optional.ofNullable(this.hiddenPlayers || this.players == null ? null : this.players.toVanilla()),
+                Optional.ofNullable(this.version),
+                Optional.ofNullable(this.favicon),
+                this.enforcesSecureChat);
+    }
+
+    public String motd()
+    {
+        return SpongeStatusResponse.getFirstLine(LegacyComponentSerializer.legacySection().serialize(SpongeAdventure.asAdventure(this.description)));
+    }
+
+    public String unformattedMotd()
+    {
+        return SpongeStatusResponse.getFirstLine(PlainTextComponentSerializer.plainText().serialize(SpongeAdventure.asAdventure(this.description)));
+    }
+
+
+    public int onlinePlayers() {
+        return this.players != null ? this.players.online : 0;
+    }
+
+
+    public int maxPlayers() {
+        return this.players != null ? this.players.max : -1;
+    }
+
+    public int protocol() {
+        return this.version != null ? this.version.protocol() : 127;
+    }
+
+    public String versionName(final String def) {
+        return this.version != null ? this.version.name() : def;
+    }
+
+    @Nullable
+    public static ServerStatus post(final ServerStatus status, final StatusClient client) {
+        return SpongeStatusResponse.call(status, client).toVanilla();
+    }
+
+    @Nullable
+    public static SpongeStatusResponse postLegacy(final MinecraftServer server, final InetSocketAddress address, final MinecraftVersion version,
             final InetSocketAddress virtualHost) {
-        ServerStatus response = SpongeStatusResponse.create(server);
-        response.setVersion(new ServerStatus.Version(response.getVersion().getName(), Byte.MAX_VALUE));
-        response = SpongeStatusResponse.call(response, new SpongeLegacyStatusClient(address, version, virtualHost));
-        if (response != null && response.getPlayers() == null) {
-            response.setPlayers(new ServerStatus.Players(-1, 0));
-        }
-        return response;
+        return SpongeStatusResponse.call(server.getStatus(), new SpongeLegacyStatusClient(address, version, virtualHost));
     }
 
-    private static @Nullable ServerStatus call(final ServerStatus response, final StatusClient client) {
-        if (!SpongeCommon.post(SpongeEventFactory.createClientPingServerEvent(Cause.of(EventContext.empty(), Sponge.server()), client,
-            (ClientPingServerEvent.Response) response))) {
-            return response;
+    @Nullable
+    private static SpongeStatusResponse call(final ServerStatus response, final StatusClient client) {
+        final SpongeStatusResponse mutableResponse = new SpongeStatusResponse(response);
+        if (!SpongeCommon.post(
+                SpongeEventFactory.createClientPingServerEvent(Cause.of(EventContext.empty(), Sponge.server()), client, mutableResponse))) {
+            return mutableResponse;
         }
         return null;
     }
-
-    public static ServerStatus create(final MinecraftServer server) {
-        return SpongeStatusResponse.clone(server.getStatus());
-    }
-
-    private static ServerStatus clone(final ServerStatus original) {
-        final ServerStatus clone = new ServerStatus();
-        clone.setDescription(original.getDescription());
-        if (original.getFavicon() != null) {
-            ((ClientPingServerEvent.Response) clone).setFavicon(((StatusResponse) original).favicon().get());
-        }
-
-        clone.setPlayers(SpongeStatusResponse.clone(original.getPlayers()));
-        clone.setVersion(SpongeStatusResponse.clone(original.getVersion()));
-        return clone;
-    }
-
-    private static ServerStatus.@Nullable Players clone(final ServerStatus.@Nullable Players original) {
-        if (original != null) {
-            final ServerStatus.Players clone = new ServerStatus.Players(original.getMaxPlayers(),
-                    original.getNumPlayers());
-            clone.setSample(original.getSample());
-            return clone;
-        }
-        return null;
-    }
-
-    private static ServerStatus.@Nullable Version clone(final ServerStatus.@Nullable Version original) {
-        return original != null ? new ServerStatus.Version(original.getName(), original.getProtocol()) : null;
-    }
-
-    public static String getMotd(final ServerStatus response) {
-        return SpongeStatusResponse.getFirstLine(LegacyComponentSerializer.legacySection().serialize(SpongeAdventure.asAdventure(response.getDescription())));
-    }
-
-    public static String getUnformattedMotd(final ServerStatus response) {
-        return SpongeStatusResponse.getFirstLine(PlainTextComponentSerializer.plainText().serialize(SpongeAdventure.asAdventure(response.getDescription())));
-    }
-
     private static String getFirstLine(final String s) {
         return NetworkUtil.substringBefore(s, '\n');
     }

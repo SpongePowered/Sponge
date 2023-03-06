@@ -22,24 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.network.protocol.status;
+package org.spongepowered.common.mixin.api.minecraft.network.protocol.status;
 
-import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.network.status.Favicon;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public interface ServerStatusBridge {
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
-    Component bridge$getDescription();
+import javax.imageio.ImageIO;
 
-    void bridge$setDescription(@Nullable Component text);
+@Mixin(ServerStatus.Favicon.class)
+public abstract class ServerStatus_FaviconMixin_API implements Favicon {
 
-    @Nullable Favicon bridge$getFavicon();
+    // @formatter:off
+    @Shadow @Final private byte[] iconBytes;
+    // @formatter:on
 
-    void setFavicon(@Nullable Favicon favicon);
-
-    ServerStatus.Players bridge$getPlayerBackup();
-
-    void bridge$setPlayerBackup(ServerStatus.Players players);
+    @Override
+    public BufferedImage image() {
+        try {
+            return ImageIO.read(new ByteArrayInputStream(iconBytes));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

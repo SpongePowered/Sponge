@@ -440,7 +440,8 @@
         "world.LocatableBlockMixin_API",
         "minecraft.network.chat.MessageSignatureMixin_API",
         "minecraft.world.damagesource.DamageTypeMixin_API",
-        "minecraft.world.damagesource.DamageScalingMixin_API"
+        "minecraft.world.damagesource.DamageScalingMixin_API",
+        "minecraft.network.protocol.status.ServerStatus_FaviconMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",
