@@ -68,7 +68,7 @@ import javax.annotation.Nullable;
 public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {
 
     // @formatter:off
-    @Shadow @Final private Map<Advancement, AdvancementProgress> advancements;
+    @Shadow @Final private Map<Advancement, AdvancementProgress> progress;
     @Shadow private net.minecraft.server.level.ServerPlayer player;
     // @formatter:on
 
@@ -131,7 +131,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
     @Override
     public Set<AdvancementTree> bridge$getAdvancementTrees() {
         final ImmutableSet.Builder<AdvancementTree> builder = ImmutableSet.builder();
-        for (final Map.Entry<Advancement, AdvancementProgress> entry : this.advancements.entrySet()) {
+        for (final Map.Entry<Advancement, AdvancementProgress> entry : this.progress.entrySet()) {
             final org.spongepowered.api.advancement.Advancement advancement = (org.spongepowered.api.advancement.Advancement) entry.getKey();
             if (!advancement.parent().isPresent()) {
                 advancement.tree().ifPresent(builder::add);
@@ -147,7 +147,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
 
     @Override
     public void bridge$reloadAdvancementProgress() {
-        for (final AdvancementProgress progress : this.advancements.values()) {
+        for (final AdvancementProgress progress : this.progress.values()) {
             ((AdvancementProgressBridge) progress).bridge$updateProgressMap();
         }
     }
@@ -172,7 +172,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
     @Inject(method = "award",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/PlayerAdvancements;ensureVisibility(Lnet/minecraft/advancements/Advancement;)V"))
+                    target = "Lnet/minecraft/server/PlayerAdvancements;markForVisibilityUpdate(Lnet/minecraft/advancements/Advancement;)V"))
     private void impl$callGrantEventIfSuccessful(final Advancement advancement, final String string, final CallbackInfoReturnable<Boolean> ci) {
         if (!this.impl$wasSuccess) {
             return;
@@ -208,7 +208,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
 
     @Inject(method = "revoke", locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "INVOKE",
-                     target = "Lnet/minecraft/server/PlayerAdvancements;ensureVisibility(Lnet/minecraft/advancements/Advancement;)V"))
+                     target = "Lnet/minecraft/server/PlayerAdvancements;markForVisibilityUpdate(Lnet/minecraft/advancements/Advancement;)V"))
     private void impl$callRevokeEventIfSuccessful(final Advancement advancement, final String string, final CallbackInfoReturnable<Boolean> ci, boolean var0) {
         if (var0) {
             final Cause currentCause = Sponge.server().causeStackManager().currentCause();
