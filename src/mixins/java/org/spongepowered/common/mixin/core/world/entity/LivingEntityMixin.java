@@ -142,6 +142,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow public abstract void shadow$clearSleepingPos();
     @Shadow protected abstract float shadow$getDamageAfterArmorAbsorb(DamageSource param0, float param1);
     @Shadow protected abstract float shadow$getDamageAfterMagicAbsorb(DamageSource param0, float param1);
+    @Shadow public abstract void shadow$stopRiding();
+
     // @formatter:on
 
     @Nullable private ItemStack impl$activeItemStackCopy;

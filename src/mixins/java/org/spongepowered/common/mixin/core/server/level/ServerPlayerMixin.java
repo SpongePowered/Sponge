@@ -159,7 +159,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Shadow public abstract net.minecraft.server.level.ServerLevel shadow$getLevel();
     @Shadow public abstract void shadow$setCamera(final Entity entity);
-    @Shadow public abstract void shadow$stopRiding();
     @Shadow public abstract void shadow$closeContainer();
     @Shadow public abstract void shadow$resetStat(final Stat<?> statistic);
     @Shadow protected abstract void shadow$tellNeutralMobsThatIDied();
