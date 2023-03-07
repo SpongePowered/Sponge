@@ -42,6 +42,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
+import net.minecraft.commands.arguments.TimeArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
@@ -267,7 +268,7 @@ public final class CommandRegistryLoader {
             l.add(CommandTreeNodeTypes.FLOAT_RANGE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             l.add(CommandTreeNodeTypes.DIMENSION, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             //  TODO API          l.add(CommandTreeNodeTypes.GAMEMODE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
-            l.add(CommandTreeNodeTypes.TIME, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
+            l.add(CommandTreeNodeTypes.TIME, k -> new SpongeBasicCommandTreeNodeType(k, TimeArgument.time()));
             // TODO API           l.add(CommandTreeNodeTypes.RESOURCE_OR_TAG, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             // TODO API           l.add(CommandTreeNodeTypes.RESOURCE, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
             // TODO API           l.add(CommandTreeNodeTypes.RESOURCE_KEY, k -> new SpongeBasicCommandTreeNodeType(k, fn.apply(k)));
