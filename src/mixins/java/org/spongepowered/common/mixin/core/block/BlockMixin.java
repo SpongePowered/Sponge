@@ -80,7 +80,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge {
         expect = 0
     )
     private static void impl$throwConstructPreEvent(
-        final Level level, final BlockPos pos, final ItemStack stack, final CallbackInfo ci, final float $$3,
+        final Level level, final BlockPos pos, final ItemStack stack, final CallbackInfo ci, final double $$3,
         final double xPos, final double yPos, final double zPos
     ) {
         if (!ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
@@ -111,7 +111,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge {
     )
     private static void impl$throwConstructPreEvent(
         final Level level, final BlockPos pos, final Direction direction, final ItemStack stack, final CallbackInfo ci,
-        final int stepX, final int stepY, final int stepZ, final float itemWidthX, final float itemWidthZ,
+        final int stepX, final int stepY, final int stepZ, final double itemWidthX, final double itemWidthZ,
         final double xPos, final double yPos, final double zPos, final double xMov, final double yMov, final double zMov
     ) {
         if (!ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
