@@ -80,6 +80,8 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     @Shadow public abstract void shadow$remove(Entity.RemovalReason reason);
     @Shadow public abstract float shadow$getXRot();
     @Shadow public abstract float shadow$getYRot();
+    @Shadow public abstract boolean shadow$isEffectiveAi();
+
     //@formatter:on
 
     @Nullable private Cause tracker$destructCause;

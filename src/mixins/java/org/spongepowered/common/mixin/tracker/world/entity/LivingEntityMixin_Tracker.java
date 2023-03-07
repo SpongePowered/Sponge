@@ -65,7 +65,6 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
     @Shadow public void shadow$die(final DamageSource cause) {}
     @Shadow protected abstract void shadow$dropAllDeathLoot(DamageSource damageSourceIn);
     @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
-    @Shadow public abstract boolean shadow$isEffectiveAi();
     @Shadow public abstract void shadow$swing(InteractionHand p_184609_1_);
     @Shadow protected abstract void shadow$pushEntities();
     @Shadow public abstract float shadow$getHealth();
