@@ -38,8 +38,8 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 public class TranslatableContentsMixin {
     @Shadow @Final private Object[] args;
 
-    @Inject(method = "<init>(Ljava/lang/String;[Ljava/lang/Object;)V", at = @At("TAIL"))
-    private void sponge$convertAdventureToVanilla(final String key, final Object[] args, final CallbackInfo ci) {
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void sponge$convertAdventureToVanilla(final String key, final String fallback, final Object[] args, final CallbackInfo ci) {
         for (int i = 0, length = this.args.length; i < length; i++) {
             final Object object = this.args[i];
             if (object instanceof Component) {
