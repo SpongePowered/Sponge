@@ -57,6 +57,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.ModifierFunction;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.tag.DamageTypeTags;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -277,7 +278,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                                     // livingEntity.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                                     // livingEntity.attackEntityFrom(DamageSource.causePlayerDamage(this), 1.0F);
                                     final var sweepingAttackSource = org.spongepowered.api.event.cause.entity.damage.source.DamageSource.builder().entity((org.spongepowered.api.entity.living.player.Player) this)
-                                            .type(DamageTypes.SWEEPING_ATTACK).build();
+                                            .type(DamageTypes.PLAYER_ATTACK).build();
                                     try (final CauseStackManager.StackFrame frame = isMainthread ? PhaseTracker.getInstance().pushCauseFrame() : null) {
                                         if (isMainthread) {
                                             frame.pushCause(sweepingAttackSource);

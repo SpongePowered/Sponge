@@ -90,7 +90,7 @@ public abstract class TntBlockMixin extends BlockMixin {
         final Level worldIn, final BlockPos pos, final Explosion explosionIn, final CallbackInfo ci, final PrimedTnt tnt) {
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                frame.addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSIVE);
+                frame.addContext(EventContextKeys.DAMAGE_TYPE, DamageTypes.EXPLOSION);
                 if (!((FusedExplosiveBridge) tnt).bridge$shouldPrime()) {
                     ci.cancel();
                 }
