@@ -66,6 +66,7 @@ public abstract class DamageSourceMixin_API implements DamageSource {
     @Override
     public boolean doesAffectCreative() {
         // TODO ?
+        return false;
     }
 
     @Override

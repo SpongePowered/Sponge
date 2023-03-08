@@ -237,7 +237,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(RegistryReference.Factory.class, new SpongeRegistryReference.FactoryImpl())
                 .registerFactory(DataPackType.Factory.class, new SpongeDataPackType.FactoryImpl())
                 .registerFactory(BlockVolumeFactory.class, new SpongeBlockVolumeFactory())
-                .registerFactory(DamageSource.Factory.class, new SpongeDamageSourceFactory()) // TODO needs registryAccess
+                .registerFactory(DamageSource.Factory.class, new SpongeDamageSourceFactory())
                 .registerFactory(PaletteReference.Factory.class, new SpongePaletteReferenceFactory())
                 .registerFactory(EntityArchetypeEntry.Factory.class, new SpongeEntityArchetypeEntryFactory())
                 .registerFactory(ServerLocationCreator.Factory.class, new SpongeServerLocationCreatorFactory())

@@ -24,60 +24,63 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.damagesource.DamageSources;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.common.SpongeCommon;
 
 public final class SpongeDamageSourceFactory implements DamageSource.Factory {
 
-    private final DamageSources damageSources;
+    private DamageSources damageSources;
 
-    public SpongeDamageSourceFactory(final RegistryAccess registryAccess) {
-        this.damageSources = new DamageSources(registryAccess);;
+    private DamageSources damageSources() {
+        if (this.damageSources == null) {
+            this.damageSources = new DamageSources(SpongeCommon.server().registryAccess());
+        }
+        return damageSources;
     }
 
     @Override
     public DamageSource drowning() {
-        return (DamageSource) this.damageSources.drown();
+        return (DamageSource) this.damageSources().drown();
     }
 
     @Override
     public DamageSource dryout() {
-        return (DamageSource) this.damageSources.dryOut();
+        return (DamageSource) this.damageSources().dryOut();
     }
 
     @Override
     public DamageSource falling() {
-        return (DamageSource) this.damageSources.fall();
+        return (DamageSource) this.damageSources().fall();
     }
 
     @Override
     public DamageSource fireTick() {
-        return (DamageSource) this.damageSources.onFire();
+        return (DamageSource) this.damageSources().onFire();
     }
 
     @Override
     public DamageSource generic() {
-        return (DamageSource) this.damageSources.generic();
+        return (DamageSource) this.damageSources().generic();
     }
 
     @Override
     public DamageSource magic() {
-        return (DamageSource) this.damageSources.magic();
+        return (DamageSource) this.damageSources().magic();
     }
 
     @Override
     public DamageSource starvation() {
-        return (DamageSource) this.damageSources.starve();
+        return (DamageSource) this.damageSources().starve();
     }
 
     @Override
     public DamageSource voidSource() {
-        return (DamageSource) this.damageSources.outOfWorld();
+        return (DamageSource) this.damageSources().outOfWorld();
     }
 
     @Override
     public DamageSource wither() {
-        return (DamageSource) this.damageSources.wither();
+        return (DamageSource) this.damageSources().wither();
     }
 }

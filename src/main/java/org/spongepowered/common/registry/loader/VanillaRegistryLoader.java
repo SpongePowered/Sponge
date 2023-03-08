@@ -34,6 +34,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageEffects;
+import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.MobCategory;
@@ -233,6 +235,8 @@ public final class VanillaRegistryLoader {
         this.automaticSerializedName(RegistryTypes.LLAMA_TYPE, Llama.Variant.values());
         this.automaticSerializedName(RegistryTypes.HORSE_COLOR, Variant.values());
         this.automaticName(RegistryTypes.HORSE_STYLE, Markings.values());
+        this.automaticName(RegistryTypes.DAMAGE_SCALING, DamageScaling.values());
+        this.automaticName(RegistryTypes.DAMAGE_EFFECT, DamageEffects.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {
