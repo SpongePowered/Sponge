@@ -37,8 +37,9 @@ public final class SpongeDamageSources {
     static {
         // TODO register sponge ignored damage type
         // with bypass invul/armor/magic
-        net.minecraft.world.damagesource.DamageSource damageSource = new net.minecraft.world.damagesource.DamageSource();
-        IGNORED = (DamageSource) damageSource;
+//        net.minecraft.world.damagesource.DamageSource damageSource = new net.minecraft.world.damagesource.DamageSource();
+//        IGNORED = (DamageSource) damageSource;
+        IGNORED = null;
     }
 
     // SORTFIELDS:OFF
