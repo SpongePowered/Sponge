@@ -47,6 +47,8 @@ import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.world.damagesource.DamageEffects;
+import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.flag.FeatureFlags;
@@ -553,6 +555,35 @@ public final class GeneratorMain {
                     context.relativeClass("fluid", "FluidType"),
                     "tag",
                     "FluidTypeTags"
+            ),
+            new RegistryEntriesGenerator<>(
+                    "event.cause.entity.damage",
+                    "DamageTypes",
+                    "DAMAGE_TYPE",
+                    context.relativeClass("event.cause.entity.damage", "DamageType"),
+                    Registries.DAMAGE_TYPE,
+                    a -> true, RegistryScope.SERVER
+            ),
+            new TagGenerator(
+                    "DAMAGE_TYPE",
+                    Registries.DAMAGE_TYPE,
+                    context.relativeClass("event.cause.entity.damage", "DamageType"),
+                    "tag",
+                    "DamageTypeTags"
+            ),
+            new EnumEntriesValidator<>(
+                    "event.cause.entity.damage",
+                    "DamageEffects",
+                    DamageEffects.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "event.cause.entity.damage",
+                    "DamageScalings",
+                    DamageScaling.class,
+                    "getSerializedName",
+                    "sponge"
             )
         );
     }
