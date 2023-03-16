@@ -67,7 +67,6 @@ import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestA
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.event.EventContextKey;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypeTemplate;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.fluid.FluidStack;

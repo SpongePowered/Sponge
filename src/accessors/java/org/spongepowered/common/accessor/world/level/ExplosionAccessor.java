@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.accessor.world.level;
 
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;

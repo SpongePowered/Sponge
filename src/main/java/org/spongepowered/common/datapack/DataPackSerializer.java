@@ -25,9 +25,9 @@
 package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonObject;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.SharedConstants;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.datapack.DataPackEntry;
 
