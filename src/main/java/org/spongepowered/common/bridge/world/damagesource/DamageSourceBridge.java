@@ -24,21 +24,13 @@
  */
 package org.spongepowered.common.bridge.world.damagesource;
 
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.world.server.ServerLocation;
 
 public interface DamageSourceBridge {
 
-    DamageType bridge$getDamageType();
 
-    void bridge$resetDamageType();
-
-    void bridge$setLava();
-
-    void bridge$setFireSource();
-
-    void bridge$setLightningSource();
-
-    void bridge$setHotFloorSource();
-
-    void bridge$setCactusSource();
+    void bridge$setBlock(ServerLocation location, BlockSnapshot blockSnapshot);
+    ServerLocation bridge$blockLocation();
+    BlockSnapshot bridge$blockSnapshot();
 }

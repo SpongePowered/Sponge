@@ -26,34 +26,32 @@ package org.spongepowered.common.mixin.core.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CactusBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
-import org.spongepowered.common.util.MinecraftBlockDamageSource;
 
 @Mixin(CactusBlock.class)
 public abstract class CactusBlockMixin extends BlockMixin {
 
     @Redirect(method = "entityInside",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
-    private boolean impl$reAssignForBlockDamageSource(final Entity self, final DamageSource source, float damage,
-        final net.minecraft.world.level.block.state.BlockState state, final net.minecraft.world.level.Level world, final BlockPos pos, final Entity entity) {
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSources;cactus()Lnet/minecraft/world/damagesource/DamageSource;"))
+    private DamageSource impl$reAssignForBlockDamageSource(final DamageSources instance, final BlockState $$0, final Level world, final BlockPos pos, final Entity $$3) {
+        final DamageSource source = instance.cactus();
         if (world.isClientSide()) {
-            return entity.hurt(source, damage);
+            return source;
         }
-        try {
-            final ServerLocation location = ServerLocation.of((ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
-            final MinecraftBlockDamageSource cactus = new MinecraftBlockDamageSource("cactus", location);
-            ((DamageSourceBridge) (Object) cactus).bridge$setCactusSource();
-            return entity.hurt(DamageSource.CACTUS, damage);
-        } finally {
-            ((DamageSourceBridge) source).bridge$setCactusSource();
-        }
+        final ServerLocation location = ServerLocation.of((ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
+        var blockSource = org.spongepowered.api.event.cause.entity.damage.source.DamageSource.builder()
+                .from((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source).block(location)
+                .block(location.createSnapshot()).build();
+        return (DamageSource) blockSource;
     }
 }

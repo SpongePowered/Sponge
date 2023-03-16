@@ -22,77 +22,71 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.util;
+package org.spongepowered.common.mixin.api.minecraft.world.damagesource;
 
+import net.minecraft.core.Holder;
+import net.minecraft.world.phys.Vec3;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Interface.Remap;
-import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
+
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(value = net.minecraft.world.damagesource.DamageSource.class)
-@Implements(@Interface(iface = DamageSource.class, prefix = "damageSource$", remap = Remap.NONE))
 public abstract class DamageSourceMixin_API implements DamageSource {
 
     // @formatter:off
-    @Shadow public abstract boolean shadow$isBypassArmor();
-    @Shadow public abstract boolean shadow$isBypassInvul();
-    @Shadow public abstract boolean shadow$isBypassMagic();
-    @Shadow public abstract boolean shadow$isMagic();
-    @Shadow public abstract float shadow$getFoodExhaustion();
-    @Shadow public abstract boolean shadow$scalesWithDifficulty();
-    @Shadow public abstract boolean shadow$isExplosion();
-    @Shadow public abstract boolean shadow$isFire();
-    @Shadow public abstract String shadow$getMsgId();
+    @Shadow @Final @Nullable private net.minecraft.world.entity.Entity directEntity;
+
+    @Shadow @Final @Nullable private net.minecraft.world.entity.Entity causingEntity;
+    @Shadow @Final private Holder<net.minecraft.world.damagesource.DamageType> type;
+    @Shadow @Final @Nullable private Vec3 damageSourcePosition;
     // @formatter:on
 
     @Override
-    public boolean isExplosive() {
-        return this.shadow$isExplosion();
+    public Optional<Entity> source() {
+        return Optional.ofNullable((Entity) this.directEntity);
     }
 
-    @Intrinsic
-    public boolean damageSource$isMagic() {
-        return this.shadow$isMagic();
-    }
-
-    @Intrinsic
-    public boolean damageSource$isFire() {
-        return this.shadow$isFire();
+    @Override
+    public Optional<Entity> indirectSource() {
+        return Optional.ofNullable((Entity) this.causingEntity);
     }
 
     @Override
     public boolean doesAffectCreative() {
-        return this.shadow$isBypassInvul();
+        // TODO ?
+        return false;
     }
 
     @Override
-    public boolean isAbsolute() {
-        return this.shadow$isBypassMagic();
+    public Optional<ServerLocation> location() {
+        return Optional.ofNullable(((DamageSourceBridge) this).bridge$blockLocation());
     }
 
     @Override
-    public boolean isBypassingArmor() {
-        return this.shadow$isBypassArmor();
+    public Optional<BlockSnapshot> blockSnapshot() {
+        return Optional.ofNullable(((DamageSourceBridge) this).bridge$blockSnapshot());
     }
 
     @Override
-    public boolean isScaledByDifficulty() {
-        return this.shadow$scalesWithDifficulty();
-    }
-
-    @Override
-    public double exhaustion() {
-        return this.shadow$getFoodExhaustion();
+    public Optional<Vector3d> position() {
+        return Optional.ofNullable(VecHelper.toVector3d(this.damageSourcePosition));
     }
 
     @Override
     public DamageType type() {
-        return ((DamageSourceBridge) this).bridge$getDamageType();
+        return (DamageType) (Object) this.type.value();
     }
 
 }

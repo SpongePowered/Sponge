@@ -217,7 +217,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
                 barTop = this.top;
             }
 
-            RenderSystem.disableTexture();
+//            RenderSystem.disableTexture();
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
             worldr.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             worldr.vertex(this.barLeft, this.bottom, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
@@ -239,7 +239,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
             tess.end();
         }
 
-        RenderSystem.enableTexture();
+//        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
         RenderSystem.disableScissor();
     }

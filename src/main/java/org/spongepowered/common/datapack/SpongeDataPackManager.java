@@ -122,6 +122,8 @@ public final class SpongeDataPackManager implements DataPackManager {
         this.registerAndSerializePack(DataPackTypes.ADVANCEMENT, reloadablePacks);
         this.registerAndSerializePack(DataPackTypes.RECIPE, reloadablePacks);
         this.registerAndSerializePack(DataPackTypes.BLOCK_TAG, reloadablePacks);
+        this.registerAndSerializePack(DataPackTypes.DAMAGE_TYPE, reloadablePacks);
+        this.registerAndSerializePack(DataPackTypes.DAMAGE_TYPE_TAG, reloadablePacks);
         return reloadablePacks;
     }
 

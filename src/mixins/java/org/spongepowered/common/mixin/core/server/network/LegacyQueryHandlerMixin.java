@@ -110,7 +110,7 @@ public abstract class LegacyQueryHandlerMixin extends ChannelInboundHandlerAdapt
 
         final MinecraftServer server = this.serverConnectionListener.getServer();
         final InetSocketAddress client = (InetSocketAddress) ctx.channel().remoteAddress();
-        final ServerStatus response;
+        final SpongeStatusResponse response;
 
         final int i = buf.readableBytes();
         switch (i) {
@@ -120,9 +120,9 @@ public abstract class LegacyQueryHandlerMixin extends ChannelInboundHandlerAdapt
                 response = SpongeStatusResponse.postLegacy(server, client, SpongeLegacyMinecraftVersion.V1_3, null);
                 if (response != null) {
                     this.writeResponse(ctx, String.format("%s§%d§%d",
-                            SpongeStatusResponse.getUnformattedMotd(response),
-                            response.getPlayers().getNumPlayers(),
-                            response.getPlayers().getMaxPlayers()));
+                            response.unformattedMotd(),
+                            response.onlinePlayers(),
+                            response.maxPlayers()));
                 } else {
                     ctx.close();
                 }
@@ -138,11 +138,11 @@ public abstract class LegacyQueryHandlerMixin extends ChannelInboundHandlerAdapt
                 response = SpongeStatusResponse.postLegacy(server, client, SpongeLegacyMinecraftVersion.V1_5, null);
                 if (response != null) {
                     this.writeResponse(ctx, String.format("§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
-                            response.getVersion().getProtocol(),
-                            response.getVersion().getName(),
-                            SpongeStatusResponse.getMotd(response),
-                            response.getPlayers().getNumPlayers(),
-                            response.getPlayers().getMaxPlayers()));
+                            response.protocol(),
+                            response.versionName(server.getServerVersion()),
+                            response.motd(),
+                            response.onlinePlayers(),
+                            response.maxPlayers()));
                 } else {
                     ctx.close();
                 }
@@ -183,11 +183,11 @@ public abstract class LegacyQueryHandlerMixin extends ChannelInboundHandlerAdapt
                                 InetSocketAddress.createUnresolved(NetworkUtil.cleanVirtualHost(host), port));
                 if (response != null) {
                     this.writeResponse(ctx, String.format("§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
-                            response.getVersion().getProtocol(),
-                            response.getVersion().getName(),
-                            SpongeStatusResponse.getMotd(response),
-                            response.getPlayers().getNumPlayers(),
-                            response.getPlayers().getMaxPlayers()));
+                            response.protocol(),
+                            response.versionName(server.getServerVersion()),
+                            response.motd(),
+                            response.onlinePlayers(),
+                            response.maxPlayers()));
                 } else {
                     ctx.close();
                 }

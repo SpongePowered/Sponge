@@ -27,18 +27,21 @@ package org.spongepowered.common.mixin.core.world.entity;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.Mth;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.WalkAnimationState;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -55,12 +58,10 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
 
     //@formatter:off
     @Shadow private DamageSource lastDamageSource;
-    @Shadow public float animationSpeed;
     @Shadow protected float lastHurt;
     @Shadow protected int noActionTime;
     @Shadow public int hurtDuration;
     @Shadow public int hurtTime;
-    @Shadow public float hurtDir;
     @Shadow protected int lastHurtByPlayerTime;
     @Shadow @javax.annotation.Nullable protected Player lastHurtByPlayer;
     @Shadow private long lastDamageStamp;
@@ -68,7 +69,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
     @Shadow public abstract boolean shadow$hasEffect(MobEffect param0);
     @Shadow public abstract boolean shadow$isSleeping();
     @Shadow public abstract void shadow$stopSleeping();
-    @Shadow protected abstract boolean shadow$isDamageSourceBlocked(DamageSource param0);
+    @Shadow public abstract boolean shadow$isDamageSourceBlocked(DamageSource param0);
     @Shadow protected abstract void shadow$actuallyHurt(DamageSource param0, float param1);
     @Shadow public abstract void shadow$setLastHurtByMob(@Nullable LivingEntity param0);
     @Shadow public abstract void shadow$knockback(double param0, double param1, double param2);
@@ -79,6 +80,11 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
     @Shadow public abstract void shadow$die(DamageSource param0);
     @Shadow protected abstract void shadow$playHurtSound(DamageSource param0);
     @Shadow public abstract boolean shadow$isDeadOrDying();
+    @Shadow @Final public WalkAnimationState walkAnimation;
+    @Shadow public abstract ItemStack shadow$getItemBySlot(final EquipmentSlot var1);
+    @Shadow protected abstract void shadow$hurtHelmet(final DamageSource $$0, final float $$1);
+    @Shadow public abstract void shadow$indicateDamage(final double $$0, final double $$1);
+
     // @formatter:on
 
     /**
@@ -90,7 +96,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
      * @reason Reroute damageEntity calls to our hook in order to prevent damage.
      */
     @Overwrite
-    public boolean hurt(final DamageSource source, final float amount) {
+    public boolean hurt(final DamageSource source, float amount) {
         // Sponge start - Add certain hooks for necessities
         this.lastDamageSource = source;
         if (source == null) {
@@ -116,7 +122,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
             // Sponge - Also ignore our customary damage source
         } else if (this.shadow$isDeadOrDying() && source != SpongeDamageSources.IGNORED) {
             return false;
-        } else if (source.isFire() && this.shadow$hasEffect(MobEffects.FIRE_RESISTANCE)) {
+        } else if (source.is(DamageTypeTags.IS_FIRE) && this.shadow$hasEffect(MobEffects.FIRE_RESISTANCE)) {
             return false;
         } else {
             if (this.shadow$isSleeping() && !this.level.isClientSide) {
@@ -124,7 +130,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
             }
 
             this.noActionTime = 0;
-            final float f = amount;
+            final float f2 = amount;
             // Sponge - ignore as this is handled in our damageEntityHook
 //                if ((source == DamageSource.ANVIL || source == DamageSource.FALLING_BLOCK) && !this.getItemStackFromSlot(EntityEquipmentSlot.HEAD).isEmpty())
 //                {
@@ -137,39 +143,32 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
 
             // Sponge - set the 'shield blocking ran' flag to the proper value, since
             // we comment out the logic below
-            float f1 = 0.0F;
-            final boolean flag = amount > 0.0F && this.shadow$isDamageSourceBlocked(source);
+            float blockedAmount = 0.0F;
+            boolean isBlocked = false; // $$3
 
-            // Sponge start - this is handled in our bridge$damageEntityHook
-            // but we need to account for the amount later.
-            if (flag) {
-                f1 = amount;
-            }
-//                boolean flag = false;
-//
-//                if (amount > 0.0F && this.shadow$canBlockDamageSource(source))
-//                {
-//                    this.damageShield(amount);
-//                    amount = 0.0F;
-//
-//                    if (!source.isProjectile())
-//                    {
-//                        Entity entity = source.getImmediateSource();
-//
-//                        if (entity instanceof EntityLivingBase)
-//                        {
-//                            this.blockUsingShield((EntityLivingBase)entity);
-//                        }
+            if (amount > 0.0F && this.shadow$isDamageSourceBlocked(source)) {
+// Sponge start - this is handled in our bridge$damageEntityHook
+//                this.hurtCurrentlyUsedShield($$1);
+                blockedAmount = amount;
+//                amount = 0.0F;
+//                if (!source.is(DamageTypeTags.IS_PROJECTILE)) {
+//                    Entity $$5 = source.getDirectEntity();
+//                    if ($$5 instanceof LivingEntity $$6) {
+//                        this.blockUsingShield($$6);
 //                    }
-//
-//                    flag = true;
 //                }
-            // Sponge end
+                isBlocked = true;
+// Sponge end
+            }
 
-            this.animationSpeed = 1.5F;
-            boolean flag1 = true;
+            if (source.is(DamageTypeTags.IS_FREEZING) && this.shadow$getType().is(EntityTypeTags.FREEZE_HURTS_EXTRA_TYPES)) {
+                amount *= 5.0F;
+            }
 
-            if ((float) this.invulnerableTime > 10.0F) {
+            this.walkAnimation.setSpeed(1.5F);
+            boolean isNotInvulnerable = true; // $$7
+
+            if ((float) this.invulnerableTime > 10.0F && !source.is(DamageTypeTags.BYPASSES_COOLDOWN)) {
                 if (amount <= this.lastHurt) { // Technically, this is wrong since 'amount' won't be 0 if a shield is used. However, we need bridge$damageEntityHook so that we process the shield, so we leave it as-is
                     return false;
                 }
@@ -187,7 +186,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
                 // this.damageEntity(source, amount - this.lastHurt); // handled above
                 // Sponge end
                 this.lastHurt = amount;
-                flag1 = false;
+                isNotInvulnerable = false;
             } else {
                 // Sponge start - reroute to our damage hook
                 if (((EntityTypeBridge) this.shadow$getType()).bridge$overridesDamageEntity()) {
@@ -205,119 +204,97 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
                 this.hurtTime = this.hurtDuration;
             }
 
-            this.hurtDir = 0.0F;
-            final Entity entity = source.getEntity();
+            if (source.is(DamageTypeTags.DAMAGES_HELMET) && !this.shadow$getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
+                this.shadow$hurtHelmet(source, amount);
+                amount *= 0.75F;
+            }
 
+            final Entity entity = source.getEntity(); // $$8
             if (entity != null) {
-                if (entity instanceof LivingEntity) {
-                    this.shadow$setLastHurtByMob((LivingEntity) entity);
+                if (entity instanceof LivingEntity livingEntity && !source.is(DamageTypeTags.NO_ANGER)) {
+                    this.shadow$setLastHurtByMob(livingEntity);
                 }
 
-                if (entity instanceof Player) {
+                if (entity instanceof Player player) {
                     this.lastHurtByPlayerTime = 100;
-                    this.lastHurtByPlayer = (Player) entity;
+                    this.lastHurtByPlayer = player;
                     // Forge Start - use TameableEntity instead of WolfEntity
                     // } else if (entity1 instanceof WolfEntity) {
                     //    WolfEntity wolfentity = (WolfEntity)entity1;
-                } else if (entity instanceof TamableAnimal) {
-                    final TamableAnimal wolfentity = (TamableAnimal) entity;
-                    if (wolfentity.isTame()) {
-                        this.lastHurtByPlayerTime = 100;
-                        final LivingEntity livingentity = wolfentity.getOwner();
-                        if (livingentity != null && livingentity.getType() == EntityType.PLAYER) {
-                            this.lastHurtByPlayer = (Player) livingentity;
-                        } else {
-                            this.lastHurtByPlayer = null;
-                        }
+                } else if (entity instanceof TamableAnimal animal && animal.isTame()) {
+                    this.lastHurtByPlayerTime = 100;
+                    final LivingEntity owner = animal.getOwner();
+                    if (owner instanceof Player player) {
+                        this.lastHurtByPlayer = player;
+                    } else {
+                        this.lastHurtByPlayer = null;
                     }
                 }
             }
 
-            if (flag1) {
-                if (flag) {
+            if (isNotInvulnerable) {
+                if (isBlocked) {
                     this.level.broadcastEntityEvent((LivingEntity) (Object) this, (byte) 29);
-                } else if (source instanceof EntityDamageSource && ((EntityDamageSource) source).isThorns()) {
-                    this.level.broadcastEntityEvent((LivingEntity) (Object) this, (byte) 33);
                 } else {
-                    byte b0;
-                    if (source == DamageSource.DROWN) {
-                        b0 = 36;
-                    } else if (source.isFire()) {
-                        b0 = 37;
-                    } else if (source == DamageSource.SWEET_BERRY_BUSH) {
-                        b0 = 44;
-                    } else if (source == DamageSource.FREEZE) {
-                        b0 = 57;
-                    } else {
-                        b0 = 2;
-                    }
-
-                    this.level.broadcastEntityEvent((LivingEntity) (Object) this, b0);
+                    this.level.broadcastDamageEvent((LivingEntity) (Object) this, source);
                 }
 
-
-                if (source != DamageSource.DROWN && !flag) { // Sponge - remove 'amount > 0.0F' - it's redundant in Vanilla, and breaks our handling of shields
+                if (!source.is(DamageTypeTags.NO_IMPACT) && (!isBlocked /*|| amount > 0.0F*/)) { // Sponge - remove 'amount > 0.0F' - it's redundant in Vanilla, and breaks our handling of shields
                     this.shadow$markHurt();
                 }
 
-                if (entity != null) {
-                    double d1 = entity.getX() - this.shadow$getX();
-                    double d0;
+                if (entity != null && !source.is(DamageTypeTags.IS_EXPLOSION)) {
+                    double xDir = entity.getX() - this.shadow$getX(); // $$13
+                    double zDir; // $$14
 
-                    for (d0 = entity.getZ() - this.shadow$getZ();
-                         d1 * d1 + d0 * d0 < 1.0E-4D;
-                         d0 = (Math.random() - Math.random()) * 0.01D) {
-                        d1 = (Math.random() - Math.random()) * 0.01D;
+                    for (zDir = entity.getZ() - this.shadow$getZ();
+                         xDir * xDir + zDir * zDir < 1.0E-4D;
+                         zDir = (Math.random() - Math.random()) * 0.01D) {
+                         xDir = (Math.random() - Math.random()) * 0.01D;
                     }
 
-                    this.hurtDir = (float) (Mth.atan2(d0, d1) * 57.2957763671875D - (double) this.shadow$getYRot());
-                    this.shadow$knockback(0.4F, d1, d0);
-                } else {
-                    this.hurtDir = (float) (Math.random() * 2.0D * 180);
+                    this.shadow$knockback(0.4F, xDir, zDir);
+                    if (!isBlocked) {
+                        this.shadow$indicateDamage(xDir, zDir);
+                    }
                 }
             }
 
             if (this.shadow$isDeadOrDying()) {
                 if (!this.shadow$checkTotemDeathProtection(source)) {
                     final SoundEvent soundevent = this.shadow$getDeathSound();
-
-                    // if (flag1 && soundevent != null) { Vanilla
-                    // Sponge - Check that we're not vanished
-                    if (this.bridge$vanishState().createsSounds() && flag1 && soundevent != null) {
-                        this.shadow$playSound(soundevent, this.shadow$getSoundVolume(), this.shadow$getVoicePitch());
+                    if (isNotInvulnerable && soundevent != null) {
+                        if (this.bridge$vanishState().createsSounds()) { // Sponge - Check that we're not vanished
+                            this.shadow$playSound(soundevent, this.shadow$getSoundVolume(), this.shadow$getVoicePitch());
+                        }
                     }
-
 
                     this.shadow$die(source); // Sponge tracker will redirect this call
                 }
-            } else if (flag1) {
-                // Sponge - Check if we're vanished
-                if (this.bridge$vanishState().createsSounds()) {
+            } else if (isNotInvulnerable) {
+                if (this.bridge$vanishState().createsSounds()) { // Sponge - Check that we're not vanished
                     this.shadow$playHurtSound(source);
                 }
             }
 
-            final boolean flag2 = !flag;// Sponge - remove 'amount > 0.0F' since it's handled in the event
-            if (flag2) {
+            final boolean notBlocked = !isBlocked /* || $$1 > 0.0F*/;// Sponge - remove 'amount > 0.0F' since it's handled in the event
+            if (notBlocked) {
                 this.lastDamageSource = source;
                 this.lastDamageStamp = this.level.getGameTime();
             }
 
-            if ((LivingEntity) (Object) this instanceof net.minecraft.server.level.ServerPlayer) {
-                CriteriaTriggers.ENTITY_HURT_PLAYER.trigger(
-                    (net.minecraft.server.level.ServerPlayer) (Object) this, source, f, amount, flag);
-                if (f1 > 0.0F && f1 < 3.4028235E37F) {
-                    ((net.minecraft.server.level.ServerPlayer) (Object) this).awardStat(
-                        Stats.DAMAGE_BLOCKED_BY_SHIELD, Math.round(f1 * 10.0F));
+            if ((LivingEntity) (Object) this instanceof net.minecraft.server.level.ServerPlayer player) {
+                CriteriaTriggers.ENTITY_HURT_PLAYER.trigger(player, source, f2, amount, isBlocked);
+                if (blockedAmount > 0.0F && blockedAmount < 3.4028235E37F) {
+                    player.awardStat(Stats.DAMAGE_BLOCKED_BY_SHIELD, Math.round(blockedAmount * 10.0F));
                 }
             }
 
-            if (entity instanceof net.minecraft.server.level.ServerPlayer) {
-                CriteriaTriggers.PLAYER_HURT_ENTITY.trigger(
-                    (net.minecraft.server.level.ServerPlayer) entity, (Entity) (Object) this, source, f, amount, flag);
+            if (entity instanceof net.minecraft.server.level.ServerPlayer player) {
+                CriteriaTriggers.PLAYER_HURT_ENTITY.trigger(player, (Entity) (Object) this, source, f2, amount, isBlocked);
             }
 
-            return flag2;
+            return notBlocked;
         }
     }
 }

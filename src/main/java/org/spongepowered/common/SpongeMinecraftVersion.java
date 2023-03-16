@@ -67,7 +67,7 @@ public final class SpongeMinecraftVersion implements ProtocolMinecraftVersion, M
 
     @Override
     public OptionalInt dataVersion() {
-        return OptionalInt.of(SharedConstants.getCurrentVersion().getWorldVersion());
+        return OptionalInt.of(SharedConstants.getCurrentVersion().getDataVersion().getVersion());
     }
 
     @Override

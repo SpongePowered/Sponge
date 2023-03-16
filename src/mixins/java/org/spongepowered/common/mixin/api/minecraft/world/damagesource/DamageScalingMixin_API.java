@@ -22,21 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.mixin.api.minecraft.world.damagesource;
 
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeSource;
+import org.spongepowered.api.event.cause.entity.damage.DamageScaling;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Set;
+@Mixin(value = net.minecraft.world.damagesource.DamageScaling.class)
+public abstract class DamageScalingMixin_API implements DamageScaling {
 
-@Mixin(BiomeSource.class)
-public interface BiomeSourceAccessor {
+    // @formatter:off
 
-    @Accessor("possibleBiomes") Set<Biome> accessor$possibleBiomes();
 
-    @Accessor("possibleBiomes") @Mutable void accessor$possibleBiomes(Set<Biome> possibleBiomes);
+    // @formatter:on
+
 
 }

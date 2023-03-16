@@ -5,14 +5,9 @@
     "mixinPriority": 1100,
     "mixins": [
         "common.entity.living.HumanEntityMixin_API",
-        "common.util.MinecraftBlockDamageSourceMixin_API",
-        "common.util.MinecraftFallingBlockDamageSourceMixin_API",
         "data.DataHolderMixin_API",
         "data.persistence.DataContainerMixin_API",
         "entity.ai.goal.AbstractGoalMixin_API",
-        "event.cause.entity.damage.source.common.AbstractDamageSourceMixin_API",
-        "event.cause.entity.damage.source.common.AbstractEntityDamageSourceMixin_API",
-        "event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSourceMixin_API",
         "item.merchant.MerchantMixin_API",
         "minecraft.advancements.AdvancementMixin_API",
         "minecraft.advancements.AdvancementProgressMixin_API",
@@ -73,9 +68,7 @@
         "minecraft.stats.StatMixin_API",
         "minecraft.stats.StatTypeMixin_API",
         "minecraft.tags.TagKeyMixin_API",
-        "minecraft.util.DamageSourceMixin_API",
-        "minecraft.util.EntityDamageSourceMixin_API",
-        "minecraft.util.IndirectEntityDamageSourceMixin_API",
+        "minecraft.world.damagesource.DamageSourceMixin_API",
         "minecraft.util.RandomSourceMixin_API",
         "minecraft.world.DifficultyMixin_API",
         "minecraft.world.InteractionHandMixin_API",
@@ -445,7 +438,10 @@
         "minecraft.world.ticks.TickPriorityMixin_API",
         "service.permission.SubjectMixin_API",
         "world.LocatableBlockMixin_API",
-        "minecraft.network.chat.MessageSignatureMixin_API"
+        "minecraft.network.chat.MessageSignatureMixin_API",
+        "minecraft.world.damagesource.DamageTypeMixin_API",
+        "minecraft.world.damagesource.DamageScalingMixin_API",
+        "minecraft.network.protocol.status.ServerStatus_FaviconMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

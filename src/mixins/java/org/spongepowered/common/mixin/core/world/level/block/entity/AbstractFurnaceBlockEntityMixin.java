@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -112,12 +113,10 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     // Tick up and Start
     @Redirect(method = "serverTick",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/core/NonNullList;I)Z",
-            ordinal = 1
-        )
-    )
-    private static boolean impl$checkIfCanSmelt(@Nullable final Recipe<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize, final Level level, final BlockPos entityPos, final BlockState state, final AbstractFurnaceBlockEntity entity) {
-        if (!AbstractFurnaceBlockEntityAccessor.invoker$canBurn(recipe, slots, maxStackSize)) {
+            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/core/NonNullList;I)Z",
+            ordinal = 1))
+    private static boolean impl$checkIfCanSmelt(RegistryAccess registryAccess, @Nullable final Recipe<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize, final Level level, final BlockPos entityPos, final BlockState state, final AbstractFurnaceBlockEntity entity) {
+        if (!AbstractFurnaceBlockEntityAccessor.invoker$canBurn(registryAccess, recipe, slots, maxStackSize)) {
             return false;
         }
 
@@ -181,7 +180,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         slice = @Slice(
             from = @At(
                 value = "INVOKE",
-                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;burn(Lnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/core/NonNullList;I)Z"
+                target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;burn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/core/NonNullList;I)Z"
             ),
             to = @At(
                 value = "INVOKE",
@@ -210,14 +209,14 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         method = "burn",
         locals = LocalCapture.CAPTURE_FAILHARD,
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
-    private static void impl$afterSmeltItem(
+    private static void impl$afterSmeltItem(final RegistryAccess registryAccess,
         final Recipe<?> recipe, final NonNullList<ItemStack> slots, final int var2, final CallbackInfoReturnable<Boolean> cir
     ) {
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(slots.get(1));
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final FurnaceBlockEntity entity = cause.first(FurnaceBlockEntity.class)
             .orElseThrow(() -> new IllegalStateException("Expected to have a FurnaceBlockEntity in the Cause"));
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(recipe.getResultItem());
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(recipe.getResultItem(registryAccess));
         final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, entity,
                 Collections.singletonList(snapshot), Optional.of(fuel), Optional.ofNullable((CookingRecipe) recipe));
         SpongeCommon.post(event);

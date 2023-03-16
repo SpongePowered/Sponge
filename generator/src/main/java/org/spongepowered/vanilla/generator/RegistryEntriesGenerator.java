@@ -137,6 +137,7 @@ class RegistryEntriesGenerator<V> implements Generator {
         final Registry<V> finalRegistry = registry;
         registry.stream()
             .filter(this.filter)
+// TODO this does not work for everything e.g. BlockEntityType            .filter(entry -> !(entry instanceof FeatureElement featureEntry) || featureEntry.isEnabled(FeatureFlags.VANILLA_SET))
             .sorted(Comparator.comparing(registry::getKey))
             .map(v -> this.makeField(this.targetClassSimpleName, fieldType, factoryMethod, finalRegistry.getKey(v)))
             .forEachOrdered(clazz::addField);

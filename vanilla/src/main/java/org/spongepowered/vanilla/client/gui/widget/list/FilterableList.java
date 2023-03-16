@@ -178,11 +178,6 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
         return (P) this;
     }
 
-    // Because private
-    private int getRowBottom(final int p_getRowBottom_1_) {
-        return this.getRowTop(p_getRowBottom_1_) + this.itemHeight;
-    }
-
     public int getRowHeight() {
         return this.itemHeight;
     }
@@ -269,7 +264,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
                 if (((AbstractSelectionListAccessor) this).accessor$renderSelection() && Objects.equals(this.getSelected(), filteredList.get(i))) {
                     final int xSelectStart = this.x0 + this.width / 2 - rowWidth / 2 - 2;
                     final int xSelectEnd = this.x0 + this.width / 2 + rowWidth / 2 - 4;
-                    RenderSystem.disableTexture();
+//                    RenderSystem.disableTexture();
                     RenderSystem.setShader(GameRenderer::getPositionShader);
                     final float f = this.isFocused() ? 1.0F : 0.5F;
                     RenderSystem.setShaderColor(f, f, f, 1.0F);
@@ -286,7 +281,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
                     bufferbuilder.vertex(xSelectEnd - 1, yStart - 1, 0.0D).endVertex();
                     bufferbuilder.vertex(xSelectStart + 1, yStart - 1, 0.0D).endVertex();
                     tessellator.end();
-                    RenderSystem.enableTexture();
+//                    RenderSystem.enableTexture();
                 }
 
                 final E entry = filteredList.get(i);

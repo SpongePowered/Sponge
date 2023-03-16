@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.recipe.cooking;
 
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -43,21 +44,21 @@ public class SpongeSmokingRecipe extends SmokingRecipe {
     }
 
     @Override
-    public ItemStack assemble(final Container container) {
+    public ItemStack assemble(final Container container, final RegistryAccess $$1) {
         if (this.resultFunction != null) {
             final ItemStack result = this.resultFunction.apply(container);
             result.setCount(1);
             return result;
         }
-        return super.assemble(container);
+        return super.assemble(container, $$1);
     }
 
     @Override
-    public ItemStack getResultItem() {
+    public ItemStack getResultItem(final RegistryAccess $$1) {
         if (this.resultFunction != null) {
             return ItemStack.EMPTY;
         }
-        return super.getResultItem();
+        return super.getResultItem($$1);
     }
 
 }

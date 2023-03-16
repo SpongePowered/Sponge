@@ -250,8 +250,8 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         super.die(cause);
         this.reapplyPosition();
         if (cause != null) {
-            this.setDeltaMovement(-Mth.cos((this.hurtDir + this.getYRot()) * ((float)Math.PI / 180F)) * 0.1F, 0.1F,
-                    -Mth.sin((this.hurtDir + this.getYRot()) * ((float)Math.PI / 180F)) * 0.1F);
+            this.setDeltaMovement(-Mth.cos((this.getHurtDir() + this.getYRot()) * ((float)Math.PI / 180F)) * 0.1F, 0.1F,
+                    -Mth.sin((this.getHurtDir() + this.getYRot()) * ((float)Math.PI / 180F)) * 0.1F);
         } else {
             this.setDeltaMovement(0.0D, 0.1D, 0.0D);
         }
@@ -316,7 +316,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         f += EnchantmentHelper.getDamageBonus(this.getItemInHand(InteractionHand.MAIN_HAND), this.getMobType());
         i += EnchantmentHelper.getKnockbackBonus(this);
 
-        final boolean flag = entityIn.hurt(DamageSource.mobAttack(this), f);
+        final boolean flag = entityIn.hurt(this.damageSources().mobAttack(this), f);
 
         if (flag) {
             if (i > 0) {

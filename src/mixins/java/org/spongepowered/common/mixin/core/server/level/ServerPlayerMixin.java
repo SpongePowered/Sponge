@@ -110,6 +110,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.ConnectionAccessor;
+import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
@@ -158,7 +159,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Shadow public abstract net.minecraft.server.level.ServerLevel shadow$getLevel();
     @Shadow public abstract void shadow$setCamera(final Entity entity);
-    @Shadow public abstract void shadow$stopRiding();
     @Shadow public abstract void shadow$closeContainer();
     @Shadow public abstract void shadow$resetStat(final Stat<?> statistic);
     @Shadow protected abstract void shadow$tellNeutralMobsThatIDied();
@@ -267,7 +267,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         // Update locale on Channel, used for sending localized messages
         if (this.connection != null) {
-            final Channel channel = ((ConnectionAccessor) this.connection.connection).accessor$channel();
+            final Channel channel = ((ConnectionAccessor) ((ServerGamePacketListenerImplAccessor) this.connection).accessor$connection()).accessor$channel();
             channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(language);
 
             SpongeAdventure.forEachBossBar(bar -> {
@@ -426,7 +426,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
                 player.setYHeadRot((float) actualYaw);
 
-                final ChunkPos chunkpos = new ChunkPos(new BlockPos(actualX, actualY, actualZ));
+                final ChunkPos chunkpos = new ChunkPos(new BlockPos((int) actualX, (int) actualY, (int) actualZ));
                 world.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 1, player.getId());
             } else {
                 final ChangeEntityWorldEvent.Pre preEvent = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre(player, world);
@@ -525,7 +525,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             // Sponge: From Forge - only enter this branch if the teleporter indicated that we should
             // create end platforms and we're in the end (vanilla only has the second condition)
         } else if (createEndPlatform && targetWorld.dimension() == Level.END) {
-            this.shadow$createEndPlatform(targetWorld, new BlockPos(portalinfo.pos));
+            this.shadow$createEndPlatform(targetWorld, new BlockPos((int) portalinfo.pos.x, (int) portalinfo.pos.y, (int) portalinfo.pos.z));
         }
 
         // This is standard vanilla processing

@@ -44,7 +44,7 @@ public final class VecHelper {
         if (vector == null) {
             return null;
         }
-        return new BlockPos(vector.x(), vector.y(), vector.z());
+        return new BlockPos(vector.floorX(), vector.floorY(), vector.floorZ());
     }
 
     // === Flow Vector3i --> BlockPos ===
@@ -159,7 +159,7 @@ public final class VecHelper {
         if (vector == null) {
             return null;
         }
-        return new Vec3i(vector.x(), vector.y(), vector.z());
+        return new Vec3i(vector.floorX(), vector.floorY(), vector.floorZ());
     }
 
     // === Flow Vector --> Rotations ===

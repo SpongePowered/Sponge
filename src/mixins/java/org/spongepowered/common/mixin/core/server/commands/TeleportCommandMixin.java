@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.server.commands;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.server.commands.TeleportCommand;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,6 +34,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.ChunkPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
@@ -67,7 +67,7 @@ public abstract class TeleportCommandMixin {
      */
     @Overwrite
     private static void performTeleport(CommandSourceStack source, Entity entityIn, ServerLevel worldIn, double x, double y, double z,
-            Set<ClientboundPlayerPositionPacket.RelativeArgument> relativeList, float yaw, float pitch, @Nullable TeleportCommand.LookAt facing) {
+            Set<RelativeMovement> relativeList, float yaw, float pitch, @Nullable TeleportCommand.LookAt facing) {
 
         double actualX = x;
         double actualY = y;
@@ -113,7 +113,7 @@ public abstract class TeleportCommandMixin {
 
                 if (entityIn instanceof ServerPlayer) {
 
-                    ChunkPos chunkpos = new ChunkPos(new BlockPos(actualX, actualY, actualZ));
+                    ChunkPos chunkpos = new ChunkPos(new BlockPos((int) actualX, (int) actualY, (int) actualZ));
                     worldIn.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 1, entityIn.getId());
 
                     entityIn.stopRiding();

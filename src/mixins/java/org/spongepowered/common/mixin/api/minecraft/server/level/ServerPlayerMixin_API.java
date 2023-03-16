@@ -221,7 +221,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
      */
     @Overwrite
     public String getIpAddress() {
-        return NetworkUtil.getHostString(this.connection.connection.getRemoteAddress());
+        return NetworkUtil.getHostString(((ServerGamePacketListenerImplAccessor) this.connection).accessor$connection().getRemoteAddress());
     }
 
     @Override

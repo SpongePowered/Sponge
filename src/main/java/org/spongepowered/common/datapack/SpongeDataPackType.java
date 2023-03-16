@@ -36,6 +36,7 @@ import org.spongepowered.api.adventure.ChatTypeTemplate;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPackEntry;
 import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.event.cause.entity.damage.DamageTypeTemplate;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.tag.TagTemplate;
@@ -57,6 +58,7 @@ import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.advancement.SpongeAdvancementTemplate;
 import org.spongepowered.common.adventure.SpongeChatTypeTemplate;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageTypeTemplate;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.tag.SpongeTagTemplate;
 import org.spongepowered.common.world.biome.SpongeBiomeTemplate;
@@ -161,6 +163,10 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
                 "chat_type", SpongeChatTypeTemplate::encode, SpongeChatTypeTemplate::decode,
                 false);
 
+        private final SpongeDataPackType<JsonElement, @NonNull DamageTypeTemplate> damageType = SpongeDataPackType.basic(DamageTypeTemplate.class,
+                "damage_type", SpongeDamageTypeTemplate::encode, SpongeDamageTypeTemplate::decode,
+                false);
+
 
         @Override
         public DataPackType<RecipeRegistration> recipe() {
@@ -245,6 +251,11 @@ public record SpongeDataPackType<E, T extends DataPackEntry<T>>(String dir, bool
         @Override
         public DataPackType<ChatTypeTemplate> chatType() {
             return this.chatType;
+        }
+
+        @Override
+        public DataPackType<DamageTypeTemplate> damageType() {
+            return this.damageType;
         }
 
         @Override

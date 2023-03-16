@@ -39,8 +39,6 @@
         "network.chat.StyleMixin",
         "network.chat.TranslatableContentsMixin",
         "network.protocol.game.ClientboundResourcePackPacketMixin",
-        "network.protocol.status.ClientboundStatusResponsePacketMixin",
-        "network.protocol.status.ServerStatusMixin",
         "network.syncher.EntityDataAccessorMixin",
         "network.syncher.SynchedEntityDataMixin",
         "server.MainMixin",
@@ -94,8 +92,6 @@
         "util.datafix.schemas.V1125Mixin",
         "world.BossEventMixin",
         "world.damagesource.DamageSourceMixin",
-        "world.damagesource.EntityDamageSourceMixin",
-        "world.damagesource.IndirectEntityDamageSourceMixin",
         "world.entity.ActiveChunkReferentMixin",
         "world.entity.AgableMobMixin",
         "world.entity.EntityMaxAirMixin",
@@ -241,7 +237,8 @@
         "adventure.chat.SignedMessageMixin",
         "world.level.gameevent.vibrations.VibrationListenerMixin",
         "resources.RegistryDataLoaderMixin",
-        "world.level.levelgen.WorldDimensionsMixin"
+        "world.level.levelgen.WorldDimensionsMixin",
+        "world.damagesource.DamageSourcesMixin"
     ],
     "client": [
         "client.MinecraftMixin",

@@ -197,7 +197,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         // Some entities need to have non-null fields (and the easiest way to
         // set them is to use the more specialised constructor).
         if (type == net.minecraft.world.entity.EntityType.FALLING_BLOCK) {
-            entity = FallingBlockEntity.fall(thisWorld, new BlockPos(x, y, z), Blocks.SAND.defaultBlockState());
+            entity = FallingBlockEntity.fall(thisWorld, new BlockPos((int) x, (int) y, (int) z), Blocks.SAND.defaultBlockState());
         }
         if (type == net.minecraft.world.entity.EntityType.ITEM) {
             entity = new ItemEntity(thisWorld, x, y, z, new ItemStack(Blocks.STONE));
@@ -223,7 +223,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
 
         if (naturally && entity instanceof Mob) {
             // Adding the default equipment
-            final DifficultyInstance difficulty = this.shadow$getCurrentDifficultyAt(new BlockPos(x, y, z));
+            final DifficultyInstance difficulty = this.shadow$getCurrentDifficultyAt(new BlockPos((int) x, (int) y, (int) z));
             ((MobAccessor)entity).invoker$populateDefaultEquipmentSlots(this.random, difficulty);
         }
 

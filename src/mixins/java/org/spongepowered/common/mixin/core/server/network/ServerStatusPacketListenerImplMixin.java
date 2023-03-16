@@ -43,7 +43,7 @@ public abstract class ServerStatusPacketListenerImplMixin {
 
     @Shadow @Final private static Component DISCONNECT_REASON;
 
-    @Shadow @Final private MinecraftServer server;
+    @Shadow @Final private ServerStatus status;
     @Shadow @Final private Connection connection;
     @Shadow private boolean hasRequestedStatus;
 
@@ -58,7 +58,7 @@ public abstract class ServerStatusPacketListenerImplMixin {
         } else {
             this.hasRequestedStatus = true;
 
-            final ServerStatus response = SpongeStatusResponse.post(this.server, new SpongeStatusClient(this.connection));
+            final ServerStatus response = SpongeStatusResponse.post(this.status, new SpongeStatusClient(this.connection));
             if (response != null) {
                 this.connection.send(new ClientboundStatusResponsePacket(response));
             } else {

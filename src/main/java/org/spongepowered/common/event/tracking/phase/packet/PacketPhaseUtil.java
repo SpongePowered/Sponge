@@ -222,8 +222,8 @@ public final class PacketPhaseUtil {
                         // Basically, we need to sanity check the nearby blocks because if they have
                         // any positional logic, we need to run captures
                         final AABB boundingBox = packetPlayer.getBoundingBox();
-                        final BlockPos min = new BlockPos(boundingBox.minX + 0.001D, boundingBox.minY + 0.001D, boundingBox.minZ + 0.001D);
-                        final BlockPos max = new BlockPos(boundingBox.maxX - 0.001D, boundingBox.maxY - 0.001D, boundingBox.maxZ - 0.001D);
+                        final BlockPos min = new BlockPos((int) (boundingBox.minX + 0.001D), (int) (boundingBox.minY + 0.001D), (int) (boundingBox.minZ + 0.001D));
+                        final BlockPos max = new BlockPos((int) (boundingBox.maxX - 0.001D), (int) (boundingBox.maxY - 0.001D), (int) (boundingBox.maxZ - 0.001D));
                         final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
                         if (packetPlayer.level.hasChunksAt(min, max)) {
                             for(int x = min.getX(); x <= max.getX(); ++x) {

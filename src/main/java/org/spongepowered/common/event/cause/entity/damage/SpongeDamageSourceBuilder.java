@@ -26,152 +26,79 @@ package org.spongepowered.common.event.cause.entity.damage;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
-import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 
-public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<DamageSource, DamageSource.Builder> implements DamageSource.Builder {
+public class SpongeDamageSourceBuilder implements DamageSource.Builder {
+
+    private Holder<net.minecraft.world.damagesource.DamageType> damageType;
+    private net.minecraft.world.entity.Entity directEntity;
+    private net.minecraft.world.entity.Entity causingEntity;
+    private ServerLocation location;
+    private BlockSnapshot blockSnapshot;
+
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public DamageSource build() throws IllegalStateException {
         checkState(this.damageType != null, "DamageType was null!");
-        final net.minecraft.world.damagesource.DamageSource source = DamageSourceAccessor.invoker$new(this.damageType.toString());
-        final DamageSourceAccessor accessor = (DamageSourceAccessor) source;
-        if (!this.scales
-                && this.bypasses
-                && !this.explosion
-                && !this.absolute
-                && !this.magical
-                && !this.creative
-                && !this.fire
-                && this.exhaustion == null
-                && this.damageType.equals(DamageTypes.DROWN.get())
-        ) {
-            return (DamageSource) net.minecraft.world.damagesource.DamageSource.DROWN;
+        if (this.location != null) {
+            checkState(this.blockSnapshot != null, "BlockSnapshot is null");
         }
-        if (!this.scales
-                && !this.bypasses
-                && !this.explosion
-                && !this.absolute
-                && !this.magical
-                && !this.creative
-                && !this.fire
-                && this.exhaustion == null
-                && this.damageType.equals(DamageTypes.DRYOUT.get())
-        ) {
-            return (DamageSource) net.minecraft.world.damagesource.DamageSource.DRY_OUT;
+        if (this.blockSnapshot != null) {
+            checkState(this.location != null, "ServerLocation is null");
         }
-        if (!this.scales
-                && !this.bypasses
-                && !this.explosion
-                && !this.absolute
-                && !this.magical
-                && !this.creative
-                && !this.fire
-                && this.exhaustion == null
-                && this.damageType.equals(DamageTypes.FALL.get())
-        ) {
-            return (DamageSource) net.minecraft.world.damagesource.DamageSource.FALL;
-        }
-        if (!this.scales
-                && !this.bypasses
-                && !this.explosion
-                && !this.absolute
-                && !this.magical
-                && !this.creative
-                && this.fire
-                && this.exhaustion == null
-                && this.damageType.equals(DamageTypes.FIRE.get())
-        ) {
-            return (DamageSource) net.minecraft.world.damagesource.DamageSource.ON_FIRE;
-        }
-        if (!this.scales
-                && this.bypasses
-                && !this.explosion
-                && !this.absolute
-                && !this.magical
-                && !this.creative
-                && !this.fire
-                && this.exhaustion == null
-                && this.damageType.equals(DamageTypes.GENERIC.get())
-        ) {
-            return (DamageSource) net.minecraft.world.damagesource.DamageSource.GENERIC;
-        }
-        if (!this.scales
-                && this.bypasses
-                && !this.explosion
-                && !this.absolute
-                && this.magical
-                && !this.creative
-                && !this.fire
-                && this.exhaustion == null
-                && this.damageType.equals(DamageTypes.MAGIC.get())
-        ) {
-            return (DamageSource) net.minecraft.world.damagesource.DamageSource.MAGIC;
-        }
-        if (!this.scales
-                && this.bypasses
-                && !this.explosion
-                && this.absolute
-                && !this.magical
-                && !this.creative
-                && !this.fire
-                && this.exhaustion == null
-                && this.damageType.equals(DamageTypes.HUNGER.get())
-        ) {
-            return (DamageSource) net.minecraft.world.damagesource.DamageSource.STARVE;
-        }
-        if (!this.scales
-                && this.bypasses
-                && !this.explosion
-                && !this.absolute
-                && !this.magical
-                && this.creative
-                && !this.fire
-                && this.exhaustion == null
-                && this.damageType.equals(DamageTypes.VOID.get())
-        ) {
-            return (DamageSource) net.minecraft.world.damagesource.DamageSource.OUT_OF_WORLD;
-        }
-        if (!this.scales
-                && !this.bypasses
-                && !this.explosion
-                && !this.absolute
-                && this.magical
-                && !this.creative
-                && !this.fire
-                && this.exhaustion == null
-                && this.damageType.equals(DamageTypes.MAGIC.get())
-        ) {
-            return (DamageSource) net.minecraft.world.damagesource.DamageSource.WITHER;
-        }
-        if (this.absolute) {
-            accessor.invoker$bypassMagic();
-        }
-        if (this.bypasses) {
-            accessor.invoker$bypassArmor();
-        }
-        if (this.creative) {
-            accessor.invoker$bypassInvul();
-        }
-        if (this.magical) {
-            source.setMagic();
-        }
-        if (this.scales) {
-            source.setScalesWithDifficulty();
-        }
-        if (this.explosion) {
-            source.setExplosion();
-        }
-        if (this.exhaustion != null) {
-            accessor.accessor$exhaustion(this.exhaustion.floatValue());
-        }
-        if (this.fire) {
-            accessor.invoker$setIsFire();
-        }
+
+        final var source = new net.minecraft.world.damagesource.DamageSource(this.damageType, directEntity, causingEntity);
+        ((DamageSourceBridge) source).bridge$setBlock(this.location, this.blockSnapshot);
         return (DamageSource) source;
     }
 
+    @Override
+    public DamageSource.Builder type(final DamageType damageType) {
+        final var registry = SpongeCommon.server().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE);
+        this.damageType = registry.wrapAsHolder((net.minecraft.world.damagesource.DamageType) (Object) damageType);
+        return this;
+    }
+
+    @Override
+    public SpongeDamageSourceBuilder entity(final Entity entity) {
+        this.directEntity = (net.minecraft.world.entity.Entity) entity;
+        return this;
+    }
+
+    @Override
+    public SpongeDamageSourceBuilder indirectEntity(final Entity proxy) {
+        this.causingEntity = (net.minecraft.world.entity.Entity) proxy;
+        return this;
+    }
+
+    @Override
+    public DamageSource.Builder block(final ServerLocation location) {
+        this.location = location;
+        return this;
+    }
+
+    @Override
+    public DamageSource.Builder block(final BlockSnapshot blockSnapshot) {
+        this.blockSnapshot = blockSnapshot;
+        return this;
+    }
+
+    @Override
+    public SpongeDamageSourceBuilder from(final DamageSource value) {
+        this.type(value.type());
+        value.source().ifPresent(this::entity);
+        value.indirectSource().ifPresent(this::indirectEntity);
+        value.blockSnapshot().ifPresent(this::block);
+        value.location().ifPresent(this::block);
+        return this;
+    }
 }

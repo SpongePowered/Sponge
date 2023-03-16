@@ -487,7 +487,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                 final BlockEntity tileEntity = this.shadow$getBlockEntity(pos);
                 if(tileEntity instanceof JukeboxBlockEntity) {
                     final JukeboxBlockEntity jukebox = (JukeboxBlockEntity) tileEntity;
-                    final ItemStack record = jukebox.getRecord();
+                    final ItemStack record = jukebox.getItem(0);
                     frame.pushCause(jukebox);
                     frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(record));
                     if (!record.isEmpty()) {

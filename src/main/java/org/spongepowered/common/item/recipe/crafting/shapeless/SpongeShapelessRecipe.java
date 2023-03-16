@@ -25,6 +25,7 @@
 package org.spongepowered.common.item.recipe.crafting.shapeless;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -86,19 +87,19 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer p_77572_1_) {
+    public ItemStack assemble(CraftingContainer container, final RegistryAccess $$1) {
         if (this.resultFunction != null) {
-            return this.resultFunction.apply(p_77572_1_);
+            return this.resultFunction.apply(container);
         }
-        return super.assemble(p_77572_1_);
+        return super.assemble(container, $$1);
     }
 
     @Override
-    public ItemStack getResultItem() {
+    public ItemStack getResultItem(final RegistryAccess $$1) {
         if (this.resultFunction != null) {
             return ItemStack.EMPTY;
         }
-        return super.getResultItem();
+        return super.getResultItem($$1);
     }
 
     private static boolean matches(List<ItemStack> stacks, List<Ingredient> ingredients) {

@@ -29,6 +29,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import io.netty.buffer.ByteBuf;
 import net.kyori.adventure.text.Component;
+import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.apache.logging.log4j.LogManager;
@@ -89,9 +90,9 @@ public class VelocityForwardingInfo {
                     return;
                 }
 
-                final ConnectionAccessor connectionAccessor = (ConnectionAccessor) mcConn.getConnection();
-                connectionAccessor.accessor$address(new InetSocketAddress(VelocityForwardingInfo.readAddress(response), ((InetSocketAddress) mcConn.getConnection()
-                    .getRemoteAddress()).getPort()));
+                final Connection connection = ((ServerLoginPacketListenerImplAccessor) mcConn).accessor$connection();
+                ((ConnectionAccessor) connection).accessor$address(new InetSocketAddress(VelocityForwardingInfo.readAddress(response),
+                        ((InetSocketAddress) connection.getRemoteAddress()).getPort()));
 
                 ((ServerLoginPacketListenerImplAccessor) mcConn).accessor$gameProfile(VelocityForwardingInfo.createProfile(response));
         }).exceptionally(err -> {

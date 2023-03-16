@@ -151,7 +151,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
             }
             // See PlayerDataAccess - keep this line up to date.
             final int version = compound.contains("DataVersion", 3) ? compound.getInt("DataVersion") : -1;
-            NbtUtils.update(DataFixers.getDataFixer(), DataFixTypes.PLAYER, compound, version);
+            DataFixTypes.PLAYER.updateToCurrentVersion(DataFixers.getDataFixer(), compound, version);
             return new SpongeUserData(profile, compound);
         } catch (final IOException e) {
             SpongeCommon.logger().warn("Unable to load corrupt user file '{}'!",

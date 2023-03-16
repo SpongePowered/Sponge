@@ -45,13 +45,13 @@ public abstract class PacketUtilsMixin_Tracker {
 
     @Redirect(method = "ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/util/thread/BlockableEventLoop;executeIfPossible(Ljava/lang/Runnable;)V"))
-    private static <T extends PacketListener> void tracker$redirectProcessPacket(BlockableEventLoop threadTaskExecutor, Runnable p_execute_1_,
-            Packet<T> p_218797_0_, T p_218797_1_, BlockableEventLoop<?> p_218797_2_) {
+    private static <T extends PacketListener> void tracker$redirectProcessPacket(BlockableEventLoop threadTaskExecutor, Runnable runnable,
+            Packet<T> packet, T packetListener, BlockableEventLoop<?> blockableEventLoop) {
         threadTaskExecutor.execute(() -> {
-            if (p_218797_1_.getConnection().isConnected()) {
-                PacketPhaseUtil.onProcessPacket(p_218797_0_, p_218797_1_);
+            if (packetListener.isAcceptingMessages()) {
+                PacketPhaseUtil.onProcessPacket(packet, packetListener);
             } else {
-                LOGGER.debug("Ignoring packet due to disconnection: " + p_218797_0_);
+                LOGGER.debug("Ignoring packet due to disconnection: " + packet);
             }
         });
     }

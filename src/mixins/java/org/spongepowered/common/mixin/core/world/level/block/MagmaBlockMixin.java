@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.MagmaBlock;
@@ -35,31 +36,22 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
-import org.spongepowered.common.util.MinecraftBlockDamageSource;
 
 @Mixin(MagmaBlock.class)
 public abstract class MagmaBlockMixin extends BlockMixin {
 
-    @Redirect(
-        method = "stepOn",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"
-        )
-    )
-    private boolean impl$swapDamageSourceForMagma(Entity entity, DamageSource source, float damage, Level world, BlockPos pos, BlockState state, Entity original) {
-        if (!world.isClientSide) {
-            try {
-                final ServerLocation location = ServerLocation.of((ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
-                final DamageSource hotFloor = MinecraftBlockDamageSource.ofFire("hotFloor", location, false);
-                ((DamageSourceBridge) (Object) hotFloor).bridge$setHotFloorSource();
-                return entity.hurt(DamageSource.HOT_FLOOR, damage);
-            } finally {
-                ((DamageSourceBridge) source).bridge$setHotFloorSource();
-            }
+    @Redirect(method = "stepOn",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSources;hotFloor()Lnet/minecraft/world/damagesource/DamageSource;"))
+    private DamageSource impl$spongeRedirectForFireDamage(final DamageSources instance, final Level world, final BlockPos blockPos, final BlockState blockState, final Entity entity) {
+        final DamageSource source = instance.hotFloor();
+        if (world.isClientSide) { // Short Circuit
+            return source;
         }
-        return entity.hurt(source, damage);
+        final ServerLocation location = ServerLocation.of((ServerWorld) world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
+        var blockSource = org.spongepowered.api.event.cause.entity.damage.source.DamageSource.builder()
+                .from((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source).block(location)
+                .block(location.createSnapshot()).build();
+        return (DamageSource) blockSource;
     }
 }

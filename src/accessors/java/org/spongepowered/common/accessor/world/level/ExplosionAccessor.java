@@ -43,8 +43,6 @@ public interface ExplosionAccessor {
 
     @Accessor("z") double accessor$z();
 
-    @Accessor("source") Entity accessor$source();
-
     @Accessor("radius") float accessor$radius();
 
 }

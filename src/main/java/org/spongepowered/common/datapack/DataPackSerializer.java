@@ -25,7 +25,7 @@
 package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonObject;
-import com.mojang.bridge.game.PackType;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.SharedConstants;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
@@ -91,7 +91,7 @@ public abstract class DataPackSerializer<E, T extends DataPackEntry<T>> {
             final JsonObject packDataRoot = new JsonObject();
             final JsonObject packData = new JsonObject();
             packDataRoot.add("pack", packData);
-            packData.addProperty("pack_format", SharedConstants.getCurrentVersion().getPackVersion(PackType.DATA));
+            packData.addProperty("pack_format", SharedConstants.getCurrentVersion().getPackVersion(PackType.SERVER_DATA));
             packData.addProperty("description", pack.description());
 
             JsonDataPackSerializer.writeFile(packMeta, packDataRoot);

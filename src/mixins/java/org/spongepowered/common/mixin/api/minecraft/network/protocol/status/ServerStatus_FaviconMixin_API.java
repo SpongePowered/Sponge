@@ -22,32 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.damagesource;
+package org.spongepowered.common.mixin.api.minecraft.network.protocol.status;
 
-import com.google.common.base.MoreObjects;
-import net.minecraft.world.damagesource.EntityDamageSource;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.registry.RegistryTypes;
+import net.minecraft.network.protocol.status.ServerStatus;
+import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
-@Mixin(EntityDamageSource.class)
-public abstract class EntityDamageSourceMixin extends DamageSourceMixin {
+import javax.imageio.ImageIO;
 
-    @Shadow @Final @Nullable protected net.minecraft.world.entity.Entity entity;
+@Mixin(ServerStatus.Favicon.class)
+public abstract class ServerStatus_FaviconMixin_API implements Favicon {
+
+    // @formatter:off
+    @Shadow @Final private byte[] iconBytes;
+    // @formatter:on
 
     @Override
-    public String toString() {
-        final ResourceKey resourceKey = Sponge.game().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.impl$damageType.get());
-
-        return MoreObjects.toStringHelper("EntityDamageSource")
-            .add("Name", this.msgId)
-            .add("Type", resourceKey)
-            .add("Source", this.entity)
-            .toString();
+    public BufferedImage image() {
+        try {
+            return ImageIO.read(new ByteArrayInputStream(iconBytes));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

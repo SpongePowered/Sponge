@@ -61,7 +61,7 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
         this.chunkPosition = chunkLayout.forceToChunk(this.blockPosition);
         this.biomePosition = position.toInt().mul(1, 0, 1);
 
-        this.pos = new BlockPos(position.x(), position.y(), position.z());
+        this.pos = new BlockPos(position.floorX(), position.floorY(), position.floorZ());
     }
 
     protected SpongeLocation(final W worldRef, final Vector3d position, final Vector3i chunkPosition, final Vector3i biomePosition) {
@@ -71,7 +71,7 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
         this.chunkPosition = chunkPosition;
         this.biomePosition = biomePosition;
 
-        this.pos = new BlockPos(position.x(), position.y(), position.z());
+        this.pos = new BlockPos(position.floorX(), position.floorY(), position.floorZ());
     }
 
     @Override

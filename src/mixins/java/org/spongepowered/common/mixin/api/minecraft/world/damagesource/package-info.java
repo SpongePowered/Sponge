@@ -22,17 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.damagesource;
-
-import net.minecraft.world.damagesource.EntityDamageSource;
-import net.minecraft.world.entity.Entity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.gen.Accessor;
-
-@Mixin(EntityDamageSource.class)
-public interface EntityDamageSourceAccessor {
-
-    @Accessor("entity") @Mutable void accessor$entity(final Entity entity);
-
-}
+@org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
+package org.spongepowered.common.mixin.api.minecraft.world.damagesource;

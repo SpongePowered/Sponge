@@ -24,24 +24,19 @@
  */
 package org.spongepowered.common.accessor.world.level.biome;
 
+import com.mojang.datafixers.util.Either;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
-
 
 @Mixin(MultiNoiseBiomeSource.class)
 public interface MultiNoiseBiomeSourceAccessor {
 
     @Accessor("parameters")
-    Climate.ParameterList<Holder<Biome>> accessor$parameters();
+    Either<Climate.ParameterList<Holder<Biome>>, Holder<MultiNoiseBiomeSourceParameterList>> accessor$parameters();
 
-    @Invoker("<init>")
-    static MultiNoiseBiomeSource invoker$new(final Climate.ParameterList<Holder<Biome>> $$0) {
-        throw new UntransformedInvokerError();
-    }
 }

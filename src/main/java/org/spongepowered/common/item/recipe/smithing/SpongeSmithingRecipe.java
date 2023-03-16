@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.item.recipe.smithing;
 
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.UpgradeRecipe;
+import net.minecraft.world.item.crafting.LegacyUpgradeRecipe;
 
 import java.util.function.Function;
 
-public class SpongeSmithingRecipe extends UpgradeRecipe {
+public class SpongeSmithingRecipe extends LegacyUpgradeRecipe {
 
     private final Function<Container, ItemStack> resultFunction;
 
@@ -43,29 +44,29 @@ public class SpongeSmithingRecipe extends UpgradeRecipe {
     }
 
     @Override
-    public ItemStack assemble(Container p_77572_1_) {
+    public ItemStack assemble(Container $$0, RegistryAccess $$1) {
         if (this.resultFunction != null) {
-            return this.resultFunction.apply(p_77572_1_);
+            return this.resultFunction.apply($$0);
         }
 
-        if (this.getResultItem().hasTag()) {
-            final ItemStack itemStack = this.getResultItem().copy();
-            CompoundTag compoundnbt = p_77572_1_.getItem(0).getTag();
+        if (this.getResultItem($$1).hasTag()) {
+            final ItemStack itemStack = this.getResultItem($$1).copy();
+            CompoundTag compoundnbt = $$0.getItem(0).getTag();
             if (compoundnbt != null) {
                 final CompoundTag merged = itemStack.getTag().merge(compoundnbt.copy());
                 itemStack.setTag(merged);
                 return itemStack;
             }
         }
-        return super.assemble(p_77572_1_);
+        return super.assemble($$0, $$1);
     }
 
     @Override
-    public ItemStack getResultItem() {
+    public ItemStack getResultItem(RegistryAccess $$1) {
         if (this.resultFunction != null) {
             return ItemStack.EMPTY;
         }
-        return super.getResultItem();
+        return super.getResultItem($$1);
     }
 
 }

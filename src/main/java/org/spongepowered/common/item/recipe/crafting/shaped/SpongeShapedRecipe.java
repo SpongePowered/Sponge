@@ -26,6 +26,7 @@ package org.spongepowered.common.item.recipe.crafting.shaped;
 
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -57,18 +58,18 @@ public class SpongeShapedRecipe extends ShapedRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer p_77572_1_) {
+    public ItemStack assemble(final CraftingContainer $$0, final RegistryAccess $$1) {
         if (this.resultFunction != null) {
-            return this.resultFunction.apply(p_77572_1_);
+            return this.resultFunction.apply($$0);
         }
-        return super.assemble(p_77572_1_);
+        return super.assemble($$0, $$1);
     }
 
     @Override
-    public ItemStack getResultItem() {
+    public ItemStack getResultItem(final RegistryAccess $$0) {
         if (this.resultFunction != null) {
             return ItemStack.EMPTY;
         }
-        return super.getResultItem();
+        return super.getResultItem($$0);
     }
 }

@@ -155,7 +155,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                             double d8 = this.z;
 
                             for (final float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
-                                final BlockPos blockpos = new BlockPos(d4, d6, d8);
+                                final BlockPos blockpos = new BlockPos((int) d4, (int) d6, (int) d8);
                                 final BlockState blockstate = this.level.getBlockState(blockpos);
                                 final FluidState fluidstate = this.level.getFluidState(blockpos);
                                 final Optional<Float> optional = this.damageCalculator.getBlockExplosionResistance((net.minecraft.world.level.Explosion) (Object) this, this.level, blockpos, blockstate, fluidstate);

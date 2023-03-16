@@ -55,9 +55,9 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.ModifierFunction;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.tag.DamageTypeTags;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -212,7 +212,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                     }
 
                     // Sponge Start - Create the event and throw it
-                    final DamageSource damageSource = DamageSource.playerAttack((net.minecraft.world.entity.player.Player) (Object) this);
+                    final DamageSource damageSource = this.level.damageSources().playerAttack((net.minecraft.world.entity.player.Player) (Object) this);
                     final boolean isMainthread = !this.level.isClientSide;
                     if (isMainthread) {
                         PhaseTracker.getInstance().pushCause(damageSource);
@@ -254,7 +254,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                     }
 
                     final net.minecraft.world.phys.Vec3 targetMotion = targetEntity.getDeltaMovement();
-                    final boolean attackSucceeded = targetEntity.hurt(DamageSource.playerAttack((net.minecraft.world.entity.player.Player) (Object) this), damage);
+                    final boolean attackSucceeded = targetEntity.hurt(this.level.damageSources().playerAttack((net.minecraft.world.entity.player.Player) (Object) this), damage);
 
                     if (attackSucceeded) {
                         if (knockbackModifier > 0) {
@@ -277,10 +277,8 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                                     // Sponge Start - Do a small event for these entities
                                     // livingEntity.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                                     // livingEntity.attackEntityFrom(DamageSource.causePlayerDamage(this), 1.0F);
-                                    final EntityDamageSource sweepingAttackSource = EntityDamageSource.builder()
-                                        .entity((org.spongepowered.api.entity.living.player.Player) this)
-                                        .type(DamageTypes.SWEEPING_ATTACK)
-                                        .build();
+                                    final var sweepingAttackSource = org.spongepowered.api.event.cause.entity.damage.source.DamageSource.builder().entity((org.spongepowered.api.entity.living.player.Player) this)
+                                            .type(DamageTypes.PLAYER_ATTACK).build();
                                     try (final CauseStackManager.StackFrame frame = isMainthread ? PhaseTracker.getInstance().pushCauseFrame() : null) {
                                         if (isMainthread) {
                                             frame.pushCause(sweepingAttackSource);
@@ -306,7 +304,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                                                 (double) Mth.sin(this.shadow$getYRot() * ((float)Math.PI / 180F)),
                                                 (double) -Mth.cos(this.shadow$getYRot() * ((float)Math.PI / 180F)));
 
-                                            livingEntity.hurt(DamageSource.playerAttack((net.minecraft.world.entity.player.Player) (Object) this),
+                                            livingEntity.hurt(this.level.damageSources().playerAttack((net.minecraft.world.entity.player.Player) (Object) this),
                                                 (float) sweepingAttackEvent.finalOutputDamage());
                                         }
                                     }
