@@ -36,7 +36,7 @@ import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.advancement.CriterionEvent;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.cause.First;
@@ -152,7 +152,7 @@ public class EventManagerRegistrationTest {
         @Listener(order = Order.FIRST)
         public void onFirst(
             final DamageEntityEvent event,
-            final @First(inverse = true) EntityDamageSource source,
+            final @First(inverse = true) DamageSource source,
             final @Getter("entity") Player target
         ) {
 
