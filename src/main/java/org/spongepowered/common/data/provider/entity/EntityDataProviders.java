@@ -52,6 +52,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         CreeperData.register(this.registrator);
         DamagingProjectileData.register(this.registrator);
         DolphinData.register(this.registrator);
+        DisplayEntityData.register(this.registrator);
         EnderCrystalData.register(this.registrator);
         EnderDragonData.register(this.registrator);
         EndermanData.register(this.registrator);

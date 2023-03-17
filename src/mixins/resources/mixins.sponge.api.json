@@ -441,7 +441,11 @@
         "minecraft.network.chat.MessageSignatureMixin_API",
         "minecraft.world.damagesource.DamageTypeMixin_API",
         "minecraft.world.damagesource.DamageScalingMixin_API",
-        "minecraft.network.protocol.status.ServerStatus_FaviconMixin_API"
+        "minecraft.network.protocol.status.ServerStatus_FaviconMixin_API",
+        "minecraft.world.entity.DisplayMixin_API",
+        "minecraft.world.entity.Display_BlockDisplayMixin_API",
+        "minecraft.world.entity.Display_ItemDisplayMixin_API",
+        "minecraft.world.entity.Display_TextDisplayMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

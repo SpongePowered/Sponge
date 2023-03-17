@@ -36,6 +36,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageEffects;
 import net.minecraft.world.damagesource.DamageScaling;
+import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.MobCategory;
@@ -59,6 +60,7 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.FireworkRocketItem;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.GameType;
@@ -237,6 +239,8 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.HORSE_STYLE, Markings.values());
         this.automaticName(RegistryTypes.DAMAGE_SCALING, DamageScaling.values());
         this.automaticName(RegistryTypes.DAMAGE_EFFECT, DamageEffects.values());
+        this.automaticSerializedName(RegistryTypes.ITEM_DISPLAY_TYPE, ItemDisplayContext.values());
+        this.automaticSerializedName(RegistryTypes.BILLBOARD_TYPE, Display.BillboardConstraints.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {

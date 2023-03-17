@@ -199,7 +199,10 @@
         "world.level.levelgen.structure.pools.StructureTemplatePoolAccessor",
         "network.protocol.game.ClientboundPlayerInfoUpdatePacketAccessor",
         "sounds.SoundEventAccessor",
-        "server.network.ServerGamePacketListenerImplAccessor"
+        "server.network.ServerGamePacketListenerImplAccessor",
+        "world.entity.Display_TextDisplayAccessor",
+        "world.entity.Display_ItemDisplayAccessor",
+        "world.entity.DisplayAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"

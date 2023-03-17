@@ -49,10 +49,12 @@ import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
 import net.minecraft.world.damagesource.DamageEffects;
 import net.minecraft.world.damagesource.DamageScaling;
+import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.FireworkRocketItem;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.DataPackConfig;
 import org.tinylog.Logger;
@@ -582,6 +584,20 @@ public final class GeneratorMain {
                     "event.cause.entity.damage",
                     "DamageScalings",
                     DamageScaling.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "entity.display",
+                    "ItemDisplayTypes",
+                    ItemDisplayContext.class,
+                    "getSerializedName",
+                    "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "entity.display",
+                    "BillboardTypes",
+                    Display.BillboardConstraints.class,
                     "getSerializedName",
                     "sponge"
             )
