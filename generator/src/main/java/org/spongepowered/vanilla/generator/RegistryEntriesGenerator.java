@@ -25,6 +25,8 @@
 package org.spongepowered.vanilla.generator;
 
 import com.github.javaparser.ast.body.TypeDeclaration;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -33,11 +35,16 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.flag.FeatureElement;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.flag.FeatureFlags;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
 import javax.lang.model.element.Modifier;
 
 // Generates a constants file based on registry entries
@@ -137,9 +144,8 @@ class RegistryEntriesGenerator<V> implements Generator {
         final Registry<V> finalRegistry = registry;
         registry.stream()
             .filter(this.filter)
-// TODO this does not work for everything e.g. BlockEntityType            .filter(entry -> !(entry instanceof FeatureElement featureEntry) || featureEntry.isEnabled(FeatureFlags.VANILLA_SET))
             .sorted(Comparator.comparing(registry::getKey))
-            .map(v -> this.makeField(this.targetClassSimpleName, fieldType, factoryMethod, finalRegistry.getKey(v)))
+            .map(v -> this.makeField(this.targetClassSimpleName, fieldType, factoryMethod, finalRegistry.getKey(v), v instanceof FeatureElement fe ? fe.requiredFeatures() : null))
             .forEachOrdered(clazz::addField);
 
         clazz.addMethod(registryMethod);
@@ -162,9 +168,25 @@ class RegistryEntriesGenerator<V> implements Generator {
         }
     }
 
-    private FieldSpec makeField(final String ownType, final TypeName fieldType, final MethodSpec factoryMethod, final ResourceLocation element) {
-        return FieldSpec.builder(fieldType, Types.keyToFieldName(element.getPath()), Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-            .initializer("$L.$N($L)", ownType, factoryMethod, Types.resourceKey(element))
-            .build();
+    private FieldSpec makeField(final String ownType, final TypeName fieldType, final MethodSpec factoryMethod, final ResourceLocation element, @Nullable final FeatureFlagSet featureFlagSet) {
+
+        final FieldSpec.Builder builder =
+                FieldSpec.builder(fieldType, Types.keyToFieldName(element.getPath()), Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                        .initializer("$L.$N($L)", ownType, factoryMethod, Types.resourceKey(element));
+        if (featureFlagSet != null) {
+            if (!featureFlagSet.isSubsetOf(FeatureFlags.VANILLA_SET)) {
+                final var flags = FeatureFlags.REGISTRY.toNames(featureFlagSet).stream().map(rl -> rl.getNamespace().equals("minecraft") ? rl.getPath() : rl.getNamespace() + ":" + rl.getPath()).toArray();
+                if (featureFlagSet.contains(FeatureFlags.UPDATE_1_20)) {
+                    var annotation = AnnotationSpec.builder(ClassName.get("org.spongepowered.api.util.annotation", "Experimental"))
+                            .addMember("value", "$S", flags).build();
+                    builder.addAnnotation(annotation).build();
+                    builder.addAnnotation(ApiStatus.Experimental.class).build();
+                }
+            }
+
+
+        }
+        return builder.build();
+
     }
 }
