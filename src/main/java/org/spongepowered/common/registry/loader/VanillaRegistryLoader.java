@@ -241,6 +241,7 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.DAMAGE_EFFECT, DamageEffects.values());
         this.automaticSerializedName(RegistryTypes.ITEM_DISPLAY_TYPE, ItemDisplayContext.values());
         this.automaticSerializedName(RegistryTypes.BILLBOARD_TYPE, Display.BillboardConstraints.values());
+        this.automaticSerializedName(RegistryTypes.TEXT_ALIGNMENT, Display.TextDisplay.Align.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {

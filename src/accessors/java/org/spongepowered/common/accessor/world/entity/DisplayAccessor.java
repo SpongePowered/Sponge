@@ -24,13 +24,17 @@
  */
 package org.spongepowered.common.accessor.world.entity;
 
+import net.minecraft.util.Brightness;
 import net.minecraft.world.entity.Display;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import javax.annotation.Nullable;
 
 @Mixin(Display.class)
 public interface DisplayAccessor {
 
     @Invoker("setBillboardConstraints") void invoker$setBillboardConstraints(Display.BillboardConstraints $$0);
+    @Invoker("setBrightnessOverride") void invoker$setBrightnessOverride(@Nullable Brightness $$0);
 
 }

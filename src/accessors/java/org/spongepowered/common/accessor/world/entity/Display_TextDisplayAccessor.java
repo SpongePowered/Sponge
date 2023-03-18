@@ -35,4 +35,16 @@ public interface Display_TextDisplayAccessor {
 
     @Invoker("setText") void invoker$setText(Component component);
 
+    @Invoker("setLineWidth") void invoker$setLineWidth(int $$0);
+
+    @Invoker("getTextOpacity") byte invoker$getTextOpacity();
+
+    @Invoker("setTextOpacity") void invoker$setTextOpacity(byte $$0);
+
+    @Invoker("setFlags") void invoker$setFlags(byte $$0);
+
+    @Invoker("getBackgroundColor") int invoker$getBackgroundColor();
+
+    @Invoker("setBackgroundColor") void invoker$setBackgroundColor(int $$0);
+
 }

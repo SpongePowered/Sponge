@@ -600,6 +600,13 @@ public final class GeneratorMain {
                     Display.BillboardConstraints.class,
                     "getSerializedName",
                     "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                    "entity.display",
+                    "TextAlignments",
+                    Display.TextDisplay.Align.class,
+                    "getSerializedName",
+                    "sponge"
             )
         );
     }
