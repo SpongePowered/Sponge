@@ -22,29 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.entity;
+package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
-import com.mojang.math.Transformation;
-import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.util.Brightness;
-import net.minecraft.world.entity.Display;
+import net.minecraft.world.entity.Interaction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
 
-import javax.annotation.Nullable;
+@Mixin(Interaction.class)
+public abstract class InteractionMixin_API implements org.spongepowered.api.entity.Interaction {
 
-@Mixin(Display.class)
-public interface DisplayAccessor {
-
-    @Invoker("setBillboardConstraints") void invoker$setBillboardConstraints(Display.BillboardConstraints $$0);
-
-    @Invoker("setBrightnessOverride") void invoker$setBrightnessOverride(@Nullable Brightness $$0);
-
-    @Invoker("setTransformation") void invoker$setTransformation(Transformation $$0);
-
-    @Invoker("createTransformation") static Transformation invoker$createTransformation(SynchedEntityData $$0) {
-        throw new UntransformedInvokerError();
-    }
 
 }

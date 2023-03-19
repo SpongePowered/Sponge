@@ -445,7 +445,12 @@
         "minecraft.world.entity.DisplayMixin_API",
         "minecraft.world.entity.Display_BlockDisplayMixin_API",
         "minecraft.world.entity.Display_ItemDisplayMixin_API",
-        "minecraft.world.entity.Display_TextDisplayMixin_API"
+        "minecraft.world.entity.Display_TextDisplayMixin_API",
+        "minecraft.world.item.ItemDisplayContextMixin_API",
+        "minecraft.world.entity.Display_BillboardConstraintsMixin_API",
+        "minecraft.world.entity.Display_TextDisplay_AlignMixin_API",
+        "minecraft.world.entity.InteractionMixin_API",
+        "minecraft.world.entity.animal.sniffer.SnifferMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",

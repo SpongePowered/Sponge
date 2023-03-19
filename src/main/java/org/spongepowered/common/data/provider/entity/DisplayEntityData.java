@@ -24,19 +24,25 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import com.mojang.math.Transformation;
 import net.minecraft.util.Brightness;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.item.ItemDisplayContext;
+import org.joml.Quaterniond;
+import org.joml.Vector3f;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.display.BillboardType;
 import org.spongepowered.api.entity.display.ItemDisplayType;
+import org.spongepowered.api.util.Transform;
 import org.spongepowered.common.accessor.world.entity.DisplayAccessor;
 import org.spongepowered.common.accessor.world.entity.Display_ItemDisplayAccessor;
 import org.spongepowered.common.accessor.world.entity.Display_TextDisplayAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.math.matrix.Matrix4d;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.awt.Color;
 
@@ -62,6 +68,9 @@ public class DisplayEntityData {
                         .get(h -> DisplayEntityData.blockLight(h.getPackedBrightnessOverride()))
                         .set((h, v) -> ((DisplayAccessor)h).invoker$setBrightnessOverride(DisplayEntityData.brightness(h.getPackedBrightnessOverride(), null, v)))
                         .delete(h -> ((DisplayAccessor)h).invoker$setBrightnessOverride(null))
+                    .create(Keys.TRANSFORM)
+                        .get(DisplayEntityData::getTransform)
+                        .set(DisplayEntityData::setTransform)
                 .asMutable(Display.BlockDisplay.class)
                     .create(Keys.BLOCK_STATE)
                         .get(h -> ((BlockState) h.getBlockState()))
@@ -154,5 +163,32 @@ public class DisplayEntityData {
 
     private static int colorToInt(final Color color) {
         return color.getRGB();
+    }
+
+    private static Transform getTransform(final Display display) {
+        var vanillaTransform = DisplayAccessor.invoker$createTransformation(display.getEntityData());
+        var vMatrix = vanillaTransform.getMatrix();
+        var scale = vMatrix.getScale(new Vector3f());
+        var translation = vMatrix.getTranslation(new Vector3f());
+        var rotation = vMatrix.getNormalizedRotation(new Quaterniond());
+        var eulerRot = rotation.getEulerAnglesXYZ(new org.joml.Vector3d());
+
+        final Transform transform = Transform.of(new Vector3d(translation.x, translation.y, translation.z),
+                                                 new Vector3d(eulerRot.x, eulerRot.y, eulerRot.z),
+                                                 new Vector3d(scale.x, scale.y, scale.z));
+        return transform;
+    }
+
+    private static void setTransform(final Display h, final Transform transform) {
+
+        final Matrix4d matrix = transform.toMatrix();
+        var vMatrix = new org.joml.Matrix4f(
+                (float) matrix.get(0, 0), (float) matrix.get(1, 0), (float) matrix.get(2, 0), (float) matrix.get(3, 0),
+                (float) matrix.get(0, 1), (float) matrix.get(1, 1), (float) matrix.get(2, 1), (float) matrix.get(3, 1),
+                (float) matrix.get(0, 2), (float) matrix.get(1, 2), (float) matrix.get(2, 2), (float) matrix.get(3, 2),
+                (float) matrix.get(0, 3), (float) matrix.get(1, 3), (float) matrix.get(2, 3), (float) matrix.get(3, 3)
+        );
+        var vanillaTransform = new Transformation(vMatrix);
+        ((DisplayAccessor) h).invoker$setTransformation(vanillaTransform);
     }
 }

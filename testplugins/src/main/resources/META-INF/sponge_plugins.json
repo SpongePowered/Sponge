@@ -279,6 +279,12 @@
             "name": "Testing Damage",
             "entrypoint": "org.spongepowered.test.damage.DamageTest",
             "description": "Testing damage"
+        },
+        {
+            "id": "displayentitytest",
+            "name": "Display Entities Test",
+            "entrypoint": "org.spongepowered.test.entity.DisplayEntityTest",
+            "description": "Testing Display Entities"
         }
     ]
 }
