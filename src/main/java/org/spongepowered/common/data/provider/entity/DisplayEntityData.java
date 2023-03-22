@@ -34,6 +34,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.display.BillboardType;
 import org.spongepowered.api.entity.display.ItemDisplayType;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.common.accessor.world.entity.DisplayAccessor;
 import org.spongepowered.common.accessor.world.entity.Display_ItemDisplayAccessor;
@@ -71,6 +72,22 @@ public class DisplayEntityData {
                     .create(Keys.TRANSFORM)
                         .get(DisplayEntityData::getTransform)
                         .set(DisplayEntityData::setTransform)
+                .asMutable(DisplayAccessor.class)
+                    .create(Keys.INTERPOLATION_DURATION)
+                        .get(h -> Ticks.of(h.invoker$getInterpolationDuration()))
+                        .set((h ,v) -> h.invoker$setInterpolationDuration((int) v.ticks()))
+                    .create(Keys.INTERPOLATION_DELAY)
+                        .get(h -> Ticks.of(h.invoker$getInterpolationDelay()))
+                        .set((h ,v) -> h.invoker$setInterpolationDelay((int) v.ticks()))
+                    .create(Keys.SHADOW_RADIUS)
+                        .get(h -> (double) h.invoker$getShadowRadius())
+                        .set((h ,v) -> h.invoker$setShadowRadius(v.floatValue()))
+                    .create(Keys.SHADOW_STRENGTH)
+                        .get(h -> (double) h.invoker$getShadowStrength())
+                        .set((h ,v) -> h.invoker$setShadowStrength(v.floatValue()))
+                    .create(Keys.VIEW_RANGE)
+                        .get(h -> (double) h.invoker$getViewRange())
+                        .set((h ,v) -> h.invoker$setViewRange(v.floatValue()))
                 .asMutable(Display.BlockDisplay.class)
                     .create(Keys.BLOCK_STATE)
                         .get(h -> ((BlockState) h.getBlockState()))

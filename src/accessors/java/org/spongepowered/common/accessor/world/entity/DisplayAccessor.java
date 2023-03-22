@@ -47,4 +47,27 @@ public interface DisplayAccessor {
         throw new UntransformedInvokerError();
     }
 
+    @Invoker("setInterpolationDuration") void invoker$setInterpolationDuration(int $$0);
+
+    @Invoker("getInterpolationDuration") int invoker$getInterpolationDuration();
+
+
+    @Invoker("setInterpolationDelay") void invoker$setInterpolationDelay(int $$0);
+
+    @Invoker("getInterpolationDelay") int invoker$getInterpolationDelay();
+
+
+    @Invoker("setShadowRadius") void invoker$setShadowRadius(float $$0);
+
+    @Invoker("getShadowRadius") float invoker$getShadowRadius();
+
+
+    @Invoker("setShadowStrength") void invoker$setShadowStrength(float $$0);
+
+    @Invoker("getShadowStrength") float invoker$getShadowStrength();
+
+    @Invoker("setViewRange") void invoker$setViewRange(float $$0);
+
+    @Invoker("getViewRange") float invoker$getViewRange();
+
 }
