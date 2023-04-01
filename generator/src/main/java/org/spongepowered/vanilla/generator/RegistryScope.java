@@ -141,8 +141,8 @@ enum RegistryScope {
 
     final MethodSpec registryGetter(final String registryTypeName, final TypeName valueType) {
         final var methodBuilder = MethodSpec.methodBuilder("registry")
-            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-            .returns(ParameterizedTypeName.get(Types.REGISTRY, valueType));
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(ParameterizedTypeName.get(Types.REGISTRY, valueType));
 
         final CodeBlock registryType = CodeBlock.of("$T.$L", Types.REGISTRY_TYPES, registryTypeName.toUpperCase(Locale.ROOT));
         this.populateRegistryGetter(methodBuilder, registryType);

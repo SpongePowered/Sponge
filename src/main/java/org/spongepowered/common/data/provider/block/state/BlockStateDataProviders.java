@@ -30,6 +30,8 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
 
     @Override
     public void registerProviders() {
+        BlockStateDataProvider.register(this.registrator); // for all BlockStateProperties
+
         AbstractBannerData.register(this.registrator);
         AbstractButtonData.register(this.registrator);
         AbstractFurnaceData.register(this.registrator);

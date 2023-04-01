@@ -226,7 +226,7 @@ public final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());
         this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
         this.knownName(RegistryTypes.ENTITY_CATEGORY, MobCategory.values(), VanillaRegistryLoader.sanitizedName(MobCategory::getName));
-        this.automaticSerializedName(RegistryTypes.WALL_TYPE, WallSide.values());
+        this.automaticSerializedName(RegistryTypes.WALL_CONNECTION_STATE, WallSide.values());
         this.automaticName(RegistryTypes.GRASS_COLOR_MODIFIER, BiomeSpecialEffects.GrassColorModifier.values());
         this.automaticName(RegistryTypes.PRECIPITATION, Biome.Precipitation.values());
         this.automaticName(RegistryTypes.TEMPERATURE_MODIFIER, Biome.TemperatureModifier.values());

@@ -68,7 +68,6 @@
         "minecraft.stats.StatMixin_API",
         "minecraft.stats.StatTypeMixin_API",
         "minecraft.tags.TagKeyMixin_API",
-        "minecraft.world.damagesource.DamageSourceMixin_API",
         "minecraft.util.RandomSourceMixin_API",
         "minecraft.world.DifficultyMixin_API",
         "minecraft.world.InteractionHandMixin_API",
@@ -450,7 +449,11 @@
         "minecraft.world.entity.Display_BillboardConstraintsMixin_API",
         "minecraft.world.entity.Display_TextDisplay_AlignMixin_API",
         "minecraft.world.entity.InteractionMixin_API",
-        "minecraft.world.entity.animal.sniffer.SnifferMixin_API"
+        "minecraft.world.entity.animal.sniffer.SnifferMixin_API",
+        "minecraft.world.level.block.state.properties.WallSideMixin_API",
+        "minecraft.world.level.block.state.properties.BambooLeavesMixin_API",
+        "minecraft.world.level.block.state.properties.BellAttachTypeMixin_API",
+        "minecraft.world.level.block.state.properties.FrontAndTopMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",
