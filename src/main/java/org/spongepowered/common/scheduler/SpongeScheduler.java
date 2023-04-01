@@ -62,7 +62,7 @@ public abstract class SpongeScheduler implements Scheduler {
     private final String tag;
 
     // The simple queue of all pending (and running) ScheduledTasks
-    protected final Map<UUID, SpongeScheduledTask> tasks = new ConcurrentHashMap<>();
+    private final Map<UUID, SpongeScheduledTask> tasks = new ConcurrentHashMap<>();
     private long sequenceNumber = 0L;
 
     SpongeScheduler(final String tag) {
@@ -107,9 +107,7 @@ public abstract class SpongeScheduler implements Scheduler {
     @Override
     public Optional<ScheduledTask> findTask(final UUID id) {
         Objects.requireNonNull(id, "id");
-        synchronized (this.tasks) {
-            return Optional.ofNullable(this.tasks.get(id));
-        }
+        return Optional.ofNullable(this.tasks.get(id));
     }
 
     @Override
@@ -130,9 +128,7 @@ public abstract class SpongeScheduler implements Scheduler {
 
     @Override
     public Set<ScheduledTask> tasks() {
-        synchronized (this.tasks) {
-            return Sets.newHashSet(this.tasks.values());
-        }
+        return Sets.newHashSet(this.tasks.values());
     }
 
     @Override

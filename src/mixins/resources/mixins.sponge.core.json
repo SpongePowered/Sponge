@@ -222,6 +222,7 @@
         "world.level.border.WorldBorderMixin",
         "world.level.chunk.ChunkGeneratorMixin",
         "world.level.chunk.LevelChunkMixin",
+        "world.level.chunk.storage.IOWorkerMixin",
         "world.level.dimension.DimensionTypeMixin",
         "world.level.dimension.LevelStemMixin",
         "world.level.entity.PersistentEntitySectionManagerMixin",

@@ -31,6 +31,22 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 @ConfigSerializable
 public final class MovementChecksCategory {
 
+    @Setting("moved-wrongly-threshold")
+    @Comment("Sets the threshold for whether the 'player moved wrongly!' check will be enforced")
+    public double movedWronglyThreshold = 0.0625;
+
+    @Setting("vehicle-moved-wrongly-threshold")
+    @Comment("Sets the threshold for whether the 'vehicle of player moved wrongly!' check will be enforced")
+    public double vehicleMovedWronglyThreshold = 0.0625;
+
+    @Setting("moved-too-quickly-threshold")
+    @Comment("Sets the threshold for whether the 'player moved too quickly!' check will be enforced")
+    public double movedTooQuicklyThreshold = 100.0;
+
+    @Setting("vehicle-moved-too-quickly-threshold")
+    @Comment("Sets the threshold for whether the 'vehicle of player moved too quickly!' check will be enforced")
+    public double vehicleMovedTooQuicklyThreshold = 100.0;
+
     @Setting("moved-wrongly")
     @Comment("Controls whether the 'player/entity moved wrongly!' check will be enforced")
     public boolean movedWrongly = true;

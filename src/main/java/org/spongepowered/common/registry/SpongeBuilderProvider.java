@@ -170,7 +170,7 @@ import org.spongepowered.common.event.cause.entity.damage.SpongeBlockDamageSourc
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSourceBuilder;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageType;
 import org.spongepowered.common.event.cause.entity.damage.SpongeEntityDamageSourceBuilder;
-import org.spongepowered.common.event.cause.entity.damage.SpongeFallingBlockDamgeSourceBuilder;
+import org.spongepowered.common.event.cause.entity.damage.SpongeFallingBlockDamageSourceBuilder;
 import org.spongepowered.common.event.cause.entity.damage.SpongeIndirectEntityDamageSourceBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.fluid.SpongeFluidStackSnapshotBuilder;
@@ -273,7 +273,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(DamageSource.Builder.class, SpongeDamageSourceBuilder::new)
                 .register(EntityDamageSource.Builder.class, SpongeEntityDamageSourceBuilder::new)
                 .register(IndirectEntityDamageSource.Builder.class, SpongeIndirectEntityDamageSourceBuilder::new)
-                .register(FallingBlockDamageSource.Builder.class, SpongeFallingBlockDamgeSourceBuilder::new)
+                .register(FallingBlockDamageSource.Builder.class, SpongeFallingBlockDamageSourceBuilder::new)
                 .register(BlockDamageSource.Builder.class, SpongeBlockDamageSourceBuilder::new)
                 .register(Explosion.Builder.class, SpongeExplosionBuilder::new)
                 .register(BlockState.Builder.class, SpongeBlockStateBuilder::new)

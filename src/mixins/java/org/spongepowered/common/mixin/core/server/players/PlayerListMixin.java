@@ -119,6 +119,7 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -177,8 +178,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                 final Ban.Profile var0 = profileBanOpt.get();
                 final MutableComponent var1 = new TranslatableComponent("multiplayer.disconnect.banned.reason", var0.reason().orElse(Component.empty()));
                 if (var0.expirationDate().isPresent()) {
-                    var1.append(new TranslatableComponent("multiplayer.disconnect.banned.expiration",
-                        PlayerListMixin.BAN_DATE_FORMAT.format(var0.expirationDate().get())));
+                    Date date = Date.from(var0.expirationDate().get());
+                    var1.append(new TranslatableComponent("multiplayer.disconnect.banned.expiration", BAN_DATE_FORMAT.format(date)));
                 }
                 return CompletableFuture.completedFuture(var1);
             }
@@ -198,8 +199,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                     final Ban.IP var2 = ipBanOpt.get();
                     final MutableComponent var3 = new TranslatableComponent("multiplayer.disconnect.banned_ip.reason", var2.reason().orElse(Component.empty()));
                     if (var2.expirationDate().isPresent()) {
-                        var3.append(new TranslatableComponent("multiplayer.disconnect.banned_ip.expiration",
-                            PlayerListMixin.BAN_DATE_FORMAT.format(var2.expirationDate().get())));
+                        Date date = Date.from(var2.expirationDate().get());
+                        var3.append(new TranslatableComponent("multiplayer.disconnect.banned_ip.expiration", BAN_DATE_FORMAT.format(date)));
                     }
                     return CompletableFuture.completedFuture(var3);
                 }

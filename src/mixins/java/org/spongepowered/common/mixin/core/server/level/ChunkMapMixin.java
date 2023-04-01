@@ -47,11 +47,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.level.ServerChunkCacheAccessor;
+import org.spongepowered.common.accessor.world.level.chunk.storage.ChunkStorageAccessor;
 import org.spongepowered.common.bridge.world.DistanceManagerBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.bridge.world.server.ChunkMapBridge;
 import org.spongepowered.common.event.ShouldFire;
@@ -72,6 +75,11 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         // The ticket manager on this object is a package-private class and isn't accessible from here
         // - @Shadow doesn't work because it seems to need the exact type.
         return (DistanceManagerBridge) ((ServerChunkCacheAccessor) this.level.getChunkSource()).accessor$distanceManager();
+    }
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void impl$setIOWorkerDimension(final CallbackInfo ci) {
+        ((IOWorkerBridge) ((ChunkStorageAccessor) this).accessor$worker()).bridge$setDimension(this.level.dimension());
     }
 
     @Redirect(method = "save",
@@ -125,10 +133,9 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         level.unload(chunk);
 
         for (final Direction dir : Constants.Chunk.CARDINAL_DIRECTIONS) {
-            final Vector3i neighborPos = chunkPos.add(dir.asBlockOffset());
-            final ChunkAccess neighbor = this.level.getChunk(neighborPos.x(), neighborPos.z(), ChunkStatus.EMPTY, false);
-            if (neighbor instanceof LevelChunk) {
-                final int index = DirectionUtil.directionToIndex(dir);
+            final int index = DirectionUtil.directionToIndex(dir);
+            final LevelChunk neighbor = ((LevelChunkBridge) chunk).bridge$getNeighborChunk(index);
+            if (neighbor != null) {
                 final int oppositeIndex = DirectionUtil.directionToIndex(dir.opposite());
                 ((LevelChunkBridge) chunk).bridge$setNeighborChunk(index, null);
                 ((LevelChunkBridge) neighbor).bridge$setNeighborChunk(oppositeIndex, null);
@@ -140,17 +147,6 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
                 (ResourceKey) (Object) this.level.dimension().location());
             SpongeCommon.post(event);
         }
-    }
-
-    @Inject(method = "save", at = @At(value = "RETURN"))
-    private void impl$onSaved(final ChunkAccess var1, final CallbackInfoReturnable<Boolean> cir) {
-        if (ShouldFire.CHUNK_EVENT_SAVE_POST) {
-            final Vector3i chunkPos = new Vector3i(var1.getPos().x, 0, var1.getPos().z);
-            final ChunkEvent.Save.Post postSave = SpongeEventFactory.createChunkEventSavePost(PhaseTracker.getInstance().currentCause(), chunkPos,
-                    (ResourceKey) (Object) this.level.dimension().location());
-            SpongeCommon.post(postSave);
-        }
-
     }
 
     @Inject(method = "save", at = @At(value = "HEAD"), cancellable = true)

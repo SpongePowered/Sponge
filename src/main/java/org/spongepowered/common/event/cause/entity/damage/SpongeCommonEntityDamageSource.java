@@ -60,13 +60,6 @@ public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource 
         ((EntityDamageSourceAccessor) this).accessor$entity(entitySource);
     }
 
-    public void bridge$setDamageIsAbsolute() {
-        this.bypassMagic();
-    }
-    public void bridge$setDamageBypassesArmor() {
-        this.bypassArmor();
-    }
-
     @Override
     public Entity getEntity() {
         return (Entity) this.source();

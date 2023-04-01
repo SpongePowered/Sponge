@@ -39,20 +39,15 @@ import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 
 import java.lang.ref.WeakReference;
 
-public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBuilder<FallingBlockDamageSource, FallingBlockDamageSource.Builder> implements FallingBlockDamageSource.Builder {
+public final class SpongeFallingBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<FallingBlockDamageSource, FallingBlockDamageSource.Builder> implements FallingBlockDamageSource.Builder {
 
     protected WeakReference<Entity> reference = null;
 
     @Override
-    public SpongeFallingBlockDamgeSourceBuilder entity(final Entity entity) {
+    public SpongeFallingBlockDamageSourceBuilder entity(final Entity entity) {
         checkArgument(entity instanceof FallingBlock);
         this.reference = new WeakReference<>(entity);
         return this;
-    }
-
-    @Override
-    public FallingBlockDamageSource.Builder fire() {
-        return null;
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -81,6 +76,9 @@ public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSo
         if (this.explosion) {
             damageSource.setExplosion();
         }
+        if (this.fire) {
+            accessor.invoker$setIsFire();
+        }
         if (this.exhaustion != null) {
             accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }
@@ -95,7 +93,7 @@ public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSo
     }
 
     @Override
-    public SpongeFallingBlockDamgeSourceBuilder reset() {
+    public SpongeFallingBlockDamageSourceBuilder reset() {
         super.reset();
         this.reference = null;
         return this;

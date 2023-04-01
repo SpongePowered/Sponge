@@ -22,17 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.listener;
+package org.spongepowered.common.accessor.world.level.chunk.storage;
 
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.filter.IsCancelled;
-import org.spongepowered.common.event.EventFilterTest;
+import net.minecraft.world.level.chunk.storage.ChunkStorage;
+import net.minecraft.world.level.chunk.storage.IOWorker;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public class InvalidCancelledListener {
+@Mixin(ChunkStorage.class)
+public interface ChunkStorageAccessor {
 
-    @Listener
-    @IsCancelled
-    public void onEvent(EventFilterTest.UncancellableEvent event) {
-    }
-
+    @Accessor("worker") IOWorker accessor$worker();
 }

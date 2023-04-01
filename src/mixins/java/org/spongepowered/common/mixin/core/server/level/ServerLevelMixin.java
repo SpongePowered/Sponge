@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -36,6 +35,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.ProgressListener;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
@@ -65,8 +65,10 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
@@ -78,6 +80,7 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.weather.Weather;
@@ -90,12 +93,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
@@ -144,7 +150,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     private LevelStorageSource.LevelStorageAccess impl$levelSave;
     private CustomBossEvents impl$bossBarManager;
     private ChunkProgressListener impl$chunkStatusListener;
-    private Map<Entity, Vector3d> impl$rotationUpdates;
     private Weather impl$prevWeather;
     private boolean impl$isManualSave = false;
     private long impl$preTickTime = 0L;
@@ -156,7 +161,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                                      final CallbackInfo ci) {
         this.impl$levelSave = p_i241885_3_;
         this.impl$chunkStatusListener = p_i241885_7_;
-        this.impl$rotationUpdates = new Object2ObjectOpenHashMap<>();
         this.impl$prevWeather = ((ServerWorld) this).weather();
         ((LevelTicksBridge<?>) this.blockTicks).bridge$setGameTimeSupplier(this.levelData::getGameTime);
         ((LevelTicksBridge<?>) this.fluidTicks).bridge$setGameTimeSupplier(this.levelData::getGameTime);
@@ -216,21 +220,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
 
         return this.impl$bossBarManager;
-    }
-
-    @Override
-    public void bridge$addEntityRotationUpdate(final net.minecraft.world.entity.Entity entity, final Vector3d rotation) {
-        this.impl$rotationUpdates.put(entity, rotation);
-    }
-
-    @Override
-    public void bridge$updateRotation(final net.minecraft.world.entity.Entity entityIn) {
-        final Vector3d rotationUpdate = this.impl$rotationUpdates.get(entityIn);
-        if (rotationUpdate != null) {
-            entityIn.setXRot((float) rotationUpdate.x());
-            entityIn.setYRot((float) rotationUpdate.y());
-        }
-        this.impl$rotationUpdates.remove(entityIn);
     }
 
     @Override
@@ -331,6 +320,10 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Overwrite
     public void save(@Nullable final ProgressListener progress, final boolean flush, final boolean skipSave) {
 
+        final boolean isManualSave = this.impl$isManualSave;
+
+        this.impl$isManualSave = false;
+
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
 
         if (Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPre(currentCause, ((ServerWorld) this)))) {
@@ -370,17 +363,12 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                 progress.progressStage(new TranslatableComponent("menu.savingChunks"));
             }
 
-            final boolean canAutomaticallySave = !this.impl$isManualSave && behavior == SerializationBehavior.AUTOMATIC;
-            final boolean canManuallySave = this.impl$isManualSave && behavior == SerializationBehavior.MANUAL;
-
-            if (canAutomaticallySave || canManuallySave) {
+            if (behavior == SerializationBehavior.AUTOMATIC || (isManualSave && behavior == SerializationBehavior.MANUAL)) {
                 chunkProvider.save(flush);
             }
 
             Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPost(currentCause, ((ServerWorld) this)));
         }
-
-        this.impl$isManualSave = false;
     }
 
     @Inject(method = "advanceWeatherCycle",

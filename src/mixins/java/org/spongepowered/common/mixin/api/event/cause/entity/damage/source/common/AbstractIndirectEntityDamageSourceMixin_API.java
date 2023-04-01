@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
 import org.spongepowered.common.event.cause.entity.damage.SpongeCommonIndirectEntityDamageSource;
 
 /*
@@ -48,28 +49,36 @@ public abstract class AbstractIndirectEntityDamageSourceMixin_API implements Ind
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setUpBridges(final CallbackInfo callbackInfo) {
-        final SpongeCommonIndirectEntityDamageSource commonIndirect = (SpongeCommonIndirectEntityDamageSource) (Object) this;
-        commonIndirect.setDamageType(this.type().name());
-        commonIndirect.setEntitySource((Entity) this.source());
-        commonIndirect.setIndirectSource((Entity) this.indirectSource());
+        final SpongeCommonIndirectEntityDamageSource commonSource = (SpongeCommonIndirectEntityDamageSource) (Object) this;
+        final DamageSourceAccessor accessor = (DamageSourceAccessor) commonSource;
+
+        commonSource.setDamageType(this.type().name());
+        commonSource.setEntitySource((Entity) this.source());
+        commonSource.setIndirectSource((Entity) this.indirectSource());
+
         if (this.isAbsolute()) {
-            commonIndirect.bridge$setDamageIsAbsolute();
+            accessor.invoker$bypassMagic();
         }
         if (this.isBypassingArmor()) {
-            commonIndirect.bridge$setDamageBypassesArmor();
+            accessor.invoker$bypassArmor();
         }
         if (this.isExplosive()) {
-            commonIndirect.setExplosion();
+            commonSource.setExplosion();
         }
         if (this.isMagic()) {
-            commonIndirect.setMagic();
+            commonSource.setMagic();
         }
         if (this.isScaledByDifficulty()) {
-            commonIndirect.setScalesWithDifficulty();
+            commonSource.setScalesWithDifficulty();
         }
         if (this.doesAffectCreative()) {
-            commonIndirect.isBypassInvul();
+            accessor.invoker$bypassInvul();
         }
+        if (this.isFire()) {
+            accessor.invoker$setIsFire();
+        }
+
+        accessor.accessor$exhaustion((float) this.exhaustion());
     }
 
 }

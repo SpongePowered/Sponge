@@ -314,6 +314,7 @@ allprojects {
             trimTrailingWhitespace()
             removeUnusedImports()
             importOrderFile(rootProject.file("SpongeAPI/extra/eclipse/sponge_eclipse.importorder"))
+            targetExclude("build/generated/**/*") // exclude generated content
         }
         kotlinGradle {
             endWithNewline()

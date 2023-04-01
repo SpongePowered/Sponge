@@ -191,6 +191,7 @@
         "world.level.chunk.LevelChunk$BoundTickingBlockEntityAccessor",
         "world.level.chunk.LevelChunk$RebindableTickingBlockEntityWrapperAccessor",
         "world.level.chunk.LevelChunkAccessor",
+        "world.level.chunk.storage.ChunkStorageAccessor",
         "world.level.dimension.DimensionTypeAccessor",
         "world.level.entity.EntityTickListAccessor",
         "world.level.entity.PersistentEntitySectionManagerAccessor",

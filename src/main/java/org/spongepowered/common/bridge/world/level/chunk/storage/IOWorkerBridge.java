@@ -22,29 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server.level;
+package org.spongepowered.common.bridge.world.level.chunk.storage;
 
-import net.minecraft.server.bossevents.CustomBossEvents;
-import net.minecraft.server.level.progress.ChunkProgressListener;
-import net.minecraft.world.level.storage.LevelStorageSource;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.world.explosion.Explosion;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
-public interface ServerLevelBridge {
+public interface IOWorkerBridge {
 
-    LevelStorageSource.LevelStorageAccess bridge$getLevelSave();
-
-    ChunkProgressListener bridge$getChunkStatusListener();
-
-    boolean bridge$isLoaded();
-
-    CustomBossEvents bridge$getBossBarManager();
-
-    void bridge$triggerExplosion(Explosion explosion);
-
-    void bridge$setManualSave(boolean state);
-
-    BlockSnapshot bridge$createSnapshot(int x, int y, int z);
-
-    long[] bridge$recentTickTimes();
+    void bridge$setDimension(ResourceKey<Level> dimension);
 }

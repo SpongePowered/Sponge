@@ -30,6 +30,7 @@ import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.objectweb.asm.Opcodes.IFNE;
+import static org.objectweb.asm.Opcodes.INSTANCEOF;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 
 import org.objectweb.asm.ClassWriter;
@@ -60,21 +61,43 @@ public class CancellationEventFilterDelegate implements FilterDelegate {
         if (this.state == Tristate.UNDEFINED) {
             return locals;
         }
-        if (!Cancellable.class.isAssignableFrom(method.parameterTypes()[0].clazz())) {
-            throw new IllegalStateException("Attempted to filter a non-cancellable event type by its cancellation status");
+
+        final boolean checkCancellable = !Cancellable.class.isAssignableFrom(method.parameterTypes()[0].clazz());
+        final String cancellableClassName = Type.getInternalName(Cancellable.class);
+        final Label notCancelled = new Label();
+
+        if (checkCancellable) {
+            mv.visitVarInsn(ALOAD, 1);
+            mv.visitTypeInsn(INSTANCEOF, cancellableClassName);
+            mv.visitJumpInsn(IFEQ, notCancelled);
         }
+
         mv.visitVarInsn(ALOAD, 1);
-        mv.visitTypeInsn(CHECKCAST, Type.getInternalName(Cancellable.class));
-        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Cancellable.class), "isCancelled", "()Z", true);
-        final Label success = new Label();
-        if (this.state == Tristate.TRUE) {
-            mv.visitJumpInsn(IFNE, success);
-        } else {
-            mv.visitJumpInsn(IFEQ, success);
+        if (checkCancellable) {
+            mv.visitTypeInsn(CHECKCAST, cancellableClassName);
         }
-        mv.visitInsn(ACONST_NULL);
-        mv.visitInsn(ARETURN);
-        mv.visitLabel(success);
+        mv.visitMethodInsn(INVOKEINTERFACE, cancellableClassName, "isCancelled", "()Z", true);
+
+        if (this.state == Tristate.TRUE) {
+            final Label cancelled = new Label();
+            mv.visitJumpInsn(IFNE, cancelled);
+
+            if (checkCancellable) {
+                mv.visitLabel(notCancelled);
+            }
+            mv.visitInsn(ACONST_NULL);
+            mv.visitInsn(ARETURN);
+
+            mv.visitLabel(cancelled);
+        } else {
+            mv.visitJumpInsn(IFEQ, notCancelled);
+
+            mv.visitInsn(ACONST_NULL);
+            mv.visitInsn(ARETURN);
+
+            mv.visitLabel(notCancelled);
+        }
+
         return locals;
     }
 

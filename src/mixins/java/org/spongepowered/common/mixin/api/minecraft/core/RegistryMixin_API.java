@@ -58,6 +58,7 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     @Shadow @Nullable public abstract ResourceLocation shadow$getKey(T p_177774_1_);
     @Shadow public abstract Optional<HolderSet.Named<T>> shadow$getTag(TagKey<T> var1);
     @Shadow public abstract Optional<T> shadow$getOptional(@Nullable net.minecraft.resources.ResourceLocation param0);
+    @Shadow @Nullable public abstract T shadow$get(@Nullable ResourceLocation var1);
     // @formatter:on
 
     @Shadow public abstract net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> key();
@@ -100,8 +101,12 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
 
     @Override
     public <V extends T> V value(final ResourceKey key) {
-        return (V) this.shadow$getOptional((ResourceLocation) (Object) Objects.requireNonNull(key, "key"))
-            .orElseThrow(() -> new ValueNotFoundException(String.format("No value was found for key '%s'!", key)));
+        final V value = (V) this.shadow$get((ResourceLocation) (Object) Objects.requireNonNull(key, "key"));
+        if (value != null) {
+            return value;
+        }
+
+        throw new ValueNotFoundException(String.format("No value was found for key '%s'!", key));
     }
 
     @Override

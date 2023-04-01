@@ -85,10 +85,19 @@ public final class ArmorStandData {
                         .set((h, v) -> ((ArmorStandAccessor) h).invoker$setNoBasePlate(!v))
                     .create(Keys.HAS_MARKER)
                         .get(ArmorStand::isMarker)
-                        .set((h, v) -> ((ArmorStandAccessor) h).invoker$setMarker(v))
+                        .set((h, v) -> {
+                            ((ArmorStandAccessor) h).invoker$setMarker(v);
+                            h.noPhysics = !((ArmorStandAccessor) h).invoker$hasPhysics();
+                        })
                     .create(Keys.HEAD_ROTATION)
                         .get(h -> VecHelper.toVector3d(h.getHeadPose()))
                         .set((h, v) -> h.setHeadPose(VecHelper.toRotation(v)))
+                    .create(Keys.IS_GRAVITY_AFFECTED)
+                        .get(h -> !h.isNoGravity())
+                        .set((h, v) -> {
+                            h.setNoGravity(!v);
+                            h.noPhysics = !((ArmorStandAccessor) h).invoker$hasPhysics();
+                        })
                     .create(Keys.IS_PLACING_DISABLED)
                         .get(h -> Sponge.game().registry(RegistryTypes.EQUIPMENT_TYPE)
                                 .streamEntries()

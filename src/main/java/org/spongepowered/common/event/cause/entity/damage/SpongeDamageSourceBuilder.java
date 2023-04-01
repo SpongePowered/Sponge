@@ -165,11 +165,11 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
         if (this.explosion) {
             source.setExplosion();
         }
-        if (this.exhaustion != null) {
-            accessor.accessor$exhaustion(this.exhaustion.floatValue());
-        }
         if (this.fire) {
             accessor.invoker$setIsFire();
+        }
+        if (this.exhaustion != null) {
+            accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }
         return (DamageSource) source;
     }
