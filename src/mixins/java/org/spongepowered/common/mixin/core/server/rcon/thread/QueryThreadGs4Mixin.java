@@ -65,6 +65,12 @@ public abstract class QueryThreadGs4Mixin {
 
     @Redirect(method = "processPacket", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/rcon/thread/QueryThreadGs4;sendTo([BLjava/net/DatagramPacket;)V"))
     public void impl$basicSendTo(QueryThreadGs4 query, byte[] param0, DatagramPacket datagramPacket) throws IOException {
+        if (datagramPacket.getLength() == 15) {
+            // We already generated the full query event and response in another mixin
+            this.shadow$sendTo(param0, datagramPacket);
+            return;
+        }
+
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
         final QueryServerEvent.Basic event = SpongeEventFactory.createQueryServerEventBasic(currentCause,
                 (InetSocketAddress) datagramPacket.getSocketAddress(),
