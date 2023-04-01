@@ -47,7 +47,7 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
                 && !this.creative
                 && !this.fire
                 && this.exhaustion == null
-                && this.damageType.equals(DamageTypes.DROWN)
+                && this.damageType.equals(DamageTypes.DROWN.get())
         ) {
             return (DamageSource) net.minecraft.world.damagesource.DamageSource.DROWN;
         }
@@ -165,11 +165,11 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
         if (this.explosion) {
             source.setExplosion();
         }
-        if (this.exhaustion != null) {
-            accessor.accessor$exhaustion(this.exhaustion.floatValue());
-        }
         if (this.fire) {
             accessor.invoker$setIsFire();
+        }
+        if (this.exhaustion != null) {
+            accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }
         return (DamageSource) source;
     }

@@ -65,15 +65,6 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends net.minecra
         ((IndirectEntityDamageSourceAccessor) this).accessor$owner(entity);
     }
 
-
-    public void bridge$setDamageIsAbsolute() {
-        this.bypassMagic();
-    }
-    public void bridge$setDamageBypassesArmor() {
-        this.bypassArmor();
-    }
-
-
     @Override
     public Entity getEntity() {
         return (Entity) this.source();

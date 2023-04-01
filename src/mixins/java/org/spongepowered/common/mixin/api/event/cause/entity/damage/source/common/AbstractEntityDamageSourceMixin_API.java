@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
 import org.spongepowered.common.event.cause.entity.damage.SpongeCommonEntityDamageSource;
 
 /*
@@ -49,13 +50,16 @@ public abstract class AbstractEntityDamageSourceMixin_API implements EntityDamag
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$bridgeApiToImplConstruction(final CallbackInfo callbackInfo) {
         final SpongeCommonEntityDamageSource commonSource = (SpongeCommonEntityDamageSource) (Object) this;
+        final DamageSourceAccessor accessor = (DamageSourceAccessor) commonSource;
+
         commonSource.setDamageType(this.type().name());
         commonSource.setEntitySource((Entity) this.source());
+
         if (this.isAbsolute()) {
-            commonSource.bridge$setDamageIsAbsolute();
+            accessor.invoker$bypassMagic();
         }
         if (this.isBypassingArmor()) {
-            commonSource.bridge$setDamageBypassesArmor();
+            accessor.invoker$bypassArmor();
         }
         if (this.isExplosive()) {
             commonSource.setExplosion();
@@ -67,8 +71,13 @@ public abstract class AbstractEntityDamageSourceMixin_API implements EntityDamag
             commonSource.setScalesWithDifficulty();
         }
         if (this.doesAffectCreative()) {
-            commonSource.isBypassInvul();
+            accessor.invoker$bypassInvul();
         }
+        if (this.isFire()) {
+            accessor.invoker$setIsFire();
+        }
+
+        accessor.accessor$exhaustion((float) this.exhaustion());
     }
 
 }
