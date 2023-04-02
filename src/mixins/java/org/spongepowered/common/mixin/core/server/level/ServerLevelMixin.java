@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -37,7 +36,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.ProgressListener;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.player.Player;
@@ -148,7 +146,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     private LevelStorageSource.LevelStorageAccess impl$levelSave;
     private CustomBossEvents impl$bossBarManager;
     private ChunkProgressListener impl$chunkStatusListener;
-    private Map<Entity, Vector3d> impl$rotationUpdates;
     private Weather impl$prevWeather;
     private boolean impl$isManualSave = false;
     private long impl$preTickTime = 0L;
@@ -159,7 +156,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             final List $$9, final boolean $$10, final CallbackInfo ci) {
         this.impl$levelSave = $$2;
         this.impl$chunkStatusListener = $$6;
-        this.impl$rotationUpdates = new Object2ObjectOpenHashMap<>();
         this.impl$prevWeather = ((ServerWorld) this).weather();
         ((LevelTicksBridge<?>) this.blockTicks).bridge$setGameTimeSupplier(this.levelData::getGameTime);
         ((LevelTicksBridge<?>) this.fluidTicks).bridge$setGameTimeSupplier(this.levelData::getGameTime);
