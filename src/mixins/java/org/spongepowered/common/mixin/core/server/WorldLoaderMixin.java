@@ -24,10 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.WorldLoader;
+import net.minecraft.server.packs.resources.CloseableResourceManager;
+import net.minecraft.world.level.WorldDataConfiguration;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -35,6 +38,14 @@ import org.spongepowered.common.launch.Launch;
 
 @Mixin(WorldLoader.class)
 public abstract class WorldLoaderMixin {
+
+    @Redirect(method = "load", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/WorldLoader$PackConfig;createResourceManager()Lcom/mojang/datafixers/util/Pair;"))
+    private static Pair<WorldDataConfiguration, CloseableResourceManager> impl$onGetSecond(final WorldLoader.PackConfig instance) {
+        final Pair<WorldDataConfiguration, CloseableResourceManager> pair = instance.createResourceManager();
+        Launch.instance().lifecycle().setWorldDataConfiguration(pair.getFirst());
+        return pair;
+    }
 
     @Redirect(method = "load", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/core/LayeredRegistryAccess;getAccessForLoading(Ljava/lang/Object;)Lnet/minecraft/core/RegistryAccess$Frozen;"))

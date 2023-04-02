@@ -27,6 +27,7 @@ package org.spongepowered.common.launch;
 import com.google.inject.Injector;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.RegistryLayer;
+import net.minecraft.world.level.WorldDataConfiguration;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Server;
@@ -81,4 +82,5 @@ public interface Lifecycle {
 
     void callStoppedGameEvent();
 
+    void setWorldDataConfiguration(WorldDataConfiguration first);
 }

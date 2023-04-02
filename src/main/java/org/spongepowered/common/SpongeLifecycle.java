@@ -32,6 +32,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.RegistryLayer;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.level.WorldDataConfiguration;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
@@ -72,6 +74,7 @@ public final class SpongeLifecycle implements Lifecycle {
 
     private final Game game;
     private final Injector injector;
+    private FeatureFlagSet featureFlags;
 
     @Inject
     public SpongeLifecycle(final Game game, final Injector injector) {
@@ -121,7 +124,7 @@ public final class SpongeLifecycle implements Lifecycle {
         {
             // WORLDGEN ->
             case DIMENSIONS -> {
-                SpongeRegistries.registerGlobalRegistriesDimensionLayer((SpongeRegistryHolder) this.game, registryAccess);
+                SpongeRegistries.registerGlobalRegistriesDimensionLayer((SpongeRegistryHolder) this.game, registryAccess, this.featureFlags);
 
                 // Plugin registries
                 this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
@@ -246,6 +249,11 @@ public final class SpongeLifecycle implements Lifecycle {
 
         // Then shut down our own thread pool
         ((AsyncScheduler) this.game.asyncScheduler()).close();
+    }
+
+    @Override
+    public void setWorldDataConfiguration(final WorldDataConfiguration config) {
+        this.featureFlags = config.enabledFeatures();
     }
 
     private Collection<PluginContainer> filterInternalPlugins(final Collection<PluginContainer> plugins) {
