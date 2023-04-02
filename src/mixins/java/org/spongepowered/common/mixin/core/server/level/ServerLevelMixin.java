@@ -119,11 +119,9 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
