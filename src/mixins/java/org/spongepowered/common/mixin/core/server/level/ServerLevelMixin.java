@@ -45,10 +45,13 @@ import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
@@ -61,6 +64,7 @@ import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.ticks.LevelTicks;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -75,8 +79,10 @@ import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.sound.PlaySoundEvent;
 import org.spongepowered.api.event.world.ChangeWeatherEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
@@ -234,21 +240,6 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     }
 
     @Override
-    public void bridge$addEntityRotationUpdate(final net.minecraft.world.entity.Entity entity, final Vector3d rotation) {
-        this.impl$rotationUpdates.put(entity, rotation);
-    }
-
-    @Override
-    public void bridge$updateRotation(final net.minecraft.world.entity.Entity entityIn) {
-        final Vector3d rotationUpdate = this.impl$rotationUpdates.get(entityIn);
-        if (rotationUpdate != null) {
-            entityIn.setXRot((float) rotationUpdate.x());
-            entityIn.setYRot((float) rotationUpdate.y());
-        }
-        this.impl$rotationUpdates.remove(entityIn);
-    }
-
-    @Override
     public void bridge$triggerExplosion(Explosion explosion) {
         // Sponge start
         // Set up the pre event
@@ -346,6 +337,10 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Overwrite
     public void save(@Nullable final ProgressListener progress, final boolean flush, final boolean skipSave) {
 
+        final boolean isManualSave = this.impl$isManualSave;
+
+        this.impl$isManualSave = false;
+
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
 
         if (Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPre(currentCause, ((ServerWorld) this)))) {
@@ -375,9 +370,9 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
                 levelData.setCustomBossEvents(((ServerLevelBridge) this).bridge$getBossBarManager().save());
 
-                final CompoundTag singlePlayerTag = this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList().getSingleplayerData() : null;
-                final RegistryAccess registryAccess = SpongeCommon.server().registryAccess();
-                ((ServerLevelBridge) this).bridge$getLevelSave().saveDataTag(registryAccess, (PrimaryLevelData) this.shadow$getLevelData(), singlePlayerTag);
+                ((ServerLevelBridge) this).bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess()
+                    , (PrimaryLevelData) this.shadow$getLevelData(), this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList()
+                        .getSingleplayerData() : null);
 
                 // Sponge End
             }
@@ -385,17 +380,12 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                 progress.progressStage(Component.translatable("menu.savingChunks"));
             }
 
-            final boolean canAutomaticallySave = !this.impl$isManualSave && behavior == SerializationBehavior.AUTOMATIC;
-            final boolean canManuallySave = this.impl$isManualSave && behavior == SerializationBehavior.MANUAL;
-
-            if (canAutomaticallySave || canManuallySave) {
+            if (behavior == SerializationBehavior.AUTOMATIC || (isManualSave && behavior == SerializationBehavior.MANUAL)) {
                 chunkProvider.save(flush);
             }
 
             Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPost(currentCause, ((ServerWorld) this)));
         }
-
-        this.impl$isManualSave = false;
     }
 
     @Inject(method = "advanceWeatherCycle",
@@ -526,6 +516,29 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             return;
         }
         manager.add(pos, type);
+    }
+
+    @Inject(
+        method = "tick",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/level/ServerLevel;emptyTime:I",
+            opcode = Opcodes.PUTFIELD,
+            shift = At.Shift.AFTER
+        )
+    )
+    private void impl$unloadBlockEntities(final BooleanSupplier param0, final CallbackInfo ci) {
+        /*
+         * This code fixes block entity memory leak when the level hasn't online players
+         * and forced chunks. For the first 300 ticks the level can still clean up removed
+         * block entities on its own (ticks are performed for block entities). After it
+         * this mixin code is responsible for the subsequent unloading of block entities.
+         * Such a memory leak occurs when a plugin writes a lot of blocks, but the level
+         * is without players.
+         */
+        if (this.emptyTime >= 300 && !this.blockEntityTickers.isEmpty()) {
+            this.blockEntityTickers.removeIf(TickingBlockEntity::isRemoved);
+        }
     }
 
     @Override

@@ -34,7 +34,7 @@ public interface ServerPlayerEntityHealthScaleBridge {
 
     void bridge$resetHealthScale();
 
-    double bridge$getHealthScale();
+    Double bridge$getHealthScale();
 
     float bridge$getInternalScaledHealth();
 

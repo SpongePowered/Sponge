@@ -41,6 +41,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -61,6 +62,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.MobAccessor;
+import org.spongepowered.common.accessor.world.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
@@ -68,6 +70,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 @Mixin(net.minecraft.world.level.Level.class)
@@ -82,6 +85,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
     @Shadow protected float thunderLevel;
     @Shadow @Final public RandomSource random;
     @Shadow @Final protected WritableLevelData levelData;
+    @Shadow @Final protected List<TickingBlockEntity> blockEntityTickers;
 
     @Shadow public abstract LevelData shadow$getLevelData();
     @Shadow public abstract void shadow$updateSkyBrightness();
@@ -197,7 +201,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
         // Some entities need to have non-null fields (and the easiest way to
         // set them is to use the more specialised constructor).
         if (type == net.minecraft.world.entity.EntityType.FALLING_BLOCK) {
-            entity = FallingBlockEntity.fall(thisWorld, new BlockPos((int) x, (int) y, (int) z), Blocks.SAND.defaultBlockState());
+            entity = FallingBlockEntityAccessor.invoker$new(thisWorld, x, y, z, Blocks.SAND.defaultBlockState());
         }
         if (type == net.minecraft.world.entity.EntityType.ITEM) {
             entity = new ItemEntity(thisWorld, x, y, z, new ItemStack(Blocks.STONE));

@@ -25,9 +25,12 @@
 package org.spongepowered.common.accessor.world.entity.item;
 
 import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(FallingBlockEntity.class)
 public interface FallingBlockEntityAccessor {
@@ -56,4 +59,7 @@ public interface FallingBlockEntityAccessor {
 
     @Accessor("fallDamagePerDistance") void accessor$fallDamagePerDistance(final float fallDamageAmount);
 
+    @Invoker("<init>") static FallingBlockEntity invoker$new(final Level world, final double x, final double y, final double z, final BlockState blockState) {
+        throw new UntransformedInvokerError();
+    }
 }

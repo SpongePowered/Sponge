@@ -22,17 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.listener;
+package org.spongepowered.common.bridge.world.level.chunk.storage;
 
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.filter.IsCancelled;
-import org.spongepowered.common.event.EventFilterTest;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
-public class InvalidCancelledListener {
+public interface IOWorkerBridge {
 
-    @Listener
-    @IsCancelled
-    public void onEvent(EventFilterTest.UncancellableEvent event) {
-    }
-
+    void bridge$setDimension(ResourceKey<Level> dimension);
 }

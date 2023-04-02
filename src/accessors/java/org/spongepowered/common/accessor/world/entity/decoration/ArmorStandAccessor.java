@@ -56,4 +56,6 @@ public interface ArmorStandAccessor {
 
     @Invoker("setMarker") void invoker$setMarker(final boolean marker);
 
+    @Invoker("hasPhysics") boolean invoker$hasPhysics();
+
 }

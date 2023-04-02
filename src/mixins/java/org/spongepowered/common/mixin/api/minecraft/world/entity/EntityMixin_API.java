@@ -61,7 +61,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
@@ -210,10 +209,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             ((ServerPlayer) (Object) this).connection.teleport(this.position().x(), this.position().y(),
                     this.position().z(), (float) rotation.y(), (float) rotation.x(), EnumSet.noneOf(RelativeMovement.class));
         } else {
-            if (!this.shadow$getCommandSenderWorld().isClientSide) { // We can't set the rotation update on client worlds.
-                ((ServerLevelBridge) this.world()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
-            }
-
             // Let the entity tracker do its job, this just updates the variables
             this.shadow$setRot((float) rotation.y(), (float) rotation.x());
         }

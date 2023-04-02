@@ -24,19 +24,9 @@
  */
 package org.spongepowered.common.bridge;
 
-import net.minecraft.world.entity.Entity;
 import org.spongepowered.common.config.tracker.TrackerConfig;
 
 public interface TrackableBridge {
-
-    /**
-     * Sets an entity to be tracked or untracked. Specifically used in
-     * Level#add(Entity) and
-     * {@link net.minecraft.server.level.ServerLevel.EntityCallbacks#onTrackingEnd(Entity)}
-     *
-     */
-    default void bridge$markEntityRemovedFromLevel() {
-    }
 
     default boolean bridge$shouldTick() {
         return true;

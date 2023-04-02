@@ -47,6 +47,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.UserBanList;
@@ -55,6 +56,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import net.minecraft.world.phys.Vec3;
 import org.objectweb.asm.Opcodes;
@@ -123,6 +125,7 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -185,8 +188,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                 final Ban.Profile var0 = profileBanOpt.get();
                 final MutableComponent var1 = net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.banned.reason", var0.reason().orElse(Component.empty()));
                 if (var0.expirationDate().isPresent()) {
-                    var1.append(net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.banned.expiration",
-                        PlayerListMixin.BAN_DATE_FORMAT.format(var0.expirationDate().get())));
+                    Date date = Date.from(var0.expirationDate().get());
+                    var1.append(net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.banned.expiration", BAN_DATE_FORMAT.format(date)));
                 }
                 return CompletableFuture.completedFuture(var1);
             }
@@ -206,8 +209,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                     final Ban.IP var2 = ipBanOpt.get();
                     final MutableComponent var3 = net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.banned_ip.reason", var2.reason().orElse(Component.empty()));
                     if (var2.expirationDate().isPresent()) {
-                        var3.append(net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.banned_ip.expiration",
-                            PlayerListMixin.BAN_DATE_FORMAT.format(var2.expirationDate().get())));
+                        Date date = Date.from(var2.expirationDate().get());
+                        var3.append(net.minecraft.network.chat.Component.translatable("multiplayer.disconnect.banned_ip.expiration", BAN_DATE_FORMAT.format(date)));
                     }
                     return CompletableFuture.completedFuture(var3);
                 }

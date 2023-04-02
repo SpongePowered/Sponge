@@ -71,7 +71,10 @@ val testPlugins = file("testplugins.settings.gradle.kts")
 if (testPlugins.exists()) {
     apply(from = testPlugins)
 } else {
-    testPlugins.writeText("// Uncomment to enable client module for debugging\n//include(\":testplugins\")\n")
+    testPlugins.writeText(listOf(
+        "// Uncomment to enable client module for debugging",
+        "//include(\":testplugins\")"
+    ).joinToString(separator = System.lineSeparator(), postfix = System.lineSeparator()))
 }
 val testPluginsEnabledInCi: String = startParameter.projectProperties.getOrDefault("enableTestPlugins", "false")
 if (testPluginsEnabledInCi.toBoolean()) {
@@ -83,10 +86,12 @@ val spongeForge = file("spongeforge.settings.gradle.kts")
 if (spongeForge.exists()) {
     // apply(from = spongeForge)
 } else {
-    spongeForge.writeText("// Uncomment to enable SpongeForge module.\n" +
-            "// By default only Sponge and SpongeVanilla are made available\n" +
-            "//include(\":SpongeForge\")\n" +
-            "//project(\":SpongeForge\").projectDir = file(\"forge\")\n")
+    spongeForge.writeText(listOf(
+        "// Uncomment to enable SpongeForge module.",
+        "// By default only Sponge and SpongeVanilla are made available",
+        "//include(\":SpongeForge\")",
+        "//project(\":SpongeForge\").projectDir = file(\"forge\")"
+    ).joinToString(separator = System.lineSeparator(), postfix = System.lineSeparator()))
 }
 val spongeForgeEnabledInCi: String = startParameter.projectProperties.getOrDefault("enableSpongeForge", "false")
 if (false && spongeForgeEnabledInCi.toBoolean()) {

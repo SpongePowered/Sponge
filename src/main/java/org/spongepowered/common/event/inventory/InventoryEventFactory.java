@@ -235,7 +235,7 @@ public class InventoryEventFactory {
             return false;
         }
         // Custom cursor
-        PacketPhaseUtil.handleCursorRestore(player, event.cursorTransaction());
+        PacketPhaseUtil.handleCursorRestore(player, event.cursorTransaction(), event.isCancelled());
         return true;
     }
 
@@ -483,7 +483,7 @@ public class InventoryEventFactory {
         SpongeCommon.post(event);
 
         PacketPhaseUtil.handleSlotRestore(playerIn, container, event.transactions(), event.isCancelled());
-        PacketPhaseUtil.handleCursorRestore(playerIn, event.cursorTransaction());
+        PacketPhaseUtil.handleCursorRestore(playerIn, event.cursorTransaction(), event.isCancelled());
         return event;
     }
 

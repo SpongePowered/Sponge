@@ -22,22 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.server.level;
+package org.spongepowered.common.accessor.world.level.chunk.storage;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.chunk.storage.ChunkStorage;
+import net.minecraft.world.level.chunk.storage.IOWorker;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ServerLevel.EntityCallbacks.class)
-public abstract class ServerLevel$EntityCallbackMixin_Tracker {
+@Mixin(ChunkStorage.class)
+public interface ChunkStorageAccessor {
 
-    @Inject(method = "onTrackingEnd(Lnet/minecraft/world/entity/Entity;)V", at = @At("TAIL"))
-    private void tracker$setEntityUntracked(Entity var1, CallbackInfo ci) {
-        ((TrackableBridge) var1).bridge$markEntityRemovedFromLevel();
-    }
-
+    @Accessor("worker") IOWorker accessor$worker();
 }

@@ -34,6 +34,7 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.entity.EntityInLevelCallback;
 import net.minecraft.world.scores.Team;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -70,6 +71,7 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     @Shadow @Final private EntityType<?> type;
     @Shadow public Level level;
     @Shadow @Final protected RandomSource random;
+    @Shadow private EntityInLevelCallback levelCallback;
 
     @Shadow @Nullable public abstract Team getTeam();
     @Shadow public abstract UUID shadow$getUUID();
@@ -84,7 +86,6 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
 
     //@formatter:on
 
-    @Nullable private Cause tracker$destructCause;
     protected @MonotonicNonNull EffectTransactor tracker$dropsTransactor = null;
 
     @Inject(
@@ -128,24 +129,6 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     }
 
     @Override
-    public void bridge$markEntityRemovedFromLevel() {
-        if (this.tracker$destructCause != null && ShouldFire.DESTRUCT_ENTITY_EVENT) {
-            final Audience originalChannel = Audience.empty();
-            SpongeCommon.post(SpongeEventFactory.createDestructEntityEvent(
-                this.tracker$destructCause,
-                originalChannel,
-                Optional.of(originalChannel),
-                Component.empty(),
-                Component.empty(),
-                (org.spongepowered.api.entity.Entity) this,
-                false
-            ));
-
-            this.tracker$destructCause = null;
-        }
-    }
-
-    @Override
     public final void tracker$populateFrameInTickContext(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
         this.tracker$populateDeathContextIfNeeded(frame, context);
     }
@@ -154,13 +137,23 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
         final EntityTickContext context) {
     }
 
-    @Inject(method = "remove", at = @At(value = "RETURN"))
+    @Inject(method = "setRemoved", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;stopRiding()V"))
     private void impl$createDestructionEventOnDeath(final CallbackInfo ci) {
-        if (ShouldFire.DESTRUCT_ENTITY_EVENT
-                && !((LevelBridge) this.level).bridge$isFake()) {
+        if (ShouldFire.DESTRUCT_ENTITY_EVENT && !((LevelBridge) this.level).bridge$isFake()
+                && this.levelCallback != EntityInLevelCallback.NULL) {
 
             if (!((Entity) (Object) this instanceof LivingEntity)) {
-                this.tracker$destructCause = PhaseTracker.getCauseStackManager().currentCause();
+                final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
+                final Audience originalChannel = Audience.empty();
+                SpongeCommon.post(SpongeEventFactory.createDestructEntityEvent(
+                    cause,
+                    originalChannel,
+                    Optional.of(originalChannel),
+                    Component.empty(),
+                    Component.empty(),
+                    (org.spongepowered.api.entity.Entity) this,
+                    false
+                ));
             } else if ((Entity) (Object) this instanceof ArmorStand) {
                 SpongeCommonEventFactory.callDestructEntityEventDeath((ArmorStand) (Object) this, null);
             }

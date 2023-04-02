@@ -40,53 +40,59 @@ public abstract class ServerGamePacketListenerImplMixin_MovementCheck {
 
     @Shadow public ServerPlayer player;
 
-    @Redirect(method = "handleMovePlayer",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isChangingDimension()Z", ordinal = 0))
-    private boolean movementCheck$onPlayerMovedTooQuicklyCheck(final ServerPlayer player) {
-        if (SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.player.movedTooQuickly) {
-            return player.isChangingDimension();
+    @ModifyConstant(method = "handleMovePlayer", constant = @Constant(floatValue = 100.0F, ordinal = 0), slice =
+        @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isFallFlying()Z", ordinal = 0),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;isSingleplayerOwner()Z", ordinal = 0)
+        )
+    )
+    private float movementCheck$onMovedTooQuickly(final float value) {
+        final double threshold = SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.movedTooQuicklyThreshold;
+        if (threshold > 0.0D && SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.player.movedTooQuickly) {
+            return (float) threshold;
         }
-        return true; // The 'moved too quickly' check only executes if isChangingDimension return false
+        return Float.NaN;
     }
 
-    @Redirect(method = "handleMovePlayer",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isChangingDimension()Z", ordinal = 1))
-    private boolean movementCheck$onMovedWronglyCheck(final ServerPlayer player) {
-        if (SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.movedWrongly) {
-            return player.isChangingDimension();
+    @ModifyConstant(method = "handleMovePlayer", constant = @Constant(doubleValue = 0.0625D, ordinal = 0), slice =
+        @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isChangingDimension()Z", ordinal = 1),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isSleeping()Z", ordinal = 1)
+        )
+    )
+    private double movementCheck$onMovedWronglyCheck(final double value) {
+        final double threshold = SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.movedWronglyThreshold;
+        if (threshold > 0.0D && SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.movedWrongly) {
+            return threshold;
         }
-        return true; // The 'moved too quickly' check only executes if isChangingDimension return false
+        return Double.NaN;
     }
 
-    @ModifyConstant(method = "handleMoveVehicle", constant = @Constant(doubleValue = 100, ordinal = 0), slice =
+    @ModifyConstant(method = "handleMoveVehicle", constant = @Constant(doubleValue = 0.0625D, ordinal = 0), slice =
+        @Slice(
+            from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V", ordinal = 0),
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;absMoveTo(DDDFF)V")
+        )
+    )
+    private double movementCheck$onVehicleMovedWronglyCheck(final double value) {
+        final double threshold = SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.vehicleMovedWronglyThreshold;
+        if (threshold > 0.0D && SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.movedWrongly) {
+            return threshold;
+        }
+        return Double.NaN;
+    }
+
+    @ModifyConstant(method = "handleMoveVehicle", constant = @Constant(doubleValue = 100D, ordinal = 0), slice =
         @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;lengthSqr()D", ordinal = 0),
-            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;isSingleplayerOwner()Z", ordinal = 0))
+            to = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;isSingleplayerOwner()Z", ordinal = 0)
+        )
     )
-    private double movementCheck$onVehicleMovedTooQuicklyCheck(final double val) {
-        if (SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.player.vehicleMovedTooQuickly) {
-            return val;
+    private double movementCheck$onVehicleMovedTooQuicklyCheck(final double value) {
+        final double threshold = SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.vehicleMovedTooQuicklyThreshold;
+        if (threshold > 0.0D && SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.player.vehicleMovedTooQuickly) {
+            return threshold;
         }
-        return Double.NaN; // The 'vehicle moved too quickly' check only executes if the squared difference of the motion vectors lengths is greater than 100
-    }
-
-    @ModifyConstant(method = "handleMoveVehicle",
-        constant = @Constant(doubleValue = 0.0625D, ordinal = 0),
-        slice = @Slice(
-            from = @At(
-                value = "INVOKE",
-                target = "Lnet/minecraft/world/entity/Entity;move(Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V",
-                ordinal = 0),
-            to  = @At(
-                value = "INVOKE",
-                target = "Lnet/minecraft/world/entity/Entity;absMoveTo(DDDFF)V",
-                ordinal = 0,
-                remap = false)
-    ))
-    private double movementCheck$onMovedWronglySecond(final double val) {
-        if (SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.movedWrongly) {
-            return val;
-        }
-        return Double.NaN; // The second 'moved wrongly' check only executes if the length of the movement vector is greater than 0.0625D
+        return Double.NaN;
     }
 }

@@ -677,7 +677,6 @@ public abstract class SpongeWorldManager implements WorldManager {
         world.getChunkSource().removeRegionTicket(SpongeWorldManager.SPAWN_CHUNKS, new ChunkPos(spawnPoint), 11, registryKey.location());
 
         ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter().save();
-        ((ServerLevelBridge) world).bridge$setManualSave(true);
 
         try {
             world.save(null, true, world.noSave);

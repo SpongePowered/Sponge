@@ -52,7 +52,6 @@ import org.spongepowered.common.event.listener.DoubleListener;
 import org.spongepowered.common.event.listener.FirstLastCauseListener;
 import org.spongepowered.common.event.listener.GetterListener;
 import org.spongepowered.common.event.listener.IncludeExcludeListener;
-import org.spongepowered.common.event.listener.InvalidCancelledListener;
 import org.spongepowered.common.event.listener.InvalidIncludeExcludeListener;
 import org.spongepowered.common.event.listener.RootListener;
 import org.spongepowered.common.event.listener.SimpleListener;
@@ -114,11 +113,6 @@ public class EventFilterTest {
 
         alwaysCalledListener.handle(event);
         Assert.assertTrue("Listener annotated with @IsCancelled(Tristate.UNDEFINED) was not called!", listener.alwaysCalledWasCalled);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testCancelledEvent_InvalidListener() throws Exception {
-        this.getListener(new InvalidCancelledListener(), "onEvent", UncancellableEvent.class);
     }
 
     @Test
@@ -457,14 +451,6 @@ public class EventFilterTest {
 
         public OtherSubEvent(Cause cause) {
             super(cause);
-        }
-    }
-
-    public static class UncancellableEvent implements Event {
-
-        @Override
-        public Cause getCause() {
-            return TEST_CAUSE;
         }
     }
 
