@@ -43,10 +43,12 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.CONDITIONAL, BlockStateProperties.CONDITIONAL);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DISARMED, BlockStateProperties.DISARMED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DRAG, BlockStateProperties.DRAG);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.DUSTED, BlockStateProperties.DUSTED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.ENABLED, BlockStateProperties.ENABLED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.EXTENDED, BlockStateProperties.EXTENDED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.EYE, BlockStateProperties.EYE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.FALLING, BlockStateProperties.FALLING);
+        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.FLOWER_AMOUNT, BlockStateProperties.FLOWER_AMOUNT);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.HANGING, BlockStateProperties.HANGING);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.HAS_BOTTLE_0, BlockStateProperties.HAS_BOTTLE_0);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.HAS_BOTTLE_1, BlockStateProperties.HAS_BOTTLE_1);
@@ -67,7 +69,6 @@ public final class BlockStateDataProvider {
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.TRIGGERED, BlockStateProperties.TRIGGERED);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.UNSTABLE, BlockStateProperties.UNSTABLE);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.WATERLOGGED, BlockStateProperties.WATERLOGGED);
-        BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.VINE_END, BlockStateProperties.VINE_END);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.HORIZONTAL_AXIS, BlockStateProperties.HORIZONTAL_AXIS);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.AXIS, BlockStateProperties.AXIS);
         BlockStateDataProvider.registerProperty(registrator, BlockStateKeys.UP, BlockStateProperties.UP);
