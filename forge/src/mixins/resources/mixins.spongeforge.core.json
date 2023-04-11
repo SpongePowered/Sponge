@@ -39,6 +39,7 @@
         "world.entity.vehicle.BoatMixin_Forge",
         "world.level.LevelMixin_Forge",
         "world.level.block.FireBlockMixin_Forge",
+        "world.level.block.state.BlockStateMixin_Forge",
         "world.level.storage.LevelStorageSourceMixin_Forge"
     ],
     "client": [

@@ -27,7 +27,6 @@ package org.spongepowered.common.bridge.world;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -81,9 +80,7 @@ public interface TrackedWorldBridge {
 
     /**
      * Creates a {@link BlockSnapshot} but performs an additional {@link LevelChunk#getTileEntity(BlockPos, Chunk.CreateEntityType)}
-     * lookup if the providing {@link BlockState#getBlock()} {@code instanceof} is
-     * {@code true} for being an {@link EntityBlock} or
-     * {@link BlockStateBridge#bridge$hasTileEntity()}, and associates
+     * lookup if {@link BlockStateBridge#bridge$hasTileEntity()} is {@code true}, and associates
      * the resulting snapshot of said Tile with the snapshot. This is useful for in-progress
      * snapshot creation during transaction building for {@link TransactionalCaptureSupplier}.
      *

@@ -22,46 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level.block.state;
+package org.spongepowered.forge.mixin.core.world.level.block.state;
 
-import com.google.common.collect.ImmutableMap;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraftforge.common.extensions.IForgeBlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 
-@Mixin(BlockState.class)
-public abstract class BlockStateMixin extends BlockBehaviour.BlockStateBase implements BlockStateBridge {
-
-    protected BlockStateMixin(Block block,
-        ImmutableMap<Property<?>, Comparable<?>> properties,
-        MapCodec<BlockState> codec
-    ) {
-        super(block, properties, codec);
-    }
-
+@Mixin(value = BlockState.class, priority = 1300)
+public abstract class BlockStateMixin_Forge implements BlockStateBridge {
 
     @Override
     public boolean bridge$hasTileEntity() {
-        return this.getBlock() instanceof EntityBlock;
+        return ((IForgeBlockState) this).hasTileEntity();
     }
 
     @Override
     public @Nullable BlockEntity bridge$createTileEntity(Level world) {
-        return ((EntityBlock) this.getBlock()).newBlockEntity(world);
+        return ((IForgeBlockState) this).createTileEntity(world);
     }
 
     @Override
     public int bridge$getLightValue(ServerLevel world, BlockPos pos) {
-        return this.getLightEmission();
+        return ((IForgeBlockState) this).getLightValue(world, pos);
     }
 }
