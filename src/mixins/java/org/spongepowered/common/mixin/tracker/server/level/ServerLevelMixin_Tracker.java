@@ -635,7 +635,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 .addEffect(RemoveTileEntityFromWorldEffect.getInstance())
                 .addEffect(RemoveTileEntityFromChunkEffect.getInstance())
                 .build();
-            pipeline.processEffects(current, new PipelineCursor(tileentity.getBlockState(), 0,immutable, tileentity, (Entity) null, Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
+            pipeline.processEffects(current, new PipelineCursor(tileentity.getBlockState(), 0, 0, immutable, tileentity, (Entity) null,
+                    Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
             return;
         }
         super.shadow$removeBlockEntity(immutable);
@@ -670,7 +671,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                     .addEffect(AddTileEntityToTickableListEffect.getInstance())
                     .addEffect(TileOnLoadDuringAddToWorldEffect.getInstance())
                     .build();
-                return pipeline.processEffects(current, new PipelineCursor(tileEntity.getBlockState(), 0, immutable, tileEntity,
+                return pipeline.processEffects(current, new PipelineCursor(tileEntity.getBlockState(), 0, 0, immutable, tileEntity,
                     (Entity) null,
                     Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
             }
@@ -707,7 +708,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                     .addEffect(RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect.getInstance())
                     .addEffect(ReplaceTileEntityInWorldEffect.getInstance())
                     .build();
-                pipeline.processEffects(current, new PipelineCursor(proposed.getBlockState(), 0,immutable, proposed, (Entity) null, Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
+                pipeline.processEffects(current, new PipelineCursor(proposed.getBlockState(), 0, 0, immutable, proposed, (Entity) null,
+                        Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT));
                 return;
             }
         }

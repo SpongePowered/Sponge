@@ -37,6 +37,7 @@ import java.util.StringJoiner;
 
 public final class PipelineCursor {
     public final BlockState state;
+    public final int light;
     public final int opacity;
     public final BlockPos pos;
     public final @Nullable BlockEntity tileEntity;
@@ -44,11 +45,12 @@ public final class PipelineCursor {
     public final List<ItemStack> drops;
     public final int limit;
 
-    public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
+    public PipelineCursor(final BlockState state, final int light, final int opacity, final BlockPos pos,
         final @Nullable BlockEntity tileEntity,
         final @Nullable Entity destroyer, final int limit
     ) {
         this.state = state;
+        this.light = light;
         this.opacity = opacity;
         this.pos = pos;
         this.tileEntity = tileEntity;
@@ -57,13 +59,14 @@ public final class PipelineCursor {
         this.limit = limit;
     }
 
-    public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
+    public PipelineCursor(final BlockState state, final int light, final int opacity, final BlockPos pos,
         final @Nullable BlockEntity tileEntity,
         final @Nullable Entity destroyer,
         final List<ItemStack> drops,
         final int limit
     ) {
         this.state = state;
+        this.light = light;
         this.opacity = opacity;
         this.pos = pos;
         this.tileEntity = tileEntity;
@@ -74,12 +77,9 @@ public final class PipelineCursor {
 
     @Override
     public String toString() {
-        return new StringJoiner(
-            ", ",
-            PipelineCursor.class.getSimpleName() + "[",
-            "]"
-        )
+        return new StringJoiner(", ", PipelineCursor.class.getSimpleName() + "[", "]")
             .add("state=" + this.state)
+            .add("light=" + this.light)
             .add("opacity=" + this.opacity)
             .add("pos=" + this.pos)
             .add("tileEntity=" + this.tileEntity)
