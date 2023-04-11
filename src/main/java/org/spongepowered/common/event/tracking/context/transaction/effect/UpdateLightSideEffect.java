@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.context.transaction.effect;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -51,7 +52,6 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect {
         if (!flag.updateLighting()) {
             return EffectResult.NULL_PASS;
         }
-        final int originalOpactiy = oldState.opacity;
         final ServerLevel serverWorld = pipeline.getServerWorld();
         final BlockState currentState = pipeline.getAffectedChunk().getBlockState(oldState.pos);
         // local variable notes:
@@ -68,8 +68,8 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect {
         //         )
         //     ) {
         if (oldState.state != currentState
-            && (currentState.getLightBlock(serverWorld, oldState.pos) != originalOpactiy
-            || currentState.getLightEmission() != oldState.state.getLightEmission()
+            && (currentState.getLightBlock(serverWorld, oldState.pos) != oldState.opacity
+            || ((BlockStateBridge) currentState).bridge$getLightValue(serverWorld, oldState.pos) != oldState.light
             || currentState.useShapeForLightOcclusion()
             || oldState.state.useShapeForLightOcclusion()
         )) {
