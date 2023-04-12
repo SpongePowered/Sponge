@@ -9,6 +9,7 @@
     "mixins": [
         "api.event.EventMixin_Forge",
         "api.event.block.ChangeBlockEvent_AllMixin_Forge",
+        "api.event.block.InteractBlockEvent_SecondaryMixin_Forge",
         "api.event.entity.ChangeEntityWorldEvent_PreMixin_Forge",
         "api.event.entity.ChangeEventWorldEvent_PostMixin_Forge",
         "api.event.message.PlayerChatEventMixin_Forge",
@@ -17,6 +18,7 @@
         "minecraftforge.core.ForgeRegistryMixin_Forge",
         "minecraftforge.core.NamespacedWrapperMixin_Forge",
         "minecraftforge.event.ServerChatEventMixin_Forge",
+        "minecraftforge.event.block.PlayerInteractEvent_RightClickBlockMixin_Forge",
         "minecraftforge.event.entity.EntityTravelToDimensionEventMixin_Forge",
         "minecraftforge.event.entity.player.PlayerEvent_PlayerChangedDimensionEventMixin_Forge",
         "minecraftforge.event.world.BlockEvent_BreakEventMixin_Forge",

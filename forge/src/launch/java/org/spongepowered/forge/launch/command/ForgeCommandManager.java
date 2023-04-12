@@ -28,6 +28,7 @@ import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
 import net.minecraft.commands.CommandSourceStack;
@@ -59,8 +60,14 @@ public final class ForgeCommandManager extends SpongeCommandManager {
         final CommandRegistrar<?> registrar = mapping.registrar();
         final boolean isBrig = registrar instanceof BrigadierBasedRegistrar;
         final ParseResults<CommandSourceStack> parseResults;
+
+        // Some Forge mods expect `getOriginal()` will return exactly the original entered command
+        StringReader reader = new SpongeStringReader("/" + original);
+        // Skip the very first slash
+        reader.skip();
+
         if (isBrig) {
-            parseResults = this.getDispatcher().parse(original, (CommandSourceStack) cause);
+            parseResults = this.getDispatcher().parse(reader, (CommandSourceStack) cause);
         } else {
             // We have a non Brig registrar, so we just create a dummy result for mods to inspect.
             final CommandContextBuilder<CommandSourceStack> contextBuilder = new CommandContextBuilder<>(

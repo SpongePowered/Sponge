@@ -30,9 +30,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.common.hooks.EventHooks;
 
@@ -68,5 +72,17 @@ public final class ForgeEventHooks implements EventHooks {
             return new CriticalHitResult(true, hitResult.getDamageModifier() - 1.0F);
         }
         return new CriticalHitResult(false, v);
+    }
+
+    public static final EventContextKey<BlockHitResult> BLOCK_HIT_RESULT = EventContextKey.builder()
+            .key(ResourceKey.sponge("forge_block_hit_result"))
+            .type(BlockHitResult.class)
+            .build();
+
+    @Override
+    public void addHitVectorToInteractEvent(
+            final CauseStackManager.StackFrame frame, final BlockHitResult blockRaytraceResultIn
+    ) {
+        frame.addContext(ForgeEventHooks.BLOCK_HIT_RESULT, blockRaytraceResultIn);
     }
 }

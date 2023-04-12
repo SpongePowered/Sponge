@@ -29,6 +29,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.BlockHitResult;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.common.SpongeCommon;
@@ -49,6 +51,9 @@ public interface EventHooks {
     }
 
     default void callItemDestroyedEvent(final Player player, final ItemStack stack, final InteractionHand hand) {
+    }
+
+    default void addHitVectorToInteractEvent(CauseStackManager.StackFrame event, BlockHitResult blockRaytraceResultIn) {
     }
 
     final class CriticalHitResult {

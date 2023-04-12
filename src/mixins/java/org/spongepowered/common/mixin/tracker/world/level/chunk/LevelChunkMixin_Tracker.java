@@ -47,6 +47,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.applaunch.config.common.PhaseTrackerCategory;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
@@ -89,15 +91,30 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
     // @formatter:on
     private @MonotonicNonNull PhaseContext<@NonNull ?> tracker$postProcessContext = null;
 
+    private static boolean tracker$hasLoggedDirectAccess = false;
+
     @Inject(method = "setBlockState", at = @At("HEAD"), cancellable = true)
     private void tracker$sanityCheckServerWorldSetBlockState(final BlockPos pos, final BlockState state, final boolean isMoving,
         final CallbackInfoReturnable<BlockState> cir
     ) {
-        if (!((LevelBridge) this.level).bridge$isFake()) {
-            new PrettyPrinter(80).add("Illegal Direct Chunk Access")
-                .hr()
-                .add(new IllegalAccessException("No one should be accessing Chunk.setBlock in a ServerWorld's environment"))
-                .log(PhaseTracker.LOGGER, Level.WARN);
+        if (((LevelBridge) this.level).bridge$isFake()) {
+            return;
+        }
+
+        final PhaseTrackerCategory trackerConfig = SpongeConfigs.getCommon().get().phaseTracker;
+        final boolean allowDirectChunkAccess = trackerConfig.allowDirectChunkAccess;
+        final boolean log = trackerConfig.logDirectChunkAccess;
+        if (log) {
+            if (!allowDirectChunkAccess || !LevelChunkMixin_Tracker.tracker$hasLoggedDirectAccess) {
+                new PrettyPrinter(80).add("Direct Chunk Access")
+                        .hr()
+                        .add(new IllegalAccessException("Chunk.setBlock in a ServerWorld has been called, effectively bypassing Sponge's tracking."))
+                        .log(PhaseTracker.LOGGER, Level.WARN);
+
+                LevelChunkMixin_Tracker.tracker$hasLoggedDirectAccess = true;
+            }
+        }
+        if (!allowDirectChunkAccess) {
             cir.setReturnValue(null);
         }
     }
