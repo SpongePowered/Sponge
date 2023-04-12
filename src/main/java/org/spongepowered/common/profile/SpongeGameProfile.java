@@ -25,6 +25,7 @@
 package org.spongepowered.common.profile;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -72,6 +73,10 @@ public final class SpongeGameProfile implements GameProfile {
 
     public static com.mojang.authlib.GameProfile toMcProfile(final GameProfile profile) {
         return ((SpongeGameProfile) profile).toMcProfile();
+    }
+
+    public static com.mojang.authlib.GameProfile toMcProfileNonNull(final GameProfile profile) {
+        return ((SpongeGameProfile) profile).toMcProfileNonNull();
     }
 
     public static GameProfile unsignedOf(final GameProfile profile) {
@@ -133,6 +138,17 @@ public final class SpongeGameProfile implements GameProfile {
     public com.mojang.authlib.GameProfile toMcProfile() {
         final UUID uniqueId = this.uniqueId.equals(SpongeGameProfile.EMPTY_UUID) ? null : this.uniqueId;
         final String name = this.name;
+        final com.mojang.authlib.GameProfile mcProfile = new com.mojang.authlib.GameProfile(uniqueId, name);
+        for (final SpongeProfileProperty property : this.properties) {
+            mcProfile.getProperties().put(property.name(), property.asProperty());
+        }
+        return mcProfile;
+    }
+
+    public com.mojang.authlib.GameProfile toMcProfileNonNull() {
+        // Make sure UUID and name are non-null
+        final UUID uniqueId = this.uniqueId;
+        final String name = Strings.nullToEmpty(this.name);
         final com.mojang.authlib.GameProfile mcProfile = new com.mojang.authlib.GameProfile(uniqueId, name);
         for (final SpongeProfileProperty property : this.properties) {
             mcProfile.getProperties().put(property.name(), property.asProperty());
