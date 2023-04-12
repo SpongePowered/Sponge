@@ -62,6 +62,6 @@ public abstract class BlockStateMixin extends BlockBehaviour.BlockStateBase impl
 
     @Override
     public int bridge$getLightValue(ServerLevel world, BlockPos pos) {
-        return this.getLightBlock(world, pos);
+        return this.getLightEmission();
     }
 }
