@@ -494,7 +494,7 @@ public final class SpongeCommonEventFactory {
         Optional<UUID> sourceCreator = Optional.empty();
         final boolean messageCancelled = false;
 
-        if (source.getDirectEntity() instanceof CreatorTrackedBridge creatorBridge) {
+        if (source != null && source.getDirectEntity() instanceof CreatorTrackedBridge creatorBridge) {
             sourceCreator = creatorBridge.tracker$getCreatorUUID();
         }
 
