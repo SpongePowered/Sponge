@@ -25,7 +25,6 @@
 package org.spongepowered.common.scheduler;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.bridge.world.entity.player.PlayerInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
