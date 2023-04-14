@@ -200,7 +200,7 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
 
     @Override
     public Audience bridge$getNonTeamChannel() {
-        return Audience.audience(Sponge.game().server().onlinePlayers().stream()
+        return Audience.audience(Sponge.game().server().streamOnlinePlayers()
                 .filter(player -> ((ServerPlayer) player).getTeam() != (Object) this)
                 .collect(Collectors.toSet()));
     }

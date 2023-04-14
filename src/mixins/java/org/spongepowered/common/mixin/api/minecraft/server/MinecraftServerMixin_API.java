@@ -105,6 +105,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @SuppressWarnings("rawtypes")
 @Mixin(MinecraftServer.class)
@@ -288,6 +289,14 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     }
 
     @Override
+    public Stream<ServerPlayer> streamOnlinePlayers() {
+        if (this.shadow$getPlayerList() == null || this.shadow$getPlayerList().getPlayers() == null) {
+            return Stream.empty();
+        }
+        return (Stream) this.shadow$getPlayerList().getPlayers().stream();
+    }
+
+    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<ServerPlayer> onlinePlayers() {
         if (this.shadow$getPlayerList() == null || this.shadow$getPlayerList().getPlayers() == null) {
@@ -355,9 +364,9 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     @Override
     public void shutdown(final Component kickMessage) {
         Objects.requireNonNull(kickMessage, "kickMessage");
-        for (final ServerPlayer player : this.onlinePlayers()) {
+        this.streamOnlinePlayers().forEach(player -> {
             player.kick(kickMessage);
-        }
+        });
 
         this.shadow$halt(false);
     }
