@@ -24,8 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world.item;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.LevelReader;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
@@ -39,6 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.DataHolderProcessor;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
+import org.spongepowered.common.bridge.world.item.ItemStackBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
@@ -48,7 +54,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.item.ItemStack.class)
-public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataCompoundHolder {
+public abstract class ItemStackMixin implements ItemStackBridge, SpongeDataHolderBridge, DataCompoundHolder {
 
     // @formatter:off
     @Shadow private boolean emptyCacheFlag;
@@ -57,6 +63,16 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
     @Shadow public abstract void shadow$setTag(@Nullable CompoundTag nbt);
     @Shadow @Nullable public abstract CompoundTag shadow$getTag();
     // @formatter:on
+
+    @Override
+    public InteractionResult bridge$onItemUseFirst(UseOnContext context) {
+        return InteractionResult.PASS;
+    }
+
+    @Override
+    public boolean bridge$doesSneakBypassUse(LevelReader world, BlockPos pos, Player player) {
+        return false;
+    }
 
     @Override
     public <E> Optional<E> bridge$get(final Key<@NonNull ? extends Value<E>> key) {

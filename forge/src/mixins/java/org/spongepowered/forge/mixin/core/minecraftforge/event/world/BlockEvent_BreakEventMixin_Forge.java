@@ -31,13 +31,13 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operations;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.forge.launch.bridge.event.ForgeEventBridge_Forge;
 import org.spongepowered.math.vector.Vector3i;
@@ -72,7 +72,7 @@ public abstract class BlockEvent_BreakEventMixin_Forge extends BlockEventMixin_F
     }
 
     @Override
-    public @Nullable Event bridge$createSpongeEvent() {
+    public @Nullable Event bridge$createSpongeEvent(final CauseStackManager.StackFrame frame) {
         final LevelAccessor accessor = this.shadow$getWorld();
         if (accessor instanceof ServerWorld) {
             final ServerWorld serverWorld = (ServerWorld) accessor;
@@ -91,7 +91,7 @@ public abstract class BlockEvent_BreakEventMixin_Forge extends BlockEventMixin_F
                             .build(),
                     Operations.BREAK.get()
             );
-            return SpongeEventFactory.createChangeBlockEventAll(PhaseTracker.getCauseStackManager().currentCause(),
+            return SpongeEventFactory.createChangeBlockEventAll(frame.currentCause(),
                     Collections.singletonList(transaction), serverWorld);
         }
         return null;

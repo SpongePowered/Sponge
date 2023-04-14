@@ -25,18 +25,48 @@
 package org.spongepowered.forge.hook;
 
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
+import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.EventHooks;
+import org.spongepowered.forge.launch.bridge.event.ForgeEventBridge_Forge;
+import org.spongepowered.forge.launch.event.ForgeEventManager;
 
 public final class ForgeEventHooks implements EventHooks {
+
+    @Override
+    public Tuple<InteractBlockEvent.Secondary, InteractionResult> callInteractBlockEventSecondary(
+            final ServerPlayer player, final Level level, final ItemStack heldItem, final InteractionHand hand, final BlockHitResult blockHitResult) {
+        final PlayerInteractEvent.RightClickBlock forgeEvent = new PlayerInteractEvent.RightClickBlock(player, hand, blockHitResult.getBlockPos(),
+                blockHitResult);
+        // Returning FAIL when cancelled is the behavior on SpongeVanilla, we match by default on SpongeForge but this can be changed by a mod
+        forgeEvent.setCancellationResult(InteractionResult.FAIL);
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            final InteractBlockEvent.Secondary spongeEvent =
+                    (InteractBlockEvent.Secondary) ((ForgeEventBridge_Forge) forgeEvent).bridge$createSpongeEvent(frame);
+
+            ((ForgeEventManager) MinecraftForge.EVENT_BUS).postDual(spongeEvent, forgeEvent);
+
+            return Tuple.of(spongeEvent, forgeEvent.getCancellationResult());
+        }
+    }
 
     @Override
     public ChangeEntityWorldEvent.Pre callChangeEntityWorldEventPre(final Entity entity, final ServerLevel toWorld) {

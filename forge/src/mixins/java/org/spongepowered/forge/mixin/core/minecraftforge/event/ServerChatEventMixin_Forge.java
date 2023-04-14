@@ -30,13 +30,13 @@ import net.minecraftforge.event.ServerChatEvent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.forge.launch.bridge.event.ForgeEventBridge_Forge;
 
 import java.util.Optional;
@@ -65,12 +65,12 @@ public abstract class ServerChatEventMixin_Forge implements ForgeEventBridge_For
     }
 
     @Override
-    public @Nullable Event bridge$createSpongeEvent() {
+    public @Nullable Event bridge$createSpongeEvent(final CauseStackManager.StackFrame frame) {
         final Audience audience = (Audience) this.shadow$getPlayer().server;
         final PlayerChatFormatter chatFormatter = ((ServerPlayer) this.shadow$getPlayer()).chatFormatter();
         final net.kyori.adventure.text.Component originalMessage = SpongeAdventure.asAdventure(this.shadow$getComponent());
         return SpongeEventFactory.createPlayerChatEvent(
-                PhaseTracker.getCauseStackManager().currentCause(),
+                frame.currentCause(),
                 audience,
                 Optional.of(audience),
                 chatFormatter,

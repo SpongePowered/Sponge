@@ -344,15 +344,16 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(final net.minecraft.world.entity.player.Player player, final ItemStack heldItem, final Vector3d hitVec, final BlockSnapshot targetBlock, final Direction targetSide, final InteractionHand hand) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            SpongeCommonEventFactory.applyCommonInteractContext(player, heldItem, hand, targetBlock, null, frame);
-            final InteractBlockEvent.Secondary event = SpongeEventFactory.createInteractBlockEventSecondary(frame.currentCause(),
-                    Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, targetBlock, hitVec,
-                    targetSide);
-            SpongeCommon.post(event);
-            return event;
-        }
+    public static InteractBlockEvent.Secondary createInteractBlockEventSecondary(
+            final net.minecraft.world.entity.player.Player player, final Level level, final ItemStack heldItem, final InteractionHand hand,
+            final BlockHitResult blockHitResult, final CauseStackManager.StackFrame frame) {
+        final Vector3d interactionPoint = VecHelper.toVector3d(blockHitResult.getBlockPos());
+        final Direction direction = DirectionFacingProvider.INSTANCE.getKey(blockHitResult.getDirection()).get();
+        final BlockSnapshot block = ((ServerWorld) level).createSnapshot(interactionPoint.toInt());
+
+        SpongeCommonEventFactory.applyCommonInteractContext(player, heldItem, hand, block, null, frame);
+        return SpongeEventFactory.createInteractBlockEventSecondary(frame.currentCause(),
+                Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, block, interactionPoint, direction);
     }
 
     public static void applyCommonInteractContext(final net.minecraft.world.entity.player.Player player, final ItemStack stack, final InteractionHand hand, final @Nullable BlockSnapshot targetBlock,
