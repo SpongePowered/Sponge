@@ -136,6 +136,9 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
 
     @Override
     public Optional<Players> players() {
+        if (this.hiddenPlayers) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(this.players);
     }
 
@@ -189,12 +192,12 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
 
 
     public int onlinePlayers() {
-        return this.players != null ? this.players.online : 0;
+        return !this.hiddenPlayers && this.players != null ? this.players.online : 0;
     }
 
 
     public int maxPlayers() {
-        return this.players != null ? this.players.max : -1;
+        return !this.hiddenPlayers && this.players != null ? this.players.max : -1;
     }
 
     public int protocol() {
@@ -207,7 +210,8 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
 
     @Nullable
     public static ServerStatus post(final ServerStatus status, final StatusClient client) {
-        return SpongeStatusResponse.call(status, client).toVanilla();
+        final SpongeStatusResponse response = SpongeStatusResponse.call(status, client);
+        return response != null ? response.toVanilla() : null;
     }
 
     @Nullable
