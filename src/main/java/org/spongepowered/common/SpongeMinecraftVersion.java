@@ -30,7 +30,7 @@ import org.spongepowered.api.MinecraftVersion;
 
 import java.util.OptionalInt;
 
-public final class SpongeMinecraftVersion implements ProtocolMinecraftVersion, MinecraftVersion {
+public final class SpongeMinecraftVersion implements MinecraftVersion {
 
     private final String name;
     private final int protocol;
@@ -40,23 +40,13 @@ public final class SpongeMinecraftVersion implements ProtocolMinecraftVersion, M
         this.protocol = protocol;
     }
 
-    public static int compare(ProtocolMinecraftVersion version, MinecraftVersion to) {
-        if (version.equals(to)) {
-            return 0;
-        } else if (to.isLegacy()) {
-            return 1;
-        } else {
-            return version.getProtocol() - ((ProtocolMinecraftVersion) to).getProtocol();
-        }
-    }
-
     @Override
     public String name() {
         return this.name;
     }
 
     @Override
-    public int getProtocol() {
+    public int protocolVersion() {
         return this.protocol;
     }
 
@@ -71,22 +61,14 @@ public final class SpongeMinecraftVersion implements ProtocolMinecraftVersion, M
     }
 
     @Override
-    public int compareTo(MinecraftVersion o) {
-        return SpongeMinecraftVersion.compare(this, o);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ProtocolMinecraftVersion)) {
+        if (!(o instanceof MinecraftVersion)) {
             return false;
         }
-
-        ProtocolMinecraftVersion that = (ProtocolMinecraftVersion) o;
-        return this.getProtocol() == that.getProtocol();
-
+        return compareTo((MinecraftVersion) o) == 0;
     }
 
     @Override

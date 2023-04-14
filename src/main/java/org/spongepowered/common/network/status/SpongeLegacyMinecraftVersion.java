@@ -53,6 +53,11 @@ public class SpongeLegacyMinecraftVersion implements MinecraftVersion {
     }
 
     @Override
+    public int protocolVersion() {
+        return this.latestVersion;
+    }
+
+    @Override
     public boolean isLegacy() {
         return true;
     }
@@ -60,16 +65,5 @@ public class SpongeLegacyMinecraftVersion implements MinecraftVersion {
     @Override
     public OptionalInt dataVersion() {
         return OptionalInt.empty();
-    }
-
-    @Override
-    public int compareTo(MinecraftVersion o) {
-        if (o == this) {
-            return 0;
-        } else if (!o.isLegacy()) {
-            return -1;
-        } else {
-            return this.latestVersion - ((SpongeLegacyMinecraftVersion) o).latestVersion;
-        }
     }
 }

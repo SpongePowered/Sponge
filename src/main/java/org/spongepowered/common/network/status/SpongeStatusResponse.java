@@ -52,6 +52,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import javax.imageio.ImageIO;
 
@@ -60,7 +61,7 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
     private net.minecraft.network.chat.Component description;
     private SpongeStatusPlayers players;
     private boolean hiddenPlayers;
-    private ServerStatus.Version version;
+    private SpongeStatusVersion version;
     private ServerStatus.Favicon favicon;
     private final boolean enforcesSecureChat;
 
@@ -69,7 +70,7 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
         this.description = status.description();
         this.players = new SpongeStatusPlayers(status.players().orElse(null));
         this.hiddenPlayers = false;
-        this.version = status.version().orElse(null);
+        this.version = new SpongeStatusVersion(status.version().orElse(null));
         this.favicon = status.favicon().orElse(null);
         this.enforcesSecureChat = status.enforcesSecureChat();
     }
@@ -124,6 +125,55 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
         }
     }
 
+    public final static class SpongeStatusVersion implements Version {
+        private String name;
+        private int protocol;
+
+        public SpongeStatusVersion(final ServerStatus.Version version) {
+            if (version != null) {
+                this.name = version.name();
+                this.protocol = version.protocol();
+            } else {
+                this.name = "";
+                this.protocol = 0;
+            }
+        }
+
+        @Override
+        public String name() {
+            return this.name;
+        }
+
+        @Override
+        public void setName(String name) {
+            this.name = checkNotNull(name, "name");
+        }
+
+        @Override
+        public boolean isLegacy() {
+            return false;
+        }
+
+        @Override
+        public int protocolVersion() {
+            return this.protocol;
+        }
+
+        @Override
+        public void setProtocolVersion(int protocolVersion) {
+            this.protocol = protocolVersion;
+        }
+
+        @Override
+        public OptionalInt dataVersion() {
+            return OptionalInt.empty();
+        }
+
+        public ServerStatus.Version toVanilla() {
+            return new ServerStatus.Version(this.name, this.protocol);
+        }
+    }
+
     @Override
     public void setDescription(final Component description) {
         this.description = SpongeAdventure.asVanilla(checkNotNull(description, "description"));
@@ -163,8 +213,8 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
     }
 
     @Override
-    public MinecraftVersion version() {
-        return (MinecraftVersion) (Object) this.version;
+    public Version version() {
+        return this.version;
     }
 
     @Override
@@ -175,7 +225,7 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
     private ServerStatus toVanilla() {
         return new ServerStatus(this.description,
                 Optional.ofNullable(this.hiddenPlayers || this.players == null ? null : this.players.toVanilla()),
-                Optional.ofNullable(this.version),
+                Optional.of(this.version.toVanilla()),
                 Optional.ofNullable(this.favicon),
                 this.enforcesSecureChat);
     }
@@ -195,17 +245,8 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
         return !this.hiddenPlayers && this.players != null ? this.players.online : 0;
     }
 
-
     public int maxPlayers() {
         return !this.hiddenPlayers && this.players != null ? this.players.max : -1;
-    }
-
-    public int protocol() {
-        return this.version != null ? this.version.protocol() : 127;
-    }
-
-    public String versionName(final String def) {
-        return this.version != null ? this.version.name() : def;
     }
 
     @Nullable
