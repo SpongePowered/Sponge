@@ -387,11 +387,11 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
                     target = "Lnet/minecraft/world/entity/Entity;interactAt(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"
             )
     )
-    public void impl$onRightClickAtEntity(final ServerboundInteractPacket p_147340_1, final CallbackInfo ci) {
-        final Entity entity = p_147340_1.getTarget(this.player.getLevel());
-        final ItemStack itemInHand = p_147340_1.getHand() == null ? ItemStack.EMPTY : this.player.getItemInHand(p_147340_1.getHand());
+    public void impl$onRightClickAtEntity(final ServerboundInteractPacket packet, final CallbackInfo ci) {
+        final Entity entity = packet.getTarget(this.player.getLevel());
+        final ItemStack itemInHand = packet.getHand() == null ? ItemStack.EMPTY : this.player.getItemInHand(packet.getHand());
         final InteractEntityEvent.Secondary event = SpongeCommonEventFactory
-                .callInteractEntityEventSecondary(this.player, itemInHand, entity, p_147340_1.getHand(), VecHelper.toVector3d(p_147340_1.getLocation()));
+                .callInteractEntityEventSecondary(this.player, itemInHand, entity, packet.getHand(), VecHelper.toVector3d(packet.getLocation()));
         if (event.isCancelled()) {
             ci.cancel();
         } else {
@@ -404,8 +404,8 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
             cancellable = true,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;attack(Lnet/minecraft/world/entity/Entity;)V")
     )
-    public void impl$onLeftClickEntity(final ServerboundInteractPacket p_147340_1_, final CallbackInfo ci) {
-        final Entity entity = p_147340_1_.getTarget(this.player.getLevel());
+    public void impl$onLeftClickEntity(final ServerboundInteractPacket packet, final CallbackInfo ci) {
+        final Entity entity = packet.getTarget(this.player.getLevel());
 
         final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player,
                 this.player.getItemInHand(this.player.getUsedItemHand()), entity, this.player.getUsedItemHand());
