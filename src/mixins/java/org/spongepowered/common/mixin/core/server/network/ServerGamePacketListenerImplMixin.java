@@ -432,8 +432,11 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
                 this.impl$ignorePackets--;
             } else {
                 if (ShouldFire.INTERACT_ITEM_EVENT_PRIMARY) {
+                    final double reachDistance = ((ServerPlayerBridge) this.player).bridge$reachDistance();
+                    final double pickRange = this.player.gameMode.isCreative() ? reachDistance : (reachDistance - 0.5);
+
                     final Vec3 startPos = this.player.getEyePosition(1);
-                    final Vec3 endPos = startPos.add(this.player.getLookAngle().scale(5d)); // TODO hook for blockReachDistance?
+                    final Vec3 endPos = startPos.add(this.player.getLookAngle().scale(pickRange));
                     final HitResult result = this.player.getLevel().clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.player));
                     if (result.getType() == HitResult.Type.MISS) {
                         final ItemStack heldItem = this.player.getItemInHand(hand);

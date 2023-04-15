@@ -27,11 +27,13 @@ package org.spongepowered.forge.mixin.core.server.level;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.util.ITeleporter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -41,8 +43,13 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Pla
 import org.spongepowered.common.world.portal.PortalLogic;
 import org.spongepowered.forge.mixin.core.world.entity.LivingEntityMixin_Forge;
 
-@Mixin(ServerPlayer.class)
-public abstract class ServerPlayerMixin_Forge extends LivingEntityMixin_Forge {
+@Mixin(value = ServerPlayer.class, priority = 1300)
+public abstract class ServerPlayerMixin_Forge extends LivingEntityMixin_Forge implements ServerPlayerBridge {
+
+    @Override
+    public double bridge$reachDistance() {
+        return shadow$getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
+    }
 
     /**
      * @author dualspiral - 18th December 2020 - 1.16.4
