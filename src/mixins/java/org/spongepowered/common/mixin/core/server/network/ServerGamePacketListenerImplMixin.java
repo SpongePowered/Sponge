@@ -465,22 +465,22 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     }
 
     @Redirect(method = "handlePlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayerGameMode;handleBlockBreakAction(Lnet/minecraft/core/BlockPos;Lnet/minecraft/network/protocol/game/ServerboundPlayerActionPacket$Action;Lnet/minecraft/core/Direction;I)V"))
-    public void impl$callInteractBlockPrimaryEvent(final ServerPlayerGameMode playerInteractionManager, final BlockPos p_225416_1_,
-            final ServerboundPlayerActionPacket.Action p_225416_2_, final Direction p_225416_3_, final int p_225416_4_) {
-        final BlockSnapshot snapshot = ((org.spongepowered.api.world.server.ServerWorld) (playerInteractionManager.level)).createSnapshot(VecHelper.toVector3i(p_225416_1_));
-        final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(p_225416_2_, this.player, this.player.getItemInHand(
-                InteractionHand.MAIN_HAND), snapshot, InteractionHand.MAIN_HAND, p_225416_3_);
+    public void impl$callInteractBlockPrimaryEvent(final ServerPlayerGameMode playerInteractionManager, final BlockPos blockPos,
+            final ServerboundPlayerActionPacket.Action action, final Direction direction, final int maxBuildHeight) {
+        final BlockSnapshot snapshot = ((org.spongepowered.api.world.server.ServerWorld) (playerInteractionManager.level)).createSnapshot(VecHelper.toVector3i(blockPos));
+        final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(action, this.player, this.player.getItemInHand(
+                InteractionHand.MAIN_HAND), snapshot, InteractionHand.MAIN_HAND, direction);
         if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
-            this.player.connection.send(new ClientboundBlockBreakAckPacket(p_225416_1_, playerInteractionManager.level.getBlockState(p_225416_1_), p_225416_2_, false, "block action restricted"));
+            this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, playerInteractionManager.level.getBlockState(blockPos), action, false, "block action restricted"));
             this.impl$ignorePackets++;
         } else {
-            if (p_225416_2_ == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK) {
-                if (!Objects.equals(((ServerPlayerGameModeAccessor) playerInteractionManager).accessor$destroyPos(), p_225416_1_)) {
+            if (action == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK) {
+                if (!Objects.equals(((ServerPlayerGameModeAccessor) playerInteractionManager).accessor$destroyPos(), blockPos)) {
                     return; // prevents Mismatch in destroy block pos warning
                 }
             }
-            playerInteractionManager.handleBlockBreakAction(p_225416_1_, p_225416_2_, p_225416_3_, p_225416_4_);
-            if (p_225416_2_ == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
+            playerInteractionManager.handleBlockBreakAction(blockPos, action, direction, maxBuildHeight);
+            if (action == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
                 this.impl$ignorePackets++;
             }
         }

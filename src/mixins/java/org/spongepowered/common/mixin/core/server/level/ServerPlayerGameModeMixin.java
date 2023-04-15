@@ -24,22 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.level.ServerPlayerGameModeBridge;
 
 @Mixin(ServerPlayerGameMode.class)
 public abstract class ServerPlayerGameModeMixin implements ServerPlayerGameModeBridge {
 
-    private boolean impl$interactBlockLeftClickEventCancelled = false;
     private boolean impl$interactBlockRightClickEventCancelled = false;
-    private boolean impl$lastInteractItemOnBlockCancelled = false;
 
     @Override
     public boolean bridge$isInteractBlockRightClickCancelled() {
@@ -49,30 +41,5 @@ public abstract class ServerPlayerGameModeMixin implements ServerPlayerGameModeB
     @Override
     public void bridge$setInteractBlockRightClickCancelled(final boolean cancelled) {
         this.impl$interactBlockRightClickEventCancelled = cancelled;
-    }
-
-//    @Override
-//    public boolean bridge$isLastInteractItemOnBlockCancelled() {
-//        return this.impl$lastInteractItemOnBlockCancelled;
-//    }
-//
-//    @Override
-//    public void bridge$setLastInteractItemOnBlockCancelled(final boolean lastInteractItemOnBlockCancelled) {
-//        this.impl$lastInteractItemOnBlockCancelled = lastInteractItemOnBlockCancelled;
-//    }
-
-    /**
-     * We have to check for cancelled left click events because they occur from different packets
-     * or processing branches such that there's no clear "context" of where we can store these variables.
-     * So, we store it to the interaction manager's fields, to avoid contaminating other interaction
-     * manager's processes.
-    */
-    @Inject(method = "handleBlockBreakAction", at = @At("HEAD"), cancellable = true)
-    private void impl$cancelIfInteractBlockPrimaryCancelled(final BlockPos pos, final ServerboundPlayerActionPacket.Action action,
-                                                            final Direction direction, final int maxY, final CallbackInfo ci) {
-        if (this.impl$interactBlockLeftClickEventCancelled) {
-            this.impl$interactBlockLeftClickEventCancelled = false;
-            ci.cancel();
-        }
     }
 }
