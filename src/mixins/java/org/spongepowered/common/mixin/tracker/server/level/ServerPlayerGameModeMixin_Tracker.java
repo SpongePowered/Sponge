@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.tracker.server.level;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.InteractionHand;
@@ -96,7 +97,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
 
         // Sponge start
         Tuple<InteractBlockEvent.Secondary, InteractionResult> eventTuple =
-                PlatformHooks.INSTANCE.getEventHooks().callInteractBlockEventSecondary(playerIn, worldIn, stackIn, handIn, blockRaytraceResultIn);
+                PlatformHooks.INSTANCE.getEventHooks().callInteractBlockEventSecondary(playerIn, (ServerLevel) worldIn, stackIn, handIn, blockRaytraceResultIn);
         final InteractBlockEvent.Secondary event = eventTuple.first();
         final Tristate useItem = event.useItemResult();
         final Tristate useBlock = event.useBlockResult();

@@ -31,7 +31,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -49,7 +48,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 public interface EventHooks {
 
     default Tuple<InteractBlockEvent.Secondary, InteractionResult> callInteractBlockEventSecondary(
-            final ServerPlayer player, final Level level, final ItemStack heldItem, final InteractionHand hand, final BlockHitResult blockHitResult) {
+            final ServerPlayer player, final ServerLevel level, final ItemStack heldItem, final InteractionHand hand, final BlockHitResult blockHitResult) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.createInteractBlockEventSecondary(player, level, heldItem, hand,
                     blockHitResult, frame);

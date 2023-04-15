@@ -345,7 +345,7 @@ public final class SpongeCommonEventFactory {
     }
 
     public static InteractBlockEvent.Secondary createInteractBlockEventSecondary(
-            final net.minecraft.world.entity.player.Player player, final Level level, final ItemStack heldItem, final InteractionHand hand,
+            final net.minecraft.world.entity.player.Player player, final ServerLevel level, final ItemStack heldItem, final InteractionHand hand,
             final BlockHitResult blockHitResult, final CauseStackManager.StackFrame frame) {
         final Vector3d interactionPoint = VecHelper.toVector3d(blockHitResult.getBlockPos());
         final Direction direction = DirectionFacingProvider.INSTANCE.getKey(blockHitResult.getDirection()).get();

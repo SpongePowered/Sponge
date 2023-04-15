@@ -24,6 +24,8 @@
  */
 package org.spongepowered.forge.mixin.core.minecraftforge.event.entity.player;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -60,7 +62,12 @@ public abstract class PlayerInteractEvent_RightClickBlockMixin_Forge implements 
     @Override
     public @Nullable Event bridge$createSpongeEvent(final CauseStackManager.StackFrame frame) {
         final PlayerInteractEvent.RightClickBlock forgeEvent = (PlayerInteractEvent.RightClickBlock) (Object) this;
-        return SpongeCommonEventFactory.createInteractBlockEventSecondary(forgeEvent.getPlayer(), forgeEvent.getWorld(), forgeEvent.getItemStack(),
+        final Level world = forgeEvent.getWorld();
+        if (world.isClientSide) {
+            return null;
+        }
+
+        return SpongeCommonEventFactory.createInteractBlockEventSecondary(forgeEvent.getPlayer(), (ServerLevel) world, forgeEvent.getItemStack(),
                 forgeEvent.getHand(), forgeEvent.getHitVec(), frame);
     }
 }

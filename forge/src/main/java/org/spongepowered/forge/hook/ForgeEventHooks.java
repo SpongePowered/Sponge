@@ -32,7 +32,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
@@ -52,7 +51,7 @@ public final class ForgeEventHooks implements EventHooks {
 
     @Override
     public Tuple<InteractBlockEvent.Secondary, InteractionResult> callInteractBlockEventSecondary(
-            final ServerPlayer player, final Level level, final ItemStack heldItem, final InteractionHand hand, final BlockHitResult blockHitResult) {
+            final ServerPlayer player, final ServerLevel level, final ItemStack heldItem, final InteractionHand hand, final BlockHitResult blockHitResult) {
         final PlayerInteractEvent.RightClickBlock forgeEvent = new PlayerInteractEvent.RightClickBlock(player, hand, blockHitResult.getBlockPos(),
                 blockHitResult);
         // Returning FAIL when cancelled is the behavior on SpongeVanilla, we match by default on SpongeForge but this can be changed by a mod
