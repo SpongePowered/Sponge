@@ -154,15 +154,12 @@ public final class ForgeEventManager extends SpongeEventManager implements IEven
 
     // Implementation
 
-    public boolean postDual(final org.spongepowered.api.event.Event spongeEvent, final Event forgeEvent) {
-        return postDual(spongeEvent, forgeEvent, IEventListener::invoke);
-    }
-
-    public boolean postDual(final org.spongepowered.api.event.Event spongeEvent, final Event forgeEvent, final IEventBusInvokeDispatcher dispatcher) {
+    private boolean postDual(final org.spongepowered.api.event.Event spongeEvent, final Event forgeEvent,
+            final IEventBusInvokeDispatcher dispatcher) {
         return postDual(spongeEvent, Collections.singleton(forgeEvent), dispatcher);
     }
 
-    public boolean postDual(final org.spongepowered.api.event.Event spongeEvent, final Collection<? extends Event> forgeEvents,
+    private boolean postDual(final org.spongepowered.api.event.Event spongeEvent, final Collection<? extends Event> forgeEvents,
             final IEventBusInvokeDispatcher dispatcher) {
         try (final NoExceptionClosable ignored = this.preparePost(spongeEvent)) {
             final RegisteredListener.Cache listeners = this.getHandlerCache(spongeEvent);

@@ -25,20 +25,13 @@
 package org.spongepowered.common.hooks;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.BlockHitResult;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 /**
@@ -46,16 +39,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
  * and the platform.
  */
 public interface EventHooks {
-
-    default Tuple<InteractBlockEvent.Secondary, InteractionResult> callInteractBlockEventSecondary(
-            final ServerPlayer player, final ServerLevel level, final ItemStack heldItem, final InteractionHand hand, final BlockHitResult blockHitResult) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.createInteractBlockEventSecondary(player, level, heldItem, hand,
-                    blockHitResult, frame);
-            SpongeCommon.post(event);
-            return Tuple.of(event, InteractionResult.FAIL);
-        }
-    }
 
     default ChangeEntityWorldEvent.Pre callChangeEntityWorldEventPre(final Entity entity, final ServerLevel toWorld) {
         final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(PhaseTracker.getCauseStackManager().currentCause(),

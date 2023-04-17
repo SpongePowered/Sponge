@@ -48,7 +48,7 @@ public abstract class ServerPlayerMixin_Forge extends LivingEntityMixin_Forge im
 
     @Override
     public double bridge$reachDistance() {
-        return shadow$getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
+        return this.shadow$getAttribute(ForgeMod.REACH_DISTANCE.get()).getValue();
     }
 
     /**

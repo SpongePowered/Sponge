@@ -45,7 +45,6 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -54,6 +53,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.level.ServerPlayerGameModeBridge;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
 import org.spongepowered.common.bridge.world.item.ItemStackBridge;
@@ -63,7 +63,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
-import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -91,19 +90,23 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
      * @reason Fire InteractBlockEvent.Secondary and InteractContainerEvent.Open.
      */
     @Overwrite
-    public InteractionResult useItemOn(final ServerPlayer playerIn, final Level worldIn, final ItemStack stackIn, final InteractionHand handIn, final BlockHitResult blockRaytraceResultIn) {
-        final BlockPos blockPos = blockRaytraceResultIn.getBlockPos();
+    public InteractionResult useItemOn(final ServerPlayer playerIn, final Level worldIn, final ItemStack stackIn, final InteractionHand handIn, final BlockHitResult blockHitResultIn) {
+        final BlockPos blockPos = blockHitResultIn.getBlockPos();
         final BlockState blockState = worldIn.getBlockState(blockPos);
 
         // Sponge start
-        Tuple<InteractBlockEvent.Secondary, InteractionResult> eventTuple =
-                PlatformHooks.INSTANCE.getEventHooks().callInteractBlockEventSecondary(playerIn, (ServerLevel) worldIn, stackIn, handIn, blockRaytraceResultIn);
-        final InteractBlockEvent.Secondary event = eventTuple.first();
+        final InteractBlockEvent.Secondary event;
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            event = SpongeCommonEventFactory.createInteractBlockEventSecondary(playerIn, (ServerLevel) worldIn, stackIn, handIn,
+                    blockHitResultIn, frame);
+            SpongeCommon.post(event);
+        }
+
         final Tristate useItem = event.useItemResult();
         final Tristate useBlock = event.useBlockResult();
         ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(event.isCancelled());
         if (event.isCancelled()) {
-            return eventTuple.second(); // Vanilla always returns FAIL but Forge may return something else
+            return InteractionResult.FAIL; // On the server, the interaction result only dictates whether to swing the arm or not
         }
         // Sponge end
 
@@ -113,7 +116,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                 playerIn.openMenu(menuProvider);
 
                 // Sponge start
-                final Vector3i pos = VecHelper.toVector3i(blockRaytraceResultIn.getBlockPos());
+                final Vector3i pos = VecHelper.toVector3i(blockHitResultIn.getBlockPos());
                 final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
                 try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     frame.pushCause(playerIn);
@@ -131,7 +134,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
             }
         } else {
             // Forge start
-            final UseOnContext useOnContext = new UseOnContext(playerIn, handIn, blockRaytraceResultIn);
+            final UseOnContext useOnContext = new UseOnContext(playerIn, handIn, blockHitResultIn);
             if (useItem != Tristate.FALSE) {
                 InteractionResult interactionResult = ((ItemStackBridge) (Object) stackIn).bridge$onItemUseFirst(useOnContext);
                 if (interactionResult != InteractionResult.PASS) {
@@ -151,11 +154,11 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
             if (useBlock != Tristate.FALSE && !sneakUse) { // Sponge check useBlock
                 final AbstractContainerMenu lastOpenContainer = playerIn.containerMenu; // Sponge
 
-                final InteractionResult result = blockState.use(worldIn, playerIn, handIn, blockRaytraceResultIn);
+                final InteractionResult result = blockState.use(worldIn, playerIn, handIn, blockHitResultIn);
 
                 // Sponge start
                 if (result.consumesAction() && lastOpenContainer != playerIn.containerMenu) {
-                    final Vector3i pos = VecHelper.toVector3i(blockRaytraceResultIn.getBlockPos());
+                    final Vector3i pos = VecHelper.toVector3i(blockHitResultIn.getBlockPos());
                     final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
                     try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                         frame.pushCause(playerIn);
