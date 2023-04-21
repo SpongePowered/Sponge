@@ -372,6 +372,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         this.impl$sleepingIgnored = sleepingIgnored;
     }
 
+    @Override
+    public double bridge$reachDistance() {
+        return 5;
+    }
+
     /*
     @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
     private void impl$onPlayerActive(final CallbackInfo ci) {

@@ -22,24 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.level;
+package org.spongepowered.common.bridge.world.item;
 
-import net.minecraft.server.level.ServerPlayerGameMode;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.server.level.ServerPlayerGameModeBridge;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.LevelReader;
 
-@Mixin(ServerPlayerGameMode.class)
-public abstract class ServerPlayerGameModeMixin implements ServerPlayerGameModeBridge {
+public interface ItemStackBridge {
 
-    private boolean impl$interactBlockRightClickEventCancelled = false;
+    InteractionResult bridge$onItemUseFirst(UseOnContext context);
 
-    @Override
-    public boolean bridge$isInteractBlockRightClickCancelled() {
-        return this.impl$interactBlockRightClickEventCancelled;
-    }
-
-    @Override
-    public void bridge$setInteractBlockRightClickCancelled(final boolean cancelled) {
-        this.impl$interactBlockRightClickEventCancelled = cancelled;
-    }
+    boolean bridge$doesSneakBypassUse(LevelReader world, BlockPos pos, Player player);
 }

@@ -387,11 +387,11 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
                     target = "Lnet/minecraft/world/entity/Entity;interactAt(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"
             )
     )
-    public void impl$onRightClickAtEntity(final ServerboundInteractPacket p_147340_1, final CallbackInfo ci) {
-        final Entity entity = p_147340_1.getTarget(this.player.getLevel());
-        final ItemStack itemInHand = p_147340_1.getHand() == null ? ItemStack.EMPTY : this.player.getItemInHand(p_147340_1.getHand());
+    public void impl$onRightClickAtEntity(final ServerboundInteractPacket packet, final CallbackInfo ci) {
+        final Entity entity = packet.getTarget(this.player.getLevel());
+        final ItemStack itemInHand = packet.getHand() == null ? ItemStack.EMPTY : this.player.getItemInHand(packet.getHand());
         final InteractEntityEvent.Secondary event = SpongeCommonEventFactory
-                .callInteractEntityEventSecondary(this.player, itemInHand, entity, p_147340_1.getHand(), VecHelper.toVector3d(p_147340_1.getLocation()));
+                .callInteractEntityEventSecondary(this.player, itemInHand, entity, packet.getHand(), VecHelper.toVector3d(packet.getLocation()));
         if (event.isCancelled()) {
             ci.cancel();
         } else {
@@ -404,8 +404,8 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
             cancellable = true,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;attack(Lnet/minecraft/world/entity/Entity;)V")
     )
-    public void impl$onLeftClickEntity(final ServerboundInteractPacket p_147340_1_, final CallbackInfo ci) {
-        final Entity entity = p_147340_1_.getTarget(this.player.getLevel());
+    public void impl$onLeftClickEntity(final ServerboundInteractPacket packet, final CallbackInfo ci) {
+        final Entity entity = packet.getTarget(this.player.getLevel());
 
         final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player,
                 this.player.getItemInHand(this.player.getUsedItemHand()), entity, this.player.getUsedItemHand());
@@ -432,8 +432,11 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
                 this.impl$ignorePackets--;
             } else {
                 if (ShouldFire.INTERACT_ITEM_EVENT_PRIMARY) {
+                    final double reachDistance = ((ServerPlayerBridge) this.player).bridge$reachDistance();
+                    final double pickRange = this.player.gameMode.isCreative() ? reachDistance : (reachDistance - 0.5);
+
                     final Vec3 startPos = this.player.getEyePosition(1);
-                    final Vec3 endPos = startPos.add(this.player.getLookAngle().scale(5d)); // TODO hook for blockReachDistance?
+                    final Vec3 endPos = startPos.add(this.player.getLookAngle().scale(pickRange));
                     final HitResult result = this.player.getLevel().clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.player));
                     if (result.getType() == HitResult.Type.MISS) {
                         final ItemStack heldItem = this.player.getItemInHand(hand);
@@ -465,22 +468,22 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
     }
 
     @Redirect(method = "handlePlayerAction", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayerGameMode;handleBlockBreakAction(Lnet/minecraft/core/BlockPos;Lnet/minecraft/network/protocol/game/ServerboundPlayerActionPacket$Action;Lnet/minecraft/core/Direction;I)V"))
-    public void impl$callInteractBlockPrimaryEvent(final ServerPlayerGameMode playerInteractionManager, final BlockPos p_225416_1_,
-            final ServerboundPlayerActionPacket.Action p_225416_2_, final Direction p_225416_3_, final int p_225416_4_) {
-        final BlockSnapshot snapshot = ((org.spongepowered.api.world.server.ServerWorld) (playerInteractionManager.level)).createSnapshot(VecHelper.toVector3i(p_225416_1_));
-        final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(p_225416_2_, this.player, this.player.getItemInHand(
-                InteractionHand.MAIN_HAND), snapshot, InteractionHand.MAIN_HAND, p_225416_3_);
+    public void impl$callInteractBlockPrimaryEvent(final ServerPlayerGameMode playerInteractionManager, final BlockPos blockPos,
+            final ServerboundPlayerActionPacket.Action action, final Direction direction, final int maxBuildHeight) {
+        final BlockSnapshot snapshot = ((org.spongepowered.api.world.server.ServerWorld) (playerInteractionManager.level)).createSnapshot(VecHelper.toVector3i(blockPos));
+        final InteractBlockEvent.Primary event = SpongeCommonEventFactory.callInteractBlockEventPrimary(action, this.player, this.player.getItemInHand(
+                InteractionHand.MAIN_HAND), snapshot, InteractionHand.MAIN_HAND, direction);
         if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
-            this.player.connection.send(new ClientboundBlockBreakAckPacket(p_225416_1_, playerInteractionManager.level.getBlockState(p_225416_1_), p_225416_2_, false, "block action restricted"));
+            this.player.connection.send(new ClientboundBlockBreakAckPacket(blockPos, playerInteractionManager.level.getBlockState(blockPos), action, false, "block action restricted"));
             this.impl$ignorePackets++;
         } else {
-            if (p_225416_2_ == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK) {
-                if (!Objects.equals(((ServerPlayerGameModeAccessor) playerInteractionManager).accessor$destroyPos(), p_225416_1_)) {
+            if (action == ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK) {
+                if (!Objects.equals(((ServerPlayerGameModeAccessor) playerInteractionManager).accessor$destroyPos(), blockPos)) {
                     return; // prevents Mismatch in destroy block pos warning
                 }
             }
-            playerInteractionManager.handleBlockBreakAction(p_225416_1_, p_225416_2_, p_225416_3_, p_225416_4_);
-            if (p_225416_2_ == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
+            playerInteractionManager.handleBlockBreakAction(blockPos, action, direction, maxBuildHeight);
+            if (action == ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK) {
                 this.impl$ignorePackets++;
             }
         }

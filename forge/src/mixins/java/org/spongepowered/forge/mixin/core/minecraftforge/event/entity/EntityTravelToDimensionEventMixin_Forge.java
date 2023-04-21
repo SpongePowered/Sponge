@@ -31,6 +31,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
@@ -39,7 +40,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.forge.launch.bridge.event.ForgeEventBridge_Forge;
 
 @Mixin(value = EntityTravelToDimensionEvent.class, remap = false)
@@ -65,10 +65,10 @@ public abstract class EntityTravelToDimensionEventMixin_Forge implements ForgeEv
     }
 
     @Override
-    public @Nullable Event bridge$createSpongeEvent() {
+    public @Nullable Event bridge$createSpongeEvent(final CauseStackManager.StackFrame frame) {
         final Entity entity = ((EntityEvent) (Object) this).getEntity();
         final ServerLevel toWorld = SpongeCommon.server().getLevel(this.dimension);
-        return SpongeEventFactory.createChangeEntityWorldEventPre(PhaseTracker.getCauseStackManager().currentCause(),
+        return SpongeEventFactory.createChangeEntityWorldEventPre(frame.currentCause(),
                 (org.spongepowered.api.entity.Entity) entity, (org.spongepowered.api.world.server.ServerWorld) entity.getCommandSenderWorld(),
                 (org.spongepowered.api.world.server.ServerWorld) toWorld, (org.spongepowered.api.world.server.ServerWorld) toWorld);
     }

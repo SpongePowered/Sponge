@@ -121,6 +121,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.map.SpongeMapStorage;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3d;
@@ -344,15 +345,16 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(final net.minecraft.world.entity.player.Player player, final ItemStack heldItem, final Vector3d hitVec, final BlockSnapshot targetBlock, final Direction targetSide, final InteractionHand hand) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            SpongeCommonEventFactory.applyCommonInteractContext(player, heldItem, hand, targetBlock, null, frame);
-            final InteractBlockEvent.Secondary event = SpongeEventFactory.createInteractBlockEventSecondary(frame.currentCause(),
-                    Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, targetBlock, hitVec,
-                    targetSide);
-            SpongeCommon.post(event);
-            return event;
-        }
+    public static InteractBlockEvent.Secondary createInteractBlockEventSecondary(
+            final net.minecraft.world.entity.player.Player player, final ServerLevel level, final ItemStack heldItem, final InteractionHand hand,
+            final BlockHitResult blockHitResult, final CauseStackManager.StackFrame frame) {
+        final Vector3d interactionPoint = VecHelper.toVector3d(blockHitResult.getLocation());
+        final Direction side = DirectionUtil.getFor(blockHitResult.getDirection());
+        final BlockSnapshot block = ((ServerWorld) level).createSnapshot(VecHelper.toVector3i(blockHitResult.getBlockPos()));
+
+        SpongeCommonEventFactory.applyCommonInteractContext(player, heldItem, hand, block, null, frame);
+        return SpongeEventFactory.createInteractBlockEventSecondary(frame.currentCause(),
+                Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, block, interactionPoint, side);
     }
 
     public static void applyCommonInteractContext(final net.minecraft.world.entity.player.Player player, final ItemStack stack, final InteractionHand hand, final @Nullable BlockSnapshot targetBlock,

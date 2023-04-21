@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.forge.mixin.core.world.entity.LivingEntityMixin_Forge;
 
 @Mixin(Player.class)
-public class PlayerMixin_Forge extends LivingEntityMixin_Forge {
+public abstract class PlayerMixin_Forge extends LivingEntityMixin_Forge {
     @Override
     public boolean bridge$onLivingAttack(
         final LivingEntity entity, final DamageSource source, final float amount
