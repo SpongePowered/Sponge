@@ -137,8 +137,8 @@ public abstract class LegacyQueryHandlerMixin extends ChannelInboundHandlerAdapt
                 response = SpongeStatusResponse.postLegacy(server, client, SpongeLegacyMinecraftVersion.V1_5, null);
                 if (response != null) {
                     this.writeResponse(ctx, String.format("§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
-                            response.protocol(),
-                            response.versionName(server.getServerVersion()),
+                            response.version().protocolVersion(),
+                            response.version().name(),
                             response.motd(),
                             response.onlinePlayers(),
                             response.maxPlayers()));
@@ -182,8 +182,8 @@ public abstract class LegacyQueryHandlerMixin extends ChannelInboundHandlerAdapt
                                 InetSocketAddress.createUnresolved(NetworkUtil.cleanVirtualHost(host), port));
                 if (response != null) {
                     this.writeResponse(ctx, String.format("§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
-                            response.protocol(),
-                            response.versionName(server.getServerVersion()),
+                            response.version().protocolVersion(),
+                            response.version().name(),
                             response.motd(),
                             response.onlinePlayers(),
                             response.maxPlayers()));

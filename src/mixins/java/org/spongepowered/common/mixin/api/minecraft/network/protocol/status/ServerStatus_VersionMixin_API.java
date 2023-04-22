@@ -29,13 +29,11 @@ import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.ProtocolMinecraftVersion;
-import org.spongepowered.common.SpongeMinecraftVersion;
 
 import java.util.OptionalInt;
 
 @Mixin(ServerStatus.Version.class)
-public abstract class ServerStatus_VersionMixin_API implements MinecraftVersion, ProtocolMinecraftVersion {
+public abstract class ServerStatus_VersionMixin_API implements MinecraftVersion {
 
     // @formatter:off
     @Shadow @Final private String name;
@@ -48,6 +46,11 @@ public abstract class ServerStatus_VersionMixin_API implements MinecraftVersion,
     }
 
     @Override
+    public int protocolVersion() {
+        return this.protocol;
+    }
+
+    @Override
     public boolean isLegacy() {
         return false;
     }
@@ -55,15 +58,5 @@ public abstract class ServerStatus_VersionMixin_API implements MinecraftVersion,
     @Override
     public OptionalInt dataVersion() {
         return OptionalInt.empty();
-    }
-
-    @Override
-    public int getProtocol() {
-        return this.protocol;
-    }
-
-    @Override
-    public int compareTo(final MinecraftVersion o) {
-        return SpongeMinecraftVersion.compare(this, o);
     }
 }
