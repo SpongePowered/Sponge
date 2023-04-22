@@ -48,7 +48,7 @@ public interface CriterionTriggerMixin_API<C extends FilteredTriggerConfiguratio
 
     @Override
     default void trigger() {
-        this.trigger(Sponge.server().onlinePlayers());
+        Sponge.server().streamOnlinePlayers().forEach(this::trigger);
     }
 
     @Override

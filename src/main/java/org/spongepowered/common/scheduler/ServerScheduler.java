@@ -25,7 +25,6 @@
 package org.spongepowered.common.scheduler;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.bridge.world.entity.player.PlayerInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
@@ -41,12 +40,12 @@ public final class ServerScheduler extends SyncScheduler {
     public void tick() {
         super.tick();
 
-        for (final Player player : Sponge.server().onlinePlayers()) {
+        Sponge.server().streamOnlinePlayers().forEach(player -> {
             try (final EntityTickContext context = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(player)) {
                 context.buildAndSwitch();
                 // Detect Changes on PlayerInventories marked as dirty.
                 ((PlayerInventoryBridge) ((net.minecraft.world.entity.player.Player) player).getInventory()).bridge$cleanupDirty();
             }
-        }
+        });
     }
 }
