@@ -26,6 +26,7 @@ package org.spongepowered.vanilla.launch.command;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.mojang.brigadier.StringReader;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
@@ -41,7 +42,7 @@ public final class VanillaCommandManager extends SpongeCommandManager {
     }
 
     @Override
-    protected CommandResult processCommand(final CommandCause cause, final CommandMapping mapping, final String original, final String command,
+    protected CommandResult processCommand(final CommandCause cause, final CommandMapping mapping, final StringReader original, final String command,
             final String args) throws Throwable {
         return mapping.registrar().process(cause, mapping, command, args);
     }

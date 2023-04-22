@@ -28,6 +28,7 @@ import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
 import net.minecraft.commands.CommandSourceStack;
@@ -38,7 +39,6 @@ import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
-import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
 import org.spongepowered.common.command.sponge.SpongeCommand;
@@ -54,7 +54,7 @@ public final class ForgeCommandManager extends SpongeCommandManager {
 
     @Override
     protected CommandResult processCommand(final CommandCause cause, final CommandMapping mapping,
-            final String original, final String command, final String args)
+            final StringReader original, final String command, final String args)
             throws Throwable {
         final CommandRegistrar<?> registrar = mapping.registrar();
         final boolean isBrig = registrar instanceof BrigadierBasedRegistrar;
@@ -70,9 +70,9 @@ public final class ForgeCommandManager extends SpongeCommandManager {
                     0);
             contextBuilder.withCommand(ctx -> 1);
             if (!args.isEmpty()) {
-                contextBuilder.withArgument("parsed", new ParsedArgument<>(command.length(), original.length(), args));
+                contextBuilder.withArgument("parsed", new ParsedArgument<>(command.length(), original.getRemainingLength(), args));
             }
-            parseResults = new ParseResults<>(contextBuilder, new SpongeStringReader(original), Collections.emptyMap());
+            parseResults = new ParseResults<>(contextBuilder, original, Collections.emptyMap());
         }
 
         // Relocated from Commands (injection short circuits it there)
@@ -88,7 +88,7 @@ public final class ForgeCommandManager extends SpongeCommandManager {
         if (isBrig) {
             return CommandResult.builder().result(this.getDispatcher().execute(parseResults)).build();
         } else {
-            return mapping.registrar().process(cause, mapping, command, args);
+            return registrar.process(cause, mapping, command, args);
         }
     }
 
