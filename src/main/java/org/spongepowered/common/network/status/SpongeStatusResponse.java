@@ -125,7 +125,7 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
         }
     }
 
-    public final static class SpongeStatusVersion implements Version {
+    public final static class SpongeStatusVersion implements ClientPingServerEvent.Response.Version {
         private String name;
         private int protocol;
 
@@ -213,7 +213,7 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
     }
 
     @Override
-    public Version version() {
+    public ClientPingServerEvent.Response.Version version() {
         return this.version;
     }
 
