@@ -33,24 +33,15 @@ import org.spongepowered.configurate.transformation.TransformAction;
 
 public abstract class BaseConfig implements Config {
 
-    @Setting("player-block-tracker")
-    public final PlayerBlockTracker playerBlockTracker = new PlayerBlockTracker();
-
     @Setting
     public final EntityCategory entity = new EntityCategory();
 
     @Setting("entity-activation-range")
     public final EntityActivationRangeCategory entityActivationRange = new EntityActivationRangeCategory();
 
-    @Setting("entity-collision")
-    public final EntityCollisionCategory entityCollision = new EntityCollisionCategory();
-
     @Setting("spawner")
     @Comment("Used to control spawn limits around a player's view distance.")
     public final SpawnerCategory spawner = new SpawnerCategory();
-
-    @Setting("block-entity-activation")
-    public final BlockEntityActivationCategory blockEntityActivation = new BlockEntityActivationCategory();
 
     @Setting("movement-checks")
     public final MovementChecksCategory movementChecks = new MovementChecksCategory();

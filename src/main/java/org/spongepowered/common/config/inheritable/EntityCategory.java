@@ -31,14 +31,6 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 @ConfigSerializable
 public final class EntityCategory {
 
-    @Setting("max-bounding-box-size")
-    @Comment("Maximum size of an entity's bounding box before removing it. Set to 0 to disable")
-    public int maxBoundingBoxSize = 1000;
-
-    @Setting("max-speed")
-    @Comment("Square of the maximum speed of an entity before removing it. Set to 0 to disable")
-    public int maxSpeed = 100;
-
     @Setting
     public final HumanSubCategory human = new HumanSubCategory();
 

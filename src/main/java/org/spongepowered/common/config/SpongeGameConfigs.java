@@ -32,7 +32,6 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
-import org.spongepowered.common.config.customdata.CustomDataConfig;
 import org.spongepowered.common.config.inheritable.BaseConfig;
 import org.spongepowered.common.config.inheritable.GlobalConfig;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
@@ -56,17 +55,9 @@ public final class SpongeGameConfigs {
 
     private static final Lock initLock = new ReentrantLock();
     private static ConfigHandle<TrackerConfig> trackerConfigAdapter;
-    private static ConfigHandle<CustomDataConfig> customDataConfigAdapter;
     private static volatile InheritableConfigHandle<GlobalConfig> global;
 
     private SpongeGameConfigs() {
-    }
-
-    public static ConfigHandle<CustomDataConfig> getCustomData() {
-        if (SpongeGameConfigs.customDataConfigAdapter == null) {
-            SpongeGameConfigs.customDataConfigAdapter = SpongeConfigs.create(CustomDataConfig.class, null, CustomDataConfig.FILE_NAME);
-        }
-        return SpongeGameConfigs.customDataConfigAdapter;
     }
 
     public static ConfigHandle<TrackerConfig> getTracker() {

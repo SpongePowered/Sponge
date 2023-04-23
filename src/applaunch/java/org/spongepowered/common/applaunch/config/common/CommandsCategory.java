@@ -38,20 +38,4 @@ public final class CommandsCategory {
     @Comment("Command aliases will resolve conflicts when multiple plugins request a specific command, \n"
                      + "Correct syntax is <unqualified command>=<plugin name> e.g. \"sethome=homeplugin\"")
     public final Map<String, String> aliases = new HashMap<>();
-
-    @Setting("enforce-permission-checks-on-non-sponge-commands")
-    @Comment("Some mods may not trigger a permission check when running their command. Setting this to\n"
-             + "true will enforce a check of the Sponge provided permission (\"<modid>.command.<commandname>\").\n"
-             + "Note that setting this to true may cause some commands that are generally accessible to all to\n"
-             + "require a permission to run.\n\n"
-             + "Setting this to true will enable greater control over whether a command will appear in\n"
-             + "tab completion and Sponge's help command.\n\n"
-             + "If you are not using a permissions plugin, it is highly recommended that this is set to false\n"
-             + "(as it is by default).")
-    public boolean enforcePermissionChecksOnNonSpongeCommands = false;
-
-    @Setting("commands-hidden")
-    @Comment("Defines how Sponge should act when a user tries to access a command they do not have\n"
-                     + "permission for")
-    public final CommandsHiddenCategory commandsHidden = new CommandsHiddenCategory();
 }

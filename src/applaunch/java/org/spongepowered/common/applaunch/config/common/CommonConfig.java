@@ -63,9 +63,6 @@ public final class CommonConfig implements Config {
     public final CommandsCategory commands = new CommandsCategory();
 
     @Setting
-    public final PermissionCategory permissions = new PermissionCategory();
-
-    @Setting
     public final ModuleCategory modules = new ModuleCategory();
 
     @Setting("ip-sets")
