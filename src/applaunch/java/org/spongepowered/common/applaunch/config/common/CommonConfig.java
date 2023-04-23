@@ -96,19 +96,41 @@ public final class CommonConfig implements Config {
 
     public static ConfigurationTransformation transformation() {
         return ConfigurationTransformation.versionedBuilder()
-            .makeVersion(1, builder -> {
-                // Update IP forwarding
-                builder.addAction(NodePath.path("modules", "bungeecord"), TransformAction.rename("ip-forwarding"))
-                    .addAction(NodePath.path("bungeecord"), TransformAction.rename("ip-forwarding"))
-                    .addAction(NodePath.path("bungeecord", "ip-forwarding"), (path, value) -> {
-                        if (value.getBoolean()) {
-                            value.parent().node("mode").set(IpForwardingCategory.Mode.LEGACY);
-                        }
-                        value.set(null);
-                        return null;
-                    });
-            })
-            .build();
+                .addVersion(2, CommonConfig.buildOneToTwo())
+                .makeVersion(1, builder -> {
+                    // Update IP forwarding
+                    builder.addAction(NodePath.path("modules", "bungeecord"), TransformAction.rename("ip-forwarding"))
+                            .addAction(NodePath.path("bungeecord"), TransformAction.rename("ip-forwarding"))
+                            .addAction(NodePath.path("bungeecord", "ip-forwarding"), (path, value) -> {
+                                if (value.getBoolean()) {
+                                    value.parent().node("mode").set(IpForwardingCategory.Mode.LEGACY);
+                                }
+                                value.set(null);
+                                return null;
+                            });
+                })
+                .build();
+    }
+
+    static ConfigurationTransformation buildOneToTwo() {
+        return ConfigurationTransformation.builder()
+                .addAction(NodePath.path("commands", "enforce-permission-checks-on-non-sponge-commands"), TransformAction.remove())
+                .addAction(NodePath.path("commands", "commands-hidden"), TransformAction.remove())
+                .addAction(NodePath.path("permissions"), TransformAction.remove())
+                .addAction(NodePath.path("modules", "block-entity-activation"), TransformAction.remove())
+                .addAction(NodePath.path("modules", "entity-collision"), TransformAction.remove())
+                .addAction(NodePath.path("modules", "tracking"), TransformAction.remove())
+                .addAction(NodePath.path("modules", "real-time"), TransformAction.remove())
+                .addAction(NodePath.path("optimizations", "eigen-redstone"), TransformAction.remove())
+                .addAction(NodePath.path("optimizations", "faster-thread-checks"), TransformAction.remove())
+                .addAction(NodePath.path("optimizations", "optimize-maps"), TransformAction.remove())
+                .addAction(NodePath.path("optimizations", "optimize-hoppers"), TransformAction.remove())
+                .addAction(NodePath.path("optimizations", "optimize-block-entity-ticking"), TransformAction.remove())
+                .addAction(NodePath.path("optimizations", "use-active-chunks-for-collisions"), TransformAction.remove())
+                .addAction(NodePath.path("optimizations", "disable-failing-deserialization-log-spam"), TransformAction.remove())
+                .addAction(NodePath.path("optimizations", "disable-scheduled-updates-for-persistent-leaf-blocks"), TransformAction.remove())
+                .addAction(NodePath.path("phase-tracker", "capture-async-commands"), TransformAction.remove())
+                .build();
     }
 
     public Map<String, Predicate<InetAddress>> getIpSets() {

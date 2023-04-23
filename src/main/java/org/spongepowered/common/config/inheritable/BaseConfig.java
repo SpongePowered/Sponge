@@ -51,10 +51,21 @@ public abstract class BaseConfig implements Config {
 
     public static ConfigurationTransformation transformation() {
         return ConfigurationTransformation.versionedBuilder()
-            .addVersion(2, BaseConfig.buildOneToTwo())
-            // move everything out of sponge subcategory
-            .addVersion(1, BaseConfig.buildInitialToOne())
-            .build();
+                .addVersion(3, BaseConfig.buildTwoToThree())
+                .addVersion(2, BaseConfig.buildOneToTwo())
+                // move everything out of sponge subcategory
+                .addVersion(1, BaseConfig.buildInitialToOne())
+                .build();
+    }
+
+    static ConfigurationTransformation buildTwoToThree() {
+        return ConfigurationTransformation.builder()
+                .addAction(NodePath.path("player-block-tracker"), TransformAction.remove())
+                .addAction(NodePath.path("entity-collision"), TransformAction.remove())
+                .addAction(NodePath.path("block-entity-activation"), TransformAction.remove())
+                .addAction(NodePath.path("entity", "max-bounding-box-size"), TransformAction.remove())
+                .addAction(NodePath.path("entity", "max-speed"), TransformAction.remove())
+                .build();
     }
 
     static ConfigurationTransformation buildOneToTwo() {
