@@ -28,6 +28,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.storage.IOWorker;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.chunk.ChunkEvent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,7 +45,7 @@ import org.spongepowered.math.vector.Vector3i;
 @Mixin(IOWorker.class)
 public abstract class IOWorkerMixin implements IOWorkerBridge {
 
-    private ResourceKey<Level> impl$dimension;
+    @MonotonicNonNull private ResourceKey<Level> impl$dimension; //We only set this for chunk related IO workers
 
     @Override
     public void bridge$setDimension(ResourceKey<Level> dimension) {
@@ -53,6 +54,10 @@ public abstract class IOWorkerMixin implements IOWorkerBridge {
 
     @Inject(method = "runStore", at = @At(value = "INVOKE", shift = At.Shift.AFTER, target = "Ljava/util/concurrent/CompletableFuture;complete(Ljava/lang/Object;)Z"))
     private void impl$onSaved(final ChunkPos param0, final @Coerce Object param1, final CallbackInfo ci) {
+        if (this.impl$dimension == null) {
+            return;
+        }
+
         if (ShouldFire.CHUNK_EVENT_SAVE_POST) {
             final Vector3i chunkPos = new Vector3i(param0.x, 0, param0.z);
             final ChunkEvent.Save.Post postSave = SpongeEventFactory.createChunkEventSavePost(PhaseTracker.getInstance().currentCause(), chunkPos,
