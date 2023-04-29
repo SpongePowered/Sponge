@@ -34,10 +34,10 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoTickList;
 import net.minecraft.world.phys.AABB;
-import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -65,7 +65,7 @@ import org.spongepowered.common.event.tracking.context.transaction.block.ChangeB
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.event.tracking.phase.generation.ChunkLoadContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
-import org.spongepowered.common.util.PrettyPrinter;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -85,21 +85,34 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
     @Shadow @Final private net.minecraft.world.level.Level level;
 
     @Shadow public abstract @Nullable BlockEntity shadow$getBlockEntity(BlockPos pos, LevelChunk.EntityCreationType creationMode);
-    @Shadow public abstract BlockState getBlockState(BlockPos pos);
+    @Shadow public abstract BlockState shadow$getBlockState(BlockPos pos);
     // @formatter:on
     private @MonotonicNonNull PhaseContext<@NonNull ?> tracker$postProcessContext = null;
 
     @Inject(method = "setBlockState", at = @At("HEAD"), cancellable = true)
-    private void tracker$sanityCheckServerWorldSetBlockState(final BlockPos pos, final BlockState state, final boolean isMoving,
+    private void tracker$setBlockState(final BlockPos pos, final BlockState newState, final boolean isMoving,
         final CallbackInfoReturnable<BlockState> cir
     ) {
-        if (!((LevelBridge) this.level).bridge$isFake()) {
-            new PrettyPrinter(80).add("Illegal Direct Chunk Access")
-                .hr()
-                .add(new IllegalAccessException("No one should be accessing Chunk.setBlock in a ServerWorld's environment"))
-                .log(PhaseTracker.LOGGER, Level.WARN);
-            cir.setReturnValue(null);
+        if (((LevelBridge) this.level).bridge$isFake()) {
+            return;
         }
+
+        final PhaseTracker instance = PhaseTracker.getInstance();
+        if (instance.getSidedThread() != PhaseTracker.SERVER.getSidedThread() && instance != PhaseTracker.SERVER) {
+            throw new UnsupportedOperationException("Cannot perform a tracked block change on a chunk while not on the main thread!");
+        }
+
+        final BlockState currentState = this.shadow$getBlockState(pos);
+        if (currentState == newState) {
+            cir.setReturnValue(null);
+            return;
+        }
+
+        final SpongeBlockChangeFlag spongeFlag = (SpongeBlockChangeFlag) BlockChangeFlags.NONE.withBlocksMoving(isMoving);
+        final int limit = Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT;
+
+        final ChunkPipeline chunkPipeline = this.bridge$createChunkPipeline(pos, newState, currentState, spongeFlag, limit);
+        cir.setReturnValue(chunkPipeline.processChange(instance.getPhaseContext(), currentState, newState, pos, limit));
     }
 
     /**
