@@ -38,6 +38,7 @@ import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.DataDeserializer;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.configurate.util.Types;
@@ -175,7 +176,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
 
         @Override
         public void accept(final DataView view, final T v) {
-            final DataView data = DataUtil.getSpongeData(view, this.key, this.version).orElse(DataContainer.createNew());
+            final DataView data = DataUtil.getSpongeData(view, this.key, this.version).orElse(DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED));
             this.serializer.accept(data, v);
             if (data.isEmpty()) {
                 return;

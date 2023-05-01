@@ -57,6 +57,7 @@ public abstract class SpongeDataHolderMixin implements SpongeDataHolderBridge {
 
     private DataManipulator.Mutable impl$manipulator;
     private Multimap<DataQuery, DataView> impl$failedData;
+    private boolean deserializing = false;
 
     @Override
     public DataManipulator.Mutable bridge$getManipulator() {
@@ -74,14 +75,19 @@ public abstract class SpongeDataHolderMixin implements SpongeDataHolderBridge {
             this.impl$manipulator = DataManipulator.mutableOf();
         }
 
-        if (this instanceof DataHolder.Mutable && !(this instanceof org.spongepowered.api.item.inventory.ItemStack)) {
-            // Does not work when adding ItemStacks to inventory because the Item may be empty (see Inventory#addResource)
-            for (final Value.Immutable<?> value : manipulator.getValues()) {
-                final DataProvider provider = SpongeDataManager.getProviderRegistry().getProvider(value.key(), this.getClass());
-                provider.offerValue((DataHolder.Mutable) this, value);
+        try {
+            this.deserializing = true;
+            if (this instanceof DataHolder.Mutable && !(this instanceof org.spongepowered.api.item.inventory.ItemStack)) {
+                // Does not work when adding ItemStacks to inventory because the Item may be empty (see Inventory#addResource)
+                for (final Value.Immutable<?> value : manipulator.getValues()) {
+                    final DataProvider provider = SpongeDataManager.getProviderRegistry().getProvider(value.key(), this.getClass());
+                    provider.offerValue((DataHolder.Mutable) this, value);
+                }
+            } else {
+                this.impl$manipulator.copyFrom(manipulator);
             }
-        } else {
-            this.impl$manipulator.copyFrom(manipulator);
+        } finally {
+            this.deserializing = false;
         }
     }
 
@@ -110,5 +116,10 @@ public abstract class SpongeDataHolderMixin implements SpongeDataHolderBridge {
             this.impl$failedData  = HashMultimap.create();
         }
         this.impl$failedData.put(nameSpace, keyedData);
+    }
+
+    @Override
+    public boolean brigde$isDeserializing() {
+        return this.deserializing;
     }
 }
