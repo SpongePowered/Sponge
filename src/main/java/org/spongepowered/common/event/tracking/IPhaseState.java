@@ -33,6 +33,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.ticks.ScheduledTick;
@@ -335,7 +336,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     ) {
         final Block newBlock = newState.getBlock();
         final Block currentBlock = currentState.getBlock();
-        if (newBlock == Blocks.AIR) {
+        if ((currentState.getOptionalValue(BlockStateProperties.WATERLOGGED).orElse(false) && newBlock == Blocks.WATER) || newBlock == Blocks.AIR) {
             return BlockChange.BREAK;
         } else if (newBlock != currentBlock && !TrackingUtil.forceModify(currentBlock, newBlock)) {
             return BlockChange.PLACE;
