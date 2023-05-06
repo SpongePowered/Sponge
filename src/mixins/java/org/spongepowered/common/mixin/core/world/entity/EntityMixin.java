@@ -918,13 +918,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return entity.hurt(source, damage);
     }
 
-
-    @Inject(method = "setPos(DDD)V", at = @At("HEAD"))
-    protected void impl$capturePlayerPosition(final double x, final double y, final double z, final CallbackInfo ci) {
-        // Overridden in ServerPlayer
-    }
-
-
     @SuppressWarnings({"ConstantConditions", "RedundantCast"})
     @Inject(method = "tick",
         at = @At("RETURN"))

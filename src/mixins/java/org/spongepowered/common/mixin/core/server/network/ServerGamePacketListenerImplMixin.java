@@ -144,7 +144,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
 
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch, Set<RelativeMovement> relativeArguments);
     @Shadow protected abstract CompletableFuture<List<FilteredText>> shadow$filterTextPacket(final List<String> $$0);
-    @Shadow public abstract void shadow$resetPosition();
     @Shadow public abstract void send(final Packet<?> $$0);
     @Shadow protected abstract void shadow$performChatCommand(final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1);
     @Shadow protected abstract ParseResults<CommandSourceStack> shadow$parseCommand(final String $$0);
@@ -517,11 +516,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
             frame.addContext(EventContextKeys.COMMAND, $$0.command());
             this.shadow$performChatCommand($$0, $$1);
         }
-    }
-
-    @Override
-    public void bridge$captureCurrentPlayerPosition() {
-        this.shadow$resetPosition();
     }
 
     @Inject(method = "handleResourcePackResponse", at = @At("HEAD"))

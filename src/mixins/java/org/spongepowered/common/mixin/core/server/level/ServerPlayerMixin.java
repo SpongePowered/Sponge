@@ -828,15 +828,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    protected void impl$capturePlayerPosition(
-        final double x, final double y, final double z, final CallbackInfo ci
-    ) {
-        if (this.connection != null) {
-            ((ServerGamePacketListenerImplBridge) this.connection).bridge$captureCurrentPlayerPosition();
-        }
-    }
-
-    @Override
     protected void impl$updateHealthForUseFinish(final CallbackInfo ci) {
         this.bridge$refreshScaledHealth();
     }
