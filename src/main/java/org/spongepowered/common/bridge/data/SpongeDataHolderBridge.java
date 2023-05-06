@@ -59,4 +59,6 @@ public interface SpongeDataHolderBridge {
     void bridge$invalidateFailedData();
 
     void bridge$addFailedData(DataQuery nameSpace, DataView keyedData);
+
+    boolean brigde$isDeserializing();
 }
