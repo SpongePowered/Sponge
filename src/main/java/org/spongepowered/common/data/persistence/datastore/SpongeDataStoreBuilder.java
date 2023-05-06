@@ -38,7 +38,6 @@ import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.DataDeserializer;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.configurate.util.Types;

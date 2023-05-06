@@ -116,7 +116,6 @@ import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.data.DataUtil;
