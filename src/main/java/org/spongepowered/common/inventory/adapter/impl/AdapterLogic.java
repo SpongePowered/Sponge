@@ -202,7 +202,7 @@ public abstract class AdapterLogic {
                 remaining -= push;
                 Slot slot = ((SlotAdapter) lens.getSlotLens(fabric, ord).getAdapter(fabric, null));
                 result.transaction(new SlotTransaction(slot, ItemStackUtil.snapshotOf(old), ItemStackUtil.snapshotOf(lens.getStack(fabric, ord))));
-            } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
+            } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack) && maxStackSize > old.getCount()) {
                 ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
                 push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
                 old.setCount(old.getCount() + push);
@@ -214,11 +214,11 @@ public abstract class AdapterLogic {
 
         }
 
-        if (remaining == stack.quantity()) {
-            // No items were consumed
-            result.type(Type.FAILURE).reject(ItemStackUtil.cloneDefensive(nativeStack));
-        } else {
-            stack.setQuantity(remaining);
+        if (remaining > 0) {
+            result.type(Type.FAILURE).reject(ItemStackUtil.cloneDefensive(nativeStack, remaining));
+        }
+
+        if (remaining != stack.quantity()) {
             fabric.fabric$markDirty();
         }
 
