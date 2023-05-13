@@ -135,9 +135,9 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         }
 
         final net.minecraft.network.protocol.Packet<?> mcPacket = mcPacketSupplier.get();
-        PacketSender.sendTo(connection, mcPacket, sendFuture -> {
-            if (!sendFuture.isSuccess()) {
-                this.handleException(connection, sendFuture.cause(), future);
+        PacketSender.sendTo(connection, mcPacket, throwable -> {
+            if (throwable != null) {
+                this.handleException(connection, throwable, future);
                 // Failed before it could reach the client, so complete it
                 // and remove it from the store
                 if (response != null) {

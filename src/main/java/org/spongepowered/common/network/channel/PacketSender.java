@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.network.channel;
 
-import io.netty.util.concurrent.Future;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.protocol.Packet;
@@ -45,32 +44,32 @@ public final class PacketSender {
         PacketSender.sendTo(connection, packet, (Consumer) null);
     }
 
-    public static void sendTo(final EngineConnection connection, final Packet<?> packet, final @Nullable Consumer<Future<? super Void>> listener) {
+    public static void sendTo(final EngineConnection connection, final Packet<?> packet, final @Nullable Consumer<Throwable> listener) {
         final Connection networkManager = ((ConnectionHolderBridge) connection).bridge$getConnection();
         networkManager.send(packet, listener == null ? null : new SpongePacketSendListener(connection.side(), listener));
     }
 
     public static void sendTo(final EngineConnection connection, final Packet<?> packet, final CompletableFuture<Void> future) {
-        PacketSender.sendTo(connection, packet, sendFuture -> {
-            if (sendFuture.isSuccess()) {
+        PacketSender.sendTo(connection, packet, throwable -> {
+            if (throwable == null) {
                 future.complete(null);
             } else {
-                future.completeExceptionally(sendFuture.cause());
+                future.completeExceptionally(throwable);
             }
         });
     }
 
     public static final class SpongePacketSendListener implements PacketSendListener {
         private final BlockableEventLoop<?> executor;
-        private final Consumer<Future<? super Void>> listener;
+        private final Consumer<Throwable> listener;
 
-        public SpongePacketSendListener(final EngineConnectionSide<? extends EngineConnection> side, final Consumer<Future<? super Void>> listener) {
+        public SpongePacketSendListener(final EngineConnectionSide<? extends EngineConnection> side, final Consumer<Throwable> listener) {
             this.executor = (BlockableEventLoop<?>) (side == EngineConnectionSide.CLIENT ? Sponge.client() : Sponge.server());
             this.listener = listener;
         }
 
-        public void accept(final Future nettyFuture) {
-            this.executor.execute(() -> this.listener.accept(nettyFuture));
+        public void accept(final Throwable throwable) {
+            this.executor.execute(() -> this.listener.accept(throwable));
         }
     }
 
