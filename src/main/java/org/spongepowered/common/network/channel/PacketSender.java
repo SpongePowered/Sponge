@@ -44,7 +44,7 @@ public final class PacketSender {
         PacketSender.sendTo(connection, packet, (Consumer) null);
     }
 
-    public static void sendTo(final EngineConnection connection, final Packet<?> packet, final @Nullable Consumer<Throwable> listener) {
+    public static void sendTo(final EngineConnection connection, final Packet<?> packet, final @Nullable Consumer<@Nullable Throwable> listener) {
         final Connection networkManager = ((ConnectionHolderBridge) connection).bridge$getConnection();
         networkManager.send(packet, listener == null ? null : new SpongePacketSendListener(connection.side(), listener));
     }
@@ -63,12 +63,12 @@ public final class PacketSender {
         private final BlockableEventLoop<?> executor;
         private final Consumer<Throwable> listener;
 
-        public SpongePacketSendListener(final EngineConnectionSide<? extends EngineConnection> side, final Consumer<Throwable> listener) {
+        public SpongePacketSendListener(final EngineConnectionSide<? extends EngineConnection> side, final Consumer<@Nullable Throwable> listener) {
             this.executor = (BlockableEventLoop<?>) (side == EngineConnectionSide.CLIENT ? Sponge.client() : Sponge.server());
             this.listener = listener;
         }
 
-        public void accept(final Throwable throwable) {
+        public void accept(final @Nullable Throwable throwable) {
             this.executor.execute(() -> this.listener.accept(throwable));
         }
     }
