@@ -328,7 +328,7 @@ public final class Constants {
 
                 public static final DataQuery V1_BLOCK_PALETTE = of("Palette");
                 public static final DataQuery V1_BLOCK_PALETTE_MAX = of("Palette");
-                public static final DataQuery V2_BLOCK_PALETTE = of("BlockPalette");
+                public static final DataQuery V2_BLOCK_PALETTE = of("Palette");
                 public static final DataQuery V2_BIOME_PALETTE = of("BiomePalette");
                 public static final DataQuery V2_BLOCK_DATA = of("BlockData");
                 public static final DataQuery V2_BIOME_DATA = of("BiomeData");

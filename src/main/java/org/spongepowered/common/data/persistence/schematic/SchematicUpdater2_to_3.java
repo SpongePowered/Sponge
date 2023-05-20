@@ -62,10 +62,10 @@ public final class SchematicUpdater2_to_3 implements DataContentUpdater {
 
     @Override
     public DataView update(final DataView content) {
-        // Move BlockData, BlockPalette, BlockEntities -> Blocks.Data, Blocks.Palette, and Blocks.BlockEntities
+        // Move BlockData, Palette, BlockEntities -> Blocks.Data, Blocks.Palette, and Blocks.BlockEntities
         content.getView(Constants.Sponge.Schematic.Versions.V2_BLOCK_PALETTE).ifPresent(dataView -> {
             content.remove(Constants.Sponge.Schematic.Versions.V2_BLOCK_PALETTE);
-            final byte[] blockData = (byte[]) content.get(Constants.Sponge.Schematic.BLOCK_DATA)
+            final byte[] blockData = (byte[]) content.get(Constants.Sponge.Schematic.Versions.V2_BLOCK_DATA)
                 .orElseThrow(() -> new InvalidDataException("Missing BlockData for Schematic"));
             content.remove(Constants.Sponge.Schematic.Versions.V2_BLOCK_DATA);
             final List<DataView> blockEntities = content.getViewList(Constants.Sponge.Schematic.BLOCKENTITY_CONTAINER).orElse(
