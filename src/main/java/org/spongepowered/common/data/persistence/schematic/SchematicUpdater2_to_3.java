@@ -45,6 +45,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 // TODO - Migrate this to DataFixer DSL in 1.14.
@@ -70,6 +71,17 @@ public final class SchematicUpdater2_to_3 implements DataContentUpdater {
             content.remove(Constants.Sponge.Schematic.Versions.V2_BLOCK_DATA);
             final List<DataView> blockEntities = content.getViewList(Constants.Sponge.Schematic.BLOCKENTITY_CONTAINER).orElse(
                 Collections.emptyList());
+            for (final DataView blockEntity : blockEntities) {
+                for (final Map.Entry<DataQuery, Object> entry : blockEntity.values(false).entrySet()) {
+                    final DataQuery key = entry.getKey();
+                    if (key.equals(Constants.Sponge.Schematic.BLOCKENTITY_POS) || key.equals(Constants.Sponge.Schematic.BLOCKENTITY_ID)) {
+                        continue;
+                    }
+
+                    blockEntity.remove(key);
+                    blockEntity.set(Constants.Sponge.Schematic.BLOCKENTITY_DATA.then(key), entry.getValue());
+                }
+            }
             content.remove(Constants.Sponge.Schematic.BLOCKENTITY_CONTAINER);
             final DataView blockContainer = content.createView(Constants.Sponge.Schematic.BLOCK_CONTAINER);
             blockContainer.set(Constants.Sponge.Schematic.BLOCK_DATA, blockData);
