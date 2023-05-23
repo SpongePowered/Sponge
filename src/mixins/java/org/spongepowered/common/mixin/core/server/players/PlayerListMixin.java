@@ -378,13 +378,31 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundLoginPacket"))
-    private ClientboundLoginPacket impl$usePerWorldViewDistance(final int $$0, final boolean $$1, final GameType $$2, final GameType $$3, final Set $$4, final RegistryAccess.Frozen $$5,
-            final ResourceKey $$6, final ResourceKey $$7, final long $$8, final int $$9, final int $$10, final int $$11, final boolean $$12, final boolean $$13, final boolean $$14, final boolean $$15,
-            final Optional $$16, final Connection conn, final net.minecraft.server.level.ServerPlayer player) {
+    private ClientboundLoginPacket impl$usePerWorldViewDistance(final int playerId,
+            final boolean hardcore,
+            final GameType gameType,
+            final GameType previousGameType,
+            final Set levels,
+            final RegistryAccess.Frozen registryHolder,
+            final ResourceKey dimensionType,
+            final ResourceKey dimension,
+            final long seed,
+            final int maxPlayers,
+            final int chunkRadius,
+            final int simulationDistance,
+            final boolean reducedDebugInfo,
+            final boolean showDeathScreen,
+            final boolean isDebug,
+            final boolean isFlat,
+            final Optional lastDeathLocation,
+            final int portalCooldown,
+            final Connection conn,
+            final net.minecraft.server.level.ServerPlayer player) {
 
-        final Integer viewDistance = ((PrimaryLevelDataBridge) player.serverLevel().getLevelData()).bridge$viewDistance().orElse($$10);
-        return new ClientboundLoginPacket($$0, $$1, $$2, $$3, $$4, $$5, $$6, $$7,
-            $$8, $$9, viewDistance, $$11, $$12, $$13, $$14, $$15, $$16);
+        final Integer viewDistance = ((PrimaryLevelDataBridge) player.serverLevel().getLevelData()).bridge$viewDistance().orElse(chunkRadius);
+        return new ClientboundLoginPacket(playerId, hardcore, gameType, previousGameType, levels, registryHolder, dimensionType, dimension,
+                seed, maxPlayers, viewDistance, simulationDistance, reducedDebugInfo, showDeathScreen, isDebug, isFlat, lastDeathLocation,
+                portalCooldown);
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))

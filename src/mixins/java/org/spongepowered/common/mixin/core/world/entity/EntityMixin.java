@@ -230,6 +230,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow protected String stringUUID;
     @Shadow @Nullable protected abstract PortalInfo shadow$findDimensionEntryPoint(ServerLevel param0);
 
+    @Shadow public abstract int shadow$getPortalCooldown();
+
     // @formatter:on
 
 

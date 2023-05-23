@@ -150,7 +150,8 @@ public final class ServerPlayerData {
                     h.serverLevel().isDebug(),
                     h.serverLevel().isFlat(),
                     (byte) 0,
-                    h.getLastDeathLocation()));
+                    h.getLastDeathLocation(),
+                    h.getPortalCooldown()));
             // tp - just in case
             h.connection.teleport(h.getX(), h.getY(), h.getZ(), h.getYRot(), h.getXRot());
             // resend remaining player data... (see ServerPlayer#changeDimension)
