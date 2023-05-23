@@ -29,6 +29,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -84,7 +85,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public void populateLootContext(final ExplosionContext phaseContext, final LootContext.Builder lootBuilder) {
+    public void populateLootContext(final ExplosionContext phaseContext, final LootParams.Builder lootBuilder) {
         final Explosion explosion = phaseContext.getExplosion();
         lootBuilder.withOptionalParameter(LootContextParams.THIS_ENTITY, explosion.getDirectSourceEntity());
 

@@ -36,6 +36,7 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -106,13 +107,12 @@ public abstract class FishingHookMixin extends ProjectileMixin {
             final List<Transaction<@NonNull ItemStackSnapshot>> transactions;
             if (this.nibble > 0) {
                 // Moved from below
-                final LootContext.Builder lootcontext$builder = new LootContext.Builder((ServerLevel)this.level)
+                final LootParams.Builder lootcontext$builder = new LootParams.Builder((ServerLevel)this.level)
                         .withParameter(LootContextParams.ORIGIN, this.shadow$position())
                         .withParameter(LootContextParams.TOOL, stack)
                         .withParameter(LootContextParams.THIS_ENTITY, (FishingHook) (Object) this)
-                        .withRandom(this.random)
                         .withLuck((float)this.luck + playerEntity.getLuck());
-                final LootTable lootTable = this.level.getServer().getLootTables().get(BuiltInLootTables.FISHING);
+                final LootTable lootTable = this.level.getServer().getLootData().getLootTable(BuiltInLootTables.FISHING);
                 final List<ItemStack> list = lootTable.getRandomItems(lootcontext$builder.create(LootContextParamSets.FISHING));
                 transactions = list.stream().map(ItemStackUtil::snapshotOf)
                         .map(snapshot -> new Transaction<>(snapshot, snapshot))

@@ -30,6 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -63,11 +64,10 @@ public final class AddBlockLootDropsEffect implements ProcessingSideEffect {
         final @Nullable BlockEntity existingTile = oldState.tileEntity;
         final BlockPos pos = oldState.pos;
 
-        final LootContext.Builder lootBuilder = (new LootContext.Builder(world))
-            .withRandom(world.random)
-            .withParameter(LootContextParams.ORIGIN, VecHelper.toVanillaVector3d(pos))
-            .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
-            .withOptionalParameter(LootContextParams.BLOCK_ENTITY, existingTile);
+        final LootParams.Builder lootBuilder = new LootParams.Builder(world)
+                .withParameter(LootContextParams.ORIGIN, VecHelper.toVanillaVector3d(pos))
+                .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
+                .withOptionalParameter(LootContextParams.BLOCK_ENTITY, existingTile);
 
         phaseContext.populateLootContext(lootBuilder);
 

@@ -33,6 +33,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.ticks.ScheduledTick;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -294,7 +296,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().createSpawnEvent(this.asContext(), parent, collect, currentCause);
     }
 
-    default void populateLootContext(final LootContext.Builder lootBuilder) {
+    default void populateLootContext(final LootParams.Builder lootBuilder) {
         this.getState().populateLootContext(this.asContext(), lootBuilder);
     }
 
