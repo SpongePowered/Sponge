@@ -30,7 +30,6 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import org.spongepowered.api.block.entity.Sign;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
@@ -42,21 +41,22 @@ import java.util.Set;
 public abstract class SignBlockEntityMixin_API extends BlockEntityMixin_API implements Sign {
 
     // @formatter:off
-    @Shadow @Final private Component[] messages;
-    // @formatter:on
+    @Shadow private net.minecraft.world.level.block.entity.SignText frontText;
 
-    @Shadow private boolean hasGlowingText;
+    @Shadow private net.minecraft.world.level.block.entity.SignText backText;
+    // @formatter:on
 
     @Override
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
-        final List<String> lines = Lists.newArrayList();
-        for (final Component line : this.messages) {
-            lines.add(Component.Serializer.toJson(line));
-        }
+        // TODO update for front/back sign
+//        final List<String> lines = Lists.newArrayList();
+//        for (final Component line : this.messages) {
+//            lines.add(Component.Serializer.toJson(line));
+//        }
 
-        container.set(Constants.TileEntity.Sign.LINES, lines);
-        container.set(Constants.TileEntity.Sign.GLOWING_TEXT, this.hasGlowingText);
+//        container.set(Constants.TileEntity.Sign.LINES, lines);
+//        container.set(Constants.TileEntity.Sign.GLOWING_TEXT, this.hasGlowingText);
         return container;
     }
 

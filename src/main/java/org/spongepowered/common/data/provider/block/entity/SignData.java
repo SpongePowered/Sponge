@@ -28,9 +28,10 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
+import org.spongepowered.api.block.entity.Sign;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.common.accessor.world.level.block.entity.SignBlockEntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.DirectionUtil;
@@ -42,6 +43,8 @@ import java.util.List;
 
 public final class SignData {
 
+    private static final boolean FRONT_SIGN = true;
+    private static final boolean BACK_SIGN = false;
     private SignData() {
     }
 
@@ -75,14 +78,31 @@ public final class SignData {
                         })
                         .supports(h -> h.getLevel() != null)
                     .create(Keys.GLOWING_TEXT)
-                        .get(SignBlockEntity::hasGlowingText)
-                        .set(SignBlockEntity::setHasGlowingText)
+                        .get(h -> h.getFrontText().hasGlowingText())
+                        .set((h, v) -> h.updateText(text -> text.setHasGlowingText(v), FRONT_SIGN))
+                    .create(Keys.SIGN_FRONT_TEXT)
+                        .get(h -> (Sign.SignText) h.getFrontText())
+                        .set((h, v) -> h.setText((SignText) v, FRONT_SIGN))
+                    .create(Keys.SIGN_BACK_TEXT)
+                        .get(h -> (Sign.SignText) h.getBackText())
+                        .set((h, v) -> h.setText((SignText) v, BACK_SIGN))
+                    .create(Keys.SIGN_WAXED)
+                        .get(SignBlockEntity::isWaxed)
+                        .set(SignBlockEntity::setWaxed)
                 .asMutable(ServerLocation.class)
                     .create(Keys.SIGN_LINES)
                         .get(SignData::getSignLines)
                         .set(SignData::setSignLines)
                         .delete(h -> SignData.setSignLines(h, Collections.emptyList()))
-                        .supports(loc -> loc.blockEntity().map(b -> b instanceof SignBlockEntity).orElse(false));
+                        .supports(loc -> loc.blockEntity().map(b -> b instanceof SignBlockEntity).orElse(false))
+                .asMutable(SignText.class)
+                    .create(Keys.SIGN_LINES)
+                        .get(SignData::getSignLines)
+                        .set(SignData::setSignLines)
+                        .delete(h -> SignData.setSignLines(h, Collections.emptyList()))
+                    .create(Keys.GLOWING_TEXT)
+                        .get(SignText::hasGlowingText)
+                        .set(SignText::setHasGlowingText);
     }
     // @formatter:on
 
@@ -95,25 +115,28 @@ public final class SignData {
     }
 
     private static void setSignLines(final SignBlockEntity holder, final List<Component> value) {
-        final SignBlockEntityAccessor accessor = (SignBlockEntityAccessor) holder;
-        final int messageCount = accessor.accessor$messages().length;
-        for (int i = 0; i < messageCount; i++) {
+        holder.updateText(signText -> SignData.setSignLines(signText, value), FRONT_SIGN);
+    }
+
+    private static SignText setSignLines(final SignText holder, final List<Component> value) {
+        for (int i = 0; i < holder.getMessages(true).length; i++) {
             holder.setMessage(i, SpongeAdventure.asVanilla(i > value.size() - 1 ? Component.empty() : value.get(i)));
         }
-        holder.setChanged();
-        holder.getLevel().sendBlockUpdated(holder.getBlockPos(), holder.getBlockState(), holder.getBlockState(), 3);
+        return holder;
     }
 
     private static List<Component> getSignLines(ServerLocation h) {
         return SignData.getSignLines(SignData.toSignTileEntity(h));
     }
 
-    private static List<Component> getSignLines(SignBlockEntity h) {
-        final SignBlockEntityAccessor accessor = (SignBlockEntityAccessor) h;
-        final int messageCount = accessor.accessor$messages().length;
-        final List<Component> lines = new ArrayList<>(messageCount);
-        for (int i = 0; i < messageCount; i++) {
-            lines.add(SpongeAdventure.asAdventure(h.getMessage(i, false)));
+    private static List<Component> getSignLines(SignBlockEntity holder) {
+        return SignData.getSignLines(holder.getFrontText());
+    }
+
+    private static List<Component> getSignLines(SignText holder) {
+        final List<Component> lines = new ArrayList<>();
+        for (int i = 0; i < holder.getMessages(true).length; i++) {
+            lines.add(SpongeAdventure.asAdventure(holder.getMessage(i, true)));
         }
         return lines;
     }

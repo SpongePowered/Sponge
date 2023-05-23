@@ -162,7 +162,6 @@
         "world.level.block.entity.EnchantmentTableBlockEntityAccessor",
         "world.level.block.entity.HopperBlockEntityAccessor",
         "world.level.block.entity.LecternBlockEntity_Accessor",
-        "world.level.block.entity.SignBlockEntityAccessor",
         "world.level.block.entity.SkullBlockEntityAccessor",
         "world.level.block.entity.SpawnerBlockEntityAccessor",
         "world.level.block.entity.StructureBlockEntityAccessor",

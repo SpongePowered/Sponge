@@ -22,15 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.block.entity;
+package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
+import org.spongepowered.api.block.entity.Sign;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(SignBlockEntity.class)
-public interface SignBlockEntityAccessor {
+@Mixin(SignText.class)
+public abstract class SignTextMixin_API implements Sign.SignText {
 
-    @Accessor("messages") Component[] accessor$messages();
+
 }
