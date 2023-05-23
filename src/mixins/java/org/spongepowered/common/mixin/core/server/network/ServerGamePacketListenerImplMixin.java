@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
@@ -54,7 +53,6 @@ import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
-import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -65,9 +63,11 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -108,7 +108,6 @@ import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
-import org.spongepowered.common.data.value.ImmutableSpongeListValue;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -148,6 +147,10 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     @Shadow protected abstract void shadow$performChatCommand(final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1);
     @Shadow protected abstract ParseResults<CommandSourceStack> shadow$parseCommand(final String $$0);
     // @formatter:on
+
+    @Shadow protected abstract void signBook(final FilteredText $$0, final List<FilteredText> $$1, final int $$2);
+
+    @Shadow public abstract void send(final Packet<?> $$0, @org.jetbrains.annotations.Nullable final PacketSendListener $$1);
 
     private int impl$ignorePackets;
 
@@ -482,11 +485,11 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         }
     }
 
-    @Redirect(method = "updateSignText", at = @At(value = "INVOKE", remap = false, target = "Ljava/util/List;size()I"))
-    private int impl$callChangeSignEvent(final List<FilteredText> list, final ServerboundSignUpdatePacket p_244542_1_, final List<String> p_244542_2_) {
-        final SignBlockEntity blockEntity = (SignBlockEntity) this.player.level().getBlockEntity(p_244542_1_.getPos());
-        final ListValue<Component> originalLinesValue = ((Sign) blockEntity).getValue(Keys.SIGN_LINES)
-                .orElseGet(() -> new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.of()));
+    @Redirect(method = "updateSignText",
+            at = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/world/level/block/entity/SignBlockEntity;updateSignText(Lnet/minecraft/world/entity/player/Player;ZLjava/util/List;)V"))
+    private void impl$callChangeSignEvent(final SignBlockEntity sign, final Player player, final boolean isFrontText, final List<FilteredText> list) {
+        final SignText oldText = isFrontText ? sign.getFrontText() : sign.getBackText();
+        final ListValue.Immutable<Component> originalLines = ((Sign.SignText) oldText).lines().asImmutable();
 
         final List<Component> newLines = new ArrayList<>();
         for (final FilteredText line : list) {
@@ -499,14 +502,38 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this.player);
             final ListValue.Mutable<Component> newLinesValue = ListValue.mutableOf(Keys.SIGN_LINES, newLines);
+            // TODO event needs adjusting (missing front/back side)
             final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getCauseStackManager().currentCause(),
-                    originalLinesValue.asImmutable(), newLinesValue,
-                    (Sign) blockEntity);
-            final ListValue<Component> toApply = SpongeCommon.post(event) ? originalLinesValue : newLinesValue;
-            ((Sign) blockEntity).offer(toApply);
+                    originalLines, newLinesValue,
+                    (Sign) sign);
+            final ListValue<Component> toApply = SpongeCommon.post(event) ? originalLines : newLinesValue;
+            this.impl$updateSignText(sign, player, isFrontText, toApply.get());
         }
 
-        return 0;
+    }
+
+    /**
+     * Mirrors {@link SignBlockEntity#updateSignText(Player, boolean, List)}
+     */
+    private void impl$updateSignText(final SignBlockEntity sign, final Player player, final boolean isFrontText, final List<Component> lines) {
+        if (!sign.isWaxed() && player.getUUID().equals(sign.getPlayerWhoMayEdit()) && sign.getLevel() != null) {
+
+            if (player.isTextFilteringEnabled()) {
+                // TODO text filtering?
+            }
+            sign.updateText(signText -> {
+                for (int i = 0; i < lines.size(); i++) {
+                    signText.setMessage(i, SpongeAdventure.asVanilla(lines.get(i)));
+                }
+                return signText;
+            }, isFrontText);
+
+            sign.setAllowedPlayerEditor(null);
+            sign.getLevel().sendBlockUpdated(sign.getBlockPos(), sign.getBlockState(), sign.getBlockState(), 3);
+        } else {
+            // TODO maybe not ignore this?
+            // LOGGER.warn("Player {} just tried to change non-editable sign", $$0.getName().getString());
+        }
     }
 
     @Redirect(method = "lambda$handleChatCommand$11", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
