@@ -79,11 +79,11 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
 
     @ModifyConstant(method = "mergeWithNeighbours", constant = @Constant(doubleValue = Constants.Entity.Item.DEFAULT_ITEM_MERGE_RADIUS))
     private double impl$changeSearchRadiusFromConfig(final double originalRadius) {
-        if (this.level.isClientSide || ((LevelBridge) this.level).bridge$isFake()) {
+        if (this.shadow$level().isClientSide || ((LevelBridge) this.shadow$level()).bridge$isFake()) {
             return originalRadius;
         }
         if (this.impl$cachedRadius == -1) {
-            final double configRadius = ((PrimaryLevelDataBridge) this.level.getLevelData()).bridge$configAdapter().get().world.itemMergeRadius;
+            final double configRadius = ((PrimaryLevelDataBridge) this.shadow$level().getLevelData()).bridge$configAdapter().get().world.itemMergeRadius;
             this.impl$cachedRadius = configRadius < 0 ? 0 : configRadius;
         }
         return this.impl$cachedRadius;
@@ -131,12 +131,12 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
 
     @Override
     public int bridge$getDespawnDelay() {
-        return SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate - (this.impl$infiniteDespawnDelay ? this.impl$previousDespawnDelay : this.age);
+        return SpongeGameConfigs.getForWorld(this.shadow$level()).get().entity.item.despawnRate - (this.impl$infiniteDespawnDelay ? this.impl$previousDespawnDelay : this.age);
     }
 
     @Override
     public void bridge$setDespawnDelay(final int delay, final boolean infinite) {
-        this.age = SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate - delay;
+        this.age = SpongeGameConfigs.getForWorld(this.shadow$level()).get().entity.item.despawnRate - delay;
         final boolean previous = this.impl$infiniteDespawnDelay;
         this.impl$infiniteDespawnDelay = infinite;
         if (infinite && !previous) {
@@ -173,7 +173,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
 
     @ModifyConstant(method = "isMergable", constant = @Constant(intValue = 6000))
     private int impl$isMergableUseDespawnRateFromConfig(final int originalValue) {
-        return SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate;
+        return SpongeGameConfigs.getForWorld(this.shadow$level()).get().entity.item.despawnRate;
     }
 
     @Inject(method = "tryToMerge", cancellable = true,

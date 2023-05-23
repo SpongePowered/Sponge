@@ -35,7 +35,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -100,19 +99,19 @@ public abstract class FishingHookMixin extends ProjectileMixin {
     public int retrieve(final ItemStack stack) {
         final Player playerEntity = this.shadow$getPlayerOwner();
 
-        if (!this.level.isClientSide && playerEntity != null) {
+        if (!this.shadow$level().isClientSide && playerEntity != null) {
             int i = 0;
 
             // Sponge start
             final List<Transaction<@NonNull ItemStackSnapshot>> transactions;
             if (this.nibble > 0) {
                 // Moved from below
-                final LootParams.Builder lootcontext$builder = new LootParams.Builder((ServerLevel)this.level)
+                final LootParams.Builder lootcontext$builder = new LootParams.Builder((ServerLevel) this.shadow$level())
                         .withParameter(LootContextParams.ORIGIN, this.shadow$position())
                         .withParameter(LootContextParams.TOOL, stack)
                         .withParameter(LootContextParams.THIS_ENTITY, (FishingHook) (Object) this)
                         .withLuck((float)this.luck + playerEntity.getLuck());
-                final LootTable lootTable = this.level.getServer().getLootData().getLootTable(BuiltInLootTables.FISHING);
+                final LootTable lootTable = this.shadow$level().getServer().getLootData().getLootTable(BuiltInLootTables.FISHING);
                 final List<ItemStack> list = lootTable.getRandomItems(lootcontext$builder.create(LootContextParamSets.FISHING));
                 transactions = list.stream().map(ItemStackUtil::snapshotOf)
                         .map(snapshot -> new Transaction<>(snapshot, snapshot))
@@ -132,7 +131,7 @@ public abstract class FishingHookMixin extends ProjectileMixin {
             if (this.hookedIn != null) {
                 this.shadow$pullEntity(this.hookedIn);
                 CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer) playerEntity, stack, (FishingHook) (Object) this, Collections.emptyList());
-                this.level.broadcastEntityEvent((FishingHook) (Object) this, (byte) 31);
+                this.shadow$level().broadcastEntityEvent((FishingHook) (Object) this, (byte) 31);
                 i = this.hookedIn instanceof ItemEntity ? 3 : 5;
             } // Sponge: Remove else
 
@@ -149,14 +148,14 @@ public abstract class FishingHookMixin extends ProjectileMixin {
                     final ItemStack itemstack = (ItemStack) (Object) transaction.finalReplacement().createStack();
                     // Sponge end
 
-                    final ItemEntity entityitem = new ItemEntity(this.level, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), itemstack);
+                    final ItemEntity entityitem = new ItemEntity(this.shadow$level(), this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), itemstack);
                     final double d0 = playerEntity.getX() - this.shadow$getX();
                     final double d1 = playerEntity.getY() - this.shadow$getY();
                     final double d2 = playerEntity.getZ() - this.shadow$getZ();
                     final double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
                     //double d4 = 0.1D;
                     entityitem.setDeltaMovement(d0 * 0.1D, d1 * 0.1D + Math.sqrt(d3) * 0.08D, d2 * 0.1D);
-                    this.level.addFreshEntity(entityitem);
+                    this.shadow$level().addFreshEntity(entityitem);
                     playerEntity.level().addFreshEntity(new ExperienceOrb(playerEntity.level(), playerEntity.getX(), playerEntity.getY() + 0.5D,
                             playerEntity.getZ() + 0.5D,
                             this.random.nextInt(6) + 1));
@@ -184,7 +183,7 @@ public abstract class FishingHookMixin extends ProjectileMixin {
     @Inject(method = "checkCollision", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;onHit(Lnet/minecraft/world/phys/HitResult;)V"))
     private void impl$callCollideImpactEvent(final CallbackInfo ci, final HitResult hitResult) {
-        if (hitResult.getType() == HitResult.Type.MISS || ((LevelBridge) this.level).bridge$isFake()) {
+        if (hitResult.getType() == HitResult.Type.MISS || ((LevelBridge) this.shadow$level()).bridge$isFake()) {
             return;
         }
 

@@ -105,7 +105,7 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
 
     @Inject(method = "setSwellDir", at = @At("HEAD"), cancellable = true)
     private void impl$preStateChange(final int state, final CallbackInfo ci) {
-        if (this.level.isClientSide) {
+        if (this.shadow$level().isClientSide) {
             return;
         }
         this.bridge$setFuseDuration(this.impl$fuseDuration);
@@ -123,7 +123,7 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
 
     @Inject(method = "setSwellDir", at = @At("RETURN"))
     private void impl$postStateChange(final int state, final CallbackInfo ci) {
-        if (this.level.isClientSide) {
+        if (this.shadow$level().isClientSide) {
             return;
         }
 

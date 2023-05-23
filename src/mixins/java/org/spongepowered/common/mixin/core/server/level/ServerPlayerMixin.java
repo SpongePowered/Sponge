@@ -71,7 +71,6 @@ import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -313,7 +312,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public boolean bridge$keepInventory() {
         if (this.impl$keepInventory == null) {
-            return this.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
+            return this.shadow$level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
         }
         return this.impl$keepInventory;
     }
@@ -471,7 +470,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Override
     protected final void impl$onChangingDimension(final ServerLevel target) {
-        if (this.level == target) {
+        if (this.shadow$level() == target) {
             this.isChangingDimension = true;
         }
     }
@@ -614,7 +613,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
         // Sponge end
 
-        final boolean flag = this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !event.isMessageCancelled();
+        final boolean flag = this.shadow$level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !event.isMessageCancelled();
         if (flag) {
             final net.minecraft.network.chat.Component component = this.shadow$getCombatTracker().getDeathMessage();
             final ClientboundPlayerCombatKillPacket packet = new ClientboundPlayerCombatKillPacket(this.shadow$getId(), component);
@@ -652,7 +651,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
 
         this.shadow$removeEntitiesOnShoulder();
-        if (this.level.getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {
+        if (this.shadow$level().getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {
             this.shadow$tellNeutralMobsThatIDied();
         }
 
@@ -674,7 +673,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             this.shadow$createWitherRose(livingentity);
         }
 
-        this.level.broadcastEntityEvent((net.minecraft.server.level.ServerPlayer) (Object) this, (byte) 3);
+        this.shadow$level().broadcastEntityEvent((net.minecraft.server.level.ServerPlayer) (Object) this, (byte) 3);
         this.shadow$awardStat(Stats.DEATHS);
         this.shadow$resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_DEATH));
         this.shadow$resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
@@ -811,13 +810,13 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                 case OBSTRUCTED:
                 case NOT_SAFE:
                     final Cause currentCause = Sponge.server().causeStackManager().currentCause();
-                    final BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
+                    final BlockSnapshot snapshot = ((ServerWorld) this.shadow$level()).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
                     if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) this))) {
                         final Either<Player.BedSleepingProblem, Unit> var5 = super.shadow$startSleepInBed(param0).ifRight((param0x) -> {
                             this.shadow$awardStat(Stats.SLEEP_IN_BED);
                             CriteriaTriggers.SLEPT_IN_BED.trigger((net.minecraft.server.level.ServerPlayer) (Object) this);
                         });
-                        ((ServerLevel)this.level).updateSleepingPlayerList();
+                        ((ServerLevel) this.shadow$level()).updateSleepingPlayerList();
                         cir.setReturnValue(var5);
                     }
                     break;

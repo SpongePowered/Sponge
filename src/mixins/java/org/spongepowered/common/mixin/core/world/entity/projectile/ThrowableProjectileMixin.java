@@ -48,7 +48,7 @@ public abstract class ThrowableProjectileMixin extends ProjectileMixin {
         )
     )
     private void impl$handleProjectileImpact(final ThrowableProjectile projectile, final HitResult movingObjectPosition) {
-        if (((LevelBridge) this.level).bridge$isFake() || movingObjectPosition.getType() == HitResult.Type.MISS) {
+        if (((LevelBridge) this.shadow$level()).bridge$isFake() || movingObjectPosition.getType() == HitResult.Type.MISS) {
             this.shadow$onHit(movingObjectPosition);
             return;
         }

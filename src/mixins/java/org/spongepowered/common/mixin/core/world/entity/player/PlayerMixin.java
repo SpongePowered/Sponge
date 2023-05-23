@@ -175,11 +175,11 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isSleeping()Z"))
     private boolean impl$postSleepingEvent(final net.minecraft.world.entity.player.Player self) {
         if (self.isSleeping()) {
-            if (!((LevelBridge) this.level).bridge$isFake()) {
+            if (!((LevelBridge) this.shadow$level()).bridge$isFake()) {
                 final CauseStackManager csm = PhaseTracker.getCauseStackManager();
                 csm.pushCause(this);
                 final BlockPos bedLocation = this.shadow$getSleepingPos().get();
-                final BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
+                final BlockSnapshot snapshot = ((ServerWorld) this.shadow$level()).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
                 SpongeCommon.post(SpongeEventFactory.createSleepingEventTick(csm.currentCause(), snapshot, (Living) this));
                 csm.popCause();
             }
@@ -233,7 +233,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
         if (!this.bridge$vanishState().createsSounds()) {
             return;
         }
-        this.level.playSound(player, x, y, z, sound, category, volume, pitch);
+        this.shadow$level().playSound(player, x, y, z, sound, category, volume, pitch);
     }
 
     @Redirect(method = "canUseGameMasterBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getPermissionLevel()I"))
@@ -271,7 +271,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
         // Just sanity checks, if the player is not in a managed world, then don't bother either.
         // some fake players may exist in pseudo worlds as well, which means we don't want to
         // process on them since the world is not a valid world to plugins.
-        if (this.level instanceof LevelBridge && !((LevelBridge) this.level).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
+        if (this.shadow$level() instanceof LevelBridge && !((LevelBridge) this.shadow$level()).bridge$isFake() && ShouldFire.CHANGE_BLOCK_EVENT_PRE) {
             // Note that this can potentially cause phase contexts to auto populate frames
             // we shouldn't rely so much on them, but sometimes the extra information is provided
             // through this method.
@@ -281,7 +281,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(stack));
                 // Then go ahead and call the event and return if it was cancelled
                 // if it was cancelled, then there should be no changes needed to roll back
-                return !SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) this.level, cachedBlockInfo.getPos(), this).isCancelled();
+                return !SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) this.shadow$level(), cachedBlockInfo.getPos(), this).isCancelled();
             }
         }
         // Otherwise, if all else is ignored, or we're not throwing events, we're just going to return the

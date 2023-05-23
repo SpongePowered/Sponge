@@ -71,13 +71,13 @@ public abstract class AbstractArrowMixin extends ProjectileMixin {
      */
     @Inject(method = "onHitBlock", at = @At("HEAD"), cancellable = true)
     private void onProjectileHit(final BlockHitResult hitResult, final CallbackInfo ci) {
-        if (!((LevelBridge) this.level).bridge$isFake() && hitResult.getType() != HitResult.Type.MISS) {
+        if (!((LevelBridge) this.shadow$level()).bridge$isFake() && hitResult.getType() != HitResult.Type.MISS) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent((AbstractArrow) (Object) this,
                     this.impl$getProjectileSource(), hitResult)) {
                 this.shadow$playSound(SoundEvents.ARROW_HIT, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
                 // Make it almost look like it collided with something
                 final BlockHitResult blockraytraceresult = (BlockHitResult)hitResult;
-                final BlockState blockstate = this.level.getBlockState(blockraytraceresult.getBlockPos());
+                final BlockState blockstate = this.shadow$level().getBlockState(blockraytraceresult.getBlockPos());
                 this.lastState = blockstate;
                 final Vec3 vec3d = blockraytraceresult.getLocation().subtract(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
                 this.shadow$setDeltaMovement(vec3d);
@@ -100,7 +100,7 @@ public abstract class AbstractArrowMixin extends ProjectileMixin {
      */
     @Inject(method = "onHitEntity", at = @At("HEAD"), cancellable = true)
     private void onProjectileHit(final EntityHitResult hitResult, final CallbackInfo ci) {
-        if (!((LevelBridge) this.level).bridge$isFake() && hitResult.getType() != HitResult.Type.MISS) {
+        if (!((LevelBridge) this.shadow$level()).bridge$isFake() && hitResult.getType() != HitResult.Type.MISS) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent((AbstractArrow) (Object) this,
                 this.impl$getProjectileSource(), hitResult)) {
                 this.shadow$playSound(SoundEvents.ARROW_HIT, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
@@ -111,7 +111,7 @@ public abstract class AbstractArrowMixin extends ProjectileMixin {
                 this.shadow$setYRot(this.shadow$getYRot() + 180.0F);
                 this.yRotO += 180.0F;
                 this.life = 0;
-                if (!this.level.isClientSide && this.shadow$getDeltaMovement().lengthSqr() < 1.0E-7D) {
+                if (!this.shadow$level().isClientSide && this.shadow$getDeltaMovement().lengthSqr() < 1.0E-7D) {
                     if (this.pickup == AbstractArrow.Pickup.ALLOWED) {
                         this.shadow$spawnAtLocation(this.shadow$getPickupItem(), 0.1F);
                     }

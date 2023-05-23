@@ -117,7 +117,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
         // Sponge end
         if (this.shadow$isInvulnerableTo(source)) {
             return false;
-        } else if (this.level.isClientSide) {
+        } else if (this.shadow$level().isClientSide) {
             return false;
             // Sponge - Also ignore our customary damage source
         } else if (this.shadow$isDeadOrDying() && source != SpongeDamageSources.IGNORED) {
@@ -125,7 +125,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
         } else if (source.is(DamageTypeTags.IS_FIRE) && this.shadow$hasEffect(MobEffects.FIRE_RESISTANCE)) {
             return false;
         } else {
-            if (this.shadow$isSleeping() && !this.level.isClientSide) {
+            if (this.shadow$isSleeping() && !this.shadow$level().isClientSide) {
                 this.shadow$stopSleeping();
             }
 
@@ -234,9 +234,9 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
 
             if (isNotInvulnerable) {
                 if (isBlocked) {
-                    this.level.broadcastEntityEvent((LivingEntity) (Object) this, (byte) 29);
+                    this.shadow$level().broadcastEntityEvent((LivingEntity) (Object) this, (byte) 29);
                 } else {
-                    this.level.broadcastDamageEvent((LivingEntity) (Object) this, source);
+                    this.shadow$level().broadcastDamageEvent((LivingEntity) (Object) this, source);
                 }
 
                 if (!source.is(DamageTypeTags.NO_IMPACT) && (!isBlocked /*|| amount > 0.0F*/)) { // Sponge - remove 'amount > 0.0F' - it's redundant in Vanilla, and breaks our handling of shields
@@ -280,7 +280,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
             final boolean notBlocked = !isBlocked /* || $$1 > 0.0F*/;// Sponge - remove 'amount > 0.0F' since it's handled in the event
             if (notBlocked) {
                 this.lastDamageSource = source;
-                this.lastDamageStamp = this.level.getGameTime();
+                this.lastDamageStamp = this.shadow$level().getGameTime();
             }
 
             if ((LivingEntity) (Object) this instanceof net.minecraft.server.level.ServerPlayer player) {

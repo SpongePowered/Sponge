@@ -65,7 +65,7 @@ public abstract class LightningBoltMixin extends EntityMixin {
     private List<Entity> impl$ThrowEventAndProcess(
         final Level level, final Entity thisEntity, final AABB boundingBox, final Predicate<Entity> predicate
     ) {
-        if (this.shadow$isRemoved() || this.level.isClientSide) {
+        if (this.shadow$isRemoved() || this.shadow$level().isClientSide) {
             return Collections.emptyList();
         }
         final List<Entity> originalEntities = level.getEntities(thisEntity, boundingBox, predicate);
@@ -87,7 +87,7 @@ public abstract class LightningBoltMixin extends EntityMixin {
         )
     )
     private void impl$ThrowEventAndProcess(final CallbackInfo ci) {
-        if (this.shadow$isRemoved() || this.level.isClientSide || this.life >= 0) {
+        if (this.shadow$isRemoved() || this.shadow$level().isClientSide || this.life >= 0) {
             return;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {

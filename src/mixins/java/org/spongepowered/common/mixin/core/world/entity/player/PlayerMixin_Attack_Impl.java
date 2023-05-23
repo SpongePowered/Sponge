@@ -211,8 +211,8 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                     }
 
                     // Sponge Start - Create the event and throw it
-                    final DamageSource damageSource = this.level.damageSources().playerAttack((net.minecraft.world.entity.player.Player) (Object) this);
-                    final boolean isMainthread = !this.level.isClientSide;
+                    final DamageSource damageSource = this.shadow$level().damageSources().playerAttack((net.minecraft.world.entity.player.Player) (Object) this);
+                    final boolean isMainthread = !this.shadow$level().isClientSide;
                     if (isMainthread) {
                         PhaseTracker.getInstance().pushCause(damageSource);
                     }
@@ -253,7 +253,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                     }
 
                     final net.minecraft.world.phys.Vec3 targetMotion = targetEntity.getDeltaMovement();
-                    final boolean attackSucceeded = targetEntity.hurt(this.level.damageSources().playerAttack((net.minecraft.world.entity.player.Player) (Object) this), damage);
+                    final boolean attackSucceeded = targetEntity.hurt(this.shadow$level().damageSources().playerAttack((net.minecraft.world.entity.player.Player) (Object) this), damage);
 
                     if (attackSucceeded) {
                         if (knockbackModifier > 0) {
@@ -270,7 +270,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                         }
 
                         if (isSweapingAttack) {
-                            for (final LivingEntity livingEntity : this.level
+                            for (final LivingEntity livingEntity : this.shadow$level()
                                 .getEntitiesOfClass(LivingEntity.class, targetEntity.getBoundingBox().inflate(1.0D, 0.25D, 1.0D))) {
                                 if (livingEntity != (net.minecraft.world.entity.player.Player) (Object) this && livingEntity != targetEntity && !this.shadow$isAlliedTo(livingEntity) && (!(livingEntity instanceof ArmorStand) || !((ArmorStand)livingEntity).isMarker()) && this.shadow$distanceToSqr(livingEntity) < 9.0D) {
                                     // Sponge Start - Do a small event for these entities
@@ -303,7 +303,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                                                 (double) Mth.sin(this.shadow$getYRot() * ((float)Math.PI / 180F)),
                                                 (double) -Mth.cos(this.shadow$getYRot() * ((float)Math.PI / 180F)));
 
-                                            livingEntity.hurt(this.level.damageSources().playerAttack((net.minecraft.world.entity.player.Player) (Object) this),
+                                            livingEntity.hurt(this.shadow$level().damageSources().playerAttack((net.minecraft.world.entity.player.Player) (Object) this),
                                                 (float) sweepingAttackEvent.finalOutputDamage());
                                         }
                                     }
@@ -312,7 +312,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                             }
 
                             if (this.bridge$vanishState().createsSounds()) {
-                                this.level.playSound(
+                                this.shadow$level().playSound(
                                     null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(),
                                     SoundEvents.PLAYER_ATTACK_SWEEP, this.shadow$getSoundSource(), 1.0F, 1.0F
                                 );
@@ -328,16 +328,16 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
 
                         if (isCriticalAttack) {
                             if (this.bridge$vanishState().createsSounds()) {
-                                this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.shadow$getSoundSource(), 1.0F, 1.0F);
+                                this.shadow$level().playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_CRIT, this.shadow$getSoundSource(), 1.0F, 1.0F);
                             }
                             this.shadow$crit(targetEntity);
                         }
 
                         if (!isCriticalAttack && !isSweapingAttack && this.bridge$vanishState().createsSounds()) {
                             if (isStrongAttack) {
-                                this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.shadow$getSoundSource(), 1.0F, 1.0F);
+                                this.shadow$level().playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.shadow$getSoundSource(), 1.0F, 1.0F);
                             } else {
-                                this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_WEAK , this.shadow$getSoundSource(), 1.0F, 1.0F);
+                                this.shadow$level().playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_WEAK , this.shadow$getSoundSource(), 1.0F, 1.0F);
                             }
                         }
 
@@ -361,7 +361,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                         //    entity = ((EnderDragonPart) targetEntity).parentMob;
                         // }
 
-                        if(!this.level.isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity) {
+                        if(!this.shadow$level().isClientSide && !itemstack1.isEmpty() && entity instanceof LivingEntity) {
                             itemstack1.hurtEnemy((LivingEntity) entity, (net.minecraft.world.entity.player.Player) (Object) this);
                             if(itemstack1.isEmpty()) {
                                 // Sponge - platform hook for forge
@@ -384,16 +384,16 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                                 targetEntity.setSecondsOnFire(fireAspectModifier * 4);
                             }
 
-                            if (this.level instanceof ServerWorld && f5 > 2.0F) {
+                            if (this.shadow$level() instanceof ServerWorld && f5 > 2.0F) {
                                 final int k = (int) ((double) f5 * 0.5D);
-                                ((net.minecraft.server.level.ServerLevel) this.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(), targetEntity.getY() + (double) (targetEntity.getBbHeight() * 0.5F), targetEntity.getZ(), k, 0.1D, 0.0D, 0.1D, 0.2D);
+                                ((net.minecraft.server.level.ServerLevel) this.shadow$level()).sendParticles(ParticleTypes.DAMAGE_INDICATOR, targetEntity.getX(), targetEntity.getY() + (double) (targetEntity.getBbHeight() * 0.5F), targetEntity.getZ(), k, 0.1D, 0.0D, 0.1D, 0.2D);
                             }
                         }
 
                         this.shadow$causeFoodExhaustion(0.1F);
                     } else {
                         if (this.bridge$vanishState().createsSounds()) {
-                            this.level.playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.shadow$getSoundSource(), 1.0F, 1.0F);
+                            this.shadow$level().playSound(null, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.shadow$getSoundSource(), 1.0F, 1.0F);
                         }
 
                         if (litEntityOnFire) {

@@ -92,7 +92,7 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
             target = "Lnet/minecraft/world/level/Level;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V")
     )
     private void impl$useSpongeExplosion(final Level world, final Entity self, final byte state) {
-        if (this.level.isClientSide) {
+        if (this.shadow$level().isClientSide) {
             world.broadcastEntityEvent(self, state);
             return;
         }
@@ -112,7 +112,7 @@ public abstract class FireworkRocketEntityMixin extends ProjectileMixin implemen
 
     @Inject(method = "tick()V", at = @At("RETURN"))
     private void impl$postPrimeEvent(final CallbackInfo ci) {
-        if (this.life == 1 && !this.level.isClientSide) {
+        if (this.life == 1 && !this.shadow$level().isClientSide) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$getProjectileSource());

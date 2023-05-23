@@ -109,7 +109,7 @@ public abstract class MobMixin extends LivingEntityMixin {
         ),
         cancellable = true)
     private void impl$ThrowUnleashEvent(final boolean sendPacket, final boolean dropLead, final CallbackInfo ci) {
-        if (this.level.isClientSide) {
+        if (this.shadow$level().isClientSide) {
             return;
         }
 
@@ -139,7 +139,7 @@ public abstract class MobMixin extends LivingEntityMixin {
      */
     @Inject(method = "setTarget", at = @At("HEAD"), cancellable = true)
     private void onSetAttackTarget(@Nullable final LivingEntity entitylivingbaseIn, final CallbackInfo ci) {
-        if (this.level.isClientSide || entitylivingbaseIn == null) {
+        if (this.shadow$level().isClientSide || entitylivingbaseIn == null) {
             return;
         }
         //noinspection ConstantConditions
@@ -223,7 +223,7 @@ public abstract class MobMixin extends LivingEntityMixin {
         }
 
         // Sponge Start - Throw our event and handle appropriately
-        final DamageSource damageSource = this.level.damageSources().mobAttack((Mob) (Object) this);
+        final DamageSource damageSource = this.shadow$level().damageSources().mobAttack((Mob) (Object) this);
         PhaseTracker.getCauseStackManager().pushCause(damageSource);
         final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.entity.Entity) targetEntity,
             originalFunctions, knockbackModifier, originalBaseDamage);
@@ -291,7 +291,7 @@ public abstract class MobMixin extends LivingEntityMixin {
 
     @Inject(method = "setLeashedTo", at = @At("HEAD"), cancellable = true)
     private void impl$onSetLeashedTo(final net.minecraft.world.entity.Entity param0, final boolean param1, final CallbackInfo ci) {
-        if (!this.level.isClientSide) {
+        if (!this.shadow$level().isClientSide) {
             final Cause currentCause = Sponge.server().causeStackManager().currentCause();
             if (Sponge.eventManager().post(SpongeEventFactory.createLeashEntityEvent(currentCause, (Entity) this))) {
                 ci.cancel();

@@ -38,7 +38,7 @@ public abstract class ShulkerBulletMixin extends ProjectileMixin {
 
     @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
     private void onBulletHitBlock(final HitResult result, final CallbackInfo ci) {
-        if (!((LevelBridge) this.level).bridge$isFake() && result.getType() != HitResult.Type.MISS
+        if (!((LevelBridge) this.shadow$level()).bridge$isFake() && result.getType() != HitResult.Type.MISS
                 && SpongeCommonEventFactory.handleCollideImpactEvent(
                 (ShulkerBullet) (Object) this, this.impl$getProjectileSource(), result)) {
             this.shadow$discard();

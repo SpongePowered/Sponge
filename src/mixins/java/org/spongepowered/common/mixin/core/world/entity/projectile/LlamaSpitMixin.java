@@ -40,7 +40,7 @@ public abstract class LlamaSpitMixin extends ProjectileMixin {
 
     @Inject(method = "onHitEntity", at = @At("HEAD"), cancellable = true)
     private void impl$onHitCollideEvent(final EntityHitResult hitResult, final CallbackInfo ci) {
-        if (((LevelBridge) this.level).bridge$isFake() || hitResult.getType() == HitResult.Type.MISS) {
+        if (((LevelBridge) this.shadow$level()).bridge$isFake() || hitResult.getType() == HitResult.Type.MISS) {
             return;
         }
 
@@ -53,7 +53,7 @@ public abstract class LlamaSpitMixin extends ProjectileMixin {
 
     @Inject(method = "onHitBlock", at = @At("HEAD"), cancellable = true)
     private void impl$onHitCollideEvent(final BlockHitResult hitResult, final CallbackInfo ci) {
-        if (((LevelBridge) this.level).bridge$isFake() || hitResult.getType() == HitResult.Type.MISS) {
+        if (((LevelBridge) this.shadow$level()).bridge$isFake() || hitResult.getType() == HitResult.Type.MISS) {
             return;
         }
 

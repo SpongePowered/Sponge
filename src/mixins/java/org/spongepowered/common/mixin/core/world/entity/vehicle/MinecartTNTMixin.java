@@ -107,11 +107,11 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
 
     @Inject(method = "activateMinecart(IIIZ)V", at = @At("HEAD"))
     private void impl$onActivateSetPrimeCauseNotifier(final int x, final int y, final int z, final boolean receivingPower, final CallbackInfo ci) {
-        if (((LevelBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
             return;
         }
         if (receivingPower) {
-            ((ServerWorld) this.level).get(x, y, z, Keys.NOTIFIER).ifPresent(notifier -> this.impl$primeCause = notifier);
+            ((ServerWorld) this.shadow$level()).get(x, y, z, Keys.NOTIFIER).ifPresent(notifier -> this.impl$primeCause = notifier);
         }
     }
 

@@ -324,7 +324,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Inject(method = "die", at = @At("HEAD"), cancellable = true)
     private void impl$throwDestructEntityDeath(final DamageSource cause, final CallbackInfo ci) {
-        final boolean throwEvent = !((LevelBridge) this.level).bridge$isFake() && Sponge.isServerAvailable() && Sponge.server().onMainThread();
+        final boolean throwEvent = !((LevelBridge) this.shadow$level()).bridge$isFake() && Sponge.isServerAvailable() && Sponge.server().onMainThread();
         if (!this.dead) { // isDead should be set later on in this method so we aren't re-throwing the events.
             if (throwEvent && this.impl$deathEventsPosted <= Constants.Sponge.MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
@@ -480,7 +480,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         at = @At(value = "FIELD",
             target = "Lnet/minecraft/world/entity/LivingEntity;useItem:Lnet/minecraft/world/item/ItemStack;"))
     private void impl$onSetActiveItemStack(final InteractionHand hand, final CallbackInfo ci, final ItemStack stack) {
-        if (this.level.isClientSide) {
+        if (this.shadow$level().isClientSide) {
             return;
         }
 
@@ -505,7 +505,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         at = @At(value = "FIELD",
             target = "Lnet/minecraft/world/entity/LivingEntity;useItemRemaining:I"))
     private void impl$getItemDuration(final LivingEntity this$0, final int count) {
-        if (this.level.isClientSide) {
+        if (this.shadow$level().isClientSide) {
             this.useItemRemaining = count;
         }
         // If we're on the server, do nothing, since we already set this field on onSetActiveItemStack
@@ -534,7 +534,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             target = "Lnet/minecraft/world/entity/LivingEntity;getUseItemRemainingTicks()I",
             ordinal = 0))
     private int impl$onGetRemainingItemDuration(final LivingEntity self) {
-        if (this.level.isClientSide) {
+        if (this.shadow$level().isClientSide) {
             return self.getUseItemRemainingTicks();
         }
 
@@ -567,7 +567,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/LivingEntity;triggerItemUseEffects(Lnet/minecraft/world/item/ItemStack;I)V"))
     private void impl$onUpdateItemUse(final CallbackInfo ci) {
-        if (this.level.isClientSide) {
+        if (this.shadow$level().isClientSide) {
             return;
         }
 
@@ -597,7 +597,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/LivingEntity;setItemInHand(Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;)V"))
     private void impl$onSetHeldItem(final LivingEntity self, final InteractionHand hand, final ItemStack stack) {
-        if (this.level.isClientSide) {
+        if (this.shadow$level().isClientSide) {
             self.setItemInHand(hand, stack);
             return;
         }
@@ -642,7 +642,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             target = "Lnet/minecraft/world/item/ItemStack;releaseUsing(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;I)V"))
     // stopActiveHand
     private void impl$onStopPlayerUsing(final ItemStack stack, final net.minecraft.world.level.Level world, final LivingEntity self, final int duration) {
-        if (this.level.isClientSide) {
+        if (this.shadow$level().isClientSide) {
             stack.releaseUsing(world, self, duration);
             return;
         }
@@ -666,7 +666,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Inject(method = "stopUsingItem",
         at = @At("HEAD"))
     private void impl$onResetActiveHand(final CallbackInfo ci) {
-        if (this.level.isClientSide) {
+        if (this.shadow$level().isClientSide) {
             return;
         }
 
@@ -705,7 +705,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Inject(method = "stopSleeping", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;clearSleepingPos()V"))
     private void impl$callFinishSleepingEvent(final CallbackInfo ci) {
-        if (this.level.isClientSide) {
+        if (this.shadow$level().isClientSide) {
             return;
         }
 
@@ -713,14 +713,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         if (!sleepingPos.isPresent()) {
             return;
         }
-        final BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(sleepingPos.get().getX(), sleepingPos.get().getY(), sleepingPos.get().getZ());
+        final BlockSnapshot snapshot = ((ServerWorld) this.shadow$level()).createSnapshot(sleepingPos.get().getX(), sleepingPos.get().getY(), sleepingPos.get().getZ());
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
-        final ServerLocation loc = ServerLocation.of((ServerWorld) this.level, VecHelper.toVector3d(this.shadow$position()));
+        final ServerLocation loc = ServerLocation.of((ServerWorld) this.shadow$level(), VecHelper.toVector3d(this.shadow$position()));
         final Vector3d rot = ((Living) this).rotation();
         final SleepingEvent.Finish event = SpongeEventFactory.createSleepingEventFinish(currentCause, loc, loc, rot, rot, snapshot, (Living) this);
         Sponge.eventManager().post(event);
         this.shadow$clearSleepingPos();
-        if (event.toLocation().world() != this.level) {
+        if (event.toLocation().world() != this.shadow$level()) {
             throw new UnsupportedOperationException("World change is not supported here.");
         }
         this.shadow$setPos(event.toLocation().x(), event.toLocation().y(), event.toLocation().z());

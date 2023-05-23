@@ -43,11 +43,11 @@ public abstract class ItemFrameMixin_Optimization_Map extends HangingEntityMixin
 
     @Inject(method = "setItem(Lnet/minecraft/world/item/ItemStack;Z)V", at = @At(value = "HEAD"))
     private void mapOptimization$SetItemUpdateMapData(final ItemStack stack, final boolean p_174864_2_, final CallbackInfo ci) {
-        if (((LevelBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
             return;
         }
 
-        final OptimizedMapDataBridge mapData = (OptimizedMapDataBridge) MapItem.getSavedData(stack, this.level);
+        final OptimizedMapDataBridge mapData = (OptimizedMapDataBridge) MapItem.getSavedData(stack, this.shadow$level());
         if (stack.getItem() instanceof MapItem) {
             mapData.mapOptimizationBridge$updateItemFrameDecoration((ItemFrame) (Object) this);
         } else if (this.shadow$getItem().getItem() instanceof MapItem && stack.isEmpty()) {
