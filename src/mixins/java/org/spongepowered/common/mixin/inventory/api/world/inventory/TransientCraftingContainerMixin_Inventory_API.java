@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.inventory.api.world.inventory;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.TransientCraftingContainer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -43,8 +43,8 @@ import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLe
 
 import java.util.Optional;
 
-@Mixin(CraftingContainer.class)
-public abstract class CraftingContainerMixin_Inventory_API implements CraftingGridInventory {
+@Mixin(TransientCraftingContainer.class)
+public abstract class TransientCraftingContainerMixin_Inventory_API implements CraftingGridInventory {
 
     // @formatter:off
     @Shadow @Final private AbstractContainerMenu menu;

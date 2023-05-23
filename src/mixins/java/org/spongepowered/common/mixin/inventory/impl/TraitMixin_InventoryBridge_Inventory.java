@@ -32,10 +32,10 @@ import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.MerchantContainer;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -62,7 +62,7 @@ import javax.annotation.Nullable;
         CustomInventory.class,
         SimpleContainer.class,
         SpongeUserInventory.class,
-        CraftingContainer.class,
+        TransientCraftingContainer.class,
         ResultContainer.class,
         AbstractMinecartContainer.class,
         ArmorStand.class,

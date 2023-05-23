@@ -27,8 +27,8 @@ package org.spongepowered.common.mixin.inventory.impl;
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.inventory.LensGeneratorBridge;
@@ -40,7 +40,7 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
         BaseContainerBlockEntity.class,
         CompoundContainer.class,
         ResultContainer.class,
-        CraftingContainer.class,
+        TransientCraftingContainer.class,
         SimpleContainer.class
 })
 public abstract class TraitMixin_Lens_Inventory implements Container, LensGeneratorBridge {
