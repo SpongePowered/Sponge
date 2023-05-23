@@ -34,6 +34,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.EnderEyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityTypes;
@@ -91,7 +92,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         cancellable = true
     )
     private void impl$ThrowForPreEvent(final Level worldIn, final Player playerIn, final InteractionHand handIn,
-        final CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, final ItemStack used, final HitResult rayTraceResult, final ServerLevel world, final BlockPos targetPos) {
+        final CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, final ItemStack used, final BlockHitResult rayTraceResult, final ServerLevel world, final BlockPos targetPos) {
         if (targetPos != null && !((LevelBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final ConstructEntityEvent.Pre event =
                     SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().currentCause(),
