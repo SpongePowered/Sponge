@@ -25,19 +25,14 @@
 package org.spongepowered.common.accessor.world.entity;
 
 import net.minecraft.world.entity.Display;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(Display.ItemDisplay.class)
-public interface Display_ItemDisplayAccessor {
+@Mixin(Display.BlockDisplay.class)
+public interface Display_BlockDisplayAccessor {
 
-
-    @Invoker("setItemTransform") void invoker$setItemTransform(ItemDisplayContext context);
-    @Invoker("getItemTransform") ItemDisplayContext invoker$getItemTransform();
-
-    @Invoker("setItemStack") void invoker$setItemStack(ItemStack stack);
-    @Invoker("getItemStack") ItemStack invoker$getItemStack();
+    @Invoker("setBlockState") void invoker$setBlockState(BlockState component);
+    @Invoker("getBlockState") BlockState invoker$getBlockState();
 
 }

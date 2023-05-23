@@ -38,8 +38,10 @@ import javax.annotation.Nullable;
 public interface DisplayAccessor {
 
     @Invoker("setBillboardConstraints") void invoker$setBillboardConstraints(Display.BillboardConstraints $$0);
+    @Invoker("getBillboardConstraints") Display.BillboardConstraints invoker$getBillboardConstraints();
 
     @Invoker("setBrightnessOverride") void invoker$setBrightnessOverride(@Nullable Brightness $$0);
+    @Invoker("getPackedBrightnessOverride") int invoker$getPackedBrightnessOverride();
 
     @Invoker("setTransformation") void invoker$setTransformation(Transformation $$0);
 

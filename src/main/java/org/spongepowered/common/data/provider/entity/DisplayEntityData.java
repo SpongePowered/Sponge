@@ -37,6 +37,7 @@ import org.spongepowered.api.entity.display.ItemDisplayType;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.common.accessor.world.entity.DisplayAccessor;
+import org.spongepowered.common.accessor.world.entity.Display_BlockDisplayAccessor;
 import org.spongepowered.common.accessor.world.entity.Display_ItemDisplayAccessor;
 import org.spongepowered.common.accessor.world.entity.Display_TextDisplayAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -58,21 +59,21 @@ public class DisplayEntityData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(Display.class)
-                    .create(Keys.BILLBOARD_TYPE)
-                        .get(h -> (BillboardType) (Object) h.getBillboardConstraints())
-                        .set((h, v) -> ((DisplayAccessor)h).invoker$setBillboardConstraints((Display.BillboardConstraints) (Object) v))
-                    .create(Keys.SKY_LIGHT)
-                        .get(h -> DisplayEntityData.skyLight(h.getPackedBrightnessOverride()))
-                        .set((h, v) -> ((DisplayAccessor)h).invoker$setBrightnessOverride(DisplayEntityData.brightness(h.getPackedBrightnessOverride(), v, null)))
-                        .delete(h -> ((DisplayAccessor)h).invoker$setBrightnessOverride(null))
-                    .create(Keys.BLOCK_LIGHT)
-                        .get(h -> DisplayEntityData.blockLight(h.getPackedBrightnessOverride()))
-                        .set((h, v) -> ((DisplayAccessor)h).invoker$setBrightnessOverride(DisplayEntityData.brightness(h.getPackedBrightnessOverride(), null, v)))
-                        .delete(h -> ((DisplayAccessor)h).invoker$setBrightnessOverride(null))
                     .create(Keys.TRANSFORM)
                         .get(DisplayEntityData::getTransform)
                         .set(DisplayEntityData::setTransform)
                 .asMutable(DisplayAccessor.class)
+                    .create(Keys.BILLBOARD_TYPE)
+                        .get(h -> (BillboardType) (Object) h.invoker$getBillboardConstraints())
+                        .set((h, v) -> h.invoker$setBillboardConstraints((Display.BillboardConstraints) (Object) v))
+                    .create(Keys.SKY_LIGHT)
+                        .get(h -> DisplayEntityData.skyLight(h.invoker$getPackedBrightnessOverride()))
+                        .set((h, v) -> h.invoker$setBrightnessOverride(DisplayEntityData.brightness(h.invoker$getPackedBrightnessOverride(), v, null)))
+                        .delete(h -> h.invoker$setBrightnessOverride(null))
+                    .create(Keys.BLOCK_LIGHT)
+                        .get(h -> DisplayEntityData.blockLight(h.invoker$getPackedBrightnessOverride()))
+                        .set((h, v) -> h.invoker$setBrightnessOverride(DisplayEntityData.brightness(h.invoker$getPackedBrightnessOverride(), null, v)))
+                        .delete(h -> h.invoker$setBrightnessOverride(null))
                     .create(Keys.INTERPOLATION_DURATION)
                         .get(h -> Ticks.of(h.invoker$getInterpolationDuration()))
                         .set((h ,v) -> h.invoker$setInterpolationDuration((int) v.ticks()))
@@ -88,29 +89,29 @@ public class DisplayEntityData {
                     .create(Keys.VIEW_RANGE)
                         .get(h -> (double) h.invoker$getViewRange())
                         .set((h ,v) -> h.invoker$setViewRange(v.floatValue()))
-                .asMutable(Display.BlockDisplay.class)
+                .asMutable(Display_BlockDisplayAccessor.class)
                     .create(Keys.BLOCK_STATE)
-                        .get(h -> ((BlockState) h.getBlockState()))
-                        .set((h, v) -> h.setBlockState((net.minecraft.world.level.block.state.BlockState) v))
-                .asMutable(Display.ItemDisplay.class)
+                        .get(h -> ((BlockState) h.invoker$getBlockState()))
+                        .set((h, v) -> h.invoker$setBlockState((net.minecraft.world.level.block.state.BlockState) v))
+                .asMutable(Display_ItemDisplayAccessor.class)
                     .create(Keys.ITEM_STACK_SNAPSHOT)
-                        .get(h -> ItemStackUtil.snapshotOf(h.getItemStack()))
-                        .set((h, v) -> h.getSlot(0).set(ItemStackUtil.fromSnapshotToNative(v)))
+                        .get(h -> ItemStackUtil.snapshotOf(((Display_ItemDisplayAccessor)h).invoker$getItemStack()))
+                        .set((h, v) -> h.invoker$setItemStack(ItemStackUtil.fromSnapshotToNative(v)))
                     .create(Keys.ITEM_DISPLAY_TYPE)
-                        .get(h -> (ItemDisplayType) (Object) h.getItemTransform())
+                        .get(h -> (ItemDisplayType) (Object) h.invoker$getItemTransform())
                         .set((h, v) -> ((Display_ItemDisplayAccessor) h).invoker$setItemTransform(((ItemDisplayContext) (Object) v)))
-                .asMutable(Display.TextDisplay.class)
+                .asMutable(Display_TextDisplayAccessor.class)
                     .create(Keys.DISPLAY_NAME)
-                        .get(h -> SpongeAdventure.asAdventure(h.getText()))
-                        .set((h, v) -> ((Display_TextDisplayAccessor) h).invoker$setText(SpongeAdventure.asVanilla(v)))
+                        .get(h -> SpongeAdventure.asAdventure(h.invoker$getText()))
+                        .set((h, v) -> h.invoker$setText(SpongeAdventure.asVanilla(v)))
                     .create(Keys.LINE_WIDTH)
-                        .get(Display.TextDisplay::getLineWidth)
-                        .set((h, v) -> ((Display_TextDisplayAccessor) h).invoker$setLineWidth(v))
+                        .get(Display_TextDisplayAccessor::invoker$getLineWidth)
+                        .set(Display_TextDisplayAccessor::invoker$setLineWidth)
                     .create(Keys.OPACITY)
-                        .get(h -> ((Display_TextDisplayAccessor) h).invoker$getTextOpacity())
-                        .set((h, v) -> ((Display_TextDisplayAccessor) h).invoker$setTextOpacity(v))
+                        .get(Display_TextDisplayAccessor::invoker$getTextOpacity)
+                        .set(Display_TextDisplayAccessor::invoker$setTextOpacity)
                     .create(Keys.SEE_THROUGH_BLOCKS)
-                        .get(h -> DisplayEntityData.getFlagValue(h,  Display.TextDisplay.FLAG_SEE_THROUGH))
+                        .get(h -> DisplayEntityData.getFlagValue(h, Display.TextDisplay.FLAG_SEE_THROUGH))
                         .set((h, v) -> DisplayEntityData.setFlagValue(h, v, Display.TextDisplay.FLAG_SEE_THROUGH))
                     .create(Keys.HAS_TEXT_SHADOW)
                         .get(h -> DisplayEntityData.getFlagValue(h, Display.TextDisplay.FLAG_SHADOW))
@@ -122,24 +123,24 @@ public class DisplayEntityData {
                         .get(h -> DisplayEntityData.getFlagValue(h, Display.TextDisplay.FLAG_USE_DEFAULT_BACKGROUND))
                         .set((h, v) -> DisplayEntityData.setFlagValue(h, v, Display.TextDisplay.FLAG_USE_DEFAULT_BACKGROUND))
                     .create(Keys.TEXT_BACKGROUND_COLOR)
-                        .get(h -> DisplayEntityData.colorFromInt(((Display_TextDisplayAccessor) h).invoker$getBackgroundColor()))
-                        .set((h, v) -> ((Display_TextDisplayAccessor) h).invoker$setBackgroundColor(DisplayEntityData.colorToInt(v)))
+                        .get(h -> DisplayEntityData.colorFromInt(h.invoker$getBackgroundColor()))
+                        .set((h, v) -> h.invoker$setBackgroundColor(DisplayEntityData.colorToInt(v)))
         ;
     }
     // @formatter:on
 
-    private static boolean getFlagValue(final Display.TextDisplay h, final byte flag) {
-        return (h.getFlags() & flag) != 0;
+    private static boolean getFlagValue(final Display_TextDisplayAccessor h, final byte flag) {
+        return (h.invoker$getFlags() & flag) != 0;
     }
 
-    private static void setFlagValue(final Display.TextDisplay h, final Boolean set, final byte flag) {
-        byte flags = h.getFlags();
+    private static void setFlagValue(final Display_TextDisplayAccessor h, final Boolean set, final byte flag) {
+        byte flags = h.invoker$getFlags();
         if (set) {
             flags = (byte) (flags | flag);
         } else {
             flags = (byte) (flags & ~flag);
         }
-        ((Display_TextDisplayAccessor) h).invoker$setFlags(flags);
+        h.invoker$setFlags(flags);
     }
 
     private static Brightness brightness(final int original, @Nullable Integer block, @Nullable Integer sky) {

@@ -201,7 +201,8 @@
         "server.network.ServerGamePacketListenerImplAccessor",
         "world.entity.Display_TextDisplayAccessor",
         "world.entity.Display_ItemDisplayAccessor",
-        "world.entity.DisplayAccessor"
+        "world.entity.DisplayAccessor",
+        "world.entity.Display_BlockDisplayAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"
