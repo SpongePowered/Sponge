@@ -43,13 +43,13 @@ import org.spongepowered.common.mixin.core.world.entity.AgableMobMixin;
 @Mixin(Animal.class)
 public abstract class AnimalMixin extends AgableMobMixin {
 
-    @Inject(method = "spawnChildFromBreeding",
+    @Inject(method = "finalizeSpawnChildFromBreeding",
             locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/entity/animal/Animal;getLoveCause()Lnet/minecraft/server/level/ServerPlayer;",
                     ordinal = 0),
             cancellable = true)
-    private void impl$cancelSpawnResultIfMarked(ServerLevel p_234177_1_, Animal partner, final CallbackInfo ci, AgeableMob offspring) {
+    private void impl$cancelSpawnResultIfMarked(final ServerLevel level, final Animal partner, final AgeableMob offspring, final CallbackInfo ci) {
         if (ShouldFire.BREEDING_EVENT_BREED) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
@@ -57,7 +57,7 @@ public abstract class AnimalMixin extends AgableMobMixin {
                 final org.spongepowered.api.event.entity.BreedingEvent.Breed event =
                         SpongeEventFactory.createBreedingEventBreed(PhaseTracker.getCauseStackManager().currentCause(), (Ageable) offspring);
 
-                if (!(!SpongeCommon.post(event) && level.addFreshEntity(offspring))) {
+                if (!(!SpongeCommon.post(event) && this.level.addFreshEntity(offspring))) {
                     ci.cancel();
                 }
             }
