@@ -27,10 +27,9 @@ package org.spongepowered.common.mixin.core.world.level.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.NoteBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
-import net.minecraft.world.level.material.Material;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
@@ -61,7 +60,7 @@ public abstract class NoteBlockMixin extends BlockMixin {
         }
 
         //No noteblock sounds if the block above it isn't air
-        if (worldIn.getBlockState(pos.above()).getMaterial() != Material.AIR) {
+        if (!worldIn.getBlockState(pos.above()).is(Blocks.AIR)) {
             return;
         }
 
@@ -78,7 +77,7 @@ public abstract class NoteBlockMixin extends BlockMixin {
         // TODO byStateAbove
         final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBlockEvent(
                 PhaseTracker.getCauseStackManager().currentCause(), (ServerWorld) worldIn, pos,
-                NoteBlockInstrument.byStateBelow(state).getSoundEvent().value(), instrumentType, registry.byId(param), pitch);
+                state.instrument().getSoundEvent().value(), instrumentType, registry.byId(param), pitch);
         if (event.isCancelled()) {
             callbackInfo.setReturnValue(true);
         }

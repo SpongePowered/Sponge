@@ -176,7 +176,7 @@ public final class PortalHelper {
         for(int i = -1; i < 3; ++i) {
             for(int j = -1; j < 4; ++j) {
                 p_242955_2_.setWithOffset(p_242955_1_, p_242955_3_.getStepX() * i + direction.getStepX() * p_242955_4_, j, p_242955_3_.getStepZ() * i + direction.getStepZ() * p_242955_4_);
-                if (j < 0 && !world.getBlockState(p_242955_2_).getMaterial().isSolid()) {
+                if (j < 0 && !world.getBlockState(p_242955_2_).isSolid()) {
                     return false;
                 }
 

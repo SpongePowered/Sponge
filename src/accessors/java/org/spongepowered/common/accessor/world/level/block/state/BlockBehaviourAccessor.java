@@ -33,4 +33,5 @@ public interface BlockBehaviourAccessor {
 
     @Accessor("properties") BlockBehaviour.Properties accessor$properties();
 
+    @Accessor("hasCollision") boolean accessor$hasCollision();
 }

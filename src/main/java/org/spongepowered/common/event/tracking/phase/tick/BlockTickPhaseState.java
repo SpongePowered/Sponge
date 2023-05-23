@@ -60,7 +60,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
             if (newBlock == Blocks.AIR) {
                 return BlockChange.BREAK;
             }
-            if (newBlock instanceof BonemealableBlock || newState.getMaterial().isFlammable()) {
+            if (newBlock instanceof BonemealableBlock || newState.ignitedByLava()) {
                 return BlockChange.GROW;
             }
         }

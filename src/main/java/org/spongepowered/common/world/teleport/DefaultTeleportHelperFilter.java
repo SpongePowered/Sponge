@@ -24,55 +24,36 @@
  */
 package org.spongepowered.common.world.teleport;
 
-import com.google.common.collect.ImmutableSet;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.EmptyBlockGetter;
-import net.minecraft.world.level.block.AnvilBlock;
-import net.minecraft.world.level.block.CauldronBlock;
-import net.minecraft.world.level.block.ChorusPlantBlock;
-import net.minecraft.world.level.block.FenceBlock;
-import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.SnowLayerBlock;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.Blocks;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
-
-import java.util.Set;
+import org.spongepowered.common.accessor.world.level.block.state.BlockBehaviourAccessor;
 
 public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
 
-    // Materials it is NOT safe to put players on top of.
-    private static final Set<Material> NOT_SAFE_FLOOR = ImmutableSet.of(Material.AIR, Material.CACTUS, Material.FIRE, Material.LAVA);
-
     @Override
     public boolean isSafeFloorMaterial(BlockState blockState) {
-        return !DefaultTeleportHelperFilter.NOT_SAFE_FLOOR.contains(((net.minecraft.world.level.block.state.BlockState) blockState).getMaterial());
+        final net.minecraft.world.level.block.state.BlockState state = (net.minecraft.world.level.block.state.BlockState) blockState;
+        return !(state.is(Blocks.AIR) || state.is(Blocks.LAVA) || state.is(BlockTags.FIRE));
     }
 
     @Override
     public boolean isSafeBodyMaterial(BlockState blockState) {
         net.minecraft.world.level.block.state.BlockState state = (net.minecraft.world.level.block.state.BlockState) blockState;
-        Material material = state.getMaterial();
 
         // Deny blocks that suffocate
         if (state.isSuffocating(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)) {
             return false;
         }
         // Deny dangerous lava
-        if (material == Material.LAVA) {
+        if (state.is(Blocks.LAVA)) {
             return false;
         }
 
-        // Sadly there is no easy way to check for this using vanilla right now as Blocks like Cauldron are technically marked as passable.
-
         // Deny non-passable non "full" blocks
-        return !(state.getBlock() instanceof SlabBlock ||
-                 state.getBlock() instanceof CauldronBlock ||
-                 state.getBlock() instanceof AnvilBlock ||
-                 state.getBlock() instanceof FenceBlock ||
-                 state.getBlock() instanceof ChorusPlantBlock ||
-                 state.getBlock() instanceof SnowLayerBlock ||
-                 material == Material.GLASS ||
-                 material == Material.LEAVES);
+        return ((BlockBehaviourAccessor) state.getBlock()).accessor$hasCollision();
     }
 }

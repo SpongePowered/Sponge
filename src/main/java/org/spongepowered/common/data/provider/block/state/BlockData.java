@@ -26,16 +26,14 @@ package org.spongepowered.common.data.provider.block.state;
 
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
-import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
-import net.minecraft.world.level.material.Material;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.MatterTypes;
@@ -91,20 +89,20 @@ public final class BlockData {
                         })
                         .supports(h -> h.hasProperty(ChestBlock.TYPE))
                     .create(Keys.IS_PASSABLE)
-                        .get(h -> !h.getMaterial().blocksMotion())
+                        .get(h -> !h.blocksMotion())
                     .create(Keys.IS_FLAMMABLE)
                         .get(((BaseFireBlockAccessor) Blocks.FIRE)::invoker$canBurn)
                     .create(Keys.IS_SOLID)
-                        .get(h -> h.getMaterial().isSolid())
+                        .get(BlockBehaviour.BlockStateBase::isSolid)
                     .create(Keys.IS_REPLACEABLE)
-                        .get(h -> h.getMaterial().isReplaceable())
+                        .get(BlockBehaviour.BlockStateBase::canBeReplaced)
                     .create(Keys.LIGHT_EMISSION)
                         .get(BlockState::getLightEmission)
                     .create(Keys.MATTER_TYPE)
                         .get(h -> {
                             if (h.getBlock() instanceof LiquidBlock) {
                                 return MatterTypes.LIQUID.get();
-                            } else if (h.getMaterial() == Material.AIR || h.getBlock() instanceof AirBlock) {
+                            } else if (h.isAir()) {
                                 return MatterTypes.GAS.get();
                             } else {
                                 return MatterTypes.SOLID.get();
@@ -112,7 +110,7 @@ public final class BlockData {
                         })
                     // TODO state above
                     .create(Keys.REPRESENTED_INSTRUMENT)
-                        .get(h -> (InstrumentType) (Object) NoteBlockInstrument.byStateBelow(h));
+                        .get(h -> (InstrumentType) (Object) h.instrument());
     }
     // @formatter:on
 }

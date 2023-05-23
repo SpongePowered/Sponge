@@ -54,12 +54,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LavaCauldronBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -908,7 +908,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
         final AABB bb = this.shadow$getBoundingBox().inflate(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
         final ServerLocation location = DamageEventUtil.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
-            block.getMaterial() == Material.LAVA || block.getBlock() instanceof LavaCauldronBlock);
+            block.is(Blocks.LAVA) || block.getBlock() instanceof LavaCauldronBlock);
         if (location != null) {
             var blockSource = org.spongepowered.api.event.cause.entity.damage.source.DamageSource.builder()
                     .from((org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source).block(location)
