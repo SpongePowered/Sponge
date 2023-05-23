@@ -30,16 +30,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.LegacyUpgradeRecipe;
+import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 
 import java.util.function.Function;
 
-public class SpongeSmithingRecipe extends LegacyUpgradeRecipe {
+public class SpongeSmithingRecipe extends SmithingTransformRecipe {
 
     private final Function<Container, ItemStack> resultFunction;
 
-    public SpongeSmithingRecipe(ResourceLocation idIn, Ingredient base, Ingredient addition, ItemStack resultIn, Function<Container, ItemStack> resultFunction) {
-        super(idIn, base, addition, resultIn);
+    public SpongeSmithingRecipe(ResourceLocation idIn, Ingredient template, Ingredient base, Ingredient addition, ItemStack resultIn, Function<Container, ItemStack> resultFunction) {
+        super(idIn, template, base, addition, resultIn);
         this.resultFunction = resultFunction;
     }
 

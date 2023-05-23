@@ -53,9 +53,10 @@ import java.util.Arrays;
 import java.util.function.Function;
 
 public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, SmithingRecipe.Builder> implements
-        SmithingRecipe.Builder, SmithingRecipe.Builder.AdditionStep, SmithingRecipe.Builder.ResultStep, SmithingRecipe.Builder.EndStep {
+        SmithingRecipe.Builder, SmithingRecipe.Builder.BaseStep, SmithingRecipe.Builder.AdditionStep, SmithingRecipe.Builder.ResultStep, SmithingRecipe.Builder.EndStep {
 
     private ItemStack result;
+    private Ingredient template;
     private Ingredient base;
     private Ingredient addition;
     private Function<Container, net.minecraft.world.item.ItemStack> resultFunction;
@@ -63,6 +64,18 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
     private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
+
+    @Override
+    public BaseStep template(final ItemType ingredient) {
+        this.template = Ingredient.of(() -> ((Item) ingredient));
+        return this;
+    }
+
+    @Override
+    public BaseStep template(final org.spongepowered.api.item.recipe.crafting.Ingredient ingredient) {
+        this.template = IngredientUtil.toNative(ingredient);
+        return this;
+    }
 
     @Override
     public AdditionStep base(ItemType ingredient) {
@@ -129,7 +142,7 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
     public RecipeRegistration build0() {
         final net.minecraft.world.item.ItemStack result = ItemStackUtil.toNative(this.result);
         final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(result, this.resultFunction, null, Arrays.asList(this.base, this.addition),
-                RecipeSerializer.SMITHING, SpongeRecipeSerializers.SPONGE_SMITHING);
+                RecipeSerializer.SMITHING_TRANSFORM, SpongeRecipeSerializers.SPONGE_SMITHING);
 
         return new SpongeSmithingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.base, this.addition, result, this.resultFunction, this.pack, this.recipeCategory);
     }

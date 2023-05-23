@@ -398,6 +398,7 @@ public final class RecipeTest implements LoadableModule {
         // Smithing recipes
 
         final RecipeRegistration ironToGoldIngot = SmithingRecipe.builder()
+                .template(ItemTypes.PAPER)
                 .base(ItemTypes.IRON_INGOT)
                 .addition(ItemTypes.NETHERITE_INGOT)
                 .result(ItemStack.of(ItemTypes.GOLD_INGOT))
@@ -410,6 +411,7 @@ public final class RecipeTest implements LoadableModule {
         chainMail.offer(Keys.CUSTOM_NAME, Component.text("Heavy Chainmail", NamedTextColor.DARK_GRAY));
         chainMail.offer(Keys.LORE, Arrays.asList(Component.text("Smithing occured", NamedTextColor.DARK_GRAY)));
         final RecipeRegistration smithChainmail = SmithingRecipe.builder()
+                .template(ItemTypes.PAPER)
                 .base(ItemTypes.IRON_CHESTPLATE)
                 .addition(ItemTypes.FIRE_CHARGE)
                 .result(chainMail)

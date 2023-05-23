@@ -31,20 +31,21 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.LegacyUpgradeRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.function.Function;
 
-public class SpongeSmithingRecipeSerializer<R extends LegacyUpgradeRecipe> implements RecipeSerializer<R> {
+public class SpongeSmithingRecipeSerializer<R extends SmithingTransformRecipe> implements RecipeSerializer<R> {
 
     @SuppressWarnings("unchecked")
     @Override
     public R fromJson(final ResourceLocation recipeId, final JsonObject json) {
+        final Ingredient template = IngredientUtil.spongeDeserialize(json.get(Constants.Recipe.SMITHING_TEMPLATE_INGREDIENT));
         final Ingredient base = IngredientUtil.spongeDeserialize(json.get(Constants.Recipe.SMITHING_BASE_INGREDIENT));
         final Ingredient addition = IngredientUtil.spongeDeserialize(json.get(Constants.Recipe.SMITHING_ADDITION_INGREDIENT));
 
@@ -53,7 +54,7 @@ public class SpongeSmithingRecipeSerializer<R extends LegacyUpgradeRecipe> imple
         final ItemStack itemstack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, Constants.Recipe.RESULT));
         final ItemStack spongeStack = IngredientResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
 
-        return (R) new SpongeSmithingRecipe(recipeId, base, addition, spongeStack == null ? itemstack : spongeStack, resultFunction);
+        return (R) new SpongeSmithingRecipe(recipeId, template, base, addition, spongeStack == null ? itemstack : spongeStack, resultFunction);
     }
 
     @SuppressWarnings("unchecked")
