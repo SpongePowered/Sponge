@@ -27,14 +27,14 @@ package org.spongepowered.vanilla.client.gui.widget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 
 import java.util.Collections;
@@ -83,7 +83,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
      * @param mouseX
      * @param mouseY
      */
-    protected abstract void drawPanel(final PoseStack stack, int entryRight, int relativeY, Tesselator tess, int mouseX, int mouseY);
+    protected abstract void drawPanel(final GuiGraphics stack, int entryRight, int relativeY, Tesselator tess, int mouseX, int mouseY);
 
     protected boolean clickPanel(final double mouseX, final double mouseY, final int button) {
         return false;
@@ -177,8 +177,9 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
         return false;
     }
 
+
     @Override
-    public void render(final PoseStack stack, final int mouseX, final int mouseY, final float partialTicks) {
+    public void render(final GuiGraphics stack, final int mouseX, final int mouseY, final float partialTicks) {
         this.drawBackground();
 
         final Tesselator tess = Tesselator.getInstance();
@@ -189,7 +190,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
             (int) (this.height * scale));
 
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
+        RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         final float texScale = 32.0F;
         worldr.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);

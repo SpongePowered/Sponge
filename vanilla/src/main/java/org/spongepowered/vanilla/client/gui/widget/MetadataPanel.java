@@ -31,6 +31,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -214,22 +215,20 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
     }
 
     @Override
-    protected void drawPanel(final PoseStack stack, final int entryRight, int relativeY, final Tesselator tess, final int mouseX,
+    protected void drawPanel(final GuiGraphics stack, final int entryRight, int relativeY, final Tesselator tess, final int mouseX,
             final int mouseY) {
         final int baseX = this.left + 4;
 
+        final Font font = this.minecraft.font;
         if (this.resizedCategories.isEmpty()) {
-            final Font font = this.minecraft.font;
             final int noResultsWidth = font.width(MetadataPanel.NO_RESULTS);
 
-            font.draw(
-                stack,
-                MetadataPanel.NO_RESULTS,
-                ((float) this.width / 2) + this.left - ((float) noResultsWidth / 2),
-                this.top + 10,
-                0xFFFFFF
+            stack.drawString(font,
+                    MetadataPanel.NO_RESULTS,
+                    (int) (((float) this.width / 2) + this.left - ((float) noResultsWidth / 2)),
+                    this.top + 10,
+                    0xFFFFFF
             );
-
             return;
         }
 
@@ -241,7 +240,7 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
             }
 
             // Draw category name
-            this.minecraft.font.draw(stack, category.name, baseX, relativeY, 0xFFFFFF);
+            stack.drawString(font, category.name, baseX, relativeY, 0xFFFFFF);
             relativeY += this.lineHeight;
 
             // Iterate and draw entries
@@ -253,22 +252,22 @@ public final class MetadataPanel extends ScrollPanel implements NarratableEntry 
                 final int levelOffset = entry.level * MetadataPanel.INDENT_SIZE;
                 final int keyX = baseX + MetadataPanel.INDENT_SIZE + levelOffset;
                 final int separatorX = keyX + this.maxKeyWidth + 4 - levelOffset;
-                final int valueX = separatorX + this.minecraft.font.width(":") + 4;
+                final int valueX = separatorX + font.width(":") + 4;
 
                 // Only draw key and separator if there is any key present
                 if (entry.key != null) {
-                    this.minecraft.font.draw(stack, entry.key, keyX, relativeY, 0xFFFFFF);
+                    stack.drawString(font, entry.key, keyX, relativeY, 0xFFFFFF);
 
                     if (entry.rawValue != null && !entry.rawValue.isEmpty()) {
-                        this.minecraft.font.draw(stack, ":", separatorX, relativeY, 0xFFFFFF);
+                        stack.drawString(font, ":", separatorX, relativeY, 0xFFFFFF);
                     }
                 }
 
                 // Draw the value, and update the value bounds if needed
-                this.minecraft.font.draw(stack, entry.value, valueX, relativeY, 0xFFFFFF);
+                stack.drawString(font, entry.value, valueX, relativeY, 0xFFFFFF);
                 if (entry.value.getStyle().getClickEvent() != null) {
                     entry.valueBounds =
-                        new Bounds(valueX, relativeY + 1, valueX + this.minecraft.font.width(entry.value),
+                        new Bounds(valueX, relativeY + 1, valueX + font.width(entry.value),
                             relativeY + this.lineHeight);
                 }
                 relativeY += this.lineHeight;

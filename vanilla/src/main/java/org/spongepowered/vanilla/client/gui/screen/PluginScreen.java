@@ -27,6 +27,7 @@ package org.spongepowered.vanilla.client.gui.screen;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -104,10 +105,10 @@ public final class PluginScreen extends Screen {
     }
 
     @Override
-    public void render(final PoseStack stack, final int p_render_1_, final int p_render_2_, final float p_render_3_) {
+    public void render(final GuiGraphics stack, final int p_render_1_, final int p_render_2_, final float p_render_3_) {
         this.renderBackground(stack);
         super.render(stack, p_render_1_, p_render_2_, p_render_3_); // render the widgets
-        Screen.drawCenteredString(stack, this.font, this.title.getString(), this.width / 2, 8, 16777215);
+        stack.drawCenteredString(this.font, this.title.getString(), this.width / 2, 8, 16777215);
     }
 
     private void generateEntries(final List<PluginMetadata> metadatas) {

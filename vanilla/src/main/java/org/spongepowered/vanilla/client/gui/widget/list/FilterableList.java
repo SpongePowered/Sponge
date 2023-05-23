@@ -34,6 +34,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -207,7 +208,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
     }
 
     @Override
-    public void render(final PoseStack stack, final int p_render_1_, final int p_render_2_, final float p_render_3_) {
+    public void render(final GuiGraphics stack, final int p_render_1_, final int p_render_2_, final float p_render_3_) {
         super.render(stack, p_render_1_, p_render_2_, p_render_3_);
     }
 
@@ -235,7 +236,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
     }
 
     @Override
-    protected void renderList(final PoseStack stack, final int renderX, final int renderY, final float p_renderList_3_) {
+    protected void renderList(final GuiGraphics stack, final int renderX, final int renderY, final float p_renderList_3_) {
         // Most of this is based on AbstractList::renderList logic
         final List<E> filteredList = this.filterSupplier == null ? new ObjectArrayList<>(this.children()) : this.filterSupplier.get();
         final int itemCount = filteredList.size();
@@ -247,7 +248,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
             final String noResults = "No results...";
             final int noResultsWidth = font.width(noResults);
 
-            font.draw(stack, noResults, (this.width / 2) + this.x0 - (noResultsWidth / 2), this.y0 + 10, ChatFormatting.GRAY.getColor());
+            stack.drawString(font, noResults, (this.width / 2) + this.x0 - (noResultsWidth / 2), this.y0 + 10, ChatFormatting.GRAY.getColor());
 
             return;
         }
@@ -325,7 +326,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
 
         @SuppressWarnings("unchecked")
         @Override
-        public void render(final PoseStack stack, final int p_render_1_, final int renderY, final int renderX, final int p_render_4_,
+        public void render(final GuiGraphics stack, final int p_render_1_, final int renderY, final int renderX, final int p_render_4_,
                 final int p_render_5_, final int mouseX, final int mouseY, final boolean p_render_8_,
             final float p_render_9_) {
             if (this.getInteractBounds().isInBounds(mouseX, mouseY, renderX, renderY)) {
