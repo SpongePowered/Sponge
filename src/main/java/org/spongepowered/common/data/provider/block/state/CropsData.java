@@ -41,7 +41,7 @@ public final class CropsData {
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
                         .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, CropBlock.AGE))
-                        .get(h -> h.getValue(((CropBlock) h.getBlock()).getAgeProperty()))
+                        .get(h -> h.getValue(CropBlock.AGE))
                         .set((h, v) -> BoundedUtil.setInteger(h, v, CropBlock.AGE))
                         .supports(h -> h.getBlock() instanceof CropBlock);
     }
