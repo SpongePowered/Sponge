@@ -165,7 +165,7 @@ public final class EntityData {
                     .create(Keys.IS_WET)
                         .get(Entity::isInWaterOrRain)
                     .create(Keys.ON_GROUND)
-                        .get(Entity::isOnGround)
+                        .get(Entity::onGround)
                     .create(Keys.PASSENGERS)
                         .get(h -> h.getPassengers().stream().map(org.spongepowered.api.entity.Entity.class::cast).collect(Collectors.toList()))
                         .set((h, v) -> {

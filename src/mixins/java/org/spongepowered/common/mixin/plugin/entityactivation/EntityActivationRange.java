@@ -317,7 +317,7 @@ public final class EntityActivationRange {
             if (!entity.getPassengers().isEmpty() || entity.getVehicle() != null) {
                 return true;
             }
-        } else if (!entity.isOnGround()) {
+        } else if (!entity.onGround()) {
             return true;
         }
 
