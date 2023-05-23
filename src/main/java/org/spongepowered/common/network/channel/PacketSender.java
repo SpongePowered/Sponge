@@ -61,7 +61,7 @@ public final class PacketSender {
 
     public static final class SpongePacketSendListener implements PacketSendListener {
         private final BlockableEventLoop<?> executor;
-        private final Consumer<Throwable> listener;
+        private final Consumer<@Nullable  Throwable> listener;
 
         public SpongePacketSendListener(final EngineConnectionSide<? extends EngineConnection> side, final Consumer<@Nullable Throwable> listener) {
             this.executor = (BlockableEventLoop<?>) (side == EngineConnectionSide.CLIENT ? Sponge.client() : Sponge.server());
