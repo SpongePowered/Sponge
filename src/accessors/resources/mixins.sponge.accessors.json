@@ -53,7 +53,6 @@
         "util.datafix.schemas.V100Accessor",
         "world.CompoundContainerAccessor",
         "world.LockCodeAccessor",
-        "world.damagesource.CombatEntryAccessor",
         "world.damagesource.CombatTrackerAccessor",
         "world.entity.AgableMobAccessor",
         "world.entity.AreaEffectCloudAccessor",

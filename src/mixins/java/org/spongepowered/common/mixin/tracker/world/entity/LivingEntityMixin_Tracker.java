@@ -37,7 +37,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
 import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -80,7 +79,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
         }
         final CombatEntry entry = ((CombatTrackerAccessor) this.shadow$getCombatTracker()).invoker$getMostSignificantFall();
         if (entry != null) {
-            final DamageSource source = ((CombatEntryAccessor) entry).accessor$source();
+            final DamageSource source = entry.source();
             if (source != null) {
                 frame.addContext(
                     EventContextKeys.LAST_DAMAGE_SOURCE,

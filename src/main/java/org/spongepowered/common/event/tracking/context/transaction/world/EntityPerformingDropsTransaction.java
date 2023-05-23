@@ -40,7 +40,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.HarvestEntityEvent;
-import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
 import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
@@ -80,7 +79,7 @@ public final class EntityPerformingDropsTransaction extends WorldBasedTransactio
         if (entity instanceof LivingEntity) {
             final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) entity).getCombatTracker()).invoker$getMostSignificantFall();
             if (entry != null) {
-                lastAttacker = ((CombatEntryAccessor) entry).accessor$source();
+                lastAttacker = entry.source();
             } else {
                 lastAttacker = null;
             }
