@@ -105,7 +105,7 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
             if (old.isEmpty() && this.slot.setStack(this.inventoryAdapter$getFabric(), ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
                 remaining -= push;
                 newStack = ItemStackUtil.snapshotOf(stack);
-            } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
+            } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack) && maxStackSize > old.getCount()) {
                 this.inventoryAdapter$getFabric().fabric$markDirty();
                 push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
                 old.setCount(old.getCount() + push);
@@ -114,9 +114,8 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
             }
 
             result.transaction(new SlotTransaction(this, oldStack, newStack));
-            if (remaining == stack.quantity()) {
-                // No items were consumed
-                result.reject(ItemStackUtil.cloneDefensive(nativeStack));
+            if (remaining > 0) {
+                result.reject(ItemStackUtil.cloneDefensive(nativeStack, remaining));
                 result.type(InventoryTransactionResult.Type.FAILURE);
             }
         }
