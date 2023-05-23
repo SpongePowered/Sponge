@@ -816,7 +816,7 @@ public abstract class SpongeWorldManager implements WorldManager {
 
         final Executor executor = ((MinecraftServerAccessor) this.server).accessor$executor();
         final ServerLevel world = new ServerLevel(this.server, executor, storageSource, levelData,
-                registryKey, levelStem, chunkStatusListener, levelData.isDebugWorld(), seed, spawners, true);
+                registryKey, levelStem, chunkStatusListener, levelData.isDebugWorld(), seed, spawners, true, null);
         this.worlds.put(registryKey, world);
 
         return world;
