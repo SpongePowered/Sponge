@@ -912,7 +912,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final BlockPos spawnPoint = world.getSharedSpawnPos();
         final ChunkPos chunkPos = new ChunkPos(spawnPoint);
         final ServerChunkCache serverChunkProvider = world.getChunkSource();
-        serverChunkProvider.getLightEngine().setTaskPerBatch(500);
+//        serverChunkProvider.getLightEngine().setTaskPerBatch(500); was 5 in 1.19.4 , final 1000 in 1.20
 
         final int borderRadius = 11;
         final int diameter = ((borderRadius - 1) * 2) + 1;
@@ -936,7 +936,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         );
         return generationFuture.thenApply(v -> {
             this.updateForcedChunks(world, serverChunkProvider);
-            serverChunkProvider.getLightEngine().setTaskPerBatch(5);
+//            serverChunkProvider.getLightEngine().setTaskPerBatch(5);
 
             // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
             if (!((PrimaryLevelDataBridge) world.getLevelData()).bridge$performsSpawnLogic()) {
@@ -952,7 +952,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final ChunkProgressListener chunkStatusListener = ((ServerLevelBridge) world).bridge$getChunkStatusListener();
         chunkStatusListener.updateSpawnPos(chunkPos);
         final ServerChunkCache serverChunkProvider = world.getChunkSource();
-        serverChunkProvider.getLightEngine().setTaskPerBatch(500);
+//        serverChunkProvider.getLightEngine().setTaskPerBatch(500);
         ((MinecraftServerAccessor) this.server).accessor$nextTickTime(Util.getMillis());
         serverChunkProvider.addRegionTicket(SpongeWorldManager.SPAWN_CHUNKS, chunkPos, 11, world.dimension().location());
 
@@ -969,7 +969,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         ((MinecraftServerAccessor) this.server).accessor$nextTickTime(Util.getMillis() + 10L);
         ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();
         chunkStatusListener.stop();
-        serverChunkProvider.getLightEngine().setTaskPerBatch(5);
+//        serverChunkProvider.getLightEngine().setTaskPerBatch(5);
 
         // Sponge Start - Release the chunk ticket if spawn is not set to be kept loaded...
         if (!((PrimaryLevelDataBridge) world.getLevelData()).bridge$performsSpawnLogic()) {
