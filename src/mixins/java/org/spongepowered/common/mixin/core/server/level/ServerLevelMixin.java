@@ -36,6 +36,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.ProgressListener;
+import net.minecraft.world.RandomSequences;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.player.Player;
@@ -153,7 +154,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$cacheLevelSave(final MinecraftServer $$0, final Executor $$1, final LevelStorageSource.LevelStorageAccess $$2, final ServerLevelData $$3,
             final net.minecraft.resources.ResourceKey $$4, final LevelStem $$5, final ChunkProgressListener $$6, final boolean $$7, final long $$8,
-            final List $$9, final boolean $$10, final CallbackInfo ci) {
+            final List $$9, final boolean $$10, final RandomSequences $$11, final CallbackInfo ci) {
         this.impl$levelSave = $$2;
         this.impl$chunkStatusListener = $$6;
         this.impl$prevWeather = ((ServerWorld) this).weather();
@@ -492,7 +493,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
     }
 
-    @Redirect(method = "lambda$onBlockStateChange$14",
+    @Redirect(method = "lambda$onBlockStateChange$17",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/entity/ai/village/poi/PoiManager;add(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Holder;)V"
