@@ -84,7 +84,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
     @SuppressWarnings({"ConstantConditions"})
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setUpSpongeFields(ResourceLocation location, @Nullable Advancement parent, @Nullable DisplayInfo displayInfo,
-            AdvancementRewards rewards, Map<String, Criterion> criteria, String[][] requirements, CallbackInfo ci) {
+            AdvancementRewards rewards, Map<String, Criterion> criteria, String[][] requirements, boolean sendsTelemetryEvent, CallbackInfo ci) {
         // Don't do anything on the client, unless we're performing registry initialization
         if (!PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) {
             return;
