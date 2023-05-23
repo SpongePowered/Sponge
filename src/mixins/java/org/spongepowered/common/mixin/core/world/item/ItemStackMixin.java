@@ -51,16 +51,17 @@ import javax.annotation.Nullable;
 public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataCompoundHolder {
 
     // @formatter:off
-    @Shadow private boolean emptyCacheFlag;
     @Shadow private CompoundTag tag;
 
     @Shadow public abstract void shadow$setTag(@Nullable CompoundTag nbt);
     @Shadow @Nullable public abstract CompoundTag shadow$getTag();
     // @formatter:on
 
+    @Shadow public abstract boolean isEmpty();
+
     @Override
     public <E> Optional<E> bridge$get(final Key<@NonNull ? extends Value<E>> key) {
-        if (this.emptyCacheFlag) {
+        if (this.isEmpty()) {
             return Optional.empty();
         }
         return DataHolderProcessor.bridge$get(this, key);
@@ -68,7 +69,7 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
 
     @Override
     public <E> DataTransactionResult bridge$offer(final Key<@NonNull ? extends Value<E>> key, final E value) {
-        if (this.emptyCacheFlag) {
+        if (this.isEmpty()) {
             return DataTransactionResult.failNoData();
         }
         return DataHolderProcessor.bridge$offer(this, key, value);
@@ -76,7 +77,7 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
 
     @Override
     public <E> DataTransactionResult bridge$remove(final Key<@NonNull ? extends Value<E>> key) {
-        if (this.emptyCacheFlag) {
+        if (this.isEmpty()) {
             return DataTransactionResult.failNoData();
         }
         return DataHolderProcessor.bridge$remove(this, key);
@@ -108,7 +109,7 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
     // Read custom data from nbt
     @Inject(method = "<init>(Lnet/minecraft/nbt/CompoundTag;)V", at = @At("RETURN"))
     private void impl$onRead(final CompoundTag compound, final CallbackInfo info) {
-        if (!this.emptyCacheFlag) {
+        if (!this.isEmpty()) {
             DataUtil.syncTagToData(this); // Deserialize
             DataUtil.syncDataToTag(this); // Sync back after reading
         }
