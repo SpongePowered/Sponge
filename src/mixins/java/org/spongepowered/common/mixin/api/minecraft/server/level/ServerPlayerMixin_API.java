@@ -137,7 +137,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Shadow @Final private PlayerAdvancements advancements;
     @Shadow public ServerGamePacketListenerImpl connection;
 
-    @Shadow public abstract net.minecraft.server.level.ServerLevel shadow$getLevel();
+    @Shadow public abstract net.minecraft.server.level.ServerLevel shadow$serverLevel();
     @Shadow public abstract void shadow$sendSystemMessage(final net.minecraft.network.chat.Component $$0);
 
     // @formatter:on
@@ -151,7 +151,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public ServerWorld world() {
-        return (ServerWorld) this.shadow$getLevel();
+        return (ServerWorld) this.shadow$serverLevel();
     }
 
     @Override
@@ -621,7 +621,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         }
         final SoundSource source = SpongeAdventure.asVanilla(sound.source());
         final Holder<SoundEvent> event = this.api$resolveEvent(sound);
-        final long random = sound.seed().orElseGet(() -> this.shadow$getLevel().getRandom().nextLong());
+        final long random = sound.seed().orElseGet(() -> this.shadow$serverLevel().getRandom().nextLong());
         this.connection.send(new ClientboundSoundPacket(event, source, x, y, z, sound.volume(), sound.pitch(), random));
     }
 
