@@ -61,7 +61,7 @@ public abstract class DifficultyCommandMixin {
             source.getLevel().setSpawnSettings(((MinecraftServerAccessor) SpongeCommon.server()).invoker$isSpawningMonsters(), SpongeCommon.server().isSpawningAnimals());
             source.getLevel().getPlayers(p -> true).forEach(p -> p.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(),
                     levelData.isDifficultyLocked())));
-            source.sendSuccess(Component.translatable("commands.difficulty.success", difficulty.getDisplayName()), true);
+            source.sendSuccess(() -> Component.translatable("commands.difficulty.success", difficulty.getDisplayName()), true);
             return 0;
         }
     }
