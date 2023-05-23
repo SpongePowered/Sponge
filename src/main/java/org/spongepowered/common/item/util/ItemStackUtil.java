@@ -119,7 +119,7 @@ public abstract class ItemStackUtil {
     }
 
     public static boolean compareIgnoreQuantity(net.minecraft.world.item.ItemStack stack1, net.minecraft.world.item.ItemStack stack2) {
-        return stack1.sameItem(stack2) && net.minecraft.world.item.ItemStack.tagMatches(stack1, stack2);
+        return net.minecraft.world.item.ItemStack.isSameItemSameTags(stack1, stack2);
     }
 
     public static boolean compareIgnoreQuantity(net.minecraft.world.item.ItemStack stack1, ItemStack stack2) {
