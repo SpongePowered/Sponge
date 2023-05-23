@@ -136,7 +136,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     @Redirect(
             // This normally would target this.entityTickList.forEach((var2x) ->
             // but we don't have lambda syntax support yet.
-            method = "lambda$tick$3",
+            method = "lambda$tick$6",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/server/level/ServerLevel;guardEntityTick(Ljava/util/function/Consumer;Lnet/minecraft/world/entity/Entity;)V")
@@ -156,7 +156,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
     /**
      * For PhaseTracking, we need to wrap around the
-     * {@link BlockState#tick(ServerLevel, BlockPos, Random)} method, and the ScheduledTickList uses a lambda method
+     * {@link BlockState#tick(ServerLevel, BlockPos, RandomSource)} method, and the ScheduledTickList uses a lambda method
      * to {@code ServerWorld#tickBlock(NextTickListEntry)}, so it's either we customize the ScheduledTickList
      * or we wrap in this method here.
      *
@@ -220,7 +220,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
     /**
      * For PhaseTracking, we need to wrap around the
-     * {@link BlockState#tick(ServerLevel, BlockPos, Random)} method, and the ScheduledTickList uses a lambda method
+     * {@link BlockState#tick(ServerLevel, BlockPos, RandomSource)} method, and the ScheduledTickList uses a lambda method
      * to {@code ServerWorld#tickBlock(NextTickListEntry)}, so it's either we customize the ScheduledTickList
      * or we wrap in this method here.
      *
