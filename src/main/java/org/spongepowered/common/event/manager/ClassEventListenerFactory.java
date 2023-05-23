@@ -73,21 +73,19 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
 
     @Override
     public AnnotatedEventListener create(final Object handle, final ListenerClassVisitor.DiscoveredMethod method,
-                                         MethodHandles.@Nullable Lookup lookup) throws Throwable {
-        if (lookup == null) {
-            lookup = this.createLookup(method);
-        }
+                                         final MethodHandles.@Nullable Lookup handleLookup) throws Throwable {
+        final MethodHandles.Lookup lookup = this.createLookup(method, handleLookup != null ? handleLookup : this.lookup);
         return (AnnotatedEventListener) lookup.findConstructor(
             lookup.lookupClass(),
             MethodType.methodType(void.class, method.declaringClass())
         ).invoke(handle);
     }
 
-    MethodHandles.Lookup createLookup(final ListenerClassVisitor.DiscoveredMethod method) throws Exception {
+    MethodHandles.Lookup createLookup(final ListenerClassVisitor.DiscoveredMethod method, final MethodHandles.Lookup handleLookup) throws Exception {
         final Class<?> handle = method.declaringClass();
         final Class<?> eventClass = method.parameterTypes()[0].clazz();
         final String listenerName = "Listener_" + handle.getSimpleName() + '_' + method.methodName();
-        final MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(handle, this.lookup);
+        final MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(handle, handleLookup);
         final @Nullable EventFilter filter = this.filterFactory.create(method, lookup);
 
         if (filter == null && method.parameterTypes().length != 1) {
