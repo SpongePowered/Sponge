@@ -26,8 +26,8 @@ package org.spongepowered.common.advancement.criterion;
 
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.DeserializationContext;
-import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
@@ -49,7 +49,7 @@ public final class SpongeScoreTrigger extends SimpleCriterionTrigger<SpongeScore
     }
 
     @Override
-    protected Instance createInstance(final JsonObject jsonObject, final EntityPredicate.Composite andPredicate,
+    protected Instance createInstance(final JsonObject jsonObject, final ContextAwarePredicate andPredicate,
             final DeserializationContext conditionArrayParser) {
         return new SpongeScoreTrigger.Instance(this.resourceLocation, andPredicate, -1);
     }
@@ -58,13 +58,13 @@ public final class SpongeScoreTrigger extends SimpleCriterionTrigger<SpongeScore
 
         private final int triggerTimes;
 
-        public Instance(final ResourceLocation criterionIn, final EntityPredicate.Composite andPredicate, final int triggerTimes) {
+        public Instance(final ResourceLocation criterionIn, final ContextAwarePredicate andPredicate, final int triggerTimes) {
             super(criterionIn, andPredicate);
             this.triggerTimes = triggerTimes;
         }
 
         public static Instance of(int triggerTimes) {
-            return new Instance(SpongeScoreTrigger.SCORE_TRIGGER.getId(), EntityPredicate.Composite.ANY, triggerTimes);
+            return new Instance(SpongeScoreTrigger.SCORE_TRIGGER.getId(), ContextAwarePredicate.ANY, triggerTimes);
         }
 
         @Override

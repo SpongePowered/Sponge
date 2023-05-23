@@ -26,8 +26,8 @@ package org.spongepowered.common.advancement.criterion;
 
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.DeserializationContext;
-import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
@@ -49,19 +49,19 @@ public final class SpongeDummyTrigger extends SimpleCriterionTrigger<SpongeDummy
     }
 
     @Override
-    protected Instance createInstance(final JsonObject jsonObject, final EntityPredicate.Composite andPredicate, final DeserializationContext
+    protected Instance createInstance(final JsonObject jsonObject, final ContextAwarePredicate andPredicate, final DeserializationContext
             conditionArrayParser) {
         return new SpongeDummyTrigger.Instance(this.resourceLocation, andPredicate);
     }
 
     public static class Instance extends AbstractCriterionTriggerInstance {
 
-        public Instance(final ResourceLocation resourceLocation, final EntityPredicate.Composite andPredicate) {
+        public Instance(final ResourceLocation resourceLocation, final ContextAwarePredicate andPredicate) {
             super(resourceLocation, andPredicate);
         }
 
         public static Instance dummy() {
-            return new Instance(SpongeDummyTrigger.DUMMY_TRIGGER.getId(), EntityPredicate.Composite.ANY);
+            return new Instance(SpongeDummyTrigger.DUMMY_TRIGGER.getId(), ContextAwarePredicate.ANY);
         }
 
         @Override
