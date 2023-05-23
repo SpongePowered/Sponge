@@ -199,10 +199,10 @@ public final class VolumeStreamUtils {
 
     public static void validateStreamArgs(final Vector3i min, final Vector3i max, final Vector3i existingMin, final Vector3i existingMax, final StreamOptions options) {
         VolumeStreamUtils.validateStreamArgs(min, max, options);
-        if (existingMin.compareTo(Objects.requireNonNull(min, "Minimum coordinates cannot be null!")) < 0) {
+        if (existingMin.compareTo(Objects.requireNonNull(min, "Minimum coordinates cannot be null!")) > 0) {
             throw new IllegalArgumentException(String.format("Minimum %s cannot be lower than the current minimum coordinates: %s", min, existingMin));
         }
-        if (existingMax.compareTo(Objects.requireNonNull(max, "Minimum coordinates cannot be null!")) < 0) {
+        if (existingMax.compareTo(Objects.requireNonNull(max, "Maximum coordinates cannot be null!")) < 0) {
             throw new IllegalArgumentException(String.format("Maximum %s cannot be greater than the current maximum coordinates: %s", max, existingMax));
         }
     }
