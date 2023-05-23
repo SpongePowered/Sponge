@@ -156,7 +156,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow private float lastSentHealth;
     @Shadow private int lastSentFood;
 
-    @Shadow public abstract net.minecraft.server.level.ServerLevel shadow$getLevel();
+    @Shadow public abstract ServerLevel shadow$serverLevel();
     @Shadow public abstract void shadow$setCamera(final Entity entity);
     @Shadow public abstract void shadow$closeContainer();
     @Shadow public abstract void shadow$resetStat(final Stat<?> statistic);
@@ -164,8 +164,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow protected abstract void shadow$createEndPlatform(ServerLevel p_241206_1_, BlockPos blockPos);
     @Shadow protected abstract void shadow$triggerDimensionChangeTriggers(ServerLevel serverworld);
     @Shadow public abstract void shadow$doCloseContainer();
-    @Shadow public abstract void shadow$setLevel(ServerLevel serverLevel);
+    @Shadow public abstract void shadow$setServerLevel(ServerLevel serverLevel);
     // @formatter:on
+
 
 
     private net.minecraft.network.chat.@Nullable Component impl$connectionMessage;
@@ -220,7 +221,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         if (isChangeOfWorld) {
             this.shadow$absMoveTo(destinationPosition.x(), destinationPosition.y(), destinationPosition.z(), this.shadow$getYRot(), this.shadow$getXRot());
-            EntityUtil.performPostChangePlayerWorldLogic(player, this.shadow$getLevel(), destinationWorld, destinationWorld, false);
+            EntityUtil.performPostChangePlayerWorldLogic(player, this.shadow$serverLevel(), destinationWorld, destinationWorld, false);
         } else {
             this.connection.teleport(destinationPosition.x(), destinationPosition.y(), destinationPosition.z(), this.shadow$getYRot(), this.shadow$getXRot(),
                     new HashSet<>());
@@ -379,7 +380,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
      */
     @Overwrite
     public void teleportTo(
-            final net.minecraft.server.level.ServerLevel world, final double x, final double y, final double z, final float yaw, final float pitch) {
+            final ServerLevel world, final double x, final double y, final double z, final float yaw, final float pitch) {
         final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;
         double actualX = x;
         double actualY = y;
@@ -461,9 +462,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                 this.shadow$setYRot((float) actualYaw);
                 this.shadow$setXRot((float) actualPitch);
 
-                EntityUtil.performPostChangePlayerWorldLogic(player, (net.minecraft.server.level.ServerLevel) preEvent.originalWorld(),
-                        (net.minecraft.server.level.ServerLevel) preEvent.originalDestinationWorld(),
-                        (net.minecraft.server.level.ServerLevel) preEvent.destinationWorld(), false);
+                EntityUtil.performPostChangePlayerWorldLogic(player, (ServerLevel) preEvent.originalWorld(),
+                        (ServerLevel) preEvent.originalDestinationWorld(),
+                        (ServerLevel) preEvent.destinationWorld(), false);
             }
         }
     }
@@ -479,7 +480,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     protected final Entity impl$performGameWinLogic() {
         this.shadow$unRide();
-        this.shadow$getLevel().removePlayerImmediately((net.minecraft.server.level.ServerPlayer) (Object) this, Entity.RemovalReason.CHANGED_DIMENSION);
+        this.shadow$serverLevel().removePlayerImmediately((net.minecraft.server.level.ServerPlayer) (Object) this, Entity.RemovalReason.CHANGED_DIMENSION);
         if (!this.wonGame) {
             this.wonGame = true;
             this.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.WIN_GAME, this.seenCredits ? 0.0F : 1.0F));
@@ -530,7 +531,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         // This is standard vanilla processing
         serverworld.getProfiler().pop();
         serverworld.getProfiler().push("placing");
-        this.shadow$setLevel(targetWorld);
+        this.shadow$setServerLevel(targetWorld);
         targetWorld.addDuringPortalTeleport((net.minecraft.server.level.ServerPlayer) (Object) this);
         this.shadow$setRot(portalinfo.yRot, portalinfo.xRot);
         // Sponge Start: prevent sending the teleport packet here, we'll do so later.
@@ -543,7 +544,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    protected final void impl$postPortalForceChangeTasks(final Entity entity, final net.minecraft.server.level.ServerLevel targetWorld,
+    protected final void impl$postPortalForceChangeTasks(final Entity entity, final ServerLevel targetWorld,
             final boolean isNetherPortal) {
         // Standard vanilla processing
         this.gameMode.setLevel(targetWorld);
