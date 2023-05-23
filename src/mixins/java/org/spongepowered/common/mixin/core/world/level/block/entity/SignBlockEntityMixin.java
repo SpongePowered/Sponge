@@ -25,9 +25,11 @@
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
@@ -39,7 +41,11 @@ import org.spongepowered.common.bridge.permissions.SubjectBridge;
 @Mixin(SignBlockEntity.class)
 public abstract class SignBlockEntityMixin extends BlockEntityMixin implements SubjectBridge, CommandSourceProviderBridge {
 
-    @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack(final @Nullable ServerPlayer player);
+    // @formatter:off
+    @Shadow private static CommandSourceStack shadow$createCommandSourceStack(final Player $$0, final Level $$1, final BlockPos $$2) {
+        throw new UnsupportedOperationException("Shadowed createCommandSourceStack");
+    }
+    // @formatter:on
 
     @Override
     public String bridge$getSubjectCollectionIdentifier() {
@@ -53,7 +59,7 @@ public abstract class SignBlockEntityMixin extends BlockEntityMixin implements S
 
     @Override
     public CommandSourceStack bridge$getCommandSource(final Cause cause) {
-        return this.shadow$createCommandSourceStack(cause.first(ServerPlayer.class).orElse(null));
+        return SignBlockEntityMixin.shadow$createCommandSourceStack(cause.first(ServerPlayer.class).orElse(null), this.level, this.worldPosition);
     }
 
 }
