@@ -131,7 +131,7 @@ public abstract class StructureTemplateMixin_API implements Schematic, SpongeArc
     // TODO caching
     private Map<BlockPos, CompoundTag> api$buildBlockNbtMap() {
         final List<StructureTemplate.StructureBlockInfo> blockInfos = this.palettes.iterator().next().blocks();
-        return blockInfos.stream().filter(info -> info.nbt != null).collect(Collectors.toMap(info -> info.pos, info -> info.nbt));
+        return blockInfos.stream().filter(info -> info.nbt() != null).collect(Collectors.toMap(StructureTemplate.StructureBlockInfo::pos, StructureTemplate.StructureBlockInfo::nbt));
     }
 
     @Override
@@ -258,7 +258,7 @@ public abstract class StructureTemplateMixin_API implements Schematic, SpongeArc
     // TODO caching
     private Map<BlockPos, net.minecraft.world.level.block.state.BlockState> api$buildBlockStateMap() {
         final List<StructureTemplate.StructureBlockInfo> blockInfos = this.palettes.iterator().next().blocks();
-        return blockInfos.stream().collect(Collectors.toMap(info -> info.pos, info -> info.state));
+        return blockInfos.stream().collect(Collectors.toMap(StructureTemplate.StructureBlockInfo::pos, StructureTemplate.StructureBlockInfo::state));
     }
 
     @Override
