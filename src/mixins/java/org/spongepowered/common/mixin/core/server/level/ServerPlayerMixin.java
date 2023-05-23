@@ -616,7 +616,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         final boolean flag = this.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES) && !event.isMessageCancelled();
         if (flag) {
             final net.minecraft.network.chat.Component component = this.shadow$getCombatTracker().getDeathMessage();
-            final ClientboundPlayerCombatKillPacket packet = new ClientboundPlayerCombatKillPacket(this.shadow$getCombatTracker(), component);
+            final ClientboundPlayerCombatKillPacket packet = new ClientboundPlayerCombatKillPacket(this.shadow$getId(), component);
             PacketSender.sendTo((EngineConnection) this.connection, packet, (p_212356_2_) -> {
                 if (!p_212356_2_.isSuccess()) {
                     final int i = 256;
@@ -624,7 +624,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                     final net.minecraft.network.chat.Component itextcomponent1 = net.minecraft.network.chat.Component.translatable("death.attack.message_too_long", net.minecraft.network.chat.Component.literal(s).withStyle(ChatFormatting.YELLOW));
                     final net.minecraft.network.chat.Component itextcomponent2 = net.minecraft.network.chat.Component.translatable("death.attack.even_more_magic", this.shadow$getDisplayName())
                             .withStyle((p_212357_1_) -> p_212357_1_.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, itextcomponent1)));
-                    this.connection.send(new ClientboundPlayerCombatKillPacket(this.shadow$getCombatTracker(), itextcomponent2));
+                    this.connection.send(new ClientboundPlayerCombatKillPacket(this.shadow$getId(), itextcomponent2));
                 }
             });
             final Team team = this.shadow$getTeam();
@@ -647,7 +647,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             }
         } else {
             this.connection.send(
-                    new ClientboundPlayerCombatKillPacket(this.shadow$getCombatTracker(), net.minecraft.network.chat.Component.empty()));
+                    new ClientboundPlayerCombatKillPacket(this.shadow$getId(), net.minecraft.network.chat.Component.empty()));
         }
 
         this.shadow$removeEntitiesOnShoulder();

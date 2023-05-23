@@ -277,7 +277,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 final float f2 = this.shadow$getHealth();
 
                 this.shadow$setHealth(f2 - damage);
-                this.shadow$getCombatTracker().recordDamage(damageSource, f2, damage);
+                this.shadow$getCombatTracker().recordDamage(damageSource, damage);
 
                 if (isHuman) {
                     if (damage < 3.4028235E37F) {
