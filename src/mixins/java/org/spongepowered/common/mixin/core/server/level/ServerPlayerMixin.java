@@ -574,7 +574,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Redirect(method = "getExitPortal",
             slice = @Slice(
                     from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getExitPortal(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;ZLnet/minecraft/world/level/border/WorldBorder;)Ljava/util/Optional;"),
-                    to = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/server/level/ServerPlayer;level:Lnet/minecraft/world/level/Level;")
+                    to = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;level()Lnet/minecraft/world/level/Level;")
             ),
             at = @At(value = "INVOKE", remap = false, target = "Ljava/util/Optional;isPresent()Z"))
     private boolean impl$dontCreatePortalIfItsAlreadyBeenAttempted(final Optional<?> optional) {
