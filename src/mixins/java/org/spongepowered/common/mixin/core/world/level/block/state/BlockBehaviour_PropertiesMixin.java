@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world.level.block.state;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -37,9 +36,9 @@ import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 @Mixin(BlockBehaviour.Properties.class)
 public abstract class BlockBehaviour_PropertiesMixin {
 
-    @Inject(method = "of(Lnet/minecraft/world/level/material/Material;Lnet/minecraft/world/item/DyeColor;)Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;",
+    @Inject(method = "mapColor(Lnet/minecraft/world/item/DyeColor;)Lnet/minecraft/world/level/block/state/BlockBehaviour$Properties;",
             at = @At("RETURN"))
-    private static void impl$onCreate(final Material material, final DyeColor color, final CallbackInfoReturnable<Block.Properties> cir) {
+    private void impl$onCreate(final DyeColor color, final CallbackInfoReturnable<Block.Properties> cir) {
         final Block.Properties returnValue = cir.getReturnValue();
         ((DyeColorBlockBridge) returnValue).bridge$setDyeColor((org.spongepowered.api.data.type.DyeColor) (Object) color);
     }
