@@ -76,7 +76,7 @@ public final class SpongeDamageSourceFactory implements DamageSource.Factory {
 
     @Override
     public DamageSource voidSource() {
-        return (DamageSource) this.damageSources().outOfWorld();
+        return (DamageSource) this.damageSources().fellOutOfWorld();
     }
 
     @Override
