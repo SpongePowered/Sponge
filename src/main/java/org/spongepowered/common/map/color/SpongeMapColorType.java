@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.map.color;
 
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.util.Color;
 
 public final class SpongeMapColorType implements MapColorType {
 
-    private final MaterialColor materialColor;
+    private final MapColor materialColor;
 
-    public SpongeMapColorType(final MaterialColor materialColor) {
+    public SpongeMapColorType(final MapColor materialColor) {
         this.materialColor = materialColor;
     }
 
