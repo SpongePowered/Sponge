@@ -118,7 +118,7 @@ public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder
                 this.displayInfo.isHidden());
         final net.minecraft.advancements.Advancement parent = (net.minecraft.advancements.Advancement) this.parent;
         final var advancement = new net.minecraft.advancements.Advancement(
-                resourceLocation, parent, displayInfo, rewards, result.first(), result.second());
+                resourceLocation, parent, displayInfo, rewards, result.first(), result.second(), false);
         ((AdvancementBridge) advancement).bridge$setCriterion(this.criterion);
         return new SpongeAdvancementTemplate(this.key, advancement, this.pack);
     }
