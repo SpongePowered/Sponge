@@ -36,6 +36,6 @@ public abstract class ItemEntityMixin_Vanilla extends EntityMixin_Vanilla {
 
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 6000))
     private int vanilla$tickUseDespawnRateFromConfig(final int originalValue) {
-        return SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate;
+        return SpongeGameConfigs.getForWorld(this.shadow$level()).get().entity.item.despawnRate;
     }
 }

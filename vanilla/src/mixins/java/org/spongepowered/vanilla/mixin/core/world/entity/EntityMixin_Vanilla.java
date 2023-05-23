@@ -38,8 +38,9 @@ import javax.annotation.Nullable;
 public abstract class EntityMixin_Vanilla implements EntityBridge {
 
     // @formatter:off
-    @Shadow public Level level;
+    @Shadow public abstract Level shadow$level();
     // @formatter:on
+
 
     /**
      * @author dualspiral - 19th December 2020 - 1.16.4

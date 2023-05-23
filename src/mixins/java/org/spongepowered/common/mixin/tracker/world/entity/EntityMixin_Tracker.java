@@ -69,7 +69,6 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
 
     // @formatter:off
     @Shadow @Final private EntityType<?> type;
-    @Shadow public Level level;
     @Shadow @Final protected RandomSource random;
     @Shadow private EntityInLevelCallback levelCallback;
 
@@ -84,7 +83,10 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     @Shadow public abstract float shadow$getYRot();
     @Shadow public abstract boolean shadow$isEffectiveAi();
 
+    @Shadow public abstract Level shadow$level();
+
     //@formatter:on
+
 
     protected @MonotonicNonNull EffectTransactor tracker$dropsTransactor = null;
 
@@ -98,7 +100,7 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
         if (!instance.onSidedThread()) {
             return;
         }
-        if (((LevelBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
@@ -116,7 +118,7 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
         if (!instance.onSidedThread()) {
             return;
         }
-        if (((LevelBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.shadow$level()).bridge$isFake()) {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
@@ -139,7 +141,7 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
 
     @Inject(method = "setRemoved", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;stopRiding()V"))
     private void impl$createDestructionEventOnDeath(final CallbackInfo ci) {
-        if (ShouldFire.DESTRUCT_ENTITY_EVENT && !((LevelBridge) this.level).bridge$isFake()
+        if (ShouldFire.DESTRUCT_ENTITY_EVENT && !((LevelBridge) this.shadow$level()).bridge$isFake()
                 && this.levelCallback != EntityInLevelCallback.NULL) {
 
             if (!((Entity) (Object) this instanceof LivingEntity)) {
