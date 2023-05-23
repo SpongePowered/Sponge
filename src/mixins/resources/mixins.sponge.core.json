@@ -236,7 +236,6 @@
         "server.WorldLoaderMixin",
         "registries.BuiltInRegistriesMixin",
         "adventure.chat.SignedMessageMixin",
-        "world.level.gameevent.vibrations.VibrationListenerMixin",
         "resources.RegistryDataLoaderMixin",
         "world.level.levelgen.WorldDimensionsMixin",
         "world.damagesource.DamageSourcesMixin"
