@@ -81,7 +81,7 @@ public abstract class TeleportCommandMixin {
             actualPitch = Mth.clamp(actualPitch, -90.0F, 90.0F);
         }
 
-        if (worldIn == entityIn.level) {
+        if (worldIn == entityIn.level()) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
 

@@ -62,11 +62,11 @@ public final class SpongePacketHandler {
 
                     final net.minecraft.server.level.ServerPlayer sender = (net.minecraft.server.level.ServerPlayer) player;
                     final BlockPos pos = new BlockPos(requestPacket.x, requestPacket.y, requestPacket.z);
-                    if (!sender.level.hasChunkAt(pos)) {
+                    if (!sender.level().hasChunkAt(pos)) {
                         return;
                     }
 
-                    final LevelChunkBridge levelChunkBridge = (LevelChunkBridge) sender.level.getChunkAt(pos);
+                    final LevelChunkBridge levelChunkBridge = (LevelChunkBridge) sender.level().getChunkAt(pos);
                     final Optional<UUID> owner = levelChunkBridge.bridge$getBlockCreatorUUID(pos);
                     final Optional<UUID> notifier = levelChunkBridge.bridge$getBlockNotifierUUID(pos);
 
@@ -80,7 +80,7 @@ public final class SpongePacketHandler {
                     }
 
                     final net.minecraft.server.level.ServerPlayer sender = (net.minecraft.server.level.ServerPlayer) player;
-                    final Entity entity = sender.level.getEntity(requestPacket.entityId);
+                    final Entity entity = sender.level().getEntity(requestPacket.entityId);
                     if (!(entity instanceof CreatorTrackedBridge)) {
                         return;
                     }

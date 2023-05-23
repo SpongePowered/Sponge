@@ -610,7 +610,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             tracked,
             sound.volume(),
             sound.pitch(),
-            sound.seed().orElseGet(() -> tracked.level.getRandom().nextLong())
+            sound.seed().orElseGet(() -> tracked.level().getRandom().nextLong())
         ));
     }
 

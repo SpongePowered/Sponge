@@ -55,7 +55,7 @@ public abstract class ServerGamePacketListenerImplMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimeChatSpamCheck(final ServerGamePacketListenerImpl self, final int modifier) {
-        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || ((LevelBridge) this.player.level).bridge$isFake()) {
+        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || ((LevelBridge) this.player.level()).bridge$isFake()) {
             this.chatSpamTickCount = modifier;
             return;
         }
@@ -72,7 +72,7 @@ public abstract class ServerGamePacketListenerImplMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimeDropSpamCheck(final ServerGamePacketListenerImpl self, final int modifier) {
-        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || ((LevelBridge) this.player.level).bridge$isFake()) {
+        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || ((LevelBridge) this.player.level()).bridge$isFake()) {
             this.dropSpamTickCount = modifier;
             return;
         }

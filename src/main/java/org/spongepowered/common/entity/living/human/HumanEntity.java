@@ -169,7 +169,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
     @Override
     public Team getTeam() {
-        return this.level.getScoreboard().getPlayersTeam(this.fakeProfile.getName());
+        return this.level().getScoreboard().getPlayersTeam(this.fakeProfile.getName());
     }
 
     @Override
@@ -387,7 +387,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     public void removeFromTabListDelayed(final @Nullable ServerPlayer player, final ClientboundPlayerInfoRemovePacket removePacket) {
-        final int delay = SpongeGameConfigs.getForWorld(this.level).get().entity.human.tabListRemoveDelay;
+        final int delay = SpongeGameConfigs.getForWorld(this.level()).get().entity.human.tabListRemoveDelay;
         final Runnable removeTask = () -> this.pushPackets(player, removePacket);
         if (delay == 0) {
             removeTask.run();
@@ -420,7 +420,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     private boolean isAliveAndInWorld() {
-        return this.level.getEntity(this.getId()) == this && !this.isRemoved();
+        return this.level().getEntity(this.getId()) == this && !this.isRemoved();
     }
 
     private void respawnOnClient() {
@@ -524,16 +524,16 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     @Override
     public void performRangedAttack(final LivingEntity target, final float distanceFactor) {
         // Borrowed from Skeleton
-        final Arrow entitytippedarrow = new Arrow(this.level, this);
+        final Arrow entitytippedarrow = new Arrow(this.level(), this);
         final double d0 = target.getX() - this.getX();
         final double d1 = target.getBoundingBox().minY + target.getBbHeight() / 3.0F - entitytippedarrow.getY();
         final double d2 = target.getZ() - this.getZ();
         final double d3 = Math.sqrt(d0 * d0 + d2 * d2);
-        entitytippedarrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.level.getDifficulty().getId() * 4);
+        entitytippedarrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.level().getDifficulty().getId() * 4);
         // These names are wrong
         final int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.PUNCH_ARROWS, this);
         final int j = EnchantmentHelper.getEnchantmentLevel(Enchantments.FLAMING_ARROWS, this);
-        entitytippedarrow.setBaseDamage(distanceFactor * 2.0F + this.random.nextGaussian() * 0.25D + this.level.getDifficulty().getId() * 0.11F);
+        entitytippedarrow.setBaseDamage(distanceFactor * 2.0F + this.random.nextGaussian() * 0.25D + this.level().getDifficulty().getId() * 0.11F);
 
         if (i > 0) {
             entitytippedarrow.setBaseDamage(entitytippedarrow.getBaseDamage() + i * 0.5D + 0.5D);
@@ -550,6 +550,6 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         }
 
         this.playSound(SoundEvents.ARROW_SHOOT, 1.0F, 1.0F / (this.random.nextFloat() * 0.4F + 0.8F));
-        this.level.addFreshEntity(entitytippedarrow);
+        this.level().addFreshEntity(entitytippedarrow);
     }
 }

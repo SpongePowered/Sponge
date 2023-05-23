@@ -157,7 +157,7 @@ public abstract class FishingHookMixin extends ProjectileMixin {
                     //double d4 = 0.1D;
                     entityitem.setDeltaMovement(d0 * 0.1D, d1 * 0.1D + Math.sqrt(d3) * 0.08D, d2 * 0.1D);
                     this.level.addFreshEntity(entityitem);
-                    playerEntity.level.addFreshEntity(new ExperienceOrb(playerEntity.level, playerEntity.getX(), playerEntity.getY() + 0.5D,
+                    playerEntity.level().addFreshEntity(new ExperienceOrb(playerEntity.level(), playerEntity.getX(), playerEntity.getY() + 0.5D,
                             playerEntity.getZ() + 0.5D,
                             this.random.nextInt(6) + 1));
 

@@ -49,7 +49,7 @@ public final class VanishableData {
                     .create(Keys.VANISH_STATE)
                         .get(VanishableBridge::bridge$vanishState)
                         .setAnd((h, v) -> {
-                            if (h instanceof Entity && ((Entity) h).level.isClientSide) {
+                            if (h instanceof Entity && ((Entity) h).level().isClientSide) {
                                 return false;
                             }
                             h.bridge$vanishState(v);

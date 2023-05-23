@@ -123,7 +123,7 @@ public final class EntityActivationRange {
      */
     public static void initializeEntityActivationState(final Entity entity) {
         final ActivationCapabilityBridge spongeEntity = (ActivationCapabilityBridge) entity;
-        if (entity.level.isClientSide()) {
+        if (entity.level().isClientSide()) {
             return;
         }
 
@@ -144,7 +144,7 @@ public final class EntityActivationRange {
             return;
         }
 
-        final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.getForWorld(entity.level);
+        final InheritableConfigHandle<WorldConfig> configAdapter = SpongeGameConfigs.getForWorld(entity.level());
         final EntityActivationRangeCategory config = configAdapter.get().entityActivationRange;
 
         final EntityTypeBridge type = (EntityTypeBridge) entity.getType();
@@ -255,7 +255,7 @@ public final class EntityActivationRange {
      */
     private static void activateChunkEntities(final ServerPlayer player, final LevelChunk chunk) {
         //TODO find a better way
-        for (Entity entity : player.getLevel().getAllEntities()) {
+        for (Entity entity : player.serverLevel().getAllEntities()) {
             if (!entity.chunkPosition().equals(chunk.getPos())) {
                 continue;
             }
@@ -357,7 +357,7 @@ public final class EntityActivationRange {
      */
     public static boolean checkIfActive(final Entity entity) {
         // Never safe to skip fireworks or entities not yet added to chunk
-        if (entity instanceof Player || entity.level.isClientSide() || !entity.touchingUnloadedChunk() || entity instanceof FireworkRocketEntity) {
+        if (entity instanceof Player || entity.level().isClientSide() || !entity.touchingUnloadedChunk() || entity instanceof FireworkRocketEntity) {
             return true;
         }
         final LevelChunkBridge activeChunk = ((ActiveChunkReferantBridge) entity).bridge$getActiveChunk();

@@ -87,9 +87,9 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
 
     @Inject(method = "onTake", at = @At("HEAD"))
     private void impl$beforeTake(final Player thePlayer, final ItemStack stack, final CallbackInfo ci) {
-        if (this.impl$onTakeRecipe == null || !((Recipe) this.impl$onTakeRecipe).matches(this.craftSlots, thePlayer.level)) {
-            this.impl$onTakeRecipe = ((CraftingRecipe) thePlayer.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots,
-                    thePlayer.level).orElse(null));
+        if (this.impl$onTakeRecipe == null || !((Recipe) this.impl$onTakeRecipe).matches(this.craftSlots, thePlayer.level())) {
+            this.impl$onTakeRecipe = ((CraftingRecipe) thePlayer.level().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots,
+                    thePlayer.level()).orElse(null));
         }
 
         // When shift-crafting the crafted item was reduced to quantity 0
@@ -115,7 +115,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
 
     @Inject(method = "onTake", cancellable = true, at = @At("RETURN"))
     private void impl$afterTake(final Player thePlayer, final ItemStack stack, final CallbackInfo cir) {
-        if (((LevelBridge) thePlayer.level).bridge$isFake()) {
+        if (((LevelBridge) thePlayer.level()).bridge$isFake()) {
             return;
         }
 

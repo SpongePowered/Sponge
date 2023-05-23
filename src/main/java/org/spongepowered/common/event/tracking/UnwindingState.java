@@ -90,7 +90,7 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
 
     @Override
     public Supplier<ResourceKey> attemptWorldKey(UnwindingPhaseContext context) {
-        final Optional<Supplier<ResourceKey>> o = context.getSource(Entity.class).map(s -> () -> (ResourceKey) (Object) s.level.dimension().location());
+        final Optional<Supplier<ResourceKey>> o = context.getSource(Entity.class).map(s -> () -> (ResourceKey) (Object) s.level().dimension().location());
         return o.orElseThrow(() -> new IllegalStateException("Expected to be ticking an entity!"));
     }
 

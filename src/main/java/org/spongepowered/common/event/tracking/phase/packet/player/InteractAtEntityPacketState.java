@@ -49,7 +49,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
     public boolean isPacketIgnored(final Packet<?> packetIn, final ServerPlayer packetPlayer) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
-        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget((ServerLevel) packetPlayer.level);
+        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget((ServerLevel) packetPlayer.level());
         return entity == null;
     }
 
@@ -70,12 +70,12 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
         final ServerPlayer player = context.getPacketPlayer();
 
         final ServerboundInteractPacket useEntityPacket = context.getPacket();
-        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget((ServerLevel) player.level);
+        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget((ServerLevel) player.level());
         if (entity == null) {
             // Something happened?
             return;
         }
-        final World spongeWorld = (World) player.level;
+        final World spongeWorld = (World) player.level();
         if (entity instanceof CreatorTrackedBridge) {
             ((CreatorTrackedBridge) entity).tracker$setTrackedUUID(PlayerTracker.Type.CREATOR, player.getUUID());
         } else {

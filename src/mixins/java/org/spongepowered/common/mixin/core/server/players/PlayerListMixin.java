@@ -285,7 +285,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             mcPlayer.setPos(spawnPoint.getX() + 0.5, spawnPoint.getY() + 0.5, spawnPoint.getZ() + 0.5);
         }
 
-        mcPlayer.setLevel(mcWorld);
+        mcPlayer.setServerLevel(mcWorld);
 
         final ServerPlayer player = (ServerPlayer) mcPlayer;
         final ServerLocation location = player.serverLocation();
@@ -337,7 +337,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private void impl$onInitPlayer_printPlayerWorldInJoinFeedback(final org.slf4j.Logger logger, final String s, final Object[] objects,
             final Connection conn, final net.minecraft.server.level.ServerPlayer player) {
         logger.info("{}[{}] logged in to world '{}' with entity id {} at ({}, {}, {})", player.getName().getString(), player,
-                ((ServerWorld)player.getLevel()).key(), player.getId(), player.getX(), player.getY(), player.getZ());
+                ((ServerWorld)player.serverLevel()).key(), player.getId(), player.getX(), player.getY(), player.getZ());
     }
 
     @Redirect(method = "placeNewPlayer",
@@ -382,7 +382,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             final ResourceKey $$6, final ResourceKey $$7, final long $$8, final int $$9, final int $$10, final int $$11, final boolean $$12, final boolean $$13, final boolean $$14, final boolean $$15,
             final Optional $$16, final Connection conn, final net.minecraft.server.level.ServerPlayer player) {
 
-        final Integer viewDistance = ((PrimaryLevelDataBridge) player.getLevel().getLevelData()).bridge$viewDistance().orElse($$10);
+        final Integer viewDistance = ((PrimaryLevelDataBridge) player.serverLevel().getLevelData()).bridge$viewDistance().orElse($$10);
         return new ClientboundLoginPacket($$0, $$1, $$2, $$3, $$4, $$5, $$6, $$7,
             $$8, $$9, viewDistance, $$11, $$12, $$13, $$14, $$15, $$16);
     }
@@ -390,7 +390,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))
     private CustomBossEvents impl$getPerWorldBossBarManager(
             final MinecraftServer minecraftServer, final Connection netManager, final net.minecraft.server.level.ServerPlayer playerIn) {
-        return ((ServerLevelBridge) playerIn.getLevel()).bridge$getBossBarManager();
+        return ((ServerLevelBridge) playerIn.serverLevel()).bridge$getBossBarManager();
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;updateEntireScoreboard(Lnet/minecraft/server/ServerScoreboard;Lnet/minecraft/server/level/ServerPlayer;)V"))
@@ -465,7 +465,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))
     private CustomBossEvents impl$getPerWorldBossBarManager(final MinecraftServer minecraftServer, final net.minecraft.server.level.ServerPlayer playerIn) {
-        return ((ServerLevelBridge) playerIn.getLevel()).bridge$getBossBarManager();
+        return ((ServerLevelBridge) playerIn.serverLevel()).bridge$getBossBarManager();
     }
 
     @Inject(method = "remove", at = @At("HEAD"))
@@ -520,7 +520,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         this.impl$originalRespawnDestination = originalDestination.dimension();
 
         final RespawnPlayerEvent.SelectWorld event = SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getCauseStackManager().currentCause(),
-                (ServerWorld) originalDestination, (ServerWorld) player.getLevel(), (ServerWorld) originalDestination, (ServerPlayer) player);
+                (ServerWorld) originalDestination, (ServerWorld) player.serverLevel(), (ServerWorld) originalDestination, (ServerPlayer) player);
         SpongeCommon.post(event);
 
         return (ServerLevel) event.destinationWorld();
@@ -559,7 +559,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Inject(method = "respawn", at = @At("RETURN"))
     private void impl$callRespawnPlayerPostEvent(final net.minecraft.server.level.ServerPlayer player, final boolean keepAllPlayerData, final CallbackInfoReturnable<net.minecraft.server.level.ServerPlayer> cir) {
         final ServerPlayer recreatedPlayer = (ServerPlayer) cir.getReturnValue();
-        final ServerWorld originalWorld = (ServerWorld) player.level;
+        final ServerWorld originalWorld = (ServerWorld) player.serverLevel();
 
         final RespawnPlayerEvent.Post event = SpongeEventFactory.createRespawnPlayerEventPost(PhaseTracker.getCauseStackManager().currentCause(),
                 recreatedPlayer.world(), originalWorld, (ServerWorld) this.server.getLevel(this.impl$originalRespawnDestination), recreatedPlayer);

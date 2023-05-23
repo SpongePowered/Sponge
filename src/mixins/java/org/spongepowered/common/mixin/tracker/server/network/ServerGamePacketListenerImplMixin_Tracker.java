@@ -60,7 +60,7 @@ public abstract class ServerGamePacketListenerImplMixin_Tracker {
     @Redirect(method = "tick",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;doTick()V"))
     private void tracker$wrapPlayerTickWithPhase(final ServerPlayer player) {
-        if (((PlatformEntityBridge) player).bridge$isFakePlayer() || ((LevelBridge) player.level).bridge$isFake()) {
+        if (((PlatformEntityBridge) player).bridge$isFakePlayer() || ((LevelBridge) player.level()).bridge$isFake()) {
             player.doTick();
             return;
         }

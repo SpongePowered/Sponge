@@ -177,7 +177,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Arrow> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final net.minecraft.world.entity.projectile.Arrow arrow = new net.minecraft.world.entity.projectile.Arrow(source.level, source);
+                final net.minecraft.world.entity.projectile.Arrow arrow = new net.minecraft.world.entity.projectile.Arrow(source.level(), source);
                 arrow.shoot(source.getXRot(), source.getYRot(), 0.0F, 3.0F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Arrow) arrow);
             }
@@ -187,7 +187,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<SpectralArrow> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final net.minecraft.world.entity.projectile.SpectralArrow arrow = new net.minecraft.world.entity.projectile.SpectralArrow(source.level, source);
+                final net.minecraft.world.entity.projectile.SpectralArrow arrow = new net.minecraft.world.entity.projectile.SpectralArrow(source.level(), source);
                 arrow.shoot(source.getXRot(), source.getYRot(), 0.0F, 3.0F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (SpectralArrow) arrow);
             }
@@ -196,7 +196,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Egg> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final ThrownEgg egg = new ThrownEgg(source.level, source);
+                final ThrownEgg egg = new ThrownEgg(source.level(), source);
                 egg.shoot(source.getXRot(), source.getYRot(), 0.0F, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Egg) egg);
             }
@@ -207,7 +207,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<SmallFireball> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
-                final net.minecraft.world.entity.projectile.SmallFireball fireball = new net.minecraft.world.entity.projectile.SmallFireball(source.level, source,
+                final net.minecraft.world.entity.projectile.SmallFireball fireball = new net.minecraft.world.entity.projectile.SmallFireball(source.level(), source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
                 fireball.setPos(fireball.getX(), fireball.getY() + source.getEyeHeight(), fireball.getZ());
                 return ProjectileUtil.doLaunch(loc.world(), (SmallFireball) fireball);
@@ -218,7 +218,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<FireworkRocket> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final FireworkRocketEntity firework = new FireworkRocketEntity(source.level, loc.x(), loc.y(), loc.z(), ItemStack.EMPTY);
+                final FireworkRocketEntity firework = new FireworkRocketEntity(source.level(), loc.x(), loc.y(), loc.z(), ItemStack.EMPTY);
                 return ProjectileUtil.doLaunch(loc.world(), (FireworkRocket) firework);
             }
         });
@@ -226,7 +226,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Snowball> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final net.minecraft.world.entity.projectile.Snowball snowball = new net.minecraft.world.entity.projectile.Snowball(source.level, source);
+                final net.minecraft.world.entity.projectile.Snowball snowball = new net.minecraft.world.entity.projectile.Snowball(source.level(), source);
                 snowball.shoot(source.getXRot(), source.getYRot(), 0.0F, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Snowball) snowball);
             }
@@ -236,7 +236,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<ExperienceBottle> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final ThrownExperienceBottle expBottle = new ThrownExperienceBottle(source.level, source);
+                final ThrownExperienceBottle expBottle = new ThrownExperienceBottle(source.level(), source);
                 expBottle.shoot(source.getXRot(), source.getYRot(), -20.0F, 0.7F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (ExperienceBottle) expBottle);
             }
@@ -247,7 +247,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<EnderPearl> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final ThrownEnderpearl pearl = new ThrownEnderpearl(source.level, source);
+                final ThrownEnderpearl pearl = new ThrownEnderpearl(source.level(), source);
                 pearl.shoot(source.getXRot(), source.getYRot(), 0.0F, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (EnderPearl) pearl);
             }
@@ -257,7 +257,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<ExplosiveFireball> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
-                final LargeFireball fireball = new LargeFireball(source.level, source,
+                final LargeFireball fireball = new LargeFireball(source.level(), source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4, Constants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS);
                 fireball.setPos(fireball.getX(), fireball.getY() + source.getEyeHeight(), fireball.getZ());
                 return ProjectileUtil.doLaunch(loc.world(), (ExplosiveFireball) fireball);
@@ -287,7 +287,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<WitherSkull> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
-                final net.minecraft.world.entity.projectile.WitherSkull skull = new net.minecraft.world.entity.projectile.WitherSkull(source.level, source,
+                final net.minecraft.world.entity.projectile.WitherSkull skull = new net.minecraft.world.entity.projectile.WitherSkull(source.level(), source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
                 skull.setPos(skull.getX(), skull.getY() + source.getEyeHeight(), skull.getZ());
                 return ProjectileUtil.doLaunch(loc.world(), (WitherSkull) skull);
@@ -300,7 +300,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<FishingBobber> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 if (source instanceof Player) {
-                    final FishingHook hook = new FishingHook((Player) source, source.level, 0, 0);
+                    final FishingHook hook = new FishingHook((Player) source, source.level(), 0, 0);
                     hook.setPos(loc.x(), loc.y(), loc.z());
                     return ProjectileUtil.doLaunch(loc.world(), (FishingBobber) hook);
                 }
@@ -311,7 +311,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Potion> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final ThrownPotion potion = new ThrownPotion(source.level, source);
+                final ThrownPotion potion = new ThrownPotion(source.level(), source);
                 potion.setItem(new ItemStack(Items.SPLASH_POTION, 1));
                 potion.shoot(source.getXRot(), source.getYRot(), -20.0F, 0.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Potion) potion);
@@ -331,7 +331,7 @@ public final class ProjectileUtil {
             public Optional<LlamaSpit> createProjectile(final ProjectileSource source,
                     final EntityType<LlamaSpit> projectileType, final ServerLocation loc) {
                 final Llama llama = (Llama) source;
-                final net.minecraft.world.entity.projectile.LlamaSpit llamaSpit = new net.minecraft.world.entity.projectile.LlamaSpit(llama.level, (Llama) source);
+                final net.minecraft.world.entity.projectile.LlamaSpit llamaSpit = new net.minecraft.world.entity.projectile.LlamaSpit(llama.level(), (Llama) source);
                 final net.minecraft.world.phys.Vec3 lookVec = llama.getViewVector(1);
                 llamaSpit.shoot(lookVec.x, lookVec.y, lookVec.z, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (LlamaSpit) llamaSpit);
@@ -343,7 +343,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<DragonFireball> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
-                final net.minecraft.world.entity.projectile.DragonFireball fireball = new net.minecraft.world.entity.projectile.DragonFireball(source.level, source,
+                final net.minecraft.world.entity.projectile.DragonFireball fireball = new net.minecraft.world.entity.projectile.DragonFireball(source.level(), source,
                         lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
                 fireball.setPos(fireball.getX(), fireball.getY() + source.getEyeHeight(), fireball.getZ());
                 return ProjectileUtil.doLaunch(loc.world(), (DragonFireball) fireball);

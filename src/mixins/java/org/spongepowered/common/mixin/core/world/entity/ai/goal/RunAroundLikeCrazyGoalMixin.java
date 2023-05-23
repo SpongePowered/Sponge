@@ -88,7 +88,7 @@ public abstract class RunAroundLikeCrazyGoalMixin extends GoalMixin {
             if (((EntityBridge) this.horse).bridge$removePassengers(DismountTypes.DERAIL.get())) {
                 // Sponge end
                 this.horse.makeMad();
-                this.horse.level.broadcastEntityEvent(this.horse, (byte)6);
+                this.horse.level().broadcastEntityEvent(this.horse, (byte)6);
             }
         }
     }

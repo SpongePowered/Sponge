@@ -134,7 +134,7 @@ public interface LevelAccessorMixin_API<P extends WorldLike<P>> extends WorldLik
     @Override
     default Collection<Entity> spawnEntities(final Iterable<? extends Entity> entities) {
         Objects.requireNonNull(entities, "entities");
-        return EntityUtil.spawnEntities(entities, x -> true, e -> e.level.addFreshEntity(e));
+        return EntityUtil.spawnEntities(entities, x -> true, e -> e.level().addFreshEntity(e));
     }
 
     @Override

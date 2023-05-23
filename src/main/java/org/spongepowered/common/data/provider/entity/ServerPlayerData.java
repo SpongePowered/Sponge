@@ -131,30 +131,30 @@ public final class ServerPlayerData {
         // TODO handle vanished
 
         // should work without this on ServerSideConnectionEvent.Login
-        if (h.level.getEntity(h.getId()) == h && !h.isRemoved()) {
+        if (h.level().getEntity(h.getId()) == h && !h.isRemoved()) {
             // Remove Entity
-            h.getLevel().getChunkSource().removeEntity(h);
+            h.serverLevel().getChunkSource().removeEntity(h);
             // Remove from TabList
             h.getServer().getPlayerList().broadcastAll(new ClientboundPlayerInfoRemovePacket(List.of(h.getUUID())));
             // Add back to TabList
             h.getServer().getPlayerList().broadcastAll(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(h)));
             // Add Entity
-            h.getLevel().getChunkSource().addEntity(h);
+            h.serverLevel().getChunkSource().addEntity(h);
             // Reconnect local player
             h.connection.send(new ClientboundRespawnPacket(
-                    h.level.dimensionTypeId(),
-                    h.level.dimension(),
-                    BiomeManager.obfuscateSeed(h.getLevel().getSeed()),
+                    h.level().dimensionTypeId(),
+                    h.level().dimension(),
+                    BiomeManager.obfuscateSeed(h.serverLevel().getSeed()),
                     h.gameMode.getGameModeForPlayer(),
                     h.gameMode.getPreviousGameModeForPlayer(),
-                    h.getLevel().isDebug(),
-                    h.getLevel().isFlat(),
+                    h.serverLevel().isDebug(),
+                    h.serverLevel().isFlat(),
                     (byte) 0,
                     h.getLastDeathLocation()));
             // tp - just in case
             h.connection.teleport(h.getX(), h.getY(), h.getZ(), h.getYRot(), h.getXRot());
             // resend remaining player data... (see ServerPlayer#changeDimension)
-            h.connection.send(new ClientboundChangeDifficultyPacket(h.getLevel().getLevelData().getDifficulty(), h.getLevel().getLevelData().isDifficultyLocked()));
+            h.connection.send(new ClientboundChangeDifficultyPacket(h.serverLevel().getLevelData().getDifficulty(), h.serverLevel().getLevelData().isDifficultyLocked()));
             h.connection.send(new ClientboundPlayerAbilitiesPacket(h.getAbilities()));
             h.getServer().getPlayerList().sendAllPlayerInfo(h);
             for(MobEffectInstance $$6 : h.getActiveEffects()) {

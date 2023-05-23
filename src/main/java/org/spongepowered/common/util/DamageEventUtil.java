@@ -181,7 +181,7 @@ public final class DamageEventUtil {
         final int l = Mth.floor(bb.maxY + 1.0D);
         final int i1 = Mth.floor(bb.minZ);
         final int j1 = Mth.floor(bb.maxZ + 1.0D);
-        final ChunkSource chunkSource = entity.level.getChunkSource();
+        final ChunkSource chunkSource = entity.level().getChunkSource();
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
@@ -191,7 +191,7 @@ public final class DamageEventUtil {
                         continue;
                     }
                     if (predicate.test(chunk.getBlockState(blockPos))) {
-                        return ServerLocation.of((ServerWorld) entity.level, k1, l1, i2);
+                        return ServerLocation.of((ServerWorld) entity.level(), k1, l1, i2);
                     }
                 }
             }

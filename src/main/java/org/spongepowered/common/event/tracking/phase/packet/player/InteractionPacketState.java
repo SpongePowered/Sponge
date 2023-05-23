@@ -87,10 +87,10 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             context.activeItem(itemInUse);
         }
         final BlockPos target = ((ServerboundPlayerActionPacket) packet).getPos();
-        if (!playerMP.level.isLoaded(target)) {
+        if (!playerMP.level().isLoaded(target)) {
             context.targetBlock(BlockSnapshot.empty());
         } else {
-            context.targetBlock(((TrackedWorldBridge) playerMP.level).bridge$createSnapshot(target, BlockChangeFlags.NONE));
+            context.targetBlock(((TrackedWorldBridge) playerMP.level()).bridge$createSnapshot(target, BlockChangeFlags.NONE));
         }
         context.handUsed(HandTypes.MAIN_HAND.get());
     }

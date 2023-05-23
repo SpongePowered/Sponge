@@ -46,8 +46,8 @@ public abstract class ServerGamePacketListenerImplMixin_MovementCheck {
         )
     )
     private float movementCheck$onMovedTooQuickly(final float value) {
-        final double threshold = SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.movedTooQuicklyThreshold;
-        if (threshold > 0.0D && SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.player.movedTooQuickly) {
+        final double threshold = SpongeGameConfigs.getForWorld(this.player.level()).get().movementChecks.movedTooQuicklyThreshold;
+        if (threshold > 0.0D && SpongeGameConfigs.getForWorld(this.player.level()).get().movementChecks.player.movedTooQuickly) {
             return (float) threshold;
         }
         return Float.NaN;
@@ -60,8 +60,8 @@ public abstract class ServerGamePacketListenerImplMixin_MovementCheck {
         )
     )
     private double movementCheck$onMovedWronglyCheck(final double value) {
-        final double threshold = SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.movedWronglyThreshold;
-        if (threshold > 0.0D && SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.movedWrongly) {
+        final double threshold = SpongeGameConfigs.getForWorld(this.player.level()).get().movementChecks.movedWronglyThreshold;
+        if (threshold > 0.0D && SpongeGameConfigs.getForWorld(this.player.level()).get().movementChecks.movedWrongly) {
             return threshold;
         }
         return Double.NaN;
@@ -74,8 +74,8 @@ public abstract class ServerGamePacketListenerImplMixin_MovementCheck {
         )
     )
     private double movementCheck$onVehicleMovedWronglyCheck(final double value) {
-        final double threshold = SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.vehicleMovedWronglyThreshold;
-        if (threshold > 0.0D && SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.movedWrongly) {
+        final double threshold = SpongeGameConfigs.getForWorld(this.player.level()).get().movementChecks.vehicleMovedWronglyThreshold;
+        if (threshold > 0.0D && SpongeGameConfigs.getForWorld(this.player.level()).get().movementChecks.movedWrongly) {
             return threshold;
         }
         return Double.NaN;
@@ -88,8 +88,8 @@ public abstract class ServerGamePacketListenerImplMixin_MovementCheck {
         )
     )
     private double movementCheck$onVehicleMovedTooQuicklyCheck(final double value) {
-        final double threshold = SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.vehicleMovedTooQuicklyThreshold;
-        if (threshold > 0.0D && SpongeGameConfigs.getForWorld(this.player.level).get().movementChecks.player.vehicleMovedTooQuickly) {
+        final double threshold = SpongeGameConfigs.getForWorld(this.player.level()).get().movementChecks.vehicleMovedTooQuicklyThreshold;
+        if (threshold > 0.0D && SpongeGameConfigs.getForWorld(this.player.level()).get().movementChecks.player.vehicleMovedTooQuickly) {
             return threshold;
         }
         return Double.NaN;

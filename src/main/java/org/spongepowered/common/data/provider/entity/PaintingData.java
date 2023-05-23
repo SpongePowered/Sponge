@@ -58,7 +58,7 @@ public final class PaintingData {
                     .create(Keys.ART_TYPE)
                         .get(h -> (ArtType) h.getVariant().value())
                         .setAnd((h, v) -> {
-                            if (!h.level.isClientSide) {
+                            if (!h.level().isClientSide) {
                                 final Holder<PaintingVariant> oldArt = h.getVariant();
                                 ((PaintingAccessor)h).invoker$setVariant(Holder.direct((PaintingVariant) v));
                                 ((HangingEntityAccessor) h).invoker$setDirection(h.getDirection());
@@ -68,7 +68,7 @@ public final class PaintingData {
                                     return false;
                                 }
 
-                                final ChunkMapAccessor chunkManager = (ChunkMapAccessor) ((ServerLevel) h.level).getChunkSource().chunkMap;
+                                final ChunkMapAccessor chunkManager = (ChunkMapAccessor) ((ServerLevel) h.level()).getChunkSource().chunkMap;
                                 final ChunkMap_TrackedEntityAccessor paintingTracker = chunkManager.accessor$entityMap().get(h.getId());
                                 if (paintingTracker == null) {
                                     return true;
@@ -83,7 +83,7 @@ public final class PaintingData {
                                 for (final ServerPlayer player : players) {
                                     SpongeCommon.serverScheduler().submit(Task.builder()
                                             .plugin(Launch.instance().commonPlugin())
-                                            .delay(new SpongeTicks(SpongeGameConfigs.getForWorld(h.level).get().entity.painting.respawnDelay))
+                                            .delay(new SpongeTicks(SpongeGameConfigs.getForWorld(h.level()).get().entity.painting.respawnDelay))
                                             .execute(() -> {
                                                 player.connection.send(h.getAddEntityPacket()); // TODO does it also set the variant?
                                             })

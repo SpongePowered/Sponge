@@ -394,7 +394,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                 frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
             }
 
-            if (world == player.level) {
+            if (world == player.level()) {
                 final @Nullable Vector3d destination = this.impl$fireMoveEvent(PhaseTracker.SERVER, new Vector3d(x, y, z));
                 if (destination == null) {
                     return;

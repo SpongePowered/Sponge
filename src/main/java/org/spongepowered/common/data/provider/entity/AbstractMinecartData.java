@@ -55,11 +55,11 @@ public final class AbstractMinecartData {
                     .create(Keys.IS_ON_RAIL)
                         .get(h -> {
                             final BlockPos pos = h.blockPosition();
-                            if (h.level.getBlockState(pos).is(BlockTags.RAILS)) {
+                            if (h.level().getBlockState(pos).is(BlockTags.RAILS)) {
                                 return true;
                             }
                             final BlockPos posBelow = pos.offset(0, -1, 0);
-                            return h.level.getBlockState(posBelow).is(BlockTags.RAILS);
+                            return h.level().getBlockState(posBelow).is(BlockTags.RAILS);
                         })
                     .create(Keys.MINECART_BLOCK_OFFSET)
                         .get(AbstractMinecart::getDisplayOffset)

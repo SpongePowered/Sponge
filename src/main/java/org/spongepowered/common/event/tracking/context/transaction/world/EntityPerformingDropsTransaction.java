@@ -62,7 +62,7 @@ public final class EntityPerformingDropsTransaction extends WorldBasedTransactio
     private @MonotonicNonNull Supplier<Optional<DamageSource>> lastAttacker;
 
     public EntityPerformingDropsTransaction(final Entity destroyingEntity) {
-        super(TransactionTypes.ENTITY_DEATH_DROPS.get(), ((org.spongepowered.api.world.server.ServerWorld) destroyingEntity.level).key());
+        super(TransactionTypes.ENTITY_DEATH_DROPS.get(), ((org.spongepowered.api.world.server.ServerWorld) destroyingEntity.level()).key());
         this.destroyingEntity = destroyingEntity;
     }
 
@@ -70,7 +70,7 @@ public final class EntityPerformingDropsTransaction extends WorldBasedTransactio
     protected void captureState() {
         super.captureState();
         final Entity entity = this.destroyingEntity;
-        this.worldSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier((ServerLevel) entity.level, "ServerLevel");
+        this.worldSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier((ServerLevel) entity.level(), "ServerLevel");
 
         final CompoundTag tag = new CompoundTag();
         entity.saveWithoutId(tag);

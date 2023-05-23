@@ -96,7 +96,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     public Supplier<ResourceKey> attemptWorldKey(CommandPhaseContext context) {
         final Optional<net.minecraft.world.entity.player.Player> playerSource = context.getSource(net.minecraft.world.entity.player.Player.class);
         if (playerSource.isPresent()) {
-            return () -> (ResourceKey) (Object) playerSource.get().level.dimension().location();
+            return () -> (ResourceKey) (Object) playerSource.get().level().dimension().location();
         }
         return super.attemptWorldKey(context);
     }

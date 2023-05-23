@@ -228,7 +228,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
             method = "handleInteract",
             at = @At( value = "FIELD",target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;MAX_INTERACTION_DISTANCE:D"))
     private double impl$getPlatformReach(final ServerboundInteractPacket packet) {
-        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, packet.getTarget(this.player.getLevel()));
+        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, packet.getTarget(this.player.serverLevel()));
     }
 
     @Inject(method = "handleMovePlayer",
@@ -392,7 +392,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
                 if (ShouldFire.INTERACT_ITEM_EVENT_PRIMARY) {
                     final Vec3 startPos = this.player.getEyePosition(1);
                     final Vec3 endPos = startPos.add(this.player.getLookAngle().scale(5d)); // TODO hook for blockReachDistance?
-                    final HitResult result = this.player.getLevel().clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.player));
+                    final HitResult result = this.player.serverLevel().clip(new ClipContext(startPos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, this.player));
                     if (result.getType() == HitResult.Type.MISS) {
                         final ItemStack heldItem = this.player.getItemInHand(hand);
                         SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, heldItem, hand);
@@ -484,7 +484,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
 
     @Redirect(method = "updateSignText", at = @At(value = "INVOKE", remap = false, target = "Ljava/util/List;size()I"))
     private int impl$callChangeSignEvent(final List<FilteredText> list, final ServerboundSignUpdatePacket p_244542_1_, final List<String> p_244542_2_) {
-        final SignBlockEntity blockEntity = (SignBlockEntity) this.player.level.getBlockEntity(p_244542_1_.getPos());
+        final SignBlockEntity blockEntity = (SignBlockEntity) this.player.level().getBlockEntity(p_244542_1_.getPos());
         final ListValue<Component> originalLinesValue = ((Sign) blockEntity).getValue(Keys.SIGN_LINES)
                 .orElseGet(() -> new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.of()));
 
@@ -520,7 +520,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
 
     @Inject(method = "handleResourcePackResponse", at = @At("HEAD"))
     public void impl$handleResourcePackResponse(final ServerboundResourcePackPacket packet, final CallbackInfo callbackInfo) {
-        PacketUtils.ensureRunningOnSameThread(packet, (ServerGamePacketListener) this, this.player.getLevel());
+        PacketUtils.ensureRunningOnSameThread(packet, (ServerGamePacketListener) this, this.player.serverLevel());
     }
 
     @Override

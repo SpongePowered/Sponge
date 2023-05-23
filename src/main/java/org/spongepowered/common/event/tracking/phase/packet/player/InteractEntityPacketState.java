@@ -48,14 +48,14 @@ public final class InteractEntityPacketState extends BasicPacketState {
     public boolean isPacketIgnored(final Packet<?> packetIn, final ServerPlayer packetPlayer) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
-        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget((ServerLevel) packetPlayer.level);
+        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(packetPlayer.serverLevel());
         return entity == null;
     }
 
     @Override
     public void populateContext(final ServerPlayer player, final Packet<?> packet, final BasicPacketContext context) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packet;
-        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget((ServerLevel) player.level);
+        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(player.serverLevel());
         if (entity != null) {
             final ServerboundInteractPacket_InteractionActionAccessor accessor = (ServerboundInteractPacket_InteractionActionAccessor) ((ServerboundInteractPacketAccessor) useEntityPacket).accessor$action();
             final ItemStack stack = ItemStackUtil.cloneDefensive(player.getItemInHand(accessor.accessor$hand()));
@@ -73,7 +73,7 @@ public final class InteractEntityPacketState extends BasicPacketState {
 
         final ServerPlayer player = phaseContext.getPacketPlayer();
         final ServerboundInteractPacket useEntityPacket = phaseContext.getPacket();
-        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget((ServerLevel) player.level);
+        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(player.serverLevel());
         if (entity == null) {
             // Something happened?
             return;

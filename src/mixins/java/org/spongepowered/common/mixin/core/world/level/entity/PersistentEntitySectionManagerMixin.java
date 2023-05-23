@@ -65,7 +65,7 @@ public class PersistentEntitySectionManagerMixin {
         if (!(entity instanceof final Entity mcEntity)) {
             return;
         }
-        if (!(mcEntity.level instanceof final ServerWorld sw)) {
+        if (!(mcEntity.level() instanceof final ServerWorld sw)) {
             return;
         }
 

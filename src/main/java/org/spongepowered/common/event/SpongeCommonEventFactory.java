@@ -273,7 +273,7 @@ public final class SpongeCommonEventFactory {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, entity, frame);
             final InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(frame.currentCause(), (Entity) entity);
-            if (entity instanceof Player && !((ServerWorld) player.getLevel()).properties().pvp()) {
+            if (entity instanceof Player && !((ServerWorld) player.level()).properties().pvp()) {
                 event.setCancelled(true); // if PvP is disabled for world, cancel
             }
             SpongeCommon.post(event);
@@ -508,7 +508,7 @@ public final class SpongeCommonEventFactory {
 
             final DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(frame.currentCause(),
                     originalChannel, Optional.of(originalChannel), originalMessage, originalMessage, (Living) entity,
-                    entity.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY), messageCancelled);
+                    entity.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY), messageCancelled);
             SpongeCommon.post(event);
 
             return event;
@@ -585,17 +585,17 @@ public final class SpongeCommonEventFactory {
             final Optional<UUID> creator = PhaseTracker.getInstance().getPhaseContext().getCreator();
             creator.ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
 
-            final ServerLocation impactPoint = ServerLocation.of((ServerWorld) projectile.level, VecHelper.toVector3d(movingObjectPosition.getLocation()));
+            final ServerLocation impactPoint = ServerLocation.of((ServerWorld) projectile.level(), VecHelper.toVector3d(movingObjectPosition.getLocation()));
             boolean cancelled = false;
 
             if (movingObjectType == HitResult.Type.BLOCK) {
                 final BlockHitResult blockMovingObjectPosition = (BlockHitResult) movingObjectPosition;
                 final BlockPos blockPos = blockMovingObjectPosition.getBlockPos();
-                if (blockPos.getY() < projectile.level.getMinBuildHeight()) {
+                if (blockPos.getY() < projectile.level().getMinBuildHeight()) {
                     return false;
                 }
 
-                final BlockSnapshot targetBlock = ((ServerWorld) projectile.level).createSnapshot(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                final BlockSnapshot targetBlock = ((ServerWorld) projectile.level()).createSnapshot(blockPos.getX(), blockPos.getY(), blockPos.getZ());
                 final Direction side = DirectionFacingProvider.INSTANCE.getKey(blockMovingObjectPosition.getDirection()).get();
 
                 final CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(frame.currentCause(),
@@ -605,7 +605,7 @@ public final class SpongeCommonEventFactory {
                 // Track impact block if event is not cancelled
                 if (!cancelled && creator.isPresent()) {
                     final BlockPos targetPos = VecHelper.toBlockPos(impactPoint.blockPosition());
-                    final LevelChunkBridge spongeChunk = (LevelChunkBridge) projectile.level.getChunkAt(targetPos);
+                    final LevelChunkBridge spongeChunk = (LevelChunkBridge) projectile.level().getChunkAt(targetPos);
                     spongeChunk.bridge$addTrackedBlockPosition((Block) targetBlock.state().type(), targetPos, creator.get(), PlayerTracker.Type.NOTIFIER);
                 }
             } else if (movingObjectType == HitResult.Type.ENTITY) { // entity
@@ -683,7 +683,7 @@ public final class SpongeCommonEventFactory {
 
         // SECOND throw the ConstructEntityEvent
         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.currentCause(), ServerLocation.of((ServerWorld) entity.level, posX, posY, posZ), new Vector3d(0, 0, 0), EntityTypes.ITEM.get());
+        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.currentCause(), ServerLocation.of((ServerWorld) entity.level(), posX, posY, posZ), new Vector3d(0, 0, 0), EntityTypes.ITEM.get());
         frame.removeContext(EventContextKeys.SPAWN_TYPE);
         SpongeCommon.post(event);
         if (event.isCancelled()) {

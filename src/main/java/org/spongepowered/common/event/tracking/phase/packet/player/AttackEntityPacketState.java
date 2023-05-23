@@ -54,7 +54,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
         frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
         final ServerboundInteractPacket useEntityPacket = ctx.getPacket();
         final ServerPlayer player = ctx.getPacketPlayer();
-        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(player.getLevel());
+        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(player.serverLevel());
         if (entity != null) {
             // hand is not populated if we don't have an entity in scope that caused this.
             frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
@@ -73,7 +73,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
         // There are cases where a player is interacting with an entity that
         // doesn't exist on the server.
-        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget((ServerLevel) packetPlayer.level);
+        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget((ServerLevel) packetPlayer.level());
         return entity == null;
     }
 
@@ -89,7 +89,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
     ) {
         final ServerboundInteractPacket useEntityPacket = context.getPacket();
         final ServerPlayer player = context.getPacketPlayer();
-        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(player.getLevel());
+        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(player.serverLevel());
         if (entity != null && (entity.isRemoved() || entity instanceof LivingEntity && ((LivingEntity) entity).isDeadOrDying())) {
             return entityToSpawn instanceof ExperienceOrb ? SpawnTypes.EXPERIENCE : SpawnTypes.DROPPED_ITEM;
         }
@@ -104,7 +104,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
         if (!TrackingUtil.processBlockCaptures(context)) {
             final ServerboundInteractPacket useEntityPacket = context.getPacket();
             final ServerPlayer player = context.getPacketPlayer();
-            final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(player.getLevel());
+            final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(player.serverLevel());
             if (entity instanceof Entity) {
                 ((Entity) entity).offer(Keys.NOTIFIER, player.getUUID());
             }

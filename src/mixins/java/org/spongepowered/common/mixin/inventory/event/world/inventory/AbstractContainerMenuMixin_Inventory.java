@@ -110,7 +110,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         )
     )
     private ItemStack impl$verifyReadOnlyMenu(final Slot slot, final int param0, final int param1, final Player param2) {
-        if (!((LevelBridge) param2.level).bridge$isFake()) {
+        if (!((LevelBridge) param2.level()).bridge$isFake()) {
             if (((MenuBridge) this).bridge$isReadonlyMenu(slot)) {
                 ((MenuBridge) this).bridge$refreshListeners();
                 return ItemStack.EMPTY;
@@ -128,7 +128,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     private ItemStack impl$transferStackInSlot(final AbstractContainerMenu thisContainer, final Player player, final int slotId) {
         final ItemStack result = thisContainer.quickMoveStack(player, slotId);
         // Crafting on Serverside?
-        if (((LevelBridge) player.level).bridge$isFake() || player.level.isClientSide || !(thisContainer.getSlot(slotId) instanceof ResultSlot)) {
+        if (((LevelBridge) player.level()).bridge$isFake() || player.level().isClientSide || !(thisContainer.getSlot(slotId) instanceof ResultSlot)) {
             return result;
         }
         this.bridge$detectAndSendChanges(true);
@@ -147,7 +147,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             final ClickType clickType,
             final Player player
     ) {
-        if (((LevelBridge) player.level).bridge$isFake() || player.level.isClientSide()) {
+        if (((LevelBridge) player.level()).bridge$isFake() || player.level().isClientSide()) {
             this.shadow$doClick(slotId, dragType, clickType, player);
             return;
         }

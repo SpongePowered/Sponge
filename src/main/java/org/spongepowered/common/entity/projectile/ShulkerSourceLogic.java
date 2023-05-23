@@ -43,10 +43,10 @@ public final class ShulkerSourceLogic implements ProjectileSourceLogic<Shulker> 
         if (projectileType == EntityTypes.SHULKER_BULLET.get() && args.length == 1 && args[0] instanceof Entity) {
             final net.minecraft.world.entity.monster.Shulker shulker = (net.minecraft.world.entity.monster.Shulker) source;
             final ShulkerBullet bullet =
-                    new ShulkerBullet(shulker.level, shulker, (Entity) args[0], shulker.getAttachFace().getAxis());
-            shulker.level.addFreshEntity(bullet);
+                    new ShulkerBullet(shulker.level(), shulker, (Entity) args[0], shulker.getAttachFace().getAxis());
+            shulker.level().addFreshEntity(bullet);
             shulker.playSound(SoundEvents.SHULKER_SHOOT,
-                    2.0F, (shulker.level.random.nextFloat() - shulker.level.random.nextFloat()) * 0.2F + 1.0F);
+                    2.0F, (shulker.level().random.nextFloat() - shulker.level().random.nextFloat()) * 0.2F + 1.0F);
 
             return Optional.of((P) bullet);
         }

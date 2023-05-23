@@ -98,7 +98,7 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
 
     @Override
     public Supplier<ResourceKey> attemptWorldKey(final P context) {
-        final ResourceLocation worldKey = context.packetPlayer.getLevel().dimension().location();
+        final ResourceLocation worldKey = context.packetPlayer.level().dimension().location();
         return () -> (ResourceKey) (Object) worldKey;
     }
 

@@ -376,7 +376,7 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
 
         SpongeViewableInventoryBuilder.register(ContainerTypes.MERCHANT, ContainerTypeInfo.of(sp -> new DefaultEmptyLens(), 0, 0,
                 (id, i, p, vi) -> {
-                    final Villager merchant = new Villager(EntityType.VILLAGER, p.level);
+                    final Villager merchant = new Villager(EntityType.VILLAGER, p.level());
                     merchant.setPos(p.position());
                     merchant.setVillagerData(merchant.getVillagerData().setLevel(5));
                     return new MerchantMenu(id, i, vi.applyTradeOffers(merchant));
@@ -396,7 +396,7 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
     }
 
     private static ContainerLevelAccess toPos(Player p) {
-        return ContainerLevelAccess.create(p.level, p.blockPosition());
+        return ContainerLevelAccess.create(p.level(), p.blockPosition());
     }
 
     @FunctionalInterface

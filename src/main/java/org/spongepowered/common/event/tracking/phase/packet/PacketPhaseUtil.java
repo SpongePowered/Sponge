@@ -225,12 +225,12 @@ public final class PacketPhaseUtil {
                         final BlockPos min = new BlockPos((int) (boundingBox.minX + 0.001D), (int) (boundingBox.minY + 0.001D), (int) (boundingBox.minZ + 0.001D));
                         final BlockPos max = new BlockPos((int) (boundingBox.maxX - 0.001D), (int) (boundingBox.maxY - 0.001D), (int) (boundingBox.maxZ - 0.001D));
                         final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-                        if (packetPlayer.level.hasChunksAt(min, max)) {
+                        if (packetPlayer.level().hasChunksAt(min, max)) {
                             for(int x = min.getX(); x <= max.getX(); ++x) {
                                 for(int y = min.getY(); y <= max.getY(); ++y) {
                                     for(int z = min.getZ(); z <= max.getZ(); ++z) {
                                         pos.set(x, y, z);
-                                        final Block block = packetPlayer.level.getBlockState(pos).getBlock();
+                                        final Block block = packetPlayer.level().getBlockState(pos).getBlock();
                                         if (((TrackableBlockBridge) block).bridge$hasEntityInsideLogic()) {
                                             ignoreMovementCapture = false;
                                         }

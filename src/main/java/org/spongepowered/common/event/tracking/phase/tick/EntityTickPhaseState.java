@@ -108,12 +108,12 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         final net.minecraft.world.entity.Entity entity = context.getSource(net.minecraft.world.entity.Entity.class)
             .orElseThrow(
                 () -> new IllegalStateException("Expected to be ticking an entity, but we're not ticking an entity"));
-        if (entity.level.isClientSide) {
+        if (entity.level().isClientSide) {
             return () -> {
                 throw new IllegalStateException("attempting a world key on the client???");
             };
         }
-        return () -> (ResourceKey) (Object) entity.level.dimension().location();
+        return () -> (ResourceKey) (Object) entity.level().dimension().location();
     }
 
     @Override

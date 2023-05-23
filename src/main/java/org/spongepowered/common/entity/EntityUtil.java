@@ -113,7 +113,7 @@ public final class EntityUtil {
         ((PlatformEntityBridge) player).bridge$revive();
         // Sponge End
 
-        player.setLevel(toWorld);
+        player.setServerLevel(toWorld);
         toWorld.addDuringPortalTeleport(player);
         if (isPortal) {
             ((ServerPlayerAccessor) player).invoker$triggerDimensionChangeTriggers(toWorld);
@@ -181,7 +181,7 @@ public final class EntityUtil {
                     // Since forge already has a new event thrown for the entity, we don't need to throw
                     // the event anymore as sponge plugins getting the event after forge mods will
                     // have the modified entity list for entities, so no need to re-capture the entities.
-                    entityToSpawn.level.addFreshEntity(entityToSpawn);
+                    entityToSpawn.level().addFreshEntity(entityToSpawn);
                     return true;
                 }
             }
@@ -254,6 +254,6 @@ public final class EntityUtil {
             return true;
         }
         // Temporary fix for https://bugs.mojang.com/browse/MC-149563
-        return from.level != target.level;
+        return from.level() != target.level();
     }
 }
