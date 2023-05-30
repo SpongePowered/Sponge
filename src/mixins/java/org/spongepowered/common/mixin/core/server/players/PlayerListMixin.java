@@ -433,7 +433,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     )
     private ClientboundPlayerInfoUpdatePacket impl$onlySendAddPlayerForUnvanishedPlayers(final Collection<net.minecraft.server.level.ServerPlayer> $$0) {
         // Effectively, don't notify new players of vanished players
-        final List<net.minecraft.server.level.ServerPlayer> vanishFiltered = $$0.stream().filter(p -> !((VanishableBridge) p).bridge$isInvisible()).toList();
+        final List<net.minecraft.server.level.ServerPlayer> vanishFiltered = $$0.stream().filter(p -> !((VanishableBridge) p).bridge$vanishState().invisible()).toList();
         return ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(vanishFiltered);
     }
 
