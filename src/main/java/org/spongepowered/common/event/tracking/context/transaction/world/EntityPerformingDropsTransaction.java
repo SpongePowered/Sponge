@@ -48,6 +48,7 @@ import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
@@ -77,8 +78,9 @@ public final class EntityPerformingDropsTransaction extends WorldBasedTransactio
 
         final @Nullable DamageSource lastAttacker;
         if (entity instanceof LivingEntity) {
-            final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) entity).getCombatTracker()).invoker$getMostSignificantFall();
-            if (entry != null) {
+            final List<CombatEntry> entries = ((CombatTrackerAccessor) ((LivingEntity) entity).getCombatTracker()).accessor$entries();
+            if (!entries.isEmpty()) {
+                final CombatEntry entry = entries.get(entries.size() - 1);
                 lastAttacker = entry.source();
             } else {
                 lastAttacker = null;
