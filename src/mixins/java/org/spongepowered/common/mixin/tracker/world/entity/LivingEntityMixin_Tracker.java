@@ -47,6 +47,7 @@ import org.spongepowered.common.event.tracking.context.transaction.EffectTransac
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
+import java.util.List;
 import java.util.Random;
 
 import javax.annotation.Nullable;
@@ -84,8 +85,9 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
         if (!(this.shadow$getHealth() <= 0) && this.deathTime<=0 && !this.dead) {
             return;
         }
-        final CombatEntry entry = ((CombatTrackerAccessor) this.shadow$getCombatTracker()).invoker$getMostSignificantFall();
-        if (entry != null) {
+        final List<CombatEntry> entries = ((CombatTrackerAccessor) this.shadow$getCombatTracker()).accessor$entries();
+        if (!entries.isEmpty()) {
+            final CombatEntry entry = entries.get(entries.size() - 1);
             final DamageSource source = ((CombatEntryAccessor) entry).accessor$source();
             if (source != null) {
                 frame.addContext(
