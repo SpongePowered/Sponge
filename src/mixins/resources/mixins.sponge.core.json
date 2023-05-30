@@ -153,6 +153,7 @@
         "world.entity.projectile.ThrowableProjectileMixin",
         "world.entity.projectile.ThrownEggMixin",
         "world.entity.projectile.ThrownEnderpearlMixin",
+        "world.entity.projectile.ThrownTridentMixin",
         "world.entity.projectile.WitherSkullMixin",
         "world.entity.vehicle.AbstractMinecartContainerMixin",
         "world.entity.vehicle.AbstractMinecartMixin",
