@@ -45,7 +45,7 @@ public abstract class ThrownTridentMixin extends ProjectileMixin {
 
     @Inject(method = "onHitEntity", at = @At("HEAD"), cancellable = true)
     private void onProjectileHit(final EntityHitResult hitResult, final CallbackInfo ci) {
-        if (((LevelBridge) this.level).bridge$isFake() || hitResult.getType() == HitResult.Type.MISS) {
+        if (((LevelBridge) this.shadow$level()).bridge$isFake() || hitResult.getType() == HitResult.Type.MISS) {
             return;
         }
 

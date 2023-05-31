@@ -34,7 +34,7 @@ import org.spongepowered.common.UntransformedInvokerError;
 public interface TropicalFishAccessor {
 
     @Invoker("packVariant")
-    static int invoker$packVariant(final TropicalFish.Pattern size, final DyeColor pattern, final DyeColor bodyColor) {
+    static int invoker$packVariant(final TropicalFish.Pattern size, final DyeColor bodyColor, final DyeColor pattern) {
         throw new UntransformedInvokerError();
     }
 
