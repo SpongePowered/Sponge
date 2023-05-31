@@ -49,7 +49,7 @@ public final class TropicalFishData {
                         .set((h, v) -> {
                             final net.minecraft.world.item.DyeColor patternColor = h.getPatternColor();
                             final TropicalFish.Pattern type = h.getVariant();
-                            final int variant = TropicalFishAccessor.invoker$packVariant(type, patternColor, (net.minecraft.world.item.DyeColor) (Object) v);
+                            final int variant = TropicalFishAccessor.invoker$packVariant(type, (net.minecraft.world.item.DyeColor) (Object) v, patternColor);
                             ((TropicalFishAccessor) h).invoker$setPackedVariant(variant);
                         })
                     .create(Keys.PATTERN_COLOR)
@@ -57,7 +57,7 @@ public final class TropicalFishData {
                         .set((h, v) -> {
                             final net.minecraft.world.item.DyeColor baseColor = h.getBaseColor();
                             final TropicalFish.Pattern type = h.getVariant();
-                            final int variant = TropicalFishAccessor.invoker$packVariant(type, (net.minecraft.world.item.DyeColor) (Object) v, baseColor);
+                            final int variant = TropicalFishAccessor.invoker$packVariant(type, baseColor, (net.minecraft.world.item.DyeColor) (Object) v);
                             ((TropicalFishAccessor) h).invoker$setPackedVariant(variant);
                         });
     }
