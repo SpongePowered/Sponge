@@ -107,4 +107,5 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
 
     double bridge$reachDistance();
 
+    void bridge$setGameModeNoEvent(final GameType gameType);
 }
