@@ -80,6 +80,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
     ) {
         final InteractItemEvent.Secondary event = SpongeCommonEventFactory.callInteractItemEventSecondary(player, stack, hand);
         if (event.isCancelled()) {
+            player.refreshContainer(player.inventoryMenu);
             cir.setReturnValue(InteractionResult.FAIL);
         }
     }
