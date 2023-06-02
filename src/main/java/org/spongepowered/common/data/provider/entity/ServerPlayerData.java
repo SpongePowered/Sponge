@@ -71,7 +71,7 @@ public final class ServerPlayerData {
                 .asMutable(ServerPlayer.class)
                     .create(Keys.GAME_MODE)
                         .get(h -> (GameMode) (Object) h.gameMode.getGameModeForPlayer())
-                        .set((h, v) -> h.setGameMode((GameType) (Object) v))
+                        .set((h, v) -> ((ServerPlayerBridge) h).bridge$setGameModeNoEvent((GameType) (Object) v))
                     .create(Keys.PREVIOUS_GAME_MODE)
                         .get(h -> (GameMode) (Object) h.gameMode.getPreviousGameModeForPlayer())
                     .create(Keys.SKIN_PROFILE_PROPERTY)
