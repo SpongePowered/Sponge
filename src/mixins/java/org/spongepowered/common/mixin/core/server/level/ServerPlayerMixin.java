@@ -64,6 +64,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.portal.PortalInfo;
@@ -76,15 +77,21 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.SkinPart;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
@@ -104,6 +111,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -134,6 +142,7 @@ import org.spongepowered.math.vector.Vector3d;
 
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -164,8 +173,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow protected abstract void shadow$triggerDimensionChangeTriggers(ServerLevel serverworld);
     @Shadow public abstract void shadow$doCloseContainer();
     @Shadow public abstract void shadow$setLevel(ServerLevel serverLevel);
+    @Shadow public abstract boolean shadow$setGameMode(GameType param0);
     // @formatter:on
-
 
     private net.minecraft.network.chat.@Nullable Component impl$connectionMessage;
     private Locale impl$language = Locales.DEFAULT;
@@ -177,6 +186,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     private Set<SkinPart> impl$skinParts = ImmutableSet.of();
     private final PlayerOwnBorderListener impl$borderListener = new PlayerOwnBorderListener((net.minecraft.server.level.ServerPlayer) (Object) this);
     private boolean impl$sleepingIgnored;
+    private boolean impl$noGameModeEvent;
 
     @Override
     public net.minecraft.network.chat.@Nullable Component bridge$getConnectionMessageToSend() {
@@ -825,5 +835,42 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     protected void impl$updateHealthForUseFinish(final CallbackInfo ci) {
         this.bridge$refreshScaledHealth();
+    }
+
+    @ModifyVariable(method = "setGameMode", at = @At(value = "HEAD"), argsOnly = true)
+    private GameType impl$setGameMode(final GameType value) {
+        if (!ShouldFire.CHANGE_DATA_HOLDER_EVENT_VALUE_CHANGE || Objects.equals(this.gameMode.getGameModeForPlayer(), value) || this.impl$noGameModeEvent) {
+            return value;
+        }
+
+        final DataTransactionResult transaction = DataTransactionResult.builder()
+                .replace(Value.immutableOf(Keys.GAME_MODE, (GameMode) (Object) this.gameMode.getGameModeForPlayer()))
+                .success(Value.immutableOf(Keys.GAME_MODE, (GameMode) (Object) value))
+                .result(DataTransactionResult.Type.SUCCESS)
+                .build();
+
+        final ChangeDataHolderEvent.ValueChange
+                event =
+                SpongeEventFactory.createChangeDataHolderEventValueChange(PhaseTracker.getCauseStackManager().currentCause(), transaction, (DataHolder.Mutable) this);
+
+        Sponge.eventManager().post(event);
+
+        if (event.isCancelled()) {
+            return this.gameMode.getGameModeForPlayer();
+        }
+
+        return (GameType) (Object) event.endResult().successfulValue(Keys.GAME_MODE)
+                .map(Value::get)
+                .orElse((GameMode) (Object) value);
+    }
+
+    @Override
+    public void bridge$setGameModeNoEvent(final GameType gameType) {
+        try {
+            this.impl$noGameModeEvent = true;
+            this.shadow$setGameMode(gameType);
+        } finally {
+            this.impl$noGameModeEvent = false;
+        }
     }
 }

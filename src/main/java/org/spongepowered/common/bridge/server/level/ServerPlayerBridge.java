@@ -107,4 +107,6 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
 
     void bridge$setSleepingIgnored(final boolean sleepingIgnored);
 
+    void bridge$setGameModeNoEvent(final GameType gameType);
+
 }
