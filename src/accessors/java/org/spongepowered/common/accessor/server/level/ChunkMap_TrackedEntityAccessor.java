@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.server.level;
 
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -39,5 +40,7 @@ public interface ChunkMap_TrackedEntityAccessor {
     @Invoker("updatePlayer") void accessor$updatePlayer(ServerPlayer param0);
 
     @Invoker("removePlayer") void accessor$removePlayer(ServerPlayer param0);
+
+    @Accessor("serverEntity") ServerEntity accessor$getServerEntity();
 
 }
