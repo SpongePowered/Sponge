@@ -25,7 +25,10 @@
 package org.spongepowered.common.inventory.custom;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.Slot;
@@ -46,6 +49,7 @@ import org.spongepowered.api.item.inventory.menu.handler.SlotChangeHandler;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.common.accessor.world.inventory.AbstractContainerMenuAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -116,7 +120,13 @@ public class SpongeInventoryMenu implements InventoryMenu {
     @Override
     public void setTitle(final Component title) {
         this.title = title;
-        this.reopen();
+        this.tracked.forEach((c, p) -> {
+            var container = (AbstractContainerMenu) c;
+            var connection = (ServerGamePacketListenerImpl) p.connection();
+            var packet = new ClientboundOpenScreenPacket(container.containerId, container.getType(), SpongeAdventure.asVanilla(this.title));
+            connection.send(packet);
+            container.broadcastFullState();
+        });
     }
 
     @Override
