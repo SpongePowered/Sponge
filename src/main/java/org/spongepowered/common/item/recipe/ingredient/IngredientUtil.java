@@ -106,7 +106,7 @@ public class IngredientUtil {
 
             } else {
                 // Vanilla Ingredient
-                final Ingredient.Value itemList = IngredientAccessor.invoker$valueFromJson(ingredientJson, false);
+                final Ingredient.Value itemList = IngredientAccessor.invoker$valueFromJson(ingredientJson);
                 return IngredientAccessor.invoker$fromValues(Stream.of(itemList));
             }
         }
@@ -116,7 +116,7 @@ public class IngredientUtil {
                 throw new JsonSyntaxException("Item array cannot be empty, at least one item must be defined");
             }
             return IngredientAccessor.invoker$fromValues(StreamSupport.stream(jsonarray.spliterator(), false).map((p_209355_0_) ->
-                IngredientAccessor.invoker$valueFromJson(GsonHelper.convertToJsonObject(p_209355_0_, "item"), false)));
+                IngredientAccessor.invoker$valueFromJson(GsonHelper.convertToJsonObject(p_209355_0_, "item"))));
         }
         throw new JsonSyntaxException("Expected item to be object or array of objects");
     }

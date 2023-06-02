@@ -41,7 +41,7 @@ public interface IngredientAccessor {
     }
 
     @Invoker("valueFromJson")
-    static Ingredient.Value invoker$valueFromJson(final JsonObject json, final boolean allowEmpty) {
+    static Ingredient.Value invoker$valueFromJson(final JsonObject json) {
         throw new UntransformedInvokerError();
     }
 
