@@ -182,7 +182,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public boolean restoreSnapshot(final BlockSnapshot snapshot, final boolean force, final BlockChangeFlag flag) {
-        return snapshot.restore(force, Objects.requireNonNull(flag, "flag"));
+        return Objects.requireNonNull(snapshot, "snapshot").withLocation(this.location(snapshot.position())).restore(force, Objects.requireNonNull(flag, "flag"));
     }
 
     @Override
