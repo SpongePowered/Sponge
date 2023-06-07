@@ -24,7 +24,6 @@
  */
 package org.spongepowered.vanilla.client.gui.screen;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

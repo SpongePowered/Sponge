@@ -35,7 +35,6 @@ import net.minecraft.world.item.EnderEyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;

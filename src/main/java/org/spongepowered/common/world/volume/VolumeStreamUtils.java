@@ -73,7 +73,6 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.lang.ref.WeakReference;
 import java.util.AbstractMap;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
