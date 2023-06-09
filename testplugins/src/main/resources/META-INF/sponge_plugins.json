@@ -5,7 +5,7 @@
     },
     "license": "MIT",
     "global": {
-        "version": "8.0.0",
+        "version": "11.0.0",
         "links": {
             "homepage": "https://www.spongepowered.org",
             "source": "https://www.spongepowered.org/source",
@@ -20,7 +20,7 @@
         "dependencies": [
             {
                 "id": "spongeapi",
-                "version": "8.0.0"
+                "version": "11.0.0"
             }
         ]
     },
@@ -285,6 +285,12 @@
             "name": "Display Entities Test",
             "entrypoint": "org.spongepowered.test.entity.DisplayEntityTest",
             "description": "Testing Display Entities"
+        },
+        {
+            "id": "signtest",
+            "name": "Sign Test",
+            "entrypoint": "org.spongepowered.test.sign.SignTest",
+            "description": "Testing Sign Changes"
         }
     ]
 }

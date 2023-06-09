@@ -27,9 +27,10 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 import net.minecraft.world.level.block.entity.SignText;
 import org.spongepowered.api.block.entity.Sign;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.data.holder.SpongeDataHolder;
 
 @Mixin(SignText.class)
-public abstract class SignTextMixin_API implements Sign.SignText {
+public abstract class SignTextMixin_API implements Sign.SignText, SpongeDataHolder {
 
 
 }

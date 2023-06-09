@@ -502,10 +502,10 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this.player);
             final ListValue.Mutable<Component> newLinesValue = ListValue.mutableOf(Keys.SIGN_LINES, newLines);
-            // TODO event needs adjusting (missing front/back side)
             final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getCauseStackManager().currentCause(),
                     originalLines, newLinesValue,
-                    (Sign) sign);
+                    (Sign) sign,
+                    isFrontText);
             final ListValue<Component> toApply = SpongeCommon.post(event) ? originalLines : newLinesValue;
             this.impl$updateSignText(sign, player, isFrontText, toApply.get());
         }
@@ -523,7 +523,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
             }
             sign.updateText(signText -> {
                 for (int i = 0; i < lines.size(); i++) {
-                    signText.setMessage(i, SpongeAdventure.asVanilla(lines.get(i)));
+                    signText = signText.setMessage(i, SpongeAdventure.asVanilla(lines.get(i)));
                 }
                 return signText;
             }, isFrontText);
