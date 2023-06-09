@@ -155,7 +155,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow protected int portalTime;
     @Shadow @Nullable private Entity vehicle;
     @Shadow private ImmutableList<Entity> passengers;
-    @Shadow protected boolean onGround;
     @Shadow public float fallDistance;
     @Shadow protected BlockPos portalEntrancePos;
     @Shadow private net.minecraft.world.phys.Vec3 position;
@@ -224,7 +223,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract void shadow$setYRot(final float param0);
     @Shadow public abstract void shadow$setXRot(final float param0);
     @Shadow protected abstract Vec3 shadow$collide(Vec3 param0);
-    @Shadow protected abstract boolean shadow$fireImmune();
+    @Shadow public abstract boolean shadow$fireImmune();
     @Shadow public abstract boolean shadow$isPickable();
     @Shadow protected abstract void shadow$markHurt();
 
@@ -232,6 +231,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow @Nullable protected abstract PortalInfo shadow$findDimensionEntryPoint(ServerLevel param0);
 
     @Shadow public abstract int shadow$getPortalCooldown();
+
+    @Shadow public abstract boolean shadow$onGround();
 
     // @formatter:on
 

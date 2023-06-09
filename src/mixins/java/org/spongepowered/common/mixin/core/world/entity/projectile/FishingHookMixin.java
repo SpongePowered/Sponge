@@ -169,7 +169,7 @@ public abstract class FishingHookMixin extends ProjectileMixin {
                 i = Math.max(i, 1); // Sponge: Don't lower damage if we've also caught an entity
             }
 
-            if (this.onGround) {
+            if (this.shadow$onGround()) {
                 i = 2;
             }
 
