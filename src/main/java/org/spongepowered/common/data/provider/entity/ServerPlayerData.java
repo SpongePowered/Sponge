@@ -33,6 +33,7 @@ import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.stats.Stat;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.level.GameType;
@@ -156,7 +157,9 @@ public final class ServerPlayerData {
             // resend remaining player data... (see ServerPlayer#changeDimension)
             h.connection.send(new ClientboundChangeDifficultyPacket(h.getLevel().getLevelData().getDifficulty(), h.getLevel().getLevelData().isDifficultyLocked()));
             h.connection.send(new ClientboundPlayerAbilitiesPacket(h.getAbilities()));
-            h.getServer().getPlayerList().sendAllPlayerInfo(h);
+            final PlayerList playerList = h.getServer().getPlayerList();
+            playerList.sendAllPlayerInfo(h);
+            playerList.sendPlayerPermissionLevel(h);
             for(MobEffectInstance $$6 : h.getActiveEffects()) {
                 h.connection.send(new ClientboundUpdateMobEffectPacket(h.getId(), $$6));
             }
