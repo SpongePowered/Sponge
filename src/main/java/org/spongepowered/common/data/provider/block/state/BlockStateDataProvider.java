@@ -140,12 +140,8 @@ public final class BlockStateDataProvider {
         registrator.asImmutable(BlockState.class)
                 .create(key)
                     .supports(bs -> bs.getOptionalValue(property).isPresent())
-                    .get(bs -> {
-                        return ((org.spongepowered.api.block.BlockState) bs).stateProperty((StateProperty<T>) property).orElse(null);
-                    })
-                    .set((bs, v) -> {
-                        return (BlockState) ((org.spongepowered.api.block.BlockState) bs).withStateProperty((StateProperty<T>) property, v).orElse(null);
-                    });
+                    .get(bs -> ((org.spongepowered.api.block.BlockState) bs).stateProperty((StateProperty<T>) property).orElse(null))
+                    .set((bs, v) -> (BlockState) ((org.spongepowered.api.block.BlockState) bs).withStateProperty((StateProperty<T>) property, v).orElse((org.spongepowered.api.block.BlockState) bs));
     }
     // @formatter:on
 
