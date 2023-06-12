@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import org.spongepowered.api.data.BlockStateKeys;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class BlockStateDataProvider {
@@ -134,13 +135,13 @@ public final class BlockStateDataProvider {
     }
 
     // @formatter:off
-    private static <T, V extends Comparable<V>> void registerProperty(final DataProviderRegistrator registrator, final Key<Value<T>> key, final Property<V> property) {
+    private static <T extends Comparable<T>, V extends Comparable<V>> void registerProperty(final DataProviderRegistrator registrator, final Key<Value<T>> key, final Property<V> property) {
 
         registrator.asImmutable(BlockState.class)
                 .create(key)
                     .supports(bs -> bs.getOptionalValue(property).isPresent())
-                    .get(bs -> (T) bs.getOptionalValue(property).orElse(null))
-                    .set((bs, v) -> bs.setValue(property, (V) v));
+                    .get(bs -> ((org.spongepowered.api.block.BlockState) bs).stateProperty((StateProperty<T>) property).orElse(null))
+                    .set((bs, v) -> (BlockState) ((org.spongepowered.api.block.BlockState) bs).withStateProperty((StateProperty<T>) property, v).orElse((org.spongepowered.api.block.BlockState) bs));
     }
     // @formatter:on
 
