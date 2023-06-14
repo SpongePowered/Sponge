@@ -721,6 +721,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             DataUtil.syncTagToData(this);
         }
 
+        this.impl$language = ((ServerPlayerBridge) oldPlayer).bridge$getLanguage();
+        this.impl$viewDistance = ((ServerPlayerBridge) oldPlayer).bridge$getViewDistance();
+
         // Update boss bars
         SpongeAdventure.forEachBossBar(bar -> ((BossEventBridge) bar).bridge$replacePlayer(oldPlayer, (net.minecraft.server.level.ServerPlayer) (Object) this));
 
