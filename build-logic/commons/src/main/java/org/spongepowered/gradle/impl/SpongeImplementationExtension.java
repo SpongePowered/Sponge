@@ -103,7 +103,7 @@ public abstract class SpongeImplementationExtension {
     public String generatePlatformBuildVersionString(final String apiVersion, final String minecraftVersion, final String implRecommendedVersion, final String addedVersionInfo) {
         final boolean isRelease = !implRecommendedVersion.endsWith("-SNAPSHOT");
 
-        this.logger.lifecycle("Detected Implementation Version {} as {}", implRecommendedVersion, isRelease ? "Release" : "Snapshot");
+        this.logger.info("[{}]: Detected Implementation Version {} as {}", this.project.getName(), implRecommendedVersion, isRelease ? "Release" : "Snapshot");
         final String apiReleaseVersion = generateApiReleasedVersion(apiVersion);
         final String rawBuildNumber = System.getenv("BUILD_NUMBER");
         final int buildNumber = Integer.parseInt(rawBuildNumber == null ? "0" : rawBuildNumber);

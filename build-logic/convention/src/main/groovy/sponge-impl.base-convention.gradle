@@ -1,0 +1,109 @@
+plugins {
+    id 'net.kyori.indra'
+    id 'org.jetbrains.gradle.plugin.idea-ext'
+    id 'net.kyori.indra.licenser.spotless'
+}
+
+configurations.configureEach {
+    resolutionStrategy.dependencySubstitution {
+        // https://github.com/zml2008/guice/tree/backport/5.0.1
+        substitute(module("com.google.inject:guice:${rootProject.apiLibs.versions.guice.get()}"))
+            .because("We need to run against Guava 21")
+            .using(module("ca.stellardrift.guice-backport:guice:5.0.1"))
+    }
+}
+
+indraSpotlessLicenser {
+    licenseHeaderFile(rootProject.file("HEADER.txt"))
+
+    property("name", "Sponge")
+    property("organization", project.ext.organization)
+    property("url", project.ext.projectUrl)
+}
+
+indra {
+    github("SpongePowered", "Sponge") {
+        ci true
+        publishing true
+    }
+    mitLicense()
+    javaVersions {
+        minimumToolchain 17
+    }
+
+    if (hasProperty("spongeSnapshotRepo") && hasProperty("spongeReleaseRepo")) {
+        publishSnapshotsTo("sponge", spongeSnapshotRepo)
+        publishReleasesTo("sponge", spongeReleaseRepo)
+    }
+}
+
+base {
+    archivesName.set(name.toLowerCase(Locale.ENGLISH))
+}
+
+plugins.withId("org.spongepowered.gradle.vanilla") {
+    minecraft { mc ->
+        mc.version(libs.versions.minecraft.get())
+        mc.injectRepositories(false)
+        project.sourceSets.main.resources
+            .filter { it.name.endsWith(".accesswidener") }
+            .files
+            .each {
+                mc.accessWideners(it)
+                parent?.minecraft?.accessWideners(it)
+            }
+    }
+
+    dependencies {
+        forgeFlower libs.quiltflower
+    }
+
+    tasks.named("decompile") {
+        extraFernFlowerArgs.put("win", "0")
+    }
+}
+
+idea {
+    if (project != null) {
+        project.settings {
+            delegateActions {
+                delegateBuildRunToGradle = false
+                testRunner = org.jetbrains.gradle.ext.ActionDelegationConfig.TestRunner.PLATFORM
+            }
+            compiler {
+                addNotNullAssertions = false
+                useReleaseOption = JavaVersion.current().java10Compatible
+                parallelCompilation = true
+            }
+        }
+    }
+}
+
+spotless {
+    java {
+        toggleOffOn("@formatter:off", "@formatter:on")
+        endWithNewline()
+        indentWithSpaces(4)
+        trimTrailingWhitespace()
+        importOrderFile(rootProject.file("SpongeAPI/extra/eclipse/sponge_eclipse.importorder"))
+        targetExclude("build/generated/**/*") // exclude generated content
+    }
+    if (project.name != "generator") { // removeUnusedImports parses with the javac version used by Gradle, so generator can fail to parse
+        java {
+            removeUnusedImports()
+        }
+    }
+    kotlinGradle {
+        endWithNewline()
+        indentWithSpaces(4)
+        trimTrailingWhitespace()
+    }
+}
+
+def emptyAnnotationProcessors = objects.fileCollection()
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.addAll(["-Xmaxerrs", "1000"])
+    if (project.name != "testplugins" && System.getProperty("idea.sync.active") != null) {
+        options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
+    }
+}

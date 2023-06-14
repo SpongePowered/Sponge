@@ -9,7 +9,24 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
-    repositories { pluginManagement.repositories.each { add(it) } }
+    pluginManagement.repositories.each(repositories.&add)
+    versionCatalogs {
+        libs {
+            from(files("../gradle/libs.versions.toml"))
+        }
+        apiLibs {
+            from(files("../SpongeAPI/gradle/libs.versions.toml"))
+        }
+    }
+}
+
+[
+    "commons",
+    "convention",
+    "templated-resources"
+].each {
+    include(it)
+    findProject(":$it").name = "build-logic-$it"
 }
 
 rootProject.name = "build-logic"

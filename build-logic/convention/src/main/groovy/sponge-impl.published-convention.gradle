@@ -1,0 +1,5 @@
+plugins {
+    id 'sponge-impl.base-convention'
+    // id 'org.spongepowered.gradle.sponge.dev' // TODO: eager task initialization
+    id 'net.kyori.indra.publishing'
+}

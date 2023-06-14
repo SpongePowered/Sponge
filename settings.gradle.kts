@@ -5,38 +5,22 @@ pluginManagement {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
+        maven("https://maven.architectury.dev/")
     }
 
     plugins {
         // Default plugin versions
         id("org.spongepowered.gradle.vanilla") version "0.2.1-SNAPSHOT"
-        id("com.github.johnrengelman.shadow") version "7.1.2"
+        id("dev.architectury.loom") version "1.0.+"
         id("org.spongepowered.gradle.sponge.dev") version "2.1.1"
         id("net.kyori.indra.licenser.spotless") version "3.0.1"
-        id("implementation-structure")
-        id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.6"
-        id("com.github.ben-manes.versions") version "0.42.0"
     }
 }
 
 plugins {
     id("org.spongepowered.gradle.vanilla")
-    id("org.gradle.toolchains.foojay-resolver-convention") version("0.3.0")
-}
-
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT) // needed for forge-loom, unfortunately
-    repositories {
-        maven("https://repo.spongepowered.org/repository/maven-public/") {
-            name = "sponge"
-        }
-    }
-}
-
-rootProject.name = "Sponge"
-
-extensions.configure(MinecraftRepositoryExtension::class) {
-    injectRepositories(false)
+    id("dev.architectury.loom") apply false
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.4.0"
 }
 
 // Set up project structure
@@ -51,14 +35,31 @@ if (!file("SpongeAPI/gradle.properties").exists()) {
     """.trimIndent())
 }
 
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT) // needed for forge-loom, unfortunately
+    pluginManagement.repositories.forEach(repositories::add)
+    versionCatalogs {
+        register("apiLibs") {
+            from(files("SpongeAPI/gradle/libs.versions.toml"))
+        }
+    }
+}
+
+rootProject.name = "Sponge"
+
+extensions.configure(MinecraftRepositoryExtension::class) {
+    injectRepositories(false)
+}
+
 includeBuild("build-logic")
 includeBuild("SpongeAPI") {
     dependencySubstitution {
-        substitute(module("org.spongepowered:spongeapi")).with(project(":"))
+        substitute(module("org.spongepowered:spongeapi")).using(project(":"))
     }
 }
 include(":SpongeVanilla")
 project(":SpongeVanilla").projectDir = file("vanilla")
+include("vanilla-installer")
 include("modlauncher-transformers")
 include("generator")
 
@@ -93,11 +94,8 @@ if (spongeForgeEnabledInCi.toBoolean()) {
     project(":SpongeForge").projectDir = file("forge")
 }
 
-// Bring in a newer architectury t-r
-sourceControl {
-    gitRepository(uri("https://github.com/zml2008/tiny-remapper.git")) {
-        producesModule("dev.architectury:tiny-remapper")
-    }
+if (findProject(":SpongeForge") != null) {
+    apply(plugin = "dev.architectury.loom")
 }
 
 // Include properties from API project (with api prefix)

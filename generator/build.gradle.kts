@@ -1,10 +1,7 @@
 plugins {
     id("org.spongepowered.gradle.vanilla")
+    id("sponge-impl.base-convention")
 }
-
-val apiVersion: String by project
-val organization: String by project
-val projectUrl: String by project
 
 description = "Code generator for automatically producing API catalog classes based off of Vanilla MC data"
 
@@ -17,43 +14,24 @@ minecraft {
             }
 }
 
-java {
-    // generator is non-API, we can use Java 16 just fine
-    if (JavaVersion.current() < JavaVersion.VERSION_16) {
-        toolchain { languageVersion.set(JavaLanguageVersion.of(16)) }
-    }
-
-    // Make eclipse aware of what version we're using
-    sourceCompatibility = JavaVersion.VERSION_16
-    targetCompatibility = JavaVersion.VERSION_16
-}
-
-tasks.withType(JavaCompile::class) {
-    options.release.set(16)
+indra {
+    javaVersions().target(16)
 }
 
 dependencies {
-    val tinyLogVersion: String by project
-    implementation("com.squareup:javapoet:1.13.0")
-    implementation("com.github.javaparser:javaparser-core:3.24.4")
-    implementation("org.tinylog:tinylog-api:$tinyLogVersion")
-    runtimeOnly("org.tinylog:tinylog-impl:$tinyLogVersion")
-}
-
-indraSpotlessLicenser {
-    licenseHeaderFile(rootProject.file("HEADER.txt"))
-
-    property("name", "Sponge")
-    property("organization", organization)
-    property("url", projectUrl)
+    implementation(libs.javapoet)
+    implementation(libs.javaparser)
+    implementation(libs.tinylog.api)
+    runtimeOnly(libs.tinylog.impl)
 }
 
 val apiBase = rootProject.file("SpongeAPI/src/main/java/")
-val temporaryLicenseHeader = project.buildDir.resolve("api-gen-license-header.txt")
 tasks.register("generateApiData", JavaExec::class) {
     group = "sponge"
     description = "Generate API Catalog classes"
     javaLauncher.set(project.javaToolchains.launcherFor(java.toolchain))
+
+    val temporaryLicenseHeader = temporaryDir.resolve("api-gen-license-header.txt")
 
     classpath(sourceSets.main.map { it.output }, sourceSets.main.map { it.runtimeClasspath })
     mainClass.set("org.spongepowered.vanilla.generator.GeneratorMain")

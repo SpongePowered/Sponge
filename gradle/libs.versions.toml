@@ -1,0 +1,42 @@
+[metadata]
+version = "1.0"
+
+[versions]
+minecraft = "1.16.5"
+forge = "36.2.5"
+asm = "9.4"
+log4j = "2.17.1"
+forgeAutoRenamingTool = "0.1.24"
+mixin = "0.8.5"
+modlauncher = "8.1.3"
+jline = "3.21.0"
+tinylog = "2.5.0"
+checkerQual = "3.26.0"
+quiltflower = "1.9.0"
+
+# build
+shadow = "7.1.2"
+versions = "0.44.0"
+
+[libraries]
+# Common
+accessWidener = { module = "net.fabricmc:access-widener", version = "1.0.2" }
+quiltflower = { module = "org.quiltmc:quiltflower", version.ref = "quiltflower" }
+
+# Forge
+
+# Generator
+javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
+javaparser = { module = "com.github.javaparser:javaparser-core", version = "3.24.4" }
+tinylog-api = { module = "org.tinylog:tinylog-api", version.ref = "tinylog" }
+tinylog-impl = { module = "org.tinylog:tinylog-impl", version.ref = "tinylog" }
+
+# modlauncher-transformers
+
+
+# Vanilla
+modlauncher = { module = "cpw.mods:modlauncher", version.ref = "modlauncher" }
+
+[plugins]
+shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
+versions = { id = "com.github.ben-manes.versions", version.ref = "versions" }

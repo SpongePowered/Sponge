@@ -1,0 +1,39 @@
+plugins {
+    id 'org.spongepowered.faceted'
+    id 'sponge-impl.published-convention'
+    id 'implementation-structure'
+}
+
+faceted {
+    facets {
+        applaunch {
+
+        }
+
+        launch {
+            read applauch
+        }
+
+        accessors {
+
+        }
+
+
+        main {
+            read applaunch
+            read launch
+            read accessors
+        }
+
+        mixins {
+            read applaunch
+            read launch
+            read accessors
+            read main
+        }
+    }
+
+    facets.configureEach {
+        withSourcesJar()
+    }
+}

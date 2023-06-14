@@ -1,32 +1,17 @@
 plugins {
-    id "java-gradle-plugin"
-    id "org.spongepowered.gradle.sponge.dev" version "2.1.1"
+    alias(apiLibs.plugins.spongeConvention) apply false
 }
 
-dependencies {
-    api("com.google.code.gson:gson:2.9.1")
-    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.6")
-}
+subprojects {
+    apply plugin: 'org.spongepowered.gradle.sponge.dev'
 
-indraSpotlessLicenser {
-    def parentProject = gradle.parent.rootProject
+    indraSpotlessLicenser {
+        def parentProject = gradle.parent.rootProject
 
-    licenseHeaderFile(parentProject.file('HEADER.txt'))
+        licenseHeaderFile(parentProject.file('HEADER.txt'))
 
-    property("name", "Sponge")
-    property("organization", parentProject.ext.organization)
-    property("url", parentProject.ext.projectUrl)
-}
-
-gradlePlugin {
-    plugins {
-        impl {
-            id = "implementation-structure"
-            implementationClass = "org.spongepowered.gradle.impl.SpongeImplementationPlugin"
-        }
-        templateResources {
-            id = "templated-resources"
-            implementationClass = "org.spongepowered.gradle.impl.TemplatedResourcesPlugin"
-        }
+        property("name", "Sponge")
+        property("organization", parentProject.ext.organization)
+        property("url", parentProject.ext.projectUrl)
     }
 }

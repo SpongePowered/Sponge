@@ -1,0 +1,21 @@
+plugins {
+    id 'java-gradle-plugin'
+}
+
+dependencies {
+    api("com.google.code.gson:gson:2.10.1")
+    api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.7")
+}
+
+gradlePlugin {
+    plugins {
+        impl {
+            id = "implementation-structure"
+            implementationClass = "org.spongepowered.gradle.impl.SpongeImplementationPlugin"
+        }
+        faceted {
+            id = "org.spongepowered.faceted"
+            implementationClass = "org.spongepowered.gradle.impl.FacetedPlugin"
+        }
+    }
+}

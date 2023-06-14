@@ -1,0 +1,15 @@
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+dependencies {
+    api "net.kyori:indra-common:${apiLibs.versions.indra.get()}"
+    api "net.kyori:indra-licenser-spotless:${apiLibs.versions.indra.get()}"
+    api "org.spongepowered:spongegradle-convention:${apiLibs.versions.spongeGradle.get()}"
+    api project(":build-logic-commons")
+}
+
+tasks.withType(GroovyCompile).configureEach {
+    sourceCompatibility '1.8'
+    targetCompatibility '1.8'
+}
