@@ -162,8 +162,8 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                 SpongeCommon.post(SpongeEventFactory.createExecuteCommandEventPost(cause.cause(), originalArgs, args, originalCommand, baseCommand, cause,
                         CommandResult.builder().result(result).build()));
                 return result;
-            } catch (final Exception exception) {
-                return this.commandManager.handleException(originalCommand, originalArgs, cause, exception, baseCommand, args);
+            } catch (final Throwable throwable) {
+                return this.commandManager.handleException(originalCommand, originalArgs, cause, throwable, baseCommand, args);
             }
         }
     }

@@ -556,7 +556,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
         );
     }
 
-    public int handleException(final String originalCommand, final String originalArgs, final CommandCause cause, final Exception ex, final String command, final String args) throws CommandRuntimeException, CommandSyntaxException {
+    public int handleException(final String originalCommand, final String originalArgs, final CommandCause cause, final Throwable ex, final String command, final String args) throws CommandRuntimeException, CommandSyntaxException {
         if (ex instanceof SpongeCommandResultException scre) {
             final CommandResult result = scre.result();
             this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, result);
