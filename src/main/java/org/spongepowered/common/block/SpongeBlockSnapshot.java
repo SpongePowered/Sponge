@@ -443,11 +443,13 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
         @Override
         public @NonNull BuilderImpl world(final @NonNull ServerWorldProperties worldProperties) {
             this.worldKey = Objects.requireNonNull(worldProperties).key();
+            this.worldRef = null;
             return this;
         }
 
         public BuilderImpl world(final ResourceKey key) {
             this.worldKey = Objects.requireNonNull(key);
+            this.worldRef = null;
             return this;
         }
 
