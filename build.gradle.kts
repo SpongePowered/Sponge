@@ -88,6 +88,7 @@ tasks {
         }
 
         jvmArgs("-javaagent:${mlpatcherConfig.get().resolvedConfiguration.files.firstOrNull()}")
+        maxHeapSize = "1G"
 
         val launcherArgs = mixinConfigs.map { "--mixin.config $it" } + superclassConfigs.map { "--superclass_change.config $it" }
         systemProperty("sponge.test.launcherArguments", launcherArgs.joinToString(" "))
