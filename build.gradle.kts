@@ -87,6 +87,8 @@ tasks {
             )
         }
 
+        jvmArgs("-javaagent:${mlpatcherConfig.get().resolvedConfiguration.files.firstOrNull()}")
+
         val launcherArgs = mixinConfigs.map { "--mixin.config $it" } + superclassConfigs.map { "--superclass_change.config $it" }
         systemProperty("sponge.test.launcherArguments", launcherArgs.joinToString(" "))
 
@@ -131,6 +133,8 @@ val mixinsConfig by configurations.register("mixins") {
     extendsFrom(applaunchConfig)
     extendsFrom(launchConfig)
 }
+
+val mlpatcherConfig = configurations.register("mlpatcher")
 
 // create the sourcesets
 val main by sourceSets
@@ -178,6 +182,7 @@ val mixins by sourceSets.registering {
 val test by sourceSets.named("test") {
     spongeImpl.applyNamedDependencyOnOutput(project, mixins.get(), this, project, this.implementationConfigurationName)
     configurations.named(implementationConfigurationName) {
+        extendsFrom(mlpatcherConfig.get())
         extendsFrom(applaunchConfig)
         extendsFrom(launchConfig)
     }
@@ -248,6 +253,8 @@ dependencies {
     add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 
     // Tests
+    mlpatcherConfig.name(project(":modlauncher-patcher"))
+
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
