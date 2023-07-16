@@ -30,10 +30,6 @@ dependencyResolutionManagement {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
-        maven("https://repo.spongepowered.org/repository/quiltmc/") {
-            name = "quiltmc"
-        mavenContent { releasesOnly() }
-        }
     }
 }
 
