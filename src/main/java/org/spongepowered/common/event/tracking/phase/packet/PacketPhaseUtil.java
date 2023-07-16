@@ -125,6 +125,7 @@ public final class PacketPhaseUtil {
         }
         final ItemStack cursor = ItemStackUtil.fromSnapshotToNative(cursorSnap);
         player.containerMenu.setCarried(cursor);
+        player.containerMenu.setRemoteCarried(cursor);
         if (player instanceof net.minecraft.server.level.ServerPlayer) {
             ((net.minecraft.server.level.ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, player.containerMenu.getStateId(), -1, cursor));
         }
