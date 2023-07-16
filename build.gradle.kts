@@ -253,7 +253,7 @@ allprojects {
     }
 
     plugins.withId("org.spongepowered.gradle.vanilla") {
-        val quiltflowerVersion: String by project
+        val vineflowerVersion: String by project
         minecraft {
             version(minecraftVersion)
             injectRepositories(false)
@@ -267,7 +267,7 @@ allprojects {
         }
 
         dependencies {
-            forgeFlower("org.quiltmc:quiltflower:$quiltflowerVersion")
+            decompiler("org.vineflower:vineflower:$vineflowerVersion")
         }
 
         tasks.named("decompile", DecompileJarTask::class) {
