@@ -125,6 +125,11 @@ public final class EntityData {
                             h.clearFire();
                             return dtrBuilder.result(DataTransactionResult.Type.SUCCESS).build();
                         })
+                    .create(Keys.FROZEN_TIME)
+                        .get(h -> Ticks.of(h.getTicksFrozen()))
+                        .set((h, v) -> h.setTicksFrozen((int) v.ticks()))
+                    .create(Keys.MAX_FROZEN_TIME)
+                        .get(h -> Ticks.of(h.getTicksRequiredToFreeze()))
                     .create(Keys.HEIGHT)
                         .get(h -> (double) h.getBbHeight())
                     .create(Keys.INVULNERABILITY_TICKS)
