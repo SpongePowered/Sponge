@@ -153,7 +153,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
 
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch, Set<ClientboundPlayerPositionPacket.RelativeArgument> relativeArguments);
     @Shadow protected abstract void shadow$filterTextPacket(List<String> p_244537_1_, Consumer<List<String>> p_244537_2_);
-    @Shadow public abstract void shadow$resetPosition();
     // @formatter:on
 
     private int impl$ignorePackets;
@@ -549,11 +548,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ServerGamePac
         }
 
         return 0;
-    }
-
-    @Override
-    public void bridge$captureCurrentPlayerPosition() {
-        this.shadow$resetPosition();
     }
 
     @Redirect(method = "handleChat(Ljava/lang/String;)V",

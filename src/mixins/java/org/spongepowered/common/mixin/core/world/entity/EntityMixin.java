@@ -927,12 +927,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     }
 
-
-    @Inject(method = "setPos", at = @At("HEAD"))
-    protected void impl$capturePlayerPosition(final double x, final double y, final double z, final CallbackInfo ci) {
-        // Overridden in ServerPlayer
-    }
-
     @Redirect(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collide(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;"))
     private Vec3 impl$onMoveCollide(final Entity entity, final Vec3 originalMove) {
         final Vec3 afterCollide = this.shadow$collide(originalMove);
