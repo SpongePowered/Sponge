@@ -131,7 +131,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         if (((LevelBridge) player.level).bridge$isFake() || player.level.isClientSide || !(thisContainer.getSlot(slotId) instanceof ResultSlot)) {
             return result;
         }
-        this.bridge$detectAndSendChanges(true);
+        this.bridge$detectAndSendChanges(true, true);
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         TrackingUtil.processBlockCaptures(context); // ClickContainerEvent -> CraftEvent -> PreviewEvent
         // result is modified by the ClickMenuTransaction
@@ -162,6 +162,14 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
     }
 
+    @Inject(method = "broadcastFullState", at = @At("HEAD"))
+    private void impl$broadcastFullStateWithTransactions(final CallbackInfo ci) {
+        if (!PhaseTracker.SERVER.onSidedThread()) {
+            return;
+        }
+        this.bridge$detectAndSendChanges(false, false);
+    }
+
     // broadcastChanges
 
     /**
@@ -176,14 +184,14 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         if (!PhaseTracker.SERVER.onSidedThread()) {
             return;
         }
-        this.bridge$detectAndSendChanges(false);
+        this.bridge$detectAndSendChanges(false, true);
         this.impl$captureSuccess = true; // Detect mod overrides
         ci.cancel();
     }
 
 
     @Override
-    public void bridge$detectAndSendChanges(final boolean captureOnly) {
+    public void bridge$detectAndSendChanges(final boolean capture, final boolean synchronize) {
         // Code-Flow changed from vanilla completely!
 
         final SpongeInventoryMenu menu = ((MenuBridge)this).bridge$getMenu();
@@ -212,7 +220,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             } else {
                 this.impl$capture(i, newStack, oldStack); // Capture changes for inventory events
 
-                if (captureOnly) {
+                if (capture) {
                     continue;
                 }
                 // Perform vanilla logic - updating inventory stack - notify listeners
@@ -232,8 +240,10 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             }
         }
 
-        this.shadow$synchronizeCarriedToRemote();
-        this.impl$broadcastDataSlots();
+        if(synchronize) {
+            this.shadow$synchronizeCarriedToRemote();
+            this.impl$broadcastDataSlots();
+        }
     }
 
     private void impl$sendSlotContents(final Integer i, final ItemStack oldStack) {
