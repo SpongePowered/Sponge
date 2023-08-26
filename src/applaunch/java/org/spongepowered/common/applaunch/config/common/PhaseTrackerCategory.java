@@ -61,18 +61,6 @@ public final class PhaseTrackerCategory {
                                                                 + "and emit a warning about said spawn anyways.")
     public boolean captureAsyncSpawningEntities = true;
 
-    @Setting("capture-async-commands")
-    @Comment("If set to 'true', when a mod or plugin attempts to submit a command\n"
-                                                             + "asynchronously, Sponge will automatically capture said command\n"
-                                                             + "and submit it for processing on the server thread. The catch to\n"
-                                                             + "this is that some mods are performing these commands in vanilla\n"
-                                                             + "without considering the possible consequences of such commands\n"
-                                                             + "affecting any thread-unsafe parts of Minecraft, such as worlds,\n"
-                                                             + "block edits, entity spawns, etc. If this is set to false, Sponge\n"
-                                                             + "will politely ignore the command being executed, and emit a warning\n"
-                                                             + "about said command anyways.")
-    public boolean captureAsyncCommands = true;
-
     @Setting("generate-stack-trace-per-phase")
     @Comment("If 'true', more thorough debugging for PhaseStates \n"
                                                               + "such that a StackTrace is created every time a PhaseState \n"

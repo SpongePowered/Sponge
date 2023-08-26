@@ -40,7 +40,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -57,9 +56,9 @@ public interface ResourceManagerMixin_API extends org.spongepowered.api.resource
     @Override
     default Resource load(final ResourcePath path) throws IOException {
         final ResourceLocation loc = (ResourceLocation) (Object) Objects.requireNonNull(path, "path").key();
-        final Optional<net.minecraft.server.packs.resources.Resource> resource = ((ResourceProvider) this).getResource(loc);
+        final net.minecraft.server.packs.resources.Resource resource = ((ResourceProvider) this).getResourceOrThrow(loc);
         // TODO pass optional up to API?
-        return new SpongeResource(resource.orElseThrow(), path);
+        return new SpongeResource(resource, path);
     }
 
     @Override

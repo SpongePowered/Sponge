@@ -39,14 +39,6 @@ public final class ModuleCategory {
     @Setting("entity-activation-range")
     public boolean entityActivationRange = true;
 
-    @Setting("block-entity-activation")
-    @Comment("Controls block range and tick rate of block entities. \n"
-             + "Use with caution as this can break intended functionality.")
-    public boolean blockEntityActivationRange = false;
-
-    @Setting("entity-collision")
-    public boolean entityCollision = true;
-
     @Setting
     @Comment("Controls whether any exploit patches are applied.\n"
              + "If there are issues with any specific exploits, please\n"
@@ -56,13 +48,6 @@ public final class ModuleCategory {
 
     @Setting
     public boolean optimizations = true;
-
-    @Setting
-    public boolean tracking = true;
-
-    @Setting("real-time")
-    @Comment("Use real (wall) time instead of ticks as much as possible")
-    public boolean realTime = false;
 
     @Setting("movement-checks")
     @Comment("Allows configuring Vanilla movement and speed checks")

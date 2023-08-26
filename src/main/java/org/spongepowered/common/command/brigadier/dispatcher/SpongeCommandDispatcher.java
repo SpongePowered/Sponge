@@ -162,8 +162,8 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                 SpongeCommon.post(SpongeEventFactory.createExecuteCommandEventPost(cause.cause(), originalArgs, args, originalCommand, baseCommand, cause,
                         CommandResult.builder().result(result).build()));
                 return result;
-            } catch (final Exception exception) {
-                return this.commandManager.handleException(originalCommand, originalArgs, cause, exception, baseCommand, args);
+            } catch (final Throwable throwable) {
+                return this.commandManager.handleException(originalCommand, originalArgs, cause, throwable, baseCommand, args);
             }
         }
     }
@@ -462,7 +462,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                     }
 
                     if (parse == null) {
-                        parse = this.parseNodes(redirect instanceof RootCommandNode,
+                        parse = this.parseNodes0(redirect instanceof RootCommandNode,
                                 isSuggestion,
                                 child.getRedirect(),
                                 reader,
@@ -480,7 +480,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                     }
                     return parse2;
                 } else {
-                    final ParseResults<CommandSourceStack> parse = this.parseNodes(false, isSuggestion, child, reader, context);
+                    final ParseResults<CommandSourceStack> parse = this.parseNodes0(false, isSuggestion, child, reader, context);
                     if (potentials == null) {
                         potentials = new ArrayList<>(1);
                     }
