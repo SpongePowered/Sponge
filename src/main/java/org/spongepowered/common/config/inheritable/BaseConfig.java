@@ -33,24 +33,15 @@ import org.spongepowered.configurate.transformation.TransformAction;
 
 public abstract class BaseConfig implements Config {
 
-    @Setting("player-block-tracker")
-    public final PlayerBlockTracker playerBlockTracker = new PlayerBlockTracker();
-
     @Setting
     public final EntityCategory entity = new EntityCategory();
 
     @Setting("entity-activation-range")
     public final EntityActivationRangeCategory entityActivationRange = new EntityActivationRangeCategory();
 
-    @Setting("entity-collision")
-    public final EntityCollisionCategory entityCollision = new EntityCollisionCategory();
-
     @Setting("spawner")
     @Comment("Used to control spawn limits around a player's view distance.")
     public final SpawnerCategory spawner = new SpawnerCategory();
-
-    @Setting("block-entity-activation")
-    public final BlockEntityActivationCategory blockEntityActivation = new BlockEntityActivationCategory();
 
     @Setting("movement-checks")
     public final MovementChecksCategory movementChecks = new MovementChecksCategory();
@@ -60,10 +51,21 @@ public abstract class BaseConfig implements Config {
 
     public static ConfigurationTransformation transformation() {
         return ConfigurationTransformation.versionedBuilder()
-            .addVersion(2, BaseConfig.buildOneToTwo())
-            // move everything out of sponge subcategory
-            .addVersion(1, BaseConfig.buildInitialToOne())
-            .build();
+                .addVersion(3, BaseConfig.buildTwoToThree())
+                .addVersion(2, BaseConfig.buildOneToTwo())
+                // move everything out of sponge subcategory
+                .addVersion(1, BaseConfig.buildInitialToOne())
+                .build();
+    }
+
+    static ConfigurationTransformation buildTwoToThree() {
+        return ConfigurationTransformation.builder()
+                .addAction(NodePath.path("player-block-tracker"), TransformAction.remove())
+                .addAction(NodePath.path("entity-collision"), TransformAction.remove())
+                .addAction(NodePath.path("block-entity-activation"), TransformAction.remove())
+                .addAction(NodePath.path("entity", "max-bounding-box-size"), TransformAction.remove())
+                .addAction(NodePath.path("entity", "max-speed"), TransformAction.remove())
+                .build();
     }
 
     static ConfigurationTransformation buildOneToTwo() {
