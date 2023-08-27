@@ -95,7 +95,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
             } else if (this.impl$handshakeState == ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_SYNC_PLUGIN_DATA) {
                 final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
                 if (store.isEmpty()) {
-                    this.state = ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT;
+                    this.state = ServerLoginPacketListenerImpl.State.VERIFYING;
                 }
             }
         }
@@ -103,8 +103,9 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
 
     @Inject(method = "handleHello", at = @At("RETURN"))
     private void impl$onProcessLoginStart(final ServerboundHelloPacket packet, final CallbackInfo ci) {
-        if (this.state == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
+        // TODO investigate
+        /*if (this.state == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
             this.state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
-        }
+        }*/
     }
 }

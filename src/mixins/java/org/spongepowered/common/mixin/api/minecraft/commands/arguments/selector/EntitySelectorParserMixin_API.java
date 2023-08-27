@@ -70,6 +70,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
@@ -172,7 +173,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         if (range.max() != null && range.max() < 0) {
             throw new IllegalArgumentException("max must be non-negative");
         }
-        this.distance = MinMaxBounds_DoublesAccessor.invoker$new(range.min(), range.max());
+        this.distance = MinMaxBounds_DoublesAccessor.invoker$new(Optional.ofNullable(range.min()), Optional.ofNullable(range.max()));
         return this;
     }
 
@@ -265,7 +266,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     public Selector.@NonNull Builder experienceLevel(final @NonNull Range<@NonNull Integer> range) {
         Preconditions.checkArgument(range.min() == null || range.min() >= 0, "min must be non-negative");
         Preconditions.checkArgument(range.max() == null || range.max() >= 0, "max must be non-negative");
-        this.level = MinMaxBounds_IntsAccessor.invoker$new(range.min(), range.max());
+        this.level = MinMaxBounds_IntsAccessor.invoker$new(Optional.of(range.min()), Optional.of(range.max()));
         this.shadow$setIncludesEntities(false);
         return this;
     }

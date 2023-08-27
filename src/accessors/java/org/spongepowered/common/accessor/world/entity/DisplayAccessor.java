@@ -49,14 +49,14 @@ public interface DisplayAccessor {
         throw new UntransformedInvokerError();
     }
 
-    @Invoker("setInterpolationDuration") void invoker$setInterpolationDuration(int $$0);
+    @Invoker("setTransformationInterpolationDuration") void invoker$setInterpolationDuration(int $$0);
 
-    @Invoker("getInterpolationDuration") int invoker$getInterpolationDuration();
+    @Invoker("getTransformationInterpolationDuration") int invoker$getInterpolationDuration();
 
 
-    @Invoker("setInterpolationDelay") void invoker$setInterpolationDelay(int $$0);
+    @Invoker("setTransformationInterpolationDelay") void invoker$setInterpolationDelay(int $$0);
 
-    @Invoker("getInterpolationDelay") int invoker$getInterpolationDelay();
+    @Invoker("getTransformationInterpolationDelay") int invoker$getInterpolationDelay();
 
 
     @Invoker("setShadowRadius") void invoker$setShadowRadius(float $$0);

@@ -23,6 +23,7 @@
         "server.BootstrapMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",
         "server.level.ServerPlayerMixin_Vanilla",
+        "server.network.ServerCommonPacketListenerImplMixin_Vanilla",
         "server.network.ServerGamePacketListenerImplMixin_Vanilla",
         "server.network.ServerLoginPacketListenerImpl_1Mixin_Vanilla",
         "server.network.ServerLoginPacketListenerImplMixin_Vanilla",

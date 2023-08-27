@@ -55,8 +55,6 @@ public abstract class ServerGamePacketListenerImplMixin_Tracker {
 
     @Shadow public ServerPlayer player;
 
-    @Shadow public abstract void disconnect(Component textComponent);
-
     @Redirect(method = "tick",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;doTick()V"))
     private void tracker$wrapPlayerTickWithPhase(final ServerPlayer player) {

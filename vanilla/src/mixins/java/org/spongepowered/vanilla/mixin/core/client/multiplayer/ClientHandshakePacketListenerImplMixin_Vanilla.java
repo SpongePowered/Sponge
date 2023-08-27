@@ -56,7 +56,7 @@ public abstract class ClientHandshakePacketListenerImplMixin_Vanilla implements 
         this.minecraft.execute(() -> {
             final EngineConnection connection = (EngineConnection) this;
             if (!channelRegistry.handleLoginRequestPayload(connection, packet)) {
-                PacketSender.sendTo(connection, PacketUtil.createLoginPayloadResponse(null, packet.getTransactionId()));
+                PacketSender.sendTo(connection, PacketUtil.createLoginPayloadResponse(null, packet.transactionId()));
             }
         });
     }

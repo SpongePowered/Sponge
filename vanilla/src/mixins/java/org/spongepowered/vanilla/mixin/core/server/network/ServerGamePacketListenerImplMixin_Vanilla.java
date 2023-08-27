@@ -51,24 +51,10 @@ import org.spongepowered.common.event.tracking.context.transaction.Transactional
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 
 @Mixin(value = ServerGamePacketListenerImpl.class, priority = 999)
-public abstract class ServerGamePacketListenerImplMixin_Vanilla implements ServerGamePacketListener {
-
-    // @formatter:on
-    @Shadow @Final private MinecraftServer server;
-    // @formatter:off
-
-    @Inject(method = "handleCustomPayload", at = @At(value = "HEAD"))
-    private void vanilla$onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
-        // For some reason, "ServerboundCustomPayloadPacket" is released in the processPacket
-        // method of its class, only applicable to this packet, so just retain here.
-        packet.getData().retain();
-
-        final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
-        this.server.execute(() -> channelRegistry.handlePlayPayload((EngineConnection) this, packet));
-    }
+public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCommonPacketListenerImplMixin_Vanilla implements ServerGamePacketListener {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Redirect(method = "lambda$handlePlaceRecipe$13",
+    @Redirect(method = "lambda$handlePlaceRecipe$11",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
     private void vanilla$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final net.minecraft.server.level.ServerPlayer player) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();

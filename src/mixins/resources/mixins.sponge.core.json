@@ -70,6 +70,7 @@
         "server.level.TicketMixin",
         "server.level.TicketTypeMixin",
         "server.network.LegacyQueryHandlerMixin",
+        "server.network.ServerCommonPacketListenerImplMixin",
         "server.network.ServerGamePacketListenerImpl_1Mixin",
         "server.network.ServerGamePacketListenerImplMixin",
         "server.network.ServerHandshakePacketListenerImplMixin",

@@ -92,12 +92,12 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
     public void bridge$setDecorations(final Set<org.spongepowered.api.map.decoration.MapDecoration> newDecorations) {
         this.decorations.clear();
         for (final org.spongepowered.api.map.decoration.MapDecoration decoration : newDecorations) {
-            this.impl$addDecorationToDecorationsMapIfNotExists((MapDecoration) decoration);
+            this.impl$addDecorationToDecorationsMapIfNotExists((MapDecoration) (Object) decoration);
         }
         for (final MapDecoration existingDecoration : this.decorations.values()) {
             if (!newDecorations.contains(existingDecoration)) {
                 // Removed.
-                ((MapDecorationBridge)existingDecoration).notifyRemovedFromMap((MapInfo) this);
+                ((MapDecorationBridge) (Object) existingDecoration).notifyRemovedFromMap((MapInfo) this);
                 this.setDirty();
             }
         }
@@ -112,7 +112,7 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
     @Override
     public Set<org.spongepowered.api.map.decoration.MapDecoration> bridge$getDecorations() {
         return this.decorations.values().stream()
-                .map(mapDecoration -> (org.spongepowered.api.map.decoration.MapDecoration)mapDecoration)
+                .map(mapDecoration -> (org.spongepowered.api.map.decoration.MapDecoration) (Object) mapDecoration)
                 .collect(Collectors.toSet());
     }
 
@@ -161,12 +161,12 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
     }
 
     public void impl$addDecorationToDecorationsMapIfNotExists(final MapDecoration mapDecoration) {
-        final MapDecorationBridge bridge = (MapDecorationBridge)mapDecoration;
+        final MapDecorationBridge bridge = (MapDecorationBridge) (Object) mapDecoration;
         bridge.bridge$setPersistent(true); // Anything saved should be persistent so it can save next time too.
         if (this.decorations.containsKey(bridge.bridge$getKey())) {
             return;
         }
-        ((MapDecorationBridge)mapDecoration).notifyAddedToMap((MapInfo) this);
+        ((MapDecorationBridge) (Object) mapDecoration).notifyAddedToMap((MapInfo) this);
         this.decorations.put(bridge.bridge$getKey(), mapDecoration);
         this.setDirty();
     }

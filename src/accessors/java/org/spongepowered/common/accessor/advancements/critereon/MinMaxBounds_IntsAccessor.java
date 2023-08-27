@@ -30,10 +30,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
+import java.util.Optional;
+
 @Mixin(MinMaxBounds.Ints.class)
 public interface MinMaxBounds_IntsAccessor {
 
-    @Invoker("<init>") static MinMaxBounds.Ints invoker$new(final @Nullable Integer min, final @Nullable Integer max) {
+    @Invoker("<init>") static MinMaxBounds.Ints invoker$new(final Optional<Integer> min, final Optional<Integer> max) {
         throw new UntransformedInvokerError();
     }
 

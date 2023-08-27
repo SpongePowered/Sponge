@@ -39,6 +39,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.scoreboard.Scoreboard;
+import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
 import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
@@ -55,7 +56,7 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
             return ClientType.VANILLA;
         }
 
-        return ((ConnectionBridge) ((ServerGamePacketListenerImplAccessor) mPlayer.connection).accessor$connection()).bridge$getClientType();
+        return ((ConnectionBridge) ((ServerCommonPacketListenerImplAccessor) mPlayer.connection).accessor$connection()).bridge$getClientType();
     }
 
     int bridge$getViewDistance();

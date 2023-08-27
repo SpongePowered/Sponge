@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,11 +45,11 @@ public abstract class BeaconBlockEntityMixin extends BlockEntityMixin {
      * @param id The id
      * @return The potion by id, no validation
      */
-    @Redirect(method = "load",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BeaconBlockEntity;getValidEffectById(I)Lnet/minecraft/world/effect/MobEffect;")
+    @Redirect(method = "loadEffect",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BeaconBlockEntity;filterEffect(Lnet/minecraft/world/effect/MobEffect;)Lnet/minecraft/world/effect/MobEffect;")
     )
     @Nullable
-    private MobEffect impl$UsePotionUtilInsteadOfCheckingValidPotions(final int id) {
-        return MobEffect.byId(id);
+    private static MobEffect impl$UsePotionUtilInsteadOfCheckingValidPotions(MobEffect effect) {
+        return effect;
     }
 }

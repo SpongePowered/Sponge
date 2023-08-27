@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.network.channel.packet;
 
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.login.custom.CustomQueryAnswerPayload;
+import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
+import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.ClientSideConnection;
@@ -85,7 +89,18 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
             final TransactionStore transactionStore = ConnectionUtil.getTransactionStore(connection);
             final int transactionId = transactionStore.nextId();
 
-            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(Constants.Channels.FML_LOGIN_WRAPPER_CHANNEL, payload, transactionId);
+            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
+                                                                                                               @Override
+                                                                                                               public ResourceLocation id() {
+                                                                                                                   return (ResourceLocation) (Object) Constants.Channels.FML_LOGIN_WRAPPER_CHANNEL;
+                                                                                                               }
+
+                                                                                                               @Override
+                                                                                                               public void write(FriendlyByteBuf var1) {
+                                                                                                                   var1.writeBytes((FriendlyByteBuf)payload);
+                                                                                                               }
+                                                                                                           }
+                    , transactionId);
             PacketSender.sendTo(connection, mcPacket, sendFuture -> {
                 if (!sendFuture.isSuccess()) {
                     // Failed before it could reach the client
@@ -114,8 +129,20 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
 
             final TransactionStore transactionStore = ConnectionUtil.getTransactionStore(connection);
             final int transactionId = transactionStore.nextId();
+            final ResourceKey key = SpongeBasicPacketChannel.this.key();
 
-            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(SpongeBasicPacketChannel.this.key(), payload, transactionId);
+            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
+                                                                                                               @Override
+                                                                                                               public ResourceLocation id() {
+                                                                                                                   return (ResourceLocation) (Object) key;
+                                                                                                               }
+
+                                                                                                               @Override
+                                                                                                               public void write(FriendlyByteBuf var1) {
+                                                                                                                   var1.writeBytes((FriendlyByteBuf)payload);
+                                                                                                               }
+                                                                                                           }
+                    , transactionId);
             PacketSender.sendTo(connection, mcPacket, future);
             return future;
         }
@@ -269,7 +296,9 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
                     protected void success0(final Packet response) {
                         try {
                             final ChannelBuf responsePayload = SpongeBasicPacketChannel.this.encodeLoginPayload(transactionalBinding.opcode(), response);
-                            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadResponse(responsePayload, transactionId);
+                            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadResponse(var1 -> {
+                                var1.writeBytes((FriendlyByteBuf)responsePayload);
+                            }, transactionId);
                             PacketSender.sendTo(connection, mcPacket);
                         } catch (final Throwable ex) {
                             SpongeBasicPacketChannel.this.handleException(connection, new ChannelIOException("Failed to encode response packet", ex), null);

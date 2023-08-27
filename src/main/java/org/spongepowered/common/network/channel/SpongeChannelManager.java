@@ -29,6 +29,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.network.protocol.login.custom.CustomQueryAnswerPayload;
@@ -274,16 +275,26 @@ public final class SpongeChannelManager implements ChannelManager {
         }
     }
 
+    public boolean handlePlayPayload(final EngineConnection connection, final CustomPacketPayload payload) {
+        final ResourceKey channel = (ResourceKey) (Object) payload.id();
+        final ChannelBuf buf = this.bufferAllocator.buffer();
+        payload.write((FriendlyByteBuf) buf);
+
+        return this.handlePlayPayload(connection, channel, buf);
+    }
+
     public boolean handlePlayPayload(final EngineConnection connection, final ServerboundCustomPayloadPacket packet) {
-        final ResourceKey channel = (ResourceKey) (Object) packet.getIdentifier();
-        final ChannelBuf payload = (ChannelBuf) packet.getData();
+        final ResourceKey channel = (ResourceKey) (Object) packet.payload().id();
+        final ChannelBuf payload = this.bufferAllocator.buffer();
+        packet.payload().write((FriendlyByteBuf) payload);
 
         return this.handlePlayPayload(connection, channel, payload);
     }
 
     public boolean handlePlayPayload(final EngineConnection connection, final ClientboundCustomPayloadPacket packet) {
-        final ResourceKey channel = (ResourceKey) (Object) packet.getIdentifier();
-        final ChannelBuf payload = (ChannelBuf) packet.getData();
+        final ResourceKey channel = (ResourceKey) (Object) packet.payload().id();
+        final ChannelBuf payload = this.bufferAllocator.buffer();
+        packet.payload().write((FriendlyByteBuf) payload);
 
         return this.handlePlayPayload(connection, channel, payload);
     }
@@ -329,9 +340,10 @@ public final class SpongeChannelManager implements ChannelManager {
 
     public boolean handleLoginRequestPayload(final EngineConnection connection, final ClientboundCustomQueryPacket packet) {
         // Server -> Client request
-        final ResourceKey channel = (ResourceKey) (Object) packet.getIdentifier();
-        final int transactionId = packet.getTransactionId();
-        final ChannelBuf payload = (ChannelBuf) packet.getData();
+        final ResourceKey channel = (ResourceKey) (Object) packet.payload().id();
+        final int transactionId = packet.transactionId();
+        final ChannelBuf payload = this.bufferAllocator.buffer();
+        packet.payload().write((FriendlyByteBuf) payload);
 
         try {
             return this.handleLoginRequestPayload(connection, channel, transactionId, payload);
@@ -374,8 +386,9 @@ public final class SpongeChannelManager implements ChannelManager {
     public void handleLoginResponsePayload(final EngineConnection connection, final ServerboundCustomQueryAnswerPacket packet) {
         // Client -> Server response
 
-        final int transactionId = packet.getTransactionId();
-        final ChannelBuf payload = (ChannelBuf) packet.getData();
+        final int transactionId = packet.transactionId();
+        final ChannelBuf payload = this.bufferAllocator.buffer();
+        packet.payload().write((FriendlyByteBuf) payload);
 
         try {
             this.handleLoginResponsePayload(connection, transactionId, payload);

@@ -25,6 +25,7 @@
 package org.spongepowered.common.network;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
@@ -78,9 +79,29 @@ public final class PacketUtil {
 
     public static net.minecraft.network.protocol.Packet<?> createPlayPayload(final ResourceKey channel, final ChannelBuf payload, final EngineConnectionSide<?> side) {
         if (side == EngineConnectionSide.CLIENT) {
-            return new ServerboundCustomPayloadPacket((ResourceLocation) (Object) channel, (FriendlyByteBuf) payload);
+            return new ServerboundCustomPayloadPacket(new CustomPacketPayload() {
+                @Override
+                public void write(FriendlyByteBuf var1) {
+                    var1.writeBytes((FriendlyByteBuf)payload);
+                }
+
+                @Override
+                public ResourceLocation id() {
+                    return (ResourceLocation) (Object) channel;
+                }
+            });
         } else if (side == EngineConnectionSide.SERVER) {
-            return new ClientboundCustomPayloadPacket((ResourceLocation) (Object) channel, (FriendlyByteBuf) payload);
+            return new ClientboundCustomPayloadPacket(new CustomPacketPayload() {
+                @Override
+                public void write(FriendlyByteBuf var1) {
+                    var1.writeBytes((FriendlyByteBuf)payload);
+                }
+
+                @Override
+                public ResourceLocation id() {
+                    return (ResourceLocation) (Object) channel;
+                }
+            });
         } else {
             throw new UnsupportedOperationException();
         }

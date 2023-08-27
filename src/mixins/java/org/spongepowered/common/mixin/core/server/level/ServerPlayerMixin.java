@@ -44,6 +44,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -109,6 +110,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.ConnectionAccessor;
+import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
 import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
@@ -266,7 +268,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         // Update locale on Channel, used for sending localized messages
         if (this.connection != null) {
-            final Channel channel = ((ConnectionAccessor) ((ServerGamePacketListenerImplAccessor) this.connection).accessor$connection()).accessor$channel();
+            final Channel channel = ((ConnectionAccessor) ((ServerCommonPacketListenerImplAccessor) this.connection).accessor$connection()).accessor$channel();
             channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(language);
 
             SpongeAdventure.forEachBossBar(bar -> {
@@ -492,9 +494,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     protected final void impl$prepareForPortalTeleport(final ServerLevel currentWorld, final ServerLevel targetWorld) {
         final LevelData levelData = targetWorld.getLevelData();
-        this.connection.send(new ClientboundRespawnPacket(targetWorld.dimensionTypeId(), targetWorld.dimension(),
+        this.connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(targetWorld.dimensionTypeId(), targetWorld.dimension(),
                 BiomeManager.obfuscateSeed(targetWorld.getSeed()), this.gameMode.getGameModeForPlayer(),
-                this.gameMode.getPreviousGameModeForPlayer(), targetWorld.isDebug(), targetWorld.isFlat(), ClientboundRespawnPacket.KEEP_ALL_DATA, this.shadow$getLastDeathLocation(), this.shadow$getPortalCooldown()));
+                this.gameMode.getPreviousGameModeForPlayer(), targetWorld.isDebug(), targetWorld.isFlat(), this.shadow$getLastDeathLocation(), this.shadow$getPortalCooldown()),
+                ClientboundRespawnPacket.KEEP_ALL_DATA));
         this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         final PlayerList playerlist = this.server.getPlayerList();
         playerlist.sendPlayerPermissionLevel((net.minecraft.server.level.ServerPlayer) (Object) this);

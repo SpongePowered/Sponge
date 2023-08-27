@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.spongepowered.api.block.entity.carrier.Beacon;
@@ -54,8 +55,8 @@ public abstract class BeaconBlockEntityMixin_API extends BlockEntityMixin_API im
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(Constants.TileEntity.Beacon.PRIMARY, MobEffect.getId(this.primaryPower));
-        container.set(Constants.TileEntity.Beacon.SECONDARY, MobEffect.getId(this.secondaryPower));
+        container.set(Constants.TileEntity.Beacon.PRIMARY, BuiltInRegistries.MOB_EFFECT.getId(this.primaryPower));
+        container.set(Constants.TileEntity.Beacon.SECONDARY, BuiltInRegistries.MOB_EFFECT.getId(this.secondaryPower));
         return container;
     }
 

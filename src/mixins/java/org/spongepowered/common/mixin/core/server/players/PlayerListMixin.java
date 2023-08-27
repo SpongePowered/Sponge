@@ -38,9 +38,10 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
+import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -322,7 +323,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             shift = At.Shift.AFTER
         )
     )
-    private void impl$onInitPlayer_BeforeSetWorld(final Connection p_72355_1_, final net.minecraft.server.level.ServerPlayer p_72355_2_, final CallbackInfo ci) {
+    private void impl$onInitPlayer_BeforeSetWorld(final Connection p_72355_1_, final net.minecraft.server.level.ServerPlayer p_72355_2_, final int $$2, final CallbackInfo ci) {
         if (!p_72355_1_.isConnected()) {
             ci.cancel();
         }
@@ -377,32 +378,22 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((ServerPlayerBridge) playerIn).bridge$setConnectionMessageToSend(message);
     }
 
-    @Redirect(method = "placeNewPlayer", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundLoginPacket"))
-    private ClientboundLoginPacket impl$usePerWorldViewDistance(final int playerId,
+    @Redirect(method = "placeNewPlayer", at = @At(value = "NEW", target = "(IZLjava/util/Set;IIIZZLnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;)Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;"))
+    private ClientboundLoginPacket impl$usePerWorldViewDistance(
+            final int playerId,
             final boolean hardcore,
-            final GameType gameType,
-            final GameType previousGameType,
             final Set levels,
-            final RegistryAccess.Frozen registryHolder,
-            final ResourceKey dimensionType,
-            final ResourceKey dimension,
-            final long seed,
             final int maxPlayers,
             final int chunkRadius,
             final int simulationDistance,
             final boolean reducedDebugInfo,
             final boolean showDeathScreen,
-            final boolean isDebug,
-            final boolean isFlat,
-            final Optional lastDeathLocation,
-            final int portalCooldown,
+            final CommonPlayerSpawnInfo info,
             final Connection conn,
             final net.minecraft.server.level.ServerPlayer player) {
-
         final Integer viewDistance = ((PrimaryLevelDataBridge) player.serverLevel().getLevelData()).bridge$viewDistance().orElse(chunkRadius);
-        return new ClientboundLoginPacket(playerId, hardcore, gameType, previousGameType, levels, registryHolder, dimensionType, dimension,
-                seed, maxPlayers, viewDistance, simulationDistance, reducedDebugInfo, showDeathScreen, isDebug, isFlat, lastDeathLocation,
-                portalCooldown);
+        return new ClientboundLoginPacket(playerId, hardcore, levels, maxPlayers, viewDistance, simulationDistance, reducedDebugInfo,
+                showDeathScreen, info);
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))
@@ -456,7 +447,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @Inject(method = "placeNewPlayer", at = @At(value = "RETURN"))
-    private void impl$onInitPlayer_join(final Connection networkManager, final net.minecraft.server.level.ServerPlayer mcPlayer, final CallbackInfo ci) {
+    private void impl$onInitPlayer_join(final Connection networkManager, final net.minecraft.server.level.ServerPlayer mcPlayer, final int $$2, final CallbackInfo ci) {
         final ServerPlayer player = (ServerPlayer) mcPlayer;
         final ServerSideConnection connection = player.connection();
         final Cause cause = Cause.of(EventContext.empty(), connection, player);
@@ -548,8 +539,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         method = "respawn",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;getX()D"),
         slice = @Slice(
-            from = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundRespawnPacket"),
-            to = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundSetDefaultSpawnPositionPacket")
+            from = @At(value = "NEW", target = "(Lnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;B)Lnet/minecraft/network/protocol/game/ClientboundRespawnPacket;"),
+            to = @At(value = "NEW", target = "(Lnet/minecraft/core/BlockPos;F)Lnet/minecraft/network/protocol/game/ClientboundSetDefaultSpawnPositionPacket;")
         )
     )
     private double impl$callRespawnPlayerRecreateEvent(final net.minecraft.server.level.ServerPlayer newPlayer,

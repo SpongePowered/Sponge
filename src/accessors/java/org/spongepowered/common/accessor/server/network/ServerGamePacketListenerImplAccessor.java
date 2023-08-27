@@ -36,7 +36,4 @@ public interface ServerGamePacketListenerImplAccessor {
     @Accessor("messageSignatureCache")
     MessageSignatureCache accessor$messageSignatureCache();
 
-    @Accessor("connection") Connection accessor$connection();
-
-
 }
