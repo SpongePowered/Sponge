@@ -47,7 +47,6 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
 import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
-import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;

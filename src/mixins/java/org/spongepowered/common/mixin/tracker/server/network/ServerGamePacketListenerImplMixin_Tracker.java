@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.tracker.server.network;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;

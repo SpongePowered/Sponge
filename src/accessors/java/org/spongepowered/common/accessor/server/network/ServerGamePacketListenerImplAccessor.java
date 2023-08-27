@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.accessor.server.network;
 
-import net.minecraft.network.Connection;
 import net.minecraft.network.chat.MessageSignatureCache;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;

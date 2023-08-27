@@ -40,7 +40,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
-import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;

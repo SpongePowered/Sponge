@@ -25,7 +25,6 @@
 package org.spongepowered.common.accessor.advancements.critereon;
 
 import net.minecraft.advancements.critereon.MinMaxBounds;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;

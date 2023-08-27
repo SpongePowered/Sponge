@@ -27,7 +27,6 @@ package org.spongepowered.vanilla.mixin.core.client.multiplayer;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.asm.mixin.Mixin;
