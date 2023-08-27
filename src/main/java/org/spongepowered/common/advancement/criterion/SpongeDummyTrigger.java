@@ -28,10 +28,11 @@ import com.google.gson.JsonObject;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
 import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.DeserializationContext;
-import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
+
+import java.util.Optional;
 
 public final class SpongeDummyTrigger extends SimpleCriterionTrigger<SpongeDummyTrigger.Instance> {
 
@@ -49,23 +50,23 @@ public final class SpongeDummyTrigger extends SimpleCriterionTrigger<SpongeDummy
     }
 
     @Override
-    protected Instance createInstance(final JsonObject jsonObject, final ContextAwarePredicate andPredicate, final DeserializationContext
+    protected Instance createInstance(final JsonObject jsonObject, final Optional<ContextAwarePredicate> andPredicate, final DeserializationContext
             conditionArrayParser) {
         return new SpongeDummyTrigger.Instance(this.resourceLocation, andPredicate);
     }
 
     public static class Instance extends AbstractCriterionTriggerInstance {
 
-        public Instance(final ResourceLocation resourceLocation, final ContextAwarePredicate andPredicate) {
+        public Instance(final ResourceLocation resourceLocation, final Optional<ContextAwarePredicate> andPredicate) {
             super(resourceLocation, andPredicate);
         }
 
         public static Instance dummy() {
-            return new Instance(SpongeDummyTrigger.DUMMY_TRIGGER.getId(), ContextAwarePredicate.ANY);
+            return new Instance(SpongeDummyTrigger.DUMMY_TRIGGER.getId(), Optional.empty());
         }
 
         @Override
-        public JsonObject serializeToJson(final SerializationContext arraySerializer) {
+        public JsonObject serializeToJson() {
             return new JsonObject();
         }
     }

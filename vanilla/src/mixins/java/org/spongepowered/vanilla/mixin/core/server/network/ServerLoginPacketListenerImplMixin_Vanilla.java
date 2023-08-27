@@ -25,7 +25,7 @@
 package org.spongepowered.vanilla.mixin.core.server.network;
 
 import net.minecraft.network.protocol.login.ServerLoginPacketListener;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
@@ -66,7 +66,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
     private int impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_NOT_STARTED;
 
     @Inject(method = "handleCustomQueryPacket", at = @At("HEAD"), cancellable = true)
-    private void onResponsePayload(final ServerboundCustomQueryPacket packet, final CallbackInfo ci) {
+    private void onResponsePayload(final ServerboundCustomQueryAnswerPacket packet, final CallbackInfo ci) {
         ci.cancel();
 
         final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();

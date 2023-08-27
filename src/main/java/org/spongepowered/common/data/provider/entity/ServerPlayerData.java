@@ -32,6 +32,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundSetExperiencePacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.stats.Stat;
@@ -142,7 +143,7 @@ public final class ServerPlayerData {
             // Add Entity
             h.serverLevel().getChunkSource().addEntity(h);
             // Reconnect local player
-            h.connection.send(new ClientboundRespawnPacket(
+            h.connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(
                     h.level().dimensionTypeId(),
                     h.level().dimension(),
                     BiomeManager.obfuscateSeed(h.serverLevel().getSeed()),
@@ -150,9 +151,8 @@ public final class ServerPlayerData {
                     h.gameMode.getPreviousGameModeForPlayer(),
                     h.serverLevel().isDebug(),
                     h.serverLevel().isFlat(),
-                    (byte) 0,
                     h.getLastDeathLocation(),
-                    h.getPortalCooldown()));
+                    h.getPortalCooldown()), (byte) 0));
             // tp - just in case
             h.connection.teleport(h.getX(), h.getY(), h.getZ(), h.getYRot(), h.getXRot());
             // resend remaining player data... (see ServerPlayer#changeDimension)

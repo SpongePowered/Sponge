@@ -184,7 +184,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
         registry = registrySupplier.apply(key);
 
         if (defaultValues != null) {
-            final WritableRegistry<T> mr = (WritableRegistry<T>) registry;
+            final MappedRegistry<T> mr = (MappedRegistry<T>) registry;
             defaultValues.forEach((vk, vi, vv) -> {
                 if (vi.isPresent()) {
                     mr.registerMapping(

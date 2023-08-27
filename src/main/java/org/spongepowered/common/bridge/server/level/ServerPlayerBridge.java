@@ -29,6 +29,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
+import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
@@ -94,8 +95,8 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
 
     default void bridge$sendChangeDimension(final Holder<DimensionType> dimensionType, final ResourceKey<Level> key, final long hashedSeed,
             final GameType gameType, final GameType previousGameType, final boolean isDebug, final boolean isFlat, final byte dataToKeepMask) {
-        ((ServerPlayer) this).connection.send(new ClientboundRespawnPacket(dimensionType.unwrapKey().get(), key, hashedSeed, gameType, previousGameType, isDebug,
-                isFlat, dataToKeepMask, ((ServerPlayer) this).getLastDeathLocation(), ((ServerPlayer) this).getPortalCooldown()));
+        ((ServerPlayer) this).connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(dimensionType.unwrapKey().get(), key, hashedSeed, gameType, previousGameType, isDebug,
+                isFlat, ((ServerPlayer) this).getLastDeathLocation(), ((ServerPlayer) this).getPortalCooldown()), dataToKeepMask));
     }
 
     default void bridge$sendViewerEnvironment(final DimensionType dimensionType) {

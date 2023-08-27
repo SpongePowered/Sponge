@@ -25,8 +25,9 @@
 package org.spongepowered.vanilla.mixin.core.client.multiplayer;
 
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
-import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,9 +39,8 @@ import org.spongepowered.common.network.channel.SpongeChannelManager;
 @Mixin(ClientPacketListener.class)
 public abstract class ClientPacketListenerMixin_Vanilla implements ClientGamePacketListener {
 
-    @Inject(method = "handleCustomPayload", cancellable = true, at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;getIdentifier()Lnet/minecraft/resources/ResourceLocation;"))
-    private void vanilla$handleCustomPayload(final ClientboundCustomPayloadPacket packet, final CallbackInfo ci) {
+    @Inject(method = "handleCustomPayload", cancellable = true, at = @At(value = "HEAD"))
+    private void vanilla$handleCustomPayload(final CustomPacketPayload packet, CallbackInfo ci) {
         final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
         if (channelRegistry.handlePlayPayload((EngineConnection) this, packet)) {
             ci.cancel();

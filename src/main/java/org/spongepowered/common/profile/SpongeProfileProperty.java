@@ -42,7 +42,7 @@ public final class SpongeProfileProperty implements ProfileProperty {
     private final @Nullable String signature;
 
     public SpongeProfileProperty(final Property property) {
-        this(property.getName(), property.getValue(), property.getSignature());
+        this(property.name(), property.value(), property.signature());
     }
 
     public SpongeProfileProperty(final String name, final String value, final @Nullable String signature) {

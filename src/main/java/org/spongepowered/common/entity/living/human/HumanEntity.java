@@ -27,6 +27,7 @@ package org.spongepowered.common.entity.living.human;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import com.mojang.authlib.yggdrasil.ProfileResult;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -271,7 +272,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     @Override
-    public double getMyRidingOffset() {
+    protected float ridingOffset(Entity $$0) {
         return Constants.Entity.Player.PLAYER_Y_OFFSET;
     }
 
@@ -291,10 +292,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     @Override
-    public void setAbsorptionAmount(float amount) {
-        if (amount < 0.0F) {
-            amount = 0.0F;
-        }
+    public void internalSetAbsorptionAmount(float amount) {
         this.getEntityData().set(PlayerAccessor.accessor$DATA_PLAYER_ABSORPTION_ID(), amount);
     }
 
@@ -346,11 +344,13 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     public boolean getOrLoadSkin(final UUID minecraftAccount) {
         GameProfile gameProfile = SpongeCommon.server().getProfileCache().get(minecraftAccount).orElse(null);
         if (gameProfile == null) {
-            gameProfile =
-                    SpongeCommon.server().getSessionService().fillProfileProperties(new GameProfile(minecraftAccount, ""), true);
-            if (gameProfile == null) {
+            ProfileResult result =
+                    SpongeCommon.server().getSessionService().fetchProfile(minecraftAccount, true);
+            if (result == null) {
                 return false;
             }
+
+            gameProfile = result.profile();
 
             // TODO Should we put profile cache entries with UUIDs that don't have their names?
 
@@ -373,7 +373,11 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         }
 
         if (gameProfile.getProperties().isEmpty()) {
-            gameProfile = SpongeCommon.server().getSessionService().fillProfileProperties(gameProfile, true);
+            ProfileResult result = SpongeCommon.server().getSessionService().fetchProfile(gameProfile.getId(), true);
+            if (result == null) {
+                return false;
+            }
+            gameProfile = result.profile();
             SpongeCommon.server().getProfileCache().add(gameProfile);
         }
 
