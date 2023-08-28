@@ -56,6 +56,10 @@ public abstract class TranslatableContentsMixin {
 
     @Inject(method = "decompose()V", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/network/chat/contents/TranslatableContents;decomposedWith:Lnet/minecraft/locale/Language;", shift = At.Shift.AFTER), cancellable = true)
     private <T> void impl$translateForRendering(final CallbackInfo ci) {
+        // TODO investigate
+        if (Minecraft.getInstance() == null) {
+            return;
+        }
         final Locale actualLocale = Locales.of(Minecraft.getInstance().options.languageCode);
         final Component toTranslate = MutableComponent.create((TranslatableContents) (Object) this);
 
