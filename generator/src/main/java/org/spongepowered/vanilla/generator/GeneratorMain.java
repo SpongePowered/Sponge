@@ -43,7 +43,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
@@ -135,7 +134,7 @@ public final class GeneratorMain {
         // Load resource packs, see WorldStem.load
         // and call to WorldStem.load in net.minecraft.server.Main
         // We don't currently try to load any datapacks here
-        final var packRepository = new PackRepository(new ServerPacksSource());
+        final var packRepository = ServerPacksSource.createVanillaTrustedRepository();
         MinecraftServer.configurePackRepository(packRepository, DataPackConfig.DEFAULT, /* safeMode = */ false, FeatureFlags.DEFAULT_FLAGS);
         final CloseableResourceManager resourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, packRepository.openAllSelected());
 
