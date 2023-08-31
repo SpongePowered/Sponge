@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.network;
 
+import com.google.gson.JsonSyntaxException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.asm.mixin.Mixin;
@@ -86,7 +88,7 @@ public abstract class FriendlyByteBufMixin implements FriendlyByteBufBridge {
 
             for (int i = 0; i < renderedLines.length; i++) {
                 final String lineStr = lore.getString(i);
-                final Component line = Component.Serializer.fromJson(lineStr);
+                final Component line = this.getComponentFromJson(lineStr);
                 final Component renderedLine = NativeComponentRenderer.apply(line, locale);
 
                 renderedLines[i] = renderedLine;
@@ -139,4 +141,13 @@ public abstract class FriendlyByteBufMixin implements FriendlyByteBufBridge {
     public void bridge$setLocale(final Locale locale) {
         this.impl$locale = locale;
     }
+
+    public Component getComponentFromJson(String json) {
+        try {
+            return Component.Serializer.fromJson(json);
+        } catch (JsonSyntaxException e) {
+            return new TextComponent(json);
+        }
+    }
+
 }
