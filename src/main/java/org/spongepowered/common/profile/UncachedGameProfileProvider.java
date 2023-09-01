@@ -33,9 +33,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.authlib.Agent;
 import com.mojang.authlib.ProfileLookupCallback;
-import com.mojang.authlib.yggdrasil.ProfileResult;
-import com.mojang.util.UndashedUuid;
+import com.mojang.util.UUIDTypeAdapter;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.core.util.Throwables;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -91,12 +91,8 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
             final com.mojang.authlib.GameProfile mcProfile;
 
             if (SpongeGameProfileManager.canLookup(uniqueId)) { // only attempt to resolve profiles for online mode clients
-                ProfileResult result = SpongeCommon.server().getSessionService().fetchProfile(uniqueId, true);
-                if (result != null) {
-                    mcProfile = result.profile();
-                } else {
-                    mcProfile = null;
-                }
+                mcProfile = SpongeCommon.server().getSessionService().fillProfileProperties(
+                    new com.mojang.authlib.GameProfile(uniqueId, ""), true);
             } else {
                 mcProfile = null;
             }
@@ -184,7 +180,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
             });
         }
         final CompletableFuture<GameProfile> result = new CompletableFuture<>();
-        this.submit(() -> SpongeCommon.server().getProfileRepository().findProfilesByNames(new String[]{name},
+        this.submit(() -> SpongeCommon.server().getProfileRepository().findProfilesByNames(new String[] { name }, Agent.MINECRAFT,
                 new SingleProfileLookupCallback(result)));
         return result;
     }
@@ -212,7 +208,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         }
         final List<String> nameList = Lists.newArrayList(names);
         final String[] namesArray = nameList.toArray(new String[0]);
-        this.submit(() -> SpongeCommon.server().getProfileRepository().findProfilesByNames(namesArray,
+        this.submit(() -> SpongeCommon.server().getProfileRepository().findProfilesByNames(namesArray, Agent.MINECRAFT,
                 new MapProfileLookupCallback(result, nameList)));
         return result;
     }
@@ -261,7 +257,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
     }
 
     private GameProfile parseGameProfile(final JsonObject json) {
-        final UUID uniqueId = UndashedUuid.fromStringLenient(json.get("id").getAsString());
+        final UUID uniqueId = UUIDTypeAdapter.fromString(json.get("id").getAsString());
         final String name = json.get("name").getAsString();
 
         final JsonArray propertiesJson = json.getAsJsonArray("properties");
@@ -292,9 +288,9 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         }
 
         @Override
-        public void onProfileLookupFailed(final String profileName, final Exception exception) {
+        public void onProfileLookupFailed(final com.mojang.authlib.GameProfile profile, final Exception exception) {
             if (exception instanceof com.mojang.authlib.yggdrasil.ProfileNotFoundException) {
-                this.result.completeExceptionally(new ProfileNotFoundException(profileName, exception.getCause()));
+                this.result.completeExceptionally(new ProfileNotFoundException(profile.getName(), exception.getCause()));
             } else {
                 this.result.completeExceptionally(exception);
             }
@@ -337,7 +333,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         }
 
         @Override
-        public void onProfileLookupFailed(final String profileName, final Exception exception) {
+        public void onProfileLookupFailed(final com.mojang.authlib.GameProfile profile, final Exception exception) {
             if (exception instanceof com.mojang.authlib.yggdrasil.ProfileNotFoundException) {
                 return;
             }

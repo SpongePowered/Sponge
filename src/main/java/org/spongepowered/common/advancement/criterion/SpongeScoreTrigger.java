@@ -28,11 +28,10 @@ import com.google.gson.JsonObject;
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
 import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
-
-import java.util.Optional;
 
 public final class SpongeScoreTrigger extends SimpleCriterionTrigger<SpongeScoreTrigger.Instance> {
 
@@ -50,7 +49,7 @@ public final class SpongeScoreTrigger extends SimpleCriterionTrigger<SpongeScore
     }
 
     @Override
-    protected Instance createInstance(final JsonObject jsonObject, final Optional<ContextAwarePredicate> andPredicate,
+    protected Instance createInstance(final JsonObject jsonObject, final ContextAwarePredicate andPredicate,
             final DeserializationContext conditionArrayParser) {
         return new SpongeScoreTrigger.Instance(this.resourceLocation, andPredicate, -1);
     }
@@ -59,17 +58,17 @@ public final class SpongeScoreTrigger extends SimpleCriterionTrigger<SpongeScore
 
         private final int triggerTimes;
 
-        public Instance(final ResourceLocation criterionIn, final Optional<ContextAwarePredicate> andPredicate, final int triggerTimes) {
+        public Instance(final ResourceLocation criterionIn, final ContextAwarePredicate andPredicate, final int triggerTimes) {
             super(criterionIn, andPredicate);
             this.triggerTimes = triggerTimes;
         }
 
         public static Instance of(int triggerTimes) {
-            return new Instance(SpongeScoreTrigger.SCORE_TRIGGER.getId(), Optional.empty(), triggerTimes);
+            return new Instance(SpongeScoreTrigger.SCORE_TRIGGER.getId(), ContextAwarePredicate.ANY, triggerTimes);
         }
 
         @Override
-        public JsonObject serializeToJson() {
+        public JsonObject serializeToJson(final SerializationContext arraySerializer) {
             return new JsonObject();
         }
 

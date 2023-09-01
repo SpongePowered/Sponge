@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.world.level.storage;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,7 +42,7 @@ import java.util.function.Function;
 public abstract class DimensionDataStorageMixin {
 
     @Inject(method = "readSavedData", at = @At(value = "RETURN", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void readSpongeMapData(Function<CompoundTag, SavedData> var1, DataFixTypes $$1, String var2,
+    public void readSpongeMapData(Function<CompoundTag, SavedData> var1, String var2,
                                   CallbackInfoReturnable<SavedData> cir,
                                   File var3, CompoundTag rootTag) {
         final SavedData savedData = cir.getReturnValue();

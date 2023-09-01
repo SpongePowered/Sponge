@@ -978,7 +978,7 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     private void updateForcedChunks(final ServerLevel world, final ServerChunkCache serverChunkProvider) {
-        final ForcedChunksSavedData forcedChunksSaveData = world.getDataStorage().get(ForcedChunksSavedData.factory(), "chunks");
+        final ForcedChunksSavedData forcedChunksSaveData = world.getDataStorage().get(ForcedChunksSavedData::load, "chunks");
         if (forcedChunksSaveData != null) {
             final LongIterator longIterator = forcedChunksSaveData.getChunks().iterator();
 

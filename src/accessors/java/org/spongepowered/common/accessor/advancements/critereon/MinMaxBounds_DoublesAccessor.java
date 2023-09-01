@@ -25,16 +25,15 @@
 package org.spongepowered.common.accessor.advancements.critereon;
 
 import net.minecraft.advancements.critereon.MinMaxBounds;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
-import java.util.Optional;
-
 @Mixin(MinMaxBounds.Doubles.class)
 public interface MinMaxBounds_DoublesAccessor {
 
-    @Invoker("<init>") static MinMaxBounds.Doubles invoker$new(final Optional<Double> min, final Optional<Double> max) {
+    @Invoker("<init>") static MinMaxBounds.Doubles invoker$new(final @Nullable Double min, final @Nullable Double max) {
         throw new UntransformedInvokerError();
     }
 

@@ -44,11 +44,11 @@ public abstract class BeaconBlockEntityMixin extends BlockEntityMixin {
      * @param id The id
      * @return The potion by id, no validation
      */
-    @Redirect(method = "loadEffect",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BeaconBlockEntity;filterEffect(Lnet/minecraft/world/effect/MobEffect;)Lnet/minecraft/world/effect/MobEffect;")
+    @Redirect(method = "load",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BeaconBlockEntity;getValidEffectById(I)Lnet/minecraft/world/effect/MobEffect;")
     )
     @Nullable
-    private static MobEffect impl$UsePotionUtilInsteadOfCheckingValidPotions(MobEffect effect) {
-        return effect;
+    private MobEffect impl$UsePotionUtilInsteadOfCheckingValidPotions(final int id) {
+        return MobEffect.byId(id);
     }
 }

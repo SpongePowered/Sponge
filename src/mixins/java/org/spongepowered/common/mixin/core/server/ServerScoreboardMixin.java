@@ -58,6 +58,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.bridge.world.scores.ScoreBridge;
+import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.SpongeScore;
 import org.spongepowered.common.util.Constants;
@@ -85,15 +86,16 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public void bridge$updateDisplaySlot(@Nullable final Objective objective, final DisplaySlot displaySlot) throws IllegalStateException {
+        this.bridge$updateDisplaySlot(objective, ((SpongeDisplaySlot) displaySlot).index());
+    }
+
+    @Override
+    public void bridge$updateDisplaySlot(@Nullable final Objective objective, final int slot) throws IllegalStateException {
         if (objective != null && !objective.scoreboards().contains(this)) {
             throw new IllegalStateException("Attempting to set an objective's display slot that does not exist on this scoreboard!");
         }
-        if (objective == null) {
-            ((ScoreboardAccessor) this).accessor$displayObjectives().remove(displaySlot);
-        } else {
-            ((ScoreboardAccessor) this).accessor$displayObjectives().put((net.minecraft.world.scores.DisplaySlot) (Object) displaySlot, ((SpongeObjective) objective).getObjectiveFor(this));
-        }
-        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new ClientboundSetDisplayObjectivePacket((net.minecraft.world.scores.DisplaySlot) (Object) displaySlot, ((ScoreboardAccessor) this).accessor$displayObjectives().get(displaySlot)));
+        ((ScoreboardAccessor) this).accessor$displayObjectives()[slot] = objective == null ? null: ((SpongeObjective) objective).getObjectiveFor(this);
+        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new ClientboundSetDisplayObjectivePacket(slot, ((ScoreboardAccessor) this).accessor$displayObjectives()[slot]));
     }
 
     // Get objectives
@@ -127,7 +129,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public Optional<Objective> bridge$getObjective(final DisplaySlot slot) {
-        final net.minecraft.world.scores.Objective objective = ((ScoreboardAccessor) this).accessor$displayObjectives().get(slot);
+        final net.minecraft.world.scores.Objective objective = ((ScoreboardAccessor) this).accessor$displayObjectives()[((SpongeDisplaySlot) slot).index()];
         if (objective != null) {
             return Optional.of(((ObjectiveBridge) objective).bridge$getSpongeObjective());
         }
@@ -148,11 +150,11 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         final net.minecraft.world.scores.Objective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
         ((ScoreboardAccessor) this).accessor$objectivesByName().remove(scoreObjective.getName());
 
-        ((ScoreboardAccessor) this).accessor$displayObjectives().forEach((displaySlot, objective1) -> {
-            if (objective1 == scoreObjective) {
-                ((ScoreboardAccessor) this).accessor$displayObjectives().remove(displaySlot);
+        for (int i = 0; i < 19; ++i) {
+            if (this.getDisplayObjective(i) == scoreObjective) {
+                this.setDisplayObjective(i, null);
             }
-        });
+        }
 
         ((ServerScoreboardBridge) this).bridge$sendToPlayers(new ClientboundSetObjectivePacket(scoreObjective, Constants.Scoreboards.OBJECTIVE_PACKET_REMOVE));
 
@@ -214,11 +216,11 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
             for (final net.minecraft.world.scores.Objective objective : this.getObjectives()) {
                 player.connection.send(new ClientboundSetObjectivePacket(objective, 0));
-                ((ScoreboardAccessor) this).accessor$displayObjectives().forEach((displaySlot, objective1) -> {
-                    if (objective1 == objective) {
-                        player.connection.send(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));
+                for (int i = 0; i < 19; ++i) {
+                    if (this.getDisplayObjective(i) == objective) {
+                        player.connection.send(new ClientboundSetDisplayObjectivePacket(i, objective));
                     }
-                });
+                }
                 for (final Score score : this.getPlayerScores(objective)) {
                     final ClientboundSetScorePacket packetIn = new ClientboundSetScorePacket(
                             Method.CHANGE,
@@ -327,9 +329,9 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
      */
     @Override
     @Overwrite
-    public void setDisplayObjective(final net.minecraft.world.scores.DisplaySlot slot, @Nullable final net.minecraft.world.scores.Objective objective) {
+    public void setDisplayObjective(final int slot, @Nullable final net.minecraft.world.scores.Objective objective) {
         final Objective apiObjective = objective == null ? null : ((ObjectiveBridge) objective).bridge$getSpongeObjective();
-        this.bridge$updateDisplaySlot(apiObjective, (DisplaySlot) (Object) slot);
+        this.bridge$updateDisplaySlot(apiObjective, slot);
     }
 
     @Redirect(method = "addPlayerToTeam",

@@ -24,11 +24,7 @@
  */
 package org.spongepowered.common.network.channel.raw;
 
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
-import net.minecraft.resources.ResourceLocation;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.channel.ChannelBuf;
@@ -121,9 +117,7 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
                     PacketSender.sendTo(connection, PacketUtil.createLoginPayloadResponse(null, transactionId));
                     return;
                 }
-                PacketSender.sendTo(connection, PacketUtil.createLoginPayloadResponse(var1 -> {
-                    var1.writeBytes((FriendlyByteBuf)payload);
-                }, transactionId));
+                PacketSender.sendTo(connection, PacketUtil.createLoginPayloadResponse(payload, transactionId));
             }
         };
         boolean success = false;
@@ -171,18 +165,7 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
             }
         };
 
-        final ResourceKey id = this.parent.key();
-        final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
-            @Override
-            public ResourceLocation id() {
-                return (ResourceLocation) (Object) id;
-            }
-
-            @Override
-            public void write(FriendlyByteBuf var1) {
-                var1.writeBytes((FriendlyByteBuf) payload);
-            }
-        }, transactionId);
+        final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(this.parent.key(), buf, transactionId);
 
         PacketSender.sendTo(connection, mcPacket, sendFuture -> {
             if (sendFuture.isSuccess()) {

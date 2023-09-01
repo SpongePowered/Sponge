@@ -64,7 +64,7 @@ public final class SpongeMapStorage implements MapStorage {
         final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get();
 
         final int highestId = ((MapIdTrackerBridge) defaultWorld.getDataStorage()
-                .computeIfAbsent(MapIndex.factory(), Constants.Map.MAP_INDEX_DATA_NAME)).bridge$getHighestMapId().orElse(-1);
+                .computeIfAbsent(MapIndex::load, MapIndex::new, Constants.Map.MAP_INDEX_DATA_NAME)).bridge$getHighestMapId().orElse(-1);
         for (int i = 0; i <= highestId; i++) {
             final @Nullable MapInfo mapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + i);
             if (mapInfo == null) {

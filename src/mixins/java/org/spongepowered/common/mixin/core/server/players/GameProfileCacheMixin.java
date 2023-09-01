@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.players;
 
+import com.mojang.authlib.Agent;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.ProfileLookupCallback;
 import net.minecraft.server.players.GameProfileCache;
@@ -149,17 +150,17 @@ public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {
     @Redirect(method = "lookupGameProfile",
         at = @At(
             value = "INVOKE",
-            target = "Lcom/mojang/authlib/GameProfileRepository;findProfilesByNames([Ljava/lang/String;Lcom/mojang/authlib/ProfileLookupCallback;)V",
+            target = "Lcom/mojang/authlib/GameProfileRepository;findProfilesByNames([Ljava/lang/String;Lcom/mojang/authlib/Agent;Lcom/mojang/authlib/ProfileLookupCallback;)V",
             remap = false
         )
     )
     private static void impl$lookUpViaSponge(final GameProfileRepository repository, final String[] names,
-            final ProfileLookupCallback callback) {
+            final Agent agent, final ProfileLookupCallback callback) {
         final GameProfileManager profileManager = Sponge.server().gameProfileManager();
         profileManager.basicProfile(names[0])
                 .whenComplete((profile, ex) -> {
                     if (ex != null) {
-                        callback.onProfileLookupFailed(names[0],
+                        callback.onProfileLookupFailed(new com.mojang.authlib.GameProfile(null, names[0]),
                                 ex instanceof Exception ? (Exception) ex : new RuntimeException(ex));
                     } else {
                         callback.onProfileLookupSucceeded(SpongeGameProfile.toMcProfile(profile));

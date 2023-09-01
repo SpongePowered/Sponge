@@ -29,8 +29,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.Main;
-import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.packs.repository.ServerPacksSource;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
+import java.nio.file.Path;
 
 @Mixin(Main.class)
 public abstract class MainMixin {
@@ -49,12 +49,13 @@ public abstract class MainMixin {
         return ops;
     }
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/repository/ServerPacksSource;createPackRepository(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;)Lnet/minecraft/server/packs/repository/PackRepository;"))
-    private static PackRepository impl$configurePackRepository(LevelStorageSource.LevelStorageAccess levelSave) {
+    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
+    private static Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
+        final Path datapackDir = levelSave.getLevelPath(folderName);
         final var lifecycle = Launch.instance().lifecycle();
         lifecycle.establishDataProviders();
         lifecycle.callRegisterDataEvent();
-        return ServerPacksSource.createPackRepository(levelSave);
+        return datapackDir;
     }
 
 }

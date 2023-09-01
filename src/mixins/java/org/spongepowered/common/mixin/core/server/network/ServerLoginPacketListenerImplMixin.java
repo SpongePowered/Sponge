@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.server.network;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
+import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
 import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
 import net.minecraft.server.MinecraftServer;
@@ -141,7 +141,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                     this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
                     final ServerPlayer var1 = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
                     if (var1 != null) {
-                        // TODO broken this.state = ServerLoginPacketListenerImpl.State.DELAY_ACCEPT;
+                        this.state = ServerLoginPacketListenerImpl.State.DELAY_ACCEPT;
                         // TODO broken this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile, playerProfilePublicKey);
                     } else {
                         // Sponge start - Also send the channel registrations using the minecraft channel, for compatibility
@@ -162,7 +162,8 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                     // Sponge Start
                     // If a throwable exists, we're just going to disconnect the user, better than leaving them in limbo.
                     if (throwable != null) {
-                        // TODO broken this.impl$disconnectError(throwable, this.state == ServerLoginPacketListenerImpl.State.ACCEPTED || this.state == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT);
+                        this.impl$disconnectError(throwable,
+                                this.state == ServerLoginPacketListenerImpl.State.ACCEPTED || this.state == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT);
                     }
                     return null;
                     // Sponge End
@@ -210,15 +211,14 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     @Inject(method = "handleHello(Lnet/minecraft/network/protocol/login/ServerboundHelloPacket;)V",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;KEY:Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;",
+            target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;READY_TO_ACCEPT:Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;",
             opcode = Opcodes.GETSTATIC),
         cancellable = true)
     private void impl$fireAuthEventOffline(final CallbackInfo ci) {
         // Move this check up here, so that the UUID isn't null when we fire the event
-        // TODO broken
-        /*if (!this.gameProfile.isComplete()) {
+        if (!this.gameProfile.isComplete()) {
             this.gameProfile = this.shadow$createFakeProfile(this.gameProfile);
-        }*/
+        }
 
         if (this.bridge$fireAuthEvent()) {
             ci.cancel();

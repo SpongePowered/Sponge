@@ -110,14 +110,14 @@ public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnabl
         Launch.instance().lifecycle().callStoppingEngineEvent(this);
     }
 
-    @Redirect(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;singleplayerServer:Lnet/minecraft/client/server/IntegratedServer;", opcode =
+    @Redirect(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;singleplayerServer:Lnet/minecraft/client/server/IntegratedServer;", opcode =
             Opcodes.PUTFIELD))
     private void impl$storeTemporaryServerRef(Minecraft minecraft, IntegratedServer server) {
         ((MinecraftBridge) minecraft).bridge$setTemporaryIntegratedServer(this.singleplayerServer);
         this.singleplayerServer = null;
     }
 
-    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("TAIL"))
+    @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("TAIL"))
     private void impl$nullServerRefAndPhaseTracker(Screen screenIn, CallbackInfo ci) {
         ((MinecraftBridge) this).bridge$setTemporaryIntegratedServer(null);
         try {

@@ -44,9 +44,8 @@ public abstract class ServerLoginPacketListenerImpl_1Mixin_Vanilla extends Threa
     @Inject(method = "run()V", at = @At("RETURN"), remap = false)
     private void impl$onReadyToAccept(final CallbackInfo ci) {
         final ServerLoginPacketListenerImplAccessor accessor = (ServerLoginPacketListenerImplAccessor) this.handler;
-        // TODO investigate
-        /*if (accessor.accessor$state() == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
+        if (accessor.accessor$state() == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
             accessor.accessor$state(ServerLoginPacketListenerImpl.State.NEGOTIATING);
-        }*/
+        }
     }
 }

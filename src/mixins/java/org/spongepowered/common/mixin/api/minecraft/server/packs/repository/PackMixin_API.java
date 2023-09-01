@@ -40,6 +40,7 @@ public abstract class PackMixin_API implements org.spongepowered.api.resource.pa
 
     // @formatter:off
     @Shadow @Final private net.minecraft.network.chat.Component title;
+    @Shadow @Final private net.minecraft.network.chat.Component description;
 
     @Shadow public abstract String shadow$getId();
     @Shadow public abstract PackCompatibility shadow$getCompatibility();
@@ -48,8 +49,6 @@ public abstract class PackMixin_API implements org.spongepowered.api.resource.pa
     // @formatter:on
 
     @Shadow public abstract PackResources shadow$open();
-
-    @Shadow @Final private Pack.Info info;
 
     @Override
     public String id() {
@@ -68,7 +67,7 @@ public abstract class PackMixin_API implements org.spongepowered.api.resource.pa
 
     @Override
     public Component description() {
-        return SpongeAdventure.asAdventure(this.info.description());
+        return SpongeAdventure.asAdventure(this.description);
     }
 
     @Override

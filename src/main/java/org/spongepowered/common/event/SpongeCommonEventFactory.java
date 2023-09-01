@@ -766,7 +766,7 @@ public final class SpongeCommonEventFactory {
 
         final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get();
         final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getDataStorage()
-                .computeIfAbsent(MapIndex.factory(), Constants.Map.MAP_INDEX_DATA_NAME);
+                .computeIfAbsent(MapIndex::load, MapIndex::new, Constants.Map.MAP_INDEX_DATA_NAME);
 
         final MapItemSavedData mapData = MapItemSavedData.createFresh(0, 0, (byte) 0, false, false, Level.END);
 

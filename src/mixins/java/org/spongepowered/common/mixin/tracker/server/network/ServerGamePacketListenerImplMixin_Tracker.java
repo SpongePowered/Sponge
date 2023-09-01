@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracker.server.network;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
@@ -53,6 +54,8 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 public abstract class ServerGamePacketListenerImplMixin_Tracker {
 
     @Shadow public ServerPlayer player;
+
+    @Shadow public abstract void disconnect(Component textComponent);
 
     @Redirect(method = "tick",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;doTick()V"))

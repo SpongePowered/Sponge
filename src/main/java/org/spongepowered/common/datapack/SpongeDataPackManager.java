@@ -315,7 +315,7 @@ public final class SpongeDataPackManager implements DataPackManager {
 
     private String packDescription(final PackResources pack) {
         try {
-            return pack.getMetadataSection(PackMetadataSection.TYPE).description().getString();
+            return pack.getMetadataSection(PackMetadataSection.TYPE).getDescription().getString();
         } catch (final IOException e) {
             return "N/A";
         }

@@ -29,7 +29,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
-import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
@@ -39,7 +38,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.scoreboard.Scoreboard;
-import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
+import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
@@ -55,7 +54,7 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
             return ClientType.VANILLA;
         }
 
-        return ((ConnectionBridge) ((ServerCommonPacketListenerImplAccessor) mPlayer.connection).accessor$connection()).bridge$getClientType();
+        return ((ConnectionBridge) ((ServerGamePacketListenerImplAccessor) mPlayer.connection).accessor$connection()).bridge$getClientType();
     }
 
     int bridge$getViewDistance();
@@ -95,8 +94,8 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
 
     default void bridge$sendChangeDimension(final Holder<DimensionType> dimensionType, final ResourceKey<Level> key, final long hashedSeed,
             final GameType gameType, final GameType previousGameType, final boolean isDebug, final boolean isFlat, final byte dataToKeepMask) {
-        ((ServerPlayer) this).connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(dimensionType.unwrapKey().get(), key, hashedSeed, gameType, previousGameType, isDebug,
-                isFlat, ((ServerPlayer) this).getLastDeathLocation(), ((ServerPlayer) this).getPortalCooldown()), dataToKeepMask));
+        ((ServerPlayer) this).connection.send(new ClientboundRespawnPacket(dimensionType.unwrapKey().get(), key, hashedSeed, gameType, previousGameType, isDebug,
+                isFlat, dataToKeepMask, ((ServerPlayer) this).getLastDeathLocation(), ((ServerPlayer) this).getPortalCooldown()));
     }
 
     default void bridge$sendViewerEnvironment(final DimensionType dimensionType) {

@@ -39,18 +39,22 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientboundResourcePackPacket;
+import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
+import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.FilteredText;
@@ -87,6 +91,7 @@ import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -125,10 +130,12 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPacketListenerImplMixin implements ConnectionHolderBridge, ServerGamePacketListenerImplBridge {
+public abstract class ServerGamePacketListenerImplMixin implements ConnectionHolderBridge, ServerGamePacketListenerImplBridge {
 
     // @formatter:off
+    @Shadow @Final public Connection connection;
     @Shadow public net.minecraft.server.level.ServerPlayer player;
+    @Shadow @Final private MinecraftServer server;
     @Shadow private double vehicleFirstGoodX;
     @Shadow private double vehicleFirstGoodY;
     @Shadow private double vehicleFirstGoodZ;
@@ -136,11 +143,14 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch, Set<RelativeMovement> relativeArguments);
     @Shadow protected abstract CompletableFuture<List<FilteredText>> shadow$filterTextPacket(final List<String> $$0);
+    @Shadow public abstract void send(final Packet<?> $$0);
     @Shadow protected abstract void shadow$performChatCommand(final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1);
     @Shadow protected abstract ParseResults<CommandSourceStack> shadow$parseCommand(final String $$0);
     // @formatter:on
 
     @Shadow protected abstract void signBook(final FilteredText $$0, final List<FilteredText> $$1, final int $$2);
+
+    @Shadow public abstract void send(final Packet<?> $$0, @org.jetbrains.annotations.Nullable final PacketSendListener $$1);
 
     private int impl$ignorePackets;
 
@@ -156,15 +166,17 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         this.impl$ignorePackets++;
     }
 
-    // @Override
-    public void send(final Packet<?> packet, final PacketSendListener listener) {
+    @Inject(
+        method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V",
+        at = @At("HEAD")
+    )
+    private void impl$onClientboundPacketSend(final Packet<?> packet, final PacketSendListener listener, final CallbackInfo ci) {
         if (packet instanceof ClientboundPlayerInfoUpdatePacket infoPacket) {
             ((SpongeTabList) ((ServerPlayer) this.player).tabList()).updateEntriesOnSend(infoPacket);
         } else if (packet instanceof ClientboundResourcePackPacket) {
             final ResourcePack pack = ((ClientboundResourcePackPacketBridge) packet).bridge$getSpongePack();
             this.impl$lastReceivedPack = pack;
         }
-        this.shadow$send(packet, listener);
     }
 
     @Inject(method = "handleCustomCommandSuggestions", at = @At(value = "NEW", target = "com/mojang/brigadier/StringReader", remap = false),
@@ -438,7 +450,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         }
     }
 
-    @Redirect(method = "removePlayerFromWorld", at = @At(value = "INVOKE",
+    @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V"))
     public void impl$handlePlayerDisconnect(final PlayerList instance, final net.minecraft.network.chat.Component $$0, final boolean $$1) {
         // If this happens, the connection has not been fully established yet so we've kicked them during ClientConnectionEvent.Login,
@@ -524,13 +536,18 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         }
     }
 
-    @Redirect(method = "lambda$handleChatCommand$9", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
+    @Redirect(method = "lambda$handleChatCommand$11", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
     public void impl$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this.player);
             frame.addContext(EventContextKeys.COMMAND, $$0.command());
             this.shadow$performChatCommand($$0, $$1);
         }
+    }
+
+    @Inject(method = "handleResourcePackResponse", at = @At("HEAD"))
+    public void impl$handleResourcePackResponse(final ServerboundResourcePackPacket packet, final CallbackInfo callbackInfo) {
+        PacketUtils.ensureRunningOnSameThread(packet, (ServerGamePacketListener) this, this.player.serverLevel());
     }
 
     @Override

@@ -89,7 +89,7 @@ public abstract class ServerLoginPacketListenerImplMixin_IpForward {
 
             if (((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile() != null) {
                 for (final Property property : ((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile()) {
-                    this.gameProfile.getProperties().put(property.name(), property);
+                    this.gameProfile.getProperties().put(property.getName(), property);
                 }
             }
         }
