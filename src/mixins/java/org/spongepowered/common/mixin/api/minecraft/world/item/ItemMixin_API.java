@@ -38,6 +38,7 @@ import org.spongepowered.api.tag.Tag;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,7 +49,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin(Item.class)
-public abstract class ItemMixin_API implements ItemType {
+public abstract class ItemMixin_API implements ItemType, SpongeImmutableDataHolder<ItemType> {
 
     // @formatter:off
     @Shadow @Final private Rarity rarity;
