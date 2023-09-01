@@ -37,6 +37,7 @@ import org.spongepowered.api.tag.TagTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 import org.spongepowered.common.util.TagUtil;
 
 import java.util.Arrays;
@@ -47,7 +48,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 @Mixin(Item.class)
-public abstract class ItemMixin_API implements ItemType {
+public abstract class ItemMixin_API implements ItemType, SpongeImmutableDataHolder<ItemType> {
 
     // @formatter:off
     @Shadow public abstract int shadow$getMaxStackSize();
