@@ -54,6 +54,7 @@ public abstract class ItemMixin_API implements ItemType, SpongeImmutableDataHold
     @Shadow public abstract int shadow$getMaxStackSize();
     @Shadow public abstract String shadow$getDescriptionId();
     @Shadow @Final private Rarity rarity;
+    @Shadow @Nullable public abstract Item shadow$getCraftingRemainingItem();
     // @formatter:on
 
     @Nullable protected BlockType api$blockType = null;
@@ -96,5 +97,11 @@ public abstract class ItemMixin_API implements ItemType, SpongeImmutableDataHold
     @Override
     public Collection<Tag<ItemType>> tags() {
         return TagUtil.getAssociatedTags(this, RegistryTypes.ITEM_TYPE_TAGS);
+    }
+
+    @Override
+    public Optional<ItemType> container() {
+        final Item craftingRemainingItem = this.shadow$getCraftingRemainingItem();
+        return Optional.ofNullable((ItemType) craftingRemainingItem);
     }
 }
