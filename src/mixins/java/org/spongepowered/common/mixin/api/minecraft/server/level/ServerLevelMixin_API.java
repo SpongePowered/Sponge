@@ -77,7 +77,6 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
@@ -195,12 +194,21 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
         return ((ServerLevelBridge) this).bridge$getLevelSave().getLevelPath(LevelResource.ROOT);
     }
 
-    @Override
-    public boolean save() throws IOException {
+    private boolean save(final boolean flush) {
         final SerializationBehavior behavior = ((PrimaryLevelDataBridge) this.serverLevelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
         ((ServerLevelBridge) this).bridge$setManualSave(true);
-        this.shadow$save(null, false, false);
+        this.shadow$save(null, flush, false);
         return !behavior.equals(SerializationBehavior.NONE);
+    }
+
+    @Override
+    public boolean save() {
+        return save(false);
+    }
+
+    @Override
+    public boolean saveAndFlush() {
+        return save(true);
     }
 
     @Override
