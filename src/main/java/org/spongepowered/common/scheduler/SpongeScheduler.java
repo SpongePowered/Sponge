@@ -30,6 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.scheduler.TaskExecutorService;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -37,18 +38,10 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,7 +56,7 @@ public abstract class SpongeScheduler implements Scheduler {
 
     // The simple queue of all pending (and running) ScheduledTasks
     private final Map<UUID, SpongeScheduledTask> tasks = new ConcurrentHashMap<>();
-    private long sequenceNumber = 0L;
+    private final AtomicLong sequenceNumber = new AtomicLong();
 
     SpongeScheduler(final String tag) {
         this.tag = tag;
@@ -106,13 +99,14 @@ public abstract class SpongeScheduler implements Scheduler {
 
     @Override
     public Optional<ScheduledTask> findTask(final UUID id) {
-        Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(id, "task id cannot be null");
         return Optional.ofNullable(this.tasks.get(id));
     }
 
     @Override
     public Set<ScheduledTask> findTasks(final String pattern) {
-        final Pattern searchPattern = Pattern.compile(Objects.requireNonNull(pattern, "pattern"));
+        final Pattern searchPattern = Pattern.compile(Objects
+                .requireNonNull(pattern, "pattern must not be null"));
         final Set<ScheduledTask> matchingTasks = this.tasks();
 
         final Iterator<ScheduledTask> it = matchingTasks.iterator();
@@ -133,7 +127,10 @@ public abstract class SpongeScheduler implements Scheduler {
 
     @Override
     public Set<ScheduledTask> tasks(final PluginContainer plugin) {
-        final String testOwnerId = Objects.requireNonNull(plugin, "plugin").metadata().id();
+        final String testOwnerId = Objects
+                .requireNonNull(plugin, "plugin must not be null")
+                .metadata()
+                .id();
 
         final Set<ScheduledTask> allTasks = this.tasks();
         final Iterator<ScheduledTask> it = allTasks.iterator();
@@ -149,28 +146,34 @@ public abstract class SpongeScheduler implements Scheduler {
     }
 
     @Override
-    public SpongeTaskExecutorService executor(final PluginContainer plugin) {
-        Objects.requireNonNull(plugin, "plugin");
-        return new SpongeTaskExecutorService(() -> Task.builder().plugin(plugin), this);
+    public TaskExecutorService executor(final PluginContainer plugin) {
+        Objects.requireNonNull(plugin, "plugin must not be null");
+        return new SpongeTaskExecutorService(() -> Task
+                .builder()
+                .plugin(plugin), this);
     }
 
     @Override
     public SpongeScheduledTask submit(final Task task) {
-        Objects.requireNonNull(task, "task");
+        Objects.requireNonNull(task, "task must not be null");
 
-        final String name = task.plugin().metadata().id() + "-" + SpongeScheduler.TASK_CREATED_COUNTER.incrementAndGet();
+        final String name = task
+                .plugin()
+                .metadata()
+                .id() + "-" +
+                SpongeScheduler.TASK_CREATED_COUNTER.incrementAndGet();
         return this.submit(task, name);
     }
 
     @Override
     public SpongeScheduledTask submit(Task task, String name) {
-        Objects.requireNonNull(task, "task");
-        if (Objects.requireNonNull(name, "name").isEmpty()) {
+        Objects.requireNonNull(task, "task must not be null");
+        if (Objects.requireNonNull(name, "name must not be null").isEmpty()) {
             throw new IllegalArgumentException("Task name cannot empty!");
         }
 
         final SpongeScheduledTask scheduledTask = new SpongeScheduledTask(this, (SpongeTask) task,
-                name + "-" + this.tag + "-#" + this.sequenceNumber++);
+                name + "-" + this.tag + "-#" + this.sequenceNumber.getAndIncrement());
         this.addTask(scheduledTask);
         return scheduledTask;
     }
@@ -314,5 +317,19 @@ public abstract class SpongeScheduler implements Scheduler {
             runnable.run();
             return null;
         });
+    }
+
+    protected List<ScheduledTask> drainTasks() {
+        List<ScheduledTask> list = new LinkedList<>();
+        tasks.values().removeIf(x -> {
+            if (x.cancel())
+                list.add(x);
+            return true;
+        });
+        return list;
+    }
+    public Collection<ScheduledTask> pendingTasks() {
+        // without copying
+        return Collections.unmodifiableCollection(tasks.values());
     }
 }
