@@ -50,17 +50,18 @@ public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements Pro
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
         final SpongeBlockChangeFlag flag, final int limit
     ) {
-        final ServerLevel serverWorld = pipeline.getServerWorld();
-        final LevelChunk chunk = pipeline.getAffectedChunk();
-        final @Nullable BlockEntity maybeNewTileEntity = chunk.getBlockEntity(oldState.pos, LevelChunk.EntityCreationType.CHECK);
         if (((BlockStateBridge) newState).bridge$hasTileEntity()) {
-            if (maybeNewTileEntity == null) {
-                // tileentity1 = ((ITileEntityProvider)block).createNewTileEntity(this.world); // Vanilla
-                // tileentity1 = state.createTileEntity(this.world); // Forge
+            final ServerLevel serverWorld = pipeline.getServerWorld();
+            final LevelChunk chunk = pipeline.getAffectedChunk();
+            final @Nullable BlockEntity existing = chunk.getBlockEntity(oldState.pos, LevelChunk.EntityCreationType.CHECK);
+
+            if (existing == null) {
+                // blockEntity = ((EntityBlock) block).newBlockEntity(this.level); // Vanilla
+                // blockEntity = state.createTileEntity(this.level); // Forge
                 // We cast to our bridge for easy access
-                serverWorld.setBlockEntity(oldState.pos, ((BlockStateBridge) newState).bridge$createNewTileEntity(serverWorld));
+                serverWorld.setBlockEntity(oldState.pos, ((BlockStateBridge) newState).bridge$createTileEntity(serverWorld));
             } else {
-                maybeNewTileEntity.clearCache();
+                existing.clearCache();
             }
         }
         return EffectResult.NULL_PASS;

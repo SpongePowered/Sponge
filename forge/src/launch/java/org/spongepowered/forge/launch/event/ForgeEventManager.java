@@ -32,8 +32,10 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.IEventBusInvokeDispatcher;
 import net.minecraftforge.eventbus.api.IEventListener;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.manager.RegisteredListener;
 import org.spongepowered.common.event.manager.SpongeEventManager;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.forge.launch.bridge.event.ForgeEventBridge_Forge;
 import org.spongepowered.forge.launch.bridge.event.SpongeEventBridge_Forge;
 
@@ -116,9 +118,11 @@ public final class ForgeEventManager extends SpongeEventManager implements IEven
         if (event instanceof ForgeEventBridge_Forge) {
             // intercept!
             final ForgeEventBridge_Forge forgeEvent = (ForgeEventBridge_Forge) event;
-            final org.spongepowered.api.event.@Nullable Event spongeEvent = forgeEvent.bridge$createSpongeEvent();
-            if (spongeEvent != null) {
-                return this.postDualBus(spongeEvent, Collections.singleton(event), wrapper);
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                final org.spongepowered.api.event.@Nullable Event spongeEvent = forgeEvent.bridge$createSpongeEvent(frame);
+                if (spongeEvent != null) {
+                    return this.postDual(spongeEvent, event, wrapper);
+                }
             }
         }
         // Do as Forge does - SpongeVanilla has no role to play here.
@@ -145,15 +149,21 @@ public final class ForgeEventManager extends SpongeEventManager implements IEven
             // Do as SpongeVanilla does - Forge has no role to play here.
             return super.post(event);
         }
-        return this.postDualBus(event, forgeEvents, eventBridge.bridge$eventDispatcher());
+        return this.postDual(event, forgeEvents, eventBridge.bridge$eventDispatcher());
     }
 
     // Implementation
 
-    private boolean postDualBus(final org.spongepowered.api.event.Event spongeEvent, final Collection<? extends Event> forgeEvents,
+    private boolean postDual(final org.spongepowered.api.event.Event spongeEvent, final Event forgeEvent,
+            final IEventBusInvokeDispatcher dispatcher) {
+        return postDual(spongeEvent, Collections.singleton(forgeEvent), dispatcher);
+    }
+
+    private boolean postDual(final org.spongepowered.api.event.Event spongeEvent, final Collection<? extends Event> forgeEvents,
             final IEventBusInvokeDispatcher dispatcher) {
         try (final NoExceptionClosable ignored = this.preparePost(spongeEvent)) {
             final RegisteredListener.Cache listeners = this.getHandlerCache(spongeEvent);
+
             final List<RegisteredListener<?>> beforeModifications = listeners.beforeModifications();
             if (!beforeModifications.isEmpty()) {
                 // First, we fire the Sponge beforeModifications on the Sponge event
@@ -164,6 +174,7 @@ public final class ForgeEventManager extends SpongeEventManager implements IEven
                     ((ForgeEventBridge_Forge) forgeEvent).bridge$syncFrom(spongeEvent);
                 }
             }
+
             // Then, we fire all our Forge events
             for (final Event forgeEvent : forgeEvents) {
                 this.wrappedEventBus.post(forgeEvent, dispatcher);
@@ -172,8 +183,15 @@ public final class ForgeEventManager extends SpongeEventManager implements IEven
                 ((ForgeEventBridge_Forge) forgeEvent).bridge$syncTo(spongeEvent);
             }
 
-            // and now we do our standard event listener stuff.
-            return this.post(spongeEvent, listeners.afterModifications());
+            // Now we do our standard event listener stuff.
+            final boolean result =  this.post(spongeEvent, listeners.afterModifications());
+
+            // Finally, we sync to the Forge events again
+            for (final Event forgeEvent : forgeEvents) {
+                ((ForgeEventBridge_Forge) forgeEvent).bridge$syncFrom(spongeEvent);
+            }
+
+            return result;
         }
     }
 }

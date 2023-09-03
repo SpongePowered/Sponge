@@ -22,24 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.level;
+package org.spongepowered.forge.util;
 
-import net.minecraft.server.level.ServerPlayerGameMode;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.server.level.ServerPlayerGameModeBridge;
+import net.minecraftforge.eventbus.api.Event;
+import org.spongepowered.api.util.Tristate;
 
-@Mixin(ServerPlayerGameMode.class)
-public abstract class ServerPlayerGameModeMixin implements ServerPlayerGameModeBridge {
+public final class TristateUtil {
 
-    private boolean impl$interactBlockRightClickEventCancelled = false;
-
-    @Override
-    public boolean bridge$isInteractBlockRightClickCancelled() {
-        return this.impl$interactBlockRightClickEventCancelled;
+    public static Tristate fromEventResult(final Event.Result result) {
+        switch (result) {
+            case DENY:
+                return Tristate.FALSE;
+            case DEFAULT:
+                return Tristate.UNDEFINED;
+            case ALLOW:
+                return Tristate.TRUE;
+            default:
+                throw new IllegalArgumentException("Event.Result " + result);
+        }
     }
 
-    @Override
-    public void bridge$setInteractBlockRightClickCancelled(final boolean cancelled) {
-        this.impl$interactBlockRightClickEventCancelled = cancelled;
+    public static Event.Result toEventResult(final Tristate tristate) {
+        switch (tristate) {
+            case TRUE:
+                return Event.Result.ALLOW;
+            case FALSE:
+                return Event.Result.DENY;
+            case UNDEFINED:
+                return Event.Result.DEFAULT;
+            default:
+                throw new IllegalArgumentException("Tristate " + tristate);
+        }
+    }
+
+    private TristateUtil() {
     }
 }

@@ -83,17 +83,4 @@ public abstract class SpongeCommonDamageSource extends DamageSource implements o
     public float getFoodExhaustion() {
         return (float) this.exhaustion();
     }
-
-
-    public void bridge$setDamageIsAbsolute() {
-        this.bypassMagic();
-    }
-    public void bridge$setDamageBypassesArmor() {
-        this.bypassArmor();
-    }
-
-
-    public void bridge$setHungerDamage(final float exhaustion) {
-        ((DamageSourceAccessor) this).accessor$exhaustion(exhaustion);
-    }
 }

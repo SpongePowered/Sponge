@@ -45,6 +45,7 @@ import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.game.ServerboundClientInformationPacket;
 import net.minecraft.server.MinecraftServer;
@@ -62,12 +63,16 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.portal.PortalInfo;
@@ -80,15 +85,21 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.SkinPart;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
@@ -108,6 +119,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -115,12 +127,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.ConnectionAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundClientInformationPacketAccessor;
+import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
+import org.spongepowered.common.accessor.server.level.ChunkMap_TrackedEntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.data.DataUtil;
@@ -140,6 +153,7 @@ import org.spongepowered.math.vector.Vector3d;
 
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -173,8 +187,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow protected abstract void shadow$triggerDimensionChangeTriggers(ServerLevel serverworld);
     @Shadow public abstract void shadow$doCloseContainer();
     @Shadow public abstract void shadow$refreshContainer(AbstractContainerMenu container);
+    @Shadow public abstract void shadow$setGameMode(GameType param0);
     // @formatter:on
-
 
     private net.minecraft.network.chat.@Nullable Component impl$connectionMessage;
     private Locale impl$language = Locales.DEFAULT;
@@ -186,6 +200,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     private Set<SkinPart> impl$skinParts = ImmutableSet.of();
     private final PlayerOwnBorderListener impl$borderListener = new PlayerOwnBorderListener((net.minecraft.server.level.ServerPlayer) (Object) this);
     private boolean impl$sleepingIgnored;
+    private boolean impl$noGameModeEvent;
 
     @Override
     public net.minecraft.network.chat.@Nullable Component bridge$getConnectionMessageToSend() {
@@ -370,6 +385,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public void bridge$setSleepingIgnored(final boolean sleepingIgnored) {
         this.impl$sleepingIgnored = sleepingIgnored;
+    }
+
+    @Override
+    public double bridge$reachDistance() {
+        return 5;
     }
 
     /*
@@ -720,6 +740,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             DataUtil.syncTagToData(this);
         }
 
+        this.impl$language = ((ServerPlayerBridge) oldPlayer).bridge$getLanguage();
+        this.impl$viewDistance = ((ServerPlayerBridge) oldPlayer).bridge$getViewDistance();
+
         // Update boss bars
         SpongeAdventure.forEachBossBar(bar -> ((BossEventBridge) bar).bridge$replacePlayer(oldPlayer, (net.minecraft.server.level.ServerPlayer) (Object) this));
 
@@ -807,9 +830,19 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     protected void impl$onRightClickEntity(
         final Entity entityToInteractOn, final InteractionHand hand, final CallbackInfoReturnable<InteractionResult> cir
     ) {
+        final ItemStack itemInHand = this.shadow$getItemInHand(hand);
         final InteractEntityEvent.Secondary event = SpongeCommonEventFactory.callInteractEntityEventSecondary((net.minecraft.server.level.ServerPlayer) (Object) this,
-            this.shadow$getItemInHand(hand), entityToInteractOn, hand, null);
+                itemInHand, entityToInteractOn, hand, null);
         if (event.isCancelled()) {
+            this.shadow$refreshContainer(this.containerMenu);
+            if (itemInHand.getItem() == Items.LEAD && entityToInteractOn instanceof Mob) {
+                this.connection.send(new ClientboundSetEntityLinkPacket(entityToInteractOn, ((Mob) entityToInteractOn).getLeashHolder()));
+            } else if (itemInHand.getItem() == Items.WATER_BUCKET && entityToInteractOn instanceof AbstractFish) {
+                final ChunkMap_TrackedEntityAccessor trackerAccessor = ((ChunkMapAccessor) ((ServerWorld) this.level).chunkManager()).accessor$entityMap().get(entityToInteractOn.getId());
+                if (trackerAccessor != null) {
+                    trackerAccessor.accessor$getServerEntity().sendPairingData(this.connection::send);
+                }
+            }
             cir.setReturnValue(InteractionResult.FAIL);
         }
     }
@@ -848,16 +881,44 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    protected void impl$capturePlayerPosition(
-        final double x, final double y, final double z, final CallbackInfo ci
-    ) {
-        if (this.connection != null) {
-            ((ServerGamePacketListenerImplBridge) this.connection).bridge$captureCurrentPlayerPosition();
+    protected void impl$updateHealthForUseFinish(final CallbackInfo ci) {
+        this.bridge$refreshScaledHealth();
+    }
+
+    @ModifyVariable(method = "setGameMode", at = @At(value = "HEAD"), argsOnly = true)
+    private GameType impl$setGameMode(final GameType value) {
+        if (!ShouldFire.CHANGE_DATA_HOLDER_EVENT_VALUE_CHANGE || Objects.equals(this.gameMode.getGameModeForPlayer(), value) || this.impl$noGameModeEvent) {
+            return value;
         }
+
+        final DataTransactionResult transaction = DataTransactionResult.builder()
+                .replace(Value.immutableOf(Keys.GAME_MODE, (GameMode) (Object) this.gameMode.getGameModeForPlayer()))
+                .success(Value.immutableOf(Keys.GAME_MODE, (GameMode) (Object) value))
+                .result(DataTransactionResult.Type.SUCCESS)
+                .build();
+
+        final ChangeDataHolderEvent.ValueChange
+                event =
+                SpongeEventFactory.createChangeDataHolderEventValueChange(PhaseTracker.getCauseStackManager().currentCause(), transaction, (DataHolder.Mutable) this);
+
+        Sponge.eventManager().post(event);
+
+        if (event.isCancelled()) {
+            return this.gameMode.getGameModeForPlayer();
+        }
+
+        return (GameType) (Object) event.endResult().successfulValue(Keys.GAME_MODE)
+                .map(Value::get)
+                .orElse((GameMode) (Object) value);
     }
 
     @Override
-    protected void impl$updateHealthForUseFinish(final CallbackInfo ci) {
-        this.bridge$refreshScaledHealth();
+    public void bridge$setGameModeNoEvent(final GameType gameType) {
+        try {
+            this.impl$noGameModeEvent = true;
+            this.shadow$setGameMode(gameType);
+        } finally {
+            this.impl$noGameModeEvent = false;
+        }
     }
 }

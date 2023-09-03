@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.block.BlockStateSerializerDeserializer;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
+import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Arrays;
@@ -71,7 +72,7 @@ public abstract class BlockStateMixin_API extends BlockBehaviour_BlockStateBaseM
                 .blockState((net.minecraft.world.level.block.state.BlockState) (Object) this)
                 .position(location.blockPosition())
                 .world((ServerLevel) location.world());
-        if (this.shadow$getBlock().isEntityBlock() && location.block().type().equals(this.shadow$getBlock())) {
+        if (((BlockStateBridge) this).bridge$hasTileEntity() && location.block().type().equals(this.shadow$getBlock())) {
             final BlockEntity tileEntity = location.blockEntity()
                     .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));
             builder.add(((SpongeDataHolderBridge) tileEntity).bridge$getManipulator());

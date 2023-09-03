@@ -31,9 +31,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -220,8 +218,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     private boolean impl$isConstructing = true;
     private VanishState impl$vanishState = VanishState.unvanished();
-    private boolean impl$pendingVisibilityUpdate = false;
-    private int impl$visibilityTicks = 0;
     private boolean impl$transient = false;
     private boolean impl$shouldFireRepositionEvent = true;
     private WeakReference<ServerWorld> impl$originalDestinationWorld = null;
@@ -394,6 +390,36 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Override
     public void bridge$vanishState(VanishState state) {
         this.impl$vanishState = state;
+
+        final ChunkMap_TrackedEntityAccessor trackerAccessor = ((ChunkMapAccessor) ((ServerWorld) this.level).chunkManager()).accessor$entityMap().get(this.shadow$getId());
+        if (trackerAccessor == null) {
+            return;
+        }
+
+        if (this.bridge$vanishState().invisible()) {
+            for (final ServerPlayer entityPlayerMP : trackerAccessor.accessor$seenBy()) {
+                trackerAccessor.accessor$removePlayer(entityPlayerMP);
+            }
+
+            if ((Entity) (Object) this instanceof ServerPlayer) {
+                for (final ServerPlayer entityPlayerMP : SpongeCommon.server().getPlayerList().getPlayers()) {
+                    if ((Entity) (Object) this == entityPlayerMP) {
+                        continue;
+                    }
+                    entityPlayerMP.connection.send(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, (ServerPlayer) (Object) this));
+                }
+            }
+        } else {
+            for (final ServerPlayer entityPlayerMP : SpongeCommon.server().getPlayerList().getPlayers()) {
+                if ((Entity) (Object) this == entityPlayerMP) {
+                    continue;
+                }
+                if ((Entity) (Object) this instanceof ServerPlayer) {
+                    entityPlayerMP.connection.send(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, (ServerPlayer) (Object) this));
+                }
+                trackerAccessor.accessor$updatePlayer(entityPlayerMP);
+            }
+        }
     }
 
     @Override
@@ -899,51 +925,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             ((DamageSourceBridge) source).bridge$setLava();
         }
 
-    }
-
-
-    @Inject(method = "setPos", at = @At("HEAD"))
-    protected void impl$capturePlayerPosition(final double x, final double y, final double z, final CallbackInfo ci) {
-        // Overridden in ServerPlayer
-    }
-
-
-    @SuppressWarnings({"ConstantConditions", "RedundantCast"})
-    @Inject(method = "tick",
-        at = @At("RETURN"))
-    private void impl$updateVanishState(final CallbackInfo callbackInfo) {
-        if (this.impl$pendingVisibilityUpdate && !this.level.isClientSide) {
-            final ChunkMap_TrackedEntityAccessor trackerAccessor = ((ChunkMapAccessor) ((ServerWorld) this.level).chunkManager()).accessor$entityMap().get(this.shadow$getId());
-            if (trackerAccessor != null && this.impl$visibilityTicks % 4 == 0) {
-                if (this.bridge$vanishState().invisible()) {
-                    for (final ServerPlayer entityPlayerMP : trackerAccessor.accessor$seenBy()) {
-                        entityPlayerMP.connection.send(new ClientboundRemoveEntitiesPacket(this.shadow$getId()));
-                        if ((Entity) (Object) this instanceof ServerPlayer) {
-                            entityPlayerMP.connection.send(
-                                new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, (ServerPlayer) (Object) this));
-                        }
-                    }
-                } else {
-                    this.impl$visibilityTicks = 1;
-                    this.impl$pendingVisibilityUpdate = false;
-                    for (final ServerPlayer entityPlayerMP : SpongeCommon.server().getPlayerList().getPlayers()) {
-                        if ((Entity) (Object) this == entityPlayerMP) {
-                            continue;
-                        }
-                        if ((Entity) (Object) this instanceof ServerPlayer) {
-                            final Packet<?> packet = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, (ServerPlayer) (Object) this);
-                            entityPlayerMP.connection.send(packet);
-                        }
-                        trackerAccessor.accessor$updatePlayer(entityPlayerMP);
-                    }
-                }
-            }
-            if (this.impl$visibilityTicks > 0) {
-                this.impl$visibilityTicks--;
-            } else {
-                this.impl$pendingVisibilityUpdate = false;
-            }
-        }
     }
 
     @Redirect(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collide(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;"))

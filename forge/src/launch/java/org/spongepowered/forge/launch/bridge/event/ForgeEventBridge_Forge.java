@@ -25,6 +25,7 @@
 package org.spongepowered.forge.launch.bridge.event;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 
 public interface ForgeEventBridge_Forge {
@@ -55,7 +56,9 @@ public interface ForgeEventBridge_Forge {
 
     /**
      * Creates a Sponge event from this Forge event
+     *
+     * @param frame The stack frame in which the event will be fired
      */
-    @Nullable Event bridge$createSpongeEvent();
+    @Nullable Event bridge$createSpongeEvent(final CauseStackManager.StackFrame frame);
 
 }

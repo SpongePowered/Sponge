@@ -107,7 +107,7 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
 
     @Override
     public Optional<BlockEntityArchetype> blockEntityArchetype(final int x, final int y, final int z) {
-        return Optional.empty();
+        return this.blockEntities.blockEntityArchetype(x, y, z);
     }
 
     @Override

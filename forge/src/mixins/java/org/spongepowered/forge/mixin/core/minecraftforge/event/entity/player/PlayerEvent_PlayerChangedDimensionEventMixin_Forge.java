@@ -28,6 +28,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -35,7 +36,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.forge.launch.bridge.event.ForgeEventBridge_Forge;
 
 @Mixin(value = PlayerEvent.PlayerChangedDimensionEvent.class, remap = false)
@@ -58,10 +58,10 @@ public final class PlayerEvent_PlayerChangedDimensionEventMixin_Forge implements
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Event bridge$createSpongeEvent() {
+    public Event bridge$createSpongeEvent(final CauseStackManager.StackFrame frame) {
         final PlayerEvent.PlayerChangedDimensionEvent thisEvent = (PlayerEvent.PlayerChangedDimensionEvent) (Object) this;
         return SpongeEventFactory.createChangeEntityWorldEventPost(
-                PhaseTracker.getCauseStackManager().currentCause(),
+                frame.currentCause(),
                 (Entity) thisEvent.getPlayer(),
                 (ServerWorld) SpongeCommon.server().getLevel(this.fromDim),
                 (ServerWorld) SpongeCommon.server().getLevel(this.toDim),

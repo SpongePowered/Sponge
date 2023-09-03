@@ -22,30 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.forge.mixin.core.world.level.block.state;
 
-import com.google.common.collect.EnumBiMap;
-import net.minecraft.world.InteractionResult;
-import org.spongepowered.api.util.Tristate;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.extensions.IForgeBlockState;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 
-public final class TristateUtil {
+@Mixin(value = BlockState.class, priority = 1300)
+public abstract class BlockStateMixin_Forge implements BlockStateBridge {
 
-    private static final EnumBiMap<InteractionResult, Tristate> map = EnumBiMap.create(InteractionResult.class, Tristate.class);
-
-    static {
-        TristateUtil.map.put(InteractionResult.FAIL, Tristate.FALSE);
-        TristateUtil.map.put(InteractionResult.PASS, Tristate.UNDEFINED);
-        TristateUtil.map.put(InteractionResult.SUCCESS, Tristate.TRUE);
+    @Override
+    public boolean bridge$hasTileEntity() {
+        return ((IForgeBlockState) this).hasTileEntity();
     }
 
-    public static Tristate fromActionResult(final InteractionResult result) {
-        return TristateUtil.map.get(result);
+    @Override
+    public @Nullable BlockEntity bridge$createTileEntity(Level world) {
+        return ((IForgeBlockState) this).createTileEntity(world);
     }
 
-    public static InteractionResult toActionResult(final Tristate tristate) {
-        return TristateUtil.map.inverse().get(tristate);
-    }
-
-    private TristateUtil() {
+    @Override
+    public int bridge$getLightValue(ServerLevel world, BlockPos pos) {
+        return ((IForgeBlockState) this).getLightValue(world, pos);
     }
 }

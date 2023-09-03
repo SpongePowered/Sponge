@@ -70,6 +70,9 @@ public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder
         if (this.explosion) {
             damageSource.setExplosion();
         }
+        if (this.fire) {
+            accessor.invoker$setIsFire();
+        }
         if (this.exhaustion != null) {
             accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }

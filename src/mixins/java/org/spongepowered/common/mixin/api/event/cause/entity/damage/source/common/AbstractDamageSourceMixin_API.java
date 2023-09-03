@@ -30,6 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
 import org.spongepowered.common.event.cause.entity.damage.SpongeCommonDamageSource;
 
 /*
@@ -48,12 +49,15 @@ public abstract class AbstractDamageSourceMixin_API implements DamageSource {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setUpBridges(final CallbackInfo callbackInfo) {
         final SpongeCommonDamageSource commonSource = (SpongeCommonDamageSource) (Object) this;
+        final DamageSourceAccessor accessor = (DamageSourceAccessor) commonSource;
+
         commonSource.setDamageType(this.type().name());
+
         if (this.isAbsolute()) {
-            commonSource.bridge$setDamageIsAbsolute();
+            accessor.invoker$bypassMagic();
         }
         if (this.isBypassingArmor()) {
-            commonSource.bridge$setDamageBypassesArmor();
+            accessor.invoker$bypassArmor();
         }
         if (this.isExplosive()) {
             commonSource.setExplosion();
@@ -65,11 +69,14 @@ public abstract class AbstractDamageSourceMixin_API implements DamageSource {
             commonSource.setScalesWithDifficulty();
         }
         if (this.doesAffectCreative()) {
-            commonSource.isBypassInvul();
+            accessor.invoker$bypassInvul();
         }
-        // Sets exhaustion last as to allow control if the builder specified a custom exhaustion value
+        if (this.isFire()) {
+            accessor.invoker$setIsFire();
+        }
 
-        commonSource.bridge$setHungerDamage((float) this.exhaustion());
+        // Sets exhaustion last as to allow control if the builder specified a custom exhaustion value
+        accessor.accessor$exhaustion((float) this.exhaustion());
     }
 
 }

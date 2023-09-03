@@ -262,9 +262,9 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .ifPresent(type -> {
-                    final int x = pos[0] - offset.x();
-                    final int y = pos[1] - offset.y();
-                    final int z = pos[2] - offset.z();
+                    final int x = pos[0] + offset.x();
+                    final int y = pos[1] + offset.y();
+                    final int z = pos[2] + offset.z();
                     final BlockEntityArchetype.Builder builder = SpongeBlockEntityArchetypeBuilder.pooled()
                         .state(archetypeVolume.block(x, y, z))
                         .blockEntity(type);

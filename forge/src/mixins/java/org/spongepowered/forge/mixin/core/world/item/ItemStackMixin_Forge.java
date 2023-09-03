@@ -22,24 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server.level;
+package org.spongepowered.forge.mixin.core.world.item;
 
-import net.minecraft.server.level.ServerPlayerGameMode;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.LevelReader;
+import net.minecraftforge.common.extensions.IForgeItemStack;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.server.level.ServerPlayerGameModeBridge;
+import org.spongepowered.common.bridge.world.item.ItemStackBridge;
 
-@Mixin(ServerPlayerGameMode.class)
-public abstract class ServerPlayerGameModeMixin implements ServerPlayerGameModeBridge {
-
-    private boolean impl$interactBlockRightClickEventCancelled = false;
+@Mixin(value = ItemStack.class, priority = 1300)
+public abstract class ItemStackMixin_Forge implements ItemStackBridge {
 
     @Override
-    public boolean bridge$isInteractBlockRightClickCancelled() {
-        return this.impl$interactBlockRightClickEventCancelled;
+    public InteractionResult bridge$onItemUseFirst(UseOnContext context) {
+        return ((IForgeItemStack) this).onItemUseFirst(context);
     }
 
     @Override
-    public void bridge$setInteractBlockRightClickCancelled(final boolean cancelled) {
-        this.impl$interactBlockRightClickEventCancelled = cancelled;
+    public boolean bridge$doesSneakBypassUse(LevelReader world, BlockPos pos, Player player) {
+        return ((IForgeItemStack) this).doesSneakBypassUse(world, pos, player);
     }
 }

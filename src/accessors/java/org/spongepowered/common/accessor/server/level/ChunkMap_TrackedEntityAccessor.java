@@ -35,10 +35,12 @@ import java.util.Set;
 @Mixin(targets = "net/minecraft/server/level/ChunkMap$TrackedEntity")
 public interface ChunkMap_TrackedEntityAccessor {
 
-    @Accessor("serverEntity") ServerEntity accessor$getServerEntity();
-
     @Accessor("seenBy") Set<ServerPlayer> accessor$seenBy();
 
-    @Invoker("updatePlayer")  void accessor$updatePlayer(ServerPlayer param0);
+    @Invoker("updatePlayer") void accessor$updatePlayer(ServerPlayer param0);
+
+    @Invoker("removePlayer") void accessor$removePlayer(ServerPlayer param0);
+
+    @Accessor("serverEntity") ServerEntity accessor$getServerEntity();
 
 }

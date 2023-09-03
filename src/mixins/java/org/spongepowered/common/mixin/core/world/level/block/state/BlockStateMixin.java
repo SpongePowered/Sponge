@@ -42,11 +42,11 @@ import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 @Mixin(BlockState.class)
 public abstract class BlockStateMixin extends BlockBehaviour.BlockStateBase implements BlockStateBridge {
 
-    protected BlockStateMixin(Block p_i231870_1_,
-        ImmutableMap<Property<?>, Comparable<?>> p_i231870_2_,
-        MapCodec<BlockState> p_i231870_3_
+    protected BlockStateMixin(Block block,
+        ImmutableMap<Property<?>, Comparable<?>> properties,
+        MapCodec<BlockState> codec
     ) {
-        super(p_i231870_1_, p_i231870_2_, p_i231870_3_);
+        super(block, properties, codec);
     }
 
 
@@ -56,7 +56,7 @@ public abstract class BlockStateMixin extends BlockBehaviour.BlockStateBase impl
     }
 
     @Override
-    public @Nullable BlockEntity bridge$createNewTileEntity(Level world) {
+    public @Nullable BlockEntity bridge$createTileEntity(Level world) {
         return ((EntityBlock) this.getBlock()).newBlockEntity(world);
     }
 

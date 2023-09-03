@@ -46,21 +46,21 @@ public final class TropicalFishData {
                         .set((h, v) -> {
                             final net.minecraft.world.item.DyeColor baseColor = TropicalFishData.getBaseColor(h);
                             final net.minecraft.world.item.DyeColor patternColor = TropicalFishData.getPatternColor(h);
-                            h.setVariant(((TropicalFishAccessor.invoker$calculateVariant(((TropicalFish.Pattern) (Object) v), patternColor, baseColor))));
+                            h.setVariant(((TropicalFishAccessor.invoker$calculateVariant((TropicalFish.Pattern) (Object) v, baseColor, patternColor))));
                         })
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) TropicalFishData.getBaseColor(h))
                         .set((h, v) -> {
                             final net.minecraft.world.item.DyeColor patternColor = TropicalFishData.getPatternColor(h);
                             final TropicalFish.Pattern type = TropicalFishData.getType(h);
-                            h.setVariant(((TropicalFishAccessor.invoker$calculateVariant(type, patternColor, (net.minecraft.world.item.DyeColor) (Object) v))));
+                            h.setVariant(((TropicalFishAccessor.invoker$calculateVariant(type, (net.minecraft.world.item.DyeColor) (Object) v, patternColor))));
                         })
                     .create(Keys.PATTERN_COLOR)
                         .get(h -> (DyeColor) (Object) TropicalFishData.getPatternColor(h))
                         .set((h, v) -> {
                             final net.minecraft.world.item.DyeColor baseColor = TropicalFishData.getBaseColor(h);
                             final TropicalFish.Pattern type = TropicalFishData.getType(h);
-                            h.setVariant(((TropicalFishAccessor.invoker$calculateVariant(type, (net.minecraft.world.item.DyeColor) (Object) v, baseColor))));
+                            h.setVariant(((TropicalFishAccessor.invoker$calculateVariant(type, baseColor, (net.minecraft.world.item.DyeColor) (Object) v))));
                         });
     }
     // @formatter:on
