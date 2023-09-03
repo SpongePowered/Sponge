@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
+import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -95,7 +97,12 @@ public abstract class SkullBlockEntityMixin extends BlockEntity implements Ticka
             return input;
         }
         future.thenAcceptAsync(profile -> {
-            this.owner = SpongeGameProfile.toMcProfile(profile);
+            final GameProfile mcProfile = SpongeGameProfile.toMcProfile(profile);
+            final Property textures = Iterables.getFirst(mcProfile.getProperties().get("textures"), null);
+            if(textures == null)
+                this.owner = input;
+            else
+                this.owner = mcProfile;
             this.impl$markDirtyAndUpdate();
         }, SpongeCommon.server());
         this.impl$currentProfileFuture = future;
