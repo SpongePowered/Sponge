@@ -24,8 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.material;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.world.level.material.Fluid;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.asm.mixin.Implements;
@@ -58,5 +63,22 @@ public abstract class FluidStateMixin_API implements FluidState {
     @Intrinsic
     public boolean fluidState$isEmpty() {
         return this.shadow$isEmpty();
+    }
+
+    @Override
+    public DataContainer rawData() {
+        return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED); // FluidState has no extra data
+    }
+
+    @Override
+    public boolean validateRawData(final DataView container) {
+        checkNotNull(container, "Raw data cannot be null!");
+        return true;
+    }
+
+    @Override
+    public FluidState withRawData(final DataView container) throws InvalidDataException {
+        checkNotNull(container, "Raw data cannot be null!");
+        return this; // Ignore incoming container
     }
 }

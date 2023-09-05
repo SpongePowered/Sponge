@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.state;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -82,8 +84,14 @@ public abstract class BlockStateMixin_API extends BlockBehaviour_BlockStateBaseM
     }
 
     @Override
+    public DataContainer rawData() {
+        return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED); // BlockState has no extra data
+    }
+
+    @Override
     public boolean validateRawData(final DataView container) {
-        return container.contains(Constants.Block.BLOCK_STATE);
+        checkNotNull(container, "Raw data cannot be null!");
+        return true;
     }
 
     @Override
@@ -93,7 +101,8 @@ public abstract class BlockStateMixin_API extends BlockBehaviour_BlockStateBaseM
 
     @Override
     public BlockState withRawData(final DataView container) throws InvalidDataException {
-        throw new UnsupportedOperationException("Not implemented yet"); // TODO Data API
+        checkNotNull(container, "Raw data cannot be null!");
+        return this; // Ignore incoming container
     }
 
     @Override

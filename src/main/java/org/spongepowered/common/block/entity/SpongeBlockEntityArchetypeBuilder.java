@@ -94,7 +94,7 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
     public BlockEntityArchetype.Builder from(final BlockEntityArchetype value) {
         this.type = value.blockEntityType();
         this.blockState = value.state();
-        this.data = value.blockEntityData();
+        this.data = value.rawData();
         return this;
     }
 

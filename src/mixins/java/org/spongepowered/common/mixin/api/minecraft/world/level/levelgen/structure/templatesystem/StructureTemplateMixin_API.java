@@ -328,7 +328,7 @@ public abstract class StructureTemplateMixin_API implements Schematic, SpongeArc
     public void addEntity(final EntityArchetypeEntry entry) {
         final Vec3 pos = VecHelper.toVanillaVector3d(entry.position());
         final BlockPos blockPos = VecHelper.toBlockPos(entry.position()); // TODO special handling for paintings?
-        final CompoundTag data = NBTTranslator.INSTANCE.translate(entry.archetype().entityData());
+        final CompoundTag data = NBTTranslator.INSTANCE.translate(entry.archetype().rawData());
         final StructureTemplate.StructureEntityInfo info = new StructureTemplate.StructureEntityInfo(pos, blockPos, data);
         this.entityInfoList.add(info);
     }

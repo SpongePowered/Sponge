@@ -80,11 +80,6 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
     }
 
     @Override
-    public DataContainer blockEntityData() {
-        return NBTTranslator.INSTANCE.translateFrom(this.compound);
-    }
-
-    @Override
     public Optional<BlockEntity> apply(final ServerLocation location) {
         final BlockState currentState = location.block();
         final Block currentBlock = ((net.minecraft.world.level.block.state.BlockState) currentState).getBlock();
@@ -131,7 +126,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_TYPE, this.type)
                 .set(Constants.Sponge.BlockEntityArchetype.BLOCK_STATE, this.blockState)
-                .set(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_DATA, this.blockEntityData())
+                .set(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_DATA, this.rawData())
                 ;
     }
 

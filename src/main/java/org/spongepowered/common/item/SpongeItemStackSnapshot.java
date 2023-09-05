@@ -291,7 +291,16 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
+    public DataContainer rawData() {
+        if (this.compound == null) {
+            return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+        }
+        return NBTTranslator.INSTANCE.translate(this.compound);
+    }
+
+    @Override
     public ItemStackSnapshot withRawData(DataView container) throws InvalidDataException {
+        checkNotNull(container, "Raw data cannot be null!");
         final ItemStack copy = this.privateStack.copy();
         copy.setRawData(container);
         return copy.createSnapshot();
@@ -316,8 +325,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public boolean validateRawData(DataView container) {
-        final ItemStack copy = this.privateStack.copy();
-        return copy.validateRawData(container);
+        checkNotNull(container, "Raw data cannot be null!");
+        return this.privateStack.validateRawData(container);
     }
 
     @Override

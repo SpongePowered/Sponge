@@ -466,7 +466,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 final DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
                 final Vector3i pos = entry.getKey();
                 final BlockEntityArchetype archetype = entry.getValue();
-                final DataContainer entityData = archetype.blockEntityData();
+                final DataContainer entityData = archetype.rawData();
                 final int[] apos = new int[]{pos.x() - xMin, pos.y() - yMin, pos.z() - zMin};
                 container.set(Constants.Sponge.Schematic.BLOCKENTITY_POS, apos);
                 container.set(Constants.Sponge.Schematic.BLOCKENTITY_DATA, entityData);
@@ -528,7 +528,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 requiredMods.add(key.namespace());
             }
             container.set(Constants.Sponge.Schematic.ENTITIES_ID, key.toString());
-            final DataContainer entityData = entry.archetype().entityData();
+            final DataContainer entityData = entry.archetype().rawData();
             container.set(Constants.Sponge.Schematic.BLOCKENTITY_DATA, entityData);
             return container;
         }).collect(Collectors.toList());

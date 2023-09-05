@@ -91,7 +91,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     @Override
     public EntityArchetype.Builder from(final EntityArchetype value) {
         this.entityType = value.type();
-        this.compound = NBTTranslator.INSTANCE.translate(value.entityData());
+        this.compound = NBTTranslator.INSTANCE.translate(value.rawData());
         SpongeEntityArchetypeBuilder.stripCompound(this.compound);
         // TODO Copy over the pending manipulator data?
         this.manipulator = null;

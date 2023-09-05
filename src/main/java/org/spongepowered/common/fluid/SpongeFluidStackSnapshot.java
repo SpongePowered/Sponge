@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.fluid;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -122,12 +124,22 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
+    public DataContainer rawData() {
+        if (this.extraData == null) {
+            return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+        }
+        return extraData.copy(DataView.SafetyMode.NO_DATA_CLONED);
+    }
+
+    @Override
     public boolean validateRawData(final DataView container) {
-        return container.contains(Queries.CONTENT_VERSION, Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME);
+        checkNotNull(container, "Raw data cannot be null!");
+        return this.createStack().validateRawData(container);
     }
 
     @Override
     public @NonNull FluidStackSnapshot withRawData(final @NonNull DataView container) throws InvalidDataException {
+        checkNotNull(container, "Raw data cannot be null!");
         final FluidStack stack = this.createStack();
         stack.setRawData(container);
         return stack.createSnapshot();

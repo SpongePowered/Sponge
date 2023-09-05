@@ -157,7 +157,13 @@ public final class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
+    public DataContainer rawData() {
+        return this.blockState.rawData();
+    }
+
+    @Override
     public LocatableBlock withRawData(final DataView container) throws InvalidDataException {
+        checkNotNull(container, "Raw data cannot be null!");
         return LocatableBlock.builder().from(this).state(this.blockState.withRawData(container)).build();
     }
 
@@ -168,6 +174,7 @@ public final class SpongeLocatableBlock implements LocatableBlock {
 
     @Override
     public boolean validateRawData(final DataView container) {
+        checkNotNull(container, "Raw data cannot be null!");
         return this.blockState.validateRawData(container);
     }
 

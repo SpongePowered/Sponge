@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -34,6 +36,7 @@ import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.LocatableBlock;
@@ -66,6 +69,7 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
 
     @Shadow public abstract BlockPos shadow$getBlockPos();
     @Shadow public abstract CompoundTag shadow$saveWithFullMetadata();
+    @Shadow public abstract void shadow$load(CompoundTag compoundTag);
     //@formatter:on
 
     @Shadow @Final protected BlockPos worldPosition;
@@ -122,13 +126,24 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     }
 
     @Override
+    public DataContainer rawData() {
+        return NBTTranslator.INSTANCE.translate(this.shadow$saveWithFullMetadata());
+    }
+
+    @Override
     public boolean validateRawData(final DataView container) {
-        return container.contains(Queries.WORLD_KEY)
-            && container.contains(Queries.POSITION_X)
-            && container.contains(Queries.POSITION_Y)
-            && container.contains(Queries.POSITION_Z)
-            && container.contains(Constants.TileEntity.TILE_TYPE)
-            && container.contains(Constants.Sponge.UNSAFE_NBT);
+        checkNotNull(container, "Raw data cannot be null!");
+        return true;
+    }
+
+    @Override
+    public void setRawData(final DataView container) throws InvalidDataException {
+        checkNotNull(container, "Raw data cannot be null!");
+        try {
+            this.shadow$load(NBTTranslator.INSTANCE.translate(container));
+        } catch (RuntimeException exception) {
+            throw new InvalidDataException(exception);
+        }
     }
 
     @Override

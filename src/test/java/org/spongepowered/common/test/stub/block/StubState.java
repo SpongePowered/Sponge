@@ -100,6 +100,11 @@ public final class StubState implements BlockState, SpongeImmutableDataHolder<Bl
     }
 
     @Override
+    public DataContainer rawData() {
+        return null;
+    }
+
+    @Override
     public boolean validateRawData(final DataView container) {
         return false;
     }

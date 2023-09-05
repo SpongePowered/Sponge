@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.block;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -261,13 +263,25 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     }
 
     @Override
+    public DataContainer rawData() {
+        if (this.compound == null) {
+            return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+        }
+        return NBTTranslator.INSTANCE.translate(this.compound);
+    }
+
+    @Override
     public BlockSnapshot withRawData(final DataView container) throws InvalidDataException {
-        return BuilderImpl.pooled().buildContent(container).orElseThrow(InvalidDataException::new);
+        checkNotNull(container, "Raw data cannot be null!");
+        final BuilderImpl builder = this.createBuilder();
+        builder.addUnsafeCompound(NBTTranslator.INSTANCE.translate(container));
+        return builder.build();
     }
 
     @Override
     public boolean validateRawData(final DataView container) {
-        return BuilderImpl.pooled().buildContent(container).isPresent();
+        checkNotNull(container, "Raw data cannot be null!");
+        return true;
     }
 
     @Override

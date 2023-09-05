@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
@@ -111,29 +113,25 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
     @Override
     public boolean validateRawData(final DataView container) {
-        Preconditions.checkNotNull(container);
-        return false;
+        checkNotNull(container, "Raw data cannot be null!");
+        return true;
     }
 
     @Override
     public void setRawData(final DataView container) throws InvalidDataException {
-        Preconditions.checkNotNull(container);
-
-        if (this.shadow$isEmpty()) {
-            throw new IllegalArgumentException("Cannot set data on empty item stacks!");
-        }
-        if (!container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            throw new InvalidDataException("There's no NBT Data set in the provided container");
-        }
-        final DataView nbtData = container.getView(Constants.Sponge.UNSAFE_NBT).get();
+        checkNotNull(container, "Raw data cannot be null!");
+        final CompoundTag compoundTag = new CompoundTag();
+        NBTTranslator.INSTANCE.translateContainerToData(compoundTag, container);
         try {
-            final int integer = container.getInt(Constants.ItemStack.DAMAGE_VALUE).orElse(this.shadow$getDamageValue());
-            this.shadow$setDamageValue(integer);
-            final CompoundTag stackCompound = NBTTranslator.INSTANCE.translate(nbtData);
-            this.shadow$setTag(stackCompound);
-        } catch (final Exception e) {
-            throw new InvalidDataException("Unable to set raw data or translate raw data for ItemStack setting", e);
+            this.shadow$setTag(compoundTag);
+        } catch (RuntimeException exception) {
+            throw new InvalidDataException(exception);
         }
+    }
+
+    @Override
+    public DataContainer rawData() {
+        return NBTTranslator.INSTANCE.translateFrom(this.shadow$getTag());
     }
 
     @Override

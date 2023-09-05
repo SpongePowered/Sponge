@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
@@ -42,6 +44,8 @@ import net.minecraft.world.level.entity.EntityInLevelCallback;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityArchetype;
@@ -108,6 +112,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow protected abstract void shadow$setRot(float yaw, float pitch);
     @Shadow public abstract net.minecraft.world.phys.AABB shadow$getBoundingBox();
     @Shadow public abstract boolean shadow$saveAsPassenger(CompoundTag compound);
+    @Shadow public abstract void shadow$load(CompoundTag compound);
     @Shadow @Nullable public abstract Component shadow$getCustomName();
     @Shadow public abstract Component shadow$getDisplayName();
     @Shadow public abstract void shadow$setRemoved(Entity.RemovalReason var1);
@@ -297,6 +302,29 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 .set(Constants.Entity.TYPE, entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type()))
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
         return container;
+    }
+
+    @Override
+    public DataContainer rawData() {
+        final CompoundTag compoundTag = new CompoundTag();
+        this.shadow$saveAsPassenger(compoundTag);
+        return NBTTranslator.INSTANCE.translate(compoundTag);
+    }
+
+    @Override
+    public boolean validateRawData(final DataView container) {
+        checkNotNull(container, "Raw data cannot be null!");
+        return true;
+    }
+
+    @Override
+    public void setRawData(final DataView container) throws InvalidDataException {
+        checkNotNull(container, "Raw data cannot be null!");
+        try {
+            this.shadow$load(NBTTranslator.INSTANCE.translate(container));
+        } catch (RuntimeException exception) {
+            throw new InvalidDataException(exception);
+        }
     }
 
     @Override

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.fluid;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -39,9 +41,6 @@ import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.util.Constants;
-
-import java.util.Optional;
-
 
 public class SpongeFluidStack implements FluidStack, SpongeMutableDataHolder {
 
@@ -90,31 +89,23 @@ public class SpongeFluidStack implements FluidStack, SpongeMutableDataHolder {
     }
 
     @Override
+    public DataContainer rawData() {
+        if (this.extraData == null) {
+            return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+        }
+        return extraData.copy(DataView.SafetyMode.NO_DATA_CLONED);
+    }
+
+    @Override
     public boolean validateRawData(final DataView container) {
-        return container.contains(Queries.CONTENT_VERSION, Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME);
+        checkNotNull(container, "Raw data cannot be null!");
+        return true;
     }
 
     @Override
     public void setRawData(final @NonNull DataView container) throws InvalidDataException {
-        try {
-            final int contentVersion = container.getInt(Queries.CONTENT_VERSION).get();
-            if (contentVersion != this.contentVersion()) {
-                throw new InvalidDataException("Older content found! Cannot set raw data of older content!");
-            }
-            final String rawFluid = container.getString(Constants.Fluids.FLUID_TYPE).get();
-            final int volume = container.getInt(Constants.Fluids.FLUID_VOLUME).get();
-            final Optional<FluidType> fluidType = Sponge.game().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
-            if (!fluidType.isPresent()) {
-                throw new InvalidDataException("Unknown FluidType found! Requested: " + rawFluid + "but got none.");
-            }
-            this.fluidType = fluidType.get();
-            this.volume = volume;
-            if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-                this.extraData = container.getView(Constants.Sponge.UNSAFE_NBT).get().copy();
-            }
-        } catch (final Exception e) {
-            throw new InvalidDataException("DataContainer contained invalid data!", e);
-        }
+        checkNotNull(container, "Raw data cannot be null!");
+        extraData = container.copy(DataView.SafetyMode.ALL_DATA_CLONED);
     }
 
     @Override

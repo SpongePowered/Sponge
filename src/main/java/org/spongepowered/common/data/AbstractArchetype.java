@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundTag;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.world.Archetype;
@@ -71,12 +72,16 @@ public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> im
     }
 
     @Override
+    public DataContainer rawData() {
+        return NBTTranslator.INSTANCE.translate(this.compound);
+    }
+
+    @Override
     public void setRawData(final DataView container) throws InvalidDataException {
         checkNotNull(container, "Raw data cannot be null!");
-        final CompoundTag copy = NBTTranslator.INSTANCE.translate(container);
-        final boolean valid = this.getValidator().validate(copy);
-        if (valid) {
-            this.compound = copy;
+        final CompoundTag compoundTag = NBTTranslator.INSTANCE.translate(container);
+        if (this.getValidator().validate(compoundTag)) {
+            this.compound = compoundTag;
         } else {
             throw new InvalidDataException("Invalid data for " + this.getValidationType());
         }
@@ -84,6 +89,7 @@ public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> im
 
     @Override
     public boolean validateRawData(final DataView container) {
+        checkNotNull(container, "Raw data cannot be null!");
         return this.getValidator().validate(container);
     }
 

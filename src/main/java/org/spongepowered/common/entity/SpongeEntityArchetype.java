@@ -112,17 +112,12 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
 
     @Override
     public DataContainer data$getDataContainer() {
-        return this.entityData();
+        return this.rawData();
     }
 
     @Override
     public void data$setDataContainer(final DataContainer container) {
         this.compound = NBTTranslator.INSTANCE.translate(Objects.requireNonNull(container, "DataContainer cannot be null!"));
-    }
-
-    @Override
-    public DataContainer entityData() {
-        return NBTTranslator.INSTANCE.translateFrom(this.compound);
     }
 
     @Override
@@ -210,7 +205,7 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
         return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED)
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Sponge.EntityArchetype.ENTITY_TYPE, this.type)
-                .set(Constants.Sponge.EntityArchetype.ENTITY_DATA, this.entityData());
+                .set(Constants.Sponge.EntityArchetype.ENTITY_DATA, this.rawData());
     }
 
     @Override

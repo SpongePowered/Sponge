@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.MoreObjects;
 import net.minecraft.nbt.CompoundTag;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -156,14 +158,25 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     }
 
     @Override
+    public DataContainer rawData() {
+        if (this.compound == null) {
+            return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+        }
+        return NBTTranslator.INSTANCE.translate(this.compound);
+    }
+
+    @Override
     public boolean validateRawData(final DataView container) {
-        return new SpongeEntitySnapshotBuilder().buildContent(container).isPresent();
+        checkNotNull(container, "Raw data cannot be null!");
+        return true;
     }
 
     @Override
     public EntitySnapshot withRawData(final DataView container) throws InvalidDataException {
-        final Optional<EntitySnapshot> snap = new SpongeEntitySnapshotBuilder().buildContent(container);
-        return snap.orElseThrow(InvalidDataException::new);
+        checkNotNull(container, "Raw data cannot be null!");
+        final SpongeEntitySnapshotBuilder builder = this.createBuilder();
+        builder.unsafeCompound(NBTTranslator.INSTANCE.translate(container));
+        return builder.build();
     }
 
     @Override
