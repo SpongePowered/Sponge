@@ -38,7 +38,7 @@ public abstract class ThrowableItemProjectileMixin_API extends ThrowableProjecti
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        this.getValue(Keys.ITEM_STACK_SNAPSHOT).map(Value::asImmutable).ifPresent(values::add);
+        values.add(this.requireValue(Keys.ITEM_STACK_SNAPSHOT).asImmutable());
 
         return values;
     }
