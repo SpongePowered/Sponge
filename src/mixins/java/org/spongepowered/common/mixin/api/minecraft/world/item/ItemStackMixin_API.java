@@ -86,7 +86,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Shadow public abstract int shadow$getMaxStackSize();
     @Shadow public abstract boolean shadow$hasTag();
     @Shadow public abstract boolean shadow$isEmpty();
-    @Shadow public abstract CompoundTag shadow$getTag();
+    @Shadow public abstract @Nullable CompoundTag shadow$getTag();
     @Shadow public abstract net.minecraft.world.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
     @Shadow public abstract Multimap<Attribute, net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getAttributeModifiers(EquipmentSlot equipmentSlot);
@@ -120,10 +120,11 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Override
     public void setRawData(final DataView container) throws InvalidDataException {
         checkNotNull(container, "Raw data cannot be null!");
-        final CompoundTag compoundTag = new CompoundTag();
-        NBTTranslator.INSTANCE.translateContainerToData(compoundTag, container);
+        if (container.isEmpty()) {
+            return; // Avoid to initialize internal TagCompound
+        }
         try {
-            this.shadow$setTag(compoundTag);
+            this.shadow$setTag(NBTTranslator.INSTANCE.translate(container));
         } catch (RuntimeException exception) {
             throw new InvalidDataException(exception);
         }
@@ -131,7 +132,10 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
     @Override
     public DataContainer rawData() {
-        return NBTTranslator.INSTANCE.translateFrom(this.shadow$getTag());
+        if (!this.shadow$hasTag()) {
+            return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
+        }
+        return NBTTranslator.INSTANCE.translate(this.shadow$getTag());
     }
 
     @Override
