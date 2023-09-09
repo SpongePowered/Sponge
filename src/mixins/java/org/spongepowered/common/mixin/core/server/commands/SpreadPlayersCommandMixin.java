@@ -41,7 +41,7 @@ import java.util.Set;
 @Mixin(SpreadPlayersCommand.class)
 public abstract class SpreadPlayersCommandMixin {
 
-    @Redirect(method = "setPlayerPositions", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleportTo(Lnet/minecraft/server/level/ServerLevel;DDDLjava/util/Set;FF)Z"))
+    // @Redirect(method = "setPlayerPositions", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleportTo(Lnet/minecraft/server/level/ServerLevel;DDDLjava/util/Set;FF)Z")) // TODO SF 1.19.4
     private static boolean impl$createCauseFrameForTeleport(final Entity instance, final ServerLevel level, final double x, final double y,
             final double z, final Set<RelativeMovement> relativeMovements, final float yRot, final float xRot) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {

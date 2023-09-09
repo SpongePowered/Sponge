@@ -155,7 +155,7 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         this.impl$version = new SpongeMinecraftVersion(String.valueOf(version), version);
     }
 
-    @Inject(method = "lambda$doSendPacket$8", at = @At(value = "INVOKE", target = "Lio/netty/util/concurrent/Future;isSuccess()Z"))
+    // @Inject(method = "lambda$doSendPacket$8", at = @At(value = "INVOKE", target = "Lio/netty/util/concurrent/Future;isSuccess()Z")) // TODO SF 1.19.4
     public void impl$onPacketSent(final PacketSendListener $$0x, final Future $$1x, final CallbackInfo ci) {
         if ($$0x instanceof final PacketSender.SpongePacketSendListener spongeListener) {
             spongeListener.accept($$1x.cause());
