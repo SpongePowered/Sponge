@@ -35,12 +35,12 @@ import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
 @Mixin(Blocks.class)
 public abstract class BlocksMixin_Tracker {
 
-    @Redirect(method = "<clinit>",
+    /* @Redirect(method = "<clinit>", // TODO SF 1.19.4
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/Block;getLootTable()Lnet/minecraft/resources/ResourceLocation;"
         )
-    )
+    ) */
     private static ResourceLocation impl$initializeTrackerState(final Block block) {
         final boolean randomlyTicking = block.isRandomlyTicking(block.defaultBlockState());
 

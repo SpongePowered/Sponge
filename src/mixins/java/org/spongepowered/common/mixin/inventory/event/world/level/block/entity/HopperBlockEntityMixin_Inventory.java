@@ -71,9 +71,9 @@ public abstract class HopperBlockEntityMixin_Inventory {
         return InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(inventory), InventoryUtil.toInventory(hopper)).isCancelled();
     }
 
-    @Redirect(method = "ejectItems",
+    /* @Redirect(method = "ejectItems", // TODO SF 1.19.4
             at = @At(value = "INVOKE",
-                     target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;isFullContainer(Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Z"))
+                     target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;isFullContainer(Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Z")) */
     private static boolean impl$throwTransferPreIfNotFull(
         final Container attachedContainer, final Direction direction, final Level level, final BlockPos pos, final BlockState state, final Container container
     ) {
@@ -108,10 +108,10 @@ public abstract class HopperBlockEntityMixin_Inventory {
 
     // Post Captured Transactions
 
-    @Inject(method = "ejectItems", locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+    /* @Inject(method = "ejectItems", locals = LocalCapture.CAPTURE_FAILEXCEPTION, // TODO SF 1.19.4
             at = @At(value = "INVOKE",
                      target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z",
-                     ordinal = 1))
+                     ordinal = 1)) */
     private static void impl$afterPutStackInSlots(final Level var0, final BlockPos var1, final BlockState var2, final Container var3,
         final CallbackInfoReturnable<Boolean> cir, final Container iInventory, final Direction enumFacing,
         final int i, final ItemStack itemStack, final ItemStack itemStack1

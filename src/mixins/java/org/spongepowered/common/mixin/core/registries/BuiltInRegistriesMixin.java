@@ -61,7 +61,7 @@ public abstract class BuiltInRegistriesMixin {
     @Inject(method = "lambda$static$6", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/EntityType;PIG:Lnet/minecraft/world/entity/EntityType;"))
     private static void impl$staticInitSpongeEntityTypes(final Registry $$0, final CallbackInfoReturnable<EntityType> cir)
     {
-        final var type = HumanEntity.TYPE;
+        // final var type = HumanEntity.TYPE; // TODO SF 1.19.4
     }
 
     @Inject(method = "bootStrap", at = @At(value = "HEAD"))

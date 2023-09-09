@@ -111,7 +111,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     }
 
     // Tick up and Start
-    @Redirect(method = "serverTick",
+    /* @Redirect(method = "serverTick", // TODO SF 1.19.4
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/core/NonNullList;I)Z",
             ordinal = 1))
@@ -135,7 +135,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
             SpongeCommon.post(event);
             return !event.isCancelled();
         }
-    }
+    } */
 
     // Tick down
     @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"))
@@ -205,10 +205,10 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     }
 
     // Finish
-    @Inject(
+    /* @Inject( // TODO SF 1.19.4
         method = "burn",
         locals = LocalCapture.CAPTURE_FAILHARD,
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V")) */
     private static void impl$afterSmeltItem(final RegistryAccess registryAccess,
         final Recipe<?> recipe, final NonNullList<ItemStack> slots, final int var2, final CallbackInfoReturnable<Boolean> cir
     ) {

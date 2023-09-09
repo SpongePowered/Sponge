@@ -289,7 +289,7 @@ public abstract class CommandsMixin implements CommandsBridge {
         return requiredArgumentBuilder;
     }
 
-    @Redirect(method = "sendCommands", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;fillUsableCommands(Lcom/mojang/brigadier/tree/CommandNode;Lcom/mojang/brigadier/tree/CommandNode;Lnet/minecraft/commands/CommandSourceStack;Ljava/util/Map;)V"))
+    // @Redirect(method = "sendCommands", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;fillUsableCommands(Lcom/mojang/brigadier/tree/CommandNode;Lcom/mojang/brigadier/tree/CommandNode;Lnet/minecraft/commands/CommandSourceStack;Ljava/util/Map;)V")) // TODO SF 1.19.4
     private void impl$addNonBrigSuggestions(
             final Commands commands,
             final CommandNode<CommandSourceStack> p_197052_1_,

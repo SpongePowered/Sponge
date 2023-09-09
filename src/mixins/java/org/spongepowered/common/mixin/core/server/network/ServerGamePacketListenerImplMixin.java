@@ -224,9 +224,9 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     /**
      * Specifically hooks the reach distance to use the forge hook.
      */
-    @Redirect(
+    /* @Redirect( // TODO SF 1.19.4
             method = "handleInteract",
-            at = @At( value = "FIELD",target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;MAX_INTERACTION_DISTANCE:D"))
+            at = @At( value = "FIELD",target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;MAX_INTERACTION_DISTANCE:D")) */
     private double impl$getPlatformReach(final ServerboundInteractPacket packet) {
         return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, packet.getTarget(this.player.getLevel()));
     }
@@ -509,7 +509,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         return 0;
     }
 
-    @Redirect(method = "lambda$handleChatCommand$11", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
+    //@Redirect(method = "lambda$handleChatCommand$11", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
     public void impl$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this.player);
