@@ -142,6 +142,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             sourceBridge.bridge$updateFrameFromCommandSource(frame);
 
             final CommandCause cause = sourceBridge.bridge$withCurrentCause();
+            parse.getContext().withSource((CommandSourceStack) cause);
 
             final String[] splitArg = fullCommand.split(" ", 2);
             final String baseCommand = splitArg[0];
