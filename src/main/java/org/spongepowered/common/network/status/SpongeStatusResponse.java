@@ -43,6 +43,7 @@ import org.spongepowered.api.network.status.StatusClient;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.NetworkUtil;
 
@@ -58,21 +59,21 @@ import javax.imageio.ImageIO;
 
 public final class SpongeStatusResponse implements ClientPingServerEvent.Response {
 
+    private final ServerStatus originalStatus;
+
     private net.minecraft.network.chat.Component description;
     private SpongeStatusPlayers players;
     private boolean hiddenPlayers;
     private SpongeStatusVersion version;
     private ServerStatus.Favicon favicon;
-    private final boolean enforcesSecureChat;
-
 
     private SpongeStatusResponse(ServerStatus status) {
+        this.originalStatus = status;
         this.description = status.description();
         this.players = new SpongeStatusPlayers(status.players().orElse(null));
         this.hiddenPlayers = false;
         this.version = new SpongeStatusVersion(status.version().orElse(null));
         this.favicon = status.favicon().orElse(null);
-        this.enforcesSecureChat = status.enforcesSecureChat();
     }
 
     public final static class SpongeStatusPlayers implements ClientPingServerEvent.Response.Players {
@@ -223,11 +224,12 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
     }
 
     private ServerStatus toVanilla() {
-        return new ServerStatus(this.description,
+        return PlatformHooks.INSTANCE.getGeneralHooks().createServerStatus(
+                this.originalStatus,
+                this.description,
                 Optional.ofNullable(this.hiddenPlayers || this.players == null ? null : this.players.toVanilla()),
                 Optional.of(this.version.toVanilla()),
-                Optional.ofNullable(this.favicon),
-                this.enforcesSecureChat);
+                Optional.ofNullable(this.favicon));
     }
 
     public String motd()
