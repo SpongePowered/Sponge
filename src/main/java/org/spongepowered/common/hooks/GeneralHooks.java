@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.hooks;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.Sponge;
+
+import java.util.Optional;
 
 public interface GeneralHooks {
 
@@ -44,5 +48,9 @@ public interface GeneralHooks {
         // that the game is still being loaded. This is needed to support initialization
         // events with cause tracking.
         return !Sponge.isServerAvailable() || Sponge.server().onMainThread();
+    }
+
+    default ServerStatus createServerStatus(ServerStatus originalStatus, Component description, Optional<ServerStatus.Players> players, Optional<ServerStatus.Version> version, Optional<ServerStatus.Favicon> favicon) {
+        return new ServerStatus(description, players, version, favicon, originalStatus.enforcesSecureChat());
     }
 }

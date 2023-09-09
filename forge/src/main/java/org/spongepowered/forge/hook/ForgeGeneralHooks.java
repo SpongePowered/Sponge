@@ -22,11 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.minecraftforge.core;
+package org.spongepowered.forge.hook;
 
-import net.minecraftforge.registries.IForgeRegistryEntry;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.core.WritableRegistryMixin;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.status.ServerStatus;
+import org.spongepowered.common.hooks.GeneralHooks;
 
-@Mixin(targets = {"net.minecraftforge.registries.NamespacedWrapper", "net.minecraftforge.registries.NamespacedDefaultedWrapper"})
-public abstract class NamespacedWrapperMixin_Forge<T extends IForgeRegistryEntry<T>> extends WritableRegistryMixin<T> {}
+import java.util.Optional;
+
+public class ForgeGeneralHooks implements GeneralHooks {
+
+    public ServerStatus createServerStatus(ServerStatus originalStatus, Component description, Optional<ServerStatus.Players> players, Optional<ServerStatus.Version> version, Optional<ServerStatus.Favicon> favicon) {
+        return new ServerStatus(description, players, version, favicon, originalStatus.enforcesSecureChat(), originalStatus.forgeData());
+    }
+}
