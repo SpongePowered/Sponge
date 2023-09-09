@@ -25,7 +25,7 @@
 package org.spongepowered.forge.mixin.core.minecraftforge.event.world;
 
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
@@ -73,7 +73,7 @@ public abstract class BlockEvent_BreakEventMixin_Forge extends BlockEventMixin_F
 
     @Override
     public @Nullable Event bridge$createSpongeEvent() {
-        final LevelAccessor accessor = this.shadow$getWorld();
+        final LevelAccessor accessor = this.shadow$getLevel();
         if (accessor instanceof ServerWorld) {
             final ServerWorld serverWorld = (ServerWorld) accessor;
             final BlockTransaction transaction = new BlockTransaction(

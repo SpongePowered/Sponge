@@ -24,17 +24,7 @@
  */
 package org.spongepowered.forge.mixin.api.minecraft.server;
 
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.datafixers.DataFixer;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.ServerResources;
-import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
-import net.minecraft.server.packs.repository.PackRepository;
-import net.minecraft.server.players.GameProfileCache;
-import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -42,20 +32,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.forge.ForgeServer;
 import org.spongepowered.forge.world.server.ForgeWorldManager;
 
-import java.net.Proxy;
-
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Forge_API implements ForgeServer {
 
     private ForgeWorldManager forgeAPI$worldManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void forgeAPI$setupSpongeFields(Thread p_i232576_1_, RegistryAccess.RegistryHolder p_i232576_2_,
-            LevelStorageSource.LevelStorageAccess p_i232576_3_,
-            WorldData p_i232576_4_, PackRepository p_i232576_5_, Proxy p_i232576_6_, DataFixer p_i232576_7_,
-            ServerResources p_i232576_8_, MinecraftSessionService p_i232576_9_, GameProfileRepository p_i232576_10_,
-            GameProfileCache p_i232576_11_, ChunkProgressListenerFactory p_i232576_12_, CallbackInfo ci) {
-
+    private void forgeAPI$setupSpongeFields(CallbackInfo ci) {
         this.forgeAPI$worldManager = new ForgeWorldManager((MinecraftServer) (Object) this);
     }
 

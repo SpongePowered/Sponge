@@ -24,42 +24,21 @@
  */
 package org.spongepowered.forge.mixin.core.commands;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.IEventBus;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(Commands.class)
 public abstract class CommandsMixin_Forge {
 
-    // @formatter:off
-    @Shadow @Final private CommandDispatcher<CommandSourceStack> dispatcher;
-    // @formatter:on
-
     // The event fired by Forge is fired in SpongeForgeCommandManager at the appropriate time.
-    @Inject(method = "performCommand",
-            slice = @Slice(from = @At("HEAD"),
-                    to = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/CommandDispatcher;"
-                            + "parse(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/ParseResults;", remap = false)),
-            at = @At(value = "FIELD", opcode = Opcodes.GETFIELD,
-                    target = "Lnet/minecraft/commands/Commands;dispatcher:Lcom/mojang/brigadier/CommandDispatcher;"),
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION,
-            cancellable = true)
-    private void forge$redirectToSpongeCommandManager(final CommandSourceStack commandSourceStack,
-            final String command,
-            final CallbackInfoReturnable<Integer> cir,
-            final StringReader stringReader) throws CommandSyntaxException {
-        cir.setReturnValue(this.dispatcher.execute(stringReader, commandSourceStack));
+    @Redirect(method = "performCommand",
+            at = @At(value = "INVOKE", target = "Lnet/minecraftforge/eventbus/api/IEventBus;post(Lnet/minecraftforge/eventbus/api/Event;)Z"))
+    private boolean forge$redirectToSpongeCommandManager(IEventBus instance, Event event) {
+        return false;
     }
 
 }

@@ -40,14 +40,13 @@ public abstract class BoatMixin_Forge implements BoatBridge {
 
     @Redirect(method = "getGroundFriction", at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/state/BlockState;getSlipperiness(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core"
-                    + "/BlockPos;Lnet/minecraft/world/entity/Entity;)F")
+            target = "Lnet/minecraft/world/level/block/state/BlockState;getFriction(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)F")
     )
-    private float forge$getBlockSlipperinessIfBoatIsNotOverridingMovingOnLand(BlockState caller, LevelReader level, BlockPos pos, Entity entity) {
+    private float forge$getBlockFrictionIfBoatIsNotOverridingMovingOnLand(BlockState caller, LevelReader level, BlockPos pos, Entity entity) {
         final boolean movesOnLand = this.bridge$getMoveOnLand();
-        final float friction = caller.getSlipperiness(level, pos, entity);
+        final float friction = caller.getFriction(level, pos, entity);
         if (movesOnLand && friction == 0.6f) {
-            return Blocks.ICE.getSlipperiness(caller, level, pos, entity);
+            return Blocks.ICE.getFriction(caller, level, pos, entity);
         }
         return friction;
     }
