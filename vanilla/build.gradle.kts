@@ -132,6 +132,20 @@ val vanillaAppLaunch by sourceSets.register("applaunch") {
         extendsFrom(mlTransformersConfig.get())
     }
 }
+
+sourceSets.configureEach {
+    val sourceSet = this
+    val isMain = "main".equals(sourceSet.name)
+
+    val sourcesJarName: String = if (isMain) "sourcesJar" else (sourceSet.name + "SourcesJar")
+    tasks.register(sourcesJarName, Jar::class.java) {
+        group = "build"
+        val classifier = if (isMain) "sources" else (sourceSet.name + "-sources")
+        archiveClassifier.set(classifier)
+        from(sourceSet.allJava)
+    }
+}
+
 val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementationConfigurationName) {
     extendsFrom(vanillaAppLaunchConfig.get())
     extendsFrom(vanillaLibrariesConfig.get())
@@ -535,9 +549,9 @@ publishing {
             artifact(vanillaAppLaunchJar.get())
             artifact(vanillaLaunchJar.get())
             artifact(vanillaMixinsJar.get())
-            artifact(tasks["applaunchSourceJar"])
-            artifact(tasks["launchSourceJar"])
-            artifact(tasks["mixinsSourceJar"])
+            artifact(tasks["applaunchSourcesJar"])
+            artifact(tasks["launchSourcesJar"])
+            artifact(tasks["mixinsSourcesJar"])
             pom {
                 artifactId = project.name.toLowerCase()
                 this.name.set(project.name)

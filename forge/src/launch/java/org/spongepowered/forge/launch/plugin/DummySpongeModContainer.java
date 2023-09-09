@@ -26,12 +26,10 @@ package org.spongepowered.forge.launch.plugin;
 
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.forgespi.language.IModInfo;
-import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
 
 import java.util.Objects;
 
-public final class DummySpongeModContainer extends ModContainer implements DummyPluginContainer {
-
+public final class DummySpongeModContainer extends ModContainer {
     private final String dummyInstance;
 
     public DummySpongeModContainer(final String dummyInstance, final IModInfo info) {
