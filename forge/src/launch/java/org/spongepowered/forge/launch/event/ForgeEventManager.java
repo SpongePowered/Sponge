@@ -32,11 +32,16 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.IEventBusInvokeDispatcher;
 import net.minecraftforge.eventbus.api.IEventListener;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.event.filter.FilterGenerator;
+import org.spongepowered.common.event.manager.AnnotatedEventListener;
+import org.spongepowered.common.event.manager.ClassEventListenerFactory;
 import org.spongepowered.common.event.manager.RegisteredListener;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.forge.launch.bridge.event.ForgeEventBridge_Forge;
 import org.spongepowered.forge.launch.bridge.event.SpongeEventBridge_Forge;
+import org.spongepowered.plugin.PluginContainer;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -136,6 +141,14 @@ public final class ForgeEventManager extends SpongeEventManager implements IEven
     }
 
     // EventManager
+
+    @Override
+    protected AnnotatedEventListener.Factory computeFactory(PluginContainer key) {
+        final MethodHandles.Lookup lookup;
+        // TODO SF 1.19.4, what lookup should we use?
+        lookup = SpongeEventManager.OWN_LOOKUP;
+        return new ClassEventListenerFactory(FilterGenerator::create, lookup);
+    }
 
     @Override
     public boolean post(final org.spongepowered.api.event.Event event) {

@@ -62,7 +62,7 @@ public final class PlayerEvent_PlayerChangedDimensionEventMixin_Forge implements
         final PlayerEvent.PlayerChangedDimensionEvent thisEvent = (PlayerEvent.PlayerChangedDimensionEvent) (Object) this;
         return SpongeEventFactory.createChangeEntityWorldEventPost(
                 PhaseTracker.getCauseStackManager().currentCause(),
-                (Entity) thisEvent.getPlayer(),
+                (Entity) thisEvent.getEntity(),
                 (ServerWorld) SpongeCommon.server().getLevel(this.fromDim),
                 (ServerWorld) SpongeCommon.server().getLevel(this.toDim),
                 (ServerWorld) SpongeCommon.server().getLevel(this.toDim)

@@ -34,7 +34,7 @@ import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
 @Mixin(FriendlyByteBuf.class)
 public abstract class FriendlyByteBufMixin_Forge implements FriendlyByteBufBridge {
 
-    @Redirect(method = "writeItemStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;writeNbt(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/network/FriendlyByteBuf;"))
+    // @Redirect(method = "writeItemStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;writeNbt(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/network/FriendlyByteBuf;")) // TODO SF 1.19.4
     public FriendlyByteBuf renderItemComponents(final FriendlyByteBuf buf, final CompoundTag tag) {
         return buf.writeNbt(bridge$renderItemComponents(tag));
     }

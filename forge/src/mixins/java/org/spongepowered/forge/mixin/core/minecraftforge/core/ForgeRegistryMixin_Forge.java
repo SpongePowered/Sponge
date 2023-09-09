@@ -28,7 +28,6 @@ import com.google.common.collect.Maps;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,7 +46,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 @Mixin(ForgeRegistry.class)
-public abstract class ForgeRegistryMixin_Forge<V extends IForgeRegistryEntry<V>> implements ForgeRegistryBridge<V> {
+public abstract class ForgeRegistryMixin_Forge<V> implements ForgeRegistryBridge<V> {
 
     // @formatter:off
     @Shadow @Final private net.minecraft.resources.ResourceKey<Registry<V>> key;
@@ -56,9 +55,9 @@ public abstract class ForgeRegistryMixin_Forge<V extends IForgeRegistryEntry<V>>
     private final Map<ResourceKey, RegistryBridge<V>> forge$parents = Maps.newHashMap();
     private boolean forge$warnedIfNoParent;
 
-    @Inject(method = "add(ILnet/minecraftforge/registries/IForgeRegistryEntry;Ljava/lang/String;)I", at = @At("TAIL"))
-    public void forge$writeToParent(final int id, final V value, final String owner, final CallbackInfoReturnable<Integer> cir) {
-        final ResourceKey root = (ResourceKey) (Object) this.key.getRegistryName();
+    @Inject(method = "add(ILnet/minecraft/resources/ResourceLocation;Ljava/lang/Object;Ljava/lang/String;)I", at = @At("TAIL"))
+    public void forge$writeToParent(final int id, final ResourceLocation key, final V value, final String owner, final CallbackInfoReturnable<Integer> cir) {
+        final ResourceKey root = (ResourceKey) (Object) this.key.registry();
         final ResourceKey location = (ResourceKey) (Object) this.key.location();
 
         if (!this.forge$warnedIfNoParent && this.forge$parents.isEmpty()) {
@@ -73,7 +72,7 @@ public abstract class ForgeRegistryMixin_Forge<V extends IForgeRegistryEntry<V>>
         }
 
         final SpongeRegistryEntry<V> entry = new SpongeRegistryEntry<>(new SpongeRegistryType<>(root, location),
-                (ResourceKey) (Object) value.getRegistryName(), value);
+                (ResourceKey) (Object) key, value);
 
         this.forge$parents.values().forEach(registry -> registry.bridge$register(entry));
     }
