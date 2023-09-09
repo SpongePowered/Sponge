@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.forge.launch.event.ForgeEventManager;
 
+// TODO SF 1.19.4, we can no longer mixin into fml
 @Mixin(value = FMLModContainer.class, remap = false)
 public abstract class FMLModContainerMixin_Forge extends ModContainerMixin_Forge {
 

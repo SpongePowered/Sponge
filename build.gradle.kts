@@ -145,6 +145,19 @@ val mixins by sourceSets.registering {
     }
 }
 
+sourceSets.configureEach {
+    val sourceSet = this
+    val isMain = "main".equals(sourceSet.name)
+
+    val sourcesJarName: String = if (isMain) "sourcesJar" else (sourceSet.name + "SourcesJar")
+    tasks.register(sourcesJarName, Jar::class.java) {
+        group = "build"
+        val classifier = if (isMain) "sources" else (sourceSet.name + "-sources")
+        archiveClassifier.set(classifier)
+        from(sourceSet.allJava)
+    }
+}
+
 dependencies {
     // api
     api("org.spongepowered:spongeapi:$apiVersion")
@@ -249,11 +262,10 @@ allprojects {
     apply(plugin = "net.kyori.indra.licenser.spotless")
 
     base {
-        archivesBaseName = name.toLowerCase(Locale.ENGLISH)
+        archivesName.set(name.toLowerCase(Locale.ENGLISH))
     }
 
     plugins.withId("org.spongepowered.gradle.vanilla") {
-        val quiltflowerVersion: String by project
         minecraft {
             version(minecraftVersion)
             injectRepositories(false)
@@ -264,10 +276,6 @@ allprojects {
                     accessWideners(it)
                     parent?.minecraft?.accessWideners(it)
                 }
-        }
-
-        dependencies {
-            forgeFlower("org.quiltmc:quiltflower:$quiltflowerVersion")
         }
 
         tasks.named("decompile", DecompileJarTask::class) {
@@ -348,16 +356,7 @@ allprojects {
             }
         }
     }
-    sourceSets.configureEach {
-        val sourceSet = this
-        val sourceJarName: String = if ("main".equals(this.name)) "sourceJar" else "${this.name}SourceJar"
-        tasks.register(sourceJarName, Jar::class.java) {
-            group = "build"
-            val classifier = if ("main".equals(sourceSet.name)) "sources" else "${sourceSet.name}sources"
-            archiveClassifier.set(classifier)
-            from(sourceSet.allJava)
-        }
-    }
+
     afterEvaluate {
         publishing {
             repositories {
@@ -390,11 +389,12 @@ allprojects {
 
 tasks {
     val jar by existing
-    val sourceJar by existing
+    val sourcesJar by existing
     val mixinsJar by existing
     val accessorsJar by existing
     val launchJar by existing
     val applaunchJar by existing
+
     shadowJar {
         mergeServiceFiles()
         archiveClassifier.set("dev")
@@ -406,7 +406,7 @@ tasks {
             from(commonManifest)
         }
         from(jar)
-        from(sourceJar)
+        from(sourcesJar)
         from(mixinsJar)
         from(accessorsJar)
         from(launchJar)
@@ -416,20 +416,25 @@ tasks {
         }
     }
 }
+
 publishing {
     publications {
         register("sponge", MavenPublication::class) {
             from(components["java"])
+            artifact(tasks["sourcesJar"])
 
-            artifact(tasks["sourceJar"])
             artifact(tasks["mixinsJar"])
+            artifact(tasks["mixinsSourcesJar"])
+
             artifact(tasks["accessorsJar"])
+            artifact(tasks["accessorsSourcesJar"])
+
             artifact(tasks["launchJar"])
+            artifact(tasks["launchSourcesJar"])
+
             artifact(tasks["applaunchJar"])
-            artifact(tasks["applaunchSourceJar"])
-            artifact(tasks["launchSourceJar"])
-            artifact(tasks["mixinsSourceJar"])
-            artifact(tasks["accessorsSourceJar"])
+            artifact(tasks["applaunchSourcesJar"])
+
             pom {
                 artifactId = project.name.toLowerCase()
                 this.name.set(project.name)

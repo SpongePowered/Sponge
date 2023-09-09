@@ -28,10 +28,10 @@ import static net.minecraftforge.fml.Logging.LOADING;
 
 import com.google.inject.Injector;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.AutomaticEventSubscriber;
 import net.minecraftforge.fml.Logging;
 import net.minecraftforge.fml.ModLoadingException;
 import net.minecraftforge.fml.ModLoadingStage;
+import net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData;
@@ -48,14 +48,14 @@ public final class PluginModContainer extends FMLModContainer {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public PluginModContainer(final IModInfo info, final String className, final ClassLoader modClassLoader,
-            final ModFileScanData modFileScanResults) {
-        super(info, className, modClassLoader, modFileScanResults);
+    public PluginModContainer(final IModInfo info, final String className, final ModFileScanData modFileScanData, final ModuleLayer moduleLayer) {
+        super(info, className, modFileScanData, moduleLayer);
 
         this.activityMap.put(ModLoadingStage.CONSTRUCT, this::constructPlugin);
     }
 
     private void constructPlugin() {
+        // TODO SF 1.19.4, replace accessor with reflection
         final FMLModContainerAccessor accessor = (FMLModContainerAccessor) (Object) this;
         try {
             PluginModContainer.LOGGER.trace(Logging.LOADING, "Loading plugin instance {} of type {}", getModId(), accessor.accessor$modClass().getName());

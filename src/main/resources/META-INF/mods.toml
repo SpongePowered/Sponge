@@ -1,0 +1,28 @@
+modLoader="sponge"
+loaderVersion="1"
+license = "MIT License"
+
+issueTrackerURL="https://github.com/SpongePowered/Sponge/issues"
+
+[[mods]]
+modId="sponge"
+version="10.0.0"
+displayName="Sponge"
+credits="SpongePowered and Contributors"
+authors="SpongePowered"
+description="The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms"
+
+[[dependencies.sponge]]
+modId = "spongeapi"
+mandatory = true
+versionRange = "[10.0.0,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[mods]]
+modId="spongeapi"
+version="10.0.0"
+displayName="SpongeAPI"
+credits="SpongePowered and Contributors"
+authors="SpongePowered"
+description="A Minecraft plugin API"
