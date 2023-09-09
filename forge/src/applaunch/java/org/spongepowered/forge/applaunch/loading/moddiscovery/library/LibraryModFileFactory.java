@@ -24,18 +24,18 @@
  */
 package org.spongepowered.forge.applaunch.loading.moddiscovery.library;
 
+import cpw.mods.jarhandling.SecureJar;
+import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.forgespi.locating.IModFile;
-import net.minecraftforge.forgespi.locating.IModLocator;
+import net.minecraftforge.forgespi.locating.IModProvider;
 import net.minecraftforge.forgespi.locating.ModFileFactory;
-
-import java.nio.file.Path;
 
 public final class LibraryModFileFactory implements ModFileFactory {
 
     public static final LibraryModFileFactory INSTANCE = new LibraryModFileFactory();
 
     @Override
-    public IModFile build(final Path path, final IModLocator locator, final ModFileInfoParser parser) {
-        return new SelectableTypeModFile(path, locator, parser, IModFile.Type.LIBRARY);
+    public IModFile build(final SecureJar jar, final IModProvider provider, final ModFileInfoParser parser) {
+        return new ModFile(jar, provider, parser, "LIBRARY");
     }
 }

@@ -22,10 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.applaunch.loading.moddiscovery.provider;
-
-import static net.minecraftforge.fml.Logging.LOADING;
-import static net.minecraftforge.fml.Logging.SCAN;
+package org.spongepowered.forge.lang.provider;
 
 import cpw.mods.modlauncher.api.LamdbaExceptionUtils;
 import net.minecraftforge.fml.Logging;
@@ -64,9 +61,9 @@ public final class JavaPluginLanguageProvider extends FMLJavaModLanguageProvider
     public Consumer<ModFileScanData> getFileVisitor() {
         return scanResult -> {
             final Map<String, IModLanguageLoader> modTargetMap = scanResult.getAnnotations().stream()
-                    .filter(ad -> ad.getAnnotationType().equals(JavaPluginLanguageProvider.PLUGIN_ANNOTATION))
-                    .peek(ad -> this.logger.debug(SCAN, "Found @Plugin class {} with id {}", ad.getClassType().getClassName(), ad.getAnnotationData().get("value")))
-                    .map(ad -> new PluginTarget(ad.getClassType().getClassName(), (String)ad.getAnnotationData().get("value")))
+                    .filter(ad -> ad.annotationType().equals(JavaPluginLanguageProvider.PLUGIN_ANNOTATION))
+                    .peek(ad -> this.logger.debug(Logging.SCAN, "Found @Plugin class {} with id {}", ad.clazz().getClassName(), ad.annotationData().get("value")))
+                    .map(ad -> new PluginTarget(ad.clazz().getClassName(), (String)ad.annotationData().get("value")))
                     .collect(Collectors.toMap(PluginTarget::getPlugin, Function.identity(), (a,b)->a));
             scanResult.addLanguageLoader(modTargetMap);
         };
@@ -85,7 +82,7 @@ public final class JavaPluginLanguageProvider extends FMLJavaModLanguageProvider
         }
 
         @Override
-        public <T> T loadMod(final IModInfo info, final ClassLoader modClassLoader, final ModFileScanData modFileScanResults) {
+        public <T> T loadMod(final IModInfo info, final ModFileScanData modFileScanData, final ModuleLayer moduleLayer) {
             // The following is adapted from FMLJavaModLanguageProvider.FMLModTarget
 
             // This language class is loaded in the system level classloader - before the game even starts
@@ -95,8 +92,8 @@ public final class JavaPluginLanguageProvider extends FMLJavaModLanguageProvider
                 final Class<?> pluginContainer = Class.forName(
                         "org.spongepowered.forge.launch.plugin.PluginModContainer", true, Thread.currentThread().getContextClassLoader());
                 this.logger.debug(Logging.LOADING, "Loading PluginModContainer from classloader {} - got {}", Thread.currentThread().getContextClassLoader(), pluginContainer.getClassLoader());
-                final Constructor<?> constructor = pluginContainer.getConstructor(IModInfo.class, String.class, ClassLoader.class, ModFileScanData.class);
-                return (T)constructor.newInstance(info, className, modClassLoader, modFileScanResults);
+                final Constructor<?> constructor = pluginContainer.getConstructor(IModInfo.class, String.class, ModFileScanData.class, ModuleLayer.class);
+                return (T) constructor.newInstance(info, className, modFileScanData, moduleLayer);
             }
             // ALL exception handling has to be done through the classloader, because we're loaded in the wrong context, so any classes we just blind load will be in the wrong
             // class loading context. Funky but works.
@@ -111,7 +108,7 @@ public final class JavaPluginLanguageProvider extends FMLJavaModLanguageProvider
                 }
             }
             catch (final NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                this.logger.fatal(LOADING,"Unable to load PluginModContainer, excuse me?", e);
+                this.logger.fatal(Logging.LOADING,"Unable to load PluginModContainer, excuse me?", e);
                 final Class<RuntimeException> mle = (Class<RuntimeException>)LamdbaExceptionUtils.uncheck(()->Class.forName("net.minecraftforge.fml.ModLoadingException", true, Thread.currentThread().getContextClassLoader()));
                 final Class<ModLoadingStage> mls = (Class<ModLoadingStage>) LamdbaExceptionUtils.uncheck(()->Class.forName("net.minecraftforge.fml.ModLoadingStage", true, Thread.currentThread().getContextClassLoader()));
                 throw LamdbaExceptionUtils.uncheck(()->LamdbaExceptionUtils.uncheck(()->mle.getConstructor(IModInfo.class, mls, String.class, Throwable.class)).newInstance(info, Enum.valueOf(mls, "CONSTRUCT"), "fml.modloading.failedtoloadmodclass", e));

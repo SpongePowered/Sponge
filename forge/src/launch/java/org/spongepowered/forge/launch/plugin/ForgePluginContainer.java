@@ -22,18 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.minecraftforge.fml;
+package org.spongepowered.forge.launch.plugin;
 
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
-import net.minecraftforge.forgespi.language.IModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.forge.bridge.minecraftforge.fml.ModContainerBridge;
 import org.spongepowered.forge.launch.ForgeLaunch;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
@@ -43,39 +38,33 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 
-// TODO SF 1.19.4, we can no longer mixin into fml
-@Mixin(value = ModContainer.class, remap = false)
-public abstract class ModContainerMixin_Forge implements ModContainerBridge, PluginContainer {
+public class ForgePluginContainer implements PluginContainer {
+    private final ModContainer modContainer;
 
-    // @formatter:off
-    @Shadow @Final protected IModInfo modInfo;
-    @Shadow @Final protected String modId;
-    @Shadow protected Supplier<?> contextExtension;
-    @Shadow public abstract Object shadow$getMod();
-    // @formatter:on
+    ForgePluginContainer(final ModContainer modContainer) {
+        this.modContainer = modContainer;
+    }
 
     private Logger forge$logger;
     private PluginMetadata forge$pluginMetadata;
 
+    public ModContainer getModContainer() {
+        return this.modContainer;
+    }
+
     @Override
     public PluginMetadata metadata() {
         if (this.forge$pluginMetadata == null) {
-            this.forge$pluginMetadata = ((ForgeLaunch) Launch.instance()).metadataForMod((ModInfo) this.modInfo);
+            this.forge$pluginMetadata = ((ForgeLaunch) Launch.instance()).metadataForMod((ModInfo) this.modContainer.getModInfo());
         }
         return this.forge$pluginMetadata;
     }
 
     @Override
-    public void bridge$setPluginMetadata(final PluginMetadata metadata) {
-        this.forge$pluginMetadata = metadata;
-    }
-
-    @Override
     public Logger logger() {
         if (this.forge$logger == null) {
-            this.forge$logger = LogManager.getLogger(this.modId);
+            this.forge$logger = LogManager.getLogger(this.modContainer.getModId());
         }
         return this.forge$logger;
     }
@@ -84,7 +73,7 @@ public abstract class ModContainerMixin_Forge implements ModContainerBridge, Plu
     public Optional<URI> locateResource(URI relative) {
         Objects.requireNonNull(relative, "relative");
 
-        final ClassLoader classLoader = this.shadow$getMod().getClass().getClassLoader();
+        final ClassLoader classLoader = this.modContainer.getMod().getClass().getClassLoader();
         final URL resolved = classLoader.getResource(relative.getPath());
         try {
             if (resolved == null) {
@@ -98,6 +87,14 @@ public abstract class ModContainerMixin_Forge implements ModContainerBridge, Plu
 
     @Override
     public Object instance() {
-        return this.contextExtension.get();
+        return this.modContainer.getMod();
+    }
+
+    public static ForgePluginContainer of(final ModContainer modContainer) {
+        // TODO SF 1.19.4, ensure unicity by storing references in a map
+        if (modContainer instanceof DummySpongeModContainer) {
+            return new ForgeDummyPluginContainer(modContainer);
+        }
+        return new ForgePluginContainer(modContainer);
     }
 }

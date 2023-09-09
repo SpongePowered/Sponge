@@ -22,25 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.applaunch.loading.moddiscovery;
+package org.spongepowered.forge.launch.plugin;
 
-import net.minecraftforge.forgespi.locating.IModFile;
-import net.minecraftforge.forgespi.locating.IModLocator;
-import net.minecraftforge.forgespi.locating.ModFileFactory;
-import org.spongepowered.forge.applaunch.loading.moddiscovery.library.SelectableTypeModFile;
+import net.minecraftforge.fml.ModContainer;
+import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
 
-import java.nio.file.Path;
+public class ForgeDummyPluginContainer extends ForgePluginContainer implements DummyPluginContainer {
 
-public final class LanguageLoaderModFileFactory implements ModFileFactory {
-
-    public static final LanguageLoaderModFileFactory INSTANCE = new LanguageLoaderModFileFactory();
-
-    private LanguageLoaderModFileFactory() {
+    ForgeDummyPluginContainer(final ModContainer modContainer) {
+        super(modContainer);
     }
-
-    @Override
-    public IModFile build(final Path path, final IModLocator locator, final ModFileInfoParser parser) {
-        return new SelectableTypeModFile(path, locator, parser, IModFile.Type.LANGPROVIDER);
-    }
-
 }

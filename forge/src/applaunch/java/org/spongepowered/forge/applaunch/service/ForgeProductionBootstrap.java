@@ -32,14 +32,11 @@ import cpw.mods.modlauncher.api.TypesafeMap;
 import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.ModDirTransformerDiscoverer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.transformers.modlauncher.AccessWidenerTransformationService;
 import org.spongepowered.transformers.modlauncher.SuperclassChanger;
 
-import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -83,13 +80,6 @@ public class ForgeProductionBootstrap implements ITransformationService {
     @Override
     public void initialize(final IEnvironment environment) {
         if (FMLEnvironment.production) {
-            // Register SF as a mod
-            try {
-                ModDirTransformerDiscoverer.getExtraLocators()
-                    .add(Paths.get(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI()));
-            } catch (final URISyntaxException ex) {
-                throw new RuntimeException("Failed to register SpongeForge", ex);
-            }
             // Register SF as an AW
             // todo: actually read this from the jar manifest
             environment.getProperty(AccessWidenerTransformationService.INSTANCE.get()).ifPresent(aWTS ->
@@ -99,10 +89,6 @@ public class ForgeProductionBootstrap implements ITransformationService {
                 scc.offerResource(ForgeProductionBootstrap.class.getResource("/forge.superclasschange"), "SpongeForge injected");
             });
         }
-    }
-
-    @Override
-    public void beginScanning(final IEnvironment environment) {
     }
 
     @Override

@@ -81,10 +81,9 @@ if (testPluginsEnabledInCi.toBoolean()) {
     include(":testplugins")
 }
 
-// XX: SpongeForge temporarily disabled in 1.17
 val spongeForge = file("spongeforge.settings.gradle.kts")
 if (spongeForge.exists()) {
-    // apply(from = spongeForge)
+    apply(from = spongeForge)
 } else {
     spongeForge.writeText(listOf(
         "// Uncomment to enable SpongeForge module.",
@@ -97,13 +96,6 @@ val spongeForgeEnabledInCi: String = startParameter.projectProperties.getOrDefau
 if (false && spongeForgeEnabledInCi.toBoolean()) {
     include(":SpongeForge")
     project(":SpongeForge").projectDir = file("forge")
-}
-
-// Bring in a newer architectury t-r
-sourceControl {
-    gitRepository(uri("https://github.com/zml2008/tiny-remapper.git")) {
-        producesModule("dev.architectury:tiny-remapper")
-    }
 }
 
 // Include properties from API project (with api prefix)
