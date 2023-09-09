@@ -26,6 +26,7 @@ package org.spongepowered.forge.mixin.core.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.FireBlock;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,8 +36,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-
-import java.util.Random;
 
 @Mixin(FireBlock.class)
 public class FireBlockMixin_Forge {
@@ -49,7 +48,7 @@ public class FireBlockMixin_Forge {
             expect = 0,
             cancellable = true)
     private void impl$onCatchFirePreCheck(
-        final Level world, final BlockPos pos, final int chance, final Random random, final int age, final Direction dir, final CallbackInfo callbackInfo) {
+            final Level world, final BlockPos pos, final int chance, final RandomSource random, final int age, final Direction dir, final CallbackInfo callbackInfo) {
         if (!world.isClientSide) {
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();
@@ -65,7 +64,7 @@ public class FireBlockMixin_Forge {
             expect = 0,
             cancellable = true)
     private void impl$onCatchFirePreCheckOther(
-        final Level world, final BlockPos pos, final int chance, final Random random, final int age, final Direction dir, final CallbackInfo callbackInfo) {
+        final Level world, final BlockPos pos, final int chance, final RandomSource random, final int age, final Direction dir, final CallbackInfo callbackInfo) {
         if (!world.isClientSide) {
             if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) world, pos).isCancelled()) {
                 callbackInfo.cancel();

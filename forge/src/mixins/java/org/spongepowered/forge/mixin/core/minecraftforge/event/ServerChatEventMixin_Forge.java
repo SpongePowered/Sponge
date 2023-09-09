@@ -24,59 +24,54 @@
  */
 package org.spongepowered.forge.mixin.core.minecraftforge.event;
 
-import net.kyori.adventure.audience.Audience;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.event.ServerChatEvent;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.forge.launch.bridge.event.ForgeEventBridge_Forge;
-
-import java.util.Optional;
 
 @Mixin(value = ServerChatEvent.class, remap = false)
 public abstract class ServerChatEventMixin_Forge implements ForgeEventBridge_Forge {
 
     // @formatter:off
-    @Shadow public abstract void shadow$setComponent(Component e);
-    @Shadow public abstract Component shadow$getComponent();
+    @Shadow public abstract void shadow$setMessage(Component e);
+    @Shadow public abstract Component shadow$getMessage();
     @Shadow public abstract net.minecraft.server.level.ServerPlayer shadow$getPlayer();
     // @formatter:on
 
     @Override
     public void bridge$syncFrom(final Event event) {
-        final PlayerChatEvent spongeEvent = (PlayerChatEvent) event;
+        final PlayerChatEvent.Submit spongeEvent = (PlayerChatEvent.Submit) event;
         ((net.minecraftforge.eventbus.api.Event) (Object) this).setCanceled(spongeEvent.isCancelled());
-        this.shadow$setComponent(SpongeAdventure.asVanilla(spongeEvent.message()));
+        this.shadow$setMessage(SpongeAdventure.asVanilla(spongeEvent.message()));
     }
 
     @Override
     public void bridge$syncTo(final Event event) {
-        final PlayerChatEvent spongeEvent = (PlayerChatEvent) event;
+        final PlayerChatEvent.Submit spongeEvent = (PlayerChatEvent.Submit) event;
         spongeEvent.setCancelled(((net.minecraftforge.eventbus.api.Event) (Object) this).isCanceled());
-        spongeEvent.setMessage(SpongeAdventure.asAdventure(this.shadow$getComponent()));
+        spongeEvent.setMessage(SpongeAdventure.asAdventure(this.shadow$getMessage()));
     }
 
     @Override
     public @Nullable Event bridge$createSpongeEvent() {
-        final Audience audience = (Audience) this.shadow$getPlayer().server;
+        // TODO SF 1.19.4
+        /* final Audience audience = (Audience) this.shadow$getPlayer().server;
         final PlayerChatFormatter chatFormatter = ((ServerPlayer) this.shadow$getPlayer()).chatFormatter();
-        final net.kyori.adventure.text.Component originalMessage = SpongeAdventure.asAdventure(this.shadow$getComponent());
-        return SpongeEventFactory.createPlayerChatEvent(
+        final net.kyori.adventure.text.Component originalMessage = SpongeAdventure.asAdventure(this.shadow$getMessage());
+        return SpongeEventFactory.createPlayerChatEventSubmit(
                 PhaseTracker.getCauseStackManager().currentCause(),
+                originalMessage,
+                originalMessage,
                 audience,
                 Optional.of(audience),
                 chatFormatter,
-                Optional.of(chatFormatter),
-                originalMessage,
-                originalMessage
-        );
+                Optional.of(chatFormatter)
+        ); */
+        return null;
     }
 }

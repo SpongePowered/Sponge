@@ -22,13 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.minecraftforge.fml;
+package org.spongepowered.forge.mixin.core.minecraftforge.network;
 
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.network.NetworkHooks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -39,13 +39,13 @@ import org.spongepowered.common.event.tracking.context.transaction.EffectTransac
 public abstract class NetworkHooksMixin_Forge {
 
     @Redirect(
-        method = "openGui(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/MenuProvider;Ljava/util/function/Consumer;)V",
+        method = "openScreen(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/MenuProvider;Ljava/util/function/Consumer;)V",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/MenuProvider;createMenu(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/inventory/AbstractContainerMenu;"
         )
     )
-    private static AbstractContainerMenu forge$openGuiCreateMenu(final MenuProvider instance, final int i, final Inventory inventory, final Player player) {
+    private static AbstractContainerMenu forge$openScreenCreateMenu(final MenuProvider instance, final int i, final Inventory inventory, final Player player) {
         try (final EffectTransactor ignored = PhaseTracker.SERVER.getPhaseContext()
             .getTransactor()
             .logOpenInventory(player)

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.forge.launch.event;
 
+import net.minecraftforge.eventbus.BusBuilderImpl;
 import net.minecraftforge.eventbus.EventBus;
-import net.minecraftforge.eventbus.api.BusBuilder;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBusInvokeDispatcher;
@@ -43,47 +43,61 @@ import java.util.Objects;
 public final class SpongeEventBus extends EventBus {
 
     // I hope ya'll like reflection...
-    private static Field checkTypesOnDispatchField;
     private static Field busIDField;
-    private static Field exceptionHandler;
+    private static Field exceptionHandlerField;
+    private static Field trackPhasesField;
+    private static Field shutdownField;
+    private static Field baseTypeField;
+    private static Field checkTypesOnDispatchField;
 
     static {
         try {
-            SpongeEventBus.checkTypesOnDispatchField = EventBus.class.getDeclaredField("checkTypesOnDispatch");
             SpongeEventBus.busIDField = EventBus.class.getDeclaredField("busID");
-            SpongeEventBus.exceptionHandler = EventBus.class.getDeclaredField("exceptionHandler");
+            SpongeEventBus.exceptionHandlerField = EventBus.class.getDeclaredField("exceptionHandler");
+            SpongeEventBus.trackPhasesField = EventBus.class.getDeclaredField("trackPhases");
+            SpongeEventBus.shutdownField = EventBus.class.getDeclaredField("shutdown");
+            SpongeEventBus.baseTypeField = EventBus.class.getDeclaredField("baseType");
+            SpongeEventBus.checkTypesOnDispatchField = EventBus.class.getDeclaredField("checkTypesOnDispatch");
+
         } catch (final Exception ex) {
             // Burn this to the ground
             throw new RuntimeException(ex);
         }
     }
 
-    private final BusBuilder builder;
-
     // reflected fields that are stored again to prevent multiple reflection calls
-    private final boolean rcheckTypesOnDispatch;
     private final int rbusID;
     private final IEventExceptionHandler rexceptionHandler;
+    private final boolean rtrackPhases;
     private boolean rshutdown;
+    private final Class<?> rbaseType;
+    private final boolean rcheckTypesOnDispatch;
 
-    public SpongeEventBus(final BusBuilder busBuilder) {
+    public SpongeEventBus(final BusBuilderImpl busBuilder) {
         super(busBuilder);
-        this.builder = busBuilder;
 
         // Sponge Start - I hope ya'll still like reflection
-        this.rshutdown = busBuilder.isStartingShutdown();
         try {
-            SpongeEventBus.checkTypesOnDispatchField.setAccessible(true);
             SpongeEventBus.busIDField.setAccessible(true);
-            SpongeEventBus.exceptionHandler.setAccessible(true);
+            SpongeEventBus.exceptionHandlerField.setAccessible(true);
+            SpongeEventBus.trackPhasesField.setAccessible(true);
+            SpongeEventBus.shutdownField.setAccessible(true);
+            SpongeEventBus.baseTypeField.setAccessible(true);
+            SpongeEventBus.checkTypesOnDispatchField.setAccessible(true);
 
-            this.rcheckTypesOnDispatch = SpongeEventBus.checkTypesOnDispatchField.getBoolean(null);
             this.rbusID = SpongeEventBus.busIDField.getInt(this);
-            this.rexceptionHandler = (IEventExceptionHandler) SpongeEventBus.exceptionHandler.get(this);
+            this.rexceptionHandler = (IEventExceptionHandler) SpongeEventBus.exceptionHandlerField.get(this);
+            this.rtrackPhases = SpongeEventBus.trackPhasesField.getBoolean(this);
+            this.rshutdown = SpongeEventBus.shutdownField.getBoolean(this);
+            this.rbaseType = (Class<?>) SpongeEventBus.baseTypeField.get(this);
+            this.rcheckTypesOnDispatch = SpongeEventBus.checkTypesOnDispatchField.getBoolean(this);
 
-            SpongeEventBus.checkTypesOnDispatchField.setAccessible(false);
             SpongeEventBus.busIDField.setAccessible(false);
-            SpongeEventBus.exceptionHandler.setAccessible(false);
+            SpongeEventBus.exceptionHandlerField.setAccessible(false);
+            SpongeEventBus.trackPhasesField.setAccessible(false);
+            SpongeEventBus.shutdownField.setAccessible(false);
+            SpongeEventBus.baseTypeField.setAccessible(false);
+            SpongeEventBus.checkTypesOnDispatchField.setAccessible(false);
         } catch (final Exception ex) {
             // Burn this to the ground again
             throw new RuntimeException(ex);
@@ -97,9 +111,9 @@ public final class SpongeEventBus extends EventBus {
 
         // Sponge - use the builder/member fields. Avoids reflection but remains very hacky...
         if (this.rshutdown) return false;
-        if (this.rcheckTypesOnDispatch && !this.builder.getMarkerType().isInstance(event))
+        if (this.rcheckTypesOnDispatch && !rbaseType.isInstance(event))
         {
-            throw new IllegalArgumentException("Cannot post event of type " + event.getClass().getSimpleName() + " to this event. Must match type: " + this.builder.getMarkerType().getSimpleName());
+            throw new IllegalArgumentException("Cannot post event of type " + event.getClass().getSimpleName() + " to this event. Must match type: " + this.rbaseType.getSimpleName());
         }
 
         IEventListener[] listeners = event.getListenerList().getListeners(this.rbusID);
@@ -107,7 +121,7 @@ public final class SpongeEventBus extends EventBus {
         for (; index < listeners.length; index++)
         {
             final IEventListener listener = listeners[index];
-            if (!this.builder.getTrackPhases() && Objects.equals(listener.getClass(), EventPriority.class)) continue;
+            if (!this.rtrackPhases && Objects.equals(listener.getClass(), EventPriority.class)) continue;
 
             try (
                 final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();

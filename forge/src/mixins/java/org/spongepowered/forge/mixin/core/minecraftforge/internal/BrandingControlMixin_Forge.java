@@ -22,9 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.minecraftforge.fml;
+package org.spongepowered.forge.mixin.core.minecraftforge.internal;
 
-import net.minecraftforge.fml.BrandingControl;
+import net.minecraftforge.internal.BrandingControl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 

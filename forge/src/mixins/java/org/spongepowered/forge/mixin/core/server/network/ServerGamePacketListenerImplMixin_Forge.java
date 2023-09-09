@@ -24,7 +24,6 @@
  */
 package org.spongepowered.forge.mixin.core.server.network;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.inventory.RecipeBookMenu;
@@ -46,7 +45,7 @@ import org.spongepowered.common.event.tracking.context.transaction.Transactional
 public abstract class ServerGamePacketListenerImplMixin_Forge implements ServerGamePacketListener {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Redirect(method = "lambda$handlePlaceRecipe$11",
+    @Redirect(method = "lambda$handlePlaceRecipe$14",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
     private void forge$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final net.minecraft.server.level.ServerPlayer player) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
@@ -65,13 +64,13 @@ public abstract class ServerGamePacketListenerImplMixin_Forge implements ServerG
         }
     }
 
-    @Redirect(method = "handleChat(Ljava/lang/String;)V",
+    /* @Redirect(method = "handleChat(Ljava/lang/String;)V", // TODO SF 1.19.4
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraftforge/common/ForgeHooks;onServerChatEvent(Lnet/minecraft/server/network/ServerGamePacketListenerImpl;Ljava/lang/String;Lnet/minecraft/network/chat/Component;)Lnet/minecraft/network/chat/Component;") )
     private Component forge$preventFiringForgeEvent(final ServerGamePacketListenerImpl net, final String raw, final Component comp) {
         // We don't fire the Forge event here, we do it in our manager flow.
         return comp;
-    }
+    } */
 
 }
