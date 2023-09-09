@@ -48,6 +48,7 @@ import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
 import org.spongepowered.forge.hook.ForgeEntityHooks;
 import org.spongepowered.forge.hook.ForgeEventHooks;
+import org.spongepowered.forge.hook.ForgeGeneralHooks;
 import org.spongepowered.forge.hook.ForgeWorldHooks;
 
 @Mod(Constants.MOD_ID)
@@ -71,6 +72,7 @@ public final class SpongeForge {
         PlatformHooks.INSTANCE.setEventHooks(new ForgeEventHooks());
         PlatformHooks.INSTANCE.setEntityHooks(new ForgeEntityHooks());
         PlatformHooks.INSTANCE.setWorldHooks(new ForgeWorldHooks());
+        PlatformHooks.INSTANCE.setGeneralHooks(new ForgeGeneralHooks());
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent event) {
