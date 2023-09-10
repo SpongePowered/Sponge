@@ -25,8 +25,10 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.Entity;
@@ -43,12 +45,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Objects;
 
 @Mixin(ChunkAccess.class)
-public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<P> {
+public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<P>, LevelHeightAccessor {
 
     // @formatter:off
     @Shadow public abstract ChunkStatus shadow$getStatus();
@@ -57,7 +60,8 @@ public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<
     @Shadow public abstract long shadow$getInhabitedTime();
     @Shadow public abstract ChunkPos shadow$getPos();
     @Shadow public abstract int shadow$getHeight(Heightmap.Types var1, int var2, int var3);
-
+    @Shadow public abstract LevelChunkSection shadow$getSection(int p_187657_);
+    @Shadow public abstract void shadow$setUnsaved(boolean p_62094_);
     // @formatter:on
 
     @Override
@@ -77,9 +81,7 @@ public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        // TODO ChunkBiomeContainerAccessor is dead
-        //return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.shadow$getBiomes(), () -> this.shadow$setUnsaved(true));
-        return false;
+        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> this.shadow$getSection(this.getSectionIndex(y)), () -> this.shadow$setUnsaved(true));
     }
 
     @Override
