@@ -45,10 +45,13 @@ import org.spongepowered.common.util.VecHelper;
 @Mixin(targets = "net.minecraft.server.network.ServerGamePacketListenerImpl$1")
 public abstract class ServerGamePacketListenerImpl_1Mixin implements ServerboundInteractPacket.Handler {
 
-    @Shadow @Final Entity val$target;
+    @Shadow(aliases = {
+        // Forge mapped synthetic class member
+        "val$entity"
+    }) @Final Entity val$target;
     @Shadow @Final ServerGamePacketListenerImpl this$0;
 
-    @SuppressWarnings("UnresolvedMixinReference") // Anonymous class
+    // Anonymous class
     @Inject(method = "onAttack()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;attack(Lnet/minecraft/world/entity/Entity;)V"), cancellable = true)
     public void impl$fireLeftClickEvent(final CallbackInfo ci) {
         final Entity entity = this.val$target;
@@ -63,7 +66,6 @@ public abstract class ServerGamePacketListenerImpl_1Mixin implements Serverbound
         }
     }
 
-    @SuppressWarnings("UnresolvedMixinReference") // Anonymous class
     @Inject(method = "onInteraction(Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/Vec3;)V", at = @At("HEAD"), cancellable = true)
     public void impl$fireRightClickEvent(final InteractionHand hand, final Vec3 pos, final CallbackInfo ci) {
         final Entity entity = this.val$target;
