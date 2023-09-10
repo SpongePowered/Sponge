@@ -60,9 +60,4 @@ public interface AbstractFurnaceBlockEntityAccessor {
 
     @Accessor("quickCheck")  RecipeManager.CachedCheck<Container, ? extends AbstractCookingRecipe> accessor$quickCheck();
 
-    /* @Invoker("canBurn") // TODO SF 1.19.4
-    static boolean invoker$canBurn(final RegistryAccess registryAccess, @Nullable final Recipe<?> var0, final NonNullList<ItemStack> var1, final int var2) {
-        throw new UntransformedInvokerError();
-    } */
-
 }

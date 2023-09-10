@@ -38,7 +38,8 @@
     "world.entity.player.PlayerMixin_Forge",
     "world.entity.projectile.ThrownEnderpealMixin_Forge",
     "world.entity.vehicle.BoatMixin_Forge",
-    "world.level.block.FireBlockMixin_Forge"
+    "world.level.block.FireBlockMixin_Forge",
+    "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Forge"
   ],
   "client": [
     "client.MinecraftMixin_Forge",
