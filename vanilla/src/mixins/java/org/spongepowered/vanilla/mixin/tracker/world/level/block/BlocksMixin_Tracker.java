@@ -22,35 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.world.entity.item;
+package org.spongepowered.vanilla.mixin.tracker.world.level.block;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
-import org.spongepowered.common.mixin.tracker.world.entity.EntityMixin_Tracker;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
 
-@Mixin(FallingBlockEntity.class)
-public abstract class FallingBlockEntityMixin_Tracker extends EntityMixin_Tracker {
+@Mixin(Blocks.class)
+public abstract class BlocksMixin_Tracker {
 
-    @Override
-    protected void tracker$populateDeathContextIfNeeded(
-        final CauseStackManager.StackFrame frame, final EntityTickContext context
-    ) {
-        context.getCreator().ifPresent(frame::pushCause);
-        super.tracker$populateDeathContextIfNeeded(frame, context);
+    @Redirect(method = "<clinit>",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/level/block/Block;getLootTable()Lnet/minecraft/resources/ResourceLocation;"
+            )
+    )
+    private static ResourceLocation impl$initializeTrackerState(final Block block) {
+        final boolean randomlyTicking = block.isRandomlyTicking(block.defaultBlockState());
+
+        // TODO Not the best check but the tracker options only matter during block ticks...
+        if (randomlyTicking) {
+            final var trackableBridge = (RegistryBackedTrackableBridge<Block>) block;
+            trackableBridge.bridge$refreshTrackerStates();
+        }
+
+        return block.getLootTable();
     }
-
 }

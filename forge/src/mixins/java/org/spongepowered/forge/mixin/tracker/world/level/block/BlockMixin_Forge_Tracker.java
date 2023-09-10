@@ -22,34 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.world.level.block;
+package org.spongepowered.forge.mixin.tracker.world.level.block;
+
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
+import org.spongepowered.forge.mixin.tracker.world.level.block.state.BlockBehaviorMixin_Forge_Tracker;
 
-@Mixin(Blocks.class)
-public abstract class BlocksMixin_Tracker {
+@Mixin(Block.class)
+public abstract class BlockMixin_Forge_Tracker extends BlockBehaviorMixin_Forge_Tracker implements RegistryBackedTrackableBridge<Block> {
 
-    /* @Redirect(method = "<clinit>", // TODO SF 1.19.4
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/Block;getLootTable()Lnet/minecraft/resources/ResourceLocation;"
-        )
-    ) */
-    private static ResourceLocation impl$initializeTrackerState(final Block block) {
-        final boolean randomlyTicking = block.isRandomlyTicking(block.defaultBlockState());
+    //@formatter:off
+    @Shadow public abstract boolean isRandomlyTicking(BlockState $$0);
+    @Shadow public abstract BlockState defaultBlockState();
+    //@formatter:on
 
+    @Override
+    protected void forgeTracker$initializeTrackingState(CallbackInfoReturnable<ResourceLocation> cir) {
         // TODO Not the best check but the tracker options only matter during block ticks...
-        if (randomlyTicking) {
-            final RegistryBackedTrackableBridge<Block> trackableBridge = (RegistryBackedTrackableBridge<Block>) block;
-            trackableBridge.bridge$refreshTrackerStates();
+        if (this.isRandomlyTicking(this.defaultBlockState())) {
+            this.bridge$refreshTrackerStates();
         }
-
-        return block.getLootTable();
     }
 }

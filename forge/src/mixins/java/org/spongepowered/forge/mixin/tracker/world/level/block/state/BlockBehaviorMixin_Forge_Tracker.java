@@ -22,35 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.world.entity.item;
+package org.spongepowered.forge.mixin.tracker.world.level.block.state;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.level.block.Blocks;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.event.CauseStackManager;
+
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
-import org.spongepowered.common.mixin.tracker.world.entity.EntityMixin_Tracker;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(FallingBlockEntity.class)
-public abstract class FallingBlockEntityMixin_Tracker extends EntityMixin_Tracker {
-
-    @Override
-    protected void tracker$populateDeathContextIfNeeded(
-        final CauseStackManager.StackFrame frame, final EntityTickContext context
-    ) {
-        context.getCreator().ifPresent(frame::pushCause);
-        super.tracker$populateDeathContextIfNeeded(frame, context);
+@Mixin(BlockBehaviour.class)
+public abstract class BlockBehaviorMixin_Forge_Tracker {
+    @Inject(
+        method = "getLootTable",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/world/level/block/state/BlockBehaviour;lootTableSupplier:Ljava/util/function/Supplier;",
+            remap = false
+        )
+    )
+    protected void forgeTracker$initializeTrackingState(CallbackInfoReturnable<ResourceLocation> cir) {
     }
-
 }

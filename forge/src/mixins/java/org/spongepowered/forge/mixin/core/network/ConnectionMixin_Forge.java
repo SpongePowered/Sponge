@@ -22,25 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancements;
+package org.spongepowered.forge.mixin.core.network;
 
-import com.google.gson.JsonObject;
-import net.minecraft.advancements.Advancement;
+import io.netty.util.concurrent.Future;
+import net.minecraft.network.Connection;
+import net.minecraft.network.PacketSendListener;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.advancements.AdvancementBridge;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.network.channel.PacketSender;
 
-@Mixin(Advancement.Builder.class)
-public abstract class Advancement_BuilderMixin implements AdvancementBridge {
+@Mixin(Connection.class)
+public abstract class ConnectionMixin_Forge {
 
-    // Serializing causes the following JSON: "rewards": null
-    // Deserializing does consider JsonNull to be an error here - so we fix it
-    // @Redirect(method = "fromJson", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;has(Ljava/lang/String;)Z", ordinal = 2, remap = false)) // TODO SF 1.19.4
-    private static boolean impl$onHasRewards(final JsonObject p_241043_0_, final String rewards) {
-        if (p_241043_0_.has(rewards)) {
-            return !p_241043_0_.get(rewards).isJsonNull();
+    @Inject(method = "lambda$doSendPacket$9", at = @At(value = "INVOKE", target = "Lio/netty/util/concurrent/Future;isSuccess()Z"))
+    public void impl$onPacketSent(final PacketSendListener $$0x, final Future $$1x, final CallbackInfo ci) {
+        if ($$0x instanceof final PacketSender.SpongePacketSendListener spongeListener) {
+            spongeListener.accept($$1x.cause());
         }
-        return false;
     }
+
 }

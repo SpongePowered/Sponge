@@ -1,45 +1,45 @@
 {
-    "required": true,
-    "parent": "mixins.sponge.parent.json",
-    "package": "org.spongepowered.vanilla.mixin.core",
-    "priority": 1301,
-    "client": [
-        "client.ClientBrandRetrieverMixin_Vanilla",
-        "client.MinecraftMixin_Vanilla",
-        "client.gui.screens.TitleScreenMixin_Vanilla",
-        "client.multiplayer.ClientHandshakePacketListenerImplMixin_Vanilla",
-        "client.multiplayer.ClientPacketListenerMixin_Vanilla",
-        "client.renderer.entity.EntityRenderDispatcherMixin_Vanilla",
-        "client.server.IntegratedServerMixin_Vanilla"
-    ],
-    "server": [
-        "server.dedicated.DedicatedServer_1_Mixin_Vanilla",
-        "server.dedicated.DedicatedServerMixin_Vanilla"
-    ],
-    "mixins": [
-        "CrashReportMixin_Vanilla",
-        "brigadier.exceptions.CommandSyntaxExceptionMixin_Vanilla",
-        "network.FriendlyByteBufMixin_Vanilla",
-        "server.BootstrapMixin_Vanilla",
-        "server.MinecraftServerMixin_Vanilla",
-        "server.level.ServerPlayerMixin_Vanilla",
-        "server.network.ServerGamePacketListenerImplMixin_Vanilla",
-        "server.network.ServerLoginPacketListenerImpl_1Mixin_Vanilla",
-        "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
-        "server.packs.repository.PackRepositoryMixin_Vanilla",
-        "world.entity.EntityMixin_Vanilla",
-        "world.entity.LivingEntityMixin_Vanilla",
-        "world.entity.ai.attributes.DefaultAttributesMixin",
-        "world.entity.item.ItemEntityMixin_Vanilla",
-        "world.entity.projectile.ThrownEnderpearlMixin_Vanilla",
-        "world.entity.vehicle.BoatMixin_Vanilla",
-        "world.level.portal.PortalForcerMixin_Vanilla",
-        "world.level.storage.LevelStorageSourceMixin_Vanilla",
-        "world.level.block.FireBlockMixin_Vanilla",
-        "world.level.portal.PortalForcerMixin_Vanilla",
-        "world.level.storage.LevelStorageSourceMixin_Vanilla"
-    ],
-    "overwrites": {
-        "conformVisibility": true
-    }
+  "required": true,
+  "parent": "mixins.sponge.parent.json",
+  "package": "org.spongepowered.vanilla.mixin.core",
+  "priority": 1301,
+  "client": [
+    "client.ClientBrandRetrieverMixin_Vanilla",
+    "client.MinecraftMixin_Vanilla",
+    "client.gui.screens.TitleScreenMixin_Vanilla",
+    "client.multiplayer.ClientHandshakePacketListenerImplMixin_Vanilla",
+    "client.multiplayer.ClientPacketListenerMixin_Vanilla",
+    "client.renderer.entity.EntityRenderDispatcherMixin_Vanilla",
+    "client.server.IntegratedServerMixin_Vanilla"
+  ],
+  "server": [
+    "server.dedicated.DedicatedServer_1_Mixin_Vanilla",
+    "server.dedicated.DedicatedServerMixin_Vanilla"
+  ],
+  "mixins": [
+    "CrashReportMixin_Vanilla",
+    "advancements.Advancement_BuilderMixin",
+    "brigadier.exceptions.CommandSyntaxExceptionMixin_Vanilla",
+    "network.ConnectionMixin_Vanilla",
+    "network.FriendlyByteBufMixin_Vanilla",
+    "server.BootstrapMixin_Vanilla",
+    "server.MinecraftServerMixin_Vanilla",
+    "server.level.ServerPlayerMixin_Vanilla",
+    "server.network.ServerGamePacketListenerImplMixin_Vanilla",
+    "server.network.ServerLoginPacketListenerImpl_1Mixin_Vanilla",
+    "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
+    "server.packs.repository.PackRepositoryMixin_Vanilla",
+    "world.entity.EntityMixin_Vanilla",
+    "world.entity.LivingEntityMixin_Vanilla",
+    "world.entity.ai.attributes.DefaultAttributesMixin",
+    "world.entity.item.ItemEntityMixin_Vanilla",
+    "world.entity.projectile.ThrownEnderpearlMixin_Vanilla",
+    "world.entity.vehicle.BoatMixin_Vanilla",
+    "world.level.block.FireBlockMixin_Vanilla",
+    "world.level.portal.PortalForcerMixin_Vanilla",
+    "world.level.storage.LevelStorageSourceMixin_Vanilla"
+  ],
+  "overwrites": {
+    "conformVisibility": true
+  }
 }
