@@ -57,6 +57,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.block.entity.AbstractFurnaceBlockEntityAccessor;
+import org.spongepowered.common.bridge.block.entity.AbstractFurnaceBlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -66,7 +67,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
-public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlockEntityMixin {
+public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlockEntityMixin implements AbstractFurnaceBlockEntityBridge {
 
     // @Formatter:off
     @Shadow protected NonNullList<ItemStack> items;
@@ -106,54 +107,9 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         }
     }
 
-    private AbstractCookingRecipe impl$getCurrentRecipe() {
+    @Override
+    public AbstractCookingRecipe impl$getCurrentRecipe() {
         return this.quickCheck.getRecipeFor((AbstractFurnaceBlockEntity) (Object) this, this.level).orElse(null);
-    }
-
-    // Tick up and Start
-    /* @Redirect(method = "serverTick", // TODO SF 1.19.4
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/core/NonNullList;I)Z",
-            ordinal = 1))
-    private static boolean impl$checkIfCanSmelt(RegistryAccess registryAccess, @Nullable final Recipe<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize, final Level level, final BlockPos entityPos, final BlockState state, final AbstractFurnaceBlockEntity entity) {
-        if (!AbstractFurnaceBlockEntityAccessor.invoker$canBurn(registryAccess, recipe, slots, maxStackSize)) {
-            return false;
-        }
-
-        final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(slots.get(1));
-
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-        if (((AbstractFurnaceBlockEntityMixin) (Object) (entity)).cookingProgress == 0) { // Start
-            final CookingEvent.Start event = SpongeEventFactory.createCookingEventStart(cause, (FurnaceBlockEntity) entity, Optional.of(fuel),
-                    Optional.of((CookingRecipe) recipe));
-            SpongeCommon.post(event);
-            return !event.isCancelled();
-        } else { // Tick up
-            final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf(((AbstractFurnaceBlockEntityMixin) (Object) entity).items.get(0));
-            final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entity, cooking, Optional.of(fuel),
-                    Optional.of((CookingRecipe) recipe));
-            SpongeCommon.post(event);
-            return !event.isCancelled();
-        }
-    } */
-
-    // Tick down
-    @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Mth;clamp(III)I"))
-    private static int impl$resetCookTimeIfCancelled(final int newCookTime, final int zero, final int totalCookTime,
-        final Level level, final BlockPos entityPos, final BlockState state, final AbstractFurnaceBlockEntity entity) {
-        final int clampedCookTime = Mth.clamp(newCookTime, zero, totalCookTime);
-        final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(((AbstractFurnaceBlockEntityMixin) (Object) entity).items.get(1));
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-        final AbstractCookingRecipe recipe = ((AbstractFurnaceBlockEntityMixin) (Object) entity).impl$getCurrentRecipe();
-        final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf(((AbstractFurnaceBlockEntityMixin) (Object) entity).items.get(0));
-        final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entity, cooking, Optional.of(fuel),
-                Optional.of((CookingRecipe) recipe));
-        SpongeCommon.post(event);
-        if (event.isCancelled()) {
-            return ((AbstractFurnaceBlockEntityMixin) (Object) entity).cookingProgress; // dont tick down
-        }
-
-        return clampedCookTime;
     }
 
     // Interrupt-Active - e.g. a player removing the currently smelting item
@@ -169,7 +125,6 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     }
 
     // Interrupt-Passive - if the currently smelting item was removed in some other way
-    @SuppressWarnings("InvalidInjectorMethodSignature")
     @Inject(method = "serverTick",
         at = @At(
             shift = At.Shift.BEFORE,
@@ -204,23 +159,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         }
     }
 
-    // Finish
-    /* @Inject( // TODO SF 1.19.4
-        method = "burn",
-        locals = LocalCapture.CAPTURE_FAILHARD,
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V")) */
-    private static void impl$afterSmeltItem(final RegistryAccess registryAccess,
-        final Recipe<?> recipe, final NonNullList<ItemStack> slots, final int var2, final CallbackInfoReturnable<Boolean> cir
-    ) {
-        final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(slots.get(1));
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-        final FurnaceBlockEntity entity = cause.first(FurnaceBlockEntity.class)
-            .orElseThrow(() -> new IllegalStateException("Expected to have a FurnaceBlockEntity in the Cause"));
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(recipe.getResultItem(registryAccess));
-        final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, entity,
-                Collections.singletonList(snapshot), Optional.of(fuel), Optional.ofNullable((CookingRecipe) recipe));
-        SpongeCommon.post(event);
-    }
+
 
     // Custom recipes
 //    @Redirect(method = "smelt", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/crafting/IRecipe;getRecipeOutput()Lnet/minecraft/item/ItemStack;"))

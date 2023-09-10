@@ -36,6 +36,7 @@
     "world.entity.projectile.ThrownEnderpearlMixin_Vanilla",
     "world.entity.vehicle.BoatMixin_Vanilla",
     "world.level.block.FireBlockMixin_Vanilla",
+    "world.level.block.entity.AbstractFurnaceBlockEntityMixin_Vanilla",
     "world.level.portal.PortalForcerMixin_Vanilla",
     "world.level.storage.LevelStorageSourceMixin_Vanilla"
   ],
