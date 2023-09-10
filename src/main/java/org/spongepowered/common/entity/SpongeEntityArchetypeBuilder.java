@@ -132,13 +132,13 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
             Objects.requireNonNull(entity, "Cannot build an EntityArchetype for a null entity!").type(),
             "Entity is returning a null EntityType!"
         );
-        if (!((net.minecraft.world.entity.EntityType) entityType).canSerialize() && entityType != HumanEntity.TYPE) {
+        if (!((net.minecraft.world.entity.EntityType) entityType).canSerialize() && entityType != SpongeEntityTypes.HUMAN) {
             throw new IllegalArgumentException("Attempting to archetype a non-serializable entity: " + entity);
         }
         this.entityType = entityType;
         final CompoundTag compound = new CompoundTag();
         net.minecraft.world.entity.Entity mcEntity = (net.minecraft.world.entity.Entity) entity;
-        if (entityType == HumanEntity.TYPE) {
+        if (entityType == SpongeEntityTypes.HUMAN) {
             mcEntity.saveWithoutId(compound);
         } else {
             mcEntity.saveAsPassenger(compound);

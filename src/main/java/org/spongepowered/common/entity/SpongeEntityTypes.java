@@ -22,40 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.world.entity.ai.attributes;
+package org.spongepowered.common.entity;
 
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.entity.SpongeEntityTypes;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
-@Mixin(DefaultAttributes.class)
-public abstract class DefaultAttributesMixin {
-    @Inject(
-        method = "getSupplier",
-        at = @At("HEAD"),
-        cancellable = true
-    )
-    private static void vanilla$humanGetSupplier(final EntityType<? extends LivingEntity> type, final CallbackInfoReturnable<AttributeSupplier> cir) {
-        if (type == SpongeEntityTypes.HUMAN) {
-            cir.setReturnValue(HumanEntity.createAttributes());
-        }
-    }
+public class SpongeEntityTypes {
 
-    @Inject(
-        method = "hasSupplier",
-        at = @At("HEAD"),
-        cancellable = true
-    )
-    private static void vanilla$humanHasSupplier(final EntityType<?> type, final CallbackInfoReturnable<Boolean> cir) {
-        if (type == SpongeEntityTypes.HUMAN) {
-            cir.setReturnValue(true);
-        }
-    }
+    public static EntityType<HumanEntity> HUMAN;
 }
