@@ -25,7 +25,10 @@
 package org.spongepowered.forge;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
@@ -35,12 +38,16 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
+import org.spongepowered.common.entity.SpongeEntityTypes;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
@@ -64,6 +71,8 @@ public final class SpongeForge {
         // modBus: add all FML events with it
         modBus.addListener(this::onCommonSetup);
         modBus.addListener(this::onClientSetup);
+        modBus.addListener(this::onRegister);
+        modBus.addListener(this::onEntityAttributeCreationEvent);
 
         // annotation events, for non-FML things
         MinecraftForge.EVENT_BUS.register(this);
@@ -85,8 +94,6 @@ public final class SpongeForge {
         lifecycle.establishDataKeyListeners();
 
         SpongePacketHandler.init((SpongeChannelManager) Sponge.channelManager());
-
-        // TODO Add attributes for HumanEntity to relevant event
 
         this.logger.info("SpongeForge v{} initialized", Launch.instance().platformPlugin().metadata().version());
     }
@@ -128,4 +135,20 @@ public final class SpongeForge {
         lifecycle.callStoppingEngineEvent((Server) event.getServer());
     }
 
+    public void onRegister(RegisterEvent event) {
+        if (event.getRegistryKey() == ForgeRegistries.Keys.ENTITY_TYPES) {
+            SpongeEntityTypes.HUMAN = EntityType.Builder.of(HumanEntity::new, MobCategory.MISC)
+                    .noSave()
+                    .sized(0.6F, 1.8F)
+                    .clientTrackingRange(org.spongepowered.common.util.Constants.Entity.Player.TRACKING_RANGE)
+                    .updateInterval(2)
+                    .build("sponge:human")
+            ;
+
+            event.register(ForgeRegistries.Keys.ENTITY_TYPES, helper -> helper.register(HumanEntity.KEY, SpongeEntityTypes.HUMAN));
+        }
+    }
+    public void onEntityAttributeCreationEvent(final EntityAttributeCreationEvent event) {
+        event.put(SpongeEntityTypes.HUMAN, HumanEntity.createAttributes());
+    }
 }
