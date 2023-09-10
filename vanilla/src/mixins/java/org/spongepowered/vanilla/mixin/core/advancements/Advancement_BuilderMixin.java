@@ -22,35 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.world.entity.item;
+package org.spongepowered.vanilla.mixin.core.advancements;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.level.block.Blocks;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.event.CauseStackManager;
+import com.google.gson.JsonObject;
+import net.minecraft.advancements.Advancement;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
-import org.spongepowered.common.mixin.tracker.world.entity.EntityMixin_Tracker;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 
-@Mixin(FallingBlockEntity.class)
-public abstract class FallingBlockEntityMixin_Tracker extends EntityMixin_Tracker {
+@Mixin(Advancement.Builder.class)
+public abstract class Advancement_BuilderMixin implements AdvancementBridge {
 
-    @Override
-    protected void tracker$populateDeathContextIfNeeded(
-        final CauseStackManager.StackFrame frame, final EntityTickContext context
-    ) {
-        context.getCreator().ifPresent(frame::pushCause);
-        super.tracker$populateDeathContextIfNeeded(frame, context);
+    // Serializing causes the following JSON: "rewards": null
+    // Deserializing does consider JsonNull to be an error here - so we fix it
+    @Redirect(method = "fromJson", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonObject;has(Ljava/lang/String;)Z", ordinal = 2, remap = false)) // TODO SF 1.19.4
+    private static boolean impl$onHasRewards(final JsonObject p_241043_0_, final String rewards) {
+        if (p_241043_0_.has(rewards)) {
+            return !p_241043_0_.get(rewards).isJsonNull();
+        }
+        return false;
     }
-
 }

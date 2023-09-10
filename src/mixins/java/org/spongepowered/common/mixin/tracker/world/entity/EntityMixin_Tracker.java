@@ -86,6 +86,8 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
 
     //@formatter:on
 
+    @Shadow public abstract void shadow$discard();
+
     protected @MonotonicNonNull EffectTransactor tracker$dropsTransactor = null;
 
     @Inject(

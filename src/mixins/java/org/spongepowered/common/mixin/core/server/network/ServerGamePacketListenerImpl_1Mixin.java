@@ -49,7 +49,7 @@ public abstract class ServerGamePacketListenerImpl_1Mixin implements Serverbound
     @Shadow @Final ServerGamePacketListenerImpl this$0;
 
     @SuppressWarnings("UnresolvedMixinReference") // Anonymous class
-    @Inject(method = "onAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;attack(Lnet/minecraft/world/entity/Entity;)V"), cancellable = true)
+    @Inject(method = "onAttack()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;attack(Lnet/minecraft/world/entity/Entity;)V"), cancellable = true)
     public void impl$fireLeftClickEvent(final CallbackInfo ci) {
         final Entity entity = this.val$target;
         final ServerPlayer player = this.this$0.player;

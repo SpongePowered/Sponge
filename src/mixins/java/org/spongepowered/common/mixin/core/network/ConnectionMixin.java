@@ -75,9 +75,12 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
     private final TransactionStore impl$transactionStore = new TransactionStore(() -> (EngineConnection) this.packetListener);
     private final Set<ResourceKey> impl$registeredChannels = Sets.newConcurrentHashSet();
 
-    @Nullable private InetSocketAddress impl$virtualHost;
-    @Nullable private MinecraftVersion impl$version;
-    @Nullable private net.minecraft.network.chat.Component impl$kickReason;
+    @Nullable
+    private InetSocketAddress impl$virtualHost;
+    @Nullable
+    private MinecraftVersion impl$version;
+    @Nullable
+    private net.minecraft.network.chat.Component impl$kickReason;
 
     private ClientType impl$clientType = ClientType.VANILLA;
 
@@ -153,13 +156,6 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
     @Override
     public void bridge$setVersion(final int version) {
         this.impl$version = new SpongeMinecraftVersion(String.valueOf(version), version);
-    }
-
-    // @Inject(method = "lambda$doSendPacket$8", at = @At(value = "INVOKE", target = "Lio/netty/util/concurrent/Future;isSuccess()Z")) // TODO SF 1.19.4
-    public void impl$onPacketSent(final PacketSendListener $$0x, final Future $$1x, final CallbackInfo ci) {
-        if ($$0x instanceof final PacketSender.SpongePacketSendListener spongeListener) {
-            spongeListener.accept($$1x.cause());
-        }
     }
 
     @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V", at = @At(value = "HEAD"), cancellable = true)

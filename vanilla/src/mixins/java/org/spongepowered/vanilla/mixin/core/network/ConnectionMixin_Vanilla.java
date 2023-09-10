@@ -22,35 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.tracker.world.entity.item;
+package org.spongepowered.vanilla.mixin.core.network;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.level.block.Blocks;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.event.CauseStackManager;
+import io.netty.util.concurrent.Future;
+import net.minecraft.network.Connection;
+import net.minecraft.network.PacketSendListener;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
-import org.spongepowered.common.mixin.tracker.world.entity.EntityMixin_Tracker;
+import org.spongepowered.common.network.channel.PacketSender;
 
-@Mixin(FallingBlockEntity.class)
-public abstract class FallingBlockEntityMixin_Tracker extends EntityMixin_Tracker {
+@Mixin(Connection.class)
+public class ConnectionMixin_Vanilla {
 
-    @Override
-    protected void tracker$populateDeathContextIfNeeded(
-        final CauseStackManager.StackFrame frame, final EntityTickContext context
-    ) {
-        context.getCreator().ifPresent(frame::pushCause);
-        super.tracker$populateDeathContextIfNeeded(frame, context);
+    @Inject(
+        method = "lambda$doSendPacket$8",
+        at = @At(
+            value = "INVOKE",
+            target = "Lio/netty/util/concurrent/Future;isSuccess()Z"
+        )
+    )
+    public void impl$onPacketSent(final PacketSendListener $$0x, @SuppressWarnings("rawtypes") final Future $$1x, final CallbackInfo ci) {
+        if ($$0x instanceof final PacketSender.SpongePacketSendListener spongeListener) {
+            spongeListener.accept($$1x.cause());
+        }
     }
-
 }

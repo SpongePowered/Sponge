@@ -4,7 +4,6 @@
     "package": "org.spongepowered.common.mixin.core",
     "mixinPriority": 1101,
     "mixins": [
-        "advancements.Advancement_BuilderMixin",
         "advancements.AdvancementMixin",
         "advancements.AdvancementProgressMixin",
         "advancements.CriterionMixin",
