@@ -202,7 +202,6 @@
         "world.level.block.entity.CommandBlockEntityMixin",
         "world.level.block.entity.EnchantmentTableBlockEntityMixin",
         "world.level.block.entity.LecternBlockEntityMixin",
-        "world.level.block.entity.RandomizableContainerBlockEntityMixin",
         "world.level.block.entity.SignBlockEntityMixin",
         "world.level.block.entity.SkullBlockEntityMixin",
         "world.level.block.entity.TheEndGatewayBlockEntityMixin",
