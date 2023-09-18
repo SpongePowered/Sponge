@@ -45,6 +45,8 @@ import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.util.Objects;
+
 @Mixin(ChunkAccess.class)
 public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<P> {
 
@@ -113,7 +115,7 @@ public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<
 
     @Override
     public int height(final HeightType type, final int x, final int z) {
-        return this.shadow$getHeight((Heightmap.Types) (Object) HeightTypes.WORLD_SURFACE.get(), x, z);
+        return this.shadow$getHeight((Heightmap.Types) (Object) Objects.requireNonNull(type, "type"), x, z);
     }
 
     @Override
