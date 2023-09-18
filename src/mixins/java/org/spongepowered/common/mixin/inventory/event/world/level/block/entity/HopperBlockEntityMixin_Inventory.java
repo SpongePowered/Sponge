@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.level.block.entity;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -33,8 +32,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.Hopper;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -71,19 +68,6 @@ public abstract class HopperBlockEntityMixin_Inventory {
         return InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(inventory), InventoryUtil.toInventory(hopper)).isCancelled();
     }
 
-    /* @Redirect(method = "ejectItems", // TODO SF 1.19.4
-            at = @At(value = "INVOKE",
-                     target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;isFullContainer(Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Z")) */
-    private static boolean impl$throwTransferPreIfNotFull(
-        final Container attachedContainer, final Direction direction, final Level level, final BlockPos pos, final BlockState state, final Container container
-    ) {
-        final boolean result = HopperBlockEntityAccessor.invoker$isFullContainer(attachedContainer, direction);
-        if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
-            return result;
-        }
-        return InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(container), InventoryUtil.toInventory(attachedContainer)).isCancelled();
-    }
-
     // Capture Transactions
 
     @Redirect(method = "addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/Container;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/Direction;)Lnet/minecraft/world/item/ItemStack;",
@@ -107,24 +91,6 @@ public abstract class HopperBlockEntityMixin_Inventory {
     }
 
     // Post Captured Transactions
-
-    /* @Inject(method = "ejectItems", locals = LocalCapture.CAPTURE_FAILEXCEPTION, // TODO SF 1.19.4
-            at = @At(value = "INVOKE",
-                     target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z",
-                     ordinal = 1)) */
-    private static void impl$afterPutStackInSlots(final Level var0, final BlockPos var1, final BlockState var2, final Container var3,
-        final CallbackInfoReturnable<Boolean> cir, final Container iInventory, final Direction enumFacing,
-        final int i, final ItemStack itemStack, final ItemStack itemStack1
-    ) {
-        // after putStackInInventoryAllSlots if the transfer worked
-        if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack1.isEmpty()) {
-            // Capture Insert in Origin
-            final TrackedInventoryBridge capture = InventoryUtil.forCapture(var3);
-            final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) var3, i, itemStack);
-            // Call event
-            InventoryEventFactory.callTransferPost(capture, (Inventory) iInventory, InventoryUtil.toInventory(iInventory), itemStack, sourceSlotTransaction);
-        }
-    }
 
     @Inject(method = "tryTakeInItemFromSlot",
             locals = LocalCapture.CAPTURE_FAILEXCEPTION,
