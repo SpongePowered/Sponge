@@ -1,7 +1,7 @@
 /*
  * This file is part of Sponge, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) SpongePowered <https://spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,13 +21,14 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ *
  */
-package org.spongepowered.common.mixin.core.server.commands;
+package org.spongepowered.forge.mixin.core.server.commands;
 
 import net.minecraft.server.commands.SpreadPlayersCommand;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.RelativeMovement;
+import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.entity.EntityTeleportEvent;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
@@ -36,18 +37,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import java.util.Set;
-
 @Mixin(SpreadPlayersCommand.class)
-public abstract class SpreadPlayersCommandMixin {
+public abstract class SpreadPlayersCommandMixin_Forge {
 
-    // @Redirect(method = "setPlayerPositions", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;teleportTo(Lnet/minecraft/server/level/ServerLevel;DDDLjava/util/Set;FF)Z")) // TODO SF 1.19.4
-    private static boolean impl$createCauseFrameForTeleport(final Entity instance, final ServerLevel level, final double x, final double y,
-            final double z, final Set<RelativeMovement> relativeMovements, final float yRot, final float xRot) {
+    @Redirect(method = "setPlayerPositions", at = @At(
+        value = "INVOKE",
+        target = "Lnet/minecraftforge/event/ForgeEventFactory;onEntityTeleportSpreadPlayersCommand(Lnet/minecraft/world/entity/Entity;DDD)Lnet/minecraftforge/event/entity/EntityTeleportEvent$SpreadPlayersCommand;"
+    ))
+    private static EntityTeleportEvent.SpreadPlayersCommand vanilla$createCauseFrameForTeleport(Entity entity, double targetX, double targetY, double targetZ) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
 
-            return instance.teleportTo(level, x, y, z, relativeMovements, yRot, xRot);
+            return ForgeEventFactory.onEntityTeleportSpreadPlayersCommand(entity, targetX, targetY, targetZ);
         }
     }
 }
