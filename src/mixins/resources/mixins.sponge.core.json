@@ -51,7 +51,6 @@
         "server.commands.GameRuleCommandMixin",
         "server.commands.KickCommandMixin",
         "server.commands.SaveAllCommandMixin",
-        "server.commands.SpreadPlayersCommandMixin",
         "server.commands.TeleportCommandMixin",
         "server.dedicated.DedicatedPlayerListMixin",
         "server.level.ChunkHolderMixin",

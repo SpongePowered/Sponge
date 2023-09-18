@@ -24,11 +24,13 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.network;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.network.protocol.login.ServerLoginPacketListener;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
@@ -43,20 +45,28 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerImplBridge;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.channel.TransactionStore;
 
-@Mixin(ServerLoginPacketListenerImpl.class)
-public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements ServerLoginPacketListener {
+import javax.annotation.Nullable;
 
-    @Shadow @Final private MinecraftServer server;
-    @Shadow private ServerLoginPacketListenerImpl.State state;
+@Mixin(ServerLoginPacketListenerImpl.class)
+public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements ServerLoginPacketListener, ServerLoginPacketListenerImplBridge {
+
+    // @formatter:off
+    @Shadow @Final MinecraftServer server;
+    @Shadow ServerLoginPacketListenerImpl.State state;
 
     // Handshake phase:
     // 1. Sync registered plugin channels
     // 2. Post handshake event and plugins can start sending login payloads
     // 3. Wait until the client responded for each of the plugin' requests
+    @Shadow @Nullable GameProfile gameProfile;
+    @Shadow protected abstract GameProfile shadow$createFakeProfile(GameProfile $$0);
+
+    //@formatter:on
 
     private static final int HANDSHAKE_NOT_STARTED = 0;
     private static final int HANDSHAKE_CLIENT_TYPE = 1;
@@ -108,6 +118,23 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
     private void impl$onProcessLoginStart(final ServerboundHelloPacket packet, final CallbackInfo ci) {
         if (this.state == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
             this.state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
+        }
+    }
+
+    @Inject(method = "handleHello(Lnet/minecraft/network/protocol/login/ServerboundHelloPacket;)V",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;READY_TO_ACCEPT:Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;",
+            opcode = Opcodes.GETSTATIC),
+        cancellable = true)
+    private void vanilla$fireAuthEventOffline(final CallbackInfo ci) {
+        // Move this check up here, so that the UUID isn't null when we fire the event
+        if (!this.gameProfile.isComplete()) {
+            this.gameProfile = this.shadow$createFakeProfile(this.gameProfile);
+        }
+
+        if (this.bridge$fireAuthEvent()) {
+            ci.cancel();
         }
     }
 }
