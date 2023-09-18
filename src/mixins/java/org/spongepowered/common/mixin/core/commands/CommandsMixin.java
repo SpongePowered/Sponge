@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.commands;
 
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -38,10 +37,8 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.server.commands.AdvancementCommands;
 import net.minecraft.server.level.ServerPlayer;
-import org.spongepowered.api.command.CommandCause;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -49,7 +46,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.bridge.commands.arguments.CompletionsArgumentTypeBridge;
 import org.spongepowered.common.command.brigadier.dispatcher.DelegatingCommandDispatcher;
@@ -65,7 +61,6 @@ import org.spongepowered.common.util.CommandUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -74,7 +69,6 @@ import java.util.WeakHashMap;
 public abstract class CommandsMixin implements CommandsBridge {
 
     // @formatter:off
-    @Shadow public abstract CommandDispatcher<CommandSourceStack> shadow$getDispatcher();
     @Shadow private void shadow$fillUsableCommands(final CommandNode<CommandSourceStack> rootCommandSource,
             final CommandNode<SharedSuggestionProvider> rootSuggestion,
             final CommandSourceStack source,
@@ -83,10 +77,10 @@ public abstract class CommandsMixin implements CommandsBridge {
     }
     // @formatter:on
 
-    private CauseStackManager.StackFrame impl$initFrame = null;
+    private CauseStackManager.@MonotonicNonNull StackFrame impl$initFrame = null;
     private final WeakHashMap<ServerPlayer, Map<CommandNode<CommandSourceStack>, List<CommandNode<SharedSuggestionProvider>>>> impl$playerNodeCache =
             new WeakHashMap<>();
-    private SpongeCommandManager impl$commandManager;
+    private @MonotonicNonNull SpongeCommandManager impl$commandManager;
 
     // We prepare our own dispatcher and commands manager, to redirect registrations to our system
     @Redirect(method = "<init>", at = @At(
@@ -140,17 +134,15 @@ public abstract class CommandsMixin implements CommandsBridge {
             final CommandNode<SharedSuggestionProvider> rootSuggestion,
             final CommandSourceStack source,
             final Map<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> commandNodeToSuggestionNode) {
-        if (commandNode instanceof SpongeArgumentCommandNode) {
-            return ((SpongeArgumentCommandNode<?>) commandNode).createBuilderForSuggestions(rootSuggestion, commandNodeToSuggestionNode);
+        if (commandNode instanceof SpongeArgumentCommandNode<?> node) {
+            return node.createBuilderForSuggestions(rootSuggestion, commandNodeToSuggestionNode);
         }
 
-        if (commandNode instanceof ArgumentCommandNode && ((ArgumentCommandNode<?, ?>) commandNode).getType() instanceof CompletionsArgumentTypeBridge<?>) {
-            final ArgumentCommandNode<?, ?> argNode = (ArgumentCommandNode<?, ?>) commandNode;
-            final RequiredArgumentBuilder<?, ?> builder = RequiredArgumentBuilder.argument(argNode.getName(),
-                    ((CompletionsArgumentTypeBridge<?>) ((ArgumentCommandNode<?, ?>) commandNode).getType()).bridge$clientSideCompletionType());
-            builder.executes((Command) argNode.getCommand())
-                    .forward(argNode.getRedirect(), argNode.getRedirectModifier(), argNode.isFork())
-                    .requires(argNode.getRequirement());
+        if (commandNode instanceof ArgumentCommandNode acn && acn.getType() instanceof CompletionsArgumentTypeBridge<?> catb) {
+            final RequiredArgumentBuilder<?, ?> builder = RequiredArgumentBuilder.argument(acn.getName(), catb.bridge$clientSideCompletionType());
+            builder.executes(acn.getCommand())
+                    .forward(acn.getRedirect(), acn.getRedirectModifier(), acn.isFork())
+                    .requires(acn.getRequirement());
             if (!CommandUtil.checkForCustomSuggestions(rootSuggestion)) {
                 builder.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
             }
@@ -289,31 +281,6 @@ public abstract class CommandsMixin implements CommandsBridge {
         return requiredArgumentBuilder;
     }
 
-    // @Redirect(method = "sendCommands", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;fillUsableCommands(Lcom/mojang/brigadier/tree/CommandNode;Lcom/mojang/brigadier/tree/CommandNode;Lnet/minecraft/commands/CommandSourceStack;Ljava/util/Map;)V")) // TODO SF 1.19.4
-    private void impl$addNonBrigSuggestions(
-            final Commands commands,
-            final CommandNode<CommandSourceStack> p_197052_1_,
-            final CommandNode<SharedSuggestionProvider> p_197052_2_,
-            final CommandSourceStack p_197052_3_,
-            final Map<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> p_197052_4_,
-            final ServerPlayer playerEntity) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(playerEntity);
-            frame.addContext(EventContextKeys.SUBJECT, (Subject) playerEntity);
-            final CommandCause sourceToUse = ((CommandSourceStackBridge) p_197052_3_).bridge$withCurrentCause();
-            try {
-                this.impl$playerNodeCache.put(playerEntity, new IdentityHashMap<>());
-                // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
-                final IdentityHashMap<CommandNode<CommandSourceStack>, CommandNode<SharedSuggestionProvider>> idMap = new IdentityHashMap<>(p_197052_4_);
-                this.shadow$fillUsableCommands(p_197052_1_, p_197052_2_, (CommandSourceStack) sourceToUse, idMap);
-            } finally {
-                this.impl$playerNodeCache.remove(playerEntity);
-            }
-            for (final CommandNode<SharedSuggestionProvider> node : this.impl$commandManager.getNonBrigadierSuggestions(sourceToUse)) {
-                p_197052_2_.addChild(node);
-            }
-        }
-    }
 
     @SuppressWarnings("unchecked")
     @Redirect(method = "fillUsableCommands",
