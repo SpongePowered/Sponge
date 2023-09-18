@@ -59,9 +59,9 @@ public class ClickContainerEventCancelledTest implements LoadableModule {
         @Listener
         private void onInteractItem(final ClickContainerEvent.Primary event) {
             event.setCancelled(true);
-            Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text("/*************"));
-            Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
-            Sponge.server().broadcastAudience().sendMessage(Identity.nil(),
+            Sponge.game().systemSubject().sendMessage(Identity.nil(), Component.text("/*************"));
+            Sponge.game().systemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
+            Sponge.game().systemSubject().sendMessage(Identity.nil(),
                     Component.text().append(Component.text("/* Hand: "))
                             .append(Component.text(event.context().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.game(), h).formatted()).orElse("UNKNOWN")))
                             .build()
