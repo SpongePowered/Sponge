@@ -221,16 +221,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         return SpongeCommandManager.get(this.server).getDispatcher().parse(command, (CommandSourceStack) source, true);
     }
 
-    /**
-     * Specifically hooks the reach distance to use the forge hook.
-     */
-    /* @Redirect( // TODO SF 1.19.4
-            method = "handleInteract",
-            at = @At( value = "FIELD",target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;MAX_INTERACTION_DISTANCE:D")) */
-    private double impl$getPlatformReach(final ServerboundInteractPacket packet) {
-        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, packet.getTarget(this.player.getLevel()));
-    }
-
     @Inject(method = "handleMovePlayer",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isPassenger()Z"),
             cancellable = true
