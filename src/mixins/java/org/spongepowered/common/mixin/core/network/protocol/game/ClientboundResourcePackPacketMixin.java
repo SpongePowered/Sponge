@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.network.protocol.game;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPacket;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

@@ -25,11 +25,15 @@
 package org.spongepowered.common.network.channel;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
+import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
+import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -62,6 +66,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import javax.inject.Singleton;
 
@@ -163,8 +168,17 @@ public final class SpongeChannelManager implements ChannelManager {
 
         store.put(transactionId, null, new ClientTypeSyncFuture(future));
 
-        final ChannelBuf payload = this.bufferAllocator.buffer();
-        final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(Constants.Channels.SPONGE_CLIENT_TYPE, payload, transactionId);
+        final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
+            @Override
+            public ResourceLocation id() {
+                return (ResourceLocation) (Object) Constants.Channels.SPONGE_CLIENT_TYPE;
+            }
+
+            @Override
+            public void write(FriendlyByteBuf var1) {
+
+            }
+        }, transactionId);
         PacketSender.sendTo(connection, mcPacket, sendFuture -> {
             if (!sendFuture.isSuccess()) {
                 future.completeExceptionally(sendFuture.cause());
@@ -198,8 +212,19 @@ public final class SpongeChannelManager implements ChannelManager {
 
         store.put(transactionId, null, new ChannelRegistrySyncFuture(future));
 
-        final ChannelBuf payload = this.encodeChannelRegistry();
-        final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(Constants.Channels.SPONGE_CHANNEL_REGISTRY, payload, transactionId);
+        final Consumer<FriendlyByteBuf> consumer = this.encodeChannelRegistry();
+        final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
+                                                                            @Override
+                                                                            public ResourceLocation id() {
+                                                                                return (ResourceLocation) (Object) Constants.Channels.SPONGE_CHANNEL_REGISTRY;
+                                                                            }
+
+                                                                            @Override
+                                                                            public void write(FriendlyByteBuf var1) {
+                                                                                consumer.accept(var1);
+                                                                            }
+                                                                        }
+                , transactionId);
         PacketSender.sendTo(connection, mcPacket, sendFuture -> {
             if (!sendFuture.isSuccess()) {
                 future.completeExceptionally(sendFuture.cause());
@@ -222,20 +247,19 @@ public final class SpongeChannelManager implements ChannelManager {
      *
      * @return The encoded payload
      */
-    private ChannelBuf encodeChannelRegistry() {
+    private Consumer<FriendlyByteBuf> encodeChannelRegistry() {
         final List<SpongeChannel> channels = ImmutableList.copyOf(this.channels.values());
 
-        final ChannelBuf buf = this.bufferAllocator.buffer();
-        buf.writeVarInt(channels.size());
-        for (final SpongeChannel channel : channels) {
-            buf.writeString(channel.key().formatted());
-            // The type is included to provide extra information for e.g. proxies
-            // who want to improve sponge support
-            // Not used by sponge itself
-            buf.writeByte((byte) channel.getType());
-        }
-
-        return buf;
+        return buf -> {
+            buf.writeVarInt(channels.size());
+            for (final SpongeChannel channel : channels) {
+                buf.writeUtf(channel.key().formatted());
+                // The type is included to provide extra information for e.g. proxies
+                // who want to improve sponge support
+                // Not used by sponge itself
+                buf.writeByte((byte) channel.getType());
+            }
+        };
     }
 
     private void handleChannelRegistry(final EngineConnection connection, final ChannelBuf payload) {
@@ -250,16 +274,26 @@ public final class SpongeChannelManager implements ChannelManager {
         }
     }
 
+    public boolean handlePlayPayload(final EngineConnection connection, final CustomPacketPayload payload) {
+        final ResourceKey channel = (ResourceKey) (Object) payload.id();
+        final ChannelBuf buf = this.bufferAllocator.buffer();
+        payload.write((FriendlyByteBuf) buf);
+
+        return this.handlePlayPayload(connection, channel, buf);
+    }
+
     public boolean handlePlayPayload(final EngineConnection connection, final ServerboundCustomPayloadPacket packet) {
-        final ResourceKey channel = (ResourceKey) (Object) packet.getIdentifier();
-        final ChannelBuf payload = (ChannelBuf) packet.getData();
+        final ResourceKey channel = (ResourceKey) (Object) packet.payload().id();
+        final ChannelBuf payload = this.bufferAllocator.buffer();
+        packet.payload().write((FriendlyByteBuf) payload);
 
         return this.handlePlayPayload(connection, channel, payload);
     }
 
     public boolean handlePlayPayload(final EngineConnection connection, final ClientboundCustomPayloadPacket packet) {
-        final ResourceKey channel = (ResourceKey) (Object) packet.getIdentifier();
-        final ChannelBuf payload = (ChannelBuf) packet.getData();
+        final ResourceKey channel = (ResourceKey) (Object) packet.payload().id();
+        final ChannelBuf payload = this.bufferAllocator.buffer();
+        packet.payload().write((FriendlyByteBuf) payload);
 
         return this.handlePlayPayload(connection, channel, payload);
     }
@@ -305,9 +339,10 @@ public final class SpongeChannelManager implements ChannelManager {
 
     public boolean handleLoginRequestPayload(final EngineConnection connection, final ClientboundCustomQueryPacket packet) {
         // Server -> Client request
-        final ResourceKey channel = (ResourceKey) (Object) packet.getIdentifier();
-        final int transactionId = packet.getTransactionId();
-        final ChannelBuf payload = (ChannelBuf) packet.getData();
+        final ResourceKey channel = (ResourceKey) (Object) packet.payload().id();
+        final int transactionId = packet.transactionId();
+        final ChannelBuf payload = this.bufferAllocator.buffer();
+        packet.payload().write((FriendlyByteBuf) payload);
 
         try {
             return this.handleLoginRequestPayload(connection, channel, transactionId, payload);
@@ -320,17 +355,15 @@ public final class SpongeChannelManager implements ChannelManager {
             final int transactionId, final ChannelBuf payload) {
         if (channelKey.equals(Constants.Channels.SPONGE_CLIENT_TYPE)) {
             final ClientType clientType = ((MinecraftBridge) Sponge.client()).bridge$getClientType();
-            final ChannelBuf responsePayload = this.bufferAllocator.buffer();
-            responsePayload.writeString(clientType.getName());
-            final Packet<?> mcPacket = PacketUtil.createLoginPayloadResponse(responsePayload, transactionId);
+            final Packet<?> mcPacket = PacketUtil.createLoginPayloadResponse(var1 -> var1.writeUtf(clientType.getName()), transactionId);
             PacketSender.sendTo(connection, mcPacket);
             return true;
         }
         if (channelKey.equals(Constants.Channels.SPONGE_CHANNEL_REGISTRY)) {
             this.handleChannelRegistry(connection, payload);
             // Respond with registered channels
-            final ChannelBuf responsePayload = this.encodeChannelRegistry();
-            final Packet<?> mcPacket = PacketUtil.createLoginPayloadResponse(responsePayload, transactionId);
+            final Consumer<FriendlyByteBuf> consumer = this.encodeChannelRegistry();
+            final Packet<?> mcPacket = PacketUtil.createLoginPayloadResponse(consumer::accept, transactionId);
             PacketSender.sendTo(connection, mcPacket);
             return true;
         }
@@ -349,11 +382,12 @@ public final class SpongeChannelManager implements ChannelManager {
         return false;
     }
 
-    public void handleLoginResponsePayload(final EngineConnection connection, final ServerboundCustomQueryPacket packet) {
+    public void handleLoginResponsePayload(final EngineConnection connection, final ServerboundCustomQueryAnswerPacket packet) {
         // Client -> Server response
 
-        final int transactionId = packet.getTransactionId();
-        final ChannelBuf payload = (ChannelBuf) packet.getData();
+        final int transactionId = packet.transactionId();
+        final ChannelBuf payload = this.bufferAllocator.buffer();
+        packet.payload().write((FriendlyByteBuf) payload);
 
         try {
             this.handleLoginResponsePayload(connection, transactionId, payload);

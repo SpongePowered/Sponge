@@ -31,6 +31,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.network.channel.ChannelBuf;
@@ -59,7 +60,7 @@ public abstract class FriendlyByteBufMixin_API extends ByteBuf {
     @Shadow public abstract FriendlyByteBuf shadow$writeVarInt(int input);
     @Shadow public abstract FriendlyByteBuf shadow$writeVarLong(long input);
     @Shadow public abstract FriendlyByteBuf shadow$writeUtf(String string);
-    @Shadow public abstract FriendlyByteBuf shadow$writeNbt(@Nullable CompoundTag nbt);
+    @Shadow public abstract FriendlyByteBuf shadow$writeNbt(@Nullable Tag nbt);
     @Shadow public abstract FriendlyByteBuf shadow$writeUUID(UUID uniqueId);
     
     // mojang methods, non-fluent

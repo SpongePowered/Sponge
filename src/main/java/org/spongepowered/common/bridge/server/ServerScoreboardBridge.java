@@ -49,8 +49,6 @@ public interface ServerScoreboardBridge {
 
     void bridge$updateDisplaySlot(@Nullable Objective objective, DisplaySlot displaySlot) throws IllegalStateException;
 
-    void bridge$updateDisplaySlot(@Nullable Objective objective, int slot) throws IllegalStateException;
-
     Optional<Objective> bridge$getObjective(DisplaySlot slot);
 
     Set<Objective> bridge$getObjectivesByCriterion(Criterion criterion);

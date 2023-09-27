@@ -27,12 +27,10 @@ package org.spongepowered.common.mixin.api.minecraft.server.network;
 import static java.util.Objects.requireNonNull;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.Connection;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ServerPlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -42,12 +40,10 @@ import org.spongepowered.common.profile.SpongeGameProfile;
 import java.net.InetSocketAddress;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerGamePacketListenerImplMixin_API implements ServerPlayerConnection {
+public abstract class ServerGamePacketListenerImplMixin_API extends ServerCommonPacketListenerImplMixin_API implements ServerPlayerConnection {
 
     // @formatter:off
-    @Shadow @Final public Connection connection;
     @Shadow public net.minecraft.server.level.ServerPlayer player;
-    @Shadow public abstract void shadow$disconnect(net.minecraft.network.chat.Component reason);
     // @formatter:on
 
     @Override
@@ -83,6 +79,6 @@ public abstract class ServerGamePacketListenerImplMixin_API implements ServerPla
 
     @Override
     public int latency() {
-        return this.player.latency;
+        return this.latency;
     }
 }

@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.network.channel.packet;
 
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
+import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
@@ -111,10 +114,23 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                 payload.writeString(this.key().formatted());
                 payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_REQUEST, transactionId));
                 payload.writeVarInt(binding.opcode());
-                mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
+                mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(var1 -> {
+                    var1.writeBytes((FriendlyByteBuf) payload);
+                }, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
             } else {
                 payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_REQUEST, binding.opcode()));
-                mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(this.key(), payload, transactionId);
+                final ResourceKey key = this.key();
+                mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
+                    @Override
+                    public ResourceLocation id() {
+                        return (ResourceLocation) (Object) key;
+                    }
+
+                    @Override
+                    public void write(FriendlyByteBuf var1) {
+                        var1.writeBytes((FriendlyByteBuf) payload);
+                    }
+                }, transactionId);
             }
         } else {
             payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_REQUEST, transactionId));
@@ -162,11 +178,23 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             if (isLoginPhase) {
                 if (side == EngineConnectionSide.CLIENT) {
                     payload.writeVarLong(SpongePacketChannel.packTypeAndValue(type, 0));
-                    mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(payload, transactionId);
+                    mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(var1 -> {
+                        var1.writeBytes((FriendlyByteBuf) payload);
+                    }, transactionId);
                 } else {
                     payload.writeVarLong(SpongePacketChannel.packTypeAndValue(type, transactionId));
-                    mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(
-                            this.key(), payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
+                    final ResourceKey key = this.key();
+                    mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
+                        @Override
+                        public ResourceLocation id() {
+                            return (ResourceLocation) (Object) key;
+                        }
+
+                        @Override
+                        public void write(FriendlyByteBuf var1) {
+                            var1.writeBytes((FriendlyByteBuf) payload);
+                        }
+                    }, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
                 }
             } else {
                 payload.writeVarLong(SpongePacketChannel.packTypeAndValue(type, transactionId));
@@ -178,12 +206,24 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             if (isLoginPhase) {
                 if (side == EngineConnectionSide.CLIENT) {
                     payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_DYNAMIC_RESPONSE, opcode));
-                    mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(payload, transactionId);
+                    mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(var1 -> {
+                        var1.writeBytes((FriendlyByteBuf) payload);
+                    }, transactionId);
                 } else {
                     payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_DYNAMIC_RESPONSE, transactionId));
                     payload.writeVarInt(opcode);
-                    mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(
-                            this.key(), payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
+                    final ResourceKey key = this.key();
+                    mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
+                        @Override
+                        public ResourceLocation id() {
+                            return (ResourceLocation) (Object) key;
+                        }
+
+                        @Override
+                        public void write(FriendlyByteBuf var1) {
+                            var1.writeBytes((FriendlyByteBuf) payload);
+                        }
+                    }, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
                 }
             } else {
                 payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_DYNAMIC_RESPONSE, transactionId));
@@ -217,11 +257,24 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             if (side == EngineConnectionSide.CLIENT) {
                 payload.writeString(this.key().formatted());
                 payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_NORMAL, binding.opcode()));
-                mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
+                mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(var1 -> {
+                    var1.writeBytes((FriendlyByteBuf) payload);
+                }, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
             } else {
                 payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_NORMAL, binding.opcode()));
                 final int transactionId = ConnectionUtil.getTransactionStore(connection).nextId();
-                mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(this.key(), payload, transactionId);
+                final ResourceKey key = this.key();
+                mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(new CustomQueryPayload() {
+                    @Override
+                    public ResourceLocation id() {
+                        return (ResourceLocation) (Object) key;
+                    }
+
+                    @Override
+                    public void write(FriendlyByteBuf var1) {
+                        var1.writeBytes((FriendlyByteBuf) payload);
+                    }
+                }, transactionId);
             }
         } else {
             payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_NORMAL, binding.opcode()));

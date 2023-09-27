@@ -26,11 +26,11 @@ package org.spongepowered.common.mixin.ipforward.server.network;
 
 import com.google.gson.Gson;
 import com.mojang.authlib.properties.Property;
-import com.mojang.util.UUIDTypeAdapter;
+import com.mojang.util.UndashedUuid;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.Connection;
-import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.handshake.ClientIntent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.server.network.ServerHandshakePacketListenerImpl;
@@ -58,22 +58,22 @@ public abstract class ServerHandshakePacketListenerImplMixin_IpForward {
     @Inject(method = "handleIntention", at = @At("HEAD"), cancellable = true)
     private void bungee$patchHandshake(final ClientIntentionPacket packet, final CallbackInfo ci) {
         if (SpongeConfigs.getCommon().get().ipForwarding.mode == IpForwardingCategory.Mode.LEGACY
-            && packet.getIntention() == ConnectionProtocol.LOGIN) {
-            final String ip = packet.getHostName();
+            && packet.intention() == ClientIntent.LOGIN) {
+            final String ip = packet.hostName();
             final String[] split = ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
             if (split.length == 3 || split.length == 4) {
-                ((ClientIntentionPacketAccessor) packet).accessor$hostName(split[0]);
+                ((ClientIntentionPacketAccessor) (Object) packet).accessor$hostName(split[0]);
                 ((ConnectionAccessor) this.connection).accessor$address(new InetSocketAddress(split[1],
                         ((InetSocketAddress) this.connection.getRemoteAddress()).getPort()));
-                ((ConnectionBridge_IpForward) this.connection).bungeeBridge$setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
+                ((ConnectionBridge_IpForward) this.connection).bungeeBridge$setSpoofedUUID(UndashedUuid.fromStringLenient(split[2]));
 
                 if (split.length == 4) {
                     ((ConnectionBridge_IpForward) this.connection).bungeeBridge$setSpoofedProfile(
                         ServerHandshakePacketListenerImplMixin_IpForward.ipForward$GSON.fromJson(split[3], Property[].class));
                 }
             } else {
-                this.connection.setProtocol(ConnectionProtocol.LOGIN);
+                this.connection.setClientboundProtocolAfterHandshake(ClientIntent.LOGIN);
                 final Component error = Component.literal("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!")
                             .withStyle(ChatFormatting.RED);
                 this.connection.send(new ClientboundLoginDisconnectPacket(error));

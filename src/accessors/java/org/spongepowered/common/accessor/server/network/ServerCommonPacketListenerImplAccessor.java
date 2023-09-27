@@ -22,20 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.advancements.critereon;
+package org.spongepowered.common.accessor.server.network;
 
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.network.Connection;
+import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Optional;
+@Mixin(ServerCommonPacketListenerImpl.class)
+public interface ServerCommonPacketListenerImplAccessor {
 
-@Mixin(MinMaxBounds.Doubles.class)
-public interface MinMaxBounds_DoublesAccessor {
-
-    @Invoker("<init>") static MinMaxBounds.Doubles invoker$new(final Optional<Double> min, final Optional<Double> max) {
-        throw new UntransformedInvokerError();
-    }
-
+    @Accessor("connection")
+    Connection accessor$connection();
 }

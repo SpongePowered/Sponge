@@ -159,9 +159,9 @@ public final class SpongeMapDecorationBuilder implements MapDecoration.Builder {
     @Override
     public MapDecoration build() throws IllegalStateException {
         Objects.requireNonNull(this.type, "Type has not been set");
-        final MapDecoration decoration = (MapDecoration) new net.minecraft.world.level.saveddata.maps.MapDecoration(
+        final MapDecoration decoration = (MapDecoration) (Object) new net.minecraft.world.level.saveddata.maps.MapDecoration(
                 ((SpongeMapDecorationType) this.type).getType(),
-                (byte)this.x, (byte)this.y, (byte) ((SpongeMapDecorationOrientation)this.rot).getOrientationNumber(),
+                (byte) this.x, (byte) this.y, (byte) ((SpongeMapDecorationOrientation) this.rot).getOrientationNumber(),
                 this.customName == null ? null : SpongeAdventure.asVanilla(this.customName));
         ((MapDecorationBridge) decoration).bridge$setPersistent(true); // Anything that comes out of this builder should be persistent
         return decoration;

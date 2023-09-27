@@ -25,7 +25,7 @@
 package org.spongepowered.vanilla.mixin.core.server.network;
 
 import net.minecraft.network.protocol.login.ServerLoginPacketListener;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
@@ -66,7 +66,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
     private int impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_NOT_STARTED;
 
     @Inject(method = "handleCustomQueryPacket", at = @At("HEAD"), cancellable = true)
-    private void onResponsePayload(final ServerboundCustomQueryPacket packet, final CallbackInfo ci) {
+    private void onResponsePayload(final ServerboundCustomQueryAnswerPacket packet, final CallbackInfo ci) {
         ci.cancel();
 
         final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
@@ -95,7 +95,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
             } else if (this.impl$handshakeState == ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_SYNC_PLUGIN_DATA) {
                 final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
                 if (store.isEmpty()) {
-                    this.state = ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT;
+                    this.state = ServerLoginPacketListenerImpl.State.VERIFYING;
                 }
             }
         }
@@ -103,8 +103,9 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
 
     @Inject(method = "handleHello", at = @At("RETURN"))
     private void impl$onProcessLoginStart(final ServerboundHelloPacket packet, final CallbackInfo ci) {
-        if (this.state == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
+        // TODO investigate
+        /*if (this.state == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
             this.state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
-        }
+        }*/
     }
 }

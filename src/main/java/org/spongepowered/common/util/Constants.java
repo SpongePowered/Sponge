@@ -886,7 +886,7 @@ public final class Constants {
             public static final float PLAYER_WIDTH = 0.6F;
             public static final float PLAYER_HEIGHT = 1.8F;
             public static final int TRACKING_RANGE = 32;
-            public static final double PLAYER_Y_OFFSET = -0.35D;
+            public static final float PLAYER_Y_OFFSET = -0.35F;
 
             public static final class Abilities {
                 public static final DataQuery IS_FLYING = of("abilities", "flying");

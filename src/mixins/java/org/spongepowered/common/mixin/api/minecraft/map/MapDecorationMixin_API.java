@@ -50,7 +50,7 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
     @Shadow private byte x;
     @Shadow private byte y;
     @Shadow private byte rot;
-    @Shadow @Nullable public abstract Component shadow$getName();
+    @Shadow @Nullable public abstract Component shadow$name();
     // @formatter:on
 
     @Override
@@ -103,8 +103,8 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
                 .set(Constants.Map.DECORATION_X, this.x)
                 .set(Constants.Map.DECORATION_Y, this.y)
                 .set(Constants.Map.DECORATION_ROTATION, (byte) MapUtil.normalizeDecorationOrientation(this.rot));
-        if (this.shadow$getName() != null) {
-            data.set(Constants.Map.NAME, Component.Serializer.toJson(this.shadow$getName()));
+        if (this.shadow$name() != null) {
+            data.set(Constants.Map.NAME, Component.Serializer.toJson(this.shadow$name()));
         }
         return data;
     }

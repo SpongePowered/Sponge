@@ -105,7 +105,7 @@ public final class PluginScreen extends Screen {
 
     @Override
     public void render(final GuiGraphics stack, final int p_render_1_, final int p_render_2_, final float p_render_3_) {
-        this.renderBackground(stack);
+        this.renderBackground(stack, p_render_1_, p_render_2_, p_render_3_);
         super.render(stack, p_render_1_, p_render_2_, p_render_3_); // render the widgets
         stack.drawCenteredString(this.font, this.title.getString(), this.width / 2, 8, 16777215);
     }

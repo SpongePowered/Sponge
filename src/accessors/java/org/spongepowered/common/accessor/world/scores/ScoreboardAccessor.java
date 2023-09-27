@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.world.scores;
 
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
@@ -31,7 +32,6 @@ import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.common.UntransformedAccessorError;
 
 import java.util.List;
 import java.util.Map;
@@ -45,15 +45,10 @@ public interface ScoreboardAccessor {
 
     @Accessor("playerScores") Map<String, Map<Objective, Score>> accessor$playerScores();
 
-    @Accessor("displayObjectives") Objective[] accessor$displayObjectives();
+    @Accessor("displayObjectives") Map<DisplaySlot, Objective> accessor$displayObjectives();
 
     @Accessor("teamsByName") Map<String, PlayerTeam> accessor$teamsByName();
 
     @Accessor("teamsByPlayer") Map<String, PlayerTeam> accessor$teamsByPlayer();
-
-    @Accessor("displaySlotNames")
-    static String[] accessor$displaySlotNames() {
-        throw new UntransformedAccessorError();
-    }
 
 }

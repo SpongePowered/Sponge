@@ -46,7 +46,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
-import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
+import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
@@ -91,7 +91,7 @@ public final class EntityUtil {
     public static void performPostChangePlayerWorldLogic(final ServerPlayer player, final ServerLevel fromWorld,
             final ServerLevel originalToWorld, final ServerLevel toWorld, final boolean isPortal) {
         // Sponge Start - Send any platform dimension data
-        ((ServerPlayerBridge) player).bridge$sendDimensionData(((ServerGamePacketListenerImplAccessor) player.connection).accessor$connection(), toWorld.dimensionType(), toWorld.dimension());
+        ((ServerPlayerBridge) player).bridge$sendDimensionData(((ServerCommonPacketListenerImplAccessor) player.connection).accessor$connection(), toWorld.dimensionType(), toWorld.dimension());
         // Sponge End
         final LevelData worldinfo = toWorld.getLevelData();
         // We send dimension change for portals before loading chunks
