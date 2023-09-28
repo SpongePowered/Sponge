@@ -33,6 +33,7 @@ import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.StonecutterMenu;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import org.spongepowered.api.ResourceKey;
@@ -104,7 +105,7 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
         Preconditions.checkNotNull(world);
         if (inventory instanceof AbstractFurnaceBlockEntity furnace) {
 
-            final Optional<? extends AbstractCookingRecipe> recipeFor = ((AbstractFurnaceBlockEntityAccessor) inventory).accessor$quickCheck().getRecipeFor(furnace, furnace.getLevel());
+            final Optional<? extends AbstractCookingRecipe> recipeFor = ((AbstractFurnaceBlockEntityAccessor) inventory).accessor$quickCheck().getRecipeFor(furnace, furnace.getLevel()).map(RecipeHolder::value);
             return recipeFor.map(Recipe.class::cast);
         }
         if (inventory instanceof CampfireBlockEntity) {

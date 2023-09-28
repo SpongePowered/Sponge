@@ -30,6 +30,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -61,7 +62,7 @@ public interface AbstractFurnaceBlockEntityAccessor {
     @Accessor("quickCheck")  RecipeManager.CachedCheck<Container, ? extends AbstractCookingRecipe> accessor$quickCheck();
 
     @Invoker("canBurn")
-    static boolean invoker$canBurn(final RegistryAccess registryAccess, @Nullable final Recipe<?> var0, final NonNullList<ItemStack> var1, final int var2) {
+    static boolean invoker$canBurn(final RegistryAccess registryAccess, @Nullable final RecipeHolder<?> var0, final NonNullList<ItemStack> var1, final int var2) {
         throw new UntransformedInvokerError();
     }
 

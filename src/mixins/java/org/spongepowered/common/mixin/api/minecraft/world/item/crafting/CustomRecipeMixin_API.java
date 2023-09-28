@@ -24,21 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.CustomRecipe;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(CustomRecipe.class)
 public abstract class CustomRecipeMixin_API implements SpecialCraftingRecipe {
 
-    @Shadow @Final private ResourceLocation id;
-
-    @Override
-    public ResourceKey key() {
-        return (ResourceKey) (Object) this.id;
-    }
 }

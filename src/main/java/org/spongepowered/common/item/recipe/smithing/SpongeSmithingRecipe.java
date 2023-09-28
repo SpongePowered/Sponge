@@ -26,27 +26,32 @@ package org.spongepowered.common.item.recipe.smithing;
 
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.common.item.recipe.cooking.ResultFunctionRecipe;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 
-import java.util.function.Function;
+public class SpongeSmithingRecipe extends SmithingTransformRecipe implements ResultFunctionRecipe {
 
-public class SpongeSmithingRecipe extends SmithingTransformRecipe {
+    private final String resultFunctionId;
 
-    private final Function<Container, ItemStack> resultFunction;
-
-    public SpongeSmithingRecipe(ResourceLocation idIn, Ingredient template, Ingredient base, Ingredient addition, ItemStack resultIn, Function<Container, ItemStack> resultFunction) {
+    public SpongeSmithingRecipe(final Ingredient template, final Ingredient base, final Ingredient addition, final ItemStack resultIn, final String resultFunctionId) {
         super(template, base, addition, resultIn);
-        this.resultFunction = resultFunction;
+        this.resultFunctionId = resultFunctionId;
+    }
+
+    @Nullable @Override
+    public String resultFunctionId() {
+        return this.resultFunctionId;
     }
 
     @Override
     public ItemStack assemble(Container $$0, RegistryAccess $$1) {
-        if (this.resultFunction != null) {
-            return this.resultFunction.apply($$0);
+        if (this.resultFunctionId != null) {
+            return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }
 
         if (this.getResultItem($$1).hasTag()) {
@@ -63,7 +68,7 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe {
 
     @Override
     public ItemStack getResultItem(RegistryAccess $$1) {
-        if (this.resultFunction != null) {
+        if (this.resultFunctionId != null) {
             return ItemStack.EMPTY;
         }
         return super.getResultItem($$1);

@@ -32,10 +32,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -82,7 +84,8 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
     @MonotonicNonNull private CraftingContainer craftingContainer;
     // Crafting Event
     @Nullable private ItemStack craftedStack;
-    @Nullable private CraftingRecipe onTakeRecipe;
+    @Nullable private RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe> onTakeRecipe;
+    @Nullable private ResourceKey onTakeRecipeKey;
     protected boolean used = false;
     @Nullable ItemStack shiftCraftingResult;
 
@@ -269,7 +272,9 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
             final CraftItemEvent.Craft craftEvent =
                     SpongeEventFactory.createCraftItemEventCraft(PhaseTracker.getCauseStackManager().currentCause(),
                             ContainerUtil.fromNative(this.menu), craftedItem, this.craftingInventory, event.cursorTransaction(),
-                            Optional.ofNullable(this.onTakeRecipe), Optional.of(this.craftingInventory.result()), event.transactions());
+                            Optional.ofNullable(this.onTakeRecipe).map(r -> (CraftingRecipe) r.value()),
+                            Optional.ofNullable(this.onTakeRecipe).map(r -> (ResourceKey) (Object) r.id()),
+                            Optional.of(this.craftingInventory.result()), event.transactions());
             SpongeCommon.post(craftEvent);
             this.handleEventResults(player, craftEvent);
             if (craftEvent.isCancelled() && this.shiftCraftingResult != null) {
@@ -283,10 +288,9 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
             // TODO push event to cause?
             // TODO prevent event when there is no preview?
             final SlotTransaction previewTransaction = this.getPreviewTransaction(this.craftingInventory.result(), event.transactions());
-            final Optional<CraftingRecipe> recipe = player.level().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftingContainer, player.level()).map(CraftingRecipe.class::cast);
-            final CraftItemEvent.Preview previewEvent = SpongeEventFactory
-                    .createCraftItemEventPreview(event.cause(), (Container) this.menu, this.craftingInventory, event.cursorTransaction(), previewTransaction, recipe, Optional.empty(), event
-                            .transactions());
+            final var recipe = player.level().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftingContainer, player.level());
+            final CraftItemEvent.Preview previewEvent = SpongeEventFactory.createCraftItemEventPreview(event.cause(), (Container) this.menu, this.craftingInventory, event.cursorTransaction(), previewTransaction,
+                    recipe.map(RecipeHolder::value).map(CraftingRecipe.class::cast), recipe.map(h -> h.id()).map(ResourceKey.class::cast), Optional.empty(), event.transactions());
             SpongeCommon.post(previewEvent);
             this.handleEventResults(player, previewEvent);
 

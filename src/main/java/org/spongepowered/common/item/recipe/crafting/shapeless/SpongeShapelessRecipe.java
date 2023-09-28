@@ -32,6 +32,7 @@ import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -55,19 +57,20 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
     private final String remainingItemsFunctionId;
 
     public SpongeShapelessRecipe(String groupIn, CraftingBookCategory category, ItemStack recipeOutputIn, NonNullList<Ingredient> recipeItemsIn,
-            String resultFunctionId, String remainingItemsFunctionId) {
-        super(groupIn, category, recipeOutputIn, recipeItemsIn);
+            ItemStack spongeResultStack,
+            Optional<String> resultFunctionId, Optional<String> remainingItemsFunctionId) {
+        super(groupIn, category, spongeResultStack.isEmpty() ? recipeOutputIn : spongeResultStack, recipeItemsIn);
         this.onlyVanillaIngredients = recipeItemsIn.stream().noneMatch(i -> i instanceof SpongeIngredient);
-        this.resultFunctionId = resultFunctionId;
-        this.remainingItemsFunctionId = remainingItemsFunctionId;
+        this.resultFunctionId = resultFunctionId.orElse(null);
+        this.remainingItemsFunctionId = remainingItemsFunctionId.orElse(null);
     }
 
-    public String resultFunctionId() {
-        return resultFunctionId;
+    public Optional<String> resultFunctionId() {
+        return Optional.ofNullable(resultFunctionId);
     }
 
-    public String remainingItemsFunctionId() {
-        return remainingItemsFunctionId;
+    public Optional<String> remainingItemsFunctionId() {
+        return Optional.ofNullable(remainingItemsFunctionId);
     }
 
 
@@ -88,23 +91,23 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
 
     @Override
     public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
-        if (this.remainingItemsFunction != null) {
-            return this.remainingItemsFunction.apply(inv);
+        if (this.remainingItemsFunctionId != null) {
+            return IngredientResultUtil.cachedRemainingItemsFunction(this.remainingItemsFunctionId).apply(inv);
         }
         return super.getRemainingItems(inv);
     }
 
     @Override
     public ItemStack assemble(CraftingContainer container, final RegistryAccess $$1) {
-        if (this.resultFunction != null) {
-            return this.resultFunction.apply(container);
+        if (this.resultFunctionId != null) {
+            return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply(container);
         }
         return super.assemble(container, $$1);
     }
 
     @Override
     public ItemStack getResultItem(final RegistryAccess $$1) {
-        if (this.resultFunction != null) {
+        if (this.resultFunctionId != null) {
             return ItemStack.EMPTY;
         }
         return super.getResultItem($$1);

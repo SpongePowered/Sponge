@@ -172,7 +172,6 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
         Objects.requireNonNull(this.name, "name");
         checkState(!this.name.isEmpty(), "The name cannot be empty!");
         checkState(this.configType != null, "The configType must be set");
-        // TODO this.key?
         return (Trigger<C>) new SpongeCriterionTrigger(this.configType, (Function) this.constructor, (Consumer) this.eventHandler, this.name);
     }
 

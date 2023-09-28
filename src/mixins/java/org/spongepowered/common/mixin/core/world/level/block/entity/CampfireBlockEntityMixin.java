@@ -29,9 +29,11 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.entity.carrier.Campfire;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -62,7 +64,7 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
     @Shadow @Final private int[] cookingProgress;
     // @Formatter:on
 
-    private final CampfireCookingRecipe[] impl$cookingRecipe = new CampfireCookingRecipe[4];
+    private final RecipeHolder[] impl$cookingRecipe = new RecipeHolder[4];
 
     // Tick up
     @Inject(method = "cookTick", locals = LocalCapture.CAPTURE_FAILEXCEPTION,
@@ -74,8 +76,9 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
             final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
             final CampfireBlockEntityMixin mixinSelf = MixinTargetHelper.cast(self);
             final ItemStackSnapshot stack = ItemStackUtil.snapshotOf(mixinSelf.items.get(i));
+            final RecipeHolder<?> recipe = mixinSelf.impl$cookingRecipe[i];
             final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (Campfire) self, stack, Optional.empty(),
-                    Optional.ofNullable((CookingRecipe) mixinSelf.impl$cookingRecipe[i]));
+                    Optional.ofNullable(recipe).map(r -> (CookingRecipe) r.value()), Optional.ofNullable(recipe).map(r -> (ResourceKey) (Object) r.id()));
             SpongeCommon.post(event);
             if (event.isCancelled()) {
                 ((CampfireBlockEntityMixin) (Object) self).cookingProgress[i]--;
@@ -92,14 +95,15 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final CampfireBlockEntityMixin mixinSelf = MixinTargetHelper.cast(self);
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack1);
+        final RecipeHolder<?> recipe = mixinSelf.impl$cookingRecipe[i];
         final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, (Campfire) self,
-            Collections.singletonList(snapshot), Optional.empty(), Optional.ofNullable((CookingRecipe) mixinSelf.impl$cookingRecipe[i]));
+            Collections.singletonList(snapshot), Optional.empty(), Optional.ofNullable(recipe).map(r -> (CookingRecipe) r.value()), Optional.ofNullable(recipe).map(r -> (ResourceKey) (Object) r.id()));
         SpongeCommon.post(event);
         mixinSelf.impl$cookingRecipe[i] = null;
     }
 
     @Override
-    public void bridge$placeRecipe(final CampfireCookingRecipe recipe) {
+    public void bridge$placeRecipe(final RecipeHolder<CampfireCookingRecipe> recipe) {
         for(int i = 0; i < this.items.size(); ++i) {
             final ItemStack itemstack = this.items.get(i);
             if (itemstack.isEmpty()) {

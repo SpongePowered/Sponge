@@ -73,7 +73,7 @@ public class SpongeShapelessCraftingRecipeRegistration extends SpongeRecipeRegis
     @Override
     public void serializeShape(final JsonObject json) {
         final JsonArray jsonarray = new JsonArray();
-        this.ingredients.stream().map(Ingredient::toJson).forEach(jsonarray::add);
+        this.ingredients.stream().map(i -> i.toJson(false)).forEach(jsonarray::add);
         json.add(Constants.Recipe.SHAPELESS_INGREDIENTS, jsonarray);
     }
 

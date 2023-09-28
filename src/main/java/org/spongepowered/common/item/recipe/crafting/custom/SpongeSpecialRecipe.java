@@ -47,19 +47,25 @@ import java.util.function.Function;
 
 public final class SpongeSpecialRecipe extends CustomRecipe {
 
+    private final String id;
     private final BiPredicate<CraftingGridInventory, ServerWorld> biPredicate;
     private final Function<CraftingGridInventory, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction;
     private final Function<CraftingGridInventory, org.spongepowered.api.item.inventory.ItemStack> resultFunction;
 
-    public SpongeSpecialRecipe(ResourceLocation idIn,
+    public SpongeSpecialRecipe(ResourceLocation key,
             CraftingBookCategory category,
             BiPredicate<CraftingGridInventory, ServerWorld> biPredicate,
             Function<CraftingGridInventory, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction,
             Function<CraftingGridInventory, org.spongepowered.api.item.inventory.ItemStack> resultFunction) {
         super(category);
+        this.id = key.toString();
         this.biPredicate = biPredicate;
         this.remainingItemsFunction = remainingItemsFunction;
         this.resultFunction = resultFunction;
+    }
+
+    public String id() {
+        return id;
     }
 
     @Override

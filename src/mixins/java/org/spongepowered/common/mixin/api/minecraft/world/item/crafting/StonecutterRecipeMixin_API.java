@@ -25,15 +25,10 @@
 package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
 import net.minecraft.world.item.crafting.StonecutterRecipe;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(StonecutterRecipe.class)
 public abstract class StonecutterRecipeMixin_API extends SingleItemRecipeMixin_API implements StoneCutterRecipe {
 
-    @Override
-    public ResourceKey key() {
-        return (ResourceKey) (Object) this.id;
-    }
 }

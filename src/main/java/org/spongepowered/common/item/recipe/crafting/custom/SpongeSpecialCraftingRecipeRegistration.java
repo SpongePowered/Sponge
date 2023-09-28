@@ -46,7 +46,7 @@ import java.util.function.Function;
 
 public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistration {
 
-    public static final Map<ResourceLocation, SpongeSpecialRecipe> RECIPES = new HashMap<>();
+    public static final Map<String, SpongeSpecialRecipe> RECIPES = new HashMap<>();
 
     private final BiPredicate<CraftingGridInventory, ServerWorld> biPredicate;
     private final Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction;
@@ -67,11 +67,11 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
         this.resultFunction = resultFunction;
 
         this.recipe = new SpongeSpecialRecipe(key, category, this.biPredicate, this.remainingItemsFunction, this.resultFunction);
-        SpongeSpecialCraftingRecipeRegistration.RECIPES.put(key, this.recipe);
+        SpongeSpecialCraftingRecipeRegistration.RECIPES.put(this.recipe.id(), this.recipe);
     }
 
-    public static SpongeSpecialRecipe get(final ResourceLocation location, final CraftingBookCategory category) {
-        return SpongeSpecialCraftingRecipeRegistration.RECIPES.get(location); // TOGO: category?
+    public static SpongeSpecialRecipe get(final String id, final CraftingBookCategory category) {
+        return SpongeSpecialCraftingRecipeRegistration.RECIPES.get(id); // TODO: category?
     }
 
     @Override

@@ -22,24 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.item.crafting;
+package org.spongepowered.common.mixin.core.world.item.crafting;
 
-import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.SmithingTransformRecipe;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.item.crafting.SmithingRecipeBridge;
 
-import java.util.List;
+@Mixin(SmithingTransformRecipe.class)
+public abstract class SmithingTransformRecipeMixin implements SmithingRecipeBridge {
 
-@Mixin(ShapedRecipe.class)
-public interface ShapedRecipeAccessor {
+    // @formatter=off
+    @Shadow @Final Ingredient template;
+    @Shadow @Final Ingredient base;
+    @Shadow @Final Ingredient addition;
+    // @formatter=on
 
-    @Invoker("shrink")
-    static String[] invoker$shrink(final List<String> pattern) {
-        throw new UntransformedInvokerError();
+    @Override
+    public Ingredient bridge$template() {
+        return this.template;
     }
 
-    @Accessor("group") String accessor$group();
+    @Override
+    public Ingredient bridge$base() {
+        return this.base;
+    }
 
+    @Override
+    public Ingredient bridge$addition() {
+        return this.addition;
+    }
 }

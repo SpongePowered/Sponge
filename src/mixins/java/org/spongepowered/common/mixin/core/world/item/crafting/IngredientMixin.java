@@ -24,41 +24,30 @@
  */
 package org.spongepowered.common.mixin.core.world.item.crafting;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ChorusFruitItem;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
-import org.spongepowered.common.item.recipe.ingredient.SpongePredicateItemList;
-
-import java.util.List;
 
 @Mixin(Ingredient.class)
 public abstract class IngredientMixin {
 
-
-
     @Inject(method = "codec", at = @At(value = "RETURN"), cancellable = true)
     private static void impl$modifyCodec(final boolean $$0, final CallbackInfoReturnable<Codec<Ingredient>> cir) {
         final Codec<Ingredient> original = cir.getReturnValue();
-        ExtraCodecs.xor()
-        var modified = ExtraCodecs.either(original, original).flatComapMap(
-                codec1 -> codec1.map(l -> l, r -> r),
-                ingredient -> {
-
-                }
-        );
-        cir.setReturnValue(modified);
+        var combinedCodec = ExtraCodecs.xor(SpongeIngredient.CODEC, original).xmap(to -> to.map(si -> si, i -> i),
+                fr -> {
+                    if (fr instanceof SpongeIngredient si) {
+                        return Either.left(si);
+                    } else {
+                        return Either.right(fr);
+                    }
+                });
+        cir.setReturnValue(combinedCodec);
     }
 }

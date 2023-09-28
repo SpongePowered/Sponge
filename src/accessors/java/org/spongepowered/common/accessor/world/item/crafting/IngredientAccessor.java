@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.accessor.world.item.crafting;
 
-import com.google.gson.JsonObject;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -40,9 +39,5 @@ public interface IngredientAccessor {
         throw new UntransformedInvokerError();
     }
 
-    @Invoker("valueFromJson")
-    static Ingredient.Value invoker$valueFromJson(final JsonObject json) {
-        throw new UntransformedInvokerError();
-    }
 
 }

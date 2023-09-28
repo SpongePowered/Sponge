@@ -22,24 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.item.crafting;
+package org.spongepowered.common.bridge.world.item.crafting;
 
-import net.minecraft.world.item.crafting.ShapedRecipe;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import net.minecraft.world.item.crafting.Ingredient;
 
-import java.util.List;
+public interface SmithingRecipeBridge {
 
-@Mixin(ShapedRecipe.class)
-public interface ShapedRecipeAccessor {
-
-    @Invoker("shrink")
-    static String[] invoker$shrink(final List<String> pattern) {
-        throw new UntransformedInvokerError();
-    }
-
-    @Accessor("group") String accessor$group();
+    Ingredient bridge$template();
+    Ingredient bridge$base();
+    Ingredient bridge$addition();
 
 }

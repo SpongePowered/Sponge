@@ -25,22 +25,15 @@
 package org.spongepowered.common.item.recipe.ingredient;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.Container;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.Constants;
 
-import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Map;
 import java.util.function.Function;
@@ -50,39 +43,13 @@ import javax.annotation.Nullable;
 public final class IngredientResultUtil {
 
     private static final Map<String, Function<?, net.minecraft.world.item.ItemStack>> cachedResultFunctions = new Object2ObjectOpenHashMap<>();
-    private static final Map<String, Function<?, NonNullList<net.minecraft.world.item.ItemStack>>> cachedRemainingItemsFunctions =
-            new Object2ObjectOpenHashMap<>();
-
-    public static net.minecraft.world.item.ItemStack deserializeItemStack(final JsonObject result) {
-        if (result == null) {
-            return null;
-        }
-        try {
-            final DataContainer dataContainer = DataFormats.JSON.get().read(result.toString());
-            return ItemStackUtil.toNative(ItemStack.builder().fromContainer(dataContainer).build());
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+    private static final Map<String, Function<?, NonNullList<net.minecraft.world.item.ItemStack>>> cachedRemainingItemsFunctions = new Object2ObjectOpenHashMap<>();
 
     public static JsonElement serializeItemStack(final net.minecraft.world.item.ItemStack spongeResult) {
-        final DataContainer dataContainer = ItemStackUtil.fromNative(spongeResult).toContainer();
-        try {
-            return GsonHelper.parse(DataFormats.JSON.get().write(dataContainer));
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+        final DataResult<JsonElement> encoded = net.minecraft.world.item.ItemStack.CODEC.encodeStart(JsonOps.INSTANCE, spongeResult);
+        return encoded.result().get();
 
-    @SuppressWarnings("unchecked")
-    public static <C extends Container> Function<C, net.minecraft.world.item.ItemStack> deserializeResultFunction(JsonObject json) {
-        if (json.has(Constants.Recipe.SPONGE_RESULTFUNCTION)) {
-            final String id = GsonHelper.getAsString(json, Constants.Recipe.SPONGE_RESULTFUNCTION);
-            return ((Function<C, net.minecraft.world.item.ItemStack>) IngredientResultUtil.cachedResultFunctions.get(id));
-        }
-        return null;
     }
-
     public static final Codec<String> CACHED_RESULT_FUNC_CODEC = Codec.STRING.flatXmap(
             id -> IngredientResultUtil.cachedResultFunction(id) != null ? DataResult.success(id) :
                     DataResult.error(() -> "Missing Result Function for id " + id),
@@ -105,16 +72,6 @@ public final class IngredientResultUtil {
             ));
         }
         return id.toString();
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <C extends Container> Function<C, NonNullList<net.minecraft.world.item.ItemStack>> deserializeRemainingItemsFunction(
-            JsonObject json) {
-        if (json.has(Constants.Recipe.SPONGE_REMAINING_ITEMS)) {
-            final String id = GsonHelper.getAsString(json, Constants.Recipe.SPONGE_REMAINING_ITEMS);
-            return ((Function<C, NonNullList<net.minecraft.world.item.ItemStack>>) IngredientResultUtil.cachedRemainingItemsFunctions.get(id));
-        }
-        return null;
     }
 
     public static final Codec<String> CACHED_REMAINING_FUNC_CODEC = Codec.STRING.flatXmap(

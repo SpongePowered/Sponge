@@ -28,6 +28,7 @@ import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
@@ -46,8 +47,8 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCo
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "lambda$handlePlaceRecipe$11",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
-    private void vanilla$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final net.minecraft.server.level.ServerPlayer player) {
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/server/level/ServerPlayer;)V"))
+    private void vanilla$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final RecipeHolder<?> recipe, final net.minecraft.server.level.ServerPlayer player) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
 
@@ -58,7 +59,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCo
             return;
         }
 
-        try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, recipe, player, (CraftingInventory) craftInv)) {
+        try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, (RecipeHolder) recipe, player, (CraftingInventory) craftInv)) {
             recipeBookMenu.handlePlacement(shift, recipe, player);
             player.containerMenu.broadcastChanges();
         }

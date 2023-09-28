@@ -240,7 +240,8 @@
         "world.scores.ScoreboardMixin",
         "world.scores.ScoreMixin",
         "world.ticks.LevelTicksMixin",
-        "world.ticks.ScheduledTickMixin"
+        "world.ticks.ScheduledTickMixin",
+        "world.item.crafting.SmithingTransformRecipeMixin"
     ],
     "client": [
         "client.MinecraftMixin",

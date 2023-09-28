@@ -174,7 +174,7 @@ public final class InventoryTest implements LoadableModule {
 
         @Listener
         private void onCooking(final CookingEvent event) {
-            final String recipe = event.recipe().isPresent() ? event.recipe().get().key().toString() : "no recipe";
+            final String recipe = event.recipeKey().isPresent() ? event.recipeKey().get().toString() : "no recipe";
             this.plugin.logger().info("{} in {} using {}", event.getClass().getSimpleName(), event.blockEntity().getClass().getSimpleName(), recipe);
         }
 

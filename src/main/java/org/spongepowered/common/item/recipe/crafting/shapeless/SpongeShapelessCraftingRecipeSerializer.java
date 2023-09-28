@@ -24,20 +24,18 @@
  */
 package org.spongepowered.common.item.recipe.crafting.shapeless;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingRecipeCodecs;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
-import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.util.Constants;
 
 /**
@@ -54,9 +52,6 @@ public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Ser
                             ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(ShapelessRecipe::getGroup),
                             CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapelessRecipe::category),
                             CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC.fieldOf("result").forGetter($$0x -> $$0x.getResultItem(null)),
-                            // TODO Constants.Recipe.SPONGE_RESULT
-                            // TODO IngredientResultUtil.deserializeResultFunction
-                            // TODO IngredientResultUtil.deserializeRemainingItemsFunction
                             Ingredient.CODEC_NONEMPTY
                                     .listOf()
                                     .fieldOf("ingredients")
@@ -74,26 +69,16 @@ public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Ser
                                             DataResult::success
                                     )
                                     .forGetter(ShapelessRecipe::getIngredients),
-                            IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION, null).forGetter(SpongeShapelessRecipe::resultFunctionId),
-                            IngredientResultUtil.CACHED_REMAINING_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_REMAINING_ITEMS, null).forGetter(SpongeShapelessRecipe::remainingItemsFunctionId)
+                            ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter(raw -> raw.getResultItem(null).hasTag() ? raw.getResultItem(null) : ItemStack.EMPTY),
+                            IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(SpongeShapelessRecipe::resultFunctionId),
+                            IngredientResultUtil.CACHED_REMAINING_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_REMAINING_ITEMS).forGetter(SpongeShapelessRecipe::remainingItemsFunctionId)
                     )
                     .apply($$0, SpongeShapelessRecipe::new)
     );
 
     @Override
     public Codec<ShapelessRecipe> codec() {
-        return CODEC;
-    }
-
-    private NonNullList<Ingredient> readIngredients(final JsonArray json) {
-        final NonNullList<Ingredient> nonnulllist = NonNullList.create();
-        for (final JsonElement element : json) {
-            final Ingredient ingredient = IngredientUtil.spongeDeserialize(element);
-            if (!ingredient.isEmpty()) {
-                nonnulllist.add(ingredient);
-            }
-        }
-        return nonnulllist;
+        return CODEC.xmap(r -> r, r -> (SpongeShapelessRecipe) r);
     }
 
     @Override

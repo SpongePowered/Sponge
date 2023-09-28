@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.item.recipe.ingredient;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipeCodecs;
@@ -35,6 +37,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.Constants;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
@@ -47,37 +50,45 @@ import java.util.stream.Stream;
 
 public class SpongeIngredient extends Ingredient {
 
+    // Only used to allow old recipes to load before they get regenerated
+    private static final Codec<ItemStack> LEGACY_STACK_CODEC = RecordCodecBuilder.create(b -> b.group(
+            BuiltInRegistries.ITEM.byNameCodec().fieldOf("ItemType").forGetter(ItemStack::getItem),
+            Codec.INT.fieldOf("Count").forGetter(ItemStack::getCount)).apply(b, (type, qty) -> {
+        SpongeCommon.logger().info("Found legacy recipe");
+        return new ItemStack(type, qty);
+    }));
+    private static final Codec<ItemStack> STACK_CODEC = ExtraCodecs.xor(ItemStack.CODEC, LEGACY_STACK_CODEC).xmap(to -> to.map(i -> i, i -> i), Either::left);
+
     private static final Codec<SpongeRawIngredient> RAW_CODEC = RecordCodecBuilder.create(
-            instance -> {
-                return instance.group(
+            builder -> {
+                return builder.group(
                         ExtraCodecs.strictOptionalField(Codec.STRING, SpongeItemList.INGREDIENT_TYPE, "vanilla").forGetter(raw -> raw.type),
-                        ExtraCodecs.strictOptionalField(Codec.list(CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC), SpongeItemList.INGREDIENT_ITEM,
-                                List.of()).forGetter(raw -> raw.stacks),
+                        ExtraCodecs.strictOptionalField(Codec.list(STACK_CODEC), SpongeItemList.INGREDIENT_ITEM, List.of()).forGetter(raw -> raw.stacks),
                         ExtraCodecs.strictOptionalField(Codec.STRING, SpongePredicateItemList.INGREDIENT_PREDICATE).forGetter(raw -> raw.predicateId)
-                ).apply(instance, SpongeRawIngredient::new);
+                ).apply(builder, SpongeRawIngredient::new);
             }
     );
 
-    private static final Codec<SpongeIngredient> CODEC = RAW_CODEC.flatXmap(raw -> {
+    public static final Codec<SpongeIngredient> CODEC = RAW_CODEC.flatXmap(raw -> {
         switch (raw.type) {
             case "vanilla" -> {
                 return DataResult.error(() -> "Vanilla Ingredient");
             }
             case SpongeStackItemList.TYPE_STACK -> {
                 final SpongeStackItemList spongeStackItemList = new SpongeStackItemList(raw.stacks.toArray(new ItemStack[0]));
-                final SpongeIngredient ingredient = new SpongeIngredient(raw.type, spongeStackItemList);
+                final SpongeIngredient ingredient = new SpongeIngredient(raw.type, spongeStackItemList, null);
                 return DataResult.success(ingredient);
             }
             case SpongePredicateItemList.TYPE_PREDICATE -> {
                 if (raw.predicateId.isEmpty()) {
                     return DataResult.error(() -> "Missing sponge:predicate for custom ingredient of type " + raw.type);
                 }
-                final Predicate<ItemStack> predicate = SpongeIngredient.getCachedPredicate(raw.predicateId.get());
+                final Predicate<ItemStack> predicate = SpongeIngredient.cachedPredicate(raw.predicateId.get());
                 if (predicate == null) {
                     return DataResult.error(() -> "Could not find predicate for custom ingredient with id " + raw.predicateId.get());
                 }
                 final SpongeIngredient ingredient = new SpongeIngredient(raw.type,
-                        new SpongePredicateItemList(raw.predicateId.get(), predicate, raw.stacks.toArray(new ItemStack[0])));
+                        new SpongePredicateItemList(raw.predicateId.get(), predicate, raw.stacks.toArray(new ItemStack[0])), raw.predicateId.orElse(null));
                 return DataResult.success(ingredient);
             }
             default -> {
@@ -88,28 +99,29 @@ public class SpongeIngredient extends Ingredient {
         switch (spongeIngredient.type) {
             case SpongeStackItemList.TYPE_STACK -> {
                 var stacks = Arrays.stream(spongeIngredient.values).flatMap(v -> v.getItems().stream()).toList();
-                return DataResult.success(new SpongeRawIngredient(spongeIngredient.type, stacks, null));
+                return DataResult.success(new SpongeRawIngredient(spongeIngredient.type, stacks, Optional.empty()));
             }
             case SpongePredicateItemList.TYPE_PREDICATE -> {
-                String predicateId = "TODO"; // TODO predicate id serialize?
-                return DataResult.success(new SpongeRawIngredient(spongeIngredient.type, null, Optional.of(predicateId)));
+                return DataResult.success(new SpongeRawIngredient(spongeIngredient.type, List.of(), Optional.ofNullable(spongeIngredient.predicateId)));
             }
         }
         throw new NotImplementedException("Serializing SpongeIngredient is not implemented yet.");
     });
     public final String type;
+    public final String predicateId;
 
     record SpongeRawIngredient(String type, List<ItemStack> stacks, Optional<String> predicateId) {
 
     }
 
-    public SpongeIngredient(final String type, final Stream<? extends Ingredient.Value> values) {
+    public SpongeIngredient(final String type, final Stream<? extends Ingredient.Value> values, final String predicateId) {
         super(values);
         this.type = type;
+        this.predicateId = predicateId;
     }
 
-    public SpongeIngredient(final String type, final Ingredient.Value value) {
-        this(type, Stream.of(value));
+    public SpongeIngredient(final String type, final Ingredient.Value value, final String predicateId) {
+        this(type, Stream.of(value), predicateId);
     }
 
     public static void clearCache() {
@@ -142,7 +154,7 @@ public class SpongeIngredient extends Ingredient {
 
     public static SpongeIngredient spongeFromStacks(net.minecraft.world.item.ItemStack... stacks) {
         final SpongeStackItemList itemList = new SpongeStackItemList(stacks);
-        return new SpongeIngredient(SpongeStackItemList.TYPE_STACK, itemList);
+        return new SpongeIngredient(SpongeStackItemList.TYPE_STACK, itemList, null);
     }
 
     private final static Map<String, Predicate<ItemStack>> cachedPredicates = new HashMap<>();
@@ -159,10 +171,10 @@ public class SpongeIngredient extends Ingredient {
             SpongeIngredient.cachedPredicates.put(key.toString(), mcPredicate);
         }
         final SpongePredicateItemList itemList = new SpongePredicateItemList(key.toString(), mcPredicate, exemplaryIngredients);
-        return new SpongeIngredient(SpongePredicateItemList.TYPE_PREDICATE, itemList);
+        return new SpongeIngredient(SpongePredicateItemList.TYPE_PREDICATE, itemList, key.toString());
     }
 
-    public static Predicate<ItemStack> getCachedPredicate(String id) {
+    public static Predicate<ItemStack> cachedPredicate(String id) {
 
         return SpongeIngredient.cachedPredicates.computeIfAbsent(id, k -> new WrappedPredicate(id));
     }

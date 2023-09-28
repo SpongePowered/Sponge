@@ -34,7 +34,9 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -48,7 +50,6 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.SpongeCommon;
@@ -375,7 +376,7 @@ interface TransactionSink {
         return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 
-    default EffectTransactor logPlaceRecipe(final boolean shift, final Recipe<?> recipe, final ServerPlayer player, final CraftingInventory craftInv) {
+    default EffectTransactor logPlaceRecipe(final boolean shift, final RecipeHolder<Recipe<?>> recipe, final ServerPlayer player, final CraftingInventory craftInv) {
         final PlaceRecipeTransaction transaction = new PlaceRecipeTransaction(player, shift, recipe, craftInv);
         this.logTransaction(transaction);
         return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
@@ -402,7 +403,7 @@ interface TransactionSink {
     }
 
     default void logCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv,
-        @Nullable final CraftingRecipe lastRecipe) {
+        @Nullable final RecipeHolder<CraftingRecipe> lastRecipe) {
         final CraftingTransaction transaction = new CraftingTransaction(player, craftedStack, craftInv, lastRecipe);
         this.logTransaction(transaction);
     }

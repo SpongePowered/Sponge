@@ -30,17 +30,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
-
-import java.util.function.Function;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 
 public class SpongeCampfireCookingRecipe extends CampfireCookingRecipe implements ResultFunctionRecipe {
 
-    private final Function<Container, ItemStack> resultFunction;
     private final String resultFunctionId;
 
-    public SpongeCampfireCookingRecipe(final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction, final String resultFunctionId) {
+    public SpongeCampfireCookingRecipe(final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final String resultFunctionId) {
         super(group, category, ingredient, result, experience, cookingTime);
-        this.resultFunction = resultFunction;
         this.resultFunctionId = resultFunctionId;
     }
 
@@ -51,8 +48,8 @@ public class SpongeCampfireCookingRecipe extends CampfireCookingRecipe implement
 
     @Override
     public ItemStack assemble(final Container container, final RegistryAccess $$1) {
-        if (this.resultFunction != null) {
-            final ItemStack result = this.resultFunction.apply(container);
+        if (this.resultFunctionId != null) {
+            final ItemStack result = IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply(container);
             result.setCount(1);
             return result;
         }
@@ -61,7 +58,7 @@ public class SpongeCampfireCookingRecipe extends CampfireCookingRecipe implement
 
     @Override
     public ItemStack getResultItem(final RegistryAccess $$1) {
-        if (this.resultFunction != null) {
+        if (this.resultFunctionId != null) {
             return ItemStack.EMPTY;
         }
         return super.getResultItem($$1);

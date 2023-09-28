@@ -26,7 +26,9 @@ package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 
@@ -37,11 +39,11 @@ public class CraftingTransaction extends ContainerBasedTransaction {
     final Player player;
      final ItemStack craftedStack;
     final CraftingInventory craftingInventory;
-    final CraftingRecipe recipe;
+    final RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe> recipe;
 
     public CraftingTransaction(
         final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv,
-        @Nullable final CraftingRecipe lastRecipe
+        @Nullable final RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe> lastRecipe
     ) {
         super(player.containerMenu);
         this.player = player;

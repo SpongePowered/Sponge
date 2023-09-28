@@ -30,29 +30,37 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.common.item.recipe.cooking.ResultFunctionRecipe;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 
 import java.util.function.Function;
 
-public class SpongeStonecuttingRecipe extends StonecutterRecipe {
+public class SpongeStonecuttingRecipe extends StonecutterRecipe implements ResultFunctionRecipe {
 
-    private final Function<Container, ItemStack> resultFunction;
+    private final String resultFunctionId;
 
-    public SpongeStonecuttingRecipe(ResourceLocation idIn, String groupIn, Ingredient ingredientIn, ItemStack resultIn, Function<Container, ItemStack> resultFunction) {
+    public SpongeStonecuttingRecipe(String groupIn, Ingredient ingredientIn, ItemStack resultIn, String resultFunctionId) {
         super(groupIn, ingredientIn, resultIn);
-        this.resultFunction = resultFunction;
+        this.resultFunctionId = resultFunctionId;
+    }
+
+    @Nullable @Override
+    public String resultFunctionId() {
+        return this.resultFunctionId;
     }
 
     @Override
     public ItemStack assemble(final Container container, final RegistryAccess $$1) {
-        if (this.resultFunction != null) {
-            return this.resultFunction.apply(container);
+        if (this.resultFunctionId != null) {
+            return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply(container);
         }
         return super.assemble(container, $$1);
     }
 
     @Override
     public ItemStack getResultItem(final RegistryAccess $$1) {
-        if (this.resultFunction != null) {
+        if (this.resultFunctionId != null) {
             return ItemStack.EMPTY;
         }
         return super.getResultItem($$1);

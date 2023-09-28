@@ -27,8 +27,10 @@ package org.spongepowered.common.event.tracking.context.transaction.inventory;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
@@ -74,9 +76,12 @@ public class CraftingPreviewTransaction extends ContainerBasedTransaction {
         }
         final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.player.containerMenu.getCarried());
         final SlotTransaction previewTransaction = this.getPreviewTransaction(this.craftingInventory.result(), slotTransactions);
-        final Optional<CraftingRecipe> recipe = this.player.level().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots, this.player.level()).map(CraftingRecipe.class::cast);
+        final var recipe = this.player.level().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots, this.player.level());
         final CraftItemEvent.Preview event = SpongeEventFactory.createCraftItemEventPreview(currentCause,
-                ContainerUtil.fromNative(this.menu), this.craftingInventory, new Transaction<>(cursor, cursor), previewTransaction, recipe, Optional.empty(), slotTransactions);
+                ContainerUtil.fromNative(this.menu), this.craftingInventory, new Transaction<>(cursor, cursor), previewTransaction,
+                recipe.map(RecipeHolder::value).map(CraftingRecipe.class::cast),
+                recipe.map(RecipeHolder::id).map(ResourceKey.class::cast),
+                Optional.empty(), slotTransactions);
         return Optional.of(event);
     }
 

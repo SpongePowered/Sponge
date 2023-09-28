@@ -54,7 +54,6 @@ public interface RecipeMixin_API<C extends Container> extends Recipe {
     // @formatter:off
     @Shadow ItemStack shadow$assemble(C inv, RegistryAccess registryAccess);
     @Shadow net.minecraft.world.item.ItemStack shadow$getResultItem(RegistryAccess registryAccess);
-    @Shadow ResourceLocation shadow$getId();
     @Shadow boolean shadow$isSpecial();
     @Shadow boolean shadow$matches(C inv, net.minecraft.world.level.Level worldIn);
     @Shadow NonNullList<ItemStack> shadow$getRemainingItems(C inv);

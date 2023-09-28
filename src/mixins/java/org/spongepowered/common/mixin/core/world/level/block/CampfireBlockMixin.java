@@ -33,6 +33,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -73,7 +74,7 @@ public abstract class CampfireBlockMixin extends BlockMixin {
     @Inject(method = "use", locals = LocalCapture.CAPTURE_FAILEXCEPTION, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;placeFood(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/item/ItemStack;I)Z"))
     public void impl$placeFood(BlockState p_225533_1_, Level p_225533_2_, BlockPos p_225533_3_, Player p_225533_4_, InteractionHand p_225533_5_,
             BlockHitResult p_225533_6_, CallbackInfoReturnable<InteractionResult> cir,
-            BlockEntity tileEntity, CampfireBlockEntity campfire, ItemStack itemStack, Optional<CampfireCookingRecipe> optional) {
+            BlockEntity tileEntity, CampfireBlockEntity campfire, ItemStack itemStack, Optional<RecipeHolder<CampfireCookingRecipe>> optional) {
         ((CampfireBlockEntityBridge) campfire).bridge$placeRecipe(optional.get());
     }
 

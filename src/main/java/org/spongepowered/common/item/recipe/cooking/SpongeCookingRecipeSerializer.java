@@ -55,9 +55,9 @@ public class SpongeCookingRecipeSerializer<R extends AbstractCookingRecipe & Res
                                 Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter($$0x -> $$0x.getIngredients().get(0)),
                                 BuiltInRegistries.ITEM.byNameCodec().xmap(ItemStack::new, ItemStack::getItem).fieldOf("result")
                                         .forGetter($$0x -> $$0x.getResultItem(null)),
-                                // TODO Constants.Recipe.SPONGE_RESULT itemstack
                                 Codec.FLOAT.fieldOf("experience").orElse(0.0F).forGetter(AbstractCookingRecipe::getExperience),
                                 Codec.INT.fieldOf("cookingtime").orElse(defaultCookingTime).forGetter(AbstractCookingRecipe::getCookingTime),
+                                ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter(raw -> raw.getResultItem(null).hasTag() ? raw.getResultItem(null) : ItemStack.EMPTY),
                                 Codec.STRING.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION, null).forGetter(ResultFunctionRecipe::resultFunctionId)
                         )
                         .apply($$2, factory::create)
@@ -80,6 +80,10 @@ public class SpongeCookingRecipeSerializer<R extends AbstractCookingRecipe & Res
     }
 
     interface CookingRecipeFactory<T extends AbstractCookingRecipe> {
+        default T create(String group, CookingBookCategory category, Ingredient ingredient, ItemStack result, float experience, int cookingTime,
+                ItemStack spongeResult, final String resultFunctionId) {
+            return this.create(group, category, ingredient, spongeResult.isEmpty() ? result : spongeResult, experience, cookingTime, resultFunctionId);
+        }
 
         T create(String group, CookingBookCategory category, Ingredient ingredient, ItemStack result, float experience, int cookingTime,
                 final String resultFunctionId);

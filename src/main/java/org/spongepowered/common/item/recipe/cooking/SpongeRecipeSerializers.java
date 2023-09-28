@@ -27,31 +27,30 @@ package org.spongepowered.common.item.recipe.cooking;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.BlastingRecipe;
-import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
-import net.minecraft.world.item.crafting.SmeltingRecipe;
-import net.minecraft.world.item.crafting.SmokingRecipe;
 import org.spongepowered.common.item.recipe.crafting.custom.SpongeSpecialCraftingRecipeRegistration;
+import org.spongepowered.common.item.recipe.crafting.custom.SpongeSpecialCraftingRecipeSerializer;
+import org.spongepowered.common.item.recipe.crafting.custom.SpongeSpecialRecipe;
 import org.spongepowered.common.item.recipe.crafting.shaped.SpongeShapedCraftingRecipeSerializer;
 import org.spongepowered.common.item.recipe.crafting.shapeless.SpongeShapelessCraftingRecipeSerializer;
+import org.spongepowered.common.item.recipe.smithing.SpongeSmithingRecipe;
 import org.spongepowered.common.item.recipe.smithing.SpongeSmithingRecipeSerializer;
+import org.spongepowered.common.item.recipe.stonecutting.SpongeStonecuttingRecipe;
 import org.spongepowered.common.item.recipe.stonecutting.SpongeStonecuttingRecipeSerializer;
 
 public interface SpongeRecipeSerializers {
 
-    SpongeCookingRecipeSerializer<BlastingRecipe> SPONGE_BLASTING = register("blasting", new SpongeCookingRecipeSerializer<>(SpongeBlastingRecipe::new, 100));
-    SpongeCookingRecipeSerializer<CampfireCookingRecipe> SPONGE_CAMPFIRE_COOKING = register("campfire_cooking", new SpongeCookingRecipeSerializer<>(SpongeCampfireCookingRecipe::new, 100));
-    SpongeCookingRecipeSerializer<SmeltingRecipe> SPONGE_SMELTING = register("smelting", new SpongeCookingRecipeSerializer<>(SpongeFurnaceRecipe::new, 200));
+    SpongeCookingRecipeSerializer<SpongeBlastingRecipe> SPONGE_BLASTING = register("blasting", new SpongeCookingRecipeSerializer<>(SpongeBlastingRecipe::new, 100));
+    SpongeCookingRecipeSerializer<SpongeCampfireCookingRecipe> SPONGE_CAMPFIRE_COOKING = register("campfire_cooking", new SpongeCookingRecipeSerializer<>(SpongeCampfireCookingRecipe::new, 100));
+    SpongeCookingRecipeSerializer<SpongeFurnaceRecipe> SPONGE_SMELTING = register("smelting", new SpongeCookingRecipeSerializer<>(SpongeFurnaceRecipe::new, 200));
     RecipeSerializer<?> SPONGE_CRAFTING_SHAPED = register("crafting_shaped", new SpongeShapedCraftingRecipeSerializer());
     RecipeSerializer<?> SPONGE_CRAFTING_SHAPELESS = register("crafting_shapeless", new SpongeShapelessCraftingRecipeSerializer());
-    RecipeSerializer<?> SPONGE_SMITHING = register("smithing", new SpongeSmithingRecipeSerializer<>());
-    RecipeSerializer<?> SPONGE_STONECUTTING = register("stonecutting", new SpongeStonecuttingRecipeSerializer<>());
-    SpongeCookingRecipeSerializer<SmokingRecipe> SPONGE_SMOKING = register("smoking", new SpongeCookingRecipeSerializer<>(SpongeSmokingRecipe::new, 100));
+    RecipeSerializer<?> SPONGE_SMITHING = register("smithing", new SpongeSmithingRecipeSerializer<>(SpongeSmithingRecipe::new));
+    RecipeSerializer<?> SPONGE_STONECUTTING = register("stonecutting", new SpongeStonecuttingRecipeSerializer<>(SpongeStonecuttingRecipe::new));
+    SpongeCookingRecipeSerializer<SpongeSmokingRecipe> SPONGE_SMOKING = register("smoking", new SpongeCookingRecipeSerializer<>(SpongeSmokingRecipe::new, 100));
 
-    SimpleCraftingRecipeSerializer<?> SPONGE_SPECIAL = register("special", new SimpleCraftingRecipeSerializer<>(SpongeSpecialCraftingRecipeRegistration::get));
+    SpongeSpecialCraftingRecipeSerializer<SpongeSpecialRecipe> SPONGE_SPECIAL = register("special", new SpongeSpecialCraftingRecipeSerializer<>(SpongeSpecialCraftingRecipeRegistration::get));
 
     static <S extends RecipeSerializer<T>, T extends Recipe<?>> S register(final String spongeName, final S recipeSerializer) {
         return (S)(Registry.<RecipeSerializer<?>>register(BuiltInRegistries.RECIPE_SERIALIZER, new ResourceLocation("sponge", spongeName).toString(), recipeSerializer));

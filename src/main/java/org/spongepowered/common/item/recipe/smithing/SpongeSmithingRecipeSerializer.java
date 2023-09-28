@@ -24,37 +24,43 @@
  */
 package org.spongepowered.common.item.recipe.smithing;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingRecipeCodecs;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
+import org.spongepowered.common.bridge.world.item.crafting.SmithingRecipeBridge;
+import org.spongepowered.common.item.recipe.cooking.ResultFunctionRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
-import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.util.Constants;
 
-import java.util.function.Function;
+public class SpongeSmithingRecipeSerializer<R extends SpongeSmithingRecipe> implements RecipeSerializer<R> {
 
-public class SpongeSmithingRecipeSerializer<R extends SmithingTransformRecipe> implements RecipeSerializer<R> {
 
-    @SuppressWarnings("unchecked")
+    private final Codec<R> codec;
+
+    public SpongeSmithingRecipeSerializer(SmithingItemMaker<R> factory) {
+        this.codec = RecordCodecBuilder.create(
+                $$0 -> $$0.group(
+                                Ingredient.CODEC.fieldOf("template").forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$template()),
+                                Ingredient.CODEC.fieldOf("base").forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$base()),
+                                Ingredient.CODEC.fieldOf("addition").forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$addition()),
+                                CraftingRecipeCodecs.ITEMSTACK_OBJECT_CODEC.fieldOf("result").forGetter($$0x -> $$0x.getResultItem(null)),
+                                ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter(raw -> raw.getResultItem(null).hasTag() ? raw.getResultItem(null) : ItemStack.EMPTY),
+                                IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION, null)
+                                        .forGetter(ResultFunctionRecipe::resultFunctionId)
+
+                        )
+                        .apply($$0, factory::create)
+        );
+    }
+
     @Override
-    public R fromJson(final ResourceLocation recipeId, final JsonObject json) {
-        final Ingredient template = IngredientUtil.spongeDeserialize(json.get(Constants.Recipe.SMITHING_TEMPLATE_INGREDIENT));
-        final Ingredient base = IngredientUtil.spongeDeserialize(json.get(Constants.Recipe.SMITHING_BASE_INGREDIENT));
-        final Ingredient addition = IngredientUtil.spongeDeserialize(json.get(Constants.Recipe.SMITHING_ADDITION_INGREDIENT));
-
-        final Function<Container, ItemStack> resultFunction = IngredientResultUtil.deserializeResultFunction(json);
-
-        final ItemStack itemstack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, Constants.Recipe.RESULT));
-        final ItemStack spongeStack = IngredientResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
-
-        return (R) new SpongeSmithingRecipe(recipeId, template, base, addition, spongeStack == null ? itemstack : spongeStack, resultFunction);
+    public Codec<R> codec() {
+        return this.codec;
     }
 
     @Override
@@ -65,5 +71,12 @@ public class SpongeSmithingRecipeSerializer<R extends SmithingTransformRecipe> i
     @Override
     public void toNetwork(final FriendlyByteBuf buffer, final R recipe) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
+    }
+
+    public interface SmithingItemMaker<T extends SmithingTransformRecipe> {
+        default T create(Ingredient template, Ingredient base, Ingredient addition, ItemStack resultIn, ItemStack spongeResult, String resultFunctionId) {
+            return this.create(template, base, addition, spongeResult.isEmpty() ? resultIn : spongeResult, resultFunctionId);
+        }
+        T create(Ingredient template, Ingredient base, Ingredient addition, ItemStack resultIn, String resultFunctionId);
     }
 }

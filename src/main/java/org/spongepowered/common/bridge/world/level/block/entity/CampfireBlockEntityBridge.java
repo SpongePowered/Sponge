@@ -25,8 +25,9 @@
 package org.spongepowered.common.bridge.world.level.block.entity;
 
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 public interface CampfireBlockEntityBridge {
 
-    void bridge$placeRecipe(CampfireCookingRecipe recipe);
+    void bridge$placeRecipe(RecipeHolder<CampfireCookingRecipe> recipe);
 }

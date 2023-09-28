@@ -24,43 +24,48 @@
  */
 package org.spongepowered.common.item.recipe.stonecutting;
 
-import com.google.gson.JsonObject;
-import net.minecraft.core.Registry;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.Item;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SingleItemRecipe;
+import org.spongepowered.common.item.recipe.cooking.ResultFunctionRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
-import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.util.Constants;
 
-import java.util.function.Function;
+public class SpongeStonecuttingRecipeSerializer<R extends SingleItemRecipe & ResultFunctionRecipe> implements RecipeSerializer<R> {
 
-public class SpongeStonecuttingRecipeSerializer<R extends SingleItemRecipe> implements RecipeSerializer<R> {
+    private static final MapCodec<ItemStack> RESULT_CODEC = RecordCodecBuilder.mapCodec(
+            $$0 -> $$0.group(
+                            BuiltInRegistries.ITEM.byNameCodec().fieldOf("result").forGetter(ItemStack::getItem),
+                            Codec.INT.fieldOf("count").forGetter(ItemStack::getCount)
+                    )
+                    .apply($$0, ItemStack::new)
+    );
 
-    @SuppressWarnings("unchecked")
+    private final Codec<R> codec;
+
+    public SpongeStonecuttingRecipeSerializer(SingleItemMaker<R> factory) {
+        this.codec = RecordCodecBuilder.create(
+                $$1 -> $$1.group(
+                                ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(SingleItemRecipe::getGroup),
+                                Ingredient.CODEC_NONEMPTY.fieldOf("ingredient").forGetter($$0x -> $$0x.getIngredients().get(0)),
+                                RESULT_CODEC.forGetter($$0x -> $$0x.getResultItem(null)),
+                                ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter(raw -> raw.getResultItem(null).hasTag() ? raw.getResultItem(null) : ItemStack.EMPTY),
+                                IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION, null).forGetter(ResultFunctionRecipe::resultFunctionId)
+                        )
+                        .apply($$1, factory::create)
+        );
+    }
+
     @Override
-    public R fromJson(final ResourceLocation recipeId, final JsonObject json) {
-        final String group = GsonHelper.getAsString(json, Constants.Recipe.GROUP, "");
-        final Ingredient ingredient = IngredientUtil.spongeDeserialize(json.get(Constants.Recipe.STONECUTTING_INGREDIENT));
-
-        final Function<Container, ItemStack> resultFunction = IngredientResultUtil.deserializeResultFunction(json);
-        final ItemStack spongeStack = IngredientResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
-        if (spongeStack != null) {
-            return (R) new SpongeStonecuttingRecipe(recipeId, group, ingredient, spongeStack, resultFunction);
-        }
-
-        final String type = GsonHelper.getAsString(json, Constants.Recipe.RESULT);
-        final int count = GsonHelper.getAsInt(json, Constants.Recipe.COUNT);
-        final Registry<Item> itemRegistry = BuiltInRegistries.ITEM;
-        final ItemStack itemstack = new ItemStack(itemRegistry.get(new ResourceLocation(type)), count);
-        return (R) new SpongeStonecuttingRecipe(recipeId, group, ingredient, itemstack, resultFunction);
+    public Codec<R> codec() {
+        return this.codec;
     }
 
     @Override
@@ -71,5 +76,12 @@ public class SpongeStonecuttingRecipeSerializer<R extends SingleItemRecipe> impl
     @Override
     public void toNetwork(final FriendlyByteBuf buffer, final R recipe) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
+    }
+
+    public interface SingleItemMaker<T extends SingleItemRecipe> {
+        default T create(String group, Ingredient ingredient, ItemStack result, ItemStack spongeResult, String resultFunction) {
+            return this.create(group, ingredient, spongeResult.isEmpty() ? result : spongeResult, resultFunction);
+        }
+        T create(String group, Ingredient ingredient, ItemStack result, String resultFunction);
     }
 }

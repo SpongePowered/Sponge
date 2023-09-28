@@ -32,13 +32,11 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 
-import java.util.function.Function;
-
 public class SpongeSmokingRecipe extends SmokingRecipe implements ResultFunctionRecipe {
 
     private final String resultFunctionId;
 
-    public SpongeSmokingRecipe(final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction, final String resultFunctionId) {
+    public SpongeSmokingRecipe(final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final String resultFunctionId) {
         super(group, category, ingredient, result, experience, cookingTime);
         this.resultFunctionId = resultFunctionId;
     }

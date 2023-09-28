@@ -41,13 +41,7 @@ public abstract class ShapedRecipeMixin_API implements ShapedCraftingRecipe {
     @Shadow @Final private int width;
     @Shadow @Final private int height;
     @Shadow @Final private NonNullList<Ingredient> recipeItems;
-    @Shadow @Final private ResourceLocation id;
     // @formatter:on
-
-    @Override
-    public ResourceKey key() {
-        return (ResourceKey) (Object) this.id;
-    }
 
     @SuppressWarnings("ConstantConditions")
     @Override

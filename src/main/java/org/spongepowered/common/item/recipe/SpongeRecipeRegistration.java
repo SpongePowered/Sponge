@@ -148,6 +148,10 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
     }
 
     public static JsonObject encode(RecipeRegistration template, RegistryAccess access) {
-        return ((FinishedRecipe) template).serializeRecipe();
+        try {
+            return ((FinishedRecipe) template).serializeRecipe();
+        } catch (Exception e) {
+            throw new RuntimeException("Could not encode recipe" + template.key(), e);
+        }
     }
 }

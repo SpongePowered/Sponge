@@ -34,13 +34,13 @@ import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -68,7 +68,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         super(inventoryIn, index, xPosition, yPosition);
     }
 
-    @Nullable private CraftingRecipe impl$onTakeRecipe;
+    @Nullable private RecipeHolder<net.minecraft.world.item.crafting.CraftingRecipe> impl$onTakeRecipe;
     @Nullable private ItemStack impl$craftedStack;
     private int impl$craftedStackQuantity;
 
@@ -87,9 +87,9 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
 
     @Inject(method = "onTake", at = @At("HEAD"))
     private void impl$beforeTake(final Player thePlayer, final ItemStack stack, final CallbackInfo ci) {
-        if (this.impl$onTakeRecipe == null || !((Recipe) this.impl$onTakeRecipe).matches(this.craftSlots, thePlayer.level())) {
-            this.impl$onTakeRecipe = ((CraftingRecipe) thePlayer.level().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots,
-                    thePlayer.level()).orElse(null));
+        if (this.impl$onTakeRecipe == null || !this.impl$onTakeRecipe.value().matches(this.craftSlots, thePlayer.level())) {
+            final RecipeManager manager = thePlayer.level().getRecipeManager();
+            this.impl$onTakeRecipe = manager.getRecipeFor(RecipeType.CRAFTING, this.craftSlots, thePlayer.level()).orElse(null);
         }
 
         // When shift-crafting the crafted item was reduced to quantity 0

@@ -27,8 +27,10 @@ package org.spongepowered.common.event.tracking.context.transaction.inventory;
 import net.minecraft.network.protocol.game.ServerboundPlaceRecipePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
@@ -51,10 +53,10 @@ public class PlaceRecipeTransaction extends ContainerBasedTransaction {
     private final ServerPlayer player;
     private final ItemStackSnapshot originalCursor;
     private boolean shift;
-    private Recipe<?> recipe;
+    private RecipeHolder<Recipe<?>> recipe;
     private CraftingInventory craftingInventory;
 
-    public PlaceRecipeTransaction(final ServerPlayer player, final boolean shift, final Recipe<?> recipe, CraftingInventory craftingInventory) {
+    public PlaceRecipeTransaction(final ServerPlayer player, final boolean shift, final RecipeHolder<Recipe<?>> recipe, CraftingInventory craftingInventory) {
         super(player.containerMenu);
         this.player = player;
         this.originalCursor = ItemStackUtil.snapshotOf(player.containerMenu.getCarried());
@@ -74,10 +76,16 @@ public class PlaceRecipeTransaction extends ContainerBasedTransaction {
         ClickContainerEvent.Recipe event;
         if (this.shift) {
             event = SpongeEventFactory.createClickContainerEventRecipeAll(cause, (Container) this.menu,
-                    this.craftingInventory, cursorTransaction, preview, Optional.of((CraftingRecipe) this.recipe), Optional.empty(), slotTransactions);
+                    this.craftingInventory, cursorTransaction, preview,
+                    Optional.of(this.recipe).map(RecipeHolder::value).map(CraftingRecipe.class::cast),
+                    Optional.of(this.recipe).map(RecipeHolder::id).map(ResourceKey.class::cast),
+                    Optional.empty(), slotTransactions);
         } else {
             event = SpongeEventFactory.createClickContainerEventRecipeSingle(cause, (Container) this.menu,
-                    this.craftingInventory, cursorTransaction, preview, Optional.of((CraftingRecipe) this.recipe), Optional.empty(), slotTransactions);
+                    this.craftingInventory, cursorTransaction, preview,
+                    Optional.of(this.recipe).map(RecipeHolder::value).map(CraftingRecipe.class::cast),
+                    Optional.of(this.recipe).map(RecipeHolder::id).map(ResourceKey.class::cast),
+                    Optional.empty(), slotTransactions);
         }
         return Optional.of(event);
     }
