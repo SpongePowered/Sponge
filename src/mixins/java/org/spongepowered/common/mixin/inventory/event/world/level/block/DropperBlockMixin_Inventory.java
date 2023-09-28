@@ -25,14 +25,15 @@
 package org.spongepowered.common.mixin.inventory.event.world.level.block;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSourceImpl;
 import net.minecraft.core.Direction;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.DropperBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,8 +54,8 @@ public abstract class DropperBlockMixin_Inventory {
     @Inject(method = "dispenseFrom", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/entity/DispenserBlockEntity;setItem(ILnet/minecraft/world/item/ItemStack;)V"))
-    private void afterDispense(final ServerLevel worldIn, final BlockPos pos, final CallbackInfo callbackInfo,
-            final BlockSourceImpl proxyblocksource, final DispenserBlockEntity dispensertileentity, final int i, final ItemStack itemstack,
+    private void impl$afterDispense(final ServerLevel worldIn, final BlockState state, final BlockPos pos, final CallbackInfo callbackInfo,
+            final DispenserBlockEntity dispensertileentity, final BlockSource proxyblocksource, final int i, final ItemStack itemstack,
             final Direction direction, final Container iinventory, final ItemStack itemstack1) {
         // after setItem
         dispensertileentity.setItem(i, itemstack1);
@@ -74,8 +75,8 @@ public abstract class DropperBlockMixin_Inventory {
     }
 
     @Surrogate
-    private void afterDispense(final ServerLevel worldIn, final BlockPos pos, final CallbackInfo callbackInfo,
-            final BlockSourceImpl proxyblocksource, final DispenserBlockEntity dispensertileentity, final int i, final ItemStack itemstack,
+    private void afterDispense(final ServerLevel worldIn, final BlockState state, final BlockPos pos, final CallbackInfo callbackInfo,
+            final DispenserBlockEntity dispensertileentity, final BlockSource proxyblocksource, final int i, final ItemStack itemstack,
             final ItemStack itemstack1) {
         // after setItem
         dispensertileentity.setItem(i, itemstack1);
@@ -100,8 +101,8 @@ public abstract class DropperBlockMixin_Inventory {
     @Inject(method = "dispenseFrom", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;addItem(Lnet/minecraft/world/Container;Lnet/minecraft/world/Container;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/core/Direction;)Lnet/minecraft/world/item/ItemStack;"))
-    private void onDispense(final ServerLevel world, final BlockPos pos, final CallbackInfo ci,
-            final BlockSourceImpl proxyblocksource, final DispenserBlockEntity dispensertileentity, final int i, final ItemStack itemstack,
+    private void onDispense(final ServerLevel world, final BlockState state, final BlockPos pos, final CallbackInfo ci,
+            final DispenserBlockEntity dispensertileentity, final BlockSource proxyblocksource, final int i, final ItemStack itemstack,
             final Direction direction, final Container iinventory) {
         // Before putStackInInventoryAllSlots
         if (InventoryEventFactory.callTransferPre(((Inventory) dispensertileentity), ((Inventory) iinventory)).isCancelled()) {

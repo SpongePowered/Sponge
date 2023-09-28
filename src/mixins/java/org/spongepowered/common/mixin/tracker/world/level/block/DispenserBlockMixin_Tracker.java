@@ -26,12 +26,13 @@ package org.spongepowered.common.mixin.tracker.world.level.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSourceImpl;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -63,8 +64,7 @@ public abstract class DispenserBlockMixin_Tracker {
     private PhaseContext<?> tracker$context = PhaseContext.empty();
 
     @Inject(method = "dispenseFrom", at = @At(value = "HEAD"))
-    private void tracker$createContextOnDispensing(final ServerLevel worldIn, final BlockPos pos, final CallbackInfo ci) {
-        final net.minecraft.world.level.block.state.BlockState state = worldIn.getBlockState(pos);
+    private void tracker$createContextOnDispensing(final ServerLevel worldIn, final BlockState state, final BlockPos pos, final CallbackInfo ci) {
         final SpongeBlockSnapshot spongeBlockSnapshot = ((TrackedWorldBridge) worldIn).bridge$createSnapshot(state, pos, BlockChangeFlags.ALL);
         final LevelChunkBridge mixinChunk = (LevelChunkBridge) worldIn.getChunkAt(pos);
         this.tracker$context = BlockPhase.State.DISPENSE.createPhaseContext(PhaseTracker.SERVER)
@@ -76,7 +76,7 @@ public abstract class DispenserBlockMixin_Tracker {
 
 
     @Inject(method = "dispenseFrom", at = @At(value = "RETURN"))
-    private void tracker$closeContextOnDispensing(final ServerLevel worldIn, final BlockPos pos, final CallbackInfo ci) {
+    private void tracker$closeContextOnDispensing(final ServerLevel worldIn, final BlockState state, final BlockPos pos, final CallbackInfo ci) {
         this.tracker$context.close();
         this.tracker$context = PhaseContext.empty();
     }
@@ -84,7 +84,7 @@ public abstract class DispenserBlockMixin_Tracker {
     @Inject(method = "dispenseFrom",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/core/dispenser/DispenseItemBehavior;dispense(Lnet/minecraft/core/BlockSource;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;"
+                    target = "Lnet/minecraft/core/dispenser/DispenseItemBehavior;dispense(Lnet/minecraft/core/dispenser/BlockSource;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;"
             ),
             slice = @Slice(
                     from = @At(value = "FIELD",
@@ -93,7 +93,8 @@ public abstract class DispenserBlockMixin_Tracker {
             ),
             locals = LocalCapture.CAPTURE_FAILSOFT
     )
-    private void tracker$storeOriginalItem(final ServerLevel worldIn, final BlockPos pos, final CallbackInfo ci, final BlockSourceImpl source, final DispenserBlockEntity dispenser, final int slotIndex, final ItemStack dispensedItem, final DispenseItemBehavior behavior) {
+    private void tracker$storeOriginalItem(final ServerLevel worldIn,  final BlockState state, final BlockPos pos, final CallbackInfo ci,
+            final DispenserBlockEntity dispenser, final BlockSource source, final int slotIndex, final ItemStack dispensedItem, final DispenseItemBehavior behavior) {
         final ItemStack tracker$originalItem = ItemStackUtil.cloneDefensiveNative(dispensedItem);
         this.tracker$originalItem = () -> tracker$originalItem;
     }

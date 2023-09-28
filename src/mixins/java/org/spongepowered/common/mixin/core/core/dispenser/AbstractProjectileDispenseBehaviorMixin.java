@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.core.dispenser;
 
-import net.minecraft.core.BlockSource;
 import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
@@ -44,7 +44,7 @@ public abstract class AbstractProjectileDispenseBehaviorMixin extends DefaultDis
     @Redirect(method = "execute", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"))
     private boolean impl$spawnEntityAndSetShooter(final Level world, final Entity entity, final BlockSource source, final ItemStack stack) {
-        final BlockEntity tileEntity = source.getEntity();
+        final BlockEntity tileEntity = source.blockEntity();
         if (entity instanceof Projectile && tileEntity instanceof ProjectileSource) {
             ((Projectile) entity).offer(Keys.SHOOTER, (ProjectileSource) tileEntity);
         }
