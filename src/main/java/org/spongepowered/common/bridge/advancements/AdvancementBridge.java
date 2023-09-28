@@ -35,11 +35,8 @@ import java.util.Optional;
 
 public interface AdvancementBridge {
 
-    Optional<Advancement> bridge$getParent();
 
-    void bridge$setParent(@Nullable Advancement advancement);
-
-    AdvancementCriterion bridge$getCriterion();
+     AdvancementCriterion bridge$getCriterion();
 
     void bridge$setCriterion(AdvancementCriterion criterion);
 

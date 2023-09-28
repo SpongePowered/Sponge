@@ -32,6 +32,7 @@ import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.resources.ResourceLocation;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
@@ -66,8 +67,8 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<org.spongepowered.api.advancement.Advancement> parent() {
-        return (Optional<org.spongepowered.api.advancement.Advancement>) (Optional<?>) ((AdvancementBridge) this).bridge$getParent();
+    public Optional<ResourceKey> parent() {
+        return this.parent.map(ResourceKey.class::cast);
     }
 
     @Override

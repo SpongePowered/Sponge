@@ -36,6 +36,7 @@ import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -68,8 +69,8 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
+import org.spongepowered.api.advancement.AdvancementTemplate;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
@@ -100,6 +101,7 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
 import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
+import org.spongepowered.common.advancement.SpongeAdvancementTemplate;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
@@ -340,8 +342,10 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public AdvancementProgress progress(final Advancement advancement) {
-        return (AdvancementProgress) this.advancements.getOrStartProgress((net.minecraft.advancements.Advancement) Objects.requireNonNull(advancement, "advancement"));
+    public AdvancementProgress progress(final AdvancementTemplate advancement) {
+        Objects.requireNonNull(advancement, "advancement");
+        final AdvancementHolder holder = new AdvancementHolder((ResourceLocation) (Object) advancement.key(), (Advancement) (Object) advancement.advancement());
+        return (AdvancementProgress) this.advancements.getOrStartProgress(holder);
     }
 
     @Override

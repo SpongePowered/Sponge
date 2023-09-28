@@ -26,7 +26,9 @@ package org.spongepowered.common.advancement.criterion;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -85,16 +87,17 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
         final CriterionEvent.Score.Change event;
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final Advancement advancement = this.progress.advancement();
+        final ResourceKey advancementKey = (ResourceKey) (Object) ((AdvancementProgressBridge) this.progress).bridge$getAdvancementKey();
         final ServerPlayer player = ((PlayerAdvancementsBridge) ((AdvancementProgressBridge) this.progress).bridge$getPlayerAdvancements()).bridge$getPlayer();
         if (lastScore == this.goal()) {
             event = SpongeEventFactory.createCriterionEventScoreRevoke(
-                    cause, advancement, this.criterion(), player, lastScore, score);
+                    cause, advancement, advancementKey, this.criterion(), player, lastScore, score);
         } else if (score == this.goal()) {
             event = SpongeEventFactory.createCriterionEventScoreGrant(
-                    cause, advancement, this.criterion(), player, Instant.now(), lastScore, score);
+                    cause, advancement, advancementKey, this.criterion(), player, Instant.now(), lastScore, score);
         } else {
             event = SpongeEventFactory.createCriterionEventScoreChange(
-                    cause, advancement, this.criterion(), player, lastScore, score);
+                    cause, advancement, advancementKey, this.criterion(), player, lastScore, score);
         }
         if (SpongeCommon.post(event)) {
             return this.get();

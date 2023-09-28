@@ -90,8 +90,7 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
     @Override
     public ScoreCriterionProgress require(final ScoreAdvancementCriterion criterion) {
         Objects.requireNonNull(criterion, "criterion");
-
         return this.get(criterion).orElseThrow(() -> new IllegalStateException("The score criterion " + criterion.name()
-                + " isn't present on the advancement '" + this.advancement().key().toString() + "'."));
+                + " isn't present on this advancement"));
     }
 }

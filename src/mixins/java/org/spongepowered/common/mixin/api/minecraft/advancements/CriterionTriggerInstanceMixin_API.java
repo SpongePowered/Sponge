@@ -24,30 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.advancements;
 
-import com.google.common.base.Preconditions;
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
-import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.advancement.UnknownFilteredTriggerConfiguration;
 
 @SuppressWarnings("rawtypes")
 @Mixin(CriterionTriggerInstance.class)
 public interface CriterionTriggerInstanceMixin_API extends FilteredTrigger {
-
-    @Shadow ResourceLocation shadow$getCriterion();
-
-    @Override
-    default Trigger type() {
-        final CriterionTrigger triggerType = CriteriaTriggers.getCriterion(this.shadow$getCriterion());
-        Preconditions.checkNotNull(triggerType, "triggerType");
-        return (Trigger) triggerType;
-    }
 
     @Override
     default FilteredTriggerConfiguration configuration() {

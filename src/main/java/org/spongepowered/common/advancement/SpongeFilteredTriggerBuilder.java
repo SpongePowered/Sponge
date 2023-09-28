@@ -29,46 +29,34 @@ import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
-import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 
 @SuppressWarnings("unchecked")
 public class SpongeFilteredTriggerBuilder<C extends FilteredTriggerConfiguration> implements FilteredTrigger.Builder<C> {
 
     private C config;
-    private Trigger<C> type;
 
     @Override
-    public <T extends FilteredTriggerConfiguration> FilteredTrigger.Builder<T> type(final Trigger<T> type) {
-        checkNotNull(type, "type");
-        this.type = (Trigger<C>) type;
+    public <T extends FilteredTriggerConfiguration> FilteredTrigger.Builder<T> config(final T config) {
+        checkNotNull(config, "config");
+        this.config = (C) config;
         return (FilteredTrigger.Builder<T>) this;
     }
 
     @Override
-    public FilteredTrigger.Builder<C> config(final C config) {
-        checkNotNull(config, "config");
-        this.config = config;
-        return this;
-    }
-
-    @Override
     public FilteredTrigger<C> build() {
-        checkState(this.type != null, "The type must be set");
         checkState(this.config != null, "The config must be set");
-        return new SpongeFilteredTrigger((SpongeCriterionTrigger) this.type, this.config);
+        return new SpongeFilteredTrigger(this.config);
     }
 
     @Override
     public FilteredTrigger.Builder<C> from(final FilteredTrigger<C> value) {
         this.config = value.configuration();
-        this.type = value.type();
         return this;
     }
 
     @Override
     public FilteredTrigger.Builder<C> reset() {
         this.config = null;
-        this.type = null;
         return this;
     }
 }

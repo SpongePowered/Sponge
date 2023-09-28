@@ -29,10 +29,13 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.players.PlayerList;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -68,21 +71,23 @@ import javax.annotation.Nullable;
 public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {
 
     // @formatter:off
-    @Shadow @Final private Map<Advancement, AdvancementProgress> progress;
+    @Shadow @Final private Map<AdvancementHolder, AdvancementProgress> progress;
     @Shadow private net.minecraft.server.level.ServerPlayer player;
+    @Shadow private net.minecraft.advancements.AdvancementTree tree;
+    
     // @formatter:on
 
     private boolean impl$wasSuccess;
     @Nullable private Component impl$message;
 
     @Inject(method = "startProgress", at = @At("HEAD"))
-    private void impl$setAdvancementsOnStart(final Advancement advancement, final AdvancementProgress progress, final CallbackInfo ci) {
+    private void impl$setAdvancementsOnStart(final AdvancementHolder advancement, final AdvancementProgress progress, final CallbackInfo ci) {
         final AdvancementProgressBridge advancementProgress = (AdvancementProgressBridge) progress;
-        advancementProgress.bridge$setAdvancementId(advancement.getId());
+        advancementProgress.bridge$setAdvancementId(advancement.id());
         advancementProgress.bridge$setPlayerAdvancements((PlayerAdvancements) (Object) this);
     }
 
-    @Redirect(method = "registerListeners(Lnet/minecraft/advancements/Advancement;)V",
+    @Redirect(method = "registerListeners(Lnet/minecraft/advancements/AdvancementHolder;)V",
             at = @At(
                     value = "INVOKE",
                     ordinal = 0,
@@ -116,9 +121,8 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
             return advancementProgress.getCriterion(criterion);
         }
 
-        final org.spongepowered.api.advancement.Advancement advancement =
-                ((org.spongepowered.api.advancement.AdvancementProgress) advancementProgress).advancement();
-        final AdvancementCriterion advancementCriterion = (AdvancementCriterion) ((Advancement) advancement).getCriteria().get(criterion);
+        final org.spongepowered.api.advancement.Advancement advancement = ((org.spongepowered.api.advancement.AdvancementProgress) advancementProgress).advancement();
+        final AdvancementCriterion advancementCriterion = (AdvancementCriterion) (Object) ((Advancement) (Object) advancement).criteria().get(criterion);
         final CriterionBridge criterionBridge = (CriterionBridge) advancementCriterion;
         // Only remove the trigger once the goal is reached
         if (criterionBridge.bridge$getScoreCriterion() != null && !((org.spongepowered.api.advancement.AdvancementProgress) advancementProgress)
@@ -131,10 +135,13 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
     @Override
     public Set<AdvancementTree> bridge$getAdvancementTrees() {
         final ImmutableSet.Builder<AdvancementTree> builder = ImmutableSet.builder();
-        for (final Map.Entry<Advancement, AdvancementProgress> entry : this.progress.entrySet()) {
-            final org.spongepowered.api.advancement.Advancement advancement = (org.spongepowered.api.advancement.Advancement) entry.getKey();
+        for (final Map.Entry<AdvancementHolder, AdvancementProgress> entry : this.progress.entrySet()) {
+            final org.spongepowered.api.advancement.Advancement advancement = (org.spongepowered.api.advancement.Advancement) (Object) entry.getKey().value();
             if (!advancement.parent().isPresent()) {
-                advancement.tree().ifPresent(builder::add);
+                final AdvancementNode node = this.tree.get(entry.getKey());
+                if (node != null) {
+                    builder.add((AdvancementTree) node.root());
+                }
             }
         }
         return builder.build();
@@ -152,7 +159,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
         }
     }
 
-    @Redirect(method = "award",
+    @Redirect(method = "lambda$award$2",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V"))
@@ -165,15 +172,15 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/advancements/AdvancementRewards;grant(Lnet/minecraft/server/level/ServerPlayer;)V"))
-    private void impl$setWasSuccessonGrant(final Advancement advancement, final String string, final CallbackInfoReturnable<Boolean> ci) {
+    private void impl$setWasSuccessonGrant(final AdvancementHolder advancement, final String string, final CallbackInfoReturnable<Boolean> ci) {
         this.impl$wasSuccess = true;
     }
 
     @Inject(method = "award",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/server/PlayerAdvancements;markForVisibilityUpdate(Lnet/minecraft/advancements/Advancement;)V"))
-    private void impl$callGrantEventIfSuccessful(final Advancement advancement, final String string, final CallbackInfoReturnable<Boolean> ci) {
+                    target = "Lnet/minecraft/server/PlayerAdvancements;markForVisibilityUpdate(Lnet/minecraft/advancements/AdvancementHolder;)V"))
+    private void impl$callGrantEventIfSuccessful(final AdvancementHolder advancement, final String string, final CallbackInfoReturnable<Boolean> ci) {
         if (!this.impl$wasSuccess) {
             return;
         }
@@ -193,7 +200,8 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
                 Optional.of(channel),
                 this.impl$message == null ? Component.empty() : this.impl$message,
                 this.impl$message == null ? Component.empty() : this.impl$message,
-                (org.spongepowered.api.advancement.Advancement) advancement,
+                (org.spongepowered.api.advancement.Advancement) (Object) advancement.value(),
+                (ResourceKey) (Object) advancement.id(),
                 (ServerPlayer) this.player, instant, false
 
         );
@@ -208,11 +216,11 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
 
     @Inject(method = "revoke", locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "INVOKE",
-                     target = "Lnet/minecraft/server/PlayerAdvancements;markForVisibilityUpdate(Lnet/minecraft/advancements/Advancement;)V"))
-    private void impl$callRevokeEventIfSuccessful(final Advancement advancement, final String string, final CallbackInfoReturnable<Boolean> ci, boolean var0) {
+                     target = "Lnet/minecraft/server/PlayerAdvancements;markForVisibilityUpdate(Lnet/minecraft/advancements/AdvancementHolder;)V"))
+    private void impl$callRevokeEventIfSuccessful(final AdvancementHolder advancement, final String string, final CallbackInfoReturnable<Boolean> ci, boolean var0) {
         if (var0) {
             final Cause currentCause = Sponge.server().causeStackManager().currentCause();
-            SpongeCommon.post(SpongeEventFactory.createAdvancementEventRevoke(currentCause, (org.spongepowered.api.advancement.Advancement) advancement, (ServerPlayer) this.player));
+            SpongeCommon.post(SpongeEventFactory.createAdvancementEventRevoke(currentCause, (org.spongepowered.api.advancement.Advancement) (Object) advancement.value(), (ResourceKey) (Object) advancement.id(), (ServerPlayer) this.player));
         }
     }
 

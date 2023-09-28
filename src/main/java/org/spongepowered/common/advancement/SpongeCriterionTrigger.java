@@ -30,19 +30,19 @@ import com.google.gson.JsonObject;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.critereon.DeserializationContext;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.advancements.CriterionTrigger_ListenerAccessor;
 import org.spongepowered.common.bridge.advancements.CriterionTriggerBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
@@ -91,7 +91,7 @@ public class SpongeCriterionTrigger implements CriterionTrigger<SpongeFilteredTr
 
     @Override
     public SpongeFilteredTrigger createInstance(final JsonObject json, final DeserializationContext arrayParser) {
-        return new SpongeFilteredTrigger(this, this.constructor.apply(json));
+        return new SpongeFilteredTrigger(this.constructor.apply(json));
     }
 
     @Override
@@ -102,11 +102,11 @@ public class SpongeCriterionTrigger implements CriterionTrigger<SpongeFilteredTr
         @SuppressWarnings("unchecked") // correct type verified in builder
         final TypeToken<FilteredTriggerConfiguration> typeToken = (TypeToken<FilteredTriggerConfiguration>) TypeToken.get(this.triggerConfigurationType);
         for (final Listener listener : new ArrayList<>(this.listeners.get(playerAdvancements))) {
-            final CriterionTrigger_ListenerAccessor mixinListener = (CriterionTrigger_ListenerAccessor) (Object) listener;
-            final var advancement = mixinListener.accessor$advancement().value();
-            final AdvancementCriterion advancementCriterion = (AdvancementCriterion) (Object) advancement.criteria().get(mixinListener.accessor$criterion());
-            final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause, (Advancement) (Object) advancement, advancementCriterion,
-                typeToken, player, (FilteredTrigger) listener.trigger(), this.eventHandler == null);
+            final var advancement = listener.advancement().value();
+            final var advancementKey = (ResourceKey) (Object) listener.advancement().id();
+            final AdvancementCriterion advancementCriterion = (AdvancementCriterion) (Object) advancement.criteria().get(listener.criterion());
+            final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause, (Advancement) (Object) advancement, advancementKey, advancementCriterion,
+                typeToken, player, (FilteredTrigger) listener.trigger(), (Trigger<FilteredTriggerConfiguration>) advancementCriterion.type().get(), this.eventHandler == null);
             if (this.eventHandler != null) {
                 this.eventHandler.accept(event);
                 if (!event.result()) {

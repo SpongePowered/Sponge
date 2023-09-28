@@ -46,15 +46,21 @@ public class SpongeScoreCriterion implements ScoreAdvancementCriterion, Defaulte
     public final List<DefaultedAdvancementCriterion> internalCriteria;
 
     @SuppressWarnings("ConstantConditions")
-    public SpongeScoreCriterion(final String name, final int goal, final CriterionTrigger type, final @Nullable CriterionTriggerInstance trigger) {
+    public SpongeScoreCriterion(final String name, final int goal, CriterionTrigger type, final @Nullable CriterionTriggerInstance trigger) {
         this.internalCriteria = new ArrayList<>(goal);
         this.name = name;
         for (int i = 0; i < goal; i++) {
             final CriterionTriggerInstance mctrigger;
             if (i == 0) {
-                mctrigger = trigger == null ? SpongeScoreTrigger.Instance.of(goal) : trigger;
+                if (trigger == null) {
+                    mctrigger = SpongeScoreTrigger.Instance.of(goal);
+                    type = SpongeDummyTrigger.DUMMY_TRIGGER;
+                } else {
+                    mctrigger = trigger;
+                }
             } else {
                 mctrigger = SpongeDummyTrigger.Instance.dummy();
+                type = SpongeDummyTrigger.DUMMY_TRIGGER;
             }
 
             final var criterion = new Criterion<>(type, mctrigger);
@@ -83,6 +89,11 @@ public class SpongeScoreCriterion implements ScoreAdvancementCriterion, Defaulte
     public Optional<FilteredTrigger<?>> trigger() {
         // The first internal criterion holds the trigger
         return this.internalCriteria.get(0).trigger();
+    }
+
+    @Override
+    public Optional<Trigger<?>> type() {
+        return this.internalCriteria.get(0).type();
     }
 
     @Override

@@ -45,7 +45,7 @@ import java.util.UUID;
 public abstract class CriterionMixin implements CriterionBridge {
 
     // @formatter:off
-    @Shadow @Final private CriterionTriggerInstance trigger;
+    @Shadow @Final private CriterionTriggerInstance triggerInstance;
     // @formatter:on
 
     @Nullable private String impl$name;
@@ -53,22 +53,22 @@ public abstract class CriterionMixin implements CriterionBridge {
     @Nullable private Integer impl$scoreGoal;
     @Nullable private String impl$scoreCriterionName;
 
-    @Inject(method = "criterionFromJson", at = @At("RETURN"))
+    @Inject(method = "criterionFromJson(Lcom/google/gson/JsonObject;Lnet/minecraft/advancements/critereon/DeserializationContext;)Lnet/minecraft/advancements/Criterion;", at = @At("RETURN"))
     private static void impl$fixTriggerTimeDeserializer(final JsonObject json, final DeserializationContext p_232633_1_,
-            final CallbackInfoReturnable<Criterion> ci) {
-        final Criterion criterion = ci.getReturnValue();
+            final CallbackInfoReturnable<Criterion<?>> ci) {
+        final Criterion<?> criterion = ci.getReturnValue();
         if (json.has("trigger_times")) {
-            ((CriterionBridge) criterion).bridge$setScoreGoal(json.get("trigger_times").getAsInt());
+            ((CriterionBridge) (Object) criterion).bridge$setScoreGoal(json.get("trigger_times").getAsInt());
         }
         if (json.has("criterion")) {
-            ((CriterionBridge) criterion).bridge$setScoreCriterionName(json.get("criterion").getAsString());
+            ((CriterionBridge) (Object) criterion).bridge$setScoreCriterionName(json.get("criterion").getAsString());
         }
     }
 
     @Inject(method = "serializeToJson", at = @At("RETURN"))
     private void impl$serializeTriggerTimes(CallbackInfoReturnable<JsonObject> cir) {
-        if (this.trigger instanceof SpongeScoreTrigger.Instance) {
-            cir.getReturnValue().addProperty("trigger_times", ((SpongeScoreTrigger.Instance) this.trigger).getTriggerTimes());
+        if (this.triggerInstance instanceof SpongeScoreTrigger.Instance) {
+            cir.getReturnValue().addProperty("trigger_times", ((SpongeScoreTrigger.Instance) this.triggerInstance).getTriggerTimes());
         }
         if (this.impl$scoreCriterion != null) {
             cir.getReturnValue().addProperty("criterion", this.impl$scoreCriterion.name());

@@ -37,13 +37,13 @@ public class SpongeCriterionBuilder extends AbstractCriterionBuilder<Advancement
     @Override
     AdvancementCriterion build0() {
         CriterionTriggerInstance trigger = (CriterionTriggerInstance) this.trigger;
+        CriterionTrigger type = (CriterionTrigger) this.type;
         if (this.trigger == null) {
             trigger = SpongeDummyTrigger.Instance.dummy();
+            type = SpongeDummyTrigger.DUMMY_TRIGGER;
         }
 
-
-
-        final Criterion<?> criterion = new Criterion<>((CriterionTrigger) this.trigger.type(), trigger);
+        final Criterion<?> criterion = new Criterion<>(type, trigger);
         ((CriterionBridge) (Object) criterion).bridge$setName(this.name);
         return (AdvancementCriterion) (Object) criterion;
     }

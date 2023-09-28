@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.advancements;
 import net.minecraft.advancements.AdvancementNode;
 import net.minecraft.advancements.TreeNodePosition;
 import org.spongepowered.api.advancement.AdvancementTree;
-import org.spongepowered.api.advancement.TreeLayout;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.AdvancementTreeEvent;
@@ -36,7 +35,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.advancement.SpongeTreeLayout;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(TreeNodePosition.class)
@@ -44,10 +42,8 @@ public abstract class TreeNodePositionMixin {
 
     @Inject(method = "run", at = @At("RETURN"))
     private static void impl$onLayout(AdvancementNode node, CallbackInfo ci) {
-        final AdvancementTree advancementTree = (AdvancementTree) node;
-        final TreeLayout layout = new SpongeTreeLayout(advancementTree);
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-        final AdvancementTreeEvent.GenerateLayout event = SpongeEventFactory.createAdvancementTreeEventGenerateLayout(cause, layout, advancementTree);
+        final AdvancementTreeEvent.GenerateLayout event = SpongeEventFactory.createAdvancementTreeEventGenerateLayout(cause, (AdvancementTree) node);
         SpongeCommon.post(event);
     }
 }

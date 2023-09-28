@@ -25,15 +25,19 @@
 package org.spongepowered.common.mixin.core.advancements;
 
 import io.leangen.geantyref.TypeToken;
-import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.server.PlayerAdvancements;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.ScoreCriterionProgress;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -47,6 +51,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.advancement.SpongeCriterionTrigger;
 import org.spongepowered.common.advancement.SpongeFilteredTrigger;
+import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -64,26 +69,28 @@ public abstract class CriterionTrigger_ListenerMixin {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "run", at = @At("HEAD"), cancellable = true)
     private void impl$callEvents(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
-        final org.spongepowered.api.advancement.Advancement advancement =
-                (org.spongepowered.api.advancement.Advancement) (Object) this.advancement.value();
+        final org.spongepowered.api.advancement.Advancement advancement = (org.spongepowered.api.advancement.Advancement) (Object) this.advancement.value();
         AdvancementCriterion advancementCriterion = (AdvancementCriterion) (Object) this.advancement.value().criteria().get(this.criterion);
         final CriterionBridge criterionBridge = (CriterionBridge) advancementCriterion;
         if (criterionBridge.bridge$getScoreCriterion() != null) {
             advancementCriterion = criterionBridge.bridge$getScoreCriterion();
         }
+
+
         if (!PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) {
             // Some mods do advancement granting on async threads, and we can't allow for the spam to be thrown.
             return;
         }
         // Sponge filters are always handled in the trigger method
+        final ServerPlayer player = ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer();
         if (!(this.trigger instanceof SpongeFilteredTrigger)) {
             final FilteredTrigger<FilteredTriggerConfiguration> filteredTrigger = (FilteredTrigger) this.trigger;
-            if (filteredTrigger.type() instanceof SpongeCriterionTrigger) {
+            final Trigger<?> triggerType = advancementCriterion.type().orElse(null);
+            if (triggerType instanceof SpongeCriterionTrigger) {
                 final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-                final ServerPlayer player = ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer();
-                final TypeToken<FilteredTriggerConfiguration> typeToken = (TypeToken) TypeToken.get(filteredTrigger.type().configurationType());
+                final TypeToken<FilteredTriggerConfiguration> typeToken = (TypeToken) TypeToken.get(triggerType.configurationType());
                 final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause,
-                        advancement, advancementCriterion, typeToken, player, filteredTrigger, true);
+                        advancement, (ResourceKey) (Object) this.advancement.id(), advancementCriterion, typeToken, player, filteredTrigger, (Trigger<FilteredTriggerConfiguration>) advancementCriterion.type().get(), true);
                 SpongeCommon.post(event);
                 if (!event.result()) {
                     ci.cancel();
@@ -94,9 +101,12 @@ public abstract class CriterionTrigger_ListenerMixin {
         PhaseTracker.getCauseStackManager().pushCause(this.trigger);
         // Handle the score criteria ourselves, with each trigger will
         // the score be increased by one.
-        if (advancementCriterion instanceof ScoreAdvancementCriterion) {
-            ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer().progress(advancement)
-                    .get((ScoreAdvancementCriterion) advancementCriterion).get().add(1);
+        if (advancementCriterion instanceof ScoreAdvancementCriterion sac) {
+            final AdvancementProgress progress = playerAdvancements.getOrStartProgress(this.advancement);
+            final var progressMap = ((AdvancementProgressBridge) progress).bridge$getProgressMap();
+            if (progressMap.get(sac.name()) instanceof ScoreCriterionProgress score) {
+                score.add(1);
+            }
             ci.cancel();
             PhaseTracker.getCauseStackManager().popCause();
         }

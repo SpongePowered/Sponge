@@ -41,7 +41,7 @@ public class SpongeScoreCriterionBuilder extends AbstractCriterionBuilder<ScoreA
 
     @Override
     ScoreAdvancementCriterion build0() {
-        return new SpongeScoreCriterion(this.name, this.goal, (CriterionTrigger) this.trigger.type(), (CriterionTriggerInstance) this.trigger);
+        return new SpongeScoreCriterion(this.name, this.goal, (CriterionTrigger<?>) this.type, (CriterionTriggerInstance) this.trigger);
     }
 
     @Override

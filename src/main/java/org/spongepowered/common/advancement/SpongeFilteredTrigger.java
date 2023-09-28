@@ -31,7 +31,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
-import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataSerializable;
@@ -44,17 +43,10 @@ public final class SpongeFilteredTrigger implements CriterionTriggerInstance, Fi
     private static final Logger LOGGER = LogManager.getLogger();
     private final static Gson GSON = new Gson();
 
-    private final SpongeCriterionTrigger triggerType;
     private final FilteredTriggerConfiguration configuration;
 
-    SpongeFilteredTrigger(final SpongeCriterionTrigger triggerType, final FilteredTriggerConfiguration configuration) {
-        this.triggerType = triggerType;
+    SpongeFilteredTrigger(final FilteredTriggerConfiguration configuration) {
         this.configuration = configuration;
-    }
-
-    @Override
-    public Trigger type() {
-        return (Trigger) this.triggerType;
     }
 
     @Override

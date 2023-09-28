@@ -43,6 +43,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.Advancement;
+import org.spongepowered.api.advancement.AdvancementTemplate;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.command.selector.SelectorSortAlgorithm;
@@ -205,22 +206,22 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     }
 
     @Override
-    public Selector.@NonNull Builder addAdvancement(final @NonNull Advancement advancement) {
+    public Selector.@NonNull Builder addAdvancement(final @NonNull AdvancementTemplate advancement) {
         return this.api$advancement(advancement, false);
     }
 
     @Override
-    public Selector.@NonNull Builder addNotAdvancement(final @NonNull Advancement advancement) {
+    public Selector.@NonNull Builder addNotAdvancement(final @NonNull AdvancementTemplate advancement) {
         return this.api$advancement(advancement, true);
     }
 
     @Override
-    public Selector.@NonNull Builder addAdvancementCriterion(final @NonNull Advancement advancement, final @NonNull AdvancementCriterion criterion) {
+    public Selector.@NonNull Builder addAdvancementCriterion(final @NonNull AdvancementTemplate advancement, final @NonNull AdvancementCriterion criterion) {
         return this.api$advancementCriterion(advancement, criterion, false);
     }
 
     @Override
-    public Selector.@NonNull Builder addNotAdvancementCriterion(final @NonNull Advancement advancement,
+    public Selector.@NonNull Builder addNotAdvancementCriterion(final @NonNull AdvancementTemplate advancement,
             final @NonNull AdvancementCriterion criterion) {
         return this.api$advancementCriterion(advancement, criterion, true);
     }
@@ -440,7 +441,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         return this;
     }
 
-    private Selector.@NonNull Builder api$advancement(final @NonNull Advancement advancement, final boolean inverted) {
+    private Selector.@NonNull Builder api$advancement(final @NonNull AdvancementTemplate advancement, final boolean inverted) {
         if (this.api$advancement == null) {
             this.api$advancement = new Object2BooleanOpenHashMap<>();
         }
@@ -448,7 +449,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         return this;
     }
 
-    private Selector.@NonNull Builder api$advancementCriterion(final @NonNull Advancement advancement, final @NonNull AdvancementCriterion criterion,
+    private Selector.@NonNull Builder api$advancementCriterion(final @NonNull AdvancementTemplate advancement, final @NonNull AdvancementCriterion criterion,
             final boolean inverted) {
         if (this.api$criterion == null) {
             this.api$criterion = new HashMap<>();

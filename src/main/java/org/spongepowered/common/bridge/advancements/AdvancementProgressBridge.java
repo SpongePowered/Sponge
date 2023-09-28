@@ -26,6 +26,7 @@ package org.spongepowered.common.bridge.advancements;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
 
@@ -34,6 +35,8 @@ import java.util.Map;
 public interface AdvancementProgressBridge {
 
     Advancement bridge$getAdvancement();
+
+    ResourceLocation bridge$getAdvancementKey();
 
     PlayerAdvancements bridge$getPlayerAdvancements();
 

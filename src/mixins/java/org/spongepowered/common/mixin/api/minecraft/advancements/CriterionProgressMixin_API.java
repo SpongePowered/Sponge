@@ -25,7 +25,9 @@
 package org.spongepowered.common.mixin.api.minecraft.advancements;
 
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.CriterionProgress;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,7 +44,7 @@ import javax.annotation.Nullable;
 @Mixin(CriterionProgress.class)
 public abstract class CriterionProgressMixin_API implements org.spongepowered.api.advancement.criteria.CriterionProgress {
 
-    @Shadow @Nullable private Date obtained;
+    @Shadow @Nullable private Instant obtained;
 
     @Override
     public AdvancementCriterion criterion() {
@@ -56,18 +58,20 @@ public abstract class CriterionProgressMixin_API implements org.spongepowered.ap
 
     @Override
     public Optional<Instant> get() {
-        return this.obtained == null ? Optional.empty() : Optional.of(this.obtained.toInstant());
+        return this.obtained == null ? Optional.empty() : Optional.of(this.obtained);
     }
 
     @Override
     public Instant grant() {
         if (this.obtained != null) {
-            return this.obtained.toInstant();
+            return this.obtained;
         }
         final AdvancementProgress advancementProgress = ((CriterionProgressBridge) this).bridge$getAdvancementProgress();
+        final ResourceLocation key = ((AdvancementProgressBridge) advancementProgress).bridge$getAdvancementKey();
         final org.spongepowered.api.advancement.Advancement advancement = advancementProgress.advancement();
-        ((AdvancementProgressBridge) advancementProgress).bridge$getPlayerAdvancements().award((Advancement) advancement, this.criterion().name());
-        return this.obtained.toInstant();
+        final AdvancementHolder holder = new AdvancementHolder(key, (Advancement) (Object) advancement);
+        ((AdvancementProgressBridge) advancementProgress).bridge$getPlayerAdvancements().award(holder, this.criterion().name());
+        return this.obtained;
     }
 
     @Override
@@ -75,10 +79,12 @@ public abstract class CriterionProgressMixin_API implements org.spongepowered.ap
         if (this.obtained == null) {
             return Optional.empty();
         }
-        final Instant instant = this.obtained.toInstant();
+        final Instant instant = this.obtained;
         final AdvancementProgress advancementProgress = ((CriterionProgressBridge) this).bridge$getAdvancementProgress();
+        final ResourceLocation key = ((AdvancementProgressBridge) advancementProgress).bridge$getAdvancementKey();
         final org.spongepowered.api.advancement.Advancement advancement = advancementProgress.advancement();
-        ((AdvancementProgressBridge) advancementProgress).bridge$getPlayerAdvancements().revoke((Advancement) advancement, this.criterion().name());
+        final AdvancementHolder holder = new AdvancementHolder(key, (Advancement) (Object) advancement);
+        ((AdvancementProgressBridge) advancementProgress).bridge$getPlayerAdvancements().revoke(holder, this.criterion().name());
         return Optional.of(instant);
     }
 

@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.DisplayInfo;
@@ -67,41 +68,29 @@ import javax.annotation.Nullable;
 @Mixin(Advancement.class)
 public abstract class AdvancementMixin implements AdvancementBridge {
 
-    // @formatter:off
-    @Shadow @Final @Mutable @Nullable private Advancement parent;
-    @Shadow @Final @Mutable private String[][] requirements;
-    @Shadow @Final @Mutable private Map<String, Criterion> criteria;
-    @Shadow @Final @Nullable private DisplayInfo display;
-    @Shadow @Final private ResourceLocation id;
-
-    @Shadow @Final private net.minecraft.network.chat.Component chatComponent;
-    @Shadow @Final private AdvancementRewards rewards;
-    // @formatter:on
-
+    @Shadow @Final private Optional<DisplayInfo> display;
     private AdvancementCriterion impl$criterion;
     private List<Component> impl$toastText;
 
     @SuppressWarnings({"ConstantConditions"})
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setUpSpongeFields(ResourceLocation location, @Nullable Advancement parent, @Nullable DisplayInfo displayInfo,
-            AdvancementRewards rewards, Map<String, Criterion> criteria, String[][] requirements, boolean sendsTelemetryEvent, CallbackInfo ci) {
+    @Inject(method = "<init>(Ljava/util/Optional;Ljava/util/Optional;Lnet/minecraft/advancements/AdvancementRewards;Ljava/util/Map;Lnet/minecraft/advancements/AdvancementRequirements;Z)V", at = @At("RETURN"))
+    private void impl$setUpSpongeFields(final Optional<ResourceLocation> parent, final Optional<DisplayInfo> displayInfo, final AdvancementRewards $$2,
+            final  Map<String, Criterion<?>> criteria, final AdvancementRequirements requirements, final boolean sendsTelemetryEvent, final CallbackInfo ci) {
         // Don't do anything on the client, unless we're performing registry initialization
         if (!PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) {
             return;
         }
-        if (displayInfo != null) {
-            ((DisplayInfoBridge) displayInfo).bridge$setAdvancement((org.spongepowered.api.advancement.Advancement) this);
-        }
+        displayInfo.ifPresent(info -> ((DisplayInfoBridge) info).bridge$setAdvancement((org.spongepowered.api.advancement.Advancement) this));
 
         this.impl$toastText = this.impl$generateToastText();
 
         final Map<String, DefaultedAdvancementCriterion> criteriaMap = new LinkedHashMap<>();
         final Map<String, List<DefaultedAdvancementCriterion>> scoreCriteria = new HashMap<>();
-        for (Map.Entry<String, Criterion> entry : criteria.entrySet()) {
-            final CriterionBridge mixinCriterion = (CriterionBridge) entry.getValue();
+        for (Map.Entry<String, Criterion<?>> entry : criteria.entrySet()) {
+            final CriterionBridge mixinCriterion = (CriterionBridge) (Object) entry.getValue();
             final String groupName = mixinCriterion.bridge$getScoreCriterionName();
             if (groupName != null) {
-                scoreCriteria.computeIfAbsent(groupName, k -> new ArrayList<>()).add((DefaultedAdvancementCriterion) entry.getValue());
+                scoreCriteria.computeIfAbsent(groupName, k -> new ArrayList<>()).add((DefaultedAdvancementCriterion) (Object) entry.getValue());
             }
 
             criteriaMap.put(entry.getKey(), (DefaultedAdvancementCriterion) mixinCriterion);
@@ -113,12 +102,12 @@ public abstract class AdvancementMixin implements AdvancementBridge {
         }
 
         final Set<AdvancementCriterion> andCriteria = new HashSet<>();
-        for (final String[] array : requirements) {
+        for (final String[] array : requirements.requirements()) {
             final Set<AdvancementCriterion> orCriteria = new HashSet<>();
             for (final String name : array) {
                 DefaultedAdvancementCriterion criterion = criteriaMap.get(name);
                 if (criterion == null && criteria.get(name) != null) { // internal removed by scoreCriterion
-                    criterion = criteriaMap.get(((CriterionBridge) criteria.get(name)).bridge$getScoreCriterionName());
+                    criterion = criteriaMap.get(((CriterionBridge) (Object) criteria.get(name)).bridge$getScoreCriterionName());
                 }
                 orCriteria.add(criterion);
             }
@@ -129,28 +118,12 @@ public abstract class AdvancementMixin implements AdvancementBridge {
 
     private ImmutableList<Component> impl$generateToastText() {
         final ImmutableList.Builder<Component> toastText = ImmutableList.builder();
-        if (this.display != null) {
-            final FrameType frameType = this.display.getFrame();
+        if (this.display.isPresent()) {
+            final FrameType frameType = this.display.get().getFrame();
             toastText.add(Component.translatable("advancements.toast." + frameType.getName(), SpongeAdventure.asAdventureNamed(frameType.getChatColor())));
-            toastText.add(SpongeAdventure.asAdventure(this.display.getTitle()));
-        } else {
-
-            toastText.add(Component.text("Unlocked advancement"));
-            toastText.add(Component.text(this.id.toString()));
-        }
+            toastText.add(SpongeAdventure.asAdventure(this.display.get().getTitle()));
+        } // else no display
         return toastText.build();
-    }
-
-    @Override
-    public Optional<Advancement> bridge$getParent() {
-        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
-        return Optional.ofNullable(this.parent);
-    }
-
-    @Override
-    public void bridge$setParent(@Nullable final Advancement advancement) {
-        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
-        this.parent = advancement;
     }
 
     @Override
@@ -172,14 +145,4 @@ public abstract class AdvancementMixin implements AdvancementBridge {
         return this.impl$toastText;
     }
 
-    /**
-     * @author faithcaio - 2020-10-01
-     * @reason Fix vanilla deserializing empty rewards as null
-     *
-     * @return the fixed AdvancementRewards
-     */
-    @Overwrite
-    public AdvancementRewards getRewards() {
-        return this.rewards == null ? AdvancementRewards.EMPTY : this.rewards;
-    }
 }

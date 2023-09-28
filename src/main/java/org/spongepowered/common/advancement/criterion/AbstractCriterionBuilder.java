@@ -31,6 +31,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 
 
 @SuppressWarnings("unchecked")
@@ -39,11 +41,15 @@ public abstract class AbstractCriterionBuilder<T extends AdvancementCriterion, B
 
     protected @Nullable FilteredTrigger<?> trigger;
     protected @Nullable String name;
+    protected @Nullable Trigger<?> type;
+
 
     @Override
-    public B trigger(FilteredTrigger<?> trigger) {
+    public <C extends FilteredTriggerConfiguration> B trigger(Trigger<C> type, FilteredTrigger<C> trigger) {
+        checkNotNull(type, "type");
         checkNotNull(trigger, "trigger");
         this.trigger = trigger;
+        this.type = type;
         return (B) this;
     }
 

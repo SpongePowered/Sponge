@@ -11,7 +11,6 @@
     "mixins": [
         "ChatFormattingAccessor",
         "advancements.CriteriaTriggersAccessor",
-        "advancements.CriterionTrigger_ListenerAccessor",
         "advancements.critereon.MinMaxBounds_DoublesAccessor",
         "advancements.critereon.MinMaxBounds_IntsAccessor",
         "commands.CommandSourceStackAccessor",
@@ -24,7 +23,6 @@
         "network.ConnectionAccessor",
         "network.chat.HoverEvent_ItemStackInfoAccessor",
         "network.chat.StyleAccessor",
-        "network.protocol.game.ClientboundAddPlayerPacketAccessor",
         "network.protocol.game.ServerboundInteractPacket_InteractionActionAccessor",
         "network.protocol.game.ServerboundInteractPacket_InteractionAtLocationActionAccessor",
         "network.protocol.game.ServerboundInteractPacketAccessor",

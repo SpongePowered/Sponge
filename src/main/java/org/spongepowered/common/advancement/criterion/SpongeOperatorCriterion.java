@@ -29,6 +29,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.OperatorCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,6 +56,11 @@ public class SpongeOperatorCriterion implements OperatorCriterion, DefaultedAdva
 
     @Override
     public Optional<FilteredTrigger<?>> trigger() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Trigger<?>> type() {
         return Optional.empty();
     }
 

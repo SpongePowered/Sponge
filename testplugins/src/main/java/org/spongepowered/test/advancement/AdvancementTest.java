@@ -114,7 +114,7 @@ public final class AdvancementTest implements LoadableModule {
     @Listener
     private void onTreeAdjust(final AdvancementTreeEvent.GenerateLayout event) {
         final AdvancementTree tree = event.tree();
-        if (tree.key().equals(this.rootAdvancement.key())) {
+        if (this.rootAdvancement != null && tree.key().equals(this.rootAdvancement.key())) {
             final TreeLayoutElement layoutElement1 = tree.layoutElement(this.counterAdvancement1).get();
             final TreeLayoutElement layoutElement2 = tree.layoutElement(this.counterAdvancement2).get();
             layoutElement1.setPosition(layoutElement2.position());
@@ -124,17 +124,17 @@ public final class AdvancementTest implements LoadableModule {
 
     @Listener
     private void onGranted(final AdvancementEvent.Grant event) {
-        this.logger.info("{} was granted", event.advancement().key());
+        this.logger.info("{} was granted", event.advancementKey());
     }
 
     @Listener
     private void onGranted(final AdvancementEvent.Revoke event) {
-        this.logger.info("{} was revoked", event.advancement().key());
+        this.logger.info("{} was revoked", event.advancementKey());
     }
 
     @Listener
     private void onTrigger(final CriterionEvent.Trigger<?> event) {
-        this.logger.info("{} for {} was triggered", event.trigger().type().key(RegistryTypes.TRIGGER), event.advancement().key()); // TODO trigger key?
+        this.logger.info("{} for {} was triggered", event.type().key(RegistryTypes.TRIGGER), event.advancementKey());
     }
 
     @Listener
@@ -174,8 +174,8 @@ public final class AdvancementTest implements LoadableModule {
         this.rootAdvancement = rootAdvancement;
 
         final AdvancementCriterion someDirtCriterion = AdvancementCriterion.builder().trigger(
+                this.inventoryChangeTrigger,
                 FilteredTrigger.builder()
-                        .type(this.inventoryChangeTrigger)
                         .config(new InventoryChangeTriggerConfig(ItemStack.of(ItemTypes.DIRT)))
                         .build()
         ).name("some_dirt").build();
@@ -193,8 +193,8 @@ public final class AdvancementTest implements LoadableModule {
         event.register(someDirt);
 
         final AdvancementCriterion lotsOfDirtCriterion = AdvancementCriterion.builder().trigger(
+                this.inventoryChangeTrigger,
                 FilteredTrigger.builder()
-                        .type(this.inventoryChangeTrigger)
                         .config(new InventoryChangeTriggerConfig(ItemStack.of(ItemTypes.DIRT, 64)))
                         .build()
         ).name("lots_of_dirt").build();
@@ -212,8 +212,8 @@ public final class AdvancementTest implements LoadableModule {
         event.register(lotsOfDirt);
 
         final AdvancementCriterion tonsOfDirtCriterion = AdvancementCriterion.builder().trigger(
+                this.inventoryChangeTrigger,
                 FilteredTrigger.builder()
-                        .type(this.inventoryChangeTrigger)
                         .config(new InventoryChangeTriggerConfig(ItemStack.of(ItemTypes.DIRT, 64*9)))
                         .build()
         ).name("tons_of_dirt").build();

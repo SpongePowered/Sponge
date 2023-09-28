@@ -25,8 +25,10 @@
 package org.spongepowered.common.mixin.api.minecraft.advancements;
 
 import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,7 +40,8 @@ import java.util.Optional;
 @Mixin(Criterion.class)
 public abstract class CriterionMixin_API implements DefaultedAdvancementCriterion {
 
-    @Shadow @Final private CriterionTriggerInstance trigger;
+    @Shadow @Final private CriterionTriggerInstance triggerInstance;
+    @Shadow @Final private CriterionTrigger<?> trigger;
 
     @Override
     public String name() {
@@ -47,6 +50,11 @@ public abstract class CriterionMixin_API implements DefaultedAdvancementCriterio
 
     @Override
     public Optional<FilteredTrigger<?>> trigger() {
-        return Optional.ofNullable((FilteredTrigger<?>) this.trigger);
+        return Optional.ofNullable((FilteredTrigger<?>) this.triggerInstance);
+    }
+
+    @Override
+    public Optional<Trigger<?>> type() {
+        return Optional.ofNullable((Trigger<?>) this.trigger);
     }
 }

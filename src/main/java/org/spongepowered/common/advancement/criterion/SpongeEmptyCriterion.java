@@ -25,6 +25,7 @@
 package org.spongepowered.common.advancement.criterion;
 
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 
 import java.util.Optional;
 
@@ -37,6 +38,11 @@ public final class SpongeEmptyCriterion implements DefaultedAdvancementCriterion
 
     @Override
     public Optional<FilteredTrigger<?>> trigger() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Trigger<?>> type() {
         return Optional.empty();
     }
 }
