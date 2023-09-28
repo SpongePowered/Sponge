@@ -36,12 +36,11 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public class SpongeChatDecorator implements ChatDecorator {
 
     @Override
-    public CompletableFuture<Component> decorate(@Nullable final ServerPlayer player, final Component message) {
+    public Component decorate(@Nullable final ServerPlayer player, final Component message) {
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
             if (player != null) {
@@ -50,7 +49,7 @@ public class SpongeChatDecorator implements ChatDecorator {
             final var component = SpongeAdventure.asAdventure(message);
             final PlayerChatEvent.Decorate event = SpongeEventFactory.createPlayerChatEventDecorate(frame.currentCause(), component, component, Optional.ofNullable((org.spongepowered.api.entity.living.player.server.ServerPlayer) player));
             SpongeCommon.post(event);
-            return CompletableFuture.completedFuture(SpongeAdventure.asVanillaMutable(event.message()));
+            return SpongeAdventure.asVanillaMutable(event.message());
         }
     }
 }
