@@ -37,6 +37,6 @@ public interface ServerLoginPacketListenerImplAccessor {
 
     @Accessor("state") void accessor$state(ServerLoginPacketListenerImpl.State state);
 
-    @Accessor("gameProfile") void accessor$gameProfile(final GameProfile profile);
+    @Accessor("authenticatedProfile") void accessor$gameProfile(final GameProfile profile);
     @Accessor("connection") Connection accessor$connection();
 }

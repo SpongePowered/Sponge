@@ -24,20 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.server.network;
 
-import static java.util.Objects.requireNonNull;
-
-import net.kyori.adventure.text.Component;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ServerPlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
-
-import java.net.InetSocketAddress;
 
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class ServerGamePacketListenerImplMixin_API extends ServerCommonPacketListenerImplMixin_API implements ServerPlayerConnection {
@@ -52,33 +45,8 @@ public abstract class ServerGamePacketListenerImplMixin_API extends ServerCommon
     }
 
     @Override
-    public void close() {
-        this.shadow$disconnect(net.minecraft.network.chat.Component.translatable("disconnect.disconnected"));
-    }
-
-    @Override
-    public void close(final Component reason) {
-        requireNonNull(reason, "reason");
-        this.shadow$disconnect(SpongeAdventure.asVanilla(reason));
-    }
-
-    @Override
     public ServerPlayer player() {
         return (ServerPlayer) this.player;
     }
 
-    @Override
-    public InetSocketAddress address() {
-        return ((ConnectionBridge) this.connection).bridge$getAddress();
-    }
-
-    @Override
-    public InetSocketAddress virtualHost() {
-        return ((ConnectionBridge) this.connection).bridge$getVirtualHost();
-    }
-
-    @Override
-    public int latency() {
-        return this.latency;
-    }
 }

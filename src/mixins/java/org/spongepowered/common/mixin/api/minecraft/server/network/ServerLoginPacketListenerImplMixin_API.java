@@ -45,33 +45,13 @@ public abstract class ServerLoginPacketListenerImplMixin_API implements ServerSi
 
     // @formatter:off
     @Shadow @Final public Connection connection;
-    @Shadow private com.mojang.authlib.GameProfile gameProfile;
+    @Shadow private com.mojang.authlib.GameProfile authenticatedProfile;
     @Shadow public abstract void shadow$disconnect(net.minecraft.network.chat.Component reason);
     // @formatter:on
 
     @Override
     public GameProfile profile() {
-        return SpongeGameProfile.of(this.gameProfile);
+        return SpongeGameProfile.of(this.authenticatedProfile);
     }
 
-    @Override
-    public void close() {
-        this.shadow$disconnect(net.minecraft.network.chat.Component.translatable("disconnect.disconnected"));
-    }
-
-    @Override
-    public void close(final Component reason) {
-        requireNonNull(reason, "reason");
-        this.shadow$disconnect(SpongeAdventure.asVanilla(reason));
-    }
-
-    @Override
-    public InetSocketAddress address() {
-        return ((ConnectionBridge) this.connection).bridge$getAddress();
-    }
-
-    @Override
-    public InetSocketAddress virtualHost() {
-        return ((ConnectionBridge) this.connection).bridge$getVirtualHost();
-    }
 }

@@ -26,27 +26,59 @@ package org.spongepowered.common.mixin.core.server.network;
 
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketUtils;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.resource.pack.Pack;
+import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.network.protocol.game.ClientboundResourcePackPacketBridge;
+import org.spongepowered.common.entity.player.tab.SpongeTabList;
 
 @Mixin(ServerCommonPacketListenerImpl.class)
 public abstract class ServerCommonPacketListenerImplMixin {
+
+    // @formatter:off
     @Shadow @Final protected Connection connection;
     @Shadow @Final protected MinecraftServer server;
     @Shadow public abstract void shadow$send(final Packet<?> $$0, @org.jetbrains.annotations.Nullable final PacketSendListener $$1);
+    @Shadow public abstract void shadow$disconnect(Component reason);
+    // @formatter:on
+
+    @Nullable public ResourcePack impl$lastReceivedPack;
 
     @Inject(method = "handleResourcePackResponse", at = @At("HEAD"))
     public void impl$handleResourcePackResponse(final ServerboundResourcePackPacket packet, final CallbackInfo callbackInfo) {
         PacketUtils.ensureRunningOnSameThread(packet, (ServerGamePacketListener) this, this.server);
+    }
+
+    @Inject(
+            method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V",
+            at = @At("HEAD")
+    )
+    private void impl$onClientboundPacketSend(final Packet<?> packet, final PacketSendListener listener, final CallbackInfo ci) {
+        this.impl$modifyClientBoundPacket(packet);
+
+    }
+
+    public void impl$modifyClientBoundPacket(final Packet<?> packet)
+    {
+        if (packet instanceof ClientboundResourcePackPacket) {
+            final ResourcePack pack = ((ClientboundResourcePackPacketBridge) packet).bridge$getSpongePack();
+            this.impl$lastReceivedPack = pack;
+        }
     }
 }

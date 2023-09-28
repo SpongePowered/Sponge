@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.network;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.Attribute;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.PacketEncoder;
@@ -44,7 +45,10 @@ public class PacketEncoderMixin {
     @Inject(method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;Lio/netty/buffer/ByteBuf;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;writeVarInt(I)Lnet/minecraft/network/FriendlyByteBuf;"), locals = LocalCapture.CAPTURE_FAILHARD)
     private void applyLocaleToBuffer(final ChannelHandlerContext ctx, final Packet<?> pkt, final ByteBuf orig, final CallbackInfo ci,
-            final ConnectionProtocol unused$proto, final int unused$id, final FriendlyByteBuf buffer) {
+            final Attribute<ConnectionProtocol.CodecData<?>> $$3,
+            final ConnectionProtocol.CodecData<?> $$4,
+            final int unused$id,
+            final FriendlyByteBuf buffer) {
         ((FriendlyByteBufBridge) buffer).bridge$setLocale(ctx.channel().attr(SpongeAdventure.CHANNEL_LOCALE).get());
     }
 }

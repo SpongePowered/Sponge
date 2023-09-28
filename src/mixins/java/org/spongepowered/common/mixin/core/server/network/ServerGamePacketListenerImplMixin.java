@@ -140,11 +140,17 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     @Shadow protected abstract ParseResults<CommandSourceStack> shadow$parseCommand(final String $$0);
     // @formatter:on
 
-    @Shadow protected abstract void signBook(final FilteredText $$0, final List<FilteredText> $$1, final int $$2);
+    @Nullable private ResourcePack impl$lastAcceptedPack;
 
     private int impl$ignorePackets;
 
-    @Nullable private ResourcePack impl$lastReceivedPack, impl$lastAcceptedPack;
+    @Override
+    public void impl$modifyClientBoundPacket(final Packet<?> packet) {
+        super.impl$modifyClientBoundPacket(packet);
+        if (packet instanceof ClientboundPlayerInfoUpdatePacket infoPacket) {
+            ((SpongeTabList) ((ServerPlayer) this.player).tabList()).updateEntriesOnSend(infoPacket);
+        }
+    }
 
     @Override
     public Connection bridge$getConnection() {
@@ -156,18 +162,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         this.impl$ignorePackets++;
     }
 
-    // @Override
-    public void send(final Packet<?> packet, final PacketSendListener listener) {
-        if (packet instanceof ClientboundPlayerInfoUpdatePacket infoPacket) {
-            ((SpongeTabList) ((ServerPlayer) this.player).tabList()).updateEntriesOnSend(infoPacket);
-        } else if (packet instanceof ClientboundResourcePackPacket) {
-            final ResourcePack pack = ((ClientboundResourcePackPacketBridge) packet).bridge$getSpongePack();
-            this.impl$lastReceivedPack = pack;
-        }
-        this.shadow$send(packet, listener);
-    }
-
-    @Inject(method = "handleCustomCommandSuggestions", at = @At(value = "NEW", target = "com/mojang/brigadier/StringReader", remap = false),
+    @Inject(method = "handleCustomCommandSuggestions", at = @At(value = "NEW", target = "(Ljava/lang/String;)Lcom/mojang/brigadier/StringReader;", remap = false),
             cancellable = true)
     private void impl$getSuggestionsFromNonBrigCommand(final ServerboundCommandSuggestionPacket packet, final CallbackInfo ci) {
         final String rawCommand = packet.getCommand();

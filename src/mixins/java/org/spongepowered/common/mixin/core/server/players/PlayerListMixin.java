@@ -47,6 +47,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.UserBanList;
@@ -321,8 +322,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             shift = At.Shift.AFTER
         )
     )
-    private void impl$onInitPlayer_BeforeSetWorld(final Connection p_72355_1_, final net.minecraft.server.level.ServerPlayer p_72355_2_, final int $$2, final CallbackInfo ci) {
-        if (!p_72355_1_.isConnected()) {
+    private void impl$onInitPlayer_BeforeSetWorld(final Connection $$0, final net.minecraft.server.level.ServerPlayer $$1, final CommonListenerCookie $$2, final CallbackInfo ci) {
+        if (!$$0.isConnected()) {
             ci.cancel();
         }
     }
@@ -376,7 +377,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((ServerPlayerBridge) playerIn).bridge$setConnectionMessageToSend(message);
     }
 
-    @Redirect(method = "placeNewPlayer", at = @At(value = "NEW", target = "(IZLjava/util/Set;IIIZZLnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;)Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;"))
+    @Redirect(method = "placeNewPlayer", at = @At(value = "NEW", target = "(IZLjava/util/Set;IIIZZZLnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;)Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;"))
     private ClientboundLoginPacket impl$usePerWorldViewDistance(
             final int playerId,
             final boolean hardcore,
@@ -386,12 +387,14 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             final int simulationDistance,
             final boolean reducedDebugInfo,
             final boolean showDeathScreen,
+            final boolean limitedCrafting,
             final CommonPlayerSpawnInfo info,
             final Connection conn,
-            final net.minecraft.server.level.ServerPlayer player) {
+            final net.minecraft.server.level.ServerPlayer player,
+            final CommonListenerCookie clc) {
         final Integer viewDistance = ((PrimaryLevelDataBridge) player.serverLevel().getLevelData()).bridge$viewDistance().orElse(chunkRadius);
         return new ClientboundLoginPacket(playerId, hardcore, levels, maxPlayers, viewDistance, simulationDistance, reducedDebugInfo,
-                showDeathScreen, info);
+                showDeathScreen, limitedCrafting, info);
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))
@@ -445,7 +448,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @Inject(method = "placeNewPlayer", at = @At(value = "RETURN"))
-    private void impl$onInitPlayer_join(final Connection networkManager, final net.minecraft.server.level.ServerPlayer mcPlayer, final int $$2, final CallbackInfo ci) {
+    private void impl$onInitPlayer_join(final Connection networkManager, final net.minecraft.server.level.ServerPlayer mcPlayer, final CommonListenerCookie $$2, final CallbackInfo ci) {
         final ServerPlayer player = (ServerPlayer) mcPlayer;
         final ServerSideConnection connection = player.connection();
         final Cause cause = Cause.of(EventContext.empty(), connection, player);
