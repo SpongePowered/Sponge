@@ -39,13 +39,6 @@ import org.spongepowered.common.bridge.advancements.CriterionTriggerBridge;
 @Mixin(CriterionTrigger.class)
 public interface CriterionTriggerMixin_API<C extends FilteredTriggerConfiguration> extends Trigger<C> {
 
-    @Shadow ResourceLocation shadow$getId();
-
-    @Override
-    default ResourceKey key() {
-        return (ResourceKey) (Object) this.shadow$getId();
-    }
-
     @Override
     default void trigger() {
         Sponge.server().streamOnlinePlayers().forEach(this::trigger);

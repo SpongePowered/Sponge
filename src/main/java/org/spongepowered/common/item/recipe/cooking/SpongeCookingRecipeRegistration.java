@@ -70,7 +70,7 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration {
 
     @Override
     public void serializeShape(final JsonObject json) {
-        json.add(Constants.Recipe.COOKING_INGREDIENT, this.ingredient.toJson());
+        json.add(Constants.Recipe.COOKING_INGREDIENT, this.ingredient.toJson(false));
     }
 
     @Override
@@ -83,7 +83,7 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration {
             json.add(Constants.Recipe.SPONGE_RESULT, IngredientResultUtil.serializeItemStack(this.spongeResult));
         }
         if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, IngredientResultUtil.cacheResultFunction(this.getId(), this.resultFunction));
+            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, IngredientResultUtil.cacheResultFunction(this.id(), this.resultFunction));
         }
     }
 

@@ -203,7 +203,8 @@
         "world.entity.Display_TextDisplayAccessor",
         "world.entity.Display_ItemDisplayAccessor",
         "world.entity.DisplayAccessor",
-        "world.entity.Display_BlockDisplayAccessor"
+        "world.entity.Display_BlockDisplayAccessor",
+        "world.item.crafting.ShapedRecipe_SerializerAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"

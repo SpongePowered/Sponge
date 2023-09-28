@@ -27,47 +27,47 @@ package org.spongepowered.common.item.recipe.crafting.shaped;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
-
-import java.util.function.Function;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 
 public class SpongeShapedRecipe extends ShapedRecipe {
 
-    private final Function<CraftingContainer, ItemStack> resultFunction;
-    private final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction;
 
-    public SpongeShapedRecipe(ResourceLocation idIn, String groupIn, final CraftingBookCategory category, int recipeWidthIn, int recipeHeightIn, NonNullList<Ingredient> recipeItemsIn,
-            ItemStack recipeOutputIn, Function<CraftingContainer, ItemStack> resultFunction,
-            Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction) {
-        super(idIn, groupIn, category, recipeWidthIn, recipeHeightIn, recipeItemsIn, recipeOutputIn);
-        this.resultFunction = resultFunction;
-        this.remainingItemsFunction = remainingItemsFunction;
+    private final String resultFunctionId;
+    private final String remainingItemsFunctionId;
+
+    public SpongeShapedRecipe(String groupIn, final CraftingBookCategory category, int recipeWidthIn, int recipeHeightIn, NonNullList<Ingredient> recipeItemsIn,
+            ItemStack recipeOutputIn, boolean showNotification,
+            String resultFunctionId, String remainingItemsFunctionId) {
+        super(groupIn, category, recipeWidthIn, recipeHeightIn, recipeItemsIn, recipeOutputIn, showNotification);
+        this.resultFunctionId = resultFunctionId;
+        this.remainingItemsFunctionId = remainingItemsFunctionId;
     }
+
 
     @Override
     public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
-        if (this.remainingItemsFunction != null) {
-            return this.remainingItemsFunction.apply(inv);
+        if (this.remainingItemsFunctionId != null) {
+            return IngredientResultUtil.cachedRemainingItemsFunction(this.remainingItemsFunctionId).apply(inv);
         }
         return super.getRemainingItems(inv);
     }
 
     @Override
     public ItemStack assemble(final CraftingContainer $$0, final RegistryAccess $$1) {
-        if (this.resultFunction != null) {
-            return this.resultFunction.apply($$0);
+        if (this.resultFunctionId != null) {
+            return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }
         return super.assemble($$0, $$1);
     }
 
     @Override
     public ItemStack getResultItem(final RegistryAccess $$0) {
-        if (this.resultFunction != null) {
+        if (this.resultFunctionId != null) {
             return ItemStack.EMPTY;
         }
         return super.getResultItem($$0);

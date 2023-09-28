@@ -28,7 +28,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.network.protocol.login.custom.CustomQueryAnswerPayload;
@@ -40,7 +39,6 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.packet.Packet;
-import org.spongepowered.common.accessor.network.protocol.game.ClientboundAddPlayerPacketAccessor;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -105,27 +103,6 @@ public final class PacketUtil {
         } else {
             throw new UnsupportedOperationException();
         }
-    }
-
-    public static ClientboundAddPlayerPacket createClientboundAddPlayerPacket(
-        final int entityId,
-        final UUID playerId,
-        final double x,
-        final double y,
-        final double z,
-        final byte yRot,
-        final byte xRot
-    ) {
-        final ClientboundAddPlayerPacket packet = PacketUtil.createPacketWithoutConstructor(ClientboundAddPlayerPacket.class);
-        final ClientboundAddPlayerPacketAccessor accessor = (ClientboundAddPlayerPacketAccessor) packet;
-        accessor.accessor$entityId(entityId);
-        accessor.accessor$playerId(playerId);
-        accessor.accessor$x(x);
-        accessor.accessor$y(y);
-        accessor.accessor$z(z);
-        accessor.accessor$yRot(yRot);
-        accessor.accessor$xRot(xRot);
-        return packet;
     }
 
     // TODO: Use Lmbda instead?

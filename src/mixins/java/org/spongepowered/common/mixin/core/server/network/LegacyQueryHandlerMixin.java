@@ -26,11 +26,12 @@ package org.spongepowered.common.mixin.core.server.network;
 
 import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerInfo;
 import net.minecraft.server.network.LegacyQueryHandler;
-import net.minecraft.server.network.ServerConnectionListener;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,11 +47,13 @@ import java.net.InetSocketAddress;
 public abstract class LegacyQueryHandlerMixin extends ChannelInboundHandlerAdapter {
 
     @Shadow @Final private static Logger LOGGER;
-    @Shadow @Final private ServerConnectionListener serverConnectionListener;
 
-    @Shadow private void shadow$sendFlushAndClose(final ChannelHandlerContext ctx, final ByteBuf data) { }
-    @Shadow private ByteBuf shadow$createReply(final String string) {
-        return null; // Shadowed
+    @Shadow @Final private ServerInfo server;
+
+    @Shadow private static void shadow$sendFlushAndClose(final ChannelHandlerContext ctx, final ByteBuf data) { }
+
+    @Shadow private static ByteBuf shadow$createLegacyDisconnectPacket(final ByteBufAllocator $$0, final String $$1) {
+        throw new UnsupportedOperationException("Shadowed createLegacyDisconnectPacket");
     }
 
     private ByteBuf buf;
@@ -107,7 +110,7 @@ public abstract class LegacyQueryHandlerMixin extends ChannelInboundHandlerAdapt
             return false;
         }
 
-        final MinecraftServer server = this.serverConnectionListener.getServer();
+        final MinecraftServer server = (MinecraftServer) this.server;
         final InetSocketAddress client = (InetSocketAddress) ctx.channel().remoteAddress();
         final SpongeStatusResponse response;
 
@@ -198,7 +201,8 @@ public abstract class LegacyQueryHandlerMixin extends ChannelInboundHandlerAdapt
     }
 
     private void writeResponse(final ChannelHandlerContext ctx, final String response) {
-        this.shadow$sendFlushAndClose(ctx, this.shadow$createReply(response));
+        var byteBuf = LegacyQueryHandlerMixin.shadow$createLegacyDisconnectPacket(ctx.alloc(), response);
+        LegacyQueryHandlerMixin.shadow$sendFlushAndClose(ctx, byteBuf);
     }
 
 }

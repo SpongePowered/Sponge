@@ -239,7 +239,8 @@
         "adventure.chat.SignedMessageMixin",
         "resources.RegistryDataLoaderMixin",
         "world.level.levelgen.WorldDimensionsMixin",
-        "world.damagesource.DamageSourcesMixin"
+        "world.damagesource.DamageSourcesMixin",
+        "world.item.crafting.IngredientMixin"
     ],
     "client": [
         "client.MinecraftMixin",

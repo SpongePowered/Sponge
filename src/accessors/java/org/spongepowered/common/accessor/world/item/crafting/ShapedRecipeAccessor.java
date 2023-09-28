@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
+import java.util.List;
 import java.util.Map;
 
 @Mixin(ShapedRecipe.class)
@@ -45,7 +46,7 @@ public interface ShapedRecipeAccessor {
     }
 
     @Invoker("shrink")
-    static String[] invoker$shrink(final String... pattern) {
+    static String[] invoker$shrink(final List<String> pattern) {
         throw new UntransformedInvokerError();
     }
 

@@ -39,7 +39,7 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe {
     private final Function<Container, ItemStack> resultFunction;
 
     public SpongeSmithingRecipe(ResourceLocation idIn, Ingredient template, Ingredient base, Ingredient addition, ItemStack resultIn, Function<Container, ItemStack> resultFunction) {
-        super(idIn, template, base, addition, resultIn);
+        super(template, base, addition, resultIn);
         this.resultFunction = resultFunction;
     }
 

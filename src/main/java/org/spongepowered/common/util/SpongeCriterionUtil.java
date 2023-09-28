@@ -73,8 +73,8 @@ public final class SpongeCriterionUtil {
         }
     }
 
-    public static Tuple<Map<String, Criterion>, String[][]> toVanillaCriteriaData(final AdvancementCriterion criterion) {
-        final Map<String, Criterion> criteria = new LinkedHashMap<>();
+    public static Tuple<Map<String, Criterion<?>>, String[][]> toVanillaCriteriaData(final AdvancementCriterion criterion) {
+        final Map<String, Criterion<?>> criteria = new LinkedHashMap<>();
         if (criterion instanceof SpongeEmptyCriterion) {
             return new Tuple<>(criteria, new String[0][0]);
         }
@@ -88,7 +88,7 @@ public final class SpongeCriterionUtil {
         return new Tuple<>(criteria, idsArray);
     }
 
-    private static List<List<String>> collectCriteria(final AdvancementCriterion criterion, final Map<String, Criterion> criteria) {
+    private static List<List<String>> collectCriteria(final AdvancementCriterion criterion, final Map<String, Criterion<?>> criteria) {
 
         List<List<String>> requirements = new ArrayList<>();
         if (criterion instanceof SpongeAndCriterion) {
@@ -124,11 +124,11 @@ public final class SpongeCriterionUtil {
             final SpongeScoreCriterion scoreCriterion = (SpongeScoreCriterion) criterion;
             for (int i = 0; i < scoreCriterion.goal(); i++) {
                 final DefaultedAdvancementCriterion internalCriterion = scoreCriterion.internalCriteria.get(i);
-                criteria.put(internalCriterion.name(), ((Criterion) internalCriterion));
+                criteria.put(internalCriterion.name(), ((Criterion) (Object) internalCriterion));
                 requirements.add(Collections.singletonList(internalCriterion.name()));
             }
         } else {
-            criteria.put(criterion.name(), (Criterion) criterion);
+            criteria.put(criterion.name(), (Criterion) (Object) criterion);
             requirements.add(Collections.singletonList(criterion.name()));
         }
 

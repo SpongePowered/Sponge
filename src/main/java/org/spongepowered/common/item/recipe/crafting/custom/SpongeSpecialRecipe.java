@@ -56,7 +56,7 @@ public final class SpongeSpecialRecipe extends CustomRecipe {
             BiPredicate<CraftingGridInventory, ServerWorld> biPredicate,
             Function<CraftingGridInventory, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction,
             Function<CraftingGridInventory, org.spongepowered.api.item.inventory.ItemStack> resultFunction) {
-        super(idIn, category);
+        super(category);
         this.biPredicate = biPredicate;
         this.remainingItemsFunction = remainingItemsFunction;
         this.resultFunction = resultFunction;

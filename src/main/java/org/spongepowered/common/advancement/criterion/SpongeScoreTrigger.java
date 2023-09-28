@@ -36,36 +36,30 @@ import java.util.Optional;
 
 public final class SpongeScoreTrigger extends SimpleCriterionTrigger<SpongeScoreTrigger.Instance> {
 
-    public static final SpongeScoreTrigger SCORE_TRIGGER = CriteriaTriggersAccessor.invoker$register(new SpongeScoreTrigger(new ResourceLocation("sponge:score")));
+    public static final SpongeScoreTrigger SCORE_TRIGGER = CriteriaTriggersAccessor.invoker$register("sponge:score", new SpongeScoreTrigger());
 
-    private final ResourceLocation resourceLocation;
 
-    private SpongeScoreTrigger(final ResourceLocation resourceLocation) {
-        this.resourceLocation = resourceLocation;
+    private SpongeScoreTrigger() {
     }
 
-    @Override
-    public ResourceLocation getId() {
-        return this.resourceLocation;
-    }
 
     @Override
     protected Instance createInstance(final JsonObject jsonObject, final Optional<ContextAwarePredicate> andPredicate,
             final DeserializationContext conditionArrayParser) {
-        return new SpongeScoreTrigger.Instance(this.resourceLocation, andPredicate, -1);
+        return new SpongeScoreTrigger.Instance(andPredicate, -1);
     }
 
     public static class Instance extends AbstractCriterionTriggerInstance {
 
         private final int triggerTimes;
 
-        public Instance(final ResourceLocation criterionIn, final Optional<ContextAwarePredicate> andPredicate, final int triggerTimes) {
-            super(criterionIn, andPredicate);
+        public Instance(final Optional<ContextAwarePredicate> andPredicate, final int triggerTimes) {
+            super(andPredicate);
             this.triggerTimes = triggerTimes;
         }
 
         public static Instance of(int triggerTimes) {
-            return new Instance(SpongeScoreTrigger.SCORE_TRIGGER.getId(), Optional.empty(), triggerTimes);
+            return new Instance(Optional.empty(), triggerTimes);
         }
 
         @Override

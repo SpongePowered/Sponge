@@ -26,6 +26,8 @@ package org.spongepowered.common.item.recipe.ingredient;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
@@ -43,11 +45,13 @@ import java.text.MessageFormat;
 import java.util.Map;
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 public final class IngredientResultUtil {
 
     private static final Map<String, Function<?, net.minecraft.world.item.ItemStack>> cachedResultFunctions = new Object2ObjectOpenHashMap<>();
     private static final Map<String, Function<?, NonNullList<net.minecraft.world.item.ItemStack>>> cachedRemainingItemsFunctions =
-        new Object2ObjectOpenHashMap<>();
+            new Object2ObjectOpenHashMap<>();
 
     public static net.minecraft.world.item.ItemStack deserializeItemStack(final JsonObject result) {
         if (result == null) {
@@ -79,12 +83,25 @@ public final class IngredientResultUtil {
         return null;
     }
 
+    public static final Codec<String> CACHED_RESULT_FUNC_CODEC = Codec.STRING.flatXmap(
+            id -> IngredientResultUtil.cachedResultFunction(id) != null ? DataResult.success(id) :
+                    DataResult.error(() -> "Missing Result Function for id " + id),
+            DataResult::success
+    );
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public static <C extends Container> Function<C, net.minecraft.world.item.ItemStack> cachedResultFunction(String id) {
+        return (Function<C, net.minecraft.world.item.ItemStack>) IngredientResultUtil.cachedResultFunctions.get(id);
+    }
+
+
     public static <C extends Container> String cacheResultFunction(ResourceLocation id,
-        Function<C, net.minecraft.world.item.ItemStack> resultFunction) {
+            Function<C, net.minecraft.world.item.ItemStack> resultFunction) {
         if (IngredientResultUtil.cachedResultFunctions.put(id.toString(), resultFunction) != null) {
             SpongeCommon.logger().warn(MessageFormat.format(
-                "Duplicate cache result registration! " + id + " was replaced.",
-                new Object[]{}
+                    "Duplicate cache result registration! " + id + " was replaced.",
+                    new Object[]{}
             ));
         }
         return id.toString();
@@ -92,7 +109,7 @@ public final class IngredientResultUtil {
 
     @SuppressWarnings("unchecked")
     public static <C extends Container> Function<C, NonNullList<net.minecraft.world.item.ItemStack>> deserializeRemainingItemsFunction(
-        JsonObject json) {
+            JsonObject json) {
         if (json.has(Constants.Recipe.SPONGE_REMAINING_ITEMS)) {
             final String id = GsonHelper.getAsString(json, Constants.Recipe.SPONGE_REMAINING_ITEMS);
             return ((Function<C, NonNullList<net.minecraft.world.item.ItemStack>>) IngredientResultUtil.cachedRemainingItemsFunctions.get(id));
@@ -100,12 +117,25 @@ public final class IngredientResultUtil {
         return null;
     }
 
+    public static final Codec<String> CACHED_REMAINING_FUNC_CODEC = Codec.STRING.flatXmap(
+            id -> IngredientResultUtil.cachedRemainingItemsFunction(id) != null ? DataResult.success(id) :
+                    DataResult.error(() -> "Missing Result Function for id " + id),
+            DataResult::success
+    );
+
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public static <C extends Container> Function<C, NonNullList<net.minecraft.world.item.ItemStack>> cachedRemainingItemsFunction(String id) {
+        return (Function<C, NonNullList<net.minecraft.world.item.ItemStack>>) IngredientResultUtil.cachedRemainingItemsFunctions.get(id);
+    }
+
+
     public static <C extends Container> String cacheRemainingItemsFunction(ResourceLocation id,
-        Function<C, NonNullList<net.minecraft.world.item.ItemStack>> resultFunction) {
+            Function<C, NonNullList<net.minecraft.world.item.ItemStack>> resultFunction) {
         if (IngredientResultUtil.cachedRemainingItemsFunctions.put(id.toString(), resultFunction) != null) {
             SpongeCommon.logger().warn(MessageFormat.format(
-                "Duplicate cache result registration! " + id + " was replaced.",
-                new Object[]{}
+                    "Duplicate cache result registration! " + id + " was replaced.",
+                    new Object[]{}
             ));
         }
         return id.toString();

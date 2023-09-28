@@ -47,6 +47,7 @@ import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.gson.GsonConfigurationLoader;
+import org.spongepowered.plugin.metadata.builtin.StandardInheritable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -58,8 +59,7 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 @SuppressWarnings("unchecked")
-public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> extends AbstractResourceKeyedBuilder<Trigger<C>,
-        Trigger.Builder<C>> implements Trigger.Builder<C> {
+public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implements Trigger.Builder<C> {
 
     private static final Gson GSON = new Gson();
 
@@ -168,11 +168,12 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
 
     @SuppressWarnings("rawtypes")
     @Override
-    public Trigger<C> build0() {
+    public Trigger<C> build() {
         Objects.requireNonNull(this.name, "name");
         checkState(!this.name.isEmpty(), "The name cannot be empty!");
         checkState(this.configType != null, "The configType must be set");
-        return (Trigger<C>) new SpongeCriterionTrigger(this.configType, (Function) this.constructor, (ResourceLocation) (Object) this.key, (Consumer) this.eventHandler, this.name);
+        // TODO this.key?
+        return (Trigger<C>) new SpongeCriterionTrigger(this.configType, (Function) this.constructor, (Consumer) this.eventHandler, this.name);
     }
 
     @Override
@@ -188,7 +189,6 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
 
     @Override
     public Trigger.Builder<C> reset() {
-        this.key = null;
         this.configType = null;
         this.constructor = null;
         this.eventHandler = null;

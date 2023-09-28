@@ -63,9 +63,8 @@ public class SpongeStonecuttingRecipeSerializer<R extends SingleItemRecipe> impl
         return (R) new SpongeStonecuttingRecipe(recipeId, group, ingredient, itemstack, resultFunction);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public R fromNetwork(final ResourceLocation recipeId, final FriendlyByteBuf buffer) {
+    public R fromNetwork(final FriendlyByteBuf var1) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 

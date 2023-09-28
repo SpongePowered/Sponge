@@ -147,7 +147,7 @@ public final class VanillaRegistryLoader {
         }, phase -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, ((EnderDragonPhaseAccessor) phase).accessor$name()));
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape());
         this.holder.createRegistry(RegistryTypes.TRIGGER, VanillaRegistryLoader.trigger(), true,
-                (k, trigger) -> CriteriaTriggersAccessor.invoker$register((CriterionTrigger<?>) trigger));
+                (k, trigger) -> CriteriaTriggersAccessor.invoker$register(k.location().toString(), (CriterionTrigger<?>) trigger));
         this.knownName(RegistryTypes.GAME_RULE, GameRulesAccessor.accessor$GAME_RULE_TYPES().keySet(), rule -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, rule.getId()));
     }
 
@@ -273,7 +273,7 @@ public final class VanillaRegistryLoader {
     private static RegistryLoader<Trigger<?>> trigger() {
         final var loadMe1 = SpongeDummyTrigger.DUMMY_TRIGGER; // register sponge trigger
         final var loadMe2 =   SpongeScoreTrigger.SCORE_TRIGGER; // register sponge trigger
-        return RegistryLoader.of(l -> CriteriaTriggers.all().forEach(trigger -> l.add(((ResourceKey) (Object) trigger.getId()), (Trigger<?>) trigger)));
+        return RegistryLoader.of(l -> CriteriaTriggers.all().forEach(trigger -> l.add(((ResourceKey) (Object) CriteriaTriggers.getId(trigger)), (Trigger<?>) trigger)));
     }
 
     // The following methods are named for clarity above.

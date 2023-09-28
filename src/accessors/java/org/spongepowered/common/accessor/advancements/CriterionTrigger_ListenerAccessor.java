@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.advancements;
 
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.CriterionTrigger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -32,7 +33,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CriterionTrigger.Listener.class)
 public interface CriterionTrigger_ListenerAccessor {
 
-    @Accessor("advancement") Advancement accessor$advancement();
+    @Accessor("advancement") AdvancementHolder accessor$advancement();
 
     @Accessor("criterion") String accessor$criterion();
 

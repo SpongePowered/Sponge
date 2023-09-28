@@ -26,11 +26,16 @@ package org.spongepowered.common.advancement;
 
 import com.google.gson.JsonElement;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTemplate;
+import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.common.SpongeCommon;
+
+import java.util.Optional;
 
 public record SpongeAdvancementTemplate(ResourceKey key,
                                         net.minecraft.advancements.Advancement representedAdvancement,
@@ -39,7 +44,16 @@ public record SpongeAdvancementTemplate(ResourceKey key,
 
     @Override
     public Advancement advancement() {
-        return (Advancement) this.representedAdvancement;
+        return (Advancement) (Object) this.representedAdvancement;
+    }
+
+    @Override
+    public Optional<AdvancementTree> tree() {
+        if (this.representedAdvancement.parent().isEmpty()) {
+            var node = SpongeCommon.server().getAdvancements().tree().get((ResourceLocation) (Object) this.key);
+            return Optional.of((AdvancementTree) node);
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -53,11 +67,11 @@ public record SpongeAdvancementTemplate(ResourceKey key,
     }
 
     public static JsonElement encode(final net.minecraft.advancements.Advancement advancement) {
-        return advancement.deconstruct().serializeToJson();
+        return advancement.serializeToJson();
     }
 
     public static JsonElement encode(final AdvancementTemplate template, final RegistryAccess registryAccess) {
-        return SpongeAdvancementTemplate.encode((net.minecraft.advancements.Advancement) template.advancement());
+        return SpongeAdvancementTemplate.encode((net.minecraft.advancements.Advancement) (Object) template.advancement());
     }
 
 }

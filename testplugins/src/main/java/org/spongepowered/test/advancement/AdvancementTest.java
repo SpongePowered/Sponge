@@ -79,14 +79,14 @@ public final class AdvancementTest implements LoadableModule {
     @Inject private PluginContainer plugin;
     @Inject private Logger logger;
     private boolean enabled = false;
-    private Advancement rootAdvancement;
+    private AdvancementTemplate rootAdvancement;
     private Trigger<InventoryChangeTriggerConfig> inventoryChangeTrigger;
     private TriggerListeners listeners = new TriggerListeners();
     private ScoreAdvancementCriterion counter1;
     private AdvancementCriterion counter1Bypass;
     private ScoreAdvancementCriterion counter2;
-    private Advancement counterAdvancement1;
-    private Advancement counterAdvancement2;
+    private AdvancementTemplate counterAdvancement1;
+    private AdvancementTemplate counterAdvancement2;
 
     @Override
     public void enable(final CommandContext ctx) {
@@ -114,9 +114,9 @@ public final class AdvancementTest implements LoadableModule {
     @Listener
     private void onTreeAdjust(final AdvancementTreeEvent.GenerateLayout event) {
         final AdvancementTree tree = event.tree();
-        if (tree.equals(this.rootAdvancement)) {
-            final TreeLayoutElement layoutElement1 = event.layout().element(this.counterAdvancement1).get();
-            final TreeLayoutElement layoutElement2 = event.layout().element(this.counterAdvancement2).get();
+        if (tree.key().equals(this.rootAdvancement.key())) {
+            final TreeLayoutElement layoutElement1 = tree.layoutElement(this.counterAdvancement1).get();
+            final TreeLayoutElement layoutElement2 = tree.layoutElement(this.counterAdvancement2).get();
             layoutElement1.setPosition(layoutElement2.position());
             layoutElement2.setPosition(layoutElement2.position().add(-1,2));
         }
@@ -134,7 +134,7 @@ public final class AdvancementTest implements LoadableModule {
 
     @Listener
     private void onTrigger(final CriterionEvent.Trigger<?> event) {
-        this.logger.info("{} for {} was triggered", event.trigger().type().key(), event.advancement().key());
+        this.logger.info("{} for {} was triggered", event.trigger().type().key(RegistryTypes.TRIGGER), event.advancement().key()); // TODO trigger key?
     }
 
     @Listener
@@ -147,7 +147,6 @@ public final class AdvancementTest implements LoadableModule {
                     final int found = triggerEvent.player().inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY, stack).totalQuantity();
                     triggerEvent.setResult(stack.quantity() <= found);
                 })
-                .key(ResourceKey.of(this.plugin, "my_inventory_trigger"))
                 .name("my_inventory_trigger")
                 .build();
         event.registry(RegistryTypes.TRIGGER).register(ResourceKey.of(this.plugin, "my_inventory_trigger"), this.inventoryChangeTrigger);
@@ -172,7 +171,7 @@ public final class AdvancementTest implements LoadableModule {
                 .key(ResourceKey.of(this.plugin, "root"))
                 .build();
         event.register(rootAdvancement);
-        this.rootAdvancement = rootAdvancement.advancement();
+        this.rootAdvancement = rootAdvancement;
 
         final AdvancementCriterion someDirtCriterion = AdvancementCriterion.builder().trigger(
                 FilteredTrigger.builder()
@@ -207,7 +206,7 @@ public final class AdvancementTest implements LoadableModule {
                         .title(Component.text("Got more dirt!"))
                         .type(AdvancementTypes.GOAL)
                         .build())
-                .parent(someDirt.advancement())
+                .parent(someDirt)
                 .key(ResourceKey.of(this.plugin, "lots_of_dirt"))
                 .build();
         event.register(lotsOfDirt);
@@ -227,7 +226,7 @@ public final class AdvancementTest implements LoadableModule {
                         .type(AdvancementTypes.CHALLENGE)
                         .hidden(true)
                         .build())
-                .parent(lotsOfDirt.advancement())
+                .parent(lotsOfDirt)
                 .key(ResourceKey.of(this.plugin, "tons_of_dirt"))
                 .build();
         event.register(tonsOfDirt);
@@ -245,7 +244,7 @@ public final class AdvancementTest implements LoadableModule {
                 .key(ResourceKey.of(this.plugin, "counting"))
                 .build();
         event.register(counterAdvancement1);
-        this.counterAdvancement1 = counterAdvancement1.advancement();
+        this.counterAdvancement1 = counterAdvancement1;
 
         this.counter2 = ScoreAdvancementCriterion.builder().goal(20).name("counter").build();
         AdvancementTemplate counterAdvancement2 = AdvancementTemplate.builder()
@@ -255,11 +254,11 @@ public final class AdvancementTest implements LoadableModule {
                         .title(Component.text("Open more chests"))
                         .type(AdvancementTypes.CHALLENGE)
                         .build())
-                .parent(this.counterAdvancement1)
+                .parent(counterAdvancement1)
                 .key(ResourceKey.of(this.plugin, "counting_more"))
                 .build();
         event.register(counterAdvancement2);
-        this.counterAdvancement2 = counterAdvancement2.advancement();
+        this.counterAdvancement2 = counterAdvancement2;
 
         final AdvancementCriterion a = AdvancementCriterion.builder().name("A").build();
         final AdvancementCriterion b = AdvancementCriterion.builder().name("B").build();
@@ -276,7 +275,7 @@ public final class AdvancementTest implements LoadableModule {
                         .description(Component.text("ABE ABF ACDE ACDF"))
                         .type(AdvancementTypes.CHALLENGE)
                         .build())
-                .parent(this.counterAdvancement1)
+                .parent(counterAdvancement1)
                 .key(ResourceKey.of(this.plugin, "combination"))
                 .build();
         event.register(combinationAdvancement);

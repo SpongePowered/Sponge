@@ -38,7 +38,7 @@ public class SpongeStonecuttingRecipe extends StonecutterRecipe {
     private final Function<Container, ItemStack> resultFunction;
 
     public SpongeStonecuttingRecipe(ResourceLocation idIn, String groupIn, Ingredient ingredientIn, ItemStack resultIn, Function<Container, ItemStack> resultFunction) {
-        super(idIn, groupIn, ingredientIn, resultIn);
+        super(groupIn, ingredientIn, resultIn);
         this.resultFunction = resultFunction;
     }
 

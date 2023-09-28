@@ -42,14 +42,14 @@ import org.spongepowered.common.item.recipe.stonecutting.SpongeStonecuttingRecip
 
 public interface SpongeRecipeSerializers {
 
-    SpongeCookingRecipeSerializer<BlastingRecipe> SPONGE_BLASTING = register("blasting", new SpongeCookingRecipeSerializer.Blasting());
-    SpongeCookingRecipeSerializer<CampfireCookingRecipe> SPONGE_CAMPFIRE_COOKING = register("campfire_cooking", new SpongeCookingRecipeSerializer.Campfire());
-    SpongeCookingRecipeSerializer<SmeltingRecipe> SPONGE_SMELTING = register("smelting", new SpongeCookingRecipeSerializer.Smelting());
+    SpongeCookingRecipeSerializer<BlastingRecipe> SPONGE_BLASTING = register("blasting", new SpongeCookingRecipeSerializer<>(SpongeBlastingRecipe::new, 100));
+    SpongeCookingRecipeSerializer<CampfireCookingRecipe> SPONGE_CAMPFIRE_COOKING = register("campfire_cooking", new SpongeCookingRecipeSerializer<>(SpongeCampfireCookingRecipe::new, 100));
+    SpongeCookingRecipeSerializer<SmeltingRecipe> SPONGE_SMELTING = register("smelting", new SpongeCookingRecipeSerializer<>(SpongeFurnaceRecipe::new, 200));
     RecipeSerializer<?> SPONGE_CRAFTING_SHAPED = register("crafting_shaped", new SpongeShapedCraftingRecipeSerializer());
     RecipeSerializer<?> SPONGE_CRAFTING_SHAPELESS = register("crafting_shapeless", new SpongeShapelessCraftingRecipeSerializer());
     RecipeSerializer<?> SPONGE_SMITHING = register("smithing", new SpongeSmithingRecipeSerializer<>());
     RecipeSerializer<?> SPONGE_STONECUTTING = register("stonecutting", new SpongeStonecuttingRecipeSerializer<>());
-    SpongeCookingRecipeSerializer<SmokingRecipe> SPONGE_SMOKING = register("smoking", new SpongeCookingRecipeSerializer.Smoking());
+    SpongeCookingRecipeSerializer<SmokingRecipe> SPONGE_SMOKING = register("smoking", new SpongeCookingRecipeSerializer<>(SpongeSmokingRecipe::new, 100));
 
     SimpleCraftingRecipeSerializer<?> SPONGE_SPECIAL = register("special", new SimpleCraftingRecipeSerializer<>(SpongeSpecialCraftingRecipeRegistration::get));
 

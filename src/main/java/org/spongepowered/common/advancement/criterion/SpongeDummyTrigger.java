@@ -29,40 +29,31 @@ import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
 import net.minecraft.advancements.critereon.ContextAwarePredicate;
 import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
-import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 
 import java.util.Optional;
 
 public final class SpongeDummyTrigger extends SimpleCriterionTrigger<SpongeDummyTrigger.Instance> {
 
-    public static final SpongeDummyTrigger DUMMY_TRIGGER = CriteriaTriggersAccessor.invoker$register(new SpongeDummyTrigger(new ResourceLocation("sponge:dummy")));
+    public static final SpongeDummyTrigger DUMMY_TRIGGER = CriteriaTriggersAccessor.invoker$register("sponge:dummy", new SpongeDummyTrigger());
 
-    private final ResourceLocation resourceLocation;
-
-    private SpongeDummyTrigger(final ResourceLocation resourceLocation) {
-        this.resourceLocation = resourceLocation;
+    private SpongeDummyTrigger() {
     }
 
-    @Override
-    public ResourceLocation getId() {
-        return this.resourceLocation;
-    }
 
     @Override
-    protected Instance createInstance(final JsonObject jsonObject, final Optional<ContextAwarePredicate> andPredicate, final DeserializationContext
-            conditionArrayParser) {
-        return new SpongeDummyTrigger.Instance(this.resourceLocation, andPredicate);
+    protected Instance createInstance(final JsonObject jsonObject, final Optional<ContextAwarePredicate> andPredicate, final DeserializationContext conditionArrayParser) {
+        return new SpongeDummyTrigger.Instance(andPredicate);
     }
 
     public static class Instance extends AbstractCriterionTriggerInstance {
 
-        public Instance(final ResourceLocation resourceLocation, final Optional<ContextAwarePredicate> andPredicate) {
-            super(resourceLocation, andPredicate);
+        public Instance(final Optional<ContextAwarePredicate> andPredicate) {
+            super(andPredicate);
         }
 
         public static Instance dummy() {
-            return new Instance(SpongeDummyTrigger.DUMMY_TRIGGER.getId(), Optional.empty());
+            return new Instance(Optional.empty());
         }
 
         @Override

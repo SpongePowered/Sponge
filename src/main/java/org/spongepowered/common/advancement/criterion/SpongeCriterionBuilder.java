@@ -25,6 +25,7 @@
 package org.spongepowered.common.advancement.criterion;
 
 import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
@@ -39,8 +40,11 @@ public class SpongeCriterionBuilder extends AbstractCriterionBuilder<Advancement
         if (this.trigger == null) {
             trigger = SpongeDummyTrigger.Instance.dummy();
         }
-        final Criterion criterion = new Criterion(trigger);
-        ((CriterionBridge) criterion).bridge$setName(this.name);
-        return (AdvancementCriterion) criterion;
+
+
+
+        final Criterion<?> criterion = new Criterion<>((CriterionTrigger) this.trigger.type(), trigger);
+        ((CriterionBridge) (Object) criterion).bridge$setName(this.name);
+        return (AdvancementCriterion) (Object) criterion;
     }
 }

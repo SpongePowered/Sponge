@@ -35,7 +35,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
@@ -191,6 +190,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         super.readAdditionalSaveData(tag);
         if (tag.contains("profile")) {
             this.fakeProfile = NbtUtils.readGameProfile(tag.getCompound("profile"));
+            this.setUUID(this.fakeProfile.getId());
             // Fix Vanilla not writing profiles with empty names, instead it skips the "name" property. We allow humans to have no names
             // but they are players on the client. Easiest fix is just to check for the null name and make it empty
             if (this.fakeProfile.getName() == null) {
@@ -453,27 +453,6 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     public void untrackFrom(final ServerPlayer player) {
         this.playerPacketMap.remove(player.getUUID());
         player.connection.send(new ClientboundPlayerInfoRemovePacket(List.of(this.uuid)));
-    }
-
-    /**
-     * Creates a {@link ClientboundAddPlayerPacket} packet.
-     *
-     * Copied directly from the constructor of the packet, because that can't be
-     * used as we're not a PlayerEntity.
-     *
-     * @return A new spawn packet
-     */
-    @Override
-    public ClientboundAddPlayerPacket getAddEntityPacket() {
-        return PacketUtil.createClientboundAddPlayerPacket(
-            this.getId(),
-            this.fakeProfile.getId(),
-            this.getX(),
-            this.getY(),
-            this.getZ(),
-            (byte) ((int) (this.getYRot() * 256.0F / 360.0F)),
-            (byte) ((int) (this.getXRot() * 256.0F / 360.0F))
-        );
     }
 
     /**

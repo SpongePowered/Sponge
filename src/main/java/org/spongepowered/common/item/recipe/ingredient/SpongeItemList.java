@@ -48,7 +48,6 @@ public abstract class SpongeItemList implements Ingredient.Value {
         return Arrays.asList(this.stacks);
     }
 
-    @Override
     public JsonObject serialize() {
         final JsonObject jsonobject = new JsonObject();
         final JsonArray stackArray = new JsonArray();

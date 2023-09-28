@@ -97,9 +97,9 @@ public class IngredientUtil {
                 final String type = GsonHelper.getAsString(ingredientJson, SpongeItemList.INGREDIENT_TYPE);
                 switch (type) {
                     case SpongeStackItemList.TYPE_STACK:
-                        return new SpongeIngredient(IngredientUtil.spongeDeserializeItemList(ingredientJson));
+                        return new SpongeIngredient(type, IngredientUtil.spongeDeserializeItemList(ingredientJson));
                     case SpongePredicateItemList.TYPE_PREDICATE:
-                        return new SpongeIngredient(IngredientUtil.spongeDeserializePredicateItemList(ingredientJson));
+                        return new SpongeIngredient(type, IngredientUtil.spongeDeserializePredicateItemList(ingredientJson));
                     default:
                         throw new JsonSyntaxException("Unknown Sponge ingredient type " + type);
                 }

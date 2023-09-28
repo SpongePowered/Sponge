@@ -22,32 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancements;
+package org.spongepowered.common.mixin.core.world.item.crafting;
 
-import net.minecraft.advancements.AdvancementNode;
-import net.minecraft.advancements.TreeNodePosition;
-import org.spongepowered.api.advancement.AdvancementTree;
-import org.spongepowered.api.advancement.TreeLayout;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.advancement.AdvancementTreeEvent;
+import com.mojang.serialization.Codec;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ChorusFruitItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.advancement.SpongeTreeLayout;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
+import org.spongepowered.common.item.recipe.ingredient.SpongePredicateItemList;
 
-@Mixin(TreeNodePosition.class)
-public abstract class TreeNodePositionMixin {
+import java.util.List;
 
-    @Inject(method = "run", at = @At("RETURN"))
-    private static void impl$onLayout(AdvancementNode node, CallbackInfo ci) {
-        final AdvancementTree advancementTree = (AdvancementTree) node;
-        final TreeLayout layout = new SpongeTreeLayout(advancementTree);
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-        final AdvancementTreeEvent.GenerateLayout event = SpongeEventFactory.createAdvancementTreeEventGenerateLayout(cause, layout, advancementTree);
-        SpongeCommon.post(event);
+@Mixin(Ingredient.class)
+public abstract class IngredientMixin {
+
+
+
+    @Inject(method = "codec", at = @At(value = "RETURN"), cancellable = true)
+    private static void impl$modifyCodec(final boolean $$0, final CallbackInfoReturnable<Codec<Ingredient>> cir) {
+        final Codec<Ingredient> original = cir.getReturnValue();
+        ExtraCodecs.xor()
+        var modified = ExtraCodecs.either(original, original).flatComapMap(
+                codec1 -> codec1.map(l -> l, r -> r),
+                ingredient -> {
+
+                }
+        );
+        cir.setReturnValue(modified);
     }
 }

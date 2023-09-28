@@ -27,7 +27,6 @@ package org.spongepowered.common.advancement;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
@@ -51,11 +50,6 @@ public final class SpongeFilteredTrigger implements CriterionTriggerInstance, Fi
     SpongeFilteredTrigger(final SpongeCriterionTrigger triggerType, final FilteredTriggerConfiguration configuration) {
         this.triggerType = triggerType;
         this.configuration = configuration;
-    }
-
-    @Override
-    public ResourceLocation getCriterion() {
-        return this.triggerType.getId();
     }
 
     @Override

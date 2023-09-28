@@ -25,8 +25,8 @@
 package org.spongepowered.common.entity.projectile;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSourceImpl;
 import net.minecraft.core.Direction;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Item;
@@ -72,7 +72,7 @@ public final class DispenserSourceLogic implements ProjectileSourceLogic<Dispens
     private <P extends Projectile> Optional<P> launch(final DispenserBlockEntity dispenser, final EntityType<P> projectileType, final Item item) {
         final DispenseItemBehavior behavior = DispenserBlockAccessor.accessor$DISPENSER_REGISTRY().get(item);
         final ServerLevel world = (ServerLevel) dispenser.getLevel();
-        behavior.dispense(new BlockSourceImpl(world, dispenser.getBlockPos()), new ItemStack(item));
+        behavior.dispense(new BlockSource(world, dispenser.getBlockPos(), dispenser.getLevel().getBlockState(dispenser.getBlockPos()), dispenser), new ItemStack(item));
         final List<P> entities = (List<P>) world.getEntities((net.minecraft.world.entity.EntityType<?>) projectileType, entity -> true);
         if (entities.isEmpty()) {
             return Optional.empty();

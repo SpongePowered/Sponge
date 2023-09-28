@@ -25,10 +25,12 @@
 package org.spongepowered.common.advancement.criterion;
 
 import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ public class SpongeScoreCriterion implements ScoreAdvancementCriterion, Defaulte
     public final List<DefaultedAdvancementCriterion> internalCriteria;
 
     @SuppressWarnings("ConstantConditions")
-    public SpongeScoreCriterion(final String name, final int goal, final @Nullable CriterionTriggerInstance trigger) {
+    public SpongeScoreCriterion(final String name, final int goal, final CriterionTrigger type, final @Nullable CriterionTriggerInstance trigger) {
         this.internalCriteria = new ArrayList<>(goal);
         this.name = name;
         for (int i = 0; i < goal; i++) {
@@ -54,10 +56,11 @@ public class SpongeScoreCriterion implements ScoreAdvancementCriterion, Defaulte
             } else {
                 mctrigger = SpongeDummyTrigger.Instance.dummy();
             }
-            final Criterion criterion = new Criterion(mctrigger);
-            ((CriterionBridge) criterion).bridge$setScoreCriterion(this);
-            ((CriterionBridge) criterion).bridge$setName(name + SpongeScoreCriterion.INTERNAL_SUFFIX_BASE + i);
-            this.internalCriteria.add((DefaultedAdvancementCriterion) criterion);
+
+            final var criterion = new Criterion<>(type, mctrigger);
+            ((CriterionBridge) (Object) criterion).bridge$setScoreCriterion(this);
+            ((CriterionBridge) (Object) criterion).bridge$setName(name + SpongeScoreCriterion.INTERNAL_SUFFIX_BASE + i);
+            this.internalCriteria.add((DefaultedAdvancementCriterion) (Object) criterion);
         }
     }
 

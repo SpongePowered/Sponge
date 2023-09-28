@@ -33,7 +33,7 @@ import org.spongepowered.common.UntransformedInvokerError;
 @Mixin(CriteriaTriggers.class)
 public interface CriteriaTriggersAccessor {
 
-    @Invoker("register") static <T extends CriterionTrigger<?>> T invoker$register(final T trigger) {
+    @Invoker("register") static <T extends CriterionTrigger<?>> T invoker$register(final String $$0, final T trigger) {
         throw new UntransformedInvokerError();
     }
 

@@ -57,9 +57,8 @@ public class SpongeSmithingRecipeSerializer<R extends SmithingTransformRecipe> i
         return (R) new SpongeSmithingRecipe(recipeId, template, base, addition, spongeStack == null ? itemstack : spongeStack, resultFunction);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public R fromNetwork(final ResourceLocation recipeId, final FriendlyByteBuf buffer) {
+    public R fromNetwork(final FriendlyByteBuf var1) {
         throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 

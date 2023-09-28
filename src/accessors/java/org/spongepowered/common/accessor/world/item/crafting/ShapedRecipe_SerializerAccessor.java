@@ -22,30 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.network.protocol.game;
+package org.spongepowered.common.accessor.world.item.crafting;
 
-import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
+import com.mojang.serialization.Codec;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.UUID;
+import java.util.List;
 
-@Mixin(ClientboundAddPlayerPacket.class)
-public interface ClientboundAddPlayerPacketAccessor {
+@Mixin(ShapedRecipe.Serializer.class)
+public interface ShapedRecipe_SerializerAccessor {
 
-    @Accessor("entityId") @Mutable void accessor$entityId(final int entityId);
 
-    @Accessor("playerId") @Mutable void accessor$playerId(final UUID playerId);
+    @Accessor("PATTERN_CODEC")
+    static Codec<List<String>> accessor$PATTERN_CODEC() {
+        throw new UnsupportedOperationException();
+    }
 
-    @Accessor("x") @Mutable void accessor$x(final double x);
-
-    @Accessor("y") @Mutable void accessor$y(final double y);
-
-    @Accessor("z") @Mutable void accessor$z(final double z);
-
-    @Accessor("yRot") @Mutable void accessor$yRot(final byte yRot);
-
-    @Accessor("xRot") @Mutable void accessor$xRot(final byte xRot);
-
+    @Accessor("SINGLE_CHARACTER_STRING_CODEC")
+    static Codec<String> accessor$SINGLE_CHARACTER_STRING_CODEC() {
+        throw new UnsupportedOperationException();
+    }
 }

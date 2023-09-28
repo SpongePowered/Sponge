@@ -26,7 +26,6 @@ package org.spongepowered.common.item.recipe.crafting.shapeless;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
@@ -51,17 +50,26 @@ import java.util.function.Function;
 public class SpongeShapelessRecipe extends ShapelessRecipe {
 
     private final boolean onlyVanillaIngredients;
-    private final Function<CraftingContainer, ItemStack> resultFunction;
-    private final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction;
 
-    public SpongeShapelessRecipe(ResourceLocation idIn, String groupIn, CraftingBookCategory category, ItemStack recipeOutputIn, NonNullList<Ingredient> recipeItemsIn,
-            Function<CraftingContainer, ItemStack> resultFunction,
-            Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction) {
-        super(idIn, groupIn, category, recipeOutputIn, recipeItemsIn);
+    private final String resultFunctionId;
+    private final String remainingItemsFunctionId;
+
+    public SpongeShapelessRecipe(String groupIn, CraftingBookCategory category, ItemStack recipeOutputIn, NonNullList<Ingredient> recipeItemsIn,
+            String resultFunctionId, String remainingItemsFunctionId) {
+        super(groupIn, category, recipeOutputIn, recipeItemsIn);
         this.onlyVanillaIngredients = recipeItemsIn.stream().noneMatch(i -> i instanceof SpongeIngredient);
-        this.resultFunction = resultFunction;
-        this.remainingItemsFunction = remainingItemsFunction;
+        this.resultFunctionId = resultFunctionId;
+        this.remainingItemsFunctionId = remainingItemsFunctionId;
     }
+
+    public String resultFunctionId() {
+        return resultFunctionId;
+    }
+
+    public String remainingItemsFunctionId() {
+        return remainingItemsFunctionId;
+    }
+
 
     @Override
     public boolean matches(CraftingContainer inv, Level p_77569_2_) {

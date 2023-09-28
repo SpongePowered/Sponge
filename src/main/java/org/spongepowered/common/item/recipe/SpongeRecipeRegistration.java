@@ -26,6 +26,7 @@ package org.spongepowered.common.item.recipe;
 
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.NonNullList;
@@ -38,6 +39,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
@@ -54,8 +56,7 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
 
     protected final ResourceLocation key;
     protected final RecipeSerializer<?> serializer;
-    protected final ResourceLocation advancementId;
-    protected final Advancement.Builder advancementBuilder = Advancement.Builder.advancement();
+    protected final AdvancementHolder advancement;
     protected final String group;
     protected final DataPack<RecipeRegistration> pack;
 
@@ -63,10 +64,10 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
         this.key = key;
         this.serializer = serializer;
         this.pack = pack;
-        this.advancementId = new ResourceLocation(key.getNamespace(), "recipes/" + recipeCategory.getFolderName() + "/" + key.getPath());
-        this.advancementBuilder
+        this.advancement = Advancement.Builder.advancement()
                 .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(key))
-                .rewards(AdvancementRewards.Builder.recipe(key));
+                .rewards(AdvancementRewards.Builder.recipe(key))
+                .build(new ResourceLocation(key.getNamespace(), "recipes/" + recipeCategory.getFolderName() + "/" + key.getPath()));
         this.group = group == null ? "" : group;
     }
 
@@ -93,7 +94,7 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
     }
 
     @Override
-    public ResourceLocation getId() {
+    public ResourceLocation id() {
         return this.key;
     }
 
@@ -103,7 +104,7 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
     }
 
     @Override
-    public RecipeSerializer<?> getType() {
+    public RecipeSerializer<?> type() {
         return this.serializer;
     }
 
@@ -122,14 +123,9 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
     public void serializeAdditional(final JsonObject json) {
     }
 
-    @Override
-    public JsonObject serializeAdvancement() {
-        return this.advancementBuilder.serializeToJson();
-    }
-
-    @Override
-    public ResourceLocation getAdvancementId() {
-        return this.advancementId;
+    @Nullable @Override
+    public AdvancementHolder advancement() {
+        return this.advancement;
     }
 
     @Override

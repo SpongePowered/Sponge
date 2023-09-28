@@ -56,25 +56,18 @@ public class SpongeCriterionTrigger implements CriterionTrigger<SpongeFilteredTr
 
     private final Type triggerConfigurationType;
     final Function<JsonObject, FilteredTriggerConfiguration> constructor;
-    private final ResourceLocation id;
     private final Multimap<PlayerAdvancements, Listener> listeners = HashMultimap.create();
     final @Nullable Consumer<CriterionEvent.Trigger> eventHandler;
     private final String name;
 
     SpongeCriterionTrigger(final Type triggerConfigurationType,
         final Function<JsonObject, FilteredTriggerConfiguration> constructor,
-        final ResourceLocation id, final @Nullable Consumer<CriterionEvent.Trigger> eventHandler,
+        final @Nullable Consumer<CriterionEvent.Trigger> eventHandler,
         final String name) {
         this.triggerConfigurationType = triggerConfigurationType;
         this.eventHandler = eventHandler;
         this.constructor = constructor;
-        this.id = id;
         this.name = name;
-    }
-
-    @Override
-    public ResourceLocation getId() {
-        return this.id;
     }
 
     public String getName() {
@@ -109,12 +102,11 @@ public class SpongeCriterionTrigger implements CriterionTrigger<SpongeFilteredTr
         @SuppressWarnings("unchecked") // correct type verified in builder
         final TypeToken<FilteredTriggerConfiguration> typeToken = (TypeToken<FilteredTriggerConfiguration>) TypeToken.get(this.triggerConfigurationType);
         for (final Listener listener : new ArrayList<>(this.listeners.get(playerAdvancements))) {
-            final CriterionTrigger_ListenerAccessor mixinListener = (CriterionTrigger_ListenerAccessor) listener;
-            final Advancement advancement = (Advancement) mixinListener.accessor$advancement();
-            final AdvancementCriterion advancementCriterion = (AdvancementCriterion)
-                ((net.minecraft.advancements.Advancement) advancement).getCriteria().get(mixinListener.accessor$criterion());
-            final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause, advancement, advancementCriterion,
-                typeToken, player, (FilteredTrigger) listener.getTriggerInstance(), this.eventHandler == null);
+            final CriterionTrigger_ListenerAccessor mixinListener = (CriterionTrigger_ListenerAccessor) (Object) listener;
+            final var advancement = mixinListener.accessor$advancement().value();
+            final AdvancementCriterion advancementCriterion = (AdvancementCriterion) (Object) advancement.criteria().get(mixinListener.accessor$criterion());
+            final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause, (Advancement) (Object) advancement, advancementCriterion,
+                typeToken, player, (FilteredTrigger) listener.trigger(), this.eventHandler == null);
             if (this.eventHandler != null) {
                 this.eventHandler.accept(event);
                 if (!event.result()) {

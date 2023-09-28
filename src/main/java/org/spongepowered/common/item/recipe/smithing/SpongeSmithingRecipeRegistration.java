@@ -66,8 +66,8 @@ public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration {
 
     @Override
     public void serializeShape(JsonObject json) {
-        json.add(Constants.Recipe.SMITHING_BASE_INGREDIENT, this.base.toJson());
-        json.add(Constants.Recipe.SMITHING_ADDITION_INGREDIENT, this.addition.toJson());
+        json.add(Constants.Recipe.SMITHING_BASE_INGREDIENT, this.base.toJson(false));
+        json.add(Constants.Recipe.SMITHING_ADDITION_INGREDIENT, this.addition.toJson(false));
     }
 
     @Override
@@ -81,7 +81,7 @@ public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration {
             json.add(Constants.Recipe.SPONGE_RESULT, IngredientResultUtil.serializeItemStack(this.spongeResult));
         }
         if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, IngredientResultUtil.cacheResultFunction(this.getId(), this.resultFunction));
+            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, IngredientResultUtil.cacheResultFunction(this.id(), this.resultFunction));
         }
     }
 }

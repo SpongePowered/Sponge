@@ -25,7 +25,6 @@
 package org.spongepowered.common.item.recipe.cooking;
 
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
@@ -34,13 +33,20 @@ import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.function.Function;
 
-public class SpongeCampfireCookingRecipe extends CampfireCookingRecipe {
+public class SpongeCampfireCookingRecipe extends CampfireCookingRecipe implements ResultFunctionRecipe {
 
     private final Function<Container, ItemStack> resultFunction;
+    private final String resultFunctionId;
 
-    public SpongeCampfireCookingRecipe(final ResourceLocation id, final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction) {
-        super(id, group, category, ingredient, result, experience, cookingTime);
+    public SpongeCampfireCookingRecipe(final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction, final String resultFunctionId) {
+        super(group, category, ingredient, result, experience, cookingTime);
         this.resultFunction = resultFunction;
+        this.resultFunctionId = resultFunctionId;
+    }
+
+    @Override
+    public String resultFunctionId() {
+        return this.resultFunctionId;
     }
 
     @Override

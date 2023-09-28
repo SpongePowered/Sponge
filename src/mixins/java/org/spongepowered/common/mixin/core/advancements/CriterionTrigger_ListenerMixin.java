@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.advancements;
 
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import net.minecraft.server.PlayerAdvancements;
@@ -56,7 +57,7 @@ public abstract class CriterionTrigger_ListenerMixin {
 
     // @formatter:off
     @Shadow @Final private CriterionTriggerInstance trigger;
-    @Shadow @Final private Advancement advancement;
+    @Shadow @Final private AdvancementHolder advancement;
     @Shadow @Final private String criterion;
     // @formatter:on
 
@@ -64,9 +65,8 @@ public abstract class CriterionTrigger_ListenerMixin {
     @Inject(method = "run", at = @At("HEAD"), cancellable = true)
     private void impl$callEvents(PlayerAdvancements playerAdvancements, CallbackInfo ci) {
         final org.spongepowered.api.advancement.Advancement advancement =
-                (org.spongepowered.api.advancement.Advancement) this.advancement;
-        AdvancementCriterion advancementCriterion = (AdvancementCriterion)
-                this.advancement.getCriteria().get(this.criterion);
+                (org.spongepowered.api.advancement.Advancement) (Object) this.advancement.value();
+        AdvancementCriterion advancementCriterion = (AdvancementCriterion) (Object) this.advancement.value().criteria().get(this.criterion);
         final CriterionBridge criterionBridge = (CriterionBridge) advancementCriterion;
         if (criterionBridge.bridge$getScoreCriterion() != null) {
             advancementCriterion = criterionBridge.bridge$getScoreCriterion();
