@@ -118,9 +118,9 @@ public final class SignData {
         holder.updateText(signText -> SignData.setSignLines(signText, value), FRONT_SIGN);
     }
 
-    private static SignText setSignLines(final SignText holder, final List<Component> value) {
+    private static SignText setSignLines(SignText holder, final List<Component> value) {
         for (int i = 0; i < holder.getMessages(true).length; i++) {
-            holder.setMessage(i, SpongeAdventure.asVanilla(i > value.size() - 1 ? Component.empty() : value.get(i)));
+            holder = holder.setMessage(i, SpongeAdventure.asVanilla(i > value.size() - 1 ? Component.empty() : value.get(i)));
         }
         return holder;
     }
