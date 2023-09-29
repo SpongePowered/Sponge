@@ -54,6 +54,6 @@ public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
         }
 
         // Deny non-passable non "full" blocks
-        return ((BlockBehaviourAccessor) state.getBlock()).accessor$hasCollision();
+        return !((BlockBehaviourAccessor) state.getBlock()).accessor$hasCollision();
     }
 }
