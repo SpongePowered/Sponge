@@ -31,13 +31,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingRecipeCodecs;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.apache.commons.lang3.NotImplementedException;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.Constants;
 
 import java.text.MessageFormat;
 import java.util.Arrays;

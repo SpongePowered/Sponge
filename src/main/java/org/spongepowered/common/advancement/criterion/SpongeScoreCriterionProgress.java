@@ -26,7 +26,6 @@ package org.spongepowered.common.advancement.criterion;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;

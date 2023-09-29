@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.advancements;
 
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementNode;

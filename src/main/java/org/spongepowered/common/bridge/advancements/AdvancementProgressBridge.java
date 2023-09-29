@@ -26,7 +26,6 @@ package org.spongepowered.common.bridge.advancements;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
 

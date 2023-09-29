@@ -101,7 +101,6 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
 import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
-import org.spongepowered.common.advancement.SpongeAdvancementTemplate;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;

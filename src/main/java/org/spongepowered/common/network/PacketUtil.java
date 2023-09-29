@@ -46,7 +46,6 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 public final class PacketUtil {

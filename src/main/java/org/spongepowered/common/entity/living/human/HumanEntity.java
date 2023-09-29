@@ -78,7 +78,6 @@ import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.profile.SpongeProfileProperty;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;

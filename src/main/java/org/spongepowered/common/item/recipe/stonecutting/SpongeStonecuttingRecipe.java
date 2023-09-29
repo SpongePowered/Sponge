@@ -25,7 +25,6 @@
 package org.spongepowered.common.item.recipe.stonecutting;
 
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -34,7 +33,6 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.common.item.recipe.cooking.ResultFunctionRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 
-import java.util.function.Function;
 
 public class SpongeStonecuttingRecipe extends StonecutterRecipe implements ResultFunctionRecipe {
 

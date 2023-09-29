@@ -36,7 +36,6 @@ import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.Optional;
 
 import javax.annotation.Nullable;

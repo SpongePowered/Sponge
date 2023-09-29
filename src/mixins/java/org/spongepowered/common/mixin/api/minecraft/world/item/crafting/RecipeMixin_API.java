@@ -28,7 +28,6 @@ import static org.spongepowered.common.inventory.util.InventoryUtil.toNativeInve
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
