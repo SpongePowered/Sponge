@@ -56,7 +56,6 @@ public abstract class DataPackSerializer<E, T extends DataPackEntry<T>> {
         for (final T packEntry : packEntries) {
             this.serializeObject(pack, packDir, packEntry);
             this.serializeAdditional(pack, packDir, packEntry);
-            this.serializeAdditional(pack, packDir, packEntry);
         }
         return true;
     }

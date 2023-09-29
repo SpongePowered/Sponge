@@ -62,6 +62,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 // TODO make IO non-blocking
@@ -143,14 +144,17 @@ public final class SpongeDataPackManager implements DataPackManager {
     }
 
     private <T extends DataPackEntry<T>> void serializePack(final Collection<String> reloadablePacks, final List<T> packEntries) {
-        for (final T packEntry : packEntries) {
-            final SpongeDataPack<JsonElement, T> implPack = (SpongeDataPack<JsonElement, T>) packEntry.pack();
+        final Map<DataPack<T>, List<T>> packEntryMap = packEntries.stream().collect(Collectors.groupingBy(DataPackEntry::pack));
+        for (final Map.Entry<DataPack<T>, List<T>> entry : packEntryMap.entrySet()) {
+            final SpongeDataPack<JsonElement, T> implPack = (SpongeDataPack<JsonElement, T>) entry.getKey();
             final String fullPackName = "file/" + implPack.name();
             try {
-                final boolean success = implPack.type().packSerializer().serialize(implPack, this.packDir(implPack), packEntries);
+                final boolean success = implPack.type().packSerializer().serialize(implPack, this.packDir(implPack), entry.getValue());
                 DataPackSerializer.writePackMetadata(implPack, this.packDir(implPack), false);
                 if (success && implPack.type().reloadable()) {
-                    reloadablePacks.add(fullPackName);
+                    if (!reloadablePacks.contains(fullPackName)) {
+                        reloadablePacks.add(fullPackName);
+                    }
                 } else {
                     reloadablePacks.remove(fullPackName);
                 }
@@ -159,7 +163,6 @@ public final class SpongeDataPackManager implements DataPackManager {
                 SpongeCommon.logger().error(e);
             }
         }
-
     }
 
     @Override
