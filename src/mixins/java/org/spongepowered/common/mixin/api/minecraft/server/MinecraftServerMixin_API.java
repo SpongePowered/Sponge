@@ -99,6 +99,7 @@ import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -364,9 +365,10 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
     @Override
     public void shutdown(final Component kickMessage) {
         Objects.requireNonNull(kickMessage, "kickMessage");
-        this.streamOnlinePlayers().forEach(player -> {
-            player.kick(kickMessage);
-        });
+
+        for (final var player : new ArrayList<>(this.shadow$getPlayerList().getPlayers())) {
+            ((ServerPlayer) player).kick(kickMessage);
+        }
 
         this.shadow$halt(false);
     }
