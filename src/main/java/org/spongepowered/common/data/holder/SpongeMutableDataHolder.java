@@ -63,10 +63,9 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         for (Mutable dataHolder : this.impl$mutableDelegateDataHolder()) {
             // Offer to the first available mutable data holder
             final DataProvider<V, E> dataProvider = this.impl$getProviderFor(key, dataHolder);
-            if (!dataProvider.isSupported(dataHolder)) {
-                return defaultResult.get();
+            if (dataProvider.isSupported(dataHolder)) {
+                return function.apply(dataProvider, dataHolder);
             }
-            return function.apply(dataProvider, dataHolder);
         }
         return defaultResult.get();
     }
