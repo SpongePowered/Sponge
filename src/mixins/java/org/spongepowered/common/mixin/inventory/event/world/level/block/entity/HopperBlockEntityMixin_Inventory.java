@@ -75,13 +75,13 @@ public abstract class HopperBlockEntityMixin_Inventory {
             at = @At(value = "INVOKE",
                      target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;isFullContainer(Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Z"))
     private static boolean impl$throwTransferPreIfNotFull(
-        final Container var0, final Direction direction, final Level level, final BlockPos pos, final BlockState state, final Container container
+        final Container attachedContainer, final Direction direction, final Level level, final BlockPos pos, final BlockState state, final Container container
     ) {
-        final boolean result = HopperBlockEntityAccessor.invoker$isFullContainer(container, direction);
+        final boolean result = HopperBlockEntityAccessor.invoker$isFullContainer(attachedContainer, direction);
         if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
             return result;
         }
-        return InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(container), InventoryUtil.toInventory(container)).isCancelled();
+        return InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(container), InventoryUtil.toInventory(attachedContainer)).isCancelled();
     }
 
     // Capture Transactions
