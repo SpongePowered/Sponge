@@ -458,7 +458,8 @@
         "minecraft.world.level.block.state.properties.FrontAndTopMixin_API",
         "minecraft.world.damagesource.DamageSourceMixin_API",
         "minecraft.world.level.block.entity.SignTextMixin_API",
-        "minecraft.advancements.AdvancementNodeMixin_API"
+        "minecraft.advancements.AdvancementNodeMixin_API",
+        "minecraft.world.level.LightLayerMixin_API"
     ],
     "client": [
         "minecraft.client.MinecraftMixin_API",
