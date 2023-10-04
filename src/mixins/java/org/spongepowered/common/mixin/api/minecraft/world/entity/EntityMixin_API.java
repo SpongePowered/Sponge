@@ -362,6 +362,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         values.add(this.requireValue(Keys.EYE_POSITION).asImmutable());
         values.add(this.requireValue(Keys.FALL_DISTANCE).asImmutable());
         values.add(this.requireValue(Keys.FIRE_DAMAGE_DELAY).asImmutable());
+        values.add(this.requireValue(Keys.FROZEN_TIME).asImmutable());
         values.add(this.requireValue(Keys.HEIGHT).asImmutable());
         values.add(this.requireValue(Keys.INVULNERABILITY_TICKS).asImmutable());
         values.add(this.requireValue(Keys.INVULNERABLE).asImmutable());
@@ -374,6 +375,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         values.add(this.requireValue(Keys.IS_SPRINTING).asImmutable());
         values.add(this.requireValue(Keys.IS_WET).asImmutable());
         values.add(this.requireValue(Keys.MAX_AIR).asImmutable());
+        values.add(this.requireValue(Keys.MAX_FROZEN_TIME).asImmutable());
         values.add(this.requireValue(Keys.ON_GROUND).asImmutable());
         values.add(this.requireValue(Keys.PASSENGERS).asImmutable());
         values.add(this.requireValue(Keys.REMAINING_AIR).asImmutable());
