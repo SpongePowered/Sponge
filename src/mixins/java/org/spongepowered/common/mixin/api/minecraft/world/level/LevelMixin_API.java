@@ -39,9 +39,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -50,6 +52,7 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.storage.LevelData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -63,6 +66,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.HeightTypes;
+import org.spongepowered.api.world.LightType;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldLike;
@@ -132,9 +136,10 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             EntityTypeTest<net.minecraft.world.entity.Entity, T> entityTypeTest,
             net.minecraft.world.phys.AABB param1,
             @org.jetbrains.annotations.Nullable Predicate<? super T> param2);
+    @Shadow public abstract ResourceKey<Level> dimension();
+
     // @formatter:on
 
-    @Shadow public abstract ResourceKey<Level> dimension();
 
     private Context api$context;
     private RegistryHolderLogic api$registryHolder;
@@ -512,5 +517,11 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         return ((WorldProperties) this.shadow$getLevelData()).weather();
     }
 
+    // EnvironmentalVolume
 
+    @Override
+    public int light(final LightType type, final int x, final int y, final int z) {
+        var thisLevel = ((BlockAndTintGetter) this);
+        return thisLevel.getBrightness((LightLayer) (Object) type, new BlockPos(x, y, z));
+    }
 }

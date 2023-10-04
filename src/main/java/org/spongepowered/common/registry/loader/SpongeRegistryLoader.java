@@ -106,8 +106,6 @@ import org.spongepowered.api.util.orientation.Orientation;
 import org.spongepowered.api.util.orientation.Orientations;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.ChunkRegenerateFlags;
-import org.spongepowered.api.world.LightType;
-import org.spongepowered.api.world.LightTypes;
 import org.spongepowered.api.world.generation.config.flat.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfigs;
@@ -171,7 +169,6 @@ import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
 import org.spongepowered.common.util.SpongeOrientation;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeChunkRegenerateFlag;
-import org.spongepowered.common.world.SpongeLightType;
 import org.spongepowered.common.world.portal.EndPortalType;
 import org.spongepowered.common.world.portal.NetherPortalType;
 import org.spongepowered.common.world.portal.UnknownPortalType;
@@ -306,13 +303,6 @@ public final class SpongeRegistryLoader {
             l.add(GoalTypes.RANGED_ATTACK_AGAINST_AGENT, k -> new SpongeGoalType(RangedAttackAgainstAgentGoal.class));
             l.add(GoalTypes.RUN_AROUND_LIKE_CRAZY, k -> new SpongeGoalType(RunAroundLikeCrazyGoal.class));
             l.add(GoalTypes.SWIM, k -> new SpongeGoalType(SwimGoal.class));
-        });
-    }
-
-    public static RegistryLoader<LightType> lightType() {
-        return RegistryLoader.of(l -> {
-            l.add(LightTypes.BLOCK, k -> new SpongeLightType(15));
-            l.add(LightTypes.SKY, k -> new SpongeLightType(15));
         });
     }
 

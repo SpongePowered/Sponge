@@ -66,7 +66,6 @@ public final class SpongeRegistries {
         holder.createFrozenRegistry(RegistryTypes.DISPLAY_SLOT, SpongeRegistryLoader.displaySlot());
         holder.createFrozenRegistry(RegistryTypes.GOAL_EXECUTOR_TYPE, SpongeRegistryLoader.goalExecutorType());
         holder.createFrozenRegistry(RegistryTypes.GOAL_TYPE, SpongeRegistryLoader.goalType());
-        holder.createFrozenRegistry(RegistryTypes.LIGHT_TYPE, SpongeRegistryLoader.lightType());
         holder.createFrozenRegistry(RegistryTypes.MATTER_TYPE, SpongeRegistryLoader.matterType());
         holder.createFrozenRegistry(RegistryTypes.MOVEMENT_TYPE, SpongeRegistryLoader.movementType());
         holder.createFrozenRegistry(RegistryTypes.MUSIC_DISC, SpongeRegistryLoader.musicDisc());

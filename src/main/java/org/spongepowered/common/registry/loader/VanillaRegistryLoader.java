@@ -64,6 +64,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSpecialEffects;
 import net.minecraft.world.level.block.Mirror;
@@ -242,6 +243,7 @@ public final class VanillaRegistryLoader {
         this.automaticSerializedName(RegistryTypes.ITEM_DISPLAY_TYPE, ItemDisplayContext.values());
         this.automaticSerializedName(RegistryTypes.BILLBOARD_TYPE, Display.BillboardConstraints.values());
         this.automaticSerializedName(RegistryTypes.TEXT_ALIGNMENT, Display.TextDisplay.Align.values());
+        this.automaticName(RegistryTypes.LIGHT_TYPE, LightLayer.values());
     }
 
     private static RegistryLoader<Criterion> criterion() {

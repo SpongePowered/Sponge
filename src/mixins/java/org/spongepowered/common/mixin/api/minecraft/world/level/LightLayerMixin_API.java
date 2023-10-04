@@ -22,21 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world;
+package org.spongepowered.common.mixin.api.minecraft.world.level;
 
+import net.minecraft.world.level.LightLayer;
 import org.spongepowered.api.world.LightType;
+import org.spongepowered.asm.mixin.Mixin;
 
-public final class SpongeLightType implements LightType {
-
-    private final int defaultLightValue;
-
-    public SpongeLightType(final int defaultLightValue) {
-        this.defaultLightValue = defaultLightValue;
-    }
+@Mixin(LightLayer.class)
+public abstract class LightLayerMixin_API implements LightType{
 
     @Override
     public int defaultLightValue() {
-        return this.defaultLightValue;
+        return switch ((LightLayer) (Object) this) {
+            case SKY -> 15;
+            case BLOCK -> 0;
+        };
     }
-
 }
