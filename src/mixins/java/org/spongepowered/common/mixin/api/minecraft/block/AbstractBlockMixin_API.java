@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.block;
 
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.api.block.BlockSoundGroup;
@@ -57,4 +58,8 @@ public abstract class AbstractBlockMixin_API implements BlockType {
         return (BlockSoundGroup) this.soundType;
     }
 
+    @Override
+    public boolean hasBlockEntity() {
+        return this instanceof EntityBlock;
+    }
 }

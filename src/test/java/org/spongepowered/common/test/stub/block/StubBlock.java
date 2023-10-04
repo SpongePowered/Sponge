@@ -102,6 +102,11 @@ public class StubBlock implements SpongeImmutableDataHolder<BlockType>, BlockTyp
     }
 
     @Override
+    public boolean hasBlockEntity() {
+        return false;
+    }
+
+    @Override
     public @NotNull Component asComponent() {
         return null;
     }
