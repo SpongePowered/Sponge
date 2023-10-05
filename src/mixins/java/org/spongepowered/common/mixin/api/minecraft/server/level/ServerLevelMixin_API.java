@@ -303,7 +303,10 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public WorldBorder setBorder(final WorldBorder border) {
-        final WorldBorder worldBorder = ((WorldBorderBridge) ((CollisionGetter) this).getWorldBorder()).bridge$applyFrom(border);
+
+        final WorldBorderBridge borderBridge = (WorldBorderBridge) ((CollisionGetter) this).getWorldBorder();
+        borderBridge.bridge$setAssociatedWorld(this.key());
+        final WorldBorder worldBorder = borderBridge.bridge$applyFrom(border);
         if (worldBorder == null) {
             return (WorldBorder) net.minecraft.world.level.border.WorldBorder.DEFAULT_SETTINGS;
         }
