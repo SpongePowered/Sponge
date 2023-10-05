@@ -24,16 +24,25 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import com.mojang.datafixers.DataFixer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.progress.ChunkProgressListener;
+import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
+import net.minecraft.world.level.entity.ChunkStatusUpdateListener;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
+import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.chunk.ChunkEvent;
@@ -63,12 +72,18 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.nio.file.Path;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
+
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin implements ChunkMapBridge {
 
     // @formatter:off
     @Shadow @Final ServerLevel level;
     // @formatter:on
+
+    private Path impl$dimensionPath;
 
     @Override
     public DistanceManagerBridge bridge$distanceManager() {
@@ -77,9 +92,28 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         return (DistanceManagerBridge) ((ServerChunkCacheAccessor) this.level.getChunkSource()).accessor$distanceManager();
     }
 
+    @Override
+    public Path bridge$dimensionPath() {
+        return this.impl$dimensionPath;
+    }
+
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setIOWorkerDimension(final CallbackInfo ci) {
+    private void impl$setIOWorkerDimension(final ServerLevel $$0,
+            final LevelStorageSource.LevelStorageAccess $$1,
+            final DataFixer $$2,
+            final StructureTemplateManager $$3,
+            final Executor $$4,
+            final BlockableEventLoop<Runnable> $$5,
+            final LightChunkGetter $$6,
+            final ChunkGenerator $$7,
+            final ChunkProgressListener $$8,
+            final ChunkStatusUpdateListener $$9,
+            final Supplier<DimensionDataStorage> $$10,
+            final int $$11,
+            final boolean $$12,
+            final CallbackInfo ci) {
         ((IOWorkerBridge) ((ChunkStorageAccessor) this).accessor$worker()).bridge$setDimension(this.level.dimension());
+        this.impl$dimensionPath = $$1.getDimensionPath($$0.dimension());
     }
 
     @Redirect(method = "save",

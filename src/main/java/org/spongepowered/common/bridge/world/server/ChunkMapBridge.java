@@ -26,8 +26,11 @@ package org.spongepowered.common.bridge.world.server;
 
 import org.spongepowered.common.bridge.world.DistanceManagerBridge;
 
+import java.nio.file.Path;
+
 public interface ChunkMapBridge {
 
     DistanceManagerBridge bridge$distanceManager();
+    Path bridge$dimensionPath();
 
 }

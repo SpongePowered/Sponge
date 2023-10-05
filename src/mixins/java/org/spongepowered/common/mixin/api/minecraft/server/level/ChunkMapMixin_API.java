@@ -25,20 +25,30 @@
 package org.spongepowered.common.mixin.api.minecraft.server.level;
 
 import net.minecraft.server.level.ChunkMap;
+import net.minecraft.world.level.ChunkPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
+import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.Ticket;
 import org.spongepowered.api.world.server.TicketType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.server.ChunkMapBridge;
 import org.spongepowered.common.util.MissingImplementationException;
+import org.spongepowered.math.vector.Vector2i;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -47,6 +57,7 @@ public abstract class ChunkMapMixin_API implements org.spongepowered.api.world.s
 
     // @formatter:off
     @Shadow @Final private net.minecraft.server.level.ServerLevel level;
+
     // @formatter:on
 
     @Override
@@ -97,6 +108,49 @@ public abstract class ChunkMapMixin_API implements org.spongepowered.api.world.s
         final CompletableFuture<Boolean> cf = new CompletableFuture<>();
         cf.completeExceptionally(new MissingImplementationException("ServerWorld", "regenerateChunk"));
         return cf;
+    }
+
+    @Override
+    public Path regionDirPath()
+    {
+        return ((ChunkMapBridge) this).bridge$dimensionPath().resolve("region");
+    }
+
+    @Override
+    public Path regionFilePath(WorldChunk chunk)
+    {
+        final ChunkPos chunkPos = new ChunkPos(chunk.chunkPosition().x(), chunk.chunkPosition().z());
+        return this.regionDirPath().resolve("r." + chunkPos.getRegionX() + "." + chunkPos.getRegionZ() + ".mca");
+    }
+
+    @Override
+    public Vector3i maxChunkFromRegion(int rx, int rz) {
+        final ChunkPos chunkPos = ChunkPos.maxFromRegion(rx, rz);
+        return new Vector3i(chunkPos.x, 0, chunkPos.z);
+    }
+
+    @Override
+    public Vector3i minChunkFromRegion(int rx, int rz) {
+        final ChunkPos chunkPos = ChunkPos.minFromRegion(rx, rz);
+        return new Vector3i(chunkPos.x, 0, chunkPos.z);
+    }
+
+    @Override
+    public Map<Vector2i, Path> regionFiles()
+    {
+        Map<Vector2i, Path> paths = new HashMap<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(this.regionDirPath(), "*.mca")) {
+            stream.forEach(path -> paths.put(this.api$pathToRegionPos(path), path));
+        } catch (IOException ex) {
+            SpongeCommon.logger().error("Could not find region files", ex);
+        }
+        return paths;
+    }
+
+    private Vector2i api$pathToRegionPos(Path regionPath)
+    {
+        final String[] split = regionPath.getFileName().toString().split("\\.");
+        return new Vector2i(Integer.parseInt(split[1]), Integer.parseInt(split[2]));
     }
 
 }
