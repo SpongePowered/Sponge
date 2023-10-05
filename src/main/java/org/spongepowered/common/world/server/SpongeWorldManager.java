@@ -425,6 +425,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                 ((PrimaryLevelDataBridge) levelData).bridge$populateFromLevelStem(scratch);
             }
 
+            ((ResourceKeyBridge) levelData).bridge$setKey(key);
             return CompletableFuture.completedFuture(Optional.of((ServerWorldProperties) levelData));
         });
     }
