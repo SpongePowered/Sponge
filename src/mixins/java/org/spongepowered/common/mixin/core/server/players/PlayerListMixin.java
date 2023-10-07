@@ -481,6 +481,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Inject(method = "remove", at = @At("HEAD"))
     private void impl$RemovePlayerReferenceFromScoreboard(final net.minecraft.server.level.ServerPlayer player, final CallbackInfo ci) {
         ((ServerScoreboardBridge) ((ServerPlayer) player).scoreboard()).bridge$removePlayer(player, false);
+        SpongeAdventure.forEachBossBar(bar -> bar.removePlayer(player));
     }
 
     @Redirect(method = "addWorldborderListener",
