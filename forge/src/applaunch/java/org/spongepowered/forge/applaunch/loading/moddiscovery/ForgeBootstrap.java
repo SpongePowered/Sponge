@@ -45,19 +45,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 
-// works with SpongeForgeBootstrapService to make this whole thing go
+// works with ForgeProductionBootstrap to make this whole thing go
 public final class ForgeBootstrap extends AbstractJarFileModProvider implements IModLocator {
 
     private static final Logger LOGGER = LogManager.getLogger();
-
-    // Paths that will not be loaded through the TCL
-    // TODO does this even make sense?
-    private static final String[] EXCLUDED_PATHS = {
-        "org/spongepowered/common/applaunch/",
-        "org/spongepowered/forge/applaunch/",
-    };
 
     private LibraryManager libraryManager;
 
@@ -93,15 +85,6 @@ public final class ForgeBootstrap extends AbstractJarFileModProvider implements 
     }
 
     @Override
-    public void scanFile(final IModFile file, final Consumer<Path> pathConsumer) {
-        super.scanFile(file, path -> {
-            if (!isTCLExcluded(path)) {
-                pathConsumer.accept(path);
-            }
-        });
-    }
-
-    @Override
     public boolean isValid(final IModFile modFile) {
         return this.modFiles.contains(modFile);
     }
@@ -116,15 +99,5 @@ public final class ForgeBootstrap extends AbstractJarFileModProvider implements 
                 .orElseThrow(() -> new IllegalStateException("no libraries available")),
             ForgeBootstrap.class.getResource("libraries.json")
         );
-    }
-
-    private static boolean isTCLExcluded(final Path excluded) {
-        final String path = excluded.toString();
-        for (final String test : ForgeBootstrap.EXCLUDED_PATHS) {
-            if (path.startsWith(test)) {
-                return true;
-            }
-        }
-        return false;
     }
 }
