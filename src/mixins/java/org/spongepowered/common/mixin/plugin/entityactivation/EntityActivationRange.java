@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.plugin.entityactivation;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.core.SectionPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -52,13 +53,18 @@ import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.entity.EntitySection;
+import net.minecraft.world.level.entity.EntitySectionStorage;
+import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.explosive.fused.FusedExplosive;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
+import org.spongepowered.common.accessor.world.level.entity.PersistentEntitySectionManagerAccessor;
 import org.spongepowered.common.accessor.world.phys.AABBAccessor;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
@@ -254,23 +260,24 @@ public final class EntityActivationRange {
      * @param chunk Chunk to check for activation
      */
     private static void activateChunkEntities(final ServerPlayer player, final LevelChunk chunk) {
-        //TODO find a better way
-        for (Entity entity : player.getLevel().getAllEntities()) {
+        final PersistentEntitySectionManager<Entity> entityManager = ((ServerLevelAccessor) chunk.getLevel()).accessor$getEntityManager();
+        final EntitySectionStorage<Entity> entitySectionStorage = ((PersistentEntitySectionManagerAccessor<Entity>) entityManager).accessor$sectionStorage();
+        entitySectionStorage.getExistingSectionsInChunk(SectionPos.of(chunk.getPos(), 0).asLong()).flatMap(EntitySection::getEntities).forEach(entity -> {
             if (!entity.chunkPosition().equals(chunk.getPos())) {
-                continue;
+                return;
             }
             final ActivationCapabilityBridge spongeEntity = (ActivationCapabilityBridge) entity;
             final long currentTick = SpongeCommon.server().getTickCount();
             if (!((TrackableBridge) entity).bridge$shouldTick()) {
-                continue;
+                return;
             }
             if (currentTick <= spongeEntity.activation$getActivatedTick()) {
-                continue;
+                return;
             }
             if (spongeEntity.activation$getDefaultActivationState()) {
                 EntityActivationRange.initializeEntityActivationState(entity);
                 spongeEntity.activation$setActivatedTick(currentTick);
-                continue;
+                return;
             }
 
             // check for entity type overrides
@@ -298,7 +305,7 @@ public final class EntityActivationRange {
             if (aabb.intersects(entity.getBoundingBox())) {
                 spongeEntity.activation$setActivatedTick(currentTick);
             }
-        }
+        });
     }
 
     /**
