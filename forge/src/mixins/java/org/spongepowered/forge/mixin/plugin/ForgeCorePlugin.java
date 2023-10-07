@@ -26,23 +26,14 @@ package org.spongepowered.forge.mixin.plugin;
 
 import cpw.mods.modlauncher.Environment;
 import cpw.mods.modlauncher.Launcher;
-import cpw.mods.modlauncher.TransformingClassLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.mixin.plugin.AbstractMixinConfigPlugin;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.function.Predicate;
 
 // just a way to get on the TCL nice and early
 public class ForgeCorePlugin extends AbstractMixinConfigPlugin {
-
-    // :(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((
-    private static final String[] FORCED_ALLOWED_PACKAGES = {
-        "com.google.inject.",
-        "javax.inject."
-    };
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -54,24 +45,6 @@ public class ForgeCorePlugin extends AbstractMixinConfigPlugin {
                 .invoke(null, Launcher.INSTANCE.environment());
         } catch (final ClassNotFoundException | InvocationTargetException | IllegalAccessException | NoSuchMethodException ex) {
             ForgeCorePlugin.LOGGER.error("Failed to bootstrap the Forge plugin platform on TCL", ex);
-        }
-
-        try {
-            final TransformingClassLoader tcl = (TransformingClassLoader) this.getClass().getClassLoader();
-            final Field targetPackageFilter = tcl.getClass().getDeclaredField("targetPackageFilter");
-            targetPackageFilter.setAccessible(true);
-            final Predicate<String> existing = (Predicate<String>) targetPackageFilter.get(tcl);
-            final Predicate<String> better = pkg -> {
-                for (final String prefix : ForgeCorePlugin.FORCED_ALLOWED_PACKAGES) {
-                    if (pkg.startsWith(prefix)) {
-                        return true;
-                    }
-                }
-                return existing.test(pkg);
-            };
-            targetPackageFilter.set(tcl, better);
-        } catch (final NoSuchFieldException | IllegalAccessException ex) {
-            ForgeCorePlugin.LOGGER.error("Failed to fix TCL package filter", ex);
         }
     }
 
