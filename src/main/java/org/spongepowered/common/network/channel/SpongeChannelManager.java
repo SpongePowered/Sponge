@@ -179,9 +179,9 @@ public final class SpongeChannelManager implements ChannelManager {
 
             }
         }, transactionId);
-        PacketSender.sendTo(connection, mcPacket, sendFuture -> {
-            if (!sendFuture.isSuccess()) {
-                future.completeExceptionally(sendFuture.cause());
+        PacketSender.sendTo(connection, mcPacket, throwable -> {
+            if (throwable != null) {
+                future.completeExceptionally(throwable);
             }
         });
 
@@ -225,9 +225,9 @@ public final class SpongeChannelManager implements ChannelManager {
                                                                             }
                                                                         }
                 , transactionId);
-        PacketSender.sendTo(connection, mcPacket, sendFuture -> {
-            if (!sendFuture.isSuccess()) {
-                future.completeExceptionally(sendFuture.cause());
+        PacketSender.sendTo(connection, mcPacket, throwable -> {
+            if (throwable != null) {
+                future.completeExceptionally(throwable);
             }
         });
 
