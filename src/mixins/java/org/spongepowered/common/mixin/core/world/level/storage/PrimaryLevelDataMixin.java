@@ -398,6 +398,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
 
         final ListTag playerIdList = new ListTag();
         data.put(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, playerIdList);
+        this.impl$playerUniqueIdMap.values().forEach(uuid -> playerIdList.add(new IntArrayTag(UUIDUtil.uuidToIntArray(uuid))));
         this.impl$pendingUniqueIds.forEach(uuid -> playerIdList.add(new IntArrayTag(UUIDUtil.uuidToIntArray(uuid))));
         this.impl$pendingUniqueIds.clear();
 
