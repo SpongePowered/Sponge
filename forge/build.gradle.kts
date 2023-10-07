@@ -40,16 +40,27 @@ repositories {
     }
 }
 
-// Forge extra configurations
-val forgeBootstrapLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("bootstrapLibraries")
-val mlTransformersConfig: NamedDomainObjectProvider<Configuration> = configurations.register("mltransformers")
+// SpongeForge libraries
+val forgeServiceLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeServiceLibraries")
 val forgeGameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameLibraries")
-val forgeLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeLibraries") {
-    extendsFrom(mlTransformersConfig.get())
+val forgeGameOnlyLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameOnlyLibraries")
+
+configurations.named("forgeRuntimeLibrary") {
+    extendsFrom(forgeServiceLibrariesConfig.get())
 }
-val forgeAppLaunchConfig: NamedDomainObjectProvider<Configuration> = configurations.register("applaunch") {
-    extendsFrom(forgeBootstrapLibrariesConfig.get())
-    extendsFrom(mlTransformersConfig.get())
+
+// ModLauncher layers
+val serviceLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceLayer") {
+    extendsFrom(forgeServiceLibrariesConfig.get())
+    extendsFrom(configurations.getByName("forgeDependencies"))
+}
+val langLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("langLayer") {
+    extendsFrom(configurations.getByName("forgeDependencies"))
+}
+val gameLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameLayer") {
+    extendsFrom(serviceLayerConfig.get())
+    extendsFrom(langLayerConfig.get())
+    extendsFrom(forgeGameLibrariesConfig.get())
 
     afterEvaluate {
         extendsFrom(configurations.getByName("minecraftNamed"))
@@ -71,8 +82,9 @@ val forgeMain by sourceSets.named("main") {
     spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(commonProject, launch.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(commonProject, applaunch.get(), this, project, this.implementationConfigurationName)
+
     configurations.named(implementationConfigurationName) {
-        extendsFrom(forgeLibrariesConfig.get())
+        extendsFrom(gameLayerConfig.get())
     }
 }
 val forgeLaunch by sourceSets.register("launch") {
@@ -83,11 +95,7 @@ val forgeLaunch by sourceSets.register("launch") {
     spongeImpl.applyNamedDependencyOnOutput(project, this, forgeMain, project, forgeMain.implementationConfigurationName)
 
     configurations.named(implementationConfigurationName) {
-        extendsFrom(forgeAppLaunchConfig.get())
-        extendsFrom(forgeLibrariesConfig.get())
-    }
-    configurations.named(runtimeClasspathConfigurationName) {
-        extendsFrom(mlTransformersConfig.get())
+        extendsFrom(gameLayerConfig.get())
     }
 }
 val forgeAccessors by sourceSets.register("accessors") {
@@ -95,8 +103,7 @@ val forgeAccessors by sourceSets.register("accessors") {
     spongeImpl.applyNamedDependencyOnOutput(project, this, forgeLaunch, project, forgeLaunch.implementationConfigurationName)
 
     configurations.named(implementationConfigurationName) {
-        extendsFrom(forgeAppLaunchConfig.get())
-        extendsFrom(forgeLibrariesConfig.get())
+        extendsFrom(gameLayerConfig.get())
     }
 }
 val forgeMixins by sourceSets.register("mixins") {
@@ -109,27 +116,33 @@ val forgeMixins by sourceSets.register("mixins") {
     spongeImpl.applyNamedDependencyOnOutput(project, forgeMain, this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, forgeAccessors, this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, forgeLaunch, this, project, this.implementationConfigurationName)
+
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(gameLayerConfig.get())
+    }
 }
 val forgeLang by sourceSets.register("lang") {
     configurations.named(implementationConfigurationName) {
-        extendsFrom(forgeAppLaunchConfig.get())
-        extendsFrom(forgeLibrariesConfig.get())
+        extendsFrom(langLayerConfig.get())
     }
 }
 val forgeAppLaunch by sourceSets.register("applaunch") {
     // implementation (compile) dependencies
     spongeImpl.applyNamedDependencyOnOutput(commonProject, applaunch.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, launch.get(), forgeLaunch, project, this.implementationConfigurationName)
-    // spongeImpl.applyNamedDependencyOnOutput(project, vanillaInstaller, this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, this, forgeLaunch, project, forgeLaunch.implementationConfigurationName)
-    // runtime dependencies - literally add the rest of the project, because we want to launch the game
-    spongeImpl.applyNamedDependencyOnOutput(project, forgeMixins, this, project, this.runtimeOnlyConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(project, forgeLaunch, this, project, this.runtimeOnlyConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, mixins.get(), this, project, this.runtimeOnlyConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, main.get(), this, project, this.runtimeOnlyConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.runtimeOnlyConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(project, forgeMain, this, project, this.runtimeOnlyConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(transformersProject, mlTransformers.get(), this, project, this.runtimeOnlyConfigurationName)
+
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(serviceLayerConfig.get())
+    }
+}
+
+val forgeAppLaunchRuntime by configurations.named(forgeAppLaunch.runtimeOnlyConfigurationName)
+
+configurations.configureEach {
+    exclude(group = "net.minecraft", module = "joined")
+    if (name != "minecraft") { // awful terrible hack sssh
+        exclude(group = "com.mojang", module = "minecraft")
+    }
 }
 
 sourceSets.configureEach {
@@ -160,24 +173,6 @@ sourceSets.configureEach {
     }
 }
 
-val forgeMixinsImplementation by configurations.named(forgeMixins.implementationConfigurationName) {
-    extendsFrom(forgeLibrariesConfig.get())
-    extendsFrom(forgeAppLaunchConfig.get())
-}
-configurations.named(forgeAppLaunch.implementationConfigurationName) {
-    extendsFrom(forgeAppLaunchConfig.get())
-    extendsFrom(launchConfig.get())
-    extendsFrom(mlTransformersConfig.get())
-}
-val forgeAppLaunchRuntime by configurations.named(forgeAppLaunch.runtimeOnlyConfigurationName)
-
-configurations.configureEach {
-    exclude(group = "net.minecraft", module = "joined")
-    if (name != "minecraft") { // awful terrible hack sssh
-        exclude(group = "com.mojang", module = "minecraft")
-    }
-}
-
 extensions.configure(LoomGradleExtensionAPI::class) {
     silentMojangMappingsLicense()
 
@@ -191,7 +186,7 @@ extensions.configure(LoomGradleExtensionAPI::class) {
             sourceSet(forgeAccessors)
             sourceSet(forgeLaunch)
 
-            configuration(forgeGameLibrariesConfig.get())
+            configuration(forgeGameOnlyLibrariesConfig.get())
         }
 
         create("sponge") {
@@ -227,64 +222,39 @@ dependencies {
         exclude(group = "org.spongepowered", module = "mixin")
     }
 
-    forgeMixinsImplementation(project(commonProject.path))
+    forgeMixins.implementationConfigurationName(project(commonProject.path))
 
-    val appLaunch = forgeBootstrapLibrariesConfig.name
-    appLaunch("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
-    appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
-    appLaunch(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
-    appLaunch("org.spongepowered:configurate-core") {
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
-    appLaunch("org.spongepowered:configurate-hocon") {
-        exclude(group = "org.spongepowered", module = "configurate-core")
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
-    appLaunch("org.spongepowered:configurate-jackson") {
-        exclude(group = "org.spongepowered", module = "configurate-core")
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
-    mlTransformersConfig.name(project(transformersProject.path))
-
+    val serviceLibraries = forgeServiceLibrariesConfig.name
     val gameLibraries = forgeGameLibrariesConfig.name
-    // SpongeAPI must be transformable (mixin)
-    gameLibraries("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
+    val gameOnlyLibraries = forgeGameOnlyLibrariesConfig.name
 
-    // adventure-api must be transformable (mixin), anything depending on adventure-api must be in the same layer
+    serviceLibraries("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
+    serviceLibraries(project(transformersProject.path))
+    serviceLibraries(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
+    serviceLibraries("org.spongepowered:configurate-core") {
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
+    serviceLibraries("org.spongepowered:configurate-hocon") {
+        exclude(group = "org.spongepowered", module = "configurate-core")
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
+    serviceLibraries("org.spongepowered:configurate-jackson") {
+        exclude(group = "org.spongepowered", module = "configurate-core")
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
+    serviceLibraries("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
+
+    gameLibraries("org.spongepowered:spongeapi:$apiVersion")
+    gameLibraries("javax.inject:javax.inject:1")
+    gameLibraries("com.zaxxer:HikariCP:2.7.8")
     gameLibraries(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
-    gameLibraries("net.kyori:adventure-serializer-configurate4") {
-        exclude(group = "org.spongepowered", module = "configurate-core") // configurate is already in the service layer
-    }
-    gameLibraries("net.kyori:adventure-text-serializer-gson") {
-        exclude(group = "com.google.code.gson", module = "gson")
-    }
-    gameLibraries("net.kyori:adventure-text-serializer-legacy")
-    gameLibraries("net.kyori:adventure-text-serializer-plain")
-    gameLibraries("net.kyori:adventure-text-minimessage")
+    gameLibraries("net.kyori:adventure-serializer-configurate4")
 
-    // guice must have access to all classes ?
-    gameLibraries("com.google.inject:guice:5.0.1") { isTransitive = false }
+    // due to dependency substitution we must add SpongeAPI manually
+    gameOnlyLibraries("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
 
-    val libraries = forgeLibrariesConfig.name
-    libraries("org.spongepowered:spongeapi:$apiVersion")
-    libraries("javax.inject:javax.inject:1") // wat
-    libraries("com.zaxxer:HikariCP:2.7.8")
-    libraries("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
-    libraries(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
-    libraries("net.kyori:adventure-serializer-configurate4")
-
-    // We cannot use Configuration#minus because some transitive dependencies wouldn't be added to runtime
-    val libs = forgeLibrariesConfig.get().resolvedConfiguration.resolvedArtifacts
-    val gameLibs = forgeGameLibrariesConfig.get().resolvedConfiguration.resolvedArtifacts
-
-    libs.forEach {
-        if (!gameLibs.contains(it)) {
-            val id = it.id.componentIdentifier.displayName
-            if (id.startsWith("project "))
-                "forgeRuntimeLibrary"(project(id.substring(8))) { isTransitive = false }
-            else
-                "forgeRuntimeLibrary"(id) { isTransitive = false }
-        }
+    afterEvaluate {
+        spongeImpl.copyModulesExcludingProvided(forgeGameLibrariesConfig.get(), serviceLayerConfig.get(), forgeGameOnlyLibrariesConfig.get())
     }
 
     testplugins?.also {
@@ -377,17 +347,9 @@ tasks {
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")
     forgeAppLaunch.resources.srcDir(installerResources)
 
-    /*val downloadNotNeeded = configurations.register("downloadNotNeeded") {
-        extendsFrom(forgeAppLaunchConfig.get())
-        extendsFrom(vanillaInstallerConfig.get())
-    }*/
-
     val emitDependencies by registering(org.spongepowered.gradle.impl.OutputDependenciesToJson::class) {
         group = "sponge"
-        // everything in applaunch
-        this.dependencies("main", forgeLibrariesConfig)
-        // except what we're providing through the installer
-        this.excludedDependencies(forgeAppLaunchConfig)
+        this.dependencies("main", forgeGameOnlyLibrariesConfig)
 
         outputFile.set(installerResources.map { it.file("org/spongepowered/forge/applaunch/loading/moddiscovery/libraries.json") })
     }
@@ -399,7 +361,7 @@ tasks {
         mergeServiceFiles()
         group = "shadow"
 
-        configurations = listOf(forgeBootstrapLibrariesConfig.get())
+        configurations = listOf()
 
         archiveClassifier.set("universal-dev")
         manifest {
@@ -414,16 +376,13 @@ tasks {
         from(commonProject.sourceSets.named("mixins").map {it.output })
         from(commonProject.sourceSets.named("accessors").map {it.output })
         from(commonProject.sourceSets.named("launch").map {it.output })
-        from(commonProject.sourceSets.named("applaunch").map {it.output })
         from(transformersProject.sourceSets.named("main").map { it.output })
 
-        // Pull dependencies from the mlTransformers project
-        from(mlTransformersConfig.get().files)
-
-        from(forgeAppLaunch.output)
         from(forgeLaunch.output)
         from(forgeAccessors.output)
         from(forgeMixins.output)
+
+        // TODO jarjar service and lang
 
         // Make sure to relocate access widener so that we don't conflict with other
         // coremods also using access widener
@@ -523,10 +482,10 @@ publishing {
 
 tasks.register("printConfigsHierarchy") {
     doLast {
-        configurations.forEach { set: Configuration  ->
+        configurations.forEach { conf: Configuration  ->
             val seen = mutableSetOf<Configuration>()
-            println("Parents of ${set.name}:")
-            printParents(set, "", seen)
+            println("Parents of ${conf.name}:")
+            printParents(conf, "", seen)
         }
     }
 }
@@ -539,5 +498,25 @@ fun printParents(conf: Configuration, indent: String, seen: MutableSet<Configura
         seen.add(parent)
         println("$indent - ${parent.name}")
         printParents(parent, indent + "  ", seen)
+    }
+}
+
+tasks.register("printConfigsResolution") {
+    doLast {
+        configurations.forEach { conf: Configuration  ->
+            println()
+            println("Artifacts of ${conf.name}:")
+            if (conf.isCanBeResolved) {
+                try {
+                    conf.forEach {
+                        println(it)
+                    }
+                } catch (e: Exception) {
+                    println("error")
+                }
+            } else {
+                println("not resolved")
+            }
+        }
     }
 }

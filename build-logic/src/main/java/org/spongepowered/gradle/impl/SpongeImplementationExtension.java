@@ -25,6 +25,13 @@
 package org.spongepowered.gradle.impl;
 
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ModuleDependency;
+import org.gradle.api.artifacts.ModuleIdentifier;
+import org.gradle.api.artifacts.ResolvedArtifact;
+import org.gradle.api.artifacts.component.ComponentIdentifier;
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
+import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.SourceSet;
 
@@ -32,7 +39,9 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,6 +58,39 @@ public abstract class SpongeImplementationExtension {
     public SpongeImplementationExtension(final Project project, final Logger logger) {
         this.project = project;
         this.logger = logger;
+    }
+
+    public void copyModulesExcludingProvided(final Configuration source, final Configuration provided, final Configuration target) {
+        final DependencyHandler deps = this.project.getDependencies();
+
+        final Map<ModuleIdentifier, String> providedModuleVersions = new HashMap<>();
+        for (ResolvedArtifact artifact : provided.getResolvedConfiguration().getResolvedArtifacts()) {
+            final ComponentIdentifier id = artifact.getId().getComponentIdentifier();
+            if (id instanceof ModuleComponentIdentifier) {
+                final ModuleComponentIdentifier moduleId = (ModuleComponentIdentifier) id;
+                providedModuleVersions.put(moduleId.getModuleIdentifier(), moduleId.getVersion());
+            }
+        }
+
+        for (ResolvedArtifact artifact : source.getResolvedConfiguration().getResolvedArtifacts()) {
+            final ComponentIdentifier id = artifact.getId().getComponentIdentifier();
+            if (id instanceof ModuleComponentIdentifier) {
+                final ModuleComponentIdentifier moduleId = (ModuleComponentIdentifier) id;
+                final ModuleIdentifier module = moduleId.getModuleIdentifier();
+                final String version = moduleId.getVersion();
+
+                final String providedVersion = providedModuleVersions.get(module);
+                if (providedVersion == null) {
+                    ModuleDependency dep = (ModuleDependency) deps.create(id.getDisplayName());
+                    dep.setTransitive(false);
+                    target.getDependencies().add(dep);
+                } else if (!providedVersion.equals(version)) {
+                    this.logger.warn("Version mismatch for module {}. {} expects {} but {} has {}.", module, source.getName(), version, provided.getName(), providedVersion);
+                }
+            }
+
+            // projects are not copied because we cannot always recreate properly a project dependency from the resolved artefact
+        }
     }
 
     public void applyNamedDependencyOnOutput(final Project originProject, final SourceSet sourceAdding, final SourceSet targetSource, final Project implProject, final String dependencyConfigName) {
