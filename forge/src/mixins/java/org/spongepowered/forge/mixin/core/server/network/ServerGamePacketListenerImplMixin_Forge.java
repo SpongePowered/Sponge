@@ -69,7 +69,7 @@ public abstract class ServerGamePacketListenerImplMixin_Forge implements ServerG
         value = "INVOKE",
         target = "Lnet/minecraftforge/common/ForgeHooks;getServerChatSubmittedDecorator()Lnet/minecraft/network/chat/ChatDecorator;"
     ))
-    private static ChatDecorator forge$useSpongeChatDecorator() {
+    private ChatDecorator forge$useSpongeChatDecorator() {
         return SpongeCommon.server().getChatDecorator();
     }
 
