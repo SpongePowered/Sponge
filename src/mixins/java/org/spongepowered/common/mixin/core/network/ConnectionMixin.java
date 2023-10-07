@@ -34,25 +34,30 @@ import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeMinecraftVersion;
+import org.spongepowered.common.accessor.network.Connection_PacketHolderAccessor;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.network.channel.PacketSender;
 import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.util.Constants;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.Queue;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -62,6 +67,8 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
 
     @Shadow private PacketListener packetListener;
     @Shadow private Channel channel;
+    @Shadow private boolean disconnectionHandled;
+    @Shadow @Final private Queue<Connection_PacketHolderAccessor> queue;
     @Shadow public abstract SocketAddress getRemoteAddress();
 
     private final TransactionStore impl$transactionStore = new TransactionStore(() -> (EngineConnection) this.packetListener);
@@ -148,7 +155,33 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
     @Inject(method = "lambda$doSendPacket$8", at = @At(value = "INVOKE", target = "Lio/netty/util/concurrent/Future;isSuccess()Z"))
     public void impl$onPacketSent(final PacketSendListener $$0x, final Future $$1x, final CallbackInfo ci) {
         if ($$0x instanceof final PacketSender.SpongePacketSendListener spongeListener) {
-            spongeListener.accept($$1x);
+            spongeListener.accept($$1x.cause());
+        }
+    }
+
+    @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$onSend(final Packet<?> $$0, final @Nullable PacketSendListener $$1, final CallbackInfo ci) {
+        if (this.disconnectionHandled) {
+            if ($$1 instanceof final PacketSender.SpongePacketSendListener spongeListener) {
+                spongeListener.accept(new IOException("Connection has been closed."));
+            }
+
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "handleDisconnection",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/network/Connection;disconnectionHandled:Z",
+            opcode = Opcodes.PUTFIELD,
+            shift = At.Shift.AFTER))
+    private void impl$onDisconnected(final CallbackInfo ci) {
+        Connection_PacketHolderAccessor packetHolder;
+        while ((packetHolder = this.queue.poll()) != null) {
+            if (packetHolder.accessor$listener() instanceof final PacketSender.SpongePacketSendListener spongeListener) {
+                spongeListener.accept(new IOException("Connection has been closed."));
+            }
         }
     }
 }

@@ -86,10 +86,10 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
             final int transactionId = transactionStore.nextId();
 
             final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(Constants.Channels.FML_LOGIN_WRAPPER_CHANNEL, payload, transactionId);
-            PacketSender.sendTo(connection, mcPacket, sendFuture -> {
-                if (!sendFuture.isSuccess()) {
+            PacketSender.sendTo(connection, mcPacket, throwable -> {
+                if (throwable != null) {
                     // Failed before it could reach the client
-                    SpongeBasicPacketChannel.this.handleException(connection, ChannelExceptionUtil.of(sendFuture.cause()), future);
+                    SpongeBasicPacketChannel.this.handleException(connection, ChannelExceptionUtil.of(throwable), future);
                 } else {
                     final TransactionData<P, R> transactionData = new TransactionData<>(request, binding, success, future);
                     transactionStore.put(transactionId, SpongeBasicPacketChannel.this, transactionData);

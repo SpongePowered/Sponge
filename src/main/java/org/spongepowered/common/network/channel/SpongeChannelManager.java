@@ -165,9 +165,9 @@ public final class SpongeChannelManager implements ChannelManager {
 
         final ChannelBuf payload = this.bufferAllocator.buffer();
         final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(Constants.Channels.SPONGE_CLIENT_TYPE, payload, transactionId);
-        PacketSender.sendTo(connection, mcPacket, sendFuture -> {
-            if (!sendFuture.isSuccess()) {
-                future.completeExceptionally(sendFuture.cause());
+        PacketSender.sendTo(connection, mcPacket, throwable -> {
+            if (throwable != null) {
+                future.completeExceptionally(throwable);
             }
         });
 
@@ -200,9 +200,9 @@ public final class SpongeChannelManager implements ChannelManager {
 
         final ChannelBuf payload = this.encodeChannelRegistry();
         final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(Constants.Channels.SPONGE_CHANNEL_REGISTRY, payload, transactionId);
-        PacketSender.sendTo(connection, mcPacket, sendFuture -> {
-            if (!sendFuture.isSuccess()) {
-                future.completeExceptionally(sendFuture.cause());
+        PacketSender.sendTo(connection, mcPacket, throwable -> {
+            if (throwable != null) {
+                future.completeExceptionally(throwable);
             }
         });
 
