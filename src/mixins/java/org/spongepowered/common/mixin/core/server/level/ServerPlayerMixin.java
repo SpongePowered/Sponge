@@ -881,7 +881,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         return (GameType) (Object) event.endResult().successfulValue(Keys.GAME_MODE)
                 .map(Value::get)
-                .orElse((GameMode) (Object) value);
+                .orElse((GameMode) (Object) this.gameMode.getGameModeForPlayer());
     }
 
     @Override
