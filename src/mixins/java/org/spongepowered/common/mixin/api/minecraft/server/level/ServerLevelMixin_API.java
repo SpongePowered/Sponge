@@ -58,6 +58,7 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.border.WorldBorder;
+import org.spongepowered.api.world.chunk.OfflineChunk;
 import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.server.ChunkManager;
@@ -76,6 +77,7 @@ import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridg
 import org.spongepowered.common.data.holder.SpongeServerLocationBaseDataHolder;
 import org.spongepowered.common.mixin.api.minecraft.world.level.LevelMixin_API;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.level.chunk.SpongeOfflineChunk;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -91,6 +93,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -328,8 +331,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
         return (ChunkManager) this.shadow$getChunkSource().chunkMap;
     }
 
-    @Override
-    public Stream<Vector3i> chunkPositions() {
+    public <T> Stream<T> api$chunkPosStream(BiFunction<RegionFile, Stream<ChunkPos>, Stream<T>> mapper) {
         final Path dimensionPath = ((ServerLevelBridge) this).bridge$getLevelSave().getDimensionPath(this.shadow$dimension());
         final Path regionPath = dimensionPath.resolve("region");
 
@@ -351,18 +353,31 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
                     RegionFile regionFile = new RegionFile(path, regionPath, true);
                     final Vector4i regionBound = this.api$pathToRegionPos(path);
                     // Find all chunks in bounds
-                    return IntStream.range(regionBound.x(), regionBound.z())
+                    final Stream<ChunkPos> chunkPosStream = IntStream.range(regionBound.x(), regionBound.z())
                             .mapToObj(x -> IntStream.range(regionBound.y(), regionBound.w()).
                                     mapToObj(z -> new ChunkPos(x, z)))
-                            .flatMap(Function.identity())
-                            .filter(regionFile::doesChunkExist) // filter out non-existent chunks
-                            .map(cp -> new Vector3i(cp.x, 0, cp.z)) // map to API type
-                            .onClose(() -> this.api$close(regionFile));
+                            .flatMap(Function.identity());
+                    return mapper.apply(regionFile, chunkPosStream).onClose(() -> this.api$close(regionFile));
                 } catch (IOException ignored) {
                     return Stream.empty();
                 }
             })
             .onClose(() -> this.api$close(stream)));
+    }
+
+    @Override
+    public Stream<Vector3i> chunkPositions() {
+        return this.api$chunkPosStream((regionFile, stream) ->
+                stream.filter(regionFile::doesChunkExist) // filter out non-existent chunks
+                      .map(cp -> new Vector3i(cp.x, 0, cp.z)) // map to API type
+        );
+    }
+
+    @Override
+    public Stream<OfflineChunk> offlineChunks() {
+        return this.api$chunkPosStream((regionFile, stream) ->
+                stream.map(cp -> SpongeOfflineChunk.of(regionFile, cp)) // map to API type
+                      .filter(Objects::nonNull)); // filter out non-existent chunks
     }
 
     private void api$close(final AutoCloseable closeable) {
