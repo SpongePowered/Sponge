@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 import net.fabricmc.loom.LoomGradleExtension
 import net.fabricmc.loom.task.RemapJarTask
@@ -41,17 +42,21 @@ repositories {
 }
 
 // SpongeForge libraries
-val forgeServiceLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeServiceLibraries")
-val forgeGameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameLibraries")
-val forgeGameOnlyLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameOnlyLibraries")
+val serviceLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeServiceLibraries")
+val gameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameLibraries")
+
+val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameManagedLibraries")
+
+val serviceShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeServiceShadedLibraries")
+val gameShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameShadedLibraries")
 
 configurations.named("forgeRuntimeLibrary") {
-    extendsFrom(forgeServiceLibrariesConfig.get())
+    extendsFrom(serviceLibrariesConfig.get())
 }
 
 // ModLauncher layers
 val serviceLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceLayer") {
-    extendsFrom(forgeServiceLibrariesConfig.get())
+    extendsFrom(serviceLibrariesConfig.get())
     extendsFrom(configurations.getByName("forgeDependencies"))
 }
 val langLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("langLayer") {
@@ -60,7 +65,7 @@ val langLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.r
 val gameLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameLayer") {
     extendsFrom(serviceLayerConfig.get())
     extendsFrom(langLayerConfig.get())
-    extendsFrom(forgeGameLibrariesConfig.get())
+    extendsFrom(gameLibrariesConfig.get())
 
     afterEvaluate {
         extendsFrom(configurations.getByName("minecraftNamed"))
@@ -186,7 +191,8 @@ extensions.configure(LoomGradleExtensionAPI::class) {
             sourceSet(forgeAccessors)
             sourceSet(forgeLaunch)
 
-            configuration(forgeGameOnlyLibrariesConfig.get())
+            configuration(gameManagedLibrariesConfig.get())
+            configuration(gameShadedLibrariesConfig.get())
         }
 
         create("sponge") {
@@ -224,10 +230,7 @@ dependencies {
 
     forgeMixins.implementationConfigurationName(project(commonProject.path))
 
-    val serviceLibraries = forgeServiceLibrariesConfig.name
-    val gameLibraries = forgeGameLibrariesConfig.name
-    val gameOnlyLibraries = forgeGameOnlyLibrariesConfig.name
-
+    val serviceLibraries = serviceLibrariesConfig.name
     serviceLibraries("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
     serviceLibraries(project(transformersProject.path))
     serviceLibraries(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
@@ -242,19 +245,23 @@ dependencies {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    serviceLibraries("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
 
+    val gameLibraries = gameLibrariesConfig.name
     gameLibraries("org.spongepowered:spongeapi:$apiVersion")
     gameLibraries("javax.inject:javax.inject:1")
     gameLibraries("com.zaxxer:HikariCP:2.7.8")
     gameLibraries(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
     gameLibraries("net.kyori:adventure-serializer-configurate4")
 
-    // due to dependency substitution we must add SpongeAPI manually
-    gameOnlyLibraries("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
+    val serviceShadedLibraries = serviceShadedLibrariesConfig.name
+    serviceShadedLibraries(project(transformersProject.path)) { isTransitive = false }
+
+    val gameShadedLibraries = gameShadedLibrariesConfig.name
+    gameShadedLibraries("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
 
     afterEvaluate {
-        spongeImpl.copyModulesExcludingProvided(forgeGameLibrariesConfig.get(), serviceLayerConfig.get(), forgeGameOnlyLibrariesConfig.get())
+        spongeImpl.copyModulesExcludingProvided(serviceLibrariesConfig.get(), configurations.getByName("forgeDependencies"), serviceShadedLibrariesConfig.get())
+        spongeImpl.copyModulesExcludingProvided(gameLibrariesConfig.get(), serviceLayerConfig.get(), gameManagedLibrariesConfig.get())
     }
 
     testplugins?.also {
@@ -308,17 +315,6 @@ tasks {
         manifest.from(forgeManifest)
         from(forgeMixins.output)
     }
-
-    val forgeAppLaunchServicesJar by registering(Jar::class) {
-        archiveClassifier.set("applaunch-services")
-        manifest.from(forgeManifest)
-
-        from(commonProject.sourceSets.named("applaunch").map { it.output })
-        from(forgeAppLaunch.output)
-
-        duplicatesStrategy = DuplicatesStrategy.WARN
-    }
-
     val forgeLangJar by registering(Jar::class) {
         archiveClassifier.set("lang")
         manifest {
@@ -328,9 +324,19 @@ tasks {
         from(forgeLang.output)
     }
 
+    val forgeServicesDevJar by registering(Jar::class) {
+        archiveClassifier.set("services-dev")
+        manifest.from(forgeManifest)
+
+        from(commonProject.sourceSets.named("applaunch").map { it.output })
+        from(forgeAppLaunch.output)
+
+        duplicatesStrategy = DuplicatesStrategy.WARN
+    }
+
     afterEvaluate {
         withType(net.fabricmc.loom.task.AbstractRunTask::class) {
-            classpath += files(mods, forgeAppLaunchServicesJar, forgeLangJar, forgeAppLaunch.runtimeClasspath)
+            classpath += files(mods, forgeServicesDevJar, forgeLangJar)
 
             argumentProviders += CommandLineArgumentProvider {
                 mixinConfigs.asSequence()
@@ -349,7 +355,8 @@ tasks {
 
     val emitDependencies by registering(org.spongepowered.gradle.impl.OutputDependenciesToJson::class) {
         group = "sponge"
-        this.dependencies("main", forgeGameOnlyLibrariesConfig)
+        this.dependencies("main", gameManagedLibrariesConfig)
+        this.excludedDependencies(gameShadedLibrariesConfig)
 
         outputFile.set(installerResources.map { it.file("org/spongepowered/forge/applaunch/loading/moddiscovery/libraries.json") })
     }
@@ -357,48 +364,78 @@ tasks {
         dependsOn(emitDependencies)
     }
 
-    shadowJar {
-        mergeServiceFiles()
+    val forgeServicesShadowJar by register("servicesShadowJar", ShadowJar::class) {
         group = "shadow"
+        archiveClassifier.set("services")
 
-        configurations = listOf()
+        mergeServiceFiles()
+        configurations = listOf(serviceShadedLibrariesConfig.get())
+        exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "module-info.class")
 
-        archiveClassifier.set("universal-dev")
         manifest {
-            attributes(mapOf(
-                "Superclass-Transformer" to "common.superclasschange,forge.superclasschange",
-                "Multi-Release" to true,
-                "MixinConfigs" to mixinConfigs.joinToString(",")
-            ))
+            attributes("Multi-Release" to true)
             from(forgeManifest)
         }
+
+        from(commonProject.sourceSets.named("applaunch").map { it.output })
+        from(forgeAppLaunch.output)
+
+        // Make sure to relocate access widener so that we don't conflict with other coremods
+        relocate("net.fabricmc.accesswidener", "org.spongepowered.forge.libs.accesswidener")
+    }
+
+    shadowJar {
+        group = "shadow"
+        archiveClassifier.set("mod-dev")
+
+        mergeServiceFiles()
+        configurations = listOf(gameShadedLibrariesConfig.get())
+
+        manifest {
+            attributes(
+                "Superclass-Transformer" to "common.superclasschange,forge.superclasschange",
+                "MixinConfigs" to mixinConfigs.joinToString(",")
+            )
+            from(forgeManifest)
+        }
+
         from(commonProject.sourceSets.main.map { it.output })
         from(commonProject.sourceSets.named("mixins").map {it.output })
         from(commonProject.sourceSets.named("accessors").map {it.output })
         from(commonProject.sourceSets.named("launch").map {it.output })
-        from(transformersProject.sourceSets.named("main").map { it.output })
 
         from(forgeLaunch.output)
         from(forgeAccessors.output)
         from(forgeMixins.output)
-
-        // TODO jarjar service and lang
-
-        // Make sure to relocate access widener so that we don't conflict with other
-        // coremods also using access widener
-        relocate("net.fabricmc.accesswidener", "org.spongepowered.forge.libs.accesswidener")
     }
 
     val remapShadowJar = register("remapShadowJar", RemapJarTask::class) {
         group = "loom"
+        archiveClassifier.set("mod")
+
         inputFile.set(shadowJar.flatMap { it.archiveFile })
-        archiveClassifier.set("universal")
-        dependsOn(shadowJar)
         atAccessWideners.add("common.accesswidener")
     }
 
+    val universalJar = register("universalJar", Jar::class) {
+        group = "build"
+        archiveClassifier.set("universal")
+
+        manifest.from(forgeManifest)
+
+        from(forgeServicesShadowJar.archiveFile.map { zipTree(it) })
+
+        into("jars") {
+            from(remapShadowJar)
+            rename("spongeforge-(.*)-mod.jar", "spongeforge-mod.jar")
+
+            from(forgeLangJar)
+            rename("spongeforge-(.*)-lang.jar", "spongeforge-lang.jar")
+        }
+    }
+
     assemble {
-        dependsOn(remapShadowJar)
+        dependsOn(universalJar)
     }
 
     templateResources {

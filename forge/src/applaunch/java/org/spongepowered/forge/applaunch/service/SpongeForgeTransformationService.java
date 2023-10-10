@@ -33,7 +33,6 @@ import joptsimple.OptionSpec;
 import joptsimple.OptionSpecBuilder;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.transformers.modlauncher.AccessWidenerTransformationService;
 import org.spongepowered.transformers.modlauncher.SuperclassChanger;
 
 import java.nio.file.Path;
@@ -43,17 +42,14 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-public class ForgeProductionBootstrap implements ITransformationService {
-
-    public static final String NAME = "spongeforge";
-
+public class SpongeForgeTransformationService implements ITransformationService {
     private OptionSpec<Boolean> checkHashes;
     private OptionSpec<String> librariesDirectoryName;
 
     @NonNull
     @Override
     public String name() {
-        return ForgeProductionBootstrap.NAME;
+        return "spongeforge";
     }
 
     @Override
@@ -80,13 +76,10 @@ public class ForgeProductionBootstrap implements ITransformationService {
     @Override
     public void initialize(final IEnvironment environment) {
         if (FMLEnvironment.production) {
-            // Register SF as an AW
-            // todo: actually read this from the jar manifest
-            environment.getProperty(AccessWidenerTransformationService.INSTANCE.get()).ifPresent(aWTS ->
-                aWTS.offerResource(ForgeProductionBootstrap.class.getResource("/common.accesswidener"), "SpongeForge injected"));
+            // TODO actually read this from the jar manifest
             environment.getProperty(SuperclassChanger.INSTANCE.get()).ifPresent(scc -> {
-                scc.offerResource(ForgeProductionBootstrap.class.getResource("/common.superclasschange"), "SpongeForge injected");
-                scc.offerResource(ForgeProductionBootstrap.class.getResource("/forge.superclasschange"), "SpongeForge injected");
+                scc.offerResource(SpongeForgeTransformationService.class.getResource("/common.superclasschange"), "SpongeForge injected");
+                scc.offerResource(SpongeForgeTransformationService.class.getResource("/forge.superclasschange"), "SpongeForge injected");
             });
         }
     }
