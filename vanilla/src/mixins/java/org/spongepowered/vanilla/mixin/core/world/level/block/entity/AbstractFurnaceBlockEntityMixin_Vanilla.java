@@ -1,7 +1,7 @@
 /*
- * This file is part of ${name}, licensed under the MIT License (MIT).
+ * This file is part of Sponge, licensed under the MIT License (MIT).
  *
- * Copyright (c) SpongePowered <https://spongepowered.org>
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,7 +21,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
  */
 package org.spongepowered.vanilla.mixin.core.world.level.block.entity;
 
@@ -53,9 +52,10 @@ import org.spongepowered.common.bridge.block.entity.AbstractFurnaceBlockEntityBr
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
 public abstract class AbstractFurnaceBlockEntityMixin_Vanilla implements AbstractFurnaceBlockEntityBridge {

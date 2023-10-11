@@ -37,7 +37,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
 import org.spongepowered.common.launch.Launch;
 
