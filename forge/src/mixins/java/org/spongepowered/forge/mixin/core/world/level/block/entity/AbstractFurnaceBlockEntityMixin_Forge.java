@@ -51,9 +51,10 @@ import org.spongepowered.common.bridge.block.entity.AbstractFurnaceBlockEntityBr
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
 public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractFurnaceBlockEntityBridge {
