@@ -191,15 +191,13 @@ extensions.configure(LoomGradleExtensionAPI::class) {
             sourceSet(forgeAccessors)
             sourceSet(forgeLaunch)
 
-            configuration(gameManagedLibrariesConfig.get())
-            configuration(gameShadedLibrariesConfig.get())
-        }
-
-        create("sponge") {
             sourceSet(main.get(), commonProject)
             sourceSet(mixins.get(), commonProject)
             sourceSet(accessors.get(), commonProject)
             sourceSet(launch.get(), commonProject)
+
+            configuration(gameManagedLibrariesConfig.get())
+            configuration(gameShadedLibrariesConfig.get())
         }
     }
 }
