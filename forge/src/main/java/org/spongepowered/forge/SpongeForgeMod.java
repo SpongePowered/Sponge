@@ -58,12 +58,12 @@ import org.spongepowered.forge.hook.ForgeEventHooks;
 import org.spongepowered.forge.hook.ForgeGeneralHooks;
 import org.spongepowered.forge.hook.ForgeWorldHooks;
 
-@Mod(Constants.MOD_ID)
-public final class SpongeForge {
+@Mod("spongeforge")
+public final class SpongeForgeMod {
 
-    private final Logger logger = LogManager.getLogger(Constants.MOD_ID);
+    private final Logger logger = LogManager.getLogger("spongeforge");
 
-    public SpongeForge() {
+    public SpongeForgeMod() {
         // WorldPersistenceHooks.addHook(SpongeLevelDataPersistence.INSTANCE); // TODO SF 1.19.4
 
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();

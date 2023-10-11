@@ -1,27 +1,53 @@
-modLoader = "javafml"
-loaderVersion = "[45,)"
-license = "MIT License"
+modLoader="javafml"
+loaderVersion="[45,)"
+license="MIT License"
 
 issueTrackerURL="https://github.com/SpongePowered/Sponge/issues"
 
+
 [[mods]]
-modId = "spongeforge"
-version = "${version}"
-displayName = "SpongeForge"
+modId="spongeforge"
+version="${version}"
+displayName="SpongeForge"
 credits="SpongePowered and Contributors"
 authors="SpongePowered"
 description = "${description}"
 
 [[dependencies.spongeforge]]
-modId = "forge"
-mandatory = true
-versionRange = "[45,)"
-ordering = "AFTER"
-side = "BOTH"
+modId="forge"
+mandatory=true
+versionRange="[45,)"
+ordering="AFTER"
+side="BOTH"
 
 [[dependencies.spongeforge]]
-modId = "sponge"
-mandatory = true
-versionRange = "[10.0.0,)"
-ordering = "AFTER"
-side = "BOTH"
+modId="sponge"
+mandatory=true
+versionRange="[${version}]"
+ordering="AFTER"
+side="BOTH"
+
+
+[[mods]]
+modId="sponge"
+version="${version}"
+displayName="Sponge"
+credits="SpongePowered and Contributors"
+authors="SpongePowered"
+description="The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms"
+
+[[dependencies.sponge]]
+modId="spongeapi"
+mandatory=true
+versionRange="[10.0.0,)"
+ordering="AFTER"
+side="BOTH"
+
+
+[[mods]]
+modId="spongeapi"
+version="10.0.0"
+displayName="SpongeAPI"
+credits="SpongePowered and Contributors"
+authors="SpongePowered"
+description="A Minecraft plugin API"

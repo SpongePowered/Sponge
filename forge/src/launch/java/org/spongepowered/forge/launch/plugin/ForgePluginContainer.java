@@ -92,9 +92,6 @@ public class ForgePluginContainer implements PluginContainer {
 
     public static ForgePluginContainer of(final ModContainer modContainer) {
         // TODO SF 1.19.4, ensure unicity by storing references in a map
-        if (modContainer instanceof DummySpongeModContainer) {
-            return new ForgeDummyPluginContainer(modContainer);
-        }
         return new ForgePluginContainer(modContainer);
     }
 }
