@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Preconditions;
-import net.kyori.adventure.text.Component;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -55,11 +54,6 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
     @Shadow public abstract AttributeInstance shadow$getAttribute(net.minecraft.world.entity.ai.attributes.Attribute attribute);
     @Shadow public abstract boolean addEffect(MobEffectInstance p_195064_1_);
     // @formatter:on
-
-    @Override
-    public Component teamRepresentation() {
-        return Component.text(this.shadow$getUUID().toString());
-    }
 
     @Override
     public Optional<Attribute> attribute(final AttributeType type) {
