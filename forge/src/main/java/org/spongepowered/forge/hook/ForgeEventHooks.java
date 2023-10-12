@@ -66,7 +66,7 @@ public final class ForgeEventHooks implements EventHooks {
     public CriticalHitResult callCriticalHitEvent(
         final Player player, final Entity targetEntity, final boolean isCriticalAttack, final float v
     ) {
-        final CriticalHitEvent hitResult = ForgeHooks.getCriticalHit(player, targetEntity, isCriticalAttack, v);
+        final CriticalHitEvent hitResult = ForgeHooks.getCriticalHit(player, targetEntity, isCriticalAttack, v + 1.0F);
         if (hitResult != null) {
             return new CriticalHitResult(true, hitResult.getDamageModifier() - 1.0F);
         }

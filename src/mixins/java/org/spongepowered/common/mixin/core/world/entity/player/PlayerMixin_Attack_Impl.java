@@ -191,7 +191,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                     isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.shadow$onClimbable() && !this.shadow$isInWater() && !this.shadow$hasEffect(
                         MobEffects.BLINDNESS) && !this.shadow$isPassenger() && targetEntity instanceof LivingEntity;
                     isCriticalAttack = isCriticalAttack && !this.shadow$isSprinting();
-                    final EventHooks.CriticalHitResult criticalResult = PlatformHooks.INSTANCE.getEventHooks().callCriticalHitEvent((net.minecraft.world.entity.player.Player) (Object) this, targetEntity, isCriticalAttack, isCriticalAttack ? 1.5F : 1.0F);
+                    final EventHooks.CriticalHitResult criticalResult = PlatformHooks.INSTANCE.getEventHooks().callCriticalHitEvent((net.minecraft.world.entity.player.Player) (Object) this, targetEntity, isCriticalAttack, isCriticalAttack ? 0.5F : 0.0F);
                     isCriticalAttack = criticalResult.criticalHit;
                     if (isCriticalAttack) {
                         // Sponge Start - add critical attack tuple
