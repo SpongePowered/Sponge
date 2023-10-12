@@ -22,20 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.vehicle;
+package org.spongepowered.common.mixin.core.world;
 
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
+import net.minecraft.world.level.BaseCommandBlock;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 
-@Mixin(MinecartCommandBlock.MinecartCommandBase.class)
-public abstract class MinecartCommandBlock_MinecartCommandBaseMixin implements CommandSourceProviderBridge {
+@Mixin(BaseCommandBlock.class)
+public abstract class BaseCommandBlockMixin implements CommandSourceProviderBridge, Audience {
 
     // @formatter:off
     @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
+    @Shadow public abstract void shadow$sendSystemMessage(net.minecraft.network.chat.Component $$0);
     // @formatter:on
 
     @Override
@@ -43,4 +50,8 @@ public abstract class MinecartCommandBlock_MinecartCommandBaseMixin implements C
         return this.shadow$createCommandSourceStack();
     }
 
+    @Override
+    public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
+        this.shadow$sendSystemMessage(SpongeAdventure.asVanilla(message));
+    }
 }

@@ -38,12 +38,12 @@ import java.util.Set;
 public abstract class MinecartCommandBlockMixin_API extends AbstractMinecartMixin_API implements CommandBlockMinecart {
 
     // @formatter:off
-    @Shadow public abstract BaseCommandBlock getCommandBlock();
+    @Shadow public abstract BaseCommandBlock shadow$getCommandBlock();
     // @formatter:on
 
     @Override
     public String identifier() {
-        return this.getCommandBlock().getName().getString();
+        return this.shadow$getCommandBlock().getName().getString();
     }
 
     @Override

@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.entity.CommandBlock;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
@@ -83,5 +87,10 @@ public abstract class CommandBlockEntityMixin_API extends BlockEntityMixin_API i
     @Override
     public String identifier() {
         return this.shadow$getCommandBlock().getName().getString();
+    }
+
+    @Override
+    public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
+        this.shadow$getCommandBlock().sendSystemMessage(SpongeAdventure.asVanilla(message));
     }
 }
