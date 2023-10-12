@@ -6,11 +6,11 @@ import org.gradle.configurationcache.extensions.capitalized
 
 buildscript {
     repositories {
+        maven("https://oss.sonatype.org/content/repositories/snapshots/")
         maven("https://repo.spongepowered.org/repository/maven-public") {
             name = "sponge"
         }
         maven("https://maven.architectury.dev/")
-        maven("https://oss.sonatype.org/content/repositories/snapshots/")
     }
 }
 
