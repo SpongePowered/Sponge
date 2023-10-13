@@ -38,16 +38,18 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.resource.pack.PackStatus;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeMinecraftVersion;
-import org.spongepowered.common.accessor.network.Connection_PacketHolderAccessor;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
+import org.spongepowered.common.network.SpongePacketHolder;
 import org.spongepowered.common.network.channel.PacketSender;
 import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.util.Constants;
@@ -59,6 +61,7 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -68,7 +71,7 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
     @Shadow private PacketListener packetListener;
     @Shadow private Channel channel;
     @Shadow private boolean disconnectionHandled;
-    @Shadow @Final private Queue<Connection_PacketHolderAccessor> queue;
+    @Shadow @Final private Queue<Consumer<Connection>> pendingActions;
     @Shadow public abstract SocketAddress getRemoteAddress();
 
     private final TransactionStore impl$transactionStore = new TransactionStore(() -> (EngineConnection) this.packetListener);
@@ -170,6 +173,32 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         }
     }
 
+//    org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException: @Redirect handler method net/minecraft/network/Connection::impl$onQueue
+//    from mixins.sponge.core.json:network.ConnectionMixin has an invalid signature.
+//    Found unexpected argument type java.util.function.Consumer at index 1,
+//    expected java.lang.Object.
+//    Handler signature:  (Ljava/util/Queue;Ljava/util/function/Consumer;Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)Z
+//    Expected signature: (Ljava/util/Queue;Ljava/lang/Object;Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)Z [INJECT Applicator Phase -> mixins.sponge.core.json:network.ConnectionMixin -> Apply Injections ->  -> Inject -> mixins.sponge.core.json:network.ConnectionMixin->@Redirect::impl$onQueue(Ljava/util/Queue;Ljava/util/function/Consumer;Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)Z]
+    @Redirect(method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;Z)V",
+            at = @At(value = "INVOKE", target = "Ljava/util/Queue;add(Ljava/lang/Object;)Z"))
+    private boolean impl$onQueue(final Queue instance, final Object consumer,
+            final Packet<?> $$0, final @Nullable PacketSendListener $$1, final boolean $$2) {
+        if ($$1 instanceof PacketSender.SpongePacketSendListener spongeListener) {
+            return instance.add(new SpongePacketHolder() {
+                @Override
+                public void apply(final Throwable t) {
+                    spongeListener.accept(t);
+                }
+
+                @Override
+                public void accept(final Connection connection) {
+                    ((Consumer<Connection>) consumer).accept(connection);
+                }
+            });
+        }
+        return instance.add(consumer);
+    }
+
     @Inject(method = "handleDisconnection",
         at = @At(
             value = "FIELD",
@@ -177,10 +206,10 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
             opcode = Opcodes.PUTFIELD,
             shift = At.Shift.AFTER))
     private void impl$onDisconnected(final CallbackInfo ci) {
-        Connection_PacketHolderAccessor packetHolder;
-        while ((packetHolder = this.queue.poll()) != null) {
-            if (packetHolder.accessor$listener() instanceof final PacketSender.SpongePacketSendListener spongeListener) {
-                spongeListener.accept(new IOException("Connection has been closed."));
+        Consumer<Connection> consumer;
+        while ((consumer = this.pendingActions.poll()) != null) {
+            if (consumer instanceof SpongePacketHolder packetHolder) {
+                packetHolder.apply(new IOException("Connection has been closed."));
             }
         }
     }

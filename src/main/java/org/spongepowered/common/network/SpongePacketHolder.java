@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.network;
+package org.spongepowered.common.network;
 
-import net.minecraft.network.PacketSendListener;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import net.minecraft.network.Connection;
 
-@Mixin(targets = "net/minecraft/network/Connection$PacketHolder")
-public interface Connection_PacketHolderAccessor {
-    @Accessor("listener") PacketSendListener accessor$listener();
+import java.util.function.Consumer;
+
+public interface SpongePacketHolder extends Consumer<Connection> {
+
+    void apply(Throwable t);
+
 }
