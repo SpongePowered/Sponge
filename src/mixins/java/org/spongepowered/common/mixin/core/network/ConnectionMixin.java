@@ -38,7 +38,6 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
-import org.spongepowered.api.resource.pack.PackStatus;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

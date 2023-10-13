@@ -181,7 +181,7 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
         checkNotNull(view);
         checkNotNull(key);
         checkArgument(!key.isEmpty());
-        checkArgument(type > Constants.NBT.TAG_END && type <= Constants.NBT.TAG_INT_ARRAY);
+        checkArgument(type > Constants.NBT.TAG_END && type <= Constants.NBT.TAG_LONG_ARRAY);
         switch (type) {
             case Constants.NBT.TAG_BYTE:
                 if (key.contains(NBTTranslator.BOOLEAN_IDENTIFIER)) {

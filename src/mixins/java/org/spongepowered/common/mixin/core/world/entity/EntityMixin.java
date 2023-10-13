@@ -34,7 +34,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -1174,10 +1173,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     //If the event is cancelled, well, don't change the underlying value.
                     return;
                 }
-                this.remainingFireTicks = valueChange.endResult().successfulValue(Keys.FIRE_TICKS)
+                valueChange.endResult().successfulValue(Keys.FIRE_TICKS)
                     .map(Value::get)
                     .map(t -> (int) t.ticks())
-                    .orElse(0);
+                    .ifPresent(t -> this.remainingFireTicks = t);
             }
             return;
         }

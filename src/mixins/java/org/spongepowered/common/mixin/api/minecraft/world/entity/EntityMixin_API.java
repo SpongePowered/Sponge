@@ -395,4 +395,9 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
         return values;
     }
+
+    @Override
+    public net.kyori.adventure.text.Component teamRepresentation() {
+        return net.kyori.adventure.text.Component.text(this.shadow$getUUID().toString());
+    }
 }

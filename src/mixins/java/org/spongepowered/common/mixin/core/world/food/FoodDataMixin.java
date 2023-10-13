@@ -119,6 +119,6 @@ public abstract class FoodDataMixin implements FoodDataBridge {
 
         return event.endResult().successfulValue(key)
                 .map(Value::get)
-                .orElse(value);
+                .orElse(currentValue);
     }
 }

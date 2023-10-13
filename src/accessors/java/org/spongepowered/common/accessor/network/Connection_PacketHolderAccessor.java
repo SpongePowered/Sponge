@@ -22,25 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.vehicle;
+package org.spongepowered.common.accessor.network;
 
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
-import org.spongepowered.api.event.Cause;
+import net.minecraft.network.PacketSendListener;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(MinecartCommandBlock.MinecartCommandBase.class)
-public abstract class MinecartCommandBlock_MinecartCommandBaseMixin implements CommandSourceProviderBridge {
-
-    // @formatter:off
-    @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
-    // @formatter:on
-
-    @Override
-    public CommandSourceStack bridge$getCommandSource(final Cause cause) {
-        return this.shadow$createCommandSourceStack();
-    }
-
+@Mixin(targets = "net/minecraft/network/Connection$PacketHolder")
+public interface Connection_PacketHolderAccessor {
+    @Accessor("listener") PacketSendListener accessor$listener();
 }

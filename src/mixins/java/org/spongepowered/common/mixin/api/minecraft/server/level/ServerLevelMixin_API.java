@@ -35,9 +35,11 @@ import net.minecraft.util.ProgressListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelResource;
@@ -56,6 +58,7 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.border.WorldBorder;
+import org.spongepowered.api.world.chunk.OfflineChunk;
 import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.server.ChunkManager;
@@ -66,6 +69,7 @@ import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.raid.RaidsAccessor;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
@@ -73,11 +77,15 @@ import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridg
 import org.spongepowered.common.data.holder.SpongeServerLocationBaseDataHolder;
 import org.spongepowered.common.mixin.api.minecraft.world.level.LevelMixin_API;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.level.chunk.SpongeOfflineChunk;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
+import org.spongepowered.math.vector.Vector4i;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
@@ -85,7 +93,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import javax.annotation.Nonnull;
@@ -182,7 +194,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public boolean restoreSnapshot(final BlockSnapshot snapshot, final boolean force, final BlockChangeFlag flag) {
-        return snapshot.restore(force, Objects.requireNonNull(flag, "flag"));
+        return Objects.requireNonNull(snapshot, "snapshot").withLocation(this.location(snapshot.position())).restore(force, Objects.requireNonNull(flag, "flag"));
     }
 
     @Override
@@ -319,4 +331,68 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
         return (ChunkManager) this.shadow$getChunkSource().chunkMap;
     }
 
+    public <T> Stream<T> api$chunkPosStream(BiFunction<RegionFile, Stream<ChunkPos>, Stream<T>> mapper) {
+        final Path dimensionPath = ((ServerLevelBridge) this).bridge$getLevelSave().getDimensionPath(this.shadow$dimension());
+        final Path regionPath = dimensionPath.resolve("region");
+
+        return Stream
+            .generate(() -> {
+                try {
+                    // open directory stream over all region files of this world
+                    return Stream.of(Files.newDirectoryStream(regionPath, "*.mca"));
+                } catch (IOException ex) {
+                    SpongeCommon.logger().error("Could not find region files", ex);
+                    return Stream.<DirectoryStream<Path>>empty();
+                }
+            })
+            .limit(1)
+            .flatMap(Function.identity())
+            .flatMap(stream -> StreamSupport.stream(stream.spliterator(), false)
+            .flatMap(path -> {
+                try { // For every region file
+                    RegionFile regionFile = new RegionFile(path, regionPath, true);
+                    final Vector4i regionBound = this.api$pathToRegionPos(path);
+                    // Find all chunks in bounds
+                    final Stream<ChunkPos> chunkPosStream = IntStream.range(regionBound.x(), regionBound.z())
+                            .mapToObj(x -> IntStream.range(regionBound.y(), regionBound.w()).
+                                    mapToObj(z -> new ChunkPos(x, z)))
+                            .flatMap(Function.identity());
+                    return mapper.apply(regionFile, chunkPosStream).onClose(() -> this.api$close(regionFile));
+                } catch (IOException ignored) {
+                    return Stream.empty();
+                }
+            })
+            .onClose(() -> this.api$close(stream)));
+    }
+
+    @Override
+    public Stream<Vector3i> chunkPositions() {
+        return this.api$chunkPosStream((regionFile, stream) ->
+                stream.filter(regionFile::doesChunkExist) // filter out non-existent chunks
+                      .map(cp -> new Vector3i(cp.x, 0, cp.z)) // map to API type
+        );
+    }
+
+    @Override
+    public Stream<OfflineChunk> offlineChunks() {
+        return this.api$chunkPosStream((regionFile, stream) ->
+                stream.map(cp -> SpongeOfflineChunk.of(regionFile, cp)) // map to API type
+                      .filter(Objects::nonNull)); // filter out non-existent chunks
+    }
+
+    private void api$close(final AutoCloseable closeable) {
+        try {
+            closeable.close();
+        } catch (Exception ignored) {
+        }
+    }
+
+    private Vector4i api$pathToRegionPos(Path regionPath) {
+        final String[] split = regionPath.getFileName().toString().split("\\.");
+        final int rx = Integer.parseInt(split[1]);
+        final int ry = Integer.parseInt(split[2]);
+        final ChunkPos min = ChunkPos.minFromRegion(rx, ry);
+        final ChunkPos max = ChunkPos.maxFromRegion(rx, ry);
+        return new Vector4i(min.x, min.z, max.x, max.z);
+    }
 }

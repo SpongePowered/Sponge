@@ -20,6 +20,7 @@
         "commands.arguments.selector.options.EntitySelectorOptions_OptionAccessor",
         "commands.arguments.selector.options.EntitySelectorOptionsAccessor",
         "entity.passive.AbstractChestedHorseEntityAccessor",
+        "network.Connection_PacketHolderAccessor",
         "network.ConnectionAccessor",
         "network.chat.HoverEvent_ItemStackInfoAccessor",
         "network.chat.StyleAccessor",

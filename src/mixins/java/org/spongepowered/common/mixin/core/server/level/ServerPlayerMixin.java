@@ -123,6 +123,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.ConnectionAccessor;
+import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
+import org.spongepowered.common.accessor.server.level.ChunkMap_TrackedEntityAccessor;
 import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.accessor.server.level.ChunkMap_TrackedEntityAccessor;
@@ -721,6 +723,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             ((DataCompoundHolder) this).data$setCompound(compound);
             DataUtil.syncTagToData(this);
         }
+
+        this.impl$language = ((ServerPlayerBridge) oldPlayer).bridge$getLanguage();
+        this.impl$viewDistance = ((ServerPlayerBridge) oldPlayer).bridge$getViewDistance();
 
         // Update boss bars
         SpongeAdventure.forEachBossBar(bar -> ((BossEventBridge) bar).bridge$replacePlayer(oldPlayer, (net.minecraft.server.level.ServerPlayer) (Object) this));
