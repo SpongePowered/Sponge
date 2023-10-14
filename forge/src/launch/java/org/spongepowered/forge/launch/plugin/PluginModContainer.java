@@ -24,58 +24,106 @@
  */
 package org.spongepowered.forge.launch.plugin;
 
-import static net.minecraftforge.fml.Logging.LOADING;
-
 import com.google.inject.Injector;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.EventBusErrorMessage;
+import net.minecraftforge.eventbus.api.BusBuilder;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.IEventListener;
 import net.minecraftforge.fml.Logging;
+import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModLoadingException;
 import net.minecraftforge.fml.ModLoadingStage;
+import net.minecraftforge.fml.event.IModBusEvent;
 import net.minecraftforge.fml.javafmlmod.AutomaticEventSubscriber;
-import net.minecraftforge.fml.javafmlmod.FMLModContainer;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.inject.plugin.PluginModule;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.forge.accessor.fml.javafmlmod.FMLModContainerAccessor;
 import org.spongepowered.forge.launch.event.ForgeEventManager;
 import org.spongepowered.plugin.PluginContainer;
 
-// If this class name changes, fix FMLModContainerMixin_Forge
-public final class PluginModContainer extends FMLModContainer {
+import java.util.Optional;
 
+// Spongified FMLModContainer
+public final class PluginModContainer extends ModContainer {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public PluginModContainer(final IModInfo info, final String className, final ModFileScanData modFileScanData, final ModuleLayer moduleLayer) {
-        super(info, className, modFileScanData, moduleLayer);
+    private final ModFileScanData scanResults;
+    private final IEventBus eventBus;
+    private Object modInstance;
+    private final Class<?> modClass;
 
+    public PluginModContainer(IModInfo info, String className, ModFileScanData modFileScanResults, ModuleLayer gameLayer) {
+        super(info);
+        LOGGER.debug(Logging.LOADING, "Creating PluginModContainer instance for {}", className);
+        this.scanResults = modFileScanResults;
         this.activityMap.put(ModLoadingStage.CONSTRUCT, this::constructPlugin);
+        this.eventBus = BusBuilder.builder().setExceptionHandler(this::onEventFailed).setTrackPhases(false).markerType(IModBusEvent.class).useModLauncher().build();
+        this.configHandler = Optional.of(ce -> this.eventBus.post(ce.self()));
+        this.contextExtension = () -> null;
+
+        try {
+            Module module = gameLayer.findModule(info.getOwningFile().moduleName()).orElseThrow();
+            modClass = Class.forName(module, className);
+            LOGGER.trace(Logging.LOADING, "Loaded modclass {} with {}", modClass.getName(), modClass.getClassLoader());
+        } catch (Throwable e) {
+            LOGGER.error(Logging.LOADING, "Failed to load class {}", className, e);
+            throw new ModLoadingException(info, ModLoadingStage.CONSTRUCT, "fml.modloading.failedtoloadmodclass", e);
+        }
+    }
+
+    private void onEventFailed(IEventBus iEventBus, Event event, IEventListener[] iEventListeners, int i, Throwable throwable) {
+        LOGGER.error(new EventBusErrorMessage(event, i, iEventListeners, throwable));
     }
 
     private void constructPlugin() {
-        // TODO SF 1.19.4, replace accessor with reflection
-        final FMLModContainerAccessor accessor = (FMLModContainerAccessor) (Object) this;
         try {
-            PluginModContainer.LOGGER.trace(Logging.LOADING, "Loading plugin instance {} of type {}", getModId(), accessor.accessor$modClass().getName());
-            final Injector childInjector = Launch.instance().lifecycle().platformInjector().createChildInjector(new PluginModule((PluginContainer) (Object) this, accessor.accessor$modClass()));
-            final Object instance = childInjector.getInstance(accessor.accessor$modClass());
-            accessor.accessor$setModInstance(instance);
-            ((ForgeEventManager) MinecraftForge.EVENT_BUS).registerListeners((PluginContainer) (Object) this, instance);
-            PluginModContainer.LOGGER.trace(Logging.LOADING, "Loaded plugin instance {} of type {}", getModId(), accessor.accessor$modClass().getName());
-        } catch (final Throwable e) {
-            PluginModContainer.LOGGER.error(Logging.LOADING,"Failed to create plugin instance. PluginID: {}, class {}", getModId(), accessor.accessor$modClass().getName(), e);
-            throw new ModLoadingException(this.modInfo, ModLoadingStage.CONSTRUCT, "fml.modloading.failedtoloadmod", e, accessor.accessor$modClass());
+            LOGGER.trace(Logging.LOADING, "Loading plugin instance {} of type {}", getModId(), this.modClass.getName());
+
+            final PluginContainer pluginContainer = ForgePluginContainer.of(this);
+            final Injector childInjector = Launch.instance().lifecycle().platformInjector().createChildInjector(new PluginModule(pluginContainer, this.modClass));
+            this.modInstance = childInjector.getInstance(this.modClass);
+            ((ForgeEventManager) MinecraftForge.EVENT_BUS).registerListeners(pluginContainer, this.modInstance);
+
+            LOGGER.trace(Logging.LOADING, "Loaded plugin instance {} of type {}", getModId(), this.modClass.getName());
+        } catch (Throwable e) {
+            LOGGER.error(Logging.LOADING, "Failed to create plugin instance. PluginID: {}, class {}", getModId(), this.modClass.getName(), e);
+            throw new ModLoadingException(this.modInfo, ModLoadingStage.CONSTRUCT, "fml.modloading.failedtoloadmod", e, this.modClass);
         }
+
         try {
-            PluginModContainer.LOGGER.trace(Logging.LOADING, "Injecting Automatic event subscribers for {}", getModId());
-            AutomaticEventSubscriber.inject(this, accessor.accessor$scanResults(), accessor.accessor$modClass().getClassLoader());
-            PluginModContainer.LOGGER.trace(Logging.LOADING, "Completed Automatic event subscribers for {}", getModId());
-        } catch (final Throwable e) {
-            LOGGER.error(LOADING,"Failed to register automatic subscribers. PluginID: {}, class {}", getModId(),
-                    accessor.accessor$modClass().getName(), e);
-            throw new ModLoadingException(this.modInfo, ModLoadingStage.CONSTRUCT, "fml.modloading.failedtoloadmod", e, accessor.accessor$modClass());
+            LOGGER.trace(Logging.LOADING, "Injecting Automatic event subscribers for {}", getModId());
+            AutomaticEventSubscriber.inject(this, this.scanResults, this.modClass.getClassLoader());
+            LOGGER.trace(Logging.LOADING, "Completed Automatic event subscribers for {}", getModId());
+        } catch (Throwable e) {
+            LOGGER.error(Logging.LOADING, "Failed to register automatic subscribers. PluginID: {}, class {}", getModId(), this.modClass.getName(), e);
+            throw new ModLoadingException(this.modInfo, ModLoadingStage.CONSTRUCT, "fml.modloading.failedtoloadmod", e, this.modClass);
+        }
+    }
+
+    @Override
+    public boolean matches(Object mod) {
+        return mod == this.modInstance;
+    }
+
+    @Override
+    public Object getMod() {
+        return this.modInstance;
+    }
+
+    @Override
+    protected <T extends Event & IModBusEvent> void acceptEvent(final T e) {
+        try {
+            LOGGER.trace(Logging.LOADING, "Firing event for modid {} : {}", this.getModId(), e);
+            this.eventBus.post(e);
+            LOGGER.trace(Logging.LOADING, "Fired event for modid {} : {}", this.getModId(), e);
+        } catch (Throwable t) {
+            LOGGER.error(Logging.LOADING, "Caught exception during event {} dispatch for modid {}", e, this.getModId(), t);
+            throw new ModLoadingException(this.modInfo, this.modLoadingStage, "fml.modloading.errorduringevent", t);
         }
     }
 }

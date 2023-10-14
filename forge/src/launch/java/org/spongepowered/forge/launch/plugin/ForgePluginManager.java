@@ -24,13 +24,13 @@
  */
 package org.spongepowered.forge.launch.plugin;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Singleton;
 import net.minecraftforge.fml.ModList;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -50,7 +50,8 @@ public final class ForgePluginManager implements SpongePluginManager {
 
     @Override
     public Collection<PluginContainer> plugins() {
-        return Collections.emptyList(); // TODO SF 1.19.4, we can no longer use accessors on FML, is time for reflection?
-        // return Collections.unmodifiableCollection((Collection<PluginContainer>) (Object) ((ModListAccessor) ModList.get()).accessor$mods());
+        final ImmutableList.Builder<PluginContainer> builder = ImmutableList.builder();
+        ModList.get().forEachModInOrder(mod -> builder.add(ForgePluginContainer.of(mod)));
+        return builder.build();
     }
 }

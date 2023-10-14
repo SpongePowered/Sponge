@@ -15,7 +15,7 @@
     "api.event.message.PlayerChatEventMixin_Forge",
     "commands.CommandsMixin_Forge",
     "minecraftforge.MinecraftForgeMixin_Forge",
-    "minecraftforge.core.ForgeRegistryMixin_Forge",
+    "minecraftforge.registries.ForgeRegistryMixin_Forge",
     "minecraftforge.event.ServerChatEventMixin_Forge",
     "minecraftforge.event.entity.EntityTravelToDimensionEventMixin_Forge",
     "minecraftforge.event.entity.player.PlayerEvent_PlayerChangedDimensionEventMixin_Forge",
