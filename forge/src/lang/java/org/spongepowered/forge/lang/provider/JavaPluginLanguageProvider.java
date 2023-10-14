@@ -82,7 +82,7 @@ public final class JavaPluginLanguageProvider extends FMLJavaModLanguageProvider
         }
 
         @Override
-        public <T> T loadMod(final IModInfo info, final ModFileScanData modFileScanData, final ModuleLayer moduleLayer) {
+        public <T> T loadMod(final IModInfo info, final ModFileScanData modFileScanData, final ModuleLayer gameLayer) {
             // The following is adapted from FMLJavaModLanguageProvider.FMLModTarget
 
             // This language class is loaded in the system level classloader - before the game even starts
@@ -93,7 +93,7 @@ public final class JavaPluginLanguageProvider extends FMLJavaModLanguageProvider
                         "org.spongepowered.forge.launch.plugin.PluginModContainer", true, Thread.currentThread().getContextClassLoader());
                 this.logger.debug(Logging.LOADING, "Loading PluginModContainer from classloader {} - got {}", Thread.currentThread().getContextClassLoader(), pluginContainer.getClassLoader());
                 final Constructor<?> constructor = pluginContainer.getConstructor(IModInfo.class, String.class, ModFileScanData.class, ModuleLayer.class);
-                return (T) constructor.newInstance(info, className, modFileScanData, moduleLayer);
+                return (T) constructor.newInstance(info, className, modFileScanData, gameLayer);
             }
             // ALL exception handling has to be done through the classloader, because we're loaded in the wrong context, so any classes we just blind load will be in the wrong
             // class loading context. Funky but works.

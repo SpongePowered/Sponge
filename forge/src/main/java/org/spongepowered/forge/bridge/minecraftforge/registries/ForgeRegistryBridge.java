@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.bridge.minecraftforge.fml;
+package org.spongepowered.forge.bridge.minecraftforge.registries;
 
 import org.spongepowered.common.bridge.core.RegistryBridge;
 

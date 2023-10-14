@@ -24,6 +24,7 @@
  */
 package org.spongepowered.forge.launch.plugin;
 
+import com.google.common.collect.MapMaker;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import org.apache.logging.log4j.LogManager;
@@ -36,6 +37,7 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -90,8 +92,9 @@ public class ForgePluginContainer implements PluginContainer {
         return this.modContainer.getMod();
     }
 
+    private static final Map<ModContainer, ForgePluginContainer> containers = new MapMaker().weakKeys().makeMap();
+
     public static ForgePluginContainer of(final ModContainer modContainer) {
-        // TODO SF 1.19.4, ensure unicity by storing references in a map
-        return new ForgePluginContainer(modContainer);
+        return containers.computeIfAbsent(modContainer, ForgePluginContainer::new);
     }
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.forge.applaunch.loading.moddiscovery.locator;
 
-import cpw.mods.jarhandling.SecureJar;
 import net.minecraftforge.fml.loading.ClasspathLocatorUtils;
 import net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileModLocator;
 import org.apache.logging.log4j.LogManager;
@@ -40,12 +39,10 @@ import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class ClasspathPluginLocator extends AbstractJarFileModLocator {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final String PLUGINS_JSON = "META-INF/sponge_plugins.json";
     private Set<Path> modCoords;
 
     @Override
@@ -55,7 +52,7 @@ public final class ClasspathPluginLocator extends AbstractJarFileModLocator {
 
     @Override
     protected ModFileOrException createMod(Path... path) {
-        return new ModFileOrException(ModFileParsers.newPluginInstance(SecureJar.from(path), this, PluginPlatformConstants.METADATA_FILE_NAME), null);
+        return new ModFileOrException(ModFileParsers.newPluginInstance(this, path), null);
     }
 
     @Override
@@ -67,14 +64,14 @@ public final class ClasspathPluginLocator extends AbstractJarFileModLocator {
     public void initArguments(final Map<String, ?> arguments) {
         try {
             this.modCoords = new LinkedHashSet<>();
-            this.locateMods(ClasspathPluginLocator.PLUGINS_JSON, "classpath_plugin", path -> true);
+            this.locateMods(PluginPlatformConstants.METADATA_FILE_LOCATION, "classpath_plugin");
         } catch (IOException e) {
             ClasspathPluginLocator.LOGGER.fatal("Error trying to find resources", e);
             throw new RuntimeException("wha?", e);
         }
     }
 
-    private void locateMods(final String resource, final String name, final Predicate<Path> filter) throws IOException {
+    private void locateMods(final String resource, final String name) throws IOException {
         final Enumeration<URL> pluginJsons = ClassLoader.getSystemClassLoader().getResources(resource);
         while (pluginJsons.hasMoreElements()) {
             final URL url = pluginJsons.nextElement();
@@ -82,10 +79,8 @@ public final class ClasspathPluginLocator extends AbstractJarFileModLocator {
             if (Files.isDirectory(path))
                 continue;
 
-            if (filter.test(path)) {
-                ClasspathPluginLocator.LOGGER.debug("Found classpath plugin: {}", path);
-                this.modCoords.add(path);
-            }
+            ClasspathPluginLocator.LOGGER.debug("Found classpath plugin: {}", path);
+            this.modCoords.add(path);
         }
     }
 }

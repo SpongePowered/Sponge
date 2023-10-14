@@ -27,75 +27,73 @@ package org.spongepowered.forge.applaunch.loading.moddiscovery;
 import cpw.mods.jarhandling.SecureJar;
 import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
-import net.minecraftforge.fml.loading.moddiscovery.NightConfigWrapper;
-import net.minecraftforge.forgespi.language.IConfigurable;
+import net.minecraftforge.fml.loading.moddiscovery.ModJarMetadata;
 import net.minecraftforge.forgespi.language.IModFileInfo;
 import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
 import net.minecraftforge.forgespi.locating.ModFileFactory;
 import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 import org.spongepowered.forge.applaunch.loading.metadata.PluginFileConfigurable;
 import org.spongepowered.plugin.metadata.builtin.MetadataContainer;
 import org.spongepowered.plugin.metadata.builtin.MetadataParser;
 
 import java.io.Reader;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public final class ModFileParsers {
-
-    private static Constructor<ModFileInfo> modFileInfoConstructor;
-    private static Field modFileInfoField;
+    private static Constructor<ModJarMetadata> modJarMetadataConstructor;
 
     static {
         try {
-            ModFileParsers.modFileInfoConstructor = ModFileInfo.class.getDeclaredConstructor(ModFile.class, IConfigurable.class);
-            ModFileParsers.modFileInfoField = NightConfigWrapper.class.getDeclaredField("file");
+            ModFileParsers.modJarMetadataConstructor = ModJarMetadata.class.getDeclaredConstructor();
+            ModFileParsers.modJarMetadataConstructor.setAccessible(true);
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static IModFileInfo pluginMetadataParser(final String fileName, final IModFile iModFile) {
-        final ModFile modFile = (ModFile)iModFile;
+    public static IModFileInfo parsePluginMetadata(final IModFile iModFile) {
+        final ModFile modFile = (ModFile) iModFile;
         AppLaunch.logger().debug("Considering plugin file candidate {}", modFile.getFilePath());
-        final Path metadataFile = modFile.findResource("META-INF/" + fileName + ".json");
+
+        final Path metadataFile = modFile.findResource(PluginPlatformConstants.METADATA_FILE_LOCATION);
         if (Files.notExists(metadataFile)) {
             AppLaunch.logger().debug("Plugin file '{}' is missing a 'sponge_plugins.json' metadata file in META-INF", modFile);
             return null;
         }
+
         try {
             final MetadataContainer container;
             try (final Reader reader = Files.newBufferedReader(metadataFile, StandardCharsets.UTF_8)) {
                 container = MetadataParser.read(reader);
             }
-            final PluginFileConfigurable configurable = new PluginFileConfigurable(container);
 
-            return ModFileParsers.generateModFileMetadata(modFile, configurable);
+            final PluginFileConfigurable config = new PluginFileConfigurable(container);
+            return new ModFileInfo(modFile, config, List.of());
         } catch (final Exception e) {
             AppLaunch.logger().warn("Could not read metadata for plugin file '{}'", modFile, e);
             return null;
         }
     }
 
-    private static ModFileInfo generateModFileMetadata(final ModFile file, final IConfigurable configurable) throws Exception {
-        ModFileParsers.modFileInfoConstructor.setAccessible(true);
-        final ModFileInfo modFileInfo = ModFileParsers.modFileInfoConstructor.newInstance(file, configurable);
-        ModFileParsers.modFileInfoConstructor.setAccessible(false);
-        if (configurable instanceof NightConfigWrapper) {
-            ModFileParsers.modFileInfoField.setAccessible(true);
-            ModFileParsers.modFileInfoField.set(configurable, modFileInfo);
-            ModFileParsers.modFileInfoField.setAccessible(false);
+    private static ModJarMetadata newModJarMetadata() {
+        try {
+            return modJarMetadataConstructor.newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        return modFileInfo;
     }
 
-    public static ModFile newPluginInstance(final SecureJar jar, final IModLocator locator, final String fileName) {
-        return (ModFile) ModFileFactory.FACTORY.build(jar, locator, file -> ModFileParsers.pluginMetadataParser(fileName, file));
+    public static ModFile newPluginInstance(final IModLocator locator, final Path... path) {
+        ModJarMetadata mjm = newModJarMetadata();
+        ModFile modFile = (ModFile) ModFileFactory.FACTORY.build(SecureJar.from(jar -> mjm, path), locator, ModFileParsers::parsePluginMetadata);
+        mjm.setModFile(modFile);
+        return modFile;
     }
 
     private ModFileParsers() {

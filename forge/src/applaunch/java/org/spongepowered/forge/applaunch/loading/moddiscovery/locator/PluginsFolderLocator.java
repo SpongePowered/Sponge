@@ -24,7 +24,6 @@
  */
 package org.spongepowered.forge.applaunch.loading.moddiscovery.locator;
 
-import cpw.mods.jarhandling.SecureJar;
 import cpw.mods.modlauncher.api.LamdbaExceptionUtils;
 import net.minecraftforge.fml.loading.ModDirTransformerDiscoverer;
 import net.minecraftforge.fml.loading.StringUtils;
@@ -34,7 +33,6 @@ import net.minecraftforge.forgespi.locating.IModLocator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.ModFileParsers;
 
 import java.nio.file.Files;
@@ -65,10 +63,9 @@ public final class PluginsFolderLocator extends AbstractJarFileModProvider imple
     private Stream<ModFile> scanForModsIn(final Path pluginsDirectory) {
         final List<Path> excluded = ModDirTransformerDiscoverer.allExcluded();
         return LamdbaExceptionUtils.uncheck(() -> Files.list(pluginsDirectory))
-            .filter((p) -> !excluded.contains(p))
+            .filter((p) -> !excluded.contains(p) && StringUtils.toLowerCase(p.getFileName().toString()).endsWith(".jar"))
             .sorted(Comparator.comparing((path) -> StringUtils.toLowerCase(path.getFileName().toString())))
-            .filter((p) -> StringUtils.toLowerCase(p.getFileName().toString()).endsWith(".jar"))
-            .map((p) -> ModFileParsers.newPluginInstance(SecureJar.from(p), this, PluginPlatformConstants.METADATA_FILE_NAME))
+            .map((p) -> ModFileParsers.newPluginInstance(this, p))
             .filter(ModFile::identifyMods);
     }
 

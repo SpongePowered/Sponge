@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.minecraftforge.core;
+package org.spongepowered.forge.mixin.core.minecraftforge.registries;
 
 import com.google.common.collect.Maps;
 import net.minecraft.core.Registry;
@@ -40,7 +40,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.core.RegistryBridge;
 import org.spongepowered.common.registry.SpongeRegistryEntry;
 import org.spongepowered.common.registry.SpongeRegistryType;
-import org.spongepowered.forge.bridge.minecraftforge.fml.ForgeRegistryBridge;
+import org.spongepowered.forge.bridge.minecraftforge.registries.ForgeRegistryBridge;
 
 import java.util.Map;
 import java.util.StringJoiner;
