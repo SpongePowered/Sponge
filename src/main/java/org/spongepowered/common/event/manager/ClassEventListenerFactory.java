@@ -63,18 +63,16 @@ import java.util.Objects;
 public final class ClassEventListenerFactory implements AnnotatedEventListener.Factory {
 
     private static final String FILTER = "filter";
-    private final MethodHandles.Lookup lookup;
     private final FilterFactory filterFactory;
 
-    public ClassEventListenerFactory(final FilterFactory factory, final MethodHandles.Lookup lookup) {
+    public ClassEventListenerFactory(final FilterFactory factory) {
         this.filterFactory = Objects.requireNonNull(factory, "filterFactory");
-        this.lookup = Objects.requireNonNull(lookup, "lookup");
     }
 
     @Override
     public AnnotatedEventListener create(final Object handle, final ListenerClassVisitor.DiscoveredMethod method,
-                                         final MethodHandles.@Nullable Lookup handleLookup) throws Throwable {
-        final MethodHandles.Lookup lookup = this.createLookup(method, handleLookup != null ? handleLookup : this.lookup);
+                                         final MethodHandles.Lookup handleLookup) throws Throwable {
+        final MethodHandles.Lookup lookup = this.createLookup(method, handleLookup);
         return (AnnotatedEventListener) lookup.findConstructor(
             lookup.lookupClass(),
             MethodType.methodType(void.class, method.declaringClass())

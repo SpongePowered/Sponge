@@ -44,12 +44,12 @@ import java.util.Optional;
 public class ForgePluginContainer implements PluginContainer {
     private final ModContainer modContainer;
 
+    private Logger logger;
+    private PluginMetadata pluginMetadata;
+
     ForgePluginContainer(final ModContainer modContainer) {
         this.modContainer = modContainer;
     }
-
-    private Logger forge$logger;
-    private PluginMetadata forge$pluginMetadata;
 
     public ModContainer getModContainer() {
         return this.modContainer;
@@ -57,18 +57,18 @@ public class ForgePluginContainer implements PluginContainer {
 
     @Override
     public PluginMetadata metadata() {
-        if (this.forge$pluginMetadata == null) {
-            this.forge$pluginMetadata = ((ForgeLaunch) Launch.instance()).metadataForMod((ModInfo) this.modContainer.getModInfo());
+        if (this.pluginMetadata == null) {
+            this.pluginMetadata = ((ForgeLaunch) Launch.instance()).metadataForMod((ModInfo) this.modContainer.getModInfo());
         }
-        return this.forge$pluginMetadata;
+        return this.pluginMetadata;
     }
 
     @Override
     public Logger logger() {
-        if (this.forge$logger == null) {
-            this.forge$logger = LogManager.getLogger(this.modContainer.getModId());
+        if (this.logger == null) {
+            this.logger = LogManager.getLogger(this.modContainer.getModId());
         }
-        return this.forge$logger;
+        return this.logger;
     }
 
     @Override

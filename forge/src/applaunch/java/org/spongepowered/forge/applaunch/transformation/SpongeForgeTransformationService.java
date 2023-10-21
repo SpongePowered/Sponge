@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.applaunch.service;
+package org.spongepowered.forge.applaunch.transformation;
 
 import cpw.mods.jarhandling.SecureJar;
 import cpw.mods.modlauncher.Environment;
@@ -43,7 +43,6 @@ import org.spongepowered.transformers.modlauncher.SuperclassChanger;
 
 import java.net.MalformedURLException;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -120,9 +119,9 @@ public class SpongeForgeTransformationService implements ITransformationService 
 
     @NonNull
     @Override
-    @SuppressWarnings("rawtypes") // :(((((((((((((((
+    @SuppressWarnings("rawtypes") // :)
     public List<ITransformer> transformers() {
-        return Collections.emptyList();
+        return List.of(new ListenerTransformer());
     }
 
     public static final class Keys {

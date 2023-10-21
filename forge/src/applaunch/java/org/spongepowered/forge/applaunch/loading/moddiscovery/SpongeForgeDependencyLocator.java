@@ -34,7 +34,7 @@ import net.minecraftforge.forgespi.locating.IModLocator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryManager;
-import org.spongepowered.forge.applaunch.service.SpongeForgeTransformationService;
+import org.spongepowered.forge.applaunch.transformation.SpongeForgeTransformationService;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
