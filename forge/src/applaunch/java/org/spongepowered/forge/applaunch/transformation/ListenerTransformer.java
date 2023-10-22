@@ -26,6 +26,7 @@ package org.spongepowered.forge.applaunch.transformation;
 
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.RETURN;
 
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerActivity;
@@ -38,6 +39,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -60,6 +62,7 @@ public class ListenerTransformer implements ITransformer<ClassNode> {
 
         if (clinit == null) {
             clinit = new MethodNode(ACC_STATIC, "<clinit>", "()V", null, null);
+            clinit.instructions.add(new InsnNode(RETURN));
             input.methods.add(clinit);
         }
 
