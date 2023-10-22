@@ -29,7 +29,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -55,12 +54,6 @@ public abstract class BuiltInRegistriesMixin {
     private static void impl$staticInitSpongeRecipeSerializers(final Registry $$0, final CallbackInfoReturnable<RecipeSerializer> cir)
     {
         final var serializer = SpongeRecipeSerializers.SPONGE_BLASTING;
-    }
-
-    @Inject(method = "lambda$static$6", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/EntityType;PIG:Lnet/minecraft/world/entity/EntityType;"))
-    private static void impl$staticInitSpongeEntityTypes(final Registry $$0, final CallbackInfoReturnable<EntityType> cir)
-    {
-        // final var type = HumanEntity.TYPE; // TODO SF 1.19.4
     }
 
     @Inject(method = "bootStrap", at = @At(value = "HEAD"))
