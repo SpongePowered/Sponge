@@ -5,7 +5,7 @@
     },
     "license": "MIT",
     "global": {
-        "version": "8.0.0",
+        "version": "10.0.0",
         "links": {
             "homepage": "https://www.spongepowered.org",
             "source": "https://www.spongepowered.org/source",
@@ -20,7 +20,7 @@
         "dependencies": [
             {
                 "id": "spongeapi",
-                "version": "8.0.0"
+                "version": "10.0.0"
             }
         ]
     },
@@ -245,25 +245,25 @@
             "description": "Pack Testing"
         },
         {
-            "id": "vanish-test",
+            "id": "vanish_test",
             "name": "Vanish Test",
             "entrypoint": "org.spongepowered.test.vanish.VanishTest",
             "description": "Vanish Testing"
         },
         {
-            "id": "logging-test",
+            "id": "logging_test",
             "name": "Logging Test",
             "entrypoint": "org.spongepowered.test.logging.LoggingTest",
             "description": "Logging Testing"
         },
         {
-            "id": "blockstate-test",
+            "id": "blockstate_test",
             "name": "BlockState Test",
             "entrypoint": "org.spongepowered.test.blockstate.BlockStateTest",
             "description": "BlockState Testing"
         },
         {
-            "id": "key-test",
+            "id": "key_test",
             "name": "Key Listener Test",
             "entrypoint": "org.spongepowered.test.keys.KeyTest",
             "description": "Key Listener Testing"

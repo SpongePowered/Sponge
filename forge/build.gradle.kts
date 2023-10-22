@@ -1,6 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
-import net.fabricmc.loom.LoomGradleExtension
 import net.fabricmc.loom.task.RemapJarTask
 import org.gradle.configurationcache.extensions.capitalized
 
@@ -30,7 +29,7 @@ val recommendedVersion: String by project
 val organization: String by project
 val projectUrl: String by project
 
-val testplugins: Project? = rootProject.subprojects.find { "testplugins".equals(it.name) }
+val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
 
 description = "The SpongeAPI implementation for MinecraftForge"
 version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVersion, recommendedVersion, forgeVersion)
@@ -49,6 +48,8 @@ val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = confi
 
 val serviceShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeServiceShadedLibraries")
 val gameShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameShadedLibraries")
+
+val runTaskOnlyConfig: NamedDomainObjectProvider<Configuration> = configurations.register("runTaskOnly")
 
 configurations.named("forgeRuntimeLibrary") {
     extendsFrom(serviceLibrariesConfig.get())
@@ -79,7 +80,6 @@ val launch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.name
 val applaunch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("applaunch")
 val mixins: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("mixins")
 val main: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("main")
-val mlTransformers: NamedDomainObjectProvider<SourceSet> = transformersProject.sourceSets.named("main")
 
 // Forge source sets
 val forgeMain by sourceSets.named("main") {
@@ -140,8 +140,6 @@ val forgeAppLaunch by sourceSets.register("applaunch") {
         extendsFrom(serviceLayerConfig.get())
     }
 }
-
-val forgeAppLaunchRuntime by configurations.named(forgeAppLaunch.runtimeOnlyConfigurationName)
 
 configurations.configureEach {
     exclude(group = "net.minecraft", module = "joined")
@@ -262,8 +260,9 @@ dependencies {
         spongeImpl.copyModulesExcludingProvided(gameLibrariesConfig.get(), serviceLayerConfig.get(), gameManagedLibrariesConfig.get())
     }
 
-    testplugins?.also {
-        forgeAppLaunchRuntime(project(it.path)) {
+    val runTaskOnly = runTaskOnlyConfig.name
+    testPluginsProject?.also {
+        runTaskOnly(project(it.path)) {
             exclude(group = "org.spongepowered")
         }
     }
@@ -284,7 +283,6 @@ val forgeManifest = java.manifest {
 }
 
 val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
-val mods: ConfigurableFileCollection = (loom as LoomGradleExtension).unmappedModCollection
 
 tasks {
     jar {
@@ -334,7 +332,7 @@ tasks {
 
     afterEvaluate {
         withType(net.fabricmc.loom.task.AbstractRunTask::class) {
-            classpath += files(mods, forgeServicesDevJar, forgeLangJar)
+            classpath += files(forgeServicesDevJar, forgeLangJar, runTaskOnlyConfig)
 
             argumentProviders += CommandLineArgumentProvider {
                 mixinConfigs.asSequence()
