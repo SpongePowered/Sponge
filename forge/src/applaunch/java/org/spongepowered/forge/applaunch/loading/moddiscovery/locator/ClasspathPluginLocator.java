@@ -35,19 +35,23 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
 public final class ClasspathPluginLocator extends AbstractJarFileModLocator {
     private static final Logger LOGGER = LogManager.getLogger();
-    private Set<Path> modCoords;
 
     @Override
     public Stream<Path> scanCandidates() {
-        return this.modCoords.stream();
+        try {
+            return locatePlugins(PluginPlatformConstants.METADATA_FILE_LOCATION, "classpath_plugin").stream();
+        } catch (IOException e) {
+            ClasspathPluginLocator.LOGGER.fatal("Error trying to find resources", e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -62,16 +66,11 @@ public final class ClasspathPluginLocator extends AbstractJarFileModLocator {
 
     @Override
     public void initArguments(final Map<String, ?> arguments) {
-        try {
-            this.modCoords = new LinkedHashSet<>();
-            this.locateMods(PluginPlatformConstants.METADATA_FILE_LOCATION, "classpath_plugin");
-        } catch (IOException e) {
-            ClasspathPluginLocator.LOGGER.fatal("Error trying to find resources", e);
-            throw new RuntimeException("wha?", e);
-        }
     }
 
-    private void locateMods(final String resource, final String name) throws IOException {
+    private static List<Path> locatePlugins(final String resource, final String name) throws IOException {
+        final List<Path> result = new ArrayList<>();
+
         final Enumeration<URL> pluginJsons = ClassLoader.getSystemClassLoader().getResources(resource);
         while (pluginJsons.hasMoreElements()) {
             final URL url = pluginJsons.nextElement();
@@ -80,7 +79,9 @@ public final class ClasspathPluginLocator extends AbstractJarFileModLocator {
                 continue;
 
             ClasspathPluginLocator.LOGGER.debug("Found classpath plugin: {}", path);
-            this.modCoords.add(path);
+            result.add(path);
         }
+
+        return result;
     }
 }

@@ -29,7 +29,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 
-@Plugin("logging-test")
+@Plugin("logging_test")
 public class LoggingTest {
 
     private final System.Logger platformLogger;
