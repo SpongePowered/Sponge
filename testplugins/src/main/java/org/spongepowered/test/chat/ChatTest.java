@@ -35,7 +35,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
-import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
@@ -99,8 +98,7 @@ public class ChatTest implements LoadableModule {
         // Register localization keys
         final TranslationRegistry lang = TranslationRegistry.create(ResourceKey.of(this.container, "translations"));
         Arrays.asList(Locales.EN_US, new Locale("en", "UD")).forEach(it ->
-                lang.registerAll(it, ResourceBundle.getBundle("org.spongepowered.test.chat.messages", it,
-                                                              UTF8ResourceBundleControl.get()), false));
+                lang.registerAll(it, ResourceBundle.getBundle("org.spongepowered.test.chat.messages", it), false));
         GlobalTranslator.translator().addSource(lang);
     }
 
