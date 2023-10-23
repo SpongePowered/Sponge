@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.data.DataUtil;
@@ -96,7 +95,7 @@ public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoun
 
     @Override
     public String toString() {
-        final ResourceKey key = (ResourceKey) (Object) SpongeCommon.vanillaRegistry(Registries.BLOCK_ENTITY_TYPE).getKey(this.type);
+        final ResourceKey key = (ResourceKey) (Object) BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(this.type);
 
         return MoreObjects.toStringHelper(this)
                 // Double check some mods are registering their tile entities and doing some "interesting"
@@ -109,7 +108,7 @@ public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoun
     }
 
     protected MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {
-        final ResourceKey key = (ResourceKey) (Object) SpongeCommon.vanillaRegistry(Registries.BLOCK_ENTITY_TYPE).getKey(this.type);
+        final ResourceKey key = (ResourceKey) (Object) BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(this.type);
 
         return MoreObjects.toStringHelper(this)
             .add("type", key)
