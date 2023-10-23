@@ -25,12 +25,11 @@
 package org.spongepowered.common.mixin.core.world.item.enchantment;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeCommon;
 
 @Mixin(Enchantment.class)
 public abstract class EnchantmentMixin {
@@ -41,7 +40,7 @@ public abstract class EnchantmentMixin {
 
     @Override
     public String toString() {
-        final ResourceKey key = (ResourceKey) (Object) SpongeCommon.vanillaRegistry(Registries.ENCHANTMENT).getKey((Enchantment) (Object) this);
+        final ResourceKey key = (ResourceKey) (Object) BuiltInRegistries.ENCHANTMENT.getKey((Enchantment) (Object) this);
         return MoreObjects.toStringHelper("EnchantmentType")
                 .add("Name", this.shadow$getDescriptionId())
                 .add("Key", key)
