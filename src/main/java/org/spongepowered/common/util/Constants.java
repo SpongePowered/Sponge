@@ -1093,6 +1093,8 @@ public final class Constants {
     public static final class GameProfile {
 
         public static final DataQuery SKIN_UUID = of("SkinUUID");
+        public static final DataQuery SKIN_TEXTURE = of("SkinTexture");
+        public static final DataQuery SKIN_SIGNATURE = of("SkinSignature");
         // RepresentedPlayerData
         public static final DataQuery GAME_PROFILE_ID = of("Id");
         public static final DataQuery GAME_PROFILE_NAME = of("Name");

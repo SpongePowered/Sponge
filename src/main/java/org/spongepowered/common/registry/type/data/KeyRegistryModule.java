@@ -403,6 +403,10 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.register("skin_unique_id", Key.builder().type(TypeTokens.UUID_VALUE_TOKEN).id("skin_uuid").name("Skin UUID").query(of("SkinUUID")).build());
 
+        this.register("skin_texture", Key.builder().type(TypeTokens.STRING_VALUE_TOKEN).id("skin_texture").name("Skin Texture").query(of("SkinTexture")).build());
+
+        this.register("skin_signature", Key.builder().type(TypeTokens.STRING_VALUE_TOKEN).id("skin_signature").name("Skin Signature").query(of("SkinSignature")).build());
+
         this.register("moisture", Key.builder().type(TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN).id("moisture").name("Moisture").query(of("Moisture")).build());
 
         this.register("angry", Key.builder().type(TypeTokens.BOOLEAN_VALUE_TOKEN).id("angry").name("Angry").query(of("Angry")).build());

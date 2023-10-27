@@ -29,6 +29,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -54,6 +55,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
+
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
@@ -68,8 +70,10 @@ import org.spongepowered.common.mixin.core.network.play.server.SPacketPlayerList
 import org.spongepowered.common.mixin.core.network.play.server.SPacketSpawnPlayerAccessor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -102,6 +106,8 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     private GameProfile fakeProfile;
     @Nullable private UUID skinUuid;
+    @Nullable private String skinTexture;
+    @Nullable private String skinSignature;
     private boolean aiDisabled = false, leftHanded = false;
 
     public EntityHuman(final World worldIn) {
@@ -128,7 +134,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         // EntityPlayer
         this.dataManager.register(EntityPlayerAccessor.accessor$getAbsorptionParameter(), Float.valueOf(0.0F));
         this.dataManager.register(EntityPlayerAccessor.accessor$getPlayerScoreParameter(), Integer.valueOf(0));
-        this.dataManager.register(EntityPlayerAccessor.accessor$getPlayerModelFlagParameter(), Byte.valueOf((byte)0));
+        this.dataManager.register(EntityPlayerAccessor.accessor$getPlayerModelFlagParameter(), Byte.valueOf((byte)127));
         this.dataManager.register(EntityPlayerAccessor.accessor$getMainHandParameter(), Byte.valueOf((byte)1));
     }
 
@@ -172,7 +178,11 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     public void readEntityFromNBT(final NBTTagCompound tagCompund) {
         super.readEntityFromNBT(tagCompund);
         final String skinUuidString = ((DataCompoundHolder) this).data$getSpongeCompound().getString("skinUuid");
-        if (!skinUuidString.isEmpty()) {
+        final String skinTextureString = ((DataCompoundHolder) this).data$getSpongeCompound().getString("skinTexture");
+        final String skinSignatureString = ((DataCompoundHolder) this).data$getSpongeCompound().getString("skinSignature");
+        if (!skinTextureString.isEmpty()) {
+            this.updateFakeProfileWithSkinTexture(skinTextureString, skinSignatureString.isEmpty() ? Optional.empty() : Optional.of(skinSignatureString));
+        } else if (!skinUuidString.isEmpty()) {
             this.updateFakeProfileWithSkin(UUID.fromString(skinUuidString));
         }
     }
@@ -185,6 +195,16 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
             spongeData.setString("skinUuid", this.skinUuid.toString());
         } else {
             spongeData.removeTag("skinUuid");
+        }
+        if (this.skinTexture != null) {
+            spongeData.setString("skinTexture", this.skinTexture);
+        } else {
+            spongeData.removeTag("skinTexture");
+        }
+        if (this.skinSignature != null) {
+            spongeData.setString("skinSignature", this.skinSignature);
+        } else {
+            spongeData.removeTag("skinSignature");
         }
     }
 
@@ -202,6 +222,8 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @Override
     public void setLeftHanded(final boolean leftHanded) {
         this.leftHanded = leftHanded;
+        this.getDataManager().set(EntityPlayerAccessor.accessor$getMainHandParameter(),
+            Byte.valueOf((byte) (leftHanded ? 0 : 1)));
     }
 
     @Override
@@ -328,6 +350,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         this.fakeProfile.getProperties().putAll(props);
     }
 
+    // update with skin from a player uuid
     private boolean updateFakeProfileWithSkin(final UUID skin) {
         final PropertyMap properties = PROPERTIES_CACHE.getUnchecked(skin);
         if (properties.isEmpty()) {
@@ -335,6 +358,37 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         }
         this.fakeProfile.getProperties().replaceValues("textures", properties.get("textures"));
         this.skinUuid = skin;
+        this.skinTexture = null;
+        this.skinSignature = null;
+        return true;
+    }
+
+    private boolean updateFakeProfileWithSkinTexture(final String texture) {
+        return updateFakeProfileWithSkinTexture(texture, Optional.of(this.skinSignature));
+    }
+
+    private boolean updateFakeProfileWithSkinSignature(final String signature) {
+        // just update the signature until there is a texture to go with it
+        if (this.skinTexture == null)
+        {
+            this.skinSignature = signature;
+            return true;
+        }
+        return updateFakeProfileWithSkinTexture(this.skinTexture, Optional.of(signature));
+    }
+
+    // update with skin texture
+    private boolean updateFakeProfileWithSkinTexture(final String texture, final Optional<String> skinSignature) {
+        Property property;
+        if (skinSignature.isPresent() && skinSignature.get() != null) {
+            property = new Property("textures", texture, skinSignature.get());
+        } else {
+            property = new Property("textures", texture);
+        }
+        this.skinTexture = texture;
+        if (skinSignature.isPresent()) this.skinSignature = skinSignature.get();
+        this.fakeProfile.getProperties().replaceValues("textures", Collections.singleton(property));
+        this.skinUuid = null;
         return true;
     }
 
@@ -373,6 +427,51 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         return this.skinUuid;
     }
 
+    public boolean setSkinTexture(final String texture) {
+        if (!SpongeImpl.getServer().isServerInOnlineMode()) {
+            // Skins only work when online-mode = true
+            return false;
+        }
+        if (texture.equals(this.skinTexture)) {
+            return true;
+        }
+        if (!updateFakeProfileWithSkinTexture(texture)) {
+            return false;
+        }
+        if (this.isAliveAndInWorld()) {
+            this.respawnOnClient();
+        }
+        return true;
+    }
+
+    @Nullable
+    public String getSkinTexture() {
+        return this.skinTexture;
+    }
+
+    public boolean setSkinSignature(final String signature) {
+        if (!SpongeImpl.getServer().isServerInOnlineMode()) {
+            // Skins only work when online-mode = true
+            return false;
+        }
+        if (signature.equals(this.skinSignature)) {
+            return true;
+        }
+        // just update the signature until there is a texture to go with it
+        if (!updateFakeProfileWithSkinSignature(signature)) {
+            return false;
+        }
+        if (this.isAliveAndInWorld()) {
+            this.respawnOnClient();
+        }
+        return true;
+    }
+
+    @Nullable
+    public String getSkinSignature() {
+        return this.skinSignature;
+    }
+
     public DataTransactionResult removeSkin() {
         if (this.skinUuid == null) {
             return DataTransactionResult.successNoData();
@@ -380,6 +479,32 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         this.fakeProfile.getProperties().removeAll("textures");
         final ImmutableValue<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN_UNIQUE_ID, this.skinUuid);
         this.skinUuid = null;
+        if (this.isAliveAndInWorld()) {
+            this.respawnOnClient();
+        }
+        return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(oldValue).build();
+    }
+
+    public DataTransactionResult removeSkinTexture() {
+        if (this.skinTexture == null) {
+            return DataTransactionResult.successNoData();
+        }
+        this.fakeProfile.getProperties().removeAll("textures");
+        final ImmutableValue<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN_TEXTURE, this.skinTexture);
+        this.skinTexture = null;
+        if (this.isAliveAndInWorld()) {
+            this.respawnOnClient();
+        }
+        return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(oldValue).build();
+    }
+
+    public DataTransactionResult removeSkinSignature() {
+        if (this.skinSignature == null) {
+            return DataTransactionResult.successNoData();
+        }
+        this.fakeProfile.getProperties().removeAll("textures");
+        final ImmutableValue<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN_SIGNATURE, this.skinSignature);
+        this.skinSignature = null;
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();
         }

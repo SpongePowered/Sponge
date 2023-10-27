@@ -377,6 +377,12 @@ public final class DataRegistrar {
         DataUtil.registerDualProcessor(SkinData.class, SpongeSkinData.class, ImmutableSkinData.class,
                 ImmutableSpongeSkinData.class, new SkinDataProcessor());
 
+        DataUtil.registerDualProcessor(SkinTextureData.class, SpongeSkinTextureData.class, ImmutableSkinTextureData.class,
+                ImmutableSpongeSkinTextureData.class, new SkinTextureDataProcessor());
+
+        DataUtil.registerDualProcessor(SkinSignatureData.class, SpongeSkinSignatureData.class, ImmutableSkinSignatureData.class,
+                ImmutableSpongeSkinSignatureData.class, new SkinSignatureDataProcessor());
+
         DataUtil.registerDualProcessor(ExpOrbData.class, SpongeExpOrbData.class, ImmutableExpOrbData.class,
                 ImmutableSpongeExpOrbData.class, new ExpOrbDataProcessor());
 
