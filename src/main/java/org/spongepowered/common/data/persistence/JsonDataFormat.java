@@ -51,7 +51,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -219,20 +218,20 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
             writer.endArray();
         } else if (value instanceof byte[]) {
             writer.beginArray();
-            for (Object item : (byte[]) value) {
-                write(writer, item);
+            for (byte item : (byte[]) value) {
+                writer.value(item);
             }
             writer.endArray();
         } else if (value instanceof int[]) {
             writer.beginArray();
-            for (Object item : (int[]) value) {
-                write(writer, item);
+            for (int item : (int[]) value) {
+                writer.value(item);
             }
             writer.endArray();
         } else if (value instanceof long[]) {
             writer.beginArray();
-            for (Object item : (long[]) value) {
-                write(writer, item);
+            for (long item : (long[]) value) {
+                writer.value(item);
             }
             writer.endArray();
         } else if (value instanceof Map) {
