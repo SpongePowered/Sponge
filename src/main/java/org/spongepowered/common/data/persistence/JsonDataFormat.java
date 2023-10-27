@@ -51,6 +51,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -211,7 +212,29 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
         } else if (value instanceof String) {
             writer.value((String) value);
         } else if (value instanceof Iterable) {
-            writeArray(writer, (Iterable<?>) value);
+            writer.beginArray();
+            for (Object item : (Iterable<?>) value) {
+                write(writer, item);
+            }
+            writer.endArray();
+        } else if (value instanceof byte[]) {
+            writer.beginArray();
+            for (Object item : (byte[]) value) {
+                write(writer, item);
+            }
+            writer.endArray();
+        } else if (value instanceof int[]) {
+            writer.beginArray();
+            for (Object item : (int[]) value) {
+                write(writer, item);
+            }
+            writer.endArray();
+        } else if (value instanceof long[]) {
+            writer.beginArray();
+            for (Object item : (long[]) value) {
+                write(writer, item);
+            }
+            writer.endArray();
         } else if (value instanceof Map) {
             writeMap(writer, (Map<?, ?>) value);
         } else if (value instanceof DataSerializable) {
@@ -221,14 +244,6 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
         } else {
             throw new IllegalArgumentException("Unable to translate object to JSON: " + value);
         }
-    }
-
-    private static void writeArray(JsonWriter writer, Iterable<?> iterable) throws IOException {
-        writer.beginArray();
-        for (Object value : iterable) {
-            write(writer, value);
-        }
-        writer.endArray();
     }
 
     private static void writeMap(JsonWriter writer, Map<?, ?> map) throws IOException {
