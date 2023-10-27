@@ -71,7 +71,7 @@ public abstract class HoverEventMixin implements HoverEventBridge {
                         String name = nbt.getString("name");
                         EntityType type = null;
                         if (nbt.hasKey("type", Constants.NBT.TAG_STRING)) {
-                            type = SpongeImpl.getGame().getRegistry().getType(EntityType.class, name).orElse(null);
+                            type = SpongeImpl.getGame().getRegistry().getType(EntityType.class, nbt.getString("type")).orElse(null);
                         }
 
                         UUID uniqueId = UUID.fromString(nbt.getString("id"));
