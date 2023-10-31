@@ -350,8 +350,8 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
                     RegionFile regionFile = new RegionFile(path, regionPath, true);
                     final Vector4i regionBound = this.api$pathToRegionPos(path);
                     // Find all chunks in bounds
-                    final Stream<ChunkPos> chunkPosStream = IntStream.range(regionBound.x(), regionBound.z())
-                            .mapToObj(x -> IntStream.range(regionBound.y(), regionBound.w()).
+                    final Stream<ChunkPos> chunkPosStream = IntStream.rangeClosed(regionBound.x(), regionBound.z())
+                            .mapToObj(x -> IntStream.rangeClosed(regionBound.y(), regionBound.w()).
                                     mapToObj(z -> new ChunkPos(x, z)))
                             .flatMap(Function.identity());
                     return mapper.apply(regionFile, chunkPosStream).onClose(() -> this.api$close(regionFile));
