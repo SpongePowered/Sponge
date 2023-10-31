@@ -35,12 +35,15 @@ import java.util.List;
 @Mixin(BellBlockEntity.class)
 public abstract class BellBLockEntityMixin extends BlockEntityMixin implements BellBlockEntityBridge {
 
+    // @formatter:off
     @Shadow private List<LivingEntity> nearbyEntities;
     @Shadow private long lastRingTimestamp;
+    @Shadow private boolean shaking;
+    // @formatter:on
 
     @Override
     public void bridge$clearNearbyEntities() {
-        if (this.nearbyEntities != null && this.level.getGameTime() > this.lastRingTimestamp + 60L) {
+        if (!this.shaking && this.nearbyEntities != null && this.level.getGameTime() > this.lastRingTimestamp + 60L) {
             this.nearbyEntities = null;
         }
     }
