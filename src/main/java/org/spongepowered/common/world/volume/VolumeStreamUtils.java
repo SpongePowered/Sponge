@@ -633,6 +633,7 @@ public final class VolumeStreamUtils {
         if (options.loadingStyle().immediateLoading()) {
             final Set<KeyReference> availableTileEntityPositions = new LinkedHashSet<>();
             sectionStream
+                .filter(Objects::nonNull)
                 .map(entityAccessor)
                 .forEach((map) -> map.forEach(entry -> entryConsumer.accept(entry, availableTileEntityPositions)));
             filteredPosStream = availableTileEntityPositions.stream();
@@ -641,6 +642,7 @@ public final class VolumeStreamUtils {
             // Since we're operating on the chunk positions, we generate the Stream of keys
             // for each position, which in turn generate their filtered lists on demand.
             filteredPosStream = sectionStream
+                .filter(Objects::nonNull)
                 .flatMap(chunk -> {
                     final Set<KeyReference> blockEntityPoses = new LinkedHashSet<>();
                     entityAccessor.apply(chunk)
