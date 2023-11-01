@@ -119,9 +119,9 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         } else {
             biomes = this.biomes;
         }
-        final Stream<VolumeElement<BiomeVolume.Mutable, Biome>> stateStream = IntStream.range(min.x(), max.x() + 1)
-            .mapToObj(x -> IntStream.range(min.z(), max.z() + 1)
-                .mapToObj(z -> IntStream.range(min.y(), max.y() + 1)
+        final Stream<VolumeElement<BiomeVolume.Mutable, Biome>> stateStream = IntStream.rangeClosed(min.x(), max.x())
+            .mapToObj(x -> IntStream.rangeClosed(min.z(), max.z())
+                .mapToObj(z -> IntStream.rangeClosed(min.y(), max.y())
                     .mapToObj(y -> VolumeElement.of((BiomeVolume.Mutable) this, () -> {
                         final byte biomeId = biomes[this.getIndex(x, y, z)];
                         return this.palette.get(biomeId & 255, Sponge.server())
