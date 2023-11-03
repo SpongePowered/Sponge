@@ -24,7 +24,6 @@
  */
 package org.spongepowered.test.data;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -328,7 +327,7 @@ public final class DataTest  {
         armorStand.equip(EquipmentTypes.MAIN_HAND.get(), ItemStack.of(ItemTypes.DIAMOND));
         armorStand.equip(EquipmentTypes.OFF_HAND.get(), ItemStack.of(ItemTypes.DIAMOND));
 
-        armorStand.offer(Keys.BODY_ROTATIONS, ImmutableMap.of(BodyParts.CHEST.get(), Vector3d.RIGHT));
+        armorStand.offer(Keys.BODY_ROTATIONS, Map.of(BodyParts.CHEST.get(), Vector3d.RIGHT));
 
         // TODO wither.get(Keys.BOSS_BAR)
 
