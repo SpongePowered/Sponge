@@ -27,6 +27,7 @@ package org.spongepowered.common.text.action;
 import net.minecraft.entity.EntityList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.HoverEvent;
@@ -66,7 +67,10 @@ public class SpongeHoverAction {
                 nbt.setString("id", entity.getUniqueId().toString());
 
                 if (entity.getType().isPresent()) {
-                    nbt.setString("type", EntityList.getKey(((SpongeEntityType) entity.getType().get()).entityClass).toString());
+                    ResourceLocation resource = EntityList.getKey(((SpongeEntityType) entity.getType().get()).entityClass);
+                    if (resource != null) {
+                        nbt.setString("type", resource.toString());
+                    }
                 }
 
                 nbt.setString("name", entity.getName());
