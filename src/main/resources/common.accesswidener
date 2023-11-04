@@ -15,7 +15,6 @@ extendable class net/minecraft/world/item/crafting/Ingredient
 extendable method net/minecraft/world/item/crafting/Ingredient <init> (Ljava/util/stream/Stream;)V
 accessible field net/minecraft/world/item/crafting/Ingredient values [Lnet/minecraft/world/item/crafting/Ingredient$Value;
 accessible class net/minecraft/world/item/crafting/Ingredient$Value
-accessible class net/minecraft/world/level/biome/MultiNoiseBiomeSource$NoiseParameters
 accessible method net/minecraft/world/level/biome/Biome getTemperature (Lnet/minecraft/core/BlockPos;)F
 accessible class net/minecraft/server/level/ServerLevel$EntityCallbacks
 accessible class net/minecraft/network/protocol/game/ServerboundInteractPacket$Action
