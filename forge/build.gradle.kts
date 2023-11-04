@@ -178,6 +178,7 @@ sourceSets.configureEach {
 
 extensions.configure(LoomGradleExtensionAPI::class) {
     silentMojangMappingsLicense()
+    accessWidenerPath.set(file("../src/main/resources/common.accesswidener"))
 
     mixin {
         useLegacyMixinAp.set(false)
