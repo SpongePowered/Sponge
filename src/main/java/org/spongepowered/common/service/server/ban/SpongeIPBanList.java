@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanService;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.BanUtil;
 import org.spongepowered.common.util.NetworkUtil;
 
@@ -63,7 +64,10 @@ public final class SpongeIPBanList extends IpBanList {
         try {
             return Sponge.server().serviceProvider().banService().find(InetAddress.getByName(entry)).join().isPresent();
         } catch (final UnknownHostException e) {
-            throw new IllegalArgumentException("Error parsing Ban IP address!", e);
+            // TODO SF 1.19.4
+            SpongeCommon.logger().info("Error parsing Ban IP address!", e);
+            return false;
+            // throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
     }
 
