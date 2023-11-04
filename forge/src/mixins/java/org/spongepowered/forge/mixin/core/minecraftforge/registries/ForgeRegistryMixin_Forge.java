@@ -40,13 +40,12 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.core.RegistryBridge;
 import org.spongepowered.common.registry.SpongeRegistryEntry;
 import org.spongepowered.common.registry.SpongeRegistryType;
-import org.spongepowered.forge.bridge.minecraftforge.registries.ForgeRegistryBridge;
 
 import java.util.Map;
 import java.util.StringJoiner;
 
 @Mixin(ForgeRegistry.class)
-public abstract class ForgeRegistryMixin_Forge<V> implements ForgeRegistryBridge<V> {
+public abstract class ForgeRegistryMixin_Forge<V> {
 
     // @formatter:off
     @Shadow @Final private net.minecraft.resources.ResourceKey<Registry<V>> key;

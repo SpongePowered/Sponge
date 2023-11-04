@@ -22,12 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.bridge.minecraftforge.registries;
+package org.spongepowered.forge.mixin.core.minecraftforge.registries;
 
-import org.spongepowered.common.bridge.core.RegistryBridge;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraftforge.registries.RegistryManager;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-public interface ForgeRegistryBridge<T> {
+import java.util.Map;
 
-    RegistryBridge<T> bridge$parent();
+@Mixin(RegistryManager.class)
+public class RegistryManagerMixin_Forge {
 
+    @SuppressWarnings("UnstableApiUsage")
+    @Inject(method = "takeSnapshot", at = @At("RETURN"))
+    public void forge$dontSendSpongeDataToClient(boolean savingToDisc, CallbackInfoReturnable<Map<ResourceLocation, ForgeRegistry.Snapshot>> cir) {
+        if (savingToDisc) {
+            return;
+        }
+
+        for (ForgeRegistry.Snapshot snapshot : cir.getReturnValue().values()) {
+            snapshot.ids.keySet().removeIf(loc -> loc.getNamespace().equals("sponge"));
+        }
+    }
 }
