@@ -356,10 +356,8 @@ public final class SpongeItemStack  {
             for (int i = 0; i < nbttaglist.size(); ++i)
             {
                 final CompoundTag nbttagcompound = nbttaglist.getCompound(i);
-                final String id = nbttagcompound.getString(Constants.Item.ITEM_ENCHANTMENT_ID);
                 final short lvl = nbttagcompound.getShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
 
-                nbttagcompound.putString(Constants.Item.ITEM_ENCHANTMENT_ID, id);
                 nbttagcompound.putShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, lvl);
             }
         }
