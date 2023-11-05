@@ -24,9 +24,10 @@
  */
 package org.spongepowered.test.channel;
 
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.packet.Packet;
+
+import java.util.StringJoiner;
 
 public final class PrintTextPacket implements Packet {
 
@@ -55,8 +56,8 @@ public final class PrintTextPacket implements Packet {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("text", this.text)
+        return new StringJoiner(", ", PrintTextPacket.class.getSimpleName() + "[", "]")
+                .add("text=" + this.text)
                 .toString();
     }
 }

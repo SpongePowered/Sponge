@@ -24,7 +24,6 @@
  */
 package org.spongepowered.test.volumestream;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.identity.Identity;
@@ -81,6 +80,7 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
@@ -127,7 +127,7 @@ public final class VolumeStreamTest implements LoadableModule {
         Files.createDirectories(this.config);
         final Parameter.Value<Biome> biomeKey = Parameter.registryElement(
             TypeToken.get(Biome.class),
-            ImmutableList.of(
+            List.of(
                 VariableValueParameters.RegistryEntryBuilder.WORLD_FROM_LOCATABLE_HOLDER_PROVIDER ,
                 VariableValueParameters.RegistryEntryBuilder.WORLD_FROM_CAUSE_HOLDER_PROVIDER
             ),

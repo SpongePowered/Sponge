@@ -24,7 +24,6 @@
  */
 package org.spongepowered.test.map;
 
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
@@ -211,7 +210,7 @@ public class MapTest implements LoadableModule {
                 .customName(Component.text("I AM A ").color(NamedTextColor.BLUE).append(BlockTypes.BLUE_BANNER.get()))
                 .rotation(MapDecorationOrientations.NORTH)
                 .build();
-        heldMap.require(Keys.MAP_INFO).offer(Keys.MAP_DECORATIONS, Sets.newHashSet(decoration));
+        heldMap.require(Keys.MAP_INFO).offer(Keys.MAP_DECORATIONS, Set.of(decoration));
         return CommandResult.success();
     }
 

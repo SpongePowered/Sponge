@@ -24,7 +24,6 @@
  */
 package org.spongepowered.test.trades;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -79,7 +78,7 @@ public class TradeTest implements LoadableModule {
     private static final Component LORE_FOURTH = TradeTest.blueText( "Granting delights for you and me");
     private static final Component LORE_FIFTH = TradeTest.blueText("For ").append(TradeTest.sponge()).append(TradeTest.blueText(" is in a State of play"));
     private static final Component LORE_SIXTH = TradeTest.blueText("Today, be happy as can be!");
-    static final ImmutableList<Component> LORE = ImmutableList.of(
+    static final List<Component> LORE = List.of(
         TradeTest.LORE_FIRST, TradeTest.LORE_SECOND,
         TradeTest.LORE_THIRD, TradeTest.LORE_FOURTH,
         TradeTest.LORE_FIFTH,
@@ -104,10 +103,10 @@ public class TradeTest implements LoadableModule {
 
     public static final class SpawnListener {
         // Here are the items that we will sell and buy
-        private static final List<Supplier<ItemType>> SELL_TYPES = ImmutableList.of(
+        private static final List<Supplier<ItemType>> SELL_TYPES = List.of(
             ItemTypes.SLIME_BALL, ItemTypes.BLAZE_ROD, ItemTypes.APPLE,
             ItemTypes.GHAST_TEAR, ItemTypes.COBBLESTONE, ItemTypes.STICK, ItemTypes.EMERALD);
-        private static final List<Supplier<ItemType>> BUYING_TYPES = ImmutableList.of(
+        private static final List<Supplier<ItemType>> BUYING_TYPES = List.of(
             ItemTypes.ACACIA_DOOR,
             ItemTypes.ACACIA_LEAVES,
             ItemTypes.BIRCH_LEAVES,
@@ -164,7 +163,7 @@ public class TradeTest implements LoadableModule {
                         // the job.... because they have a mind of their own...
                         .set(Keys.EXPERIENCE, 1)
                         .set(Keys.EXPERIENCE_LEVEL, 1)
-                        .set(Keys.TRADE_OFFERS, ImmutableList.of(SpawnListener.generateTradeOffer().apply(villager, villager.random())));
+                        .set(Keys.TRADE_OFFERS, List.of(SpawnListener.generateTradeOffer().apply(villager, villager.random())));
                     villager.copyFrom(container);
                 });
         }
