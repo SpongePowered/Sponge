@@ -238,7 +238,7 @@ dependencies {
     val apiAdventureVersion: String by project
     val apiConfigurateVersion: String by project
     val apiGsonVersion: String by project
-    val apiGuavaVersion: String by project
+    val guavaVersion: String by project
     val apiPluginSpiVersion: String by project
     val forgeAutoRenamingToolVersion: String by project
     val jlineVersion: String by project
@@ -322,7 +322,7 @@ dependencies {
     bootstrapLibraries("org.spongepowered:mixin:$mixinVersion")
     bootstrapLibraries("org.ow2.asm:asm-util:$asmVersion")
     bootstrapLibraries("org.ow2.asm:asm-tree:$asmVersion")
-    bootstrapLibraries("com.google.guava:guava:$apiGuavaVersion")
+    bootstrapLibraries("com.google.guava:guava:$guavaVersion")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     // Not needing to be source-visible past the init phase
