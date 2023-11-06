@@ -46,6 +46,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 
 class MapEntriesValidator<V> implements Generator {
 
@@ -53,6 +54,7 @@ class MapEntriesValidator<V> implements Generator {
     private final String targetClassSimpleName;
     private final Class<?> clazz;
     private final String registry;
+    private final Function<Map<?, ?>, Map<ResourceLocation, ?>> mapping;
 
     MapEntriesValidator(
             final String targetRelativePackage,
@@ -60,10 +62,21 @@ class MapEntriesValidator<V> implements Generator {
             final Class<?> clazz,
             final String registry
     ) {
+        this(targetRelativePackage, targetClassSimpleName, clazz, registry, map -> (Map<ResourceLocation, ?>) map);
+    }
+
+    MapEntriesValidator(
+            final String targetRelativePackage,
+            final String targetClassSimpleName,
+            final Class<?> clazz,
+            final String registry,
+            final Function<Map<?, ?>, Map<ResourceLocation, ?>> mapping
+    ) {
         this.relativePackageName = targetRelativePackage;
         this.targetClassSimpleName = targetClassSimpleName;
         this.clazz = clazz;
         this.registry = registry;
+        this.mapping = mapping;
     }
 
     @Override
@@ -87,7 +100,7 @@ class MapEntriesValidator<V> implements Generator {
             if (!(tmp instanceof Map<?, ?>)) {
                 throw new IllegalStateException("registry field is not a map");
             }
-            map = (Map<ResourceLocation, ?>) tmp;
+            map = this.mapping.apply((Map<?, ?>) tmp);
         } catch (Exception e) {
             throw new IllegalStateException("Failed to retrieve registry field in class " + this.clazz.getName(), e);
         }

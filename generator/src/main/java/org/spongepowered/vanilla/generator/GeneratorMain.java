@@ -25,6 +25,8 @@
 package org.spongepowered.vanilla.generator;
 
 import com.github.javaparser.utils.Log;
+import com.google.common.base.CaseFormat;
+import com.mojang.datafixers.FunctionType;
 import com.mojang.datafixers.util.Pair;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.WildcardTypeName;
@@ -50,21 +52,35 @@ import net.minecraft.world.damagesource.DamageEffects;
 import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.TropicalFish;
+import net.minecraft.world.entity.animal.horse.Markings;
+import net.minecraft.world.entity.animal.horse.Variant;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.item.ArmorMaterials;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.DataPackConfig;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.block.state.properties.BambooLeaves;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import org.jetbrains.annotations.NotNull;
 import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -198,6 +214,20 @@ public final class GeneratorMain {
                 CriteriaTriggers.class,
                 "CRITERIA"
             ),
+            new MapEntriesValidator<>(
+                "world.gamerule",
+                "GameRules",
+                GameRules.class,
+                "GAME_RULE_TYPES",
+                map -> {
+                    final Map<ResourceLocation, Object> out = new HashMap<>(map.size());
+                    map.forEach((BiConsumer<Object, Object>) (k, v) -> {
+                        var key = (GameRules.Key<?>) k;
+                        out.put(new ResourceLocation("sponge:" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.getId())), v);
+                    });
+                    return out;
+                }
+            ),
             new EnumEntriesValidator<>(
                  "item",
                  "FireworkShapes",
@@ -220,6 +250,55 @@ public final class GeneratorMain {
                  "sponge"
             ),
             new EnumEntriesValidator<>(
+                 "data.type",
+                 "ArmorMaterials",
+                 ArmorMaterials.class,
+                 "getName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "BambooLeavesTypes",
+                 BambooLeaves.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "DyeColors",
+                 DyeColor.class,
+                 "getName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "FoxTypes",
+                 Fox.Type.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "HorseColors",
+                 Variant.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "HorseStyles",
+                 Markings.class,
+                 "name",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "InstrumentTypes",
+                 NoteBlockInstrument.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
                  "item",
                  "ItemRarities",
                  Rarity.class,
@@ -231,6 +310,13 @@ public final class GeneratorMain {
                  "AdvancementTypes",
                  FrameType.class,
                  "getName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "TropicalFishShapes",
+                 TropicalFish.Pattern.class,
+                 "getSerializedName",
                  "sponge"
             ),
             new RegistryEntriesGenerator<>(
