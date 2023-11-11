@@ -249,7 +249,7 @@ allprojects {
     apply(plugin = "net.kyori.indra.licenser.spotless")
 
     base {
-        archivesBaseName = name.toLowerCase(Locale.ENGLISH)
+        archivesBaseName = name.lowercase(Locale.ENGLISH)
     }
 
     plugins.withId("org.spongepowered.gradle.vanilla") {
@@ -431,7 +431,7 @@ publishing {
             artifact(tasks["mixinsSourceJar"])
             artifact(tasks["accessorsSourceJar"])
             pom {
-                artifactId = project.name.toLowerCase()
+                artifactId = project.name.lowercase()
                 this.name.set(project.name)
                 this.description.set(project.description)
                 this.url.set(projectUrl)
