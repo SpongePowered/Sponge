@@ -126,8 +126,6 @@ import org.spongepowered.common.accessor.network.ConnectionAccessor;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.accessor.server.level.ChunkMap_TrackedEntityAccessor;
 import org.spongepowered.common.accessor.server.network.ServerCommonPacketListenerImplAccessor;
-import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
-import org.spongepowered.common.accessor.server.level.ChunkMap_TrackedEntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
