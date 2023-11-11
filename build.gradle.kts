@@ -249,7 +249,7 @@ allprojects {
     apply(plugin = "net.kyori.indra.licenser.spotless")
 
     base {
-        archivesBaseName = name.lowercase(Locale.ENGLISH)
+        archivesName = name.lowercase(Locale.ENGLISH)
     }
 
     plugins.withId("org.spongepowered.gradle.vanilla") {
@@ -350,10 +350,10 @@ allprojects {
     }
     sourceSets.configureEach {
         val sourceSet = this
-        val sourceJarName: String = if ("main".equals(this.name)) "sourceJar" else "${this.name}SourceJar"
+        val sourceJarName: String = if ("main" == this.name) "sourceJar" else "${this.name}SourceJar"
         tasks.register(sourceJarName, Jar::class.java) {
             group = "build"
-            val classifier = if ("main".equals(sourceSet.name)) "sources" else "${sourceSet.name}sources"
+            val classifier = if ("main" == sourceSet.name) "sources" else "${sourceSet.name}sources"
             archiveClassifier.set(classifier)
             from(sourceSet.allJava)
         }

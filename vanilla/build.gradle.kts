@@ -453,7 +453,7 @@ tasks {
         this.dependencies("bootstrap", vanillaAppLaunchConfig)
         this.dependencies("main", vanillaLibrariesConfig)
         // except what we're providing through the installer
-        this.excludedDependencies(downloadNotNeeded)
+        //this.excludedDependencies(downloadNotNeeded)
 
         outputFile.set(installerResources.map { it.file("libraries.json") })
     }
@@ -539,7 +539,7 @@ publishing {
             artifact(tasks["launchSourceJar"])
             artifact(tasks["mixinsSourceJar"])
             pom {
-                artifactId = project.name.toLowerCase()
+                artifactId = project.name.lowercase()
                 this.name.set(project.name)
                 this.description.set(project.description)
                 this.url.set(projectUrl)

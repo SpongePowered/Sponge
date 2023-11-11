@@ -39,7 +39,7 @@ indraSpotlessLicenser {
 }
 
 val apiBase = rootProject.file("SpongeAPI/src/main/java/")
-val temporaryLicenseHeader = project.buildDir.resolve("api-gen-license-header.txt")
+val temporaryLicenseHeader = project.layout.buildDirectory.file("api-gen-license-header.txt")
 tasks.register("generateApiData", JavaExec::class) {
     group = "sponge"
     description = "Generate API Catalog classes"
@@ -47,7 +47,7 @@ tasks.register("generateApiData", JavaExec::class) {
 
     classpath(sourceSets.main.map { it.output }, sourceSets.main.map { it.runtimeClasspath })
     mainClass.set("org.spongepowered.vanilla.generator.GeneratorMain")
-    args(apiBase.canonicalPath, temporaryLicenseHeader.canonicalPath)
+    args(apiBase.canonicalPath, temporaryLicenseHeader.get().asFile.canonicalPath)
 
     doFirst {
         // Write a template-expanded license header to the temporary file
@@ -58,7 +58,7 @@ tasks.register("generateApiData", JavaExec::class) {
             propertyMap["name"] = "SpongeAPI"
             val out = template.make(propertyMap)
 
-            temporaryLicenseHeader.bufferedWriter(Charsets.UTF_8).use { writer ->
+            temporaryLicenseHeader.get().asFile.bufferedWriter(Charsets.UTF_8).use { writer ->
                 out.writeTo(writer)
             }
         }
