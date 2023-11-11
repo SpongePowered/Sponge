@@ -24,10 +24,10 @@
  */
 package org.spongepowered.vanilla.chat.console;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ImmutableStringReader;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.context.ParsedCommandNode;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jline.reader.Highlighter;
 import org.jline.reader.LineReader;
@@ -35,6 +35,7 @@ import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -53,29 +54,29 @@ public class BrigadierHighlighter<S> implements Highlighter {
         .mapToObj(AttributedStyle.DEFAULT::foreground)
         .toArray(AttributedStyle[]::new);
 
-    private final Supplier<@Nullable CommandDispatcher<S>> dispatcherProvider;
-    private final Supplier<S> commandSourceProvider;
+    private final Supplier<@Nullable SpongeCommandDispatcher> dispatcherProvider;
+    private final Supplier<CommandSourceStack> commandSourceProvider;
 
-    public BrigadierHighlighter(final Supplier<@Nullable CommandDispatcher<S>> dispatcherProvider, final Supplier<S> commandSourceProvider) {
+    public BrigadierHighlighter(final Supplier<@Nullable SpongeCommandDispatcher> dispatcherProvider, final Supplier<CommandSourceStack> commandSourceProvider) {
         this.dispatcherProvider = dispatcherProvider;
         this.commandSourceProvider = commandSourceProvider;
     }
 
     @Override
     public AttributedString highlight(final LineReader lineReader, final String buffer) {
-        final CommandDispatcher<S> dispatcher = this.dispatcherProvider.get();
+        final SpongeCommandDispatcher dispatcher = this.dispatcherProvider.get();
         if (dispatcher == null) {
             return new AttributedString(buffer);
         }
 
         try {
-            final ParseResults<S> results = dispatcher.parse(buffer, this.commandSourceProvider.get());
+            final ParseResults<CommandSourceStack> results = dispatcher.parse(buffer, this.commandSourceProvider.get(), true);
             final ImmutableStringReader reader = results.getReader();
             final AttributedStringBuilder builder = new AttributedStringBuilder();
 
             int lastPos = 0;
             int argColorIdx = 0;
-            for (final ParsedCommandNode<S> node : results.getContext().getLastChild().getNodes()) {
+            for (final ParsedCommandNode<CommandSourceStack> node : results.getContext().getLastChild().getNodes()) {
                 // Sometimes Brigadier will spit out ranges that are invalid for the current input string????
                 final int start = Math.min(node.getRange().getStart(), reader.getTotalLength());
                 final int end = Math.min(node.getRange().getEnd(), reader.getTotalLength());

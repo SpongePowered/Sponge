@@ -171,7 +171,9 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar<
                     // send it directly to the namespaced command's target.
                     redirecting.forward(namespacedCommand.getRedirect(), namespacedCommand.getRedirectModifier(), namespacedCommand.isFork());
                 }
-                this.dispatcher.register(redirecting.build());
+                this.dispatcher.register(namespacedCommand instanceof SpongePermissionWrappedLiteralCommandNode
+                        ? new SpongePermissionWrappedLiteralCommandNode(redirecting)
+                        : redirecting.build());
             }
         }
 

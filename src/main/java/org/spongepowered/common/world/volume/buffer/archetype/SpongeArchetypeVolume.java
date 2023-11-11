@@ -198,9 +198,9 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         } else {
             buffer = this.blocks;
         }
-        final Stream<VolumeElement<ArchetypeVolume, BlockState>> stateStream = IntStream.range(min.x(), max.x() + 1)
-            .mapToObj(x -> IntStream.range(min.z(), max.z() + 1)
-                .mapToObj(z -> IntStream.range(min.y(), max.y() + 1)
+        final Stream<VolumeElement<ArchetypeVolume, BlockState>> stateStream = IntStream.rangeClosed(min.x(), max.x())
+            .mapToObj(x -> IntStream.rangeClosed(min.z(), max.z())
+                .mapToObj(z -> IntStream.rangeClosed(min.y(), max.y())
                     .mapToObj(y -> VolumeElement.of((ArchetypeVolume) this, () -> buffer.block(x, y, z), new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());

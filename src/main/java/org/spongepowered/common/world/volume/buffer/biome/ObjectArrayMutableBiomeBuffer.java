@@ -150,9 +150,9 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
         } else {
             buffer = this.biomes;
         }
-        final Stream<VolumeElement<ObjectArrayMutableBiomeBuffer, Biome>> stateStream = IntStream.range(min.x(), max.x() + 1)
-            .mapToObj(x -> IntStream.range(min.z(), max.z() + 1)
-                .mapToObj(z -> IntStream.range(min.y(), max.y() + 1)
+        final Stream<VolumeElement<ObjectArrayMutableBiomeBuffer, Biome>> stateStream = IntStream.rangeClosed(min.x(), max.x())
+            .mapToObj(x -> IntStream.rangeClosed(min.z(), max.z())
+                .mapToObj(z -> IntStream.rangeClosed(min.y(), max.y())
                     .mapToObj(y -> VolumeElement.of(this, () ->  {
                         final RegistryKey<Biome> key = buffer[this.getIndex(x, y, z)];
                         final Biome biome = this.registry.value(key);

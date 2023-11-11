@@ -24,13 +24,13 @@
  */
 package org.spongepowered.vanilla.chat.console;
 
-import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecrell.terminalconsole.SimpleTerminalConsole;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
+import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.launch.Launch;
 
@@ -46,7 +46,7 @@ public final class VanillaConsole extends SimpleTerminalConsole {
 
     @Override
     protected LineReader buildReader(LineReaderBuilder builder) {
-        final Supplier<@Nullable CommandDispatcher<CommandSourceStack>> dispatcherProvider = () -> {
+        final Supplier<@Nullable SpongeCommandDispatcher> dispatcherProvider = () -> {
             final SpongeCommandManager manager = SpongeCommandManager.get(this.server);
             return manager == null ? null : manager.getDispatcher();
         };

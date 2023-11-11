@@ -24,9 +24,10 @@
  */
 package org.spongepowered.test.channel;
 
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.packet.Packet;
+
+import java.util.StringJoiner;
 
 public final class PongPacket implements Packet {
 
@@ -55,8 +56,8 @@ public final class PongPacket implements Packet {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("id", this.id)
+        return new StringJoiner(", ", PongPacket.class.getSimpleName() + "[", "]")
+                .add("id=" + this.id)
                 .toString();
     }
 }

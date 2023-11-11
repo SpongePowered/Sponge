@@ -383,9 +383,7 @@ public final class VolumeStreamUtils {
             final ChunkPos pos = chunk.getPos();
 
             final int xStart = pos.x == minCursor.chunkX ? minCursor.xOffset : 0;
-            final int xEnd = pos.x == maxCursor.chunkX ? maxCursor.xOffset + 1 : 16; // 16 because IntStream.range is upper range exclusive
             final int zStart = pos.z == minCursor.chunkZ ? minCursor.zOffset : 0;
-            final int zEnd = pos.z == maxCursor.chunkZ ? maxCursor.zOffset + 1 : 16; // 16 because IntStream.range is upper range exclusive
 
             final int chunkMinX = pos.x << 4;
             final int chunkMinZ = pos.z << 4;
@@ -633,6 +631,7 @@ public final class VolumeStreamUtils {
         if (options.loadingStyle().immediateLoading()) {
             final Set<KeyReference> availableTileEntityPositions = new LinkedHashSet<>();
             sectionStream
+                .filter(Objects::nonNull)
                 .map(entityAccessor)
                 .forEach((map) -> map.forEach(entry -> entryConsumer.accept(entry, availableTileEntityPositions)));
             filteredPosStream = availableTileEntityPositions.stream();
@@ -641,6 +640,7 @@ public final class VolumeStreamUtils {
             // Since we're operating on the chunk positions, we generate the Stream of keys
             // for each position, which in turn generate their filtered lists on demand.
             filteredPosStream = sectionStream
+                .filter(Objects::nonNull)
                 .flatMap(chunk -> {
                     final Set<KeyReference> blockEntityPoses = new LinkedHashSet<>();
                     entityAccessor.apply(chunk)

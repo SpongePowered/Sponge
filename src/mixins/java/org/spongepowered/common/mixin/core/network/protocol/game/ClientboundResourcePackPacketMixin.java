@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.protocol.game.ClientboundResourcePackPacketBridge;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
@@ -48,7 +49,7 @@ public abstract class ClientboundResourcePackPacketMixin implements ClientboundR
     @Inject(method = "<init>(Ljava/lang/String;Ljava/lang/String;ZLnet/minecraft/network/chat/Component;)V", at = @At("RETURN") , remap = false)
     private void impl$setResourcePackOrThrowException(final String url, final String hash, final boolean required, final Component prompt, final CallbackInfo ci) {
         try {
-            this.impl$pack = SpongeResourcePack.create(url, hash, (net.kyori.adventure.text.Component) prompt);
+            this.impl$pack = SpongeResourcePack.create(url, hash, SpongeAdventure.asAdventure(prompt));
         } catch (final URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }

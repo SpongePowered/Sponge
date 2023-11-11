@@ -24,17 +24,18 @@
  */
 package org.spongepowered.vanilla.chat.console;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jline.reader.Candidate;
 import org.jline.reader.Completer;
 import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -43,23 +44,23 @@ import java.util.function.Supplier;
 
 final class BrigadierJLineCompleter<S> implements Completer {
 
-    private final Supplier<@Nullable CommandDispatcher<S>> dispatcherProvider;
-    private final Supplier<S> commandSourceProvider;
+    private final Supplier<@Nullable SpongeCommandDispatcher> dispatcherProvider;
+    private final Supplier<CommandSourceStack> commandSourceProvider;
 
-    public BrigadierJLineCompleter(final Supplier<@Nullable CommandDispatcher<S>> dispatcherProvider, final Supplier<S> commandSourceProvider) {
+    public BrigadierJLineCompleter(final Supplier<@Nullable SpongeCommandDispatcher> dispatcherProvider, final Supplier<CommandSourceStack> commandSourceProvider) {
         this.dispatcherProvider = dispatcherProvider;
         this.commandSourceProvider = commandSourceProvider;
     }
 
     @Override
     public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
-        final CommandDispatcher<S> dispatcher = this.dispatcherProvider.get();
+        final SpongeCommandDispatcher dispatcher = this.dispatcherProvider.get();
         if (dispatcher == null) {
             return;
         }
 
         final String input = line.line();
-        final ParseResults<S> parseResult = dispatcher.parse(input, this.commandSourceProvider.get());
+        final ParseResults<CommandSourceStack> parseResult = dispatcher.parse(input, this.commandSourceProvider.get(), true);
         final CompletableFuture<Suggestions> suggestions = dispatcher.getCompletionSuggestions(
             parseResult,
             line.cursor()
