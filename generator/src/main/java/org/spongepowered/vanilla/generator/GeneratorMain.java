@@ -26,7 +26,6 @@ package org.spongepowered.vanilla.generator;
 
 import com.github.javaparser.utils.Log;
 import com.google.common.base.CaseFormat;
-import com.mojang.datafixers.FunctionType;
 import com.mojang.datafixers.util.Pair;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.WildcardTypeName;
@@ -67,7 +66,6 @@ import net.minecraft.world.level.DataPackConfig;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
-import org.jetbrains.annotations.NotNull;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -80,7 +78,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
