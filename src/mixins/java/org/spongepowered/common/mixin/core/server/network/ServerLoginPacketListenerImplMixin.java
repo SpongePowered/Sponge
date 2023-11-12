@@ -184,23 +184,19 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         return event.isCancelled();
     }
 
-    @Inject(method = "startClientVerification(Lcom/mojang/authlib/GameProfile;)V", at = @At("HEAD"), cancellable = true)
-    private void impl$fireAuthEventOffline(final GameProfile gameProfile, final CallbackInfo ci) {
+    @Inject(method = "handleHello(Lnet/minecraft/network/protocol/login/ServerboundHelloPacket;)V", at = @At(value = "INVOKE", target =
+            "startClientVerification(Lcom/mojang/authlib/GameProfile;)V", ordinal = 1), cancellable = true)
+    private void impl$fireAuthEventOffline(final CallbackInfo ci) {
         // Move this check up here, so that the UUID isn't null when we fire the event
         // TODO broken
         /*if (!this.authenticatedProfile.isComplete()) {
             this.authenticatedProfile = this.shadow$createFakeProfile(this.authenticatedProfile);
         }*/
 
-        if(gameProfile.equals(createOfflineProfile(gameProfile.getName()))) {
-            if (this.bridge$fireAuthEvent()) {
-                ci.cancel();
-            }
+        if (this.bridge$fireAuthEvent()) {
+            ci.cancel();
+            System.out.println("hello");
         }
-    }
-
-    @Shadow protected static GameProfile createOfflineProfile(String $$0) {
-        throw new UnsupportedOperationException("Shadowed createOfflineProfile");
     }
 
 }
