@@ -41,6 +41,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.HitResult;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.projectile.FishingBobber;
@@ -66,13 +67,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
 @Mixin(FishingHook.class)
 public abstract class FishingHookMixin extends ProjectileMixin {
 
     // @formatter:off
-    @Shadow @Nullable private net.minecraft.world.entity.Entity hookedIn;
+    @Shadow private net.minecraft.world.entity.@Nullable Entity hookedIn;
     @Shadow private int nibble;
     @Shadow @Final private int luck;
 
@@ -81,7 +80,7 @@ public abstract class FishingHookMixin extends ProjectileMixin {
     // @formatter:on
 
     @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
-    private void onSetHookedEntity(@Nullable final net.minecraft.world.entity.Entity hookedIn, final CallbackInfo ci) {
+    private void onSetHookedEntity(final net.minecraft.world.entity.@Nullable Entity hookedIn, final CallbackInfo ci) {
         if (hookedIn != null && SpongeCommon
             .post(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getCauseStackManager().currentCause(), (Entity) hookedIn, (FishingBobber) this))) {
             this.hookedIn = null;

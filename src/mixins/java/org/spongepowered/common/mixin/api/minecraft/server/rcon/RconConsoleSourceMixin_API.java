@@ -30,7 +30,6 @@ import net.kyori.adventure.pointer.Pointers;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.rcon.RconConsoleSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.network.RconConnection;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.asm.mixin.Mixin;
@@ -92,7 +91,7 @@ public abstract class RconConsoleSourceMixin_API implements RconConsoleSourceBri
     }
 
     @Override
-    public @NotNull Pointers pointers() {
+    public @NonNull Pointers pointers() {
         return RconConsoleSourceMixin_API.API$POINTERS;
     }
 }

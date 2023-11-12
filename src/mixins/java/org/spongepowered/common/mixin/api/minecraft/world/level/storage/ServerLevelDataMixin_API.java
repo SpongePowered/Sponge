@@ -51,7 +51,7 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
     @Shadow int shadow$getWanderingTraderSpawnChance();
     @Shadow void shadow$setWanderingTraderSpawnChance(int p_230397_1_);
     @Shadow void shadow$setWanderingTraderId(UUID p_230394_1_);
-    @Shadow @javax.annotation.Nullable UUID shadow$getWanderingTraderId();
+    @Shadow @Nullable UUID shadow$getWanderingTraderId();
     @Shadow void shadow$setDayTime(long p_76068_1_);
     // @formatter:on
 

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity.ai.goal;
 
 import net.minecraft.world.entity.ai.goal.BreedGoal;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -38,8 +39,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import javax.annotation.Nullable;
-
 @Mixin(BreedGoal.class)
 public abstract class BreedGoalMixin {
 
@@ -47,18 +46,17 @@ public abstract class BreedGoalMixin {
     @Shadow @Final protected net.minecraft.world.entity.animal.Animal animal;
     @Shadow protected net.minecraft.world.entity.animal.Animal partner;
 
-    @Shadow @Nullable private net.minecraft.world.entity.animal.Animal shadow$getFreePartner() {
+    @Shadow private net.minecraft.world.entity.animal.@Nullable Animal shadow$getFreePartner() {
         // Shadow implements
         return null;
     }
     // @formatter:on
 
-    @Nullable
     @Redirect(method = "canUse",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/entity/ai/goal/BreedGoal;getFreePartner()Lnet/minecraft/world/entity/animal/Animal;"))
-    private net.minecraft.world.entity.animal.Animal impl$callFindMateEvent(final BreedGoal entityAIMate) {
+    private net.minecraft.world.entity.animal.@Nullable Animal impl$callFindMateEvent(final BreedGoal entityAIMate) {
         net.minecraft.world.entity.animal.Animal nearbyMate = this.shadow$getFreePartner();
         if (nearbyMate == null) {
             return null;

@@ -32,7 +32,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.datafix.DataFixTypes;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -246,7 +245,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         };
     }
 
-    @NotNull
+    @NonNull
     private static Consumer<DataView> deserializeBlockEntities(
         final Vector3i offset, final SpongeArchetypeVolume archetypeVolume,
         final boolean needsFixers

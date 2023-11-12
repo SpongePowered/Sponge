@@ -29,6 +29,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemRarity;
 import org.spongepowered.api.item.ItemType;
@@ -45,8 +46,6 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 @Mixin(Item.class)
 public abstract class ItemMixin_API implements ItemType, SpongeImmutableDataHolder<ItemType> {

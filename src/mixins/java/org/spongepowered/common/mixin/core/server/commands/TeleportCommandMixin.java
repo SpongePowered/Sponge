@@ -36,6 +36,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.ChunkPos;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -56,8 +57,6 @@ import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 @Mixin(TeleportCommand.class)
 public abstract class TeleportCommandMixin {
 
@@ -67,7 +66,7 @@ public abstract class TeleportCommandMixin {
      */
     @Overwrite
     private static void performTeleport(CommandSourceStack source, Entity entityIn, ServerLevel worldIn, double x, double y, double z,
-            Set<RelativeMovement> relativeList, float yaw, float pitch, @Nullable TeleportCommand.LookAt facing) {
+            Set<RelativeMovement> relativeList, float yaw, float pitch, TeleportCommand.@Nullable LookAt facing) {
 
         double actualX = x;
         double actualY = y;

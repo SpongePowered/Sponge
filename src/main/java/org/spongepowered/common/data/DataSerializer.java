@@ -26,7 +26,7 @@ package org.spongepowered.common.data;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.ArrayUtils;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -136,7 +136,7 @@ public class DataSerializer {
         throw new UnsupportedOperationException("Unsupported map-key type " + value.getClass());
     }
 
-    @NotNull
+    @NonNull
     private static Object serializeArray(final DataView.SafetyMode safetyMode, final Object value) {
         switch (safetyMode) {
             case ALL_DATA_CLONED:

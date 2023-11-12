@@ -29,6 +29,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.asm.mixin.Final;
@@ -45,8 +46,6 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 @Mixin(PlayerTeam.class)
 @Implements(@Interface(iface = Team.class, prefix = "team$", remap = Remap.NONE))

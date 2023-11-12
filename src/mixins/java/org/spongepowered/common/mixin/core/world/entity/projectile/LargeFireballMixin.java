@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.entity.projectile;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.LargeFireball;
 import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
@@ -48,8 +49,6 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 @Mixin(LargeFireball.class)
 public abstract class LargeFireballMixin extends AbstractHurtingProjectileMixin implements LargeFireballBridge, ExplosiveBridge {
 
@@ -70,8 +69,7 @@ public abstract class LargeFireballMixin extends AbstractHurtingProjectileMixin 
             target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"
         )
     )
-    @Nullable
-    public net.minecraft.world.level.Explosion impl$throwExplosionEventAndExplode(final net.minecraft.world.level.Level worldObj, @Nullable final Entity nil,
+    public net.minecraft.world.level.@Nullable Explosion impl$throwExplosionEventAndExplode(final net.minecraft.world.level.Level worldObj, @Nullable final Entity nil,
         final double x, final double y, final double z, final float strength, final boolean flaming, final Level.ExplosionInteraction mode) {
         return this.bridge$throwExplosionEventAndExplode(worldObj, nil, x, y, z, strength, flaming, mode);
     }

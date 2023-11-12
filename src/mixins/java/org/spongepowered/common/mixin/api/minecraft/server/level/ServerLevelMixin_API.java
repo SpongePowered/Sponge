@@ -46,7 +46,8 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.ticks.LevelTicks;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -100,9 +101,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowered.api.world.server.ServerWorld, ServerLocation> implements
@@ -117,7 +115,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Shadow public abstract void shadow$save(@Nullable ProgressListener p_217445_1_, boolean p_217445_2_, boolean p_217445_3_);
     @Shadow public abstract void shadow$unload(LevelChunk p_217466_1_);
     @Shadow public abstract ServerChunkCache shadow$getChunkSource();
-    @Nonnull @Shadow public abstract MinecraftServer shadow$getServer();
+    @NonNull @Shadow public abstract MinecraftServer shadow$getServer();
     @Nullable @Shadow public abstract Entity shadow$getEntity(UUID p_217461_1_);
     @Shadow public abstract List<net.minecraft.server.level.ServerPlayer> shadow$players();
     @Shadow public abstract Raids shadow$getRaids();
@@ -142,7 +140,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     // Pointered (via Audience)
 
     @Override
-    public @NotNull Pointers pointers() {
+    public @NonNull Pointers pointers() {
         if (this.api$pointers == null) {
             return this.api$pointers = Pointers.builder()
                 .withDynamic(Identity.UUID, this::uniqueId)

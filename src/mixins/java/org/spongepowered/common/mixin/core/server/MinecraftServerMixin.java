@@ -42,6 +42,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
@@ -88,8 +89,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements SpongeServer, MinecraftServerBridge, CommandSourceProviderBridge, SubjectProxy,

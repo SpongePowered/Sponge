@@ -37,6 +37,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.WritableLevelData;
 import net.minecraft.world.phys.AABB;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,8 +54,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
 
 @Mixin(Level.class)
 public abstract class LevelMixin_Tracker implements LevelBridge, LevelAccessor {

@@ -28,6 +28,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,8 +48,6 @@ import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.Map;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(AbstractContainerMenu.class)
 public abstract class AbstractContainerMenuMixin_Adapter_Inventory implements InventoryBridge, LensGeneratorBridge, InventoryAdapter, ContainerBridge {

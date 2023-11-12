@@ -32,13 +32,12 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.SpongeCommon;
 
 import java.text.MessageFormat;
 import java.util.Map;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 public final class IngredientResultUtil {
 

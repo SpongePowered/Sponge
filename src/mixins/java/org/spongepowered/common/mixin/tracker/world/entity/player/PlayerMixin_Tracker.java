@@ -29,6 +29,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,8 +38,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.tracker.world.entity.LivingEntityMixin_Tracker;
-
-import javax.annotation.Nullable;
 
 @Mixin(Player.class)
 public abstract class PlayerMixin_Tracker extends LivingEntityMixin_Tracker {

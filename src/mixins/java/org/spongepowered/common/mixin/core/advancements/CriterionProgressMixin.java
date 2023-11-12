@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.advancements;
 
 import net.minecraft.advancements.CriterionProgress;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,8 +34,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
-
-import javax.annotation.Nullable;
 
 @Mixin(CriterionProgress.class)
 public abstract class CriterionProgressMixin implements CriterionProgressBridge, ImplementationBackedCriterionProgress {

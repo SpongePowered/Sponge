@@ -34,6 +34,7 @@ import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.ResourceKey;
@@ -62,8 +63,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import javax.annotation.Nullable;
-
 @Mixin(Connection.class)
 public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet<?>> implements ConnectionBridge {
 
@@ -78,7 +77,7 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
 
     @Nullable private InetSocketAddress impl$virtualHost;
     @Nullable private MinecraftVersion impl$version;
-    @Nullable private net.minecraft.network.chat.Component impl$kickReason;
+    private net.minecraft.network.chat.@Nullable Component impl$kickReason;
 
     private ClientType impl$clientType = ClientType.VANILLA;
 

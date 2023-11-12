@@ -30,6 +30,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.carrier.NameableCarrierBlockEntity;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
@@ -42,8 +43,6 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 @Mixin(BaseContainerBlockEntity.class)
 public abstract class BaseContainerBlockEntityMixin_API extends BlockEntityMixin_API implements NameableCarrierBlockEntity {

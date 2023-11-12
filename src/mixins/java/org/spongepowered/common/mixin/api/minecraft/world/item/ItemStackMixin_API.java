@@ -36,8 +36,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.SerializableDataHolder;
@@ -222,7 +222,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     }
 
     @Override
-    public @NotNull HoverEvent<HoverEvent.ShowItem> asHoverEvent(@NotNull final UnaryOperator<HoverEvent.ShowItem> op) {
+    public @NonNull HoverEvent<HoverEvent.ShowItem> asHoverEvent(@NonNull final UnaryOperator<HoverEvent.ShowItem> op) {
         final HoverEvent.ShowItem event = HoverEvent.ShowItem.of(
             SpongeAdventure.asAdventure(SpongeCommon.vanillaRegistry(Registries.ITEM).getKey(this.shadow$getItem())),
             this.shadow$getCount(),

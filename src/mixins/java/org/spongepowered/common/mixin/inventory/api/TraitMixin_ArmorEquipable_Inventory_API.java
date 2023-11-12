@@ -30,6 +30,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.item.inventory.ArmorEquipable;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -45,8 +46,6 @@ import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLen
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 // All living implementors of ArmorEquipable
 @Mixin({ArmorStand.class, Mob.class, Player.class})

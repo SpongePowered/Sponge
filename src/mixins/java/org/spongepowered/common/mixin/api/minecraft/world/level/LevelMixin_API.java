@@ -121,20 +121,20 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
     @Shadow public abstract BlockState shadow$getBlockState(BlockPos p_180495_1_);
-    @Shadow public abstract void shadow$playSound(@javax.annotation.Nullable net.minecraft.world.entity.player.Player p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundSource p_184148_9_, float p_184148_10_, float p_184148_11_);
+    @Shadow public abstract void shadow$playSound(net.minecraft.world.entity.player.@Nullable Player p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundSource p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow public abstract LevelData shadow$getLevelData();
     @Shadow public abstract void shadow$removeBlockEntity(BlockPos pos);
     @Shadow public abstract ResourceKey<net.minecraft.world.level.Level> shadow$dimension();
     @Shadow public abstract void shadow$setBlockEntity(net.minecraft.world.level.block.entity.BlockEntity var1);
     @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos param0);
     @Shadow public abstract List<net.minecraft.world.entity.Entity> shadow$getEntities(
-            @org.jetbrains.annotations.Nullable net.minecraft.world.entity.Entity param0,
+            net.minecraft.world.entity.@Nullable Entity param0,
             net.minecraft.world.phys.AABB param1,
-            @org.jetbrains.annotations.Nullable Predicate<? super net.minecraft.world.entity.Entity> param2);
+            @Nullable Predicate<? super net.minecraft.world.entity.Entity> param2);
     @Shadow public abstract <T extends net.minecraft.world.entity.Entity> List<T> shadow$getEntities(
             EntityTypeTest<net.minecraft.world.entity.Entity, T> entityTypeTest,
             net.minecraft.world.phys.AABB param1,
-            @org.jetbrains.annotations.Nullable Predicate<? super T> param2);
+            @Nullable Predicate<? super T> param2);
     @Shadow public abstract ResourceKey<Level> dimension();
 
     // @formatter:on
@@ -414,7 +414,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         return volume;
     }
 
-    private void api$playRecord(final Vector3i position, @javax.annotation.Nullable final MusicDisc recordType) {
+    private void api$playRecord(final Vector3i position, @Nullable final MusicDisc recordType) {
         this.shadow$getServer().getPlayerList().broadcastAll(SpongeMusicDisc.createPacket(position, recordType), this.shadow$dimension());
     }
 

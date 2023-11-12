@@ -28,6 +28,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.item.merchant.Merchant;
@@ -37,8 +38,6 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Collections;
-
-import javax.annotation.Nullable;
 
 @Mixin(value = Merchant.class)
 @Implements(@Interface(iface = net.minecraft.world.item.trading.Merchant.class, prefix = "imerchant$"))

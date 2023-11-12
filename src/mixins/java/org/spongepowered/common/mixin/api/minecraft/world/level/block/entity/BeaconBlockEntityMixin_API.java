@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.carrier.Beacon;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
@@ -35,8 +36,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 @Mixin(BeaconBlockEntity.class)
 public abstract class BeaconBlockEntityMixin_API extends BlockEntityMixin_API implements Beacon {

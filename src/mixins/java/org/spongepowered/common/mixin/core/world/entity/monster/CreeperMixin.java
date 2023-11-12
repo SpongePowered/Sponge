@@ -28,6 +28,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -46,8 +47,6 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.entity.monster.Creeper.class)
 public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiveBridge, ExplosiveBridge {
@@ -138,8 +137,7 @@ public abstract class CreeperMixin extends MonsterMixin implements FusedExplosiv
     }
 
     @Redirect(method = "explodeCreeper", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"))
-    @Nullable
-    private net.minecraft.world.level.Explosion impl$useSpongeExplosion(final net.minecraft.world.level.Level world, final Entity self, final double x,
+    private net.minecraft.world.level.@Nullable Explosion impl$useSpongeExplosion(final net.minecraft.world.level.Level world, final Entity self, final double x,
         final double y, final double z, final float strength, final Level.ExplosionInteraction mode) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .location(ServerLocation.of((ServerWorld) world, x, y, z))

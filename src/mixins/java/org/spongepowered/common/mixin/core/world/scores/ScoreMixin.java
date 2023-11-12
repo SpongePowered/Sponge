@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.scores;
 
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,8 +37,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.scores.ScoreBridge;
 import org.spongepowered.common.bridge.world.scores.ScoreboardBridge;
 import org.spongepowered.common.scoreboard.SpongeScore;
-
-import javax.annotation.Nullable;
 
 @Mixin(Score.class)
 public abstract class ScoreMixin implements ScoreBridge {

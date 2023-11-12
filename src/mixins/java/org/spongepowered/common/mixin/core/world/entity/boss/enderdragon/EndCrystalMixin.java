@@ -29,6 +29,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -44,8 +45,6 @@ import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(EndCrystal.class)
 public abstract class EndCrystalMixin extends EntityMixin implements ExplosiveBridge, EndCrystalBridge {
@@ -70,8 +69,7 @@ public abstract class EndCrystalMixin extends EntityMixin implements ExplosiveBr
             target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"
         )
     )
-    @Nullable
-    private net.minecraft.world.level.Explosion impl$throwEventWithEntity(final net.minecraft.world.level.Level world,
+    private net.minecraft.world.level.@Nullable Explosion impl$throwEventWithEntity(final net.minecraft.world.level.Level world,
         final Entity entityIn, final DamageSource damageSource, final ExplosionDamageCalculator exDamageCalc, final double xIn, final double yIn, final double zIn, final float explosionRadius,
             final boolean fire, final Level.ExplosionInteraction modeIn) {
         // TODO fire?
@@ -79,9 +77,8 @@ public abstract class EndCrystalMixin extends EntityMixin implements ExplosiveBr
         return this.bridge$throwExplosionEventAndExplode(world, entityIn, xIn, yIn, zIn, modeIn.compareTo(Level.ExplosionInteraction.TNT) <= 0, damageSource);
     }
 
-    @Nullable
     @Override
-    public net.minecraft.world.level.Explosion bridge$throwExplosionEventAndExplode(final net.minecraft.world.level.Level world,
+    public net.minecraft.world.level.@Nullable Explosion bridge$throwExplosionEventAndExplode(final net.minecraft.world.level.Level world,
         @Nullable final Entity nil, final double x, final double y, final double z, final boolean smoking,
         @Nullable final DamageSource source) {
         final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();

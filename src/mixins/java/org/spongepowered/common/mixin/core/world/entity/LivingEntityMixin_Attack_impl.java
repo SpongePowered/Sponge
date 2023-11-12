@@ -40,7 +40,7 @@ import net.minecraft.world.entity.WalkAnimationState;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.Level;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -63,7 +63,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
     @Shadow public int hurtDuration;
     @Shadow public int hurtTime;
     @Shadow protected int lastHurtByPlayerTime;
-    @Shadow @javax.annotation.Nullable protected Player lastHurtByPlayer;
+    @Shadow @Nullable protected Player lastHurtByPlayer;
     @Shadow private long lastDamageStamp;
 
     @Shadow public abstract boolean shadow$hasEffect(MobEffect param0);
@@ -74,7 +74,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
     @Shadow public abstract void shadow$setLastHurtByMob(@Nullable LivingEntity param0);
     @Shadow public abstract void shadow$knockback(double param0, double param1, double param2);
     @Shadow protected abstract boolean shadow$checkTotemDeathProtection(DamageSource param0);
-    @Shadow @javax.annotation.Nullable protected abstract SoundEvent shadow$getDeathSound();
+    @Shadow @Nullable protected abstract SoundEvent shadow$getDeathSound();
     @Shadow protected abstract float shadow$getSoundVolume();
     @Shadow protected abstract float shadow$getVoicePitch();
     @Shadow public abstract void shadow$die(DamageSource param0);

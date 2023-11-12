@@ -29,6 +29,7 @@ import net.minecraft.client.Options;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.Connection;
 import net.minecraft.server.packs.repository.PackRepository;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.client.LocalServer;
@@ -50,8 +51,6 @@ import org.spongepowered.common.util.LocaleCache;
 
 import java.util.Locale;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin_API implements SpongeClient, SpongeRegistryHolder {

@@ -26,11 +26,10 @@ package org.spongepowered.common.mixin.core.world.entity.monster;
 
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.level.block.state.BlockState;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
-
-import javax.annotation.Nullable;
 
 @Mixin(EnderMan.class)
 public abstract class EnderManMixin extends MonsterMixin {

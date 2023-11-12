@@ -35,6 +35,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.generation.structure.jigsaw.JigsawPoolElement;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,13 +43,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.VecHelper;
 
-import javax.annotation.Nullable;
-
 @Mixin(StructurePoolElement.class)
 public abstract class StructurePoolElementMixin_API implements JigsawPoolElement {
 
     // @formatter:off
-    @Shadow @Nullable private volatile StructureTemplatePool.Projection projection;
+    @Shadow private volatile StructureTemplatePool.@Nullable Projection projection;
 
     @Shadow public abstract boolean shadow$place(final StructureTemplateManager var1,
             final WorldGenLevel var2, final StructureManager var3,

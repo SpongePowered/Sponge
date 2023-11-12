@@ -26,7 +26,7 @@ package org.spongepowered.common.test.stub.block;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
@@ -107,7 +107,7 @@ public class StubBlock implements SpongeImmutableDataHolder<BlockType>, BlockTyp
     }
 
     @Override
-    public @NotNull Component asComponent() {
+    public @NonNull Component asComponent() {
         return null;
     }
 

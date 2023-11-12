@@ -28,13 +28,12 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.trading.MerchantOffer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.util.RandomProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-
-import javax.annotation.Nullable;
 
 @Mixin(VillagerTrades.ItemListing.class)
 public interface VillagerTrades_ItemListingMixin_API extends TradeOfferGenerator {

@@ -27,7 +27,7 @@ package org.spongepowered.common.bridge.network.chat;
 import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.message.PlayerChatEvent;

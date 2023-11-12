@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.tracker.world.entity.item;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -33,8 +34,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.mixin.tracker.world.entity.EntityMixin_Tracker;
-
-import javax.annotation.Nullable;
 
 @Mixin(PrimedTnt.class)
 public abstract class PrimedTntMixin_Tracker extends EntityMixin_Tracker {

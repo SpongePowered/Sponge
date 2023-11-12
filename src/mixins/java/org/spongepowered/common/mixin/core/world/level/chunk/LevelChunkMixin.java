@@ -41,6 +41,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.ticks.LevelChunkTicks;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -70,8 +71,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
 public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkBridge, CacheKeyBridge {
@@ -292,13 +291,12 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
 
     // Fast neighbor methods for internal use
     @Override
-    public void bridge$setNeighborChunk(final int index, @Nullable final net.minecraft.world.level.chunk.LevelChunk chunk) {
+    public void bridge$setNeighborChunk(final int index, final net.minecraft.world.level.chunk.@Nullable LevelChunk chunk) {
         this.impl$neighbors[index] = chunk;
     }
 
-    @Nullable
     @Override
-    public net.minecraft.world.level.chunk.LevelChunk bridge$getNeighborChunk(final int index) {
+    public net.minecraft.world.level.chunk.@Nullable LevelChunk bridge$getNeighborChunk(final int index) {
         return this.impl$neighbors[index];
     }
 
@@ -325,7 +323,7 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
     }
 
     @Override
-    public void bridge$setNeighbor(final Direction direction, @Nullable final net.minecraft.world.level.chunk.LevelChunk neighbor) {
+    public void bridge$setNeighbor(final Direction direction, final net.minecraft.world.level.chunk.@Nullable LevelChunk neighbor) {
         this.impl$neighbors[DirectionUtil.directionToIndex(direction)] = neighbor;
     }
 

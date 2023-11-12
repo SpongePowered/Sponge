@@ -63,6 +63,7 @@ import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -134,8 +135,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, CommandSourceProviderBridge, DataCompoundHolder {

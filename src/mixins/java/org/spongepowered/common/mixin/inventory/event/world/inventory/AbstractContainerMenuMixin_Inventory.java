@@ -36,6 +36,7 @@ import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Final;
@@ -62,8 +63,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 @Mixin(AbstractContainerMenu.class)
 public abstract class AbstractContainerMenuMixin_Inventory implements TrackedContainerBridge, InventoryAdapter {

@@ -26,9 +26,8 @@ package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-
-import javax.annotation.Nullable;
 
 @Mixin(AbstractMinecartContainer.class)
 public abstract class AbstractMinecartContainerMixin extends AbstractMinecartMixin {
@@ -44,7 +43,7 @@ public abstract class AbstractMinecartContainerMixin extends AbstractMinecartMix
      */
     @Override
     @Nullable
-    protected @org.checkerframework.checker.nullness.qual.Nullable Entity impl$postProcessChangeDimension(final Entity entity) {
+    protected Entity impl$postProcessChangeDimension(final Entity entity) {
         return entity;
     }
 

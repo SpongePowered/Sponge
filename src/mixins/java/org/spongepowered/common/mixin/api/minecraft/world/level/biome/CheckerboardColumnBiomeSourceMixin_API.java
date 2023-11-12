@@ -29,6 +29,7 @@ import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
@@ -39,8 +40,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 @Mixin(CheckerboardColumnBiomeSource.class)
 public abstract class CheckerboardColumnBiomeSourceMixin_API extends BiomeSourceMixin_API implements ConfigurableBiomeProvider<CheckerboardBiomeConfig> {

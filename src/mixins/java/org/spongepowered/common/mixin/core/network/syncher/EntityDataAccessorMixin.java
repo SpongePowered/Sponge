@@ -25,13 +25,12 @@
 package org.spongepowered.common.mixin.core.network.syncher;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.network.syncher.EntityDataAccessorBridge;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(EntityDataAccessor.class)
 public abstract class EntityDataAccessorMixin<T> implements EntityDataAccessorBridge<T> {

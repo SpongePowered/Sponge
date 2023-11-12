@@ -30,6 +30,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -44,8 +45,6 @@ import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridg
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.level.block.entity.BlockEntity.class)
 public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoundHolder {

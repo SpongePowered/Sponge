@@ -28,6 +28,7 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.resources.ResourceLocation;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,8 +38,6 @@ import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 
 import java.time.Instant;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(CriterionProgress.class)
 public abstract class CriterionProgressMixin_API implements org.spongepowered.api.advancement.criteria.CriterionProgress {

@@ -31,6 +31,7 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -70,8 +71,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(AdvancementProgress.class)
 public abstract class AdvancementProgressMixin implements AdvancementProgressBridge {

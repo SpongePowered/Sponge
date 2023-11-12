@@ -32,6 +32,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,8 +41,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-
-import javax.annotation.Nullable;
 
 @Mixin(AbstractArrow.class)
 public abstract class AbstractArrowMixin extends ProjectileMixin {

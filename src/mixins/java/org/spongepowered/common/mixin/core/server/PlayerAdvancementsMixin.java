@@ -35,6 +35,7 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.players.PlayerList;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -64,8 +65,6 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 @Mixin(PlayerAdvancements.class)
 public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridge {

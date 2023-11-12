@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity.ai.goal;
 
 import com.google.common.base.MoreObjects;
 import net.minecraft.world.entity.ai.goal.Goal;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,8 +38,6 @@ import org.spongepowered.common.registry.provider.GoalTypeProvider;
 
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 @Mixin(Goal.class)
 public abstract class GoalMixin implements GoalBridge {

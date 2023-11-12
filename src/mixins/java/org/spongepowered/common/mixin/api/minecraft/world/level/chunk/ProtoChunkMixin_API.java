@@ -64,7 +64,7 @@ import java.util.Map;
 public abstract class ProtoChunkMixin_API extends ChunkAccess implements GenerationChunk, SpongeServerLocationBaseDataHolder {
 
     //@formatter:off
-    @Shadow @javax.annotation.Nullable private BelowZeroRetrogen belowZeroRetrogen;
+    @Shadow @Nullable private BelowZeroRetrogen belowZeroRetrogen;
     @Shadow public abstract Map<BlockPos, net.minecraft.world.level.block.entity.BlockEntity> shadow$getBlockEntities();
     @Shadow public abstract void shadow$setBlockEntity(final net.minecraft.world.level.block.entity.BlockEntity param1);
     @Shadow public abstract void shadow$removeBlockEntity(final BlockPos param0);
