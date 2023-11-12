@@ -195,7 +195,6 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
 
         if (this.bridge$fireAuthEvent()) {
             ci.cancel();
-            System.out.println("hello");
         }
     }
 
