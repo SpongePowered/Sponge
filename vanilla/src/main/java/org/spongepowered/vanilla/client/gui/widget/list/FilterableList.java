@@ -234,59 +234,43 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
     }
 
     @Override
-    protected void renderList(final GuiGraphics stack, final int renderX, final int renderY, final float p_renderList_3_) {
+    protected void renderList(final GuiGraphics $$0, final int $$1, final int $$2, final float $$3) {
         // Most of this is based on AbstractList::renderList logic
-        final List<E> filteredList = this.filterSupplier == null ? new ObjectArrayList<>(this.children()) : this.filterSupplier.get();
-        final int itemCount = filteredList.size();
-        final Tesselator tessellator = Tesselator.getInstance();
-        final BufferBuilder bufferbuilder = tessellator.getBuilder();
+        final List<E> filteredList = this.filterSupplier == null ? this.children() : this.filterSupplier.get();
 
         if (filteredList.isEmpty()) {
             final Font font = this.minecraft.font;
             final String noResults = "No results...";
             final int noResultsWidth = font.width(noResults);
 
-            stack.drawString(font, noResults, (this.width / 2) + this.x0 - (noResultsWidth / 2), this.y0 + 10, ChatFormatting.GRAY.getColor());
+            $$0.drawString(font, noResults, (this.width / 2) + this.x0 - (noResultsWidth / 2), this.y0 + 10, ChatFormatting.GRAY.getColor());
 
             return;
         }
 
-        for (int i = 0; i < itemCount; ++i) {
-            final int rowTop = this.getRowTop(i);
-            final int rowBottom = this.getRowBottom(i);
-            if (rowBottom >= this.y0 && rowTop <= this.y1) {
-                final int yStart = renderY + i * this.itemHeight + this.headerHeight;
-                final int yEnd = this.itemHeight - 4;
+        final int $$4 = this.getRowLeft();
+        final int $$5 = this.getRowWidth();
+        final int $$6 = this.itemHeight - 4;
+        final int $$7 = filteredList.size();
 
-                final int rowWidth = this.getRowWidth();
-
-                if (((AbstractSelectionListAccessor) this).accessor$renderSelection() && Objects.equals(this.getSelected(), filteredList.get(i))) {
-                    final int xSelectStart = this.x0 + this.width / 2 - rowWidth / 2 - 2;
-                    final int xSelectEnd = this.x0 + this.width / 2 + rowWidth / 2 - 4;
-//                    RenderSystem.disableTexture();
-                    RenderSystem.setShader(GameRenderer::getPositionShader);
-                    final float f = this.isFocused() ? 1.0F : 0.5F;
-                    RenderSystem.setShaderColor(f, f, f, 1.0F);
-                    bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-                    bufferbuilder.vertex(xSelectStart, yStart + yEnd + 2, 0.0D).endVertex();
-                    bufferbuilder.vertex(xSelectEnd, yStart + yEnd + 2, 0.0D).endVertex();
-                    bufferbuilder.vertex(xSelectEnd, yStart - 2, 0.0D).endVertex();
-                    bufferbuilder.vertex(xSelectStart, yStart - 2, 0.0D).endVertex();
-                    tessellator.end();
-                    RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0F);
-                    bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-                    bufferbuilder.vertex(xSelectStart + 1, yStart + yEnd + 1, 0.0D).endVertex();
-                    bufferbuilder.vertex(xSelectEnd - 1, yStart + yEnd + 1, 0.0D).endVertex();
-                    bufferbuilder.vertex(xSelectEnd - 1, yStart - 1, 0.0D).endVertex();
-                    bufferbuilder.vertex(xSelectStart + 1, yStart - 1, 0.0D).endVertex();
-                    tessellator.end();
-//                    RenderSystem.enableTexture();
-                }
-
-                final E entry = filteredList.get(i);
-                entry.render(stack, i, rowTop, this.getRowLeft(), rowWidth, yEnd, renderX, renderY, false, p_renderList_3_);
+        for (int $$8 = 0; $$8 < $$7; ++$$8) {
+            final int $$9 = this.getRowTop($$8);
+            final int $$10 = this.getRowBottom($$8);
+            if ($$10 >= this.y0 && $$9 <= this.y1) {
+                this.renderItemFromList(filteredList, $$0, $$1, $$2, $$3, $$8, $$4, $$9, $$5, $$6);
             }
         }
+    }
+
+    private void renderItemFromList(final List<E> list, final GuiGraphics $$0, final int $$1, final int $$2, final float $$3, final int $$4, final int $$5, final int $$6, final int $$7, final int $$8) {
+        final E $$9 = list.get($$4);
+        $$9.renderBack($$0, $$4, $$6, $$5, $$7, $$8, $$1, $$2, Objects.equals(this.getHovered(), $$9), $$3);
+        if (this.isSelectedItem($$4)) {
+            final int $$10 = this.isFocused() ? -1 : -8355712;
+            this.renderSelection($$0, $$6, $$7, $$8, $$10, -16777216);
+        }
+
+        $$9.render($$0, $$4, $$6, $$5, $$7, $$8, $$1, $$2, Objects.equals(this.getHovered(), $$9), $$3);
     }
 
     @Override
