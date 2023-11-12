@@ -453,7 +453,7 @@ tasks {
         this.dependencies("bootstrap", vanillaAppLaunchConfig)
         this.dependencies("main", vanillaLibrariesConfig)
         // except what we're providing through the installer
-        //this.excludedDependencies(downloadNotNeeded)
+        this.excludedDependencies(downloadNotNeeded)
 
         outputFile.set(installerResources.map { it.file("libraries.json") })
     }

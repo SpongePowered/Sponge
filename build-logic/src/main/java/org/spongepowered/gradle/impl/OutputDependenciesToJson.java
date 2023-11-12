@@ -29,17 +29,16 @@ import com.google.gson.GsonBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.NamedDomainObjectProvider;
-import org.gradle.api.artifacts.ArtifactCollection;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier;
 import org.gradle.api.artifacts.result.ResolvedArtifactResult;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.MapProperty;
-import org.gradle.api.provider.Property;
+import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
@@ -161,12 +160,15 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
      * Excludes configuration, to remove certain entries from dependencies and
      * transitive dependencies of {@link #getDependencies()}.
      */
+    @Internal
+    public abstract SetProperty<ResolvedArtifactResult> getExcludedDependencies();
+
     @Input
     @Optional
-    public abstract Property<Configuration> getExcludedDependencies();
+    protected abstract SetProperty<ModuleComponentIdentifier> getExcludedDependenciesBuildInput();
 
     public final void excludedDependencies(final NamedDomainObjectProvider<Configuration> config) {
-        this.getExcludedDependencies().set(config);
+        this.getExcludedDependencies().set(config.flatMap(conf -> conf.getIncoming().getArtifacts().getResolvedArtifacts()));
     }
 
     /**
@@ -180,13 +182,20 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
 
     public OutputDependenciesToJson() {
         this.getAllowedClassifiers().add("");
+        this.getExcludedDependenciesBuildInput().set(this.getExcludedDependencies().map(deps -> {
+            return deps.stream()
+              .map(res -> res.getId().getComponentIdentifier())
+              .filter(res -> res instanceof ModuleComponentIdentifier)
+              .map(res -> (ModuleComponentIdentifier) res)
+              .collect(Collectors.toSet());
+        }));
     }
 
     @TaskAction
     public void generateDependenciesJson() {
         final Set<ModuleComponentIdentifier> excludedDeps = new HashSet<>();
         if (this.getExcludedDependencies().isPresent()) {
-            for (final ResolvedArtifactResult result : this.getExcludedDependencies().get().getIncoming().getArtifacts()) {
+            for (final ResolvedArtifactResult result : this.getExcludedDependencies().get()) {
                 if (result.getId().getComponentIdentifier() instanceof ModuleComponentIdentifier) {
                     excludedDeps.add((ModuleComponentIdentifier) result.getId().getComponentIdentifier());
                 }
@@ -197,7 +206,7 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
         final Map<String, List<DependencyDescriptor>> dependenciesMap = new TreeMap<>();
 
         for (final Map.Entry<String, ConfigurationHolder> entry : inputConfigs.entrySet()) {
-            dependenciesMap.put(entry.getKey(), this.configToDescriptor(entry.getValue().getConfiguration().getIncoming().getArtifacts(), excludedDeps));
+            dependenciesMap.put(entry.getKey(), this.configToDescriptor(entry.getValue().getArtifacts().get(), excludedDeps));
         }
         final DependencyManifest manifest = new DependencyManifest(dependenciesMap);
 
@@ -212,8 +221,8 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
         }
     }
 
-    private List<DependencyDescriptor> configToDescriptor(final ArtifactCollection conf, final Set<ModuleComponentIdentifier> excludedDeps) {
-        return conf.getArtifacts().stream()
+    private List<DependencyDescriptor> configToDescriptor(final Set<ResolvedArtifactResult> conf, final Set<ModuleComponentIdentifier> excludedDeps) {
+        return conf.stream()
             .filter(dep -> {
                 final ComponentIdentifier ident = dep.getId().getComponentIdentifier();
                 return ident instanceof ModuleComponentIdentifier && !excludedDeps.contains(ident);
@@ -260,14 +269,23 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
     }
 
     public static class ConfigurationHolder {
-        private final Configuration configuration;
+        private final Provider<Set<ResolvedArtifactResult>> configuration;
 
         public ConfigurationHolder(final Configuration configuration) {
-            this.configuration = configuration;
+            this.configuration = configuration.getIncoming().getArtifacts().getResolvedArtifacts();
         }
 
-        @InputFiles
-        public Configuration getConfiguration() {
+        @Input
+        public Provider<Set<ModuleComponentIdentifier>> getIds() {
+            return this.getArtifacts().map(set -> set.stream()
+              .map(art -> art.getId().getComponentIdentifier())
+              .filter(id -> id instanceof ModuleComponentIdentifier)
+              .map(art -> (ModuleComponentIdentifier) art)
+              .collect(Collectors.toSet()));
+        }
+
+        @Internal
+        public Provider<Set<ResolvedArtifactResult>> getArtifacts() {
             return this.configuration;
         }
     }
