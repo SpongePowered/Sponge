@@ -29,6 +29,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.map.MapInfo;
@@ -49,9 +51,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 @Mixin(MapItemSavedData.class)
 public abstract class MapItemSavedDataMixin extends SavedData implements MapItemSavedDataBridge, DataCompoundHolder {
@@ -126,7 +125,7 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
         this.impl$mapId = mapId;
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public UUID bridge$getUniqueId() {
         return this.impl$uuid;

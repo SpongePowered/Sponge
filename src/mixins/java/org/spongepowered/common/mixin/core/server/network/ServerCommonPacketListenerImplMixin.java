@@ -50,7 +50,7 @@ public abstract class ServerCommonPacketListenerImplMixin {
     // @formatter:off
     @Shadow @Final protected Connection connection;
     @Shadow @Final protected MinecraftServer server;
-    @Shadow public abstract void shadow$send(final Packet<?> $$0, @org.jetbrains.annotations.Nullable final PacketSendListener $$1);
+    @Shadow public abstract void shadow$send(final Packet<?> $$0, @Nullable final PacketSendListener $$1);
     @Shadow public abstract void shadow$disconnect(Component reason);
     // @formatter:on
 

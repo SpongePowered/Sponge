@@ -35,6 +35,7 @@ import net.minecraft.world.item.EnderEyeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
@@ -55,8 +56,6 @@ import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.math.vector.Vector3d;
-
-import javax.annotation.Nullable;
 
 @Mixin(EnderEyeItem.class)
 public abstract class EnderEyeItemMixin extends ItemMixin {

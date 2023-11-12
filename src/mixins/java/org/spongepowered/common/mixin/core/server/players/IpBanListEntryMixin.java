@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.server.players;
 
 import com.google.gson.JsonObject;
 import net.minecraft.server.players.IpBanListEntry;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,8 +35,6 @@ import org.spongepowered.common.bridge.server.players.IpBanListEntryBridge;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-
-import javax.annotation.Nullable;
 
 @Mixin(IpBanListEntry.class)
 public abstract class IpBanListEntryMixin extends BanListEntryMixin<String> implements IpBanListEntryBridge {

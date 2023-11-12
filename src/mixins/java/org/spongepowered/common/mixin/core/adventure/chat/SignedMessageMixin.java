@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.adventure.chat;
 
 import net.kyori.adventure.chat.SignedMessage;
 import net.minecraft.network.chat.MessageSignature;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
@@ -38,7 +38,7 @@ public interface SignedMessageMixin {
      * @reason make adventure methods produce native implementations
      */
     @Overwrite
-    static SignedMessage.@NotNull Signature signature(final byte[] bytes) {
+    static SignedMessage.@NonNull Signature signature(final byte[] bytes) {
         return (SignedMessage.Signature) (Object) new MessageSignature(bytes);
     }
 

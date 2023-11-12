@@ -39,6 +39,7 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -70,8 +71,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 @SuppressWarnings({"ConstantConditions", "rawtypes"})
 @Mixin(ServerScoreboard.class)
@@ -327,7 +326,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
      */
     @Override
     @Overwrite
-    public void setDisplayObjective(final net.minecraft.world.scores.DisplaySlot slot, @Nullable final net.minecraft.world.scores.Objective objective) {
+    public void setDisplayObjective(final net.minecraft.world.scores.DisplaySlot slot, final net.minecraft.world.scores.@Nullable Objective objective) {
         final Objective apiObjective = objective == null ? null : ((ObjectiveBridge) objective).bridge$getSpongeObjective();
         this.bridge$updateDisplaySlot(apiObjective, (DisplaySlot) (Object) slot);
     }

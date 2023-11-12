@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity.projectile;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
@@ -47,8 +48,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.entity.projectile.WitherSkull.class)
 public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin implements WitherSkullBridge, ExplosiveBridge {
@@ -82,10 +81,9 @@ public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin im
         this.impl$explosionRadius = explosionRadius == null ? Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS : explosionRadius;
     }
 
-    @Nullable
     @Redirect(method = "onHit", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"))
-    public net.minecraft.world.level.Explosion impl$CreateAndProcessExplosionEvent(final net.minecraft.world.level.Level worldObj, final Entity self,
+    public net.minecraft.world.level.@Nullable Explosion impl$CreateAndProcessExplosionEvent(final net.minecraft.world.level.Level worldObj, final Entity self,
             final double x, final double y, final double z, final float strength, final boolean flaming, final Level.ExplosionInteraction mode) {
         return this.bridge$throwExplosionEventAndExplosde(worldObj, self, x, y, z, strength, flaming, mode);
     }

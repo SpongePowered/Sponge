@@ -34,6 +34,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
@@ -68,8 +69,6 @@ import org.spongepowered.common.util.DamageEventUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 @Mixin(Mob.class)
 public abstract class MobMixin extends LivingEntityMixin {
 
@@ -77,7 +76,7 @@ public abstract class MobMixin extends LivingEntityMixin {
     @Shadow @Final protected GoalSelector goalSelector;
     @Shadow @Final protected GoalSelector targetSelector;
     @Shadow @Nullable private LivingEntity target;
-    @Shadow @Nullable public abstract net.minecraft.world.entity.Entity shadow$getLeashHolder();
+    @Shadow public abstract net.minecraft.world.entity.@Nullable Entity  shadow$getLeashHolder();
     @Shadow protected abstract void shadow$registerGoals();
     @Shadow protected abstract void shadow$maybeDisableShield(Player p_233655_1_, ItemStack p_233655_2_, ItemStack p_233655_3_);
     // @formatter:on

@@ -29,6 +29,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
 import net.minecraft.world.level.ExplosionDamageCalculator;
 import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.api.event.CauseStackManager;
@@ -54,8 +55,6 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(MinecartTNT.class)
 public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements FusedExplosiveBridge, ExplosiveBridge {
@@ -142,8 +141,7 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
             target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"
         )
     )
-    @Nullable
-    private net.minecraft.world.level.Explosion impl$useSpongeExplosion(final net.minecraft.world.level.Level world, final Entity entityIn,
+    private net.minecraft.world.level.@Nullable Explosion impl$useSpongeExplosion(final net.minecraft.world.level.Level world, final Entity entityIn,
         final DamageSource damageSource, final ExplosionDamageCalculator calculator,
         final double xIn, final double yIn, final double zIn, final float explosionRadius, final boolean fire, final Level.ExplosionInteraction modeIn) {
         // TODO ExplosionDamageCalculator & fire

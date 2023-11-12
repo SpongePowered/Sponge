@@ -68,7 +68,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.AdvancementTemplate;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -129,8 +129,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
 public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements ServerPlayer {
@@ -418,7 +416,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     // Audience
 
     @Override
-    public @NotNull Pointers pointers() {
+    public @NonNull Pointers pointers() {
         Pointers pointers = this.api$pointers;
         if (pointers == null) {
             synchronized (this) {
@@ -450,7 +448,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public void sendMessage(final @NotNull Component message) {
+    public void sendMessage(final @NonNull Component message) {
         if (this.impl$isFake) {
             return;
         }
@@ -458,7 +456,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public void sendMessage(final @NotNull Component message, final net.kyori.adventure.chat.ChatType.@NotNull Bound boundChatType) {
+    public void sendMessage(final @NonNull Component message, final net.kyori.adventure.chat.ChatType.@NonNull Bound boundChatType) {
         if (this.impl$isFake) {
             return;
         }
@@ -466,7 +464,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public void sendMessage(final @NotNull SignedMessage signedMessage, final net.kyori.adventure.chat.ChatType.@NotNull Bound boundChatType) {
+    public void sendMessage(final @NonNull SignedMessage signedMessage, final net.kyori.adventure.chat.ChatType.@NonNull Bound boundChatType) {
         if (this.impl$isFake) {
             return;
         }
@@ -478,7 +476,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public void deleteMessage(final SignedMessage.@NotNull Signature signature) {
+    public void deleteMessage(final SignedMessage.@NonNull Signature signature) {
         if (this.impl$isFake) {
             return;
         }
@@ -527,7 +525,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public <T> void sendTitlePart(final @NotNull TitlePart<T> part, final @NotNull T value) {
+    public <T> void sendTitlePart(final @NonNull TitlePart<T> part, final @NonNull T value) {
         if (this.impl$isFake) {
             return;
         }
@@ -593,7 +591,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public void playSound(final @NonNull Sound sound, final Sound.@NotNull Emitter emitter) {
+    public void playSound(final @NonNull Sound sound, final Sound.@NonNull Emitter emitter) {
         Objects.requireNonNull(sound, "sound");
         Objects.requireNonNull(emitter, "emitter");
         if (this.impl$isFake) {

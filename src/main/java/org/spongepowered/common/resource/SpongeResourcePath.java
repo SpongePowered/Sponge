@@ -26,8 +26,8 @@ package org.spongepowered.common.resource;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.resource.ResourcePath;
 
@@ -97,7 +97,7 @@ public final class SpongeResourcePath implements ResourcePath {
     }
 
     @Override
-    public int compareTo(@NotNull final ResourcePath o) {
+    public int compareTo(@NonNull final ResourcePath o) {
         return this.key.compareTo(o.key());
     }
 

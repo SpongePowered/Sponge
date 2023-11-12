@@ -28,6 +28,7 @@ import com.mojang.math.Transformation;
 import net.minecraft.util.Brightness;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.item.ItemDisplayContext;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.joml.Quaterniond;
 import org.joml.Vector3f;
 import org.spongepowered.api.block.BlockState;
@@ -47,8 +48,6 @@ import org.spongepowered.math.matrix.Matrix4d;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.awt.Color;
-
-import javax.annotation.Nullable;
 
 public class DisplayEntityData {
 

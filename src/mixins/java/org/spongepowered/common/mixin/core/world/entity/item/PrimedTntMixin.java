@@ -29,6 +29,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.level.Explosion.BlockInteraction;
 import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
 import org.spongepowered.api.event.CauseStackManager;
@@ -50,8 +51,6 @@ import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(PrimedTnt.class)
 public abstract class PrimedTntMixin extends EntityMixin implements PrimedTntBridge, FusedExplosiveBridge, ExplosiveBridge {
@@ -105,7 +104,6 @@ public abstract class PrimedTntMixin extends EntityMixin implements PrimedTntBri
         this.shadow$setFuse(fuseTicks);
     }
 
-    @Nullable
     @Redirect(
         method = "explode",
         at = @At(
@@ -113,7 +111,7 @@ public abstract class PrimedTntMixin extends EntityMixin implements PrimedTntBri
             target = "Lnet/minecraft/world/level/Level;explode(Lnet/minecraft/world/entity/Entity;DDDFLnet/minecraft/world/level/Level$ExplosionInteraction;)Lnet/minecraft/world/level/Explosion;"
         )
     )
-    private net.minecraft.world.level.Explosion impl$useSpongeExplosion(final Level world,
+    private net.minecraft.world.level.@Nullable Explosion impl$useSpongeExplosion(final Level world,
         final Entity entityIn, final double xIn, final double yIn, final double zIn, final float explosionRadius,
         final Level.ExplosionInteraction modeIn) {
         return SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()

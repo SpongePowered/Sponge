@@ -55,6 +55,7 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.CauseStackManager;
@@ -90,8 +91,6 @@ import org.spongepowered.common.util.ExperienceHolderUtil;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.entity.player.Player.class)
 public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBridge, GameProfileHolderBridge {

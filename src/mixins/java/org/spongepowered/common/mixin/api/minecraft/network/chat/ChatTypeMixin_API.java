@@ -29,8 +29,8 @@ import net.kyori.adventure.text.format.Style;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.ChatTypeDecoration;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,7 +49,7 @@ public abstract class ChatTypeMixin_API implements org.spongepowered.api.adventu
     @Shadow public abstract ChatType.Bound bind(final Component $$0);
 
     @Override
-    public @NotNull Bound bind(@NotNull final ComponentLike name, @Nullable final ComponentLike target) {
+    public @NonNull Bound bind(@NonNull final ComponentLike name, @Nullable final ComponentLike target) {
         ChatType.Bound ret = this.bind(SpongeAdventure.asVanilla(name.asComponent()));
         if (target != null) {
             ret = ret.withTargetName(SpongeAdventure.asVanilla(target.asComponent()));
@@ -77,12 +77,12 @@ public abstract class ChatTypeMixin_API implements org.spongepowered.api.adventu
         // @formatter:on
 
         @Override
-        public net.kyori.adventure.chat.@NotNull ChatType type() {
+        public net.kyori.adventure.chat.@NonNull ChatType type() {
             return (net.kyori.adventure.chat.ChatType) (Object) this.shadow$chatType();
         }
 
         @Override
-        public net.kyori.adventure.text.@NotNull Component name() {
+        public net.kyori.adventure.text.@NonNull Component name() {
             return SpongeAdventure.asAdventure(this.shadow$name());
         }
 

@@ -42,8 +42,8 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
@@ -287,7 +287,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
             return new SpongeWorldTemplate(this.key, levelStem, this.pack);
         }
 
-        @NotNull
+        @NonNull
         private static Holder<DimensionType> dimensionTypeHolder(final WorldType worldType) {
             final Registry<DimensionType> dimensionTypeRegistry = SpongeCommon.server().registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
             final ResourceLocation key = dimensionTypeRegistry.getKey((DimensionType) (Object) worldType);

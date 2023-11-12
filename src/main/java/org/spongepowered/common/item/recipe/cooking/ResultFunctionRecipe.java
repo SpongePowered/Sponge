@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.recipe.cooking;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface ResultFunctionRecipe {
     @Nullable String resultFunctionId();

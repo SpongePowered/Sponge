@@ -29,7 +29,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.item.recipe.cooking.ResultFunctionRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 

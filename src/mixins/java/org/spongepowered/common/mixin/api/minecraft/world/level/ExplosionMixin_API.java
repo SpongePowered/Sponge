@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
 import net.minecraft.world.entity.Entity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -35,8 +36,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.level.ExplosionBridge;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.level.Explosion.class)
 public abstract class ExplosionMixin_API implements Explosion {

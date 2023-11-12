@@ -30,6 +30,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.Recipe;
@@ -45,8 +46,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
 @Mixin(net.minecraft.world.item.crafting.Recipe.class)
 public interface RecipeMixin_API<C extends Container> extends Recipe {
 
@@ -60,26 +59,26 @@ public interface RecipeMixin_API<C extends Container> extends Recipe {
     @Shadow NonNullList<net.minecraft.world.item.crafting.Ingredient> shadow$getIngredients();
     // @formatter:on
 
-    @Nonnull
+    @NonNull
     @Override
     default ItemStackSnapshot exemplaryResult() {
         return ItemStackUtil.snapshotOf(this.shadow$getResultItem(SpongeCommon.server().registryAccess()));
     }
 
     @Override
-    default boolean isValid(@Nonnull final Inventory inv, @Nonnull final ServerWorld world) {
+    default boolean isValid(@NonNull final Inventory inv, @NonNull final ServerWorld world) {
         return this.shadow$matches(toNativeInventory(inv), (net.minecraft.world.level.Level) world);
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    default ItemStackSnapshot result(@Nonnull final Inventory inv) {
+    default ItemStackSnapshot result(@NonNull final Inventory inv) {
         return ItemStackUtil.snapshotOf(this.shadow$assemble(toNativeInventory(inv), SpongeCommon.server().registryAccess()));
     }
 
-    @Nonnull
+    @NonNull
     @Override
-    default List<ItemStackSnapshot> remainingItems(@Nonnull final Inventory inv) {
+    default List<ItemStackSnapshot> remainingItems(@NonNull final Inventory inv) {
         return this.shadow$getRemainingItems(toNativeInventory(inv)).stream()
                 .map(ItemStackUtil::snapshotOf)
                 .collect(Collectors.toList());

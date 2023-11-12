@@ -25,14 +25,13 @@
 package org.spongepowered.common.mixin.core.world.entity;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.chunk.TrackedLevelChunkBridge;
 
 import java.lang.ref.WeakReference;
-
-import javax.annotation.Nullable;
 
 @Mixin({BlockEntity.class})
 public abstract class ActiveChunkReferentMixin implements ActiveChunkReferantBridge {

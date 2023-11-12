@@ -29,6 +29,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -49,14 +50,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
 @Mixin(value = AbstractContainerMenu.class, priority = 998)
 public abstract class ContainerMixin_Inventory_API implements org.spongepowered.api.item.inventory.Container,
         DefaultImplementedAdapterInventory.WithClear {
 
     @Shadow @Final private List<ContainerListener> containerListeners;
-    @Shadow @Final @Nullable private net.minecraft.world.inventory.MenuType<?> menuType;
+    @Shadow @Final private net.minecraft.world.inventory.@Nullable MenuType<?> menuType;
 
     @Override
     public boolean isViewedSlot(final org.spongepowered.api.item.inventory.Slot slot) {

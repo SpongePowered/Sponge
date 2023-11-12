@@ -343,7 +343,6 @@ dependencies {
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")
     }
     appLaunch("com.lmax:disruptor:3.4.4")
-    "applaunchCompileOnly"("org.jetbrains:annotations:23.1.0")
 
     testplugins?.also {
         vanillaAppLaunchRuntime(project(it.path)) {

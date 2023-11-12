@@ -40,6 +40,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
 import net.minecraft.world.phys.Vec3;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
@@ -76,8 +77,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.entity.Entity.class)
 @Implements(@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entity$", remap = Remap.NONE))

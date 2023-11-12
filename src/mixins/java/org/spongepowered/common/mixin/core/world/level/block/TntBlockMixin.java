@@ -31,6 +31,7 @@ import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -46,8 +47,6 @@ import org.spongepowered.common.bridge.world.entity.item.PrimedTntBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
-
-import javax.annotation.Nullable;
 
 @Mixin(TntBlock.class)
 public abstract class TntBlockMixin extends BlockMixin {

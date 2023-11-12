@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.optimization.world.entity;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.TamableAnimal;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -34,8 +35,6 @@ import org.spongepowered.common.mixin.core.world.entity.AgableMobMixin;
 
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 @Mixin(TamableAnimal.class)
 public abstract class TamableAnimalMixin_Optimization_Owner extends AgableMobMixin {

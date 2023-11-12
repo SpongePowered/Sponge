@@ -36,13 +36,12 @@ import net.minecraft.util.TaskChainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
 import java.util.function.IntConsumer;
-
-import javax.annotation.Nullable;
 
 @Mixin(CommandSourceStack.class)
 public interface CommandSourceStackAccessor {

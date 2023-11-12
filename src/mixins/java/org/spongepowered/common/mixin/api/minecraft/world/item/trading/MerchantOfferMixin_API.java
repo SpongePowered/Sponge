@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.item.trading;
 
 import net.minecraft.world.item.trading.MerchantOffer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -36,14 +37,12 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 @Mixin(MerchantOffer.class)
 public abstract class MerchantOfferMixin_API implements TradeOffer {
 
     // @formatter:off
     @Shadow public abstract net.minecraft.world.item.ItemStack shadow$getCostA();
-    @Shadow @Nullable public abstract net.minecraft.world.item.ItemStack shadow$getCostB();
+    @Shadow public abstract net.minecraft.world.item.@Nullable ItemStack shadow$getCostB();
     @Shadow public abstract net.minecraft.world.item.ItemStack shadow$getResult();
     @Shadow public abstract int shadow$getUses();
     @Shadow public abstract int shadow$getMaxUses();

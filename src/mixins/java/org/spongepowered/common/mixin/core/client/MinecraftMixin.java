@@ -29,6 +29,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,8 +44,6 @@ import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
-
-import javax.annotation.Nullable;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin extends ReentrantBlockableEventLoop<Runnable> implements MinecraftBridge, SpongeClient {

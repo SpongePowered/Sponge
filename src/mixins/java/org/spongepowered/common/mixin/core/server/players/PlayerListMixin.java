@@ -57,6 +57,7 @@ import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import net.minecraft.world.phys.Vec3;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -133,8 +134,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import javax.annotation.Nullable;
-
 @Mixin(PlayerList.class)
 public abstract class PlayerListMixin implements PlayerListBridge {
 
@@ -155,7 +154,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow public abstract boolean shadow$canBypassPlayerLimit(com.mojang.authlib.GameProfile param0);
     @Shadow protected abstract boolean shadow$verifyChatTrusted(final PlayerChatMessage $$0);
     @Shadow protected abstract void shadow$broadcastChatMessage(final PlayerChatMessage $$0, final Predicate<net.minecraft.server.level.ServerPlayer> $$1,
-        @Nullable final net.minecraft.server.level.ServerPlayer $$2, final ChatType.Bound $$4);
+        final net.minecraft.server.level.@Nullable ServerPlayer $$2, final ChatType.Bound $$4);
     // @formatter:on
 
     private boolean impl$isGameMechanicRespawn = false;
@@ -267,7 +266,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private net.minecraft.server.level.ServerLevel impl$onInitPlayer_getWorld(final MinecraftServer minecraftServer,
         final ResourceKey<Level> dimension, final Connection networkManager, final net.minecraft.server.level.ServerPlayer mcPlayer
     ) {
-        @Nullable final net.minecraft.network.chat.Component kickReason = ((ConnectionBridge) networkManager).bridge$getKickReason();
+        final net.minecraft.network.chat.@Nullable Component kickReason = ((ConnectionBridge) networkManager).bridge$getKickReason();
         final Component disconnectMessage;
         if (kickReason != null) {
             disconnectMessage = SpongeAdventure.asAdventure(kickReason);

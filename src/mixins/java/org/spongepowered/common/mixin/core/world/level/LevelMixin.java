@@ -93,7 +93,7 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
     @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos p_175726_1_);
     @Shadow public abstract DifficultyInstance shadow$getCurrentDifficultyAt(BlockPos p_175649_1_);
     @Shadow public abstract boolean shadow$isRaining();
-    @Shadow @javax.annotation.Nullable public abstract net.minecraft.world.level.block.entity.BlockEntity shadow$getBlockEntity(BlockPos p_175625_1_);
+    @Shadow public abstract net.minecraft.world.level.block.entity.@Nullable BlockEntity shadow$getBlockEntity(BlockPos p_175625_1_);
     @Shadow public abstract WorldBorder shadow$getWorldBorder();
     //@Shadow protected abstract void shadow$postGameEventInRadius(@javax.annotation.Nullable net.minecraft.world.entity.Entity $$0, GameEvent $$1, BlockPos $$2, int $$3);
     // @formatter on

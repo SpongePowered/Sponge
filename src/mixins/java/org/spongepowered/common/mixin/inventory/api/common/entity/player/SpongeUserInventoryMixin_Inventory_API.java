@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.inventory.api.common.entity.player;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
@@ -41,8 +42,6 @@ import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(value = SpongeUserInventory.class, remap = false)
 public abstract class SpongeUserInventoryMixin_Inventory_API implements UserInventory, InventoryAdapter {

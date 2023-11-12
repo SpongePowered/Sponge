@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.damagesource;
 
 import net.minecraft.core.Holder;
 import net.minecraft.world.phys.Vec3;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
@@ -40,15 +41,13 @@ import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 @Mixin(value = net.minecraft.world.damagesource.DamageSource.class)
 public abstract class DamageSourceMixin_API implements DamageSource {
 
     // @formatter:off
-    @Shadow @Final @Nullable private net.minecraft.world.entity.Entity directEntity;
+    @Shadow @Final private net.minecraft.world.entity.@Nullable Entity directEntity;
 
-    @Shadow @Final @Nullable private net.minecraft.world.entity.Entity causingEntity;
+    @Shadow @Final private net.minecraft.world.entity.@Nullable Entity causingEntity;
     @Shadow @Final private Holder<net.minecraft.world.damagesource.DamageType> type;
     @Shadow @Final @Nullable private Vec3 damageSourcePosition;
     // @formatter:on

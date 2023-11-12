@@ -59,6 +59,8 @@ import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.ticks.LevelTicks;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -120,9 +122,6 @@ import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin extends LevelMixin implements ServerLevelBridge, PlatformServerLevelBridge, ResourceKeyBridge {
 
@@ -132,11 +131,11 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Shadow @Final private LevelTicks<Fluid> fluidTicks;
     @Shadow private int emptyTime;
 
-    @Shadow @Nonnull public abstract MinecraftServer shadow$getServer();
+    @Shadow @NonNull public abstract MinecraftServer shadow$getServer();
     @Shadow protected abstract void shadow$saveLevelData();
     @Shadow @Final private MinecraftServer server;
 
-    @Shadow public abstract void levelEvent(@org.jetbrains.annotations.Nullable Player $$0, int $$1, BlockPos $$2, int $$3);
+    @Shadow public abstract void levelEvent(@Nullable Player $$0, int $$1, BlockPos $$2, int $$3);
     @Shadow @Final @Mutable @Nullable private EndDragonFight dragonFight;
 
     // @formatter:on

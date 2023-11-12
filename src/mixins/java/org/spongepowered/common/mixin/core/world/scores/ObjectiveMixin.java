@@ -28,6 +28,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,8 +41,6 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.bridge.world.scores.ScoreboardBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
-
-import javax.annotation.Nullable;
 
 @Mixin(Objective.class)
 public abstract class ObjectiveMixin implements ObjectiveBridge {

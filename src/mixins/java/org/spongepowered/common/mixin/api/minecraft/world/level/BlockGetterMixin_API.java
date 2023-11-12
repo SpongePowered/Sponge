@@ -28,6 +28,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.block.state.BlockState;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.volume.game.PrimitiveGameVolume;
@@ -41,14 +42,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 @Mixin(BlockGetter.class)
 @Implements(@Interface(iface = PrimitiveGameVolume.class, prefix = "primitive$"))
 public interface BlockGetterMixin_API extends PrimitiveGameVolume {
 
     //@formatter:off
-    @Shadow @Nullable net.minecraft.world.level.block.entity.BlockEntity shadow$getBlockEntity(BlockPos p_175625_1_);
+    @Shadow net.minecraft.world.level.block.entity.@Nullable BlockEntity shadow$getBlockEntity(BlockPos p_175625_1_);
     @Shadow BlockState shadow$getBlockState(BlockPos p_180495_1_);
     @Shadow net.minecraft.world.level.material.FluidState shadow$getFluidState(BlockPos p_204610_1_);
     @Shadow int shadow$getLightEmission(BlockPos p_217298_1_);

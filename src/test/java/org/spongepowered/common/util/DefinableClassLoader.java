@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.util;
 
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 

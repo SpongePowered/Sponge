@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.test.stub;
 
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 
 import java.util.Objects;
@@ -39,12 +39,12 @@ public final class StubKey implements ResourceKey {
     }
 
     @Override
-    public @NotNull String namespace() {
+    public @NonNull String namespace() {
         return this.namespace;
     }
 
     @Override
-    public @NotNull String value() {
+    public @NonNull String value() {
         return this.key;
     }
 

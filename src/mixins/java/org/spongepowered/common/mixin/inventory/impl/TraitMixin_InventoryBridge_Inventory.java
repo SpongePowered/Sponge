@@ -38,6 +38,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.LensGeneratorBridge;
@@ -48,8 +49,6 @@ import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-
-import javax.annotation.Nullable;
 
 /**
  * Mixin into all known vanilla {@link Container} and {@link AbstractContainerMenu}

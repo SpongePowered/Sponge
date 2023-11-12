@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.server.players;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.server.players.BanListEntry;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,8 +37,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.players.BanListEntryBridge;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(BanListEntry.class)
 public abstract class BanListEntryMixin<T> extends StoredUserEntryMixin<T> implements BanListEntryBridge {

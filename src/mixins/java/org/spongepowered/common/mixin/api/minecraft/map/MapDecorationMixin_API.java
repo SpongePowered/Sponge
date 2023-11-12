@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.map;
 import com.google.common.base.Preconditions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.map.decoration.MapDecorationType;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
@@ -39,8 +40,6 @@ import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOr
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.math.vector.Vector2i;
-
-import javax.annotation.Nullable;
 
 @Mixin(MapDecoration.class)
 public abstract class MapDecorationMixin_API implements org.spongepowered.api.map.decoration.MapDecoration {

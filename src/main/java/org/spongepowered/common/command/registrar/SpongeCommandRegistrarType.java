@@ -25,7 +25,7 @@
 package org.spongepowered.common.command.registrar;
 
 import io.leangen.geantyref.TypeToken;
-import org.jetbrains.annotations.NotNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
@@ -52,12 +52,12 @@ public final class SpongeCommandRegistrarType<V> implements CommandRegistrarType
     }
 
     @Override
-    public @NotNull TypeToken<V> handledType() {
+    public @NonNull TypeToken<V> handledType() {
         return this.handledType;
     }
 
     @Override
-    public @NotNull CommandRegistrar<V> create(final CommandManager.@NotNull Mutable manager) {
+    public @NonNull CommandRegistrar<V> create(final CommandManager.@NonNull Mutable manager) {
         return this.supplier.apply(manager);
     }
 }

@@ -25,13 +25,12 @@
 package org.spongepowered.common.mixin.core.block;
 
 import net.minecraft.world.level.block.Block;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(value = {
         Block.Properties.class,

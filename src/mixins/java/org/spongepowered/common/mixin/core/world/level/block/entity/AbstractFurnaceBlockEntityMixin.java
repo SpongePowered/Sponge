@@ -36,6 +36,7 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
@@ -63,8 +64,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Collections;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
 public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlockEntityMixin {

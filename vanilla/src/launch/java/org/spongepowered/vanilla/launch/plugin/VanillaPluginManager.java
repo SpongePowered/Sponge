@@ -27,7 +27,7 @@ package org.spongepowered.vanilla.launch.plugin;
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.apache.logging.log4j.Level;
-import org.jetbrains.annotations.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.InvalidPluginException;

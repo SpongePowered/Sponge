@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -53,8 +54,6 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.level.block.entity.BlockEntity.class)
 public abstract class BlockEntityMixin_API implements BlockEntity {

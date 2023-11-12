@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.entity.projectile;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.phys.HitResult;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -41,8 +42,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
-
-import javax.annotation.Nullable;
 
 @Mixin(Projectile.class)
 public abstract class ProjectileMixin extends EntityMixin {

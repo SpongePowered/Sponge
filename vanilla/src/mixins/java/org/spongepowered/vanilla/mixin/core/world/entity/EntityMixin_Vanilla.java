@@ -26,13 +26,12 @@ package org.spongepowered.vanilla.mixin.core.world.entity;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.world.portal.PortalLogic;
-
-import javax.annotation.Nullable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin_Vanilla implements EntityBridge {

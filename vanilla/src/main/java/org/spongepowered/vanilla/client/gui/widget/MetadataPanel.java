@@ -37,6 +37,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.client.gui.screen.PluginScreen;
 import org.spongepowered.vanilla.util.Bounds;
@@ -51,8 +52,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 public final class MetadataPanel extends ScrollPanel implements NarratableEntry {
 

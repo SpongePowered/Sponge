@@ -25,12 +25,11 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.entity.raid.Raider;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.raid.RaiderAccessor;
 import org.spongepowered.common.bridge.world.entity.raid.RaidBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-
-import javax.annotation.Nullable;
 
 public final class AbstractRaiderData {
 

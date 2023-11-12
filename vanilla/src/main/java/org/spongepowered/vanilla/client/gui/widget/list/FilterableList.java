@@ -42,6 +42,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.accessor.client.gui.components.AbstractSelectionListAccessor;
 import org.spongepowered.vanilla.util.Bounds;
 
@@ -50,8 +51,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 @SuppressWarnings("unchecked")
 public class FilterableList<P extends FilterableList<P, E>, E extends FilterableList.Entry<P, E>> extends AbstractSelectionList<E> {

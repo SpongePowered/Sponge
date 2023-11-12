@@ -28,11 +28,10 @@ import com.mojang.math.Transformation;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Brightness;
 import net.minecraft.world.entity.Display;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
-
-import javax.annotation.Nullable;
 
 @Mixin(Display.class)
 public interface DisplayAccessor {

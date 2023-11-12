@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.item;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
@@ -44,8 +45,6 @@ import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.item.ItemStack.class)
 public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataCompoundHolder {
