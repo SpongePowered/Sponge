@@ -21,7 +21,7 @@ indraSpotlessLicenser {
 
 val apiConfigurateVersion: String by project
 val asmVersion: String by project
-val checkerVersion: String by project
+val apiCheckerVersion: String by project
 val log4jVersion: String by project
 val modlauncherVersion: String by project
 
@@ -55,5 +55,5 @@ dependencies {
     }
 
     // And finally, compile only annotations
-    compileOnly("org.checkerframework:checker-qual:$checkerVersion")
+    compileOnly("org.checkerframework:checker-qual:$apiCheckerVersion")
 }

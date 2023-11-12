@@ -27,7 +27,6 @@ package org.spongepowered.test.command.raw;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
@@ -45,7 +44,7 @@ import java.util.Optional;
 public class ClientSuggestionsRawCommand implements Command.Raw {
 
     @Override
-    public @NonNull CommandResult process(@NotNull final CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) throws CommandException {
+    public @NonNull CommandResult process(@NonNull final CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) throws CommandException {
         cause.sendMessage(Identity.nil(), Component.text(arguments.remaining()));
         return CommandResult.success();
     }
