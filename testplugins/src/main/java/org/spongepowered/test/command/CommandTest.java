@@ -33,8 +33,8 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.SystemSubject;
@@ -516,9 +516,9 @@ public final class CommandTest implements LoadableModule {
                 Command.builder()
                         .addParameter(Parameter.enumValue(TestEnum.class).modifier(new ValueParameterModifier<TestEnum>() {
                             @Override
-                            public @NotNull Optional<? extends TestEnum> modifyResult(final Parameter.@NotNull Key<? super TestEnum> parameterKey,
-                                                                                      final ArgumentReader.@NotNull Immutable reader,
-                                                                                      final CommandContext.@NotNull Builder context,
+                            public @NonNull Optional<? extends TestEnum> modifyResult(final Parameter.@NonNull Key<? super TestEnum> parameterKey,
+                                                                                      final ArgumentReader.@NonNull Immutable reader,
+                                                                                      final CommandContext.@NonNull Builder context,
                                                                                       @Nullable final TestEnum value) throws ArgumentParseException {
                                 if (value == TestEnum.THREE) {
                                     throw reader.createException(Component.text("Can't select three!"));
@@ -527,8 +527,8 @@ public final class CommandTest implements LoadableModule {
                             }
 
                             @Override
-                            public List<CommandCompletion> modifyCompletion(@NotNull final CommandContext context,
-                                                                            @NotNull final String currentInput,
+                            public List<CommandCompletion> modifyCompletion(@NonNull final CommandContext context,
+                                                                            @NonNull final String currentInput,
                                                                             final List<CommandCompletion> completions) {
                                 return completions.stream().filter(x -> !x.completion().equalsIgnoreCase(TestEnum.THREE.name())).collect(Collectors.toList());
                             }

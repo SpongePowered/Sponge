@@ -22,6 +22,7 @@ val recommendedVersion: String by project
 val apiAdventureVersion: String by project
 val apiConfigurateVersion: String by project
 val apiGsonVersion: String by project
+val apiCheckerVersion: String by project
 val guavaVersion: String by project
 val apiPluginSpiVersion: String by project
 val asmVersion: String by project
@@ -30,7 +31,6 @@ val modlauncherVersion: String by project
 val mixinVersion: String by project
 val junitVersion: String by project
 val mockitoVersion: String by project
-val checkerVersion: String by project
 
 val commonManifest = java.manifest {
     attributes(
@@ -150,7 +150,9 @@ dependencies {
     api("org.spongepowered:spongeapi:$apiVersion")
 
     // Database stuffs... likely needs to be looked at
-    implementation("com.zaxxer:HikariCP:2.6.3")
+    implementation("com.zaxxer:HikariCP:2.6.3") {
+        exclude(group = "org.slf4j", module = "slf4j-api")
+    }
     implementation("org.mariadb.jdbc:mariadb-java-client:2.0.3")
     implementation("com.h2database:h2:1.4.196")
     implementation("org.xerial:sqlite-jdbc:3.20.0")
@@ -162,13 +164,20 @@ dependencies {
 
     // Implementation-only Adventure
     implementation(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
-    implementation("net.kyori:adventure-serializer-configurate4")
+    implementation("net.kyori:adventure-serializer-configurate4") {
+        exclude(group = "org.jetbrains", module = "annotations")
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig("org.spongepowered:spongeapi:$apiVersion")
-    launchConfig("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
+    launchConfig("org.spongepowered:plugin-spi:$apiPluginSpiVersion") {
+        exclude(group = "org.checkerframework", module = "checker-qual")
+        exclude(group = "com.google.code.gson", module = "gson")
+        exclude(group = "org.apache.logging.log4j", module = "log4j-api")
+    }
     launchConfig("org.spongepowered:mixin:$mixinVersion")
-    launchConfig("org.checkerframework:checker-qual:$checkerVersion")
+    launchConfig("org.checkerframework:checker-qual:$apiCheckerVersion")
     launchConfig("com.google.guava:guava:$guavaVersion") {
         exclude(group = "com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
@@ -181,9 +190,12 @@ dependencies {
     launchConfig("org.ow2.asm:asm-util:$asmVersion")
 
     // Applaunch -- initialization that needs to occur without game access
-    applaunchConfig("org.checkerframework:checker-qual:$checkerVersion")
+    applaunchConfig("org.checkerframework:checker-qual:$apiCheckerVersion")
     applaunchConfig("org.apache.logging.log4j:log4j-api:$log4jVersion")
-    applaunchConfig("com.google.guava:guava:$guavaVersion")
+    applaunchConfig("com.google.guava:guava:$guavaVersion"){
+        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
     applaunchConfig(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
     applaunchConfig("org.spongepowered:configurate-core") {
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
@@ -208,7 +220,9 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
+    testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion") {
+        exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
+    }
     testImplementation("org.mockito:mockito-inline:$mockitoVersion")
 }
 

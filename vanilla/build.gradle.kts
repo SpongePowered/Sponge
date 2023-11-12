@@ -288,7 +288,9 @@ dependencies {
 
     libraries("org.spongepowered:spongeapi:$apiVersion")
     libraries(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
-    libraries("net.kyori:adventure-serializer-configurate4")
+    libraries("net.kyori:adventure-serializer-configurate4") {
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
     libraries("javax.inject:javax.inject:1")
     libraries("org.spongepowered:configurate-jackson") {
         exclude(group = "org.spongepowered", module = "configurate-core")
@@ -335,7 +337,11 @@ dependencies {
     appLaunch("cpw.mods:grossjava9hacks:1.3.3") {
         exclude(group = "org.apache.logging.log4j")
     }
-    appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
+    appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion") {
+        exclude(group = "org.checkerframework", module = "checker-qual")
+        exclude(group = "com.google.code.gson", module = "gson")
+        exclude(group = "org.apache.logging.log4j", module = "log4j-api")
+    }
     appLaunch("com.lmax:disruptor:3.4.4")
     "applaunchCompileOnly"("org.jetbrains:annotations:23.1.0")
 
