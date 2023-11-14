@@ -40,11 +40,7 @@ public class ThrowableItemProjectileData {
                 .asMutable(ThrowableItemProjectile.class)
                     .create(Keys.ITEM_STACK_SNAPSHOT)
                         .get(h -> ItemStackUtil.snapshotOf(h.getItem()))
-                        .setAnd((h, v) -> {
-                            h.setItem(ItemStackUtil.fromSnapshotToNative(v));
-
-                            return true;
-                        });
+                        .set((h, v) -> h.setItem(ItemStackUtil.fromSnapshotToNative(v)));
     }
     // @formatter:on
 
