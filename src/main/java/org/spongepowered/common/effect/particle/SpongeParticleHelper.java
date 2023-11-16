@@ -26,16 +26,20 @@ package org.spongepowered.common.effect.particle;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.DustColorTransitionOptions;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.SculkChargeParticleOptions;
+import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.gameevent.BlockPositionSource;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -44,6 +48,7 @@ import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3f;
 
@@ -83,22 +88,9 @@ public final class SpongeParticleHelper {
         return packets;
     }
 
-    public static CachedParticlePacket getCachedPacket(final SpongeParticleEffect effect) {
+    private static CachedParticlePacket getCachedPacket(final SpongeParticleEffect effect) {
         final ParticleType type = effect.type();
-
-        if (type instanceof NumericalParticleType) {
-            // Special cased particle types with numerical IDs.
-            return SpongeParticleHelper.getNumericalPacket(effect, (NumericalParticleType) type);
-        } else {
-            // Normal named particle type.
-            return SpongeParticleHelper.getNamedPacket(effect, (net.minecraft.core.particles.ParticleType<?>) type);
-        }
-    }
-
-    private static CachedParticlePacket getNumericalPacket(final ParticleEffect effect, final NumericalParticleType type) {
-        int effectId = type.getId();
-
-        return new NumericalCachedPacket(effectId, type.getData(effect), false);
+        return SpongeParticleHelper.getNamedPacket(effect, (net.minecraft.core.particles.ParticleType<?>) type);
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
@@ -123,6 +115,33 @@ public final class SpongeParticleHelper {
                     (net.minecraft.core.particles.ParticleType<BlockParticleOption>) internalType,
                     (net.minecraft.world.level.block.state.BlockState) state);
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
+        } else if (internalType.getDeserializer() == DustColorTransitionOptions.DESERIALIZER) {
+            final Color color = effect.optionOrDefault(ParticleOptions.COLOR).get();
+            final Color toColor = effect.optionOrDefault(ParticleOptions.TO_COLOR).get();
+            final double scale = effect.optionOrDefault(ParticleOptions.SCALE).get();
+            final DustColorTransitionOptions particleData = new DustColorTransitionOptions(
+                    new org.joml.Vector3f(
+                            (float) color.red() / 255,
+                            (float) color.green() / 255,
+                            (float) color.blue() / 255
+                    ),
+                    new org.joml.Vector3f(
+                            (float) toColor.red() / 255,
+                            (float) toColor.green() / 255,
+                            (float) toColor.blue() / 255
+                    ),
+                    (float) scale);
+            return new NamedCachedPacket(particleData, offset, quantity, velocity);
+        } else if (internalType.getDeserializer() == DustParticleOptions.DESERIALIZER) {
+            // This particle type supports a color option.
+            final Color color = effect.optionOrDefault(ParticleOptions.COLOR).get();
+            final double scale = effect.optionOrDefault(ParticleOptions.SCALE).get();
+            final DustParticleOptions particleData = new DustParticleOptions(new org.joml.Vector3f(
+                    (float) color.red() / 255,
+                    (float) color.green() / 255,
+                    (float) color.blue() / 255),
+                    (float) scale);
+            return new NamedCachedPacket(particleData, offset, quantity, velocity);
         } else if (internalType.getDeserializer() == ItemParticleOption.DESERIALIZER) {
             // This particle type supports an item option.
             final ItemStackSnapshot snapshot = effect.optionOrDefault(ParticleOptions.ITEM_STACK_SNAPSHOT).get();
@@ -130,15 +149,18 @@ public final class SpongeParticleHelper {
                     (net.minecraft.core.particles.ParticleType<ItemParticleOption>) internalType,
                     (net.minecraft.world.item.ItemStack) (Object) snapshot.createStack());
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
-        } else if (internalType.getDeserializer() == DustParticleOptions.DESERIALIZER) {
-            // This particle type supports a color option.
-            final Color color = effect.optionOrDefault(ParticleOptions.COLOR).get();
-            final double scale = effect.optionOrDefault(ParticleOptions.SCALE).get();
-            final DustParticleOptions particleData = new DustParticleOptions(new org.joml.Vector3f(
-                (float) color.red() / 255,
-                (float) color.green() / 255,
-                (float) color.blue() / 255),
-                (float) scale);
+        } else if (internalType.getDeserializer() == SculkChargeParticleOptions.DESERIALIZER) {
+            final double roll = effect.optionOrDefault(ParticleOptions.ROLL).get();
+            final SculkChargeParticleOptions particleData = new SculkChargeParticleOptions((float) roll);
+            return new NamedCachedPacket(particleData, offset, quantity, velocity);
+        } else if (internalType.getDeserializer() == ShriekParticleOption.DESERIALIZER) {
+            final int delay = effect.optionOrDefault(ParticleOptions.DELAY).get();
+            final ShriekParticleOption particleData = new ShriekParticleOption(delay);
+            return new NamedCachedPacket(particleData, offset, quantity, velocity);
+        } else if (internalType.getDeserializer() == VibrationParticleOption.DESERIALIZER) {
+            final Ticks delay = effect.optionOrDefault(ParticleOptions.TRAVEL_TIME).get();
+            // TODO add position source
+            final VibrationParticleOption particleData = new VibrationParticleOption(new BlockPositionSource(BlockPos.ZERO), (int) delay.ticks());
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
         }
 
@@ -257,26 +279,6 @@ public final class SpongeParticleHelper {
                     output.add(message);
                 }
             }
-        }
-    }
-
-    private static final class NumericalCachedPacket implements CachedParticlePacket {
-
-        private final int type;
-        private final int data;
-        private final boolean broadcast;
-
-        public NumericalCachedPacket(final int type, final int data, final boolean broadcast) {
-            this.type = type;
-            this.data = data;
-            this.broadcast = broadcast;
-        }
-
-        @Override
-        public void process(final Vector3d position, final List<Packet<?>> output) {
-            final BlockPos blockPos = new BlockPos(position.floorX(), position.floorY(), position.floorZ());
-            final ClientboundLevelEventPacket packet = new ClientboundLevelEventPacket(this.type, blockPos, this.data, this.broadcast);
-            output.add(packet);
         }
     }
 }
