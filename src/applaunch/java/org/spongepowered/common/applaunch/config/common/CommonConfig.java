@@ -131,6 +131,7 @@ public final class CommonConfig implements Config {
                 .addAction(NodePath.path("modules", "tracking"), TransformAction.remove())
                 .addAction(NodePath.path("modules", "real-time"), TransformAction.remove())
                 .addAction(NodePath.path("modules", "timings"), TransformAction.remove())
+                .addAction(NodePath.path("optimizations", "drops-pre-merge"), TransformAction.remove())
                 .addAction(NodePath.path("optimizations", "eigen-redstone"), TransformAction.remove())
                 .addAction(NodePath.path("optimizations", "faster-thread-checks"), TransformAction.remove())
                 .addAction(NodePath.path("optimizations", "optimize-maps"), TransformAction.remove())

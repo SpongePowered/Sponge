@@ -32,15 +32,6 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 @ConfigSerializable
 public final class OptimizationCategory {
 
-    @Setting("drops-pre-merge")
-    @Comment("If 'true', block item drops are pre-processed to avoid \n"
-              + "having to spawn extra entities that will be merged post spawning. \n"
-              + "Usually, Sponge is smart enough to determine when to attempt an item pre-merge \n"
-              + "and when not to, however, in certain cases, some mods rely on items not being \n"
-              + "pre-merged and actually spawned, in which case, the items will flow right through \n"
-              + "without being merged.")
-    public boolean dropsPreMerge;
-
     @Setting("cache-tameable-owners")
     @Comment("Caches tameable entities owners to avoid constant lookups against data watchers. If mods \n"
              + "cause issues, disable this.")
@@ -65,10 +56,4 @@ public final class OptimizationCategory {
             + "to be generated on demand. This is a very safe optimization and\n"
             + "should usually remain enabled.")
     public boolean enableLazyDFU = true;
-
-    public OptimizationCategory() {
-        // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
-        // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
-        this.dropsPreMerge = AppLaunch.pluginPlatform().vanilla();
-    }
 }
