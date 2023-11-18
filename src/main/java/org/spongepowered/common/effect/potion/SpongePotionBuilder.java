@@ -117,7 +117,7 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
     }
 
     @Override
-    public PotionEffect.Builder amplifier(final int amplifier) throws IllegalArgumentException {
+    public PotionEffect.Builder amplifier(final int amplifier) {
         this.amplifier = amplifier;
         return this;
     }
