@@ -465,6 +465,7 @@
         "minecraft.client.MinecraftMixin_API",
         "minecraft.client.multiplayer.ClientLevel_ClientLevelDataMixin_API",
         "minecraft.client.multiplayer.ClientLevelMixin_API",
+        "minecraft.client.multiplayer.ClientCommonPacketListenerImpl_API",
         "minecraft.client.multiplayer.ClientPacketListenerMixin_API",
         "minecraft.client.network.ClientNetHandlerMixin_API",
         "minecraft.client.player.AbstractClientPlayerMixin_API",

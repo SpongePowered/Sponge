@@ -24,16 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.client.multiplayer;
 
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import org.spongepowered.api.entity.living.player.client.LocalPlayer;
-import org.spongepowered.api.network.LocalPlayerConnection;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(ClientPacketListener.class)
-public abstract class ClientPacketListenerMixin_API extends ClientCommonPacketListenerImpl_API implements LocalPlayerConnection {
-
-    @Override
-    public LocalPlayer player() {
-        return (LocalPlayer) this.minecraft.player;
-    }
+@Mixin(ClientCommonPacketListenerImpl.class)
+public abstract class ClientCommonPacketListenerImpl_API {
+    @Shadow @Final protected Minecraft minecraft;
 }
