@@ -26,9 +26,7 @@ package org.spongepowered.common.mixin.core.client.multiplayer;
 
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.Connection;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.mixin.api.minecraft.client.multiplayer.ClientCommonPacketListenerImpl_API;
 
