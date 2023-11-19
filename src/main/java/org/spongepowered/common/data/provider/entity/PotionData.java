@@ -26,13 +26,10 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.projectile.ThrownPotion;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.stream.Collectors;
@@ -46,18 +43,6 @@ public final class PotionData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asMutable(ThrownPotion.class)
-                    .create(Keys.ITEM_STACK_SNAPSHOT)
-                        .get(h -> ItemStackUtil.snapshotOf(h.getItem()))
-                        .setAnd((h, v) -> {
-                            final ItemStack itemStack = ItemStackUtil.fromSnapshotToNative(v);
-                            if (itemStack.getItem() != Items.SPLASH_POTION && itemStack.getItem() != Items.LINGERING_POTION) {
-                                // Minecraft will throw a hissy fit if we do allow any other type of potion
-                                // so, we have to return false because the item stack is invalid.
-                                return false;
-                            }
-                            h.setItem(itemStack);
-                            return true;
-                        })
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> PotionUtils.getMobEffects(h.getItem()).stream().map(PotionEffect.class::cast).collect(Collectors.toList()))
                         .set((h, v) -> {

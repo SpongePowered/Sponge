@@ -107,6 +107,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         SpellcastingIllagerData.register(this.registrator);
         SpiderData.register(this.registrator);
         TameableData.register(this.registrator);
+        ThrowableItemProjectileData.register(this.registrator);
         TNTData.register(this.registrator);
         TraderLlamaData.register(this.registrator);
         TropicalFishData.register(this.registrator);
