@@ -22,14 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.item.crafting;
+package org.spongepowered.common.mixin.core.world.item.crafting;
 
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
 
-public interface SmithingRecipeBridge extends RecipeResultBridge {
+@Mixin(AbstractCookingRecipe.class)
+public abstract class AbstractCookingRecipeMixin implements RecipeResultBridge {
 
-    Ingredient bridge$template();
-    Ingredient bridge$base();
-    Ingredient bridge$addition();
+    // @formatter=off
+    @Shadow @Final protected ItemStack result;
+
+    // @formatter=on
+
+    @Override
+    public ItemStack bridge$result() {
+        return this.result;
+    }
+
 
 }

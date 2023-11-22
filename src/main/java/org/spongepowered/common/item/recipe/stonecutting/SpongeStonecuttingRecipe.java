@@ -24,28 +24,68 @@
  */
 package org.spongepowered.common.item.recipe.stonecutting;
 
+import static org.spongepowered.common.util.Constants.Recipe.SPONGE_TYPE;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.SingleItemRecipe;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.item.recipe.cooking.ResultFunctionRecipe;
+import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
+import org.spongepowered.common.item.recipe.ResultFunctionRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
+import org.spongepowered.common.util.Constants;
+
+import java.util.Optional;
 
 
 public class SpongeStonecuttingRecipe extends StonecutterRecipe implements ResultFunctionRecipe {
 
+    private static final MapCodec<ItemStack> RESULT_CODEC = RecordCodecBuilder.mapCodec(
+            $$0 -> $$0.group(
+                            BuiltInRegistries.ITEM.byNameCodec().fieldOf(Constants.Recipe.RESULT).forGetter(ItemStack::getItem),
+                            Codec.INT.fieldOf(Constants.Recipe.COUNT).forGetter(ItemStack::getCount)
+                    )
+                    .apply($$0, ItemStack::new)
+    );
+
+    public static final MapCodec<SpongeStonecuttingRecipe> SPONGE_CODEC = RecordCodecBuilder.mapCodec(
+            $$1 -> $$1.group(
+                            Codec.STRING.fieldOf(SPONGE_TYPE).forGetter(a -> "custom"),
+                            ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(SingleItemRecipe::getGroup),
+                            Ingredient.CODEC_NONEMPTY.fieldOf(Constants.Recipe.STONECUTTING_INGREDIENT).forGetter($$0x -> $$0x.getIngredients().get(0)),
+                            RESULT_CODEC.forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
+                            ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$spongeResult()),
+                            IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(ResultFunctionRecipe::resultFunctionId)
+                    )
+                    .apply($$1, SpongeStonecuttingRecipe::of)
+    );
+
     private final String resultFunctionId;
 
-    public SpongeStonecuttingRecipe(String groupIn, Ingredient ingredientIn, ItemStack resultIn, String resultFunctionId) {
-        super(groupIn, ingredientIn, resultIn);
+    public static SpongeStonecuttingRecipe of(final String spongeType,
+            final String groupIn,
+            final Ingredient ingredientIn,
+            final ItemStack resultIn,
+            final ItemStack spongeResult,
+            final Optional<String> resultFunctionId) {
+        return new SpongeStonecuttingRecipe(groupIn, ingredientIn, spongeResult.isEmpty() ? resultIn : spongeResult, resultFunctionId.orElse(null));
+    }
+
+    public SpongeStonecuttingRecipe(final String groupIn, final Ingredient ingredientIn, final ItemStack spongeResult, final String resultFunctionId) {
+        super(groupIn, ingredientIn, spongeResult);
         this.resultFunctionId = resultFunctionId;
     }
 
-    @Nullable @Override
-    public String resultFunctionId() {
-        return this.resultFunctionId;
+    @Override
+    public Optional<String> resultFunctionId() {
+        return Optional.ofNullable(this.resultFunctionId);
     }
 
     @Override
@@ -58,9 +98,9 @@ public class SpongeStonecuttingRecipe extends StonecutterRecipe implements Resul
 
     @Override
     public ItemStack getResultItem(final RegistryAccess $$1) {
-        if (this.resultFunctionId != null) {
-            return ItemStack.EMPTY;
-        }
+//        if (this.resultFunctionId != null) {
+//            return ItemStack.EMPTY;
+//        }
         return super.getResultItem($$1);
     }
 

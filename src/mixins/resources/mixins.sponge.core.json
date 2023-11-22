@@ -180,7 +180,18 @@
         "world.item.ItemStackMixin",
         "world.item.MapItemMixin",
         "world.item.ServerItemCooldownsMixin",
+        "world.item.crafting.AbstractCookingRecipeMixin",
         "world.item.crafting.IngredientMixin",
+        "world.item.crafting.RecipeManagerMixin",
+        "world.item.crafting.ShapedRecipe_SerializerMixin",
+        "world.item.crafting.ShapedRecipeMixin",
+        "world.item.crafting.ShapelessRecipe_SerializerMixin",
+        "world.item.crafting.ShapelessRecipeMixin",
+        "world.item.crafting.SimpleCookingSerializerMixin",
+        "world.item.crafting.SingleItemRecipeMixin",
+        "world.item.crafting.SmithingTransformRecipe_SerializerMixin",
+        "world.item.crafting.SmithingTransformRecipeMixin",
+        "world.item.crafting.StonecutterRecipe_SerializerMixin",
         "world.item.enchantment.EnchantmentMixin",
         "world.level.BaseSpawnerMixin",
         "world.level.BlockGetterMixin",
@@ -245,8 +256,7 @@
         "world.scores.ScoreboardMixin",
         "world.scores.ScoreMixin",
         "world.ticks.LevelTicksMixin",
-        "world.ticks.ScheduledTickMixin",
-        "world.item.crafting.SmithingTransformRecipeMixin"
+        "world.ticks.ScheduledTickMixin"
     ],
     "client": [
         "client.MinecraftMixin",

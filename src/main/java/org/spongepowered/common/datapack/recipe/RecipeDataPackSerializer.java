@@ -25,14 +25,14 @@
 package org.spongepowered.common.datapack.recipe;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.data.recipes.FinishedRecipe;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.advancements.Advancement;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.common.datapack.DataPackDecoder;
 import org.spongepowered.common.datapack.DataPackEncoder;
 import org.spongepowered.common.datapack.JsonDataPackSerializer;
 import org.spongepowered.common.datapack.SpongeDataPack;
+import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -40,7 +40,8 @@ import java.nio.file.Path;
 
 public final class RecipeDataPackSerializer extends JsonDataPackSerializer<RecipeRegistration> {
 
-    public RecipeDataPackSerializer(final DataPackEncoder<JsonElement, RecipeRegistration> encoder, final DataPackDecoder<JsonElement, RecipeRegistration> decoder) {
+    public RecipeDataPackSerializer(final DataPackEncoder<JsonElement, RecipeRegistration> encoder,
+            final DataPackDecoder<JsonElement, RecipeRegistration> decoder) {
         super(encoder, decoder);
     }
 
@@ -48,16 +49,16 @@ public final class RecipeDataPackSerializer extends JsonDataPackSerializer<Recip
     protected void serializeAdditional(
             final SpongeDataPack<JsonElement, RecipeRegistration> type, final Path packDir,
             final RecipeRegistration entry) throws IOException {
-        final AdvancementHolder advancement = ((FinishedRecipe) entry).advancement();
-        if (advancement != null) {
-            final JsonObject advancementJson = advancement.value().serializeToJson();
+        if (entry instanceof SpongeRecipeRegistration<?> spongeReg) {
+            final var serialized = Advancement.CODEC.encodeStart(JsonOps.INSTANCE, spongeReg.advancement().value());
+
             final Path file = packDir.resolve("data")
                     .resolve(entry.key().namespace())
                     .resolve("advancements")
                     .resolve(entry.key().value() + ".json");
             Files.createDirectories(file.getParent());
-            JsonDataPackSerializer.writeFile(file, advancementJson);
-        }
 
+            JsonDataPackSerializer.writeFile(file, serialized.result().get());
+        }
     }
 }

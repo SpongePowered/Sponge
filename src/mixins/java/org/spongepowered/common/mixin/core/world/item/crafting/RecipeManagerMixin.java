@@ -22,26 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.item.crafting;
+package org.spongepowered.common.mixin.core.world.item.crafting;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.world.item.crafting.ShapedRecipe;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeCommon;
 
-import java.util.List;
-
-@Mixin(ShapedRecipe.Serializer.class)
-public interface ShapedRecipe_SerializerAccessor {
-
-
-    @Accessor("PATTERN_CODEC")
-    static Codec<List<String>> accessor$PATTERN_CODEC() {
-        throw new UnsupportedOperationException();
+@Mixin(RecipeManager.class)
+public abstract class RecipeManagerMixin {
+@Redirect(method = "fromJson", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;parse(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;"))
+    private static <T> DataResult<Recipe<?>> impl$onParseRecipe(final Codec<Recipe<?>> instance, final DynamicOps<T> dynamicOps, final T element, final ResourceLocation $$0)
+{
+    final DataResult<Recipe<?>> parsed;
+    try {
+        parsed = instance.parse(dynamicOps, element);
+    } catch (Exception e) {
+        SpongeCommon.logger().error("Could not parse recipe {}", $$0, e);
+        throw new RuntimeException(e);
     }
-
-    @Accessor("SINGLE_CHARACTER_STRING_CODEC")
-    static Codec<String> accessor$SINGLE_CHARACTER_STRING_CODEC() {
-        throw new UnsupportedOperationException();
+    if (parsed.error().isPresent()) {
+        SpongeCommon.logger().error("Could not parse recipe {} {}", $$0, parsed.error().get().message());
     }
+    return parsed;
+}
+
 }

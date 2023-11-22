@@ -22,22 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.item.crafting;
+package org.spongepowered.common.item.recipe;
 
-import net.minecraft.world.item.crafting.Ingredient;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import java.util.Optional;
 
-import java.util.stream.Stream;
-
-@Mixin(Ingredient.class)
-public interface IngredientAccessor {
-
-    @Invoker("fromValues")
-    static Ingredient invoker$fromValues(final Stream<? extends Ingredient.Value> stream) {
-        throw new UntransformedInvokerError();
-    }
-
+public interface ResultFunctionRecipe {
+    Optional<String> resultFunctionId();
 
 }

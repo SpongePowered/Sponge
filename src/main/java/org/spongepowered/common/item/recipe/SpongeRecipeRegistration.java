@@ -24,43 +24,49 @@
  */
 package org.spongepowered.common.item.recipe;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Map;
 import java.util.function.Function;
 
-public abstract class SpongeRecipeRegistration implements RecipeRegistration, FinishedRecipe {
+public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Container>> implements RecipeRegistration {
+
+    private static final Gson GSON = new Gson();
 
     protected final ResourceLocation key;
-    protected final RecipeSerializer<?> serializer;
+    protected final RecipeSerializer<? extends R> serializer;
     protected final AdvancementHolder advancement;
     protected final String group;
     protected final DataPack<RecipeRegistration> pack;
 
-    public SpongeRecipeRegistration(final ResourceLocation key, final RecipeSerializer<?> serializer, final Item resultItem, final String group, final DataPack<RecipeRegistration> pack, final RecipeCategory recipeCategory) {
+    public SpongeRecipeRegistration(final ResourceLocation key,
+            final String group, final DataPack<RecipeRegistration> pack, final RecipeCategory recipeCategory,
+            final RecipeSerializer<? extends R> serializer) {
         this.key = key;
         this.serializer = serializer;
         this.pack = pack;
@@ -71,17 +77,11 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
         this.group = group == null ? "" : group;
     }
 
-    public static <C extends Container> RecipeSerializer<?> determineSerializer(final ItemStack resultStack,
-                                                                                  final Function<C, ItemStack> resultFunction,
-                                                                                  final Function<net.minecraft.world.inventory.CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
-                                                                                  final Map<Character, Ingredient> ingredients, final RecipeSerializer<?> vanilla, final RecipeSerializer<?> sponge) {
-        return SpongeRecipeRegistration.determineSerializer(resultStack, resultFunction, remainingItemsFunction, ingredients.values(), vanilla, sponge);
-    }
-
-    public static <C extends Container> RecipeSerializer<?> determineSerializer(final ItemStack resultStack,
-                                                                                  final Function<C, ItemStack> resultFunction,
-                                                                                  final Function<net.minecraft.world.inventory.CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
-                                                                                  final Collection<Ingredient> ingredients, final RecipeSerializer<?> vanilla, final RecipeSerializer<?> sponge) {
+    public static <R extends Recipe<C>, C extends Container> RecipeSerializer<? extends R> determineSerializer(final ItemStack resultStack,
+            final Function<C, ItemStack> resultFunction,
+            final Function<net.minecraft.world.inventory.CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
+            final Collection<Ingredient> ingredients,
+            final RecipeSerializer<R> vanilla, final RecipeSerializer<? extends R> sponge) {
         if (resultStack.hasTag() || resultFunction != null || remainingItemsFunction != null) {
             return sponge;
         }
@@ -93,39 +93,24 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
         return vanilla;
     }
 
-    @Override
-    public ResourceLocation id() {
-        return this.key;
+    public static <C extends Container> boolean isVanillaSerializer(final ItemStack resultStack,
+            final Function<C, ItemStack> resultFunction,
+            final Function<net.minecraft.world.inventory.CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
+            final Collection<Ingredient> ingredients) {
+        if (resultStack.hasTag() || resultFunction != null || remainingItemsFunction != null) {
+            return false;
+        }
+        for (final Ingredient value : ingredients) {
+            if (value instanceof SpongeIngredient) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public ResourceKey key() {
         return (ResourceKey) (Object) this.key;
-    }
-
-    @Override
-    public RecipeSerializer<?> type() {
-        return this.serializer;
-    }
-
-    @Override
-    public void serializeRecipeData(final JsonObject json) {
-        if (!this.group.isEmpty()) {
-            json.addProperty("group", this.group);
-        }
-        this.serializeShape(json);
-        this.serializeResult(json);
-        this.serializeAdditional(json);
-    }
-
-    public abstract void serializeShape(JsonObject json);
-    public abstract void serializeResult(JsonObject json);
-    public void serializeAdditional(final JsonObject json) {
-    }
-
-    @Nullable @Override
-    public AdvancementHolder advancement() {
-        return this.advancement;
     }
 
     @Override
@@ -135,8 +120,9 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
 
     @Override
     public DataContainer toContainer() {
+        var json = Recipe.CODEC.encodeStart(JsonOps.INSTANCE, (Recipe<?>) this.recipe()).result().get();
         try {
-            return DataFormats.JSON.get().read(this.serializeRecipe().toString());
+            return DataFormats.JSON.get().read(GSON.toJson(json)); // TODO serialize or get DataContainer without serializing
         } catch (final IOException e) {
             throw new IllegalStateException(e);
         }
@@ -147,11 +133,43 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
         return this.pack;
     }
 
+    @SuppressWarnings("unchecked")
+    protected void ensureCached() {
+        if (this instanceof SpongeRecipeRegistration.ResultFunctionRegistration<?> rfr) {
+            IngredientResultUtil.cacheResultFunction(this.key, (Function) rfr.resultFunction());
+        }
+        if (this instanceof SpongeRecipeRegistration.RemainingItemsFunctionRegistration<?> rifr) {
+            IngredientResultUtil.cacheRemainingItemsFunction(this.key, (Function) rifr.remainingItems());
+        }
+    }
+
+    public AdvancementHolder advancement() {
+        return advancement;
+    }
+
     public static JsonObject encode(RecipeRegistration template, RegistryAccess access) {
         try {
-            return ((FinishedRecipe) template).serializeRecipe();
+            if (template instanceof SpongeRecipeRegistration<?> srr) {
+                srr.ensureCached();
+            }
+            final DataResult<JsonElement> encoded = Recipe.CODEC.encodeStart(JsonOps.INSTANCE, (Recipe<?>) template.recipe());
+            if (encoded.result().isPresent()) {
+                return encoded.result().get().getAsJsonObject();
+            }
+            final DataResult.PartialResult<JsonElement> error = encoded.error().get();
+            throw new RuntimeException(error.message());
         } catch (Exception e) {
-            throw new RuntimeException("Could not encode recipe" + template.key(), e);
+            throw new RuntimeException("Could not encode recipe " + template.key(), e);
         }
+    }
+
+    public interface ResultFunctionRegistration<C> {
+
+        Function<C, net.minecraft.world.item.ItemStack> resultFunction();
+    }
+
+    public interface RemainingItemsFunctionRegistration<C> {
+
+        Function<C, NonNullList<net.minecraft.world.item.ItemStack>> remainingItems();
     }
 }

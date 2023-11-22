@@ -30,7 +30,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
+import org.spongepowered.common.item.recipe.ResultFunctionRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
+
+import java.util.Optional;
 
 public class SpongeCampfireCookingRecipe extends CampfireCookingRecipe implements ResultFunctionRecipe {
 
@@ -42,8 +45,8 @@ public class SpongeCampfireCookingRecipe extends CampfireCookingRecipe implement
     }
 
     @Override
-    public String resultFunctionId() {
-        return this.resultFunctionId;
+    public Optional<String> resultFunctionId() {
+        return Optional.ofNullable(this.resultFunctionId);
     }
 
     @Override
@@ -63,4 +66,5 @@ public class SpongeCampfireCookingRecipe extends CampfireCookingRecipe implement
         }
         return super.getResultItem($$1);
     }
+
 }

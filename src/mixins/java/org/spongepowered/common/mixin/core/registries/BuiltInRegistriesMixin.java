@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
+import org.spongepowered.common.item.recipe.SpongeRecipeSerializers;
 import org.spongepowered.common.launch.Launch;
 
 import java.util.Map;
@@ -53,7 +53,7 @@ public abstract class BuiltInRegistriesMixin {
     @Inject(method = "lambda$static$18", at = @At(value = "FIELD", target = "Lnet/minecraft/world/item/crafting/RecipeSerializer;SHAPELESS_RECIPE:Lnet/minecraft/world/item/crafting/RecipeSerializer;"))
     private static void impl$staticInitSpongeRecipeSerializers(final Registry $$0, final CallbackInfoReturnable<RecipeSerializer> cir)
     {
-        final var serializer = SpongeRecipeSerializers.SPONGE_BLASTING;
+        final var serializer = SpongeRecipeSerializers.SPONGE_SPECIAL;
     }
 
     @Inject(method = "bootStrap", at = @At(value = "HEAD"))

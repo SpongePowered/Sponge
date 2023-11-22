@@ -32,7 +32,8 @@ import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
 import net.minecraft.core.NonNullList;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
@@ -43,8 +44,6 @@ import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
-import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
-import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
@@ -74,6 +73,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
     private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
+    private CraftingBookCategory craftingBookCategory = CraftingBookCategory.MISC; // TODO support category
 
     @Override
     public AisleStep aisle(final String... aisle) {
@@ -205,10 +205,9 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
 
         // Default space to Empty Ingredient
 //        ingredientsMap.putIfAbsent(' ', net.minecraft.item.crafting.Ingredient.EMPTY);
-        final net.minecraft.world.item.ItemStack resultStack = ItemStackUtil.toNative(this.result);
-        final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(resultStack, this.resultFunction, this.remainingItemsFunction, ingredientsMap,
-                RecipeSerializer.SHAPED_RECIPE, SpongeRecipeSerializers.SPONGE_CRAFTING_SHAPED);
-        return new SpongeShapedCraftingRecipeRegistration((ResourceLocation)(Object) key, serializer, this.group, this.aisle, ingredientsMap, resultStack, this.resultFunction, this.remainingItemsFunction, this.pack, this.recipeCategory);
+        final ShapedRecipePattern pattern = ShapedRecipePattern.of(ingredientsMap, this.aisle);
+        return new SpongeShapedCraftingRecipeRegistration((ResourceLocation)(Object) key, this.group, pattern,
+                ItemStackUtil.toNative(this.result), this.resultFunction, this.remainingItemsFunction, this.pack, this.recipeCategory, this.craftingBookCategory);
     }
 
     @Override

@@ -32,8 +32,8 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
@@ -43,8 +43,6 @@ import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
-import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
-import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
@@ -64,6 +62,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
     private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
+    private CraftingBookCategory craftingBookCategory = CraftingBookCategory.MISC; // TODO support category
 
     @Override
     public ResultStep addIngredients(ItemType... ingredients) {
@@ -137,12 +136,9 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
     @Override
     public RecipeRegistration build0() {
         checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
-
-        final ItemStack resultStack = ItemStackUtil.toNative(this.result);
-        final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(resultStack, this.resultFunction, this.remainingItemsFunction,
-                this.ingredients, RecipeSerializer.SHAPELESS_RECIPE, SpongeRecipeSerializers.SPONGE_CRAFTING_SHAPELESS);
-        return new SpongeShapelessCraftingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredients, resultStack, this.resultFunction, this.remainingItemsFunction, this.pack,
-                this.recipeCategory);
+        return new SpongeShapelessCraftingRecipeRegistration((ResourceLocation) (Object) key, this.group, this.ingredients,
+                ItemStackUtil.toNative(this.result), this.resultFunction, this.remainingItemsFunction, this.pack,
+                this.recipeCategory, this.craftingBookCategory);
     }
 
     @Override

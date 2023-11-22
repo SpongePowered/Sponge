@@ -131,9 +131,6 @@
         "world.item.DiggerItemAccessor",
         "world.item.ItemCooldowns_CooldownInstanceAccessor",
         "world.item.RecordItemAccessor",
-        "world.item.crafting.IngredientAccessor",
-        "world.item.crafting.ShapedRecipeAccessor",
-        "world.item.crafting.ShapelessRecipeAccessor",
         "world.item.trading.MerchantOfferAccessor",
         "world.level.BaseCommandBlockAccessor",
         "world.level.BaseSpawnerAccessor",
@@ -202,8 +199,7 @@
         "world.entity.Display_TextDisplayAccessor",
         "world.entity.Display_ItemDisplayAccessor",
         "world.entity.DisplayAccessor",
-        "world.entity.Display_BlockDisplayAccessor",
-        "world.item.crafting.ShapedRecipe_SerializerAccessor"
+        "world.entity.Display_BlockDisplayAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"

@@ -22,24 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.item.crafting;
+package org.spongepowered.common.item.recipe.cooking;
 
-import net.minecraft.world.item.crafting.ShapedRecipe;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.CookingBookCategory;
+import net.minecraft.world.item.crafting.Ingredient;
 
-import java.util.List;
+import java.util.Optional;
 
-@Mixin(ShapedRecipe.class)
-public interface ShapedRecipeAccessor {
+public interface CookingRecipeFactory<T extends AbstractCookingRecipe> {
 
-    @Invoker("shrink")
-    static String[] invoker$shrink(final List<String> pattern) {
-        throw new UntransformedInvokerError();
+    default T create(String spongeType, String group, CookingBookCategory category, Ingredient ingredient, ItemStack result, float experience,
+            int cookingTime,
+            ItemStack spongeResult, final Optional<String> resultFunctionId) {
+        return this.create(group, category, ingredient, spongeResult.isEmpty() ? result : spongeResult, experience, cookingTime, resultFunctionId.orElse(null));
     }
 
-    @Accessor("group") String accessor$group();
-
+    T create(String group, CookingBookCategory category, Ingredient ingredient, ItemStack result, float experience, int cookingTime,
+            final String resultFunctionId);
 }

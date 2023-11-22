@@ -30,20 +30,23 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
+import org.spongepowered.common.item.recipe.ResultFunctionRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 
-public class SpongeFurnaceRecipe extends SmeltingRecipe implements ResultFunctionRecipe {
+import java.util.Optional;
+
+public class SpongeSmeltingRecipe extends SmeltingRecipe implements ResultFunctionRecipe {
 
     private final String resultFunctionId;
 
-    public SpongeFurnaceRecipe(final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final String resultFunctionId) {
+    public SpongeSmeltingRecipe(final String group, final CookingBookCategory category, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final String resultFunctionId) {
         super(group, category, ingredient, result, experience, cookingTime);
         this.resultFunctionId = resultFunctionId;
     }
 
     @Override
-    public String resultFunctionId() {
-        return this.resultFunctionId;
+    public Optional<String> resultFunctionId() {
+        return Optional.ofNullable(this.resultFunctionId);
     }
 
 

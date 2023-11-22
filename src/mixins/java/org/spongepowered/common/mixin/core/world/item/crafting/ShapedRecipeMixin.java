@@ -22,14 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.item.crafting;
+package org.spongepowered.common.mixin.core.world.item.crafting;
 
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.ShapedRecipePattern;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.item.crafting.ShapedRecipeBridge;
 
-public interface SmithingRecipeBridge extends RecipeResultBridge {
+@Mixin(ShapedRecipe.class)
+public abstract class ShapedRecipeMixin implements ShapedRecipeBridge {
 
-    Ingredient bridge$template();
-    Ingredient bridge$base();
-    Ingredient bridge$addition();
+    // @formatter=off
+    @Shadow @Final ItemStack result;
+    @Shadow @Final ShapedRecipePattern pattern;
+
+    // @formatter=on
+
+
+    @Override
+    public ShapedRecipePattern bridge$pattern() {
+        return this.pattern;
+    }
+
+    @Override
+    public ItemStack bridge$result() {
+        return this.result;
+    }
+
 
 }

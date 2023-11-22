@@ -24,42 +24,30 @@
  */
 package org.spongepowered.common.mixin.core.world.item.crafting;
 
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.SmithingTransformRecipe;
-import org.spongepowered.asm.mixin.Final;
+import com.mojang.datafixers.kinds.App;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.item.crafting.SmithingRecipeBridge;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.item.recipe.crafting.shaped.SpongeShapedRecipe;
 
-@Mixin(SmithingTransformRecipe.class)
-public abstract class SmithingTransformRecipeMixin implements SmithingRecipeBridge {
+import java.util.function.Function;
 
-    // @formatter=off
-    @Shadow @Final Ingredient template;
-    @Shadow @Final Ingredient base;
-    @Shadow @Final Ingredient addition;
-    @Shadow @Final ItemStack result;
-    // @formatter=on
+@Mixin(ShapedRecipe.Serializer.class)
+public abstract class ShapedRecipe_SerializerMixin {
 
-    @Override
-    public Ingredient bridge$template() {
-        return this.template;
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"))
+    private static Codec<ShapedRecipe> impl$onCreateCodec(final Function<RecordCodecBuilder.Instance<ShapedRecipe>, ? extends App<RecordCodecBuilder.Mu<ShapedRecipe>, ShapedRecipe>> builder) {
+        final var mcMapCodec = RecordCodecBuilder.mapCodec(builder);
+        return Codec.mapEither(SpongeShapedRecipe.SPONGE_CODEC, mcMapCodec).xmap(to -> to.map(si -> si, i -> i),
+                fr -> {
+                    if (fr instanceof SpongeShapedRecipe si) {
+                        return Either.left(si);
+                    }
+                    return Either.right(fr);
+                }).codec();
     }
-
-    @Override
-    public Ingredient bridge$base() {
-        return this.base;
-    }
-
-    @Override
-    public Ingredient bridge$addition() {
-        return this.addition;
-    }
-
-    @Override
-    public ItemStack bridge$result() {
-        return this.result;
-    }
-
 }

@@ -24,85 +24,69 @@
  */
 package org.spongepowered.common.item.recipe.crafting.shaped;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
-import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
-import org.spongepowered.common.util.Constants;
 
-import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
-public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistration {
+public class SpongeShapedCraftingRecipeRegistration extends SpongeRecipeRegistration<ShapedRecipe> implements
+        SpongeRecipeRegistration.ResultFunctionRegistration<CraftingContainer>,
+        SpongeRecipeRegistration.RemainingItemsFunctionRegistration<CraftingContainer> {
 
     // Vanilla Recipe
-    private final Item result;
-    private final int count;
-    private final List<String> pattern;
-    private final Map<Character, Ingredient> ingredientMap;
+    private final ShapedRecipePattern pattern;
 
     // Sponge Recipe
     private final ItemStack spongeResult;
     private final Function<CraftingContainer, ItemStack> resultFunction;
     private final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction;
+    private final CraftingBookCategory craftingBookCategory;
+    private final boolean showNotification = true;
 
-    public SpongeShapedCraftingRecipeRegistration(final ResourceLocation key, final RecipeSerializer<?> serializer, final String group, final List<String> pattern,
-            final Map<Character, Ingredient> ingredients, final ItemStack spongeResult, final Function<CraftingContainer, ItemStack> resultFunction,
+    public SpongeShapedCraftingRecipeRegistration(final ResourceLocation key, final String group, final ShapedRecipePattern pattern,
+            final ItemStack spongeResult, final Function<CraftingContainer, ItemStack> resultFunction,
             final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction,
-            final DataPack<RecipeRegistration> pack, final RecipeCategory category) {
-        super(key, serializer, spongeResult.getItem(), group, pack, category);
-        this.result = spongeResult.getItem();
-        this.count = spongeResult.getCount();
+            final DataPack<RecipeRegistration> pack, final RecipeCategory category, final CraftingBookCategory craftingBookCategory) {
+        super(key, group, pack, category, RecipeSerializer.SHAPED_RECIPE);
         this.pattern = pattern;
-        this.ingredientMap = ingredients;
         this.spongeResult = spongeResult;
         this.resultFunction = resultFunction;
         this.remainingItemsFunction = remainingItemsFunction;
+        this.craftingBookCategory = craftingBookCategory;
     }
 
     @Override
-    public void serializeShape(final JsonObject json) {
-        final JsonArray jsonarray = new JsonArray();
-        this.pattern.forEach(jsonarray::add);
-        json.add(Constants.Recipe.SHAPED_PATTERN, jsonarray);
-        final JsonObject jsonobject = new JsonObject();
-        this.ingredientMap.forEach((key, value) -> jsonobject.add(String.valueOf(key), value.toJson(false)));
-        json.add(Constants.Recipe.SHAPED_INGREDIENTS, jsonobject);
+    public Function<CraftingContainer, ItemStack> resultFunction() {
+        return this.resultFunction;
     }
 
     @Override
-    public void serializeResult(final JsonObject json) {
-        final JsonObject result = new JsonObject();
-        final Registry<Item> itemRegistry = BuiltInRegistries.ITEM;
-        result.addProperty(Constants.Recipe.ITEM, itemRegistry.getKey(this.result).toString());
-        if (this.count > 1) {
-            result.addProperty(Constants.Recipe.COUNT, this.count);
-        }
+    public Function<CraftingContainer, NonNullList<ItemStack>> remainingItems() {
+        return this.remainingItemsFunction;
+    }
 
-        json.add(Constants.Recipe.RESULT, result);
-
-        if (this.spongeResult != null) {
-            json.add(Constants.Recipe.SPONGE_RESULT, IngredientResultUtil.serializeItemStack(this.spongeResult));
+    @Override
+    public Recipe recipe() {
+        if (SpongeRecipeRegistration.isVanillaSerializer(this.spongeResult, this.resultFunction, this.remainingItemsFunction, this.pattern.ingredients())) {
+            return (ShapedCraftingRecipe) new ShapedRecipe(this.group, this.craftingBookCategory, this.pattern, this.spongeResult, this.showNotification);
         }
-        if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, IngredientResultUtil.cacheResultFunction(this.id(), this.resultFunction));
-        }
-        if (this.remainingItemsFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_REMAINING_ITEMS, IngredientResultUtil.cacheRemainingItemsFunction(this.id(), this.remainingItemsFunction));
-        }
+        this.ensureCached();
+        return (ShapedCraftingRecipe) new SpongeShapedRecipe(this.group, this.craftingBookCategory, this.pattern, this.showNotification,
+                this.spongeResult,
+                this.resultFunction == null ? null : this.key.toString(),
+                this.remainingItemsFunction == null ? null : this.key.toString());
     }
 
 }

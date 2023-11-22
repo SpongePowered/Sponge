@@ -32,7 +32,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
@@ -43,13 +42,10 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.smithing.SmithingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
-import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
-import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
-import java.util.Arrays;
 import java.util.function.Function;
 
 public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, SmithingRecipe.Builder> implements
@@ -140,11 +136,8 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
 
     @Override
     public RecipeRegistration build0() {
-        final net.minecraft.world.item.ItemStack result = ItemStackUtil.toNative(this.result);
-        final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(result, this.resultFunction, null, Arrays.asList(this.base, this.addition),
-                RecipeSerializer.SMITHING_TRANSFORM, SpongeRecipeSerializers.SPONGE_SMITHING);
-
-        return new SpongeSmithingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.base, this.addition, result, this.resultFunction, this.pack, this.recipeCategory);
+        return new SpongeSmithingRecipeRegistration((ResourceLocation) (Object) key, this.group, this.template, this.base, this.addition,
+                ItemStackUtil.toNative(this.result), this.resultFunction, this.pack, this.recipeCategory);
     }
 
     @Override
