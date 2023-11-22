@@ -61,7 +61,8 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
     private static final int HANDSHAKE_NOT_STARTED = 0;
     private static final int HANDSHAKE_CLIENT_TYPE = 1;
     private static final int HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS = 2;
-    private static final int HANDSHAKE_SYNC_PLUGIN_DATA = 3;
+    private static final int HANDSHAKE_CHANNEL_REGISTRATION = 3;
+    private static final int HANDSHAKE_SYNC_PLUGIN_DATA = 4;
 
     private int impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_NOT_STARTED;
 
@@ -85,6 +86,8 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
                 });
 
             } else if (this.impl$handshakeState == ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS) {
+                this.impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_CHANNEL_REGISTRATION;
+
                 ((SpongeChannelManager) Sponge.channelManager()).sendLoginChannelRegistry(connection).thenAccept(result -> {
                     final Cause cause = Cause.of(EventContext.empty(), this);
                     final ServerSideConnectionEvent.Handshake event =

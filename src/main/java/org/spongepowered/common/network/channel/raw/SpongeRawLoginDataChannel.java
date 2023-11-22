@@ -167,10 +167,10 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
 
         final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(this.parent.key(), buf, transactionId);
 
+        transactionStore.put(transactionId, this.parent, resultConsumer);
+
         PacketSender.sendTo(connection, mcPacket, throwable -> {
-            if (throwable == null) {
-                transactionStore.put(transactionId, this.parent, resultConsumer);
-            } else {
+            if (throwable != null && transactionStore.remove(transactionId) != null) {
                 // The packet already failed before it could reach the client
                 future.completeExceptionally(throwable);
             }
