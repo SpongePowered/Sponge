@@ -49,6 +49,7 @@ public interface Lifecycle {
     void callRegisterBuilderEvent();
 
     void establishEarlyGlobalRegistries();
+    void finalizeEarlyGlobalRegistries();
 
     void establishGlobalRegistries(RegistryAccess.Frozen registryAccess, final RegistryLayer $$0);
 

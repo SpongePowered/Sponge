@@ -40,6 +40,7 @@ import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -114,6 +115,23 @@ public final class SpongeLifecycle implements Lifecycle {
         holder.setRootMinecraftRegistry((Registry<Registry<?>>) BuiltInRegistries.REGISTRY);
 
         SpongeRegistries.registerEarlyGlobalRegistries(holder);
+
+        // Plugin registries
+        this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
+    }
+
+    @Override
+    public void finalizeEarlyGlobalRegistries() {
+
+        // Vanilla registries we want plugins to be able to modify:
+        // TODO marker for this in API?
+        this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.BuiltInImpl<>(Cause.of(EventContext.empty(), this.game), this.game,
+                (org.spongepowered.api.registry.Registry<Trigger<?>>) BuiltInRegistries.TRIGGER_TYPES));
+
+        // TODO we might want to move more registration to here
+
+        // Plugin registry values
+        this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
     }
 
     @Override
@@ -126,18 +144,10 @@ public final class SpongeLifecycle implements Lifecycle {
             case DIMENSIONS -> {
                 SpongeRegistries.registerGlobalRegistriesDimensionLayer((SpongeRegistryHolder) this.game, registryAccess, this.featureFlags);
 
-                // Plugin registries
-                this.game.eventManager().post(new AbstractRegisterRegistryEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
-
                 // Freeze Sponge Root - Registries are now available
                 holder.registryHolder().freezeSpongeRootRegistry();
-
             }
             case RELOADABLE -> {
-
-                // Plugin registry values
-                this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
-
                 // Freeze Dynamic Registries - Values are now available
                 holder.registryHolder().freezeSpongeDynamicRegistries();
             }

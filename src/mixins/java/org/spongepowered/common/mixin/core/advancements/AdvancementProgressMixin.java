@@ -68,6 +68,7 @@ import org.spongepowered.common.hooks.PlatformHooks;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -156,7 +157,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
         // criterion actually exists, prevents bugs when mods
         // accidentally use non existent requirements
         // See https://github.com/SpongePowered/SpongeForge/issues/2191
-        for (final String[] reqs : requirements.requirements()) {
+        for (final List<String> reqs : requirements.requirements()) {
             for (final String req : reqs) {
                 if (!criteria.containsKey(req)) { // TODO was parameter is now field, correct?
                     final String advName = this.getOptionalAdvancement()

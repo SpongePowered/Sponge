@@ -31,6 +31,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
+import org.spongepowered.api.registry.DefaultedRegistryValue;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
@@ -71,6 +72,21 @@ public abstract class AbstractRegisterRegistryValueEvent extends AbstractLifecyc
         public RegistryStep<T> register(final ResourceKey key, final T value) {
             this.registry.register(key, value);
             return this;
+        }
+    }
+
+    public static final class BuiltInImpl<T extends DefaultedRegistryValue> extends AbstractLifecycleEvent implements RegisterRegistryValueEvent.BuiltIn<T> {
+
+        private Registry<T> registry;
+
+        public BuiltInImpl(final Cause cause, final Game game, Registry<T> registry) {
+            super(cause, game);
+            this.registry = registry;
+        }
+
+        @Override
+        public RegistryStep<T> registry(final RegistryType<T> registryType) {
+            return new RegistryStepImpl<>(registry);
         }
     }
     public static final class GameScopedImpl extends AbstractRegisterRegistryValueEvent implements RegisterRegistryValueEvent.GameScoped {

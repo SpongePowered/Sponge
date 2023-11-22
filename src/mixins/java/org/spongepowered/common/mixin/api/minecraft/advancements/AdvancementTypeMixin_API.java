@@ -22,29 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.advancement.criterion;
+package org.spongepowered.common.mixin.api.minecraft.advancements;
 
-import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.CriterionTrigger;
-import net.minecraft.advancements.CriterionTriggerInstance;
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.common.bridge.advancements.CriterionBridge;
+import net.kyori.adventure.text.format.TextColor;
+import net.minecraft.ChatFormatting;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.advancement.AdvancementType;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
-public class SpongeCriterionBuilder extends AbstractCriterionBuilder<AdvancementCriterion, AdvancementCriterion.Builder>
-        implements AdvancementCriterion.Builder {
+@Mixin(net.minecraft.advancements.AdvancementType.class)
+public abstract class AdvancementTypeMixin_API implements AdvancementType {
 
-    @SuppressWarnings("ConstantConditions")
+    private @Nullable TextColor api$textColor;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void api$setFields(String enumName, int ordinal, String name, ChatFormatting format, CallbackInfo ci) {
+        this.api$textColor = SpongeAdventure.asAdventure(format);
+    }
+
     @Override
-    AdvancementCriterion build0() {
-        CriterionTriggerInstance trigger = (CriterionTriggerInstance) this.trigger;
-        CriterionTrigger type = (CriterionTrigger) this.type;
-        if (this.trigger == null) {
-            trigger = SpongeDummyTrigger.TriggerInstance.dummy();
-            type = SpongeDummyTrigger.DUMMY_TRIGGER;
-        }
-
-        final Criterion<?> criterion = new Criterion<>(type, trigger);
-        ((CriterionBridge) (Object) criterion).bridge$setName(this.name);
-        return (AdvancementCriterion) (Object) criterion;
+    public TextColor textColor() {
+        return this.api$textColor;
     }
 }

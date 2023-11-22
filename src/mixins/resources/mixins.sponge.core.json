@@ -6,6 +6,7 @@
     "mixins": [
         "advancements.AdvancementMixin",
         "advancements.AdvancementProgressMixin",
+        "advancements.CriteriaTriggersMixin",
         "advancements.CriterionMixin",
         "advancements.CriterionProgressMixin",
         "advancements.CriterionTrigger_ListenerMixin",

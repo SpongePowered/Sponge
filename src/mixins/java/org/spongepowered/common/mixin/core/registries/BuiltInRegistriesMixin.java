@@ -62,4 +62,10 @@ public abstract class BuiltInRegistriesMixin {
         Launch.instance().lifecycle().establishEarlyGlobalRegistries();
     }
 
+    @Inject(method = "bootStrap", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/registries/BuiltInRegistries;freeze()V"))
+    private static void impl$beforeFreeze(CallbackInfo ci)
+    {
+        Launch.instance().lifecycle().finalizeEarlyGlobalRegistries();
+    }
+
 }

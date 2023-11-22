@@ -22,31 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.advancements;
+package org.spongepowered.common.mixin.core.advancements;
 
-import net.kyori.adventure.text.format.TextColor;
-import net.minecraft.ChatFormatting;
-import net.minecraft.advancements.FrameType;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.advancement.AdvancementType;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.core.Registry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.advancement.criterion.SpongeDummyTrigger;
+import org.spongepowered.common.advancement.criterion.SpongeScoreTrigger;
 
-@Mixin(FrameType.class)
-public abstract class FrameTypeMixin_API implements AdvancementType {
 
-    private @Nullable TextColor api$textColor;
+@Mixin(CriteriaTriggers.class)
+public abstract class CriteriaTriggersMixin {
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void api$setFields(String enumName, int ordinal, String name, ChatFormatting format, CallbackInfo ci) {
-        this.api$textColor = SpongeAdventure.asAdventure(format);
-    }
-
-    @Override
-    public TextColor textColor() {
-        return this.api$textColor;
+    @Inject(method = "bootstrap", at = @At("HEAD"))
+    private static void onBootstrap(final Registry<CriterionTrigger<?>> $$0, final CallbackInfoReturnable<CriterionTrigger<?>> cir)
+    {
+        final var loadMe1 = SpongeDummyTrigger.DUMMY_TRIGGER; // register sponge trigger
+        final var loadMe2 =   SpongeScoreTrigger.SCORE_TRIGGER; // register sponge trigger
     }
 }
