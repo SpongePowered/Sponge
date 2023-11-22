@@ -75,8 +75,8 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.BlockDataSource;
 import net.minecraft.network.chat.contents.EntityDataSource;
 import net.minecraft.network.chat.contents.KeybindContents;
-import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.NbtContents;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.network.chat.contents.ScoreContents;
 import net.minecraft.network.chat.contents.SelectorContents;
 import net.minecraft.network.chat.contents.StorageDataSource;
@@ -294,7 +294,10 @@ public final class SpongeAdventure {
     }
 
     private static ComponentBuilder<?, ?> asAdventureBuilder(final ComponentContents contents) {
-        if (contents instanceof final LiteralContents lc) {
+        if (contents instanceof final PlainTextContents lc) {
+            if (contents == PlainTextContents.EMPTY) {
+                return Component.empty().toBuilder();
+            }
             return Component.text().content(lc.text());
         }
         if (contents instanceof final TranslatableContents tc) {
@@ -328,9 +331,7 @@ public final class SpongeAdventure {
                                     .interpret(nc.isInterpreting())
                                     .separator(SpongeAdventure.asAdventure(nc.getSeparator()));
         }
-        if (contents == ComponentContents.EMPTY) {
-            return Component.empty().toBuilder();
-        }
+
         throw new UnsupportedOperationException("Cannot convert ComponentContents of type " + contents.getClass());
     }
 
