@@ -52,7 +52,7 @@ public abstract class ServerLoginPacketListenerImplMixin_IpForward {
     // @formatter:off
     @Shadow @Final private MinecraftServer server;
     @Shadow @Final public Connection connection;
-    @Shadow private GameProfile gameProfile;
+    @Shadow private GameProfile authenticatedProfile;
     // @formatter:on
 
     private boolean ipForward$sentVelocityForwardingRequest;
@@ -69,27 +69,30 @@ public abstract class ServerLoginPacketListenerImplMixin_IpForward {
     }
 
     // Bungee
-    @Inject(method = "handleHello",
+    @Inject(method = "startClientVerification",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;gameProfile:Lcom/mojang/authlib/GameProfile;",
+            target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;authenticatedProfile:Lcom/mojang/authlib/GameProfile;",
             opcode = Opcodes.PUTFIELD,
-            ordinal = 1,
             shift = At.Shift.AFTER))
     private void bungee$initUuid(final CallbackInfo ci) {
+        if (this.authenticatedProfile == this.server.getSingleplayerProfile()) {
+            return;
+        }
+
         if (!this.server.usesAuthentication() && SpongeConfigs.getCommon().get().ipForwarding.mode == IpForwardingCategory.Mode.LEGACY) {
             final UUID uuid;
             if (((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID() != null) {
                 uuid = ((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID();
             } else {
-                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.gameProfile.getName()).getBytes(Charsets.UTF_8));
+                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.authenticatedProfile.getName()).getBytes(Charsets.UTF_8));
             }
 
-            this.gameProfile = new GameProfile(uuid, this.gameProfile.getName());
+            this.authenticatedProfile = new GameProfile(uuid, this.authenticatedProfile.getName());
 
             if (((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile() != null) {
                 for (final Property property : ((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile()) {
-                    this.gameProfile.getProperties().put(property.name(), property);
+                    this.authenticatedProfile.getProperties().put(property.name(), property);
                 }
             }
         }
