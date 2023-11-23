@@ -173,9 +173,11 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                     // Sponge start - log change in hand
                     final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
                     final TransactionalCaptureSupplier transactor = context.getTransactor();
-                    try (final EffectTransactor ignored = context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {
-                        transactor.logPlayerInventoryChange(this.player, PlayerInventoryTransaction.EventCreator.STANDARD);
-                        this.player.inventoryMenu.broadcastChanges();
+                    if (!transactor.isEmpty()) { //TODO: Add effect to attach the transaction to be the child of the parents
+                        try (final EffectTransactor ignored = context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {
+                            transactor.logPlayerInventoryChange(this.player, PlayerInventoryTransaction.EventCreator.STANDARD);
+                            this.player.inventoryMenu.broadcastChanges();
+                        }
                     }
                     // Sponge end
                 }
