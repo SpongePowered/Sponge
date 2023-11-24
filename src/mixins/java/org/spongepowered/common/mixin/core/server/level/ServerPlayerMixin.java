@@ -72,6 +72,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.scores.Score;
@@ -194,6 +195,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     private final PlayerOwnBorderListener impl$borderListener = new PlayerOwnBorderListener((net.minecraft.server.level.ServerPlayer) (Object) this);
     private boolean impl$sleepingIgnored;
     private boolean impl$noGameModeEvent;
+    @Nullable private WorldBorder impl$worldBorder;
 
     @Override
     public net.minecraft.network.chat.@Nullable Component bridge$getConnectionMessageToSend() {
@@ -892,5 +894,15 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         } finally {
             this.impl$noGameModeEvent = false;
         }
+    }
+
+    @Override
+    public @Nullable WorldBorder bridge$getWorldBorder() {
+        return this.impl$worldBorder;
+    }
+
+    @Override
+    public void bridge$replaceWorldBorder(final @Nullable WorldBorder border) {
+        this.impl$worldBorder = border;
     }
 }

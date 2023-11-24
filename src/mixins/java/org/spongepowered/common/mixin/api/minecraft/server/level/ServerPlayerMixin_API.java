@@ -147,7 +147,6 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     private volatile Pointers api$pointers;
 
     private final TabList api$tabList = new SpongeTabList((net.minecraft.server.level.ServerPlayer) (Object) this);
-    @Nullable private WorldBorderBridge api$worldBorder;
 
     @Override
     public ServerWorld world() {
@@ -326,10 +325,11 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Override
     @NonNull
     public Optional<WorldBorder> worldBorder() {
-        if (this.api$worldBorder == null) {
+        final @Nullable net.minecraft.world.level.border.WorldBorder border = ((ServerPlayerBridge) this).bridge$getWorldBorder();
+        if (border == null) {
             return Optional.empty();
         }
-        return Optional.of(this.api$worldBorder.bridge$asImmutable());
+        return Optional.of(((WorldBorderBridge) border).bridge$asImmutable());
     }
 
     @Override
@@ -368,20 +368,21 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             return currentBorder;
         }
 
-        if (this.api$worldBorder != null) { // is the world border about to be unset?
-            ((WorldBorderAccessor) this.api$worldBorder).accessor$listeners().remove(
+        final @Nullable net.minecraft.world.level.border.WorldBorder oldWorldBorder = ((ServerPlayerBridge) this).bridge$getWorldBorder();
+        if (oldWorldBorder != null) { // is the world border about to be unset?
+            ((WorldBorderAccessor) oldWorldBorder).accessor$listeners().remove(
                     ((ServerPlayerBridge) this).bridge$getWorldBorderListener()); // remove the listener, if so
         }
         final Optional<WorldBorder> toSet = event.newBorder();
         if (toSet.isPresent()) {
             final net.minecraft.world.level.border.WorldBorder mutableWorldBorder =
                     new net.minecraft.world.level.border.WorldBorder();
-            this.api$worldBorder = ((WorldBorderBridge) mutableWorldBorder);
-            this.api$worldBorder.bridge$applyFrom(toSet.get());
+            ((WorldBorderBridge) mutableWorldBorder).bridge$applyFrom(toSet.get());
+            ((ServerPlayerBridge) this).bridge$replaceWorldBorder(mutableWorldBorder);
             mutableWorldBorder.addListener(((ServerPlayerBridge) this).bridge$getWorldBorderListener());
-            this.connection.send(new ClientboundInitializeBorderPacket((net.minecraft.world.level.border.WorldBorder) this.api$worldBorder));
+            this.connection.send(new ClientboundInitializeBorderPacket(mutableWorldBorder));
         } else { // unset the border if null
-            this.api$worldBorder = null;
+            ((ServerPlayerBridge) this).bridge$replaceWorldBorder(null);
             this.connection.send(new ClientboundInitializeBorderPacket(this.shadow$getCommandSenderWorld().getWorldBorder()));
         }
         return toSet;
