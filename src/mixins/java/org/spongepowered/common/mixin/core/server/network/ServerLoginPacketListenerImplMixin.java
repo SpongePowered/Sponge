@@ -45,6 +45,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
@@ -184,18 +185,22 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         return event.isCancelled();
     }
 
-    @Inject(method = "handleHello(Lnet/minecraft/network/protocol/login/ServerboundHelloPacket;)V", at = @At(value = "INVOKE", target =
-            "startClientVerification(Lcom/mojang/authlib/GameProfile;)V", ordinal = 1), cancellable = true)
-    private void impl$fireAuthEventOffline(final CallbackInfo ci) {
-        // Move this check up here, so that the UUID isn't null when we fire the event
-        // TODO broken
-        /*if (!this.authenticatedProfile.isComplete()) {
-            this.authenticatedProfile = this.shadow$createFakeProfile(this.authenticatedProfile);
-        }*/
-
+    @ModifyArg(method = "handleHello",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;startClientVerification(Lcom/mojang/authlib/GameProfile;)V"))
+    private GameProfile impl$fireAuthEventOffline(GameProfile $$0) {
+        this.authenticatedProfile = $$0;
         if (this.bridge$fireAuthEvent()) {
+            return null;
+        }
+        return $$0;
+    }
+
+    @Inject(method = "startClientVerification(Lcom/mojang/authlib/GameProfile;)V", at = @At(value = "HEAD"), cancellable = true)
+    private void impl$handleAuthEventCancellation(GameProfile $$0, final CallbackInfo ci) {
+        if ($$0 == null) {
             ci.cancel();
         }
     }
-
 }

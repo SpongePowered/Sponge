@@ -25,7 +25,6 @@
         "server.level.ServerPlayerMixin_Vanilla",
         "server.network.ServerCommonPacketListenerImplMixin_Vanilla",
         "server.network.ServerGamePacketListenerImplMixin_Vanilla",
-        "server.network.ServerLoginPacketListenerImpl_1Mixin_Vanilla",
         "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
         "server.packs.repository.PackRepositoryMixin_Vanilla",
         "world.entity.EntityMixin_Vanilla",

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
+import com.mojang.authlib.yggdrasil.ProfileResult;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
@@ -32,18 +33,22 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.accessor.server.network.ServerLoginPacketListenerImplAccessor;
 import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerImplBridge;
 
 @Mixin(targets = "net/minecraft/server/network/ServerLoginPacketListenerImpl$1")
 public abstract class ServerLoginPacketListenerImpl_1Mixin extends Thread {
 
-    @Shadow @Final
-    private ServerLoginPacketListenerImpl this$0;
+    // @formatter:off
+    @Shadow @Final private ServerLoginPacketListenerImpl this$0;
+    // @formatter:on
 
     @SuppressWarnings("UnresolvedMixinReference")
     @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
-            remap = false, cancellable = true)
-    private void impl$fireAuthEvent(final CallbackInfo ci) {
+            remap = false, cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    private void impl$fireAuthEvent(final CallbackInfo ci, final String $$0, final ProfileResult $$1) {
+        ((ServerLoginPacketListenerImplAccessor)this$0).accessor$gameProfile($$1.profile());
         if (((ServerLoginPacketListenerImplBridge) this.this$0).bridge$fireAuthEvent()) {
             ci.cancel();
         }

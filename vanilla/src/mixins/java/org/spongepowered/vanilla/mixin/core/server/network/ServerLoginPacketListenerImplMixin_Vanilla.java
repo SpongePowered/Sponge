@@ -26,7 +26,6 @@ package org.spongepowered.vanilla.mixin.core.server.network;
 
 import net.minecraft.network.protocol.login.ServerLoginPacketListener;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
-import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.spongepowered.api.Sponge;
@@ -104,11 +103,10 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
         }
     }
 
-    @Inject(method = "handleHello", at = @At("RETURN"))
-    private void impl$onProcessLoginStart(final ServerboundHelloPacket packet, final CallbackInfo ci) {
-        // TODO investigate
-        /*if (this.state == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
+    @Inject(method = "startClientVerification", at = @At("RETURN"))
+    private void impl$onStartClientVerification(final CallbackInfo ci) {
+        if (this.state == ServerLoginPacketListenerImpl.State.VERIFYING) {
             this.state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
-        }*/
+        }
     }
 }
