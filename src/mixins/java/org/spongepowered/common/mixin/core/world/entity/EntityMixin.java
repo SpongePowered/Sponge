@@ -769,7 +769,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     (ServerWorld) targetWorld,
                     destinationPosition
             );
-            if (!reposition.isCancelled() && reposition.destinationPosition() != destinationPosition) {
+
+            if (reposition.isCancelled()) {
+                cir.setReturnValue(Optional.empty());
+                this.impl$dontCreateExitPortal = true;
+            }
+            else if (reposition.destinationPosition() != destinationPosition) {
                 // Something changed so we want to re-rerun this loop.
                 // TODO: There is an open question here about whether we want to force the creation of a portal in this
                 //  scenario, or whether we're happy if the repositioning will put someone in a nearby portal.
