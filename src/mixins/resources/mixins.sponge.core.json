@@ -241,7 +241,8 @@
         "world.scores.ScoreMixin",
         "world.ticks.LevelTicksMixin",
         "world.ticks.ScheduledTickMixin",
-        "world.item.crafting.SmithingTransformRecipeMixin"
+        "world.item.crafting.SmithingTransformRecipeMixin",
+        "network.protocol.login.ServerboundCustomQueryAnswerPacketMixin"
     ],
     "client": [
         "client.MinecraftMixin",

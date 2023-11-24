@@ -25,6 +25,9 @@
 package org.spongepowered.common.mixin.api.minecraft.server.network;
 
 
+import static java.util.Objects.requireNonNull;
+
+import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.spongepowered.api.network.ServerSideConnection;
@@ -32,7 +35,11 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
+
+import java.net.InetSocketAddress;
 
 
 @Mixin(ServerLoginPacketListenerImpl.class)
@@ -43,6 +50,27 @@ public abstract class ServerLoginPacketListenerImplMixin_API implements ServerSi
     @Shadow private com.mojang.authlib.GameProfile authenticatedProfile;
     @Shadow public abstract void shadow$disconnect(net.minecraft.network.chat.Component reason);
     // @formatter:on
+
+    @Override
+    public void close() {
+        this.shadow$disconnect(net.minecraft.network.chat.Component.translatable("disconnect.disconnected"));
+    }
+
+    @Override
+    public void close(final Component reason) {
+        requireNonNull(reason, "reason");
+        this.shadow$disconnect(SpongeAdventure.asVanilla(reason));
+    }
+
+    @Override
+    public InetSocketAddress address() {
+        return ((ConnectionBridge) this.connection).bridge$getAddress();
+    }
+
+    @Override
+    public InetSocketAddress virtualHost() {
+        return ((ConnectionBridge) this.connection).bridge$getVirtualHost();
+    }
 
     @Override
     public GameProfile profile() {
