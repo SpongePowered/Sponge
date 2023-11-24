@@ -39,6 +39,7 @@
         "network.chat.StyleMixin",
         "network.chat.TranslatableContentsMixin",
         "network.protocol.game.ClientboundResourcePackPacketMixin",
+        "network.protocol.login.ServerboundCustomQueryAnswerPacketMixin",
         "network.syncher.EntityDataAccessorMixin",
         "network.syncher.SynchedEntityDataMixin",
         "registries.BuiltInRegistriesMixin",
@@ -241,8 +242,7 @@
         "world.scores.ScoreMixin",
         "world.ticks.LevelTicksMixin",
         "world.ticks.ScheduledTickMixin",
-        "world.item.crafting.SmithingTransformRecipeMixin",
-        "network.protocol.login.ServerboundCustomQueryAnswerPacketMixin"
+        "world.item.crafting.SmithingTransformRecipeMixin"
     ],
     "client": [
         "client.MinecraftMixin",
