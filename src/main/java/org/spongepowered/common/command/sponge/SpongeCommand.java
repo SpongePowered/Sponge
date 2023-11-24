@@ -503,7 +503,7 @@ public class SpongeCommand {
             }
 
             tps.add(Component.newline());
-            tps.add(this.appendTickTime(SpongeCommon.server().tickTimes, Component.text().content("Overall: ")).build());
+            tps.add(this.appendTickTime(SpongeCommon.server().getTickTimesNanos(), Component.text().content("Overall: ")).build());
             SpongeCommon.game().serviceProvider()
               .paginationService()
               .builder()

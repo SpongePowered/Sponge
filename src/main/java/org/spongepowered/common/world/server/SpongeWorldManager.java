@@ -25,7 +25,6 @@
 package org.spongepowered.common.world.server;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.longs.LongIterator;
@@ -36,8 +35,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.MiscOverworldFeatures;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
@@ -62,7 +59,6 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.PatrolSpawner;
 import net.minecraft.world.level.levelgen.PhantomSpawner;
-import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.storage.CommandStorage;
@@ -958,20 +954,20 @@ public abstract class SpongeWorldManager implements WorldManager {
         chunkStatusListener.updateSpawnPos(chunkPos);
         final ServerChunkCache serverChunkProvider = world.getChunkSource();
 //        serverChunkProvider.getLightEngine().setTaskPerBatch(500);
-        ((MinecraftServerAccessor) this.server).accessor$nextTickTime(Util.getNanos());
+        ((MinecraftServerAccessor) this.server).accessor$nextTickTimeNanos(Util.getNanos());
         serverChunkProvider.addRegionTicket(SpongeWorldManager.SPAWN_CHUNKS, chunkPos, 11, world.dimension().location());
 
         while (serverChunkProvider.getTickingGenerated() != 441) {
-            ((MinecraftServerAccessor) this.server).accessor$nextTickTime(Util.getNanos() + 10L * TimeUtil.NANOSECONDS_PER_MILLISECOND);
+            ((MinecraftServerAccessor) this.server).accessor$nextTickTimeNanos(Util.getNanos() + 10L * TimeUtil.NANOSECONDS_PER_MILLISECOND);
             ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();
         }
 
-        ((MinecraftServerAccessor) this.server).accessor$nextTickTime(Util.getNanos() + 10L * TimeUtil.NANOSECONDS_PER_MILLISECOND);
+        ((MinecraftServerAccessor) this.server).accessor$nextTickTimeNanos(Util.getNanos() + 10L * TimeUtil.NANOSECONDS_PER_MILLISECOND);
         ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();
 
         this.updateForcedChunks(world, serverChunkProvider);
 
-        ((MinecraftServerAccessor) this.server).accessor$nextTickTime(Util.getNanos() + 10L * TimeUtil.NANOSECONDS_PER_MILLISECOND);
+        ((MinecraftServerAccessor) this.server).accessor$nextTickTimeNanos(Util.getNanos() + 10L * TimeUtil.NANOSECONDS_PER_MILLISECOND);
         ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();
         chunkStatusListener.stop();
 //        serverChunkProvider.getLightEngine().setTaskPerBatch(5);
