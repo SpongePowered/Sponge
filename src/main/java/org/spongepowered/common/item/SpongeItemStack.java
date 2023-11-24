@@ -161,14 +161,14 @@ public final class SpongeItemStack  {
         }
 
         private void writeAttributeModifier(final ListTag attributeModifiers, final net.minecraft.world.entity.ai.attributes.AttributeModifier attributeModifier, final EquipmentSlot slot) {
-            final CompoundTag modifierNbt = attributeModifier.save();
-            modifierNbt.putString(Constants.ItemStack.ATTRIBUTE_NAME, attributeModifier.getName());
-
-            if (slot != null) {
-                modifierNbt.putString(Constants.ItemStack.ATTRIBUTE_SLOT, slot.getName());
-            }
-
-            attributeModifiers.add(modifierNbt);
+//            final CompoundTag modifierNbt = attributeModifier.save();
+//            modifierNbt.putString(Constants.ItemStack.ATTRIBUTE_NAME, attributeModifier.getName());
+//
+//            if (slot != null) {
+//                modifierNbt.putString(Constants.ItemStack.ATTRIBUTE_SLOT, slot.getName());
+//            }
+//
+//            attributeModifiers.add(modifierNbt);
         }
 
         @Override
