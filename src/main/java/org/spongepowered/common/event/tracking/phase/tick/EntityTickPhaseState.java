@@ -30,6 +30,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.entity.Entity;
@@ -129,8 +130,9 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.originalBlock().position());
+            final Vec3 aabbBase = VecHelper.toVanillaVector3d(transaction.originalBlock().position().toDouble());
             final List<HangingEntity> hangingEntities = ((ServerLevel) tickingEntity.world())
-                .getEntitiesOfClass(HangingEntity.class, new AABB(blockPos, blockPos).inflate(1.1D, 1.1D, 1.1D),
+                .getEntitiesOfClass(HangingEntity.class, new AABB(aabbBase, aabbBase).inflate(1.1D, 1.1D, 1.1D),
                     entityIn -> {
                         if (entityIn == null) {
                             return false;
