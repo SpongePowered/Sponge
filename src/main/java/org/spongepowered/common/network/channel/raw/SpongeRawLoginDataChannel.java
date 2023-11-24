@@ -180,7 +180,7 @@ public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {
 
             @Override
             public void write(FriendlyByteBuf var1) {
-                var1.writeBytes((FriendlyByteBuf) payload);
+                var1.writeBytes((FriendlyByteBuf) buf);
             }
         }, transactionId);
 

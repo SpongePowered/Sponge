@@ -32,12 +32,12 @@ import com.mojang.authlib.properties.Property;
 import net.minecraft.network.Connection;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
@@ -52,7 +52,6 @@ public abstract class ServerLoginPacketListenerImplMixin_IpForward {
     // @formatter:off
     @Shadow @Final private MinecraftServer server;
     @Shadow @Final public Connection connection;
-    @Shadow private GameProfile gameProfile;
     // @formatter:on
 
     private boolean ipForward$sentVelocityForwardingRequest;
@@ -69,29 +68,30 @@ public abstract class ServerLoginPacketListenerImplMixin_IpForward {
     }
 
     // Bungee
-    @Inject(method = "handleHello",
+    @ModifyArg(method = "handleHello",
         at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;gameProfile:Lcom/mojang/authlib/GameProfile;",
-            opcode = Opcodes.PUTFIELD,
-            ordinal = 1,
-            shift = At.Shift.AFTER))
-    private void bungee$initUuid(final CallbackInfo ci) {
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;startClientVerification(Lcom/mojang/authlib/GameProfile;)V",
+            ordinal = 1))
+    private GameProfile bungee$initUuid(GameProfile $$0) {
         if (!this.server.usesAuthentication() && SpongeConfigs.getCommon().get().ipForwarding.mode == IpForwardingCategory.Mode.LEGACY) {
             final UUID uuid;
             if (((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID() != null) {
                 uuid = ((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID();
             } else {
-                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.gameProfile.getName()).getBytes(Charsets.UTF_8));
+                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + $$0.getName()).getBytes(Charsets.UTF_8));
             }
 
-            this.gameProfile = new GameProfile(uuid, this.gameProfile.getName());
+            $$0 = new GameProfile(uuid, $$0.getName());
 
             if (((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile() != null) {
                 for (final Property property : ((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedProfile()) {
-                    this.gameProfile.getProperties().put(property.name(), property);
+                    $$0.getProperties().put(property.name(), property);
                 }
             }
         }
+
+        return $$0;
     }
+
 }

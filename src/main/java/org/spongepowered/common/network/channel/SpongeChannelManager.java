@@ -386,8 +386,14 @@ public final class SpongeChannelManager implements ChannelManager {
         // Client -> Server response
 
         final int transactionId = packet.transactionId();
-        final ChannelBuf payload = this.bufferAllocator.buffer();
-        packet.payload().write((FriendlyByteBuf) payload);
+
+        final ChannelBuf payload;
+        if (packet.payload() != null) {
+            payload = this.bufferAllocator.buffer();
+            packet.payload().write((FriendlyByteBuf) payload);
+        } else {
+            payload = null;
+        }
 
         try {
             this.handleLoginResponsePayload(connection, transactionId, payload);
