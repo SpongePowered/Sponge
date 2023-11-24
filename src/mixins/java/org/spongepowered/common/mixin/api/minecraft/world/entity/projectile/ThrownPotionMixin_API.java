@@ -39,7 +39,6 @@ public abstract class ThrownPotionMixin_API extends ThrowableItemProjectileMixin
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.requireValue(Keys.ITEM_STACK_SNAPSHOT).asImmutable());
         values.add(this.requireValue(Keys.POTION_EFFECTS).asImmutable());
 
         return values;

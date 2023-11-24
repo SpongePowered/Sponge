@@ -22,25 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
+package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.Set;
+public class ThrowableItemProjectileData {
 
-@Mixin(ThrowableItemProjectile.class)
-public abstract class ThrowableItemProjectileMixin_API extends ThrowableProjectileMixin_API {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.requireValue(Keys.ITEM_STACK_SNAPSHOT).asImmutable());
-
-        return values;
+    private ThrowableItemProjectileData() {
     }
+
+    // @formatter:off
+    public static void register(final DataProviderRegistrator registrator) {
+        registrator
+                .asMutable(ThrowableItemProjectile.class)
+                    .create(Keys.ITEM_STACK_SNAPSHOT)
+                        .get(h -> ItemStackUtil.snapshotOf(h.getItem()))
+                        .set((h, v) -> h.setItem(ItemStackUtil.fromSnapshotToNative(v)));
+    }
+    // @formatter:on
 
 }

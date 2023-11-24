@@ -30,15 +30,12 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.RelativeMovement;
-import net.minecraft.world.level.entity.EntityInLevelCallback;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
@@ -86,32 +83,24 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public float yRot;
     @Shadow public float xRot;
     @Shadow @Final protected net.minecraft.util.RandomSource random;
-    @Shadow public int tickCount;
     @Shadow protected UUID uuid;
     @Shadow @Final private net.minecraft.world.entity.EntityType<?> type;
     @Shadow public net.minecraft.world.level.Level level;
-    @Shadow private EntityInLevelCallback levelCallback;
 
     @Shadow public abstract double shadow$getX();
     @Shadow public abstract double shadow$getY();
     @Shadow public abstract double shadow$getZ();
     @Shadow public abstract net.minecraft.world.level.Level shadow$getCommandSenderWorld();
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
-    @Shadow public abstract void shadow$setPos(double x, double y, double z);
     @Shadow public abstract boolean shadow$isRemoved();
     @Shadow public abstract UUID shadow$getUUID();
-    @Shadow public abstract void shadow$setRemainingFireTicks(int ticks);
     @Shadow public abstract boolean shadow$hurt(DamageSource source, float amount);
-    @Shadow public abstract int shadow$getId();
-    @Shadow public abstract void shadow$playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow protected abstract void shadow$setRot(float yaw, float pitch);
     @Shadow public abstract net.minecraft.world.phys.AABB shadow$getBoundingBox();
-    @Shadow public abstract boolean shadow$saveAsPassenger(CompoundTag compound);
-    @Shadow @Nullable public abstract Component shadow$getCustomName();
-    @Shadow public abstract Component shadow$getDisplayName();
     @Shadow public abstract void shadow$setRemoved(Entity.RemovalReason var1);
     @Shadow public abstract void shadow$discard();
     @Shadow public abstract void shadow$lookAt(EntityAnchorArgument.Anchor param0, Vec3 param1);
+    @Shadow public abstract CompoundTag shadow$saveWithoutId(CompoundTag $$0);
     // @formatter:on
 
     @Override
@@ -270,9 +259,10 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public DataContainer toContainer() {
-        final CompoundTag compound = new CompoundTag();
-        this.shadow$saveAsPassenger(compound);
         final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
+        final CompoundTag compound = new CompoundTag();
+        compound.putString("id", entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type()).toString());
+        this.shadow$saveWithoutId(compound);
         final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
@@ -304,8 +294,10 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             throw new IllegalArgumentException("Cannot copy player entities!");
         }
         try {
+            final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
             final CompoundTag compound = new CompoundTag();
-            this.shadow$saveAsPassenger(compound);
+            compound.putString("id", entityTypeRegistry.getKey((net.minecraft.world.entity.EntityType<?>) this.type()).toString());
+            this.shadow$saveWithoutId(compound);
             final Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(compound, this.shadow$getCommandSenderWorld(), (createdEntity) -> {
                 createdEntity.setUUID(UUID.randomUUID());
                 return createdEntity;

@@ -120,6 +120,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         super(HumanEntity.TYPE, world);
         this.fakeProfile = new GameProfile(this.uuid, "");
         this.setCanPickUpLoot(true);
+        this.entityData.set(PlayerAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), Constants.Sponge.Entity.Human.PLAYER_MODEL_FLAG_ALL);
     }
 
     @Override
@@ -136,7 +137,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         // PlayerEntity
         this.entityData.define(PlayerAccessor.accessor$DATA_PLAYER_ABSORPTION_ID(), 0.0F);
         this.entityData.define(PlayerAccessor.accessor$DATA_SCORE_ID(), 0);
-        this.entityData.define(PlayerAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), Constants.Sponge.Entity.Human.PLAYER_MODEL_FLAG_ALL);
+        this.entityData.define(PlayerAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), (byte) 0);
         this.entityData.define(PlayerAccessor.accessor$DATA_PLAYER_MAIN_HAND(), (byte) 1);
         this.entityData.define(PlayerAccessor.accessor$DATA_SHOULDER_LEFT(), new CompoundTag());
         this.entityData.define(PlayerAccessor.accessor$DATA_SHOULDER_RIGHT(), new CompoundTag());
