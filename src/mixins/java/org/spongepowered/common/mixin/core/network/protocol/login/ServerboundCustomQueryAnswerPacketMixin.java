@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerboundCustomQueryAnswerPacket.class)
-public class ServerboundCustomQueryAnswerPacketMixin {
+public abstract class ServerboundCustomQueryAnswerPacketMixin {
 
     @Inject(method = "readUnknownPayload", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;skipBytes(I)Lnet/minecraft/network/FriendlyByteBuf;"), cancellable = true)
     private static void readUnknownPayload(final FriendlyByteBuf $$0, final CallbackInfoReturnable<CustomQueryAnswerPayload> cir) {
