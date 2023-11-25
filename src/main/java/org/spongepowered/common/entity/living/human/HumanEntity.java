@@ -35,6 +35,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
@@ -73,6 +75,7 @@ import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.network.protocol.game.ClientboundAddEntityPacketAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoUpdatePacketAccessor;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
@@ -534,5 +537,12 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
         this.playSound(SoundEvents.ARROW_SHOOT, 1.0F, 1.0F / (this.random.nextFloat() * 0.4F + 0.8F));
         this.level().addFreshEntity(entitytippedarrow);
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getAddEntityPacket() {
+        final ClientboundAddEntityPacket packet = new ClientboundAddEntityPacket(this);
+        ((ClientboundAddEntityPacketAccessor) packet).accessor$type(EntityType.PLAYER);
+        return packet;
     }
 }

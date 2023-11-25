@@ -22,6 +22,7 @@
         "network.ConnectionAccessor",
         "network.chat.HoverEvent_ItemStackInfoAccessor",
         "network.chat.StyleAccessor",
+        "network.protocol.game.ClientboundAddEntityPacketAccessor",
         "network.protocol.game.ServerboundInteractPacket_InteractionActionAccessor",
         "network.protocol.game.ServerboundInteractPacket_InteractionAtLocationActionAccessor",
         "network.protocol.game.ServerboundInteractPacketAccessor",
