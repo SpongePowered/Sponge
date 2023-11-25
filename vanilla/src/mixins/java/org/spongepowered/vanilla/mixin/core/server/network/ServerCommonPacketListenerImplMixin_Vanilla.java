@@ -39,14 +39,13 @@ import org.spongepowered.common.network.channel.SpongeChannelManager;
 
 @Mixin(value = ServerCommonPacketListenerImpl.class, priority = 999)
 public abstract class ServerCommonPacketListenerImplMixin_Vanilla {
+
+    // @formatter: off
     @Shadow @Final protected MinecraftServer server;
+    // @formatter: on
 
     @Inject(method = "handleCustomPayload", at = @At(value = "HEAD"))
     private void vanilla$onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
-        // For some reason, "ServerboundCustomPayloadPacket" is released in the processPacket
-        // method of its class, only applicable to this packet, so just retain here.
-        // TODO investigate packet.getData().retain();
-
         final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
         this.server.execute(() -> channelRegistry.handlePlayPayload((EngineConnection) this, packet.payload()));
     }

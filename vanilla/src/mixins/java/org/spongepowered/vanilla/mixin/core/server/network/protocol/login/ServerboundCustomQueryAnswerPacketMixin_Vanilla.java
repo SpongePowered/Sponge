@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network.protocol.login;
+package org.spongepowered.vanilla.mixin.core.server.network.protocol.login;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerboundCustomQueryAnswerPacket.class)
-public abstract class ServerboundCustomQueryAnswerPacketMixin {
+public abstract class ServerboundCustomQueryAnswerPacketMixin_Vanilla {
 
     @Inject(method = "readUnknownPayload", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;skipBytes(I)Lnet/minecraft/network/FriendlyByteBuf;"), cancellable = true)
     private static void impl$onReadUnknownPayload(final FriendlyByteBuf $$0, final CallbackInfoReturnable<CustomQueryAnswerPayload> cir) {
@@ -41,5 +41,4 @@ public abstract class ServerboundCustomQueryAnswerPacketMixin {
 
         cir.setReturnValue(payload == null ? null : buf -> buf.writeBytes(payload.copy()));
     }
-
 }

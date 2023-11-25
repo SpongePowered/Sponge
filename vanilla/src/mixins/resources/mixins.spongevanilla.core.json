@@ -23,6 +23,8 @@
         "server.BootstrapMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",
         "server.level.ServerPlayerMixin_Vanilla",
+        "server.network.protocol.common.ServerboundCustomPayloadPacketMixin_Vanilla",
+        "server.network.protocol.login.ServerboundCustomQueryAnswerPacketMixin_Vanilla",
         "server.network.ServerCommonPacketListenerImplMixin_Vanilla",
         "server.network.ServerGamePacketListenerImplMixin_Vanilla",
         "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
