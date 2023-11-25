@@ -1314,7 +1314,6 @@ public final class Constants {
 
         public static final int OBJECTIVE_PACKET_ADD = 0;
         public static final int OBJECTIVE_PACKET_REMOVE = 1;
-        public static final int SCORE_NAME_LENGTH = 40;
     }
 
     public static final class Functional {

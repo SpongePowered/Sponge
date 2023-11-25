@@ -63,7 +63,6 @@ public final class SpongeTeamBuilder implements Team.Builder {
     @Override
     public Team.Builder name(final String name) {
         this.name = checkNotNull(name, "Name cannot be null!");
-        checkState(name.length() < 17, "Name is " + name.length() + " characters long! It must be at most 16.");
         if (this.displayName == null) {
             this.displayName = Component.text(this.name);
         }
