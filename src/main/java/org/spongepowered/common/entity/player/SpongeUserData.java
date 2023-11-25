@@ -31,6 +31,7 @@ import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -148,7 +149,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         try {
             final CompoundTag compound;
             try (final FileInputStream in = new FileInputStream(file)) {
-                compound = NbtIo.readCompressed(in);
+                compound = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap());
             }
             // See PlayerDataAccess - keep this line up to date.
             final int version = compound.contains("DataVersion", 3) ? compound.getInt("DataVersion") : -1;
