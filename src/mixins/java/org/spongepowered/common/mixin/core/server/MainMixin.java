@@ -24,17 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import com.mojang.serialization.DynamicOps;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryOps;
+import com.mojang.serialization.Dynamic;
+import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 import net.minecraft.server.Main;
+import net.minecraft.server.WorldLoader;
+import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
@@ -42,11 +45,10 @@ import org.spongepowered.common.world.server.SpongeWorldManager;
 @Mixin(Main.class)
 public abstract class MainMixin {
 
-    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/resources/RegistryOps;"))
-    private static <T> RegistryOps<T> impl$captureBootstrapOps(final DynamicOps<T> $$0, final HolderLookup.Provider $$1) {
-        final RegistryOps<T> ops = RegistryOps.create($$0, $$1);
-        SpongeWorldManager.bootstrapOps = (RegistryOps<Tag>) ops;
-        return ops;
+    @Inject(method = "lambda$main$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource;getLevelDataAndDimensions(Lcom/mojang/serialization/Dynamic;Lnet/minecraft/world/level/WorldDataConfiguration;Lnet/minecraft/core/Registry;Lnet/minecraft/core/RegistryAccess$Frozen;)Lnet/minecraft/world/level/storage/LevelDataAndDimensions;"))
+    private static void impl$captureBootstrapOps(final Dynamic $$0x, final OptionSet $$1x, final OptionSpec $$2x, final DedicatedServerSettings $$3x,
+            final OptionSpec $$4x, final WorldLoader.DataLoadContext $$5x, final CallbackInfoReturnable<WorldLoader.DataLoadOutput> cir) {
+        SpongeWorldManager.bootstrapOps = $$0x;
     }
 
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/repository/ServerPacksSource;createPackRepository(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;)Lnet/minecraft/server/packs/repository/PackRepository;"))
