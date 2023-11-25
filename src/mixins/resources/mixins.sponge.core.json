@@ -38,7 +38,7 @@
         "network.chat.Component_SerializerMixin",
         "network.chat.StyleMixin",
         "network.chat.TranslatableContentsMixin",
-        "network.protocol.game.ClientboundResourcePackPacketMixin",
+        "network.protocol.game.ClientboundResourcePackPushPacketMixin",
         "network.syncher.EntityDataAccessorMixin",
         "network.syncher.SynchedEntityDataMixin",
         "registries.BuiltInRegistriesMixin",
