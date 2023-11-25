@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.core.world.level;
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -82,7 +84,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     @Shadow @Final private float radius;
     @Shadow @Final private net.minecraft.world.level.Explosion.BlockInteraction blockInteraction;
 
-    @Shadow public abstract DamageSource shadow$getDamageSource();
+    @Shadow @Final private DamageSource damageSource;
     // @formatter:on
 
     private boolean impl$shouldBreakBlocks;
@@ -93,11 +95,12 @@ public abstract class ExplosionMixin implements ExplosionBridge {
     private double impl$knockback;
 
     @Inject(
-        method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Explosion$BlockInteraction;)V",
+        method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lnet/minecraft/world/level/ExplosionDamageCalculator;DDDFZLnet/minecraft/world/level/Explosion$BlockInteraction;Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/core/particles/ParticleOptions;Lnet/minecraft/sounds/SoundEvent;)V",
         at = @At("RETURN")
     )
-    private void impl$onConstructed(final Level worldIn, final Entity exploderIn, final double xIn, final double yIn, final double zIn, final float sizeIn, final boolean causesFireIn,
-            final net.minecraft.world.level.Explosion.BlockInteraction modeIn, final CallbackInfo ci) {
+    private void impl$onConstructed(final Level worldIn, final Entity exploderIn, final DamageSource $$2, final ExplosionDamageCalculator $$3, final double $$4,
+            final double $$5, final double $$6, final float $$7, final boolean $$8, final net.minecraft.world.level.Explosion.BlockInteraction modeIn,
+            final ParticleOptions $$10, final ParticleOptions $$11, final SoundEvent $$12, final CallbackInfo ci) {
         // In Vanilla and Forge, 'damagesTerrain' controls both smoke particles and block damage
         // Sponge-created explosions will explicitly set 'impl$shouldBreakBlocks' to its proper value
         this.impl$shouldBreakBlocks = this.blockInteraction == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY_WITH_DECAY || this.blockInteraction == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY;
@@ -202,7 +205,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
             }
             for (final Entity entity : list) {
                 // Make sure to check the entity is immune first.
-                if (!entity.ignoreExplosion()) {
+                if (!entity.ignoreExplosion((net.minecraft.world.level.Explosion) (Object) this)) {
                     entities.add((org.spongepowered.api.entity.Entity) entity);
                 }
             }
@@ -238,7 +241,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
 
         for (int k2 = 0; k2 < list.size(); ++k2) {
             final Entity entity = list.get(k2);
-            if (!entity.ignoreExplosion()) {
+            if (!entity.ignoreExplosion((net.minecraft.world.level.Explosion) (Object) this)) {
                 final double d12 = (Math.sqrt(entity.distanceToSqr(vec3d)) / f3);
                 if (d12 <= 1.0D) {
                     double d5 = entity.getX() - this.x;
@@ -251,7 +254,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                         d9 = d9 / d13;
                         final double d14 = (double) net.minecraft.world.level.Explosion.getSeenPercent(vec3d, entity);
                         final double d10 = (1.0D - d12) * d14;
-                        entity.hurt(this.shadow$getDamageSource(), (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * (double)f3 + 1.0D)));
+                        entity.hurt(this.damageSource, (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * (double)f3 + 1.0D)));
                         double d11 = d10;
                         if (entity instanceof LivingEntity) {
                             d11 = ProtectionEnchantment.getExplosionKnockbackAfterDampener((LivingEntity)entity, d10);
