@@ -102,7 +102,7 @@ public abstract class ServerPlayerMixin_Tracker extends PlayerMixin_Tracker {
             itemEntity.setPickUpDelay(40);
 
             if (traceItem) {
-                itemEntity.setThrower(this.shadow$getUUID());
+                itemEntity.setThrower((ServerPlayer) (Object) this);
             }
 
             if (dropAround) {
