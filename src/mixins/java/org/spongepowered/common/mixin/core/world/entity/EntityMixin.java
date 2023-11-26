@@ -64,7 +64,7 @@ import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.scores.Team;
+import net.minecraft.world.scores.PlayerTeam;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
@@ -204,7 +204,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract boolean shadow$isAlliedTo(Entity entityIn);
     @Shadow public abstract double shadow$distanceToSqr(Entity entityIn);
     @Shadow public abstract SoundSource shadow$getSoundSource();
-    @Shadow @Nullable public abstract Team shadow$getTeam();
+    @Shadow @Nullable public abstract PlayerTeam shadow$getTeam();
     @Shadow public abstract void shadow$clearFire();
     @Shadow protected abstract void shadow$setSharedFlag(int flag, boolean set);
     @Shadow public abstract SynchedEntityData shadow$getEntityData();

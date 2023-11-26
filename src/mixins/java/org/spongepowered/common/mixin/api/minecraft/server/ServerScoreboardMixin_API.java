@@ -35,6 +35,7 @@ import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.scores.ScoreboardAccessor;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
@@ -49,6 +50,9 @@ import java.util.stream.Collectors;
 
 @Mixin(ServerScoreboard.class)
 public abstract class ServerScoreboardMixin_API implements Scoreboard {
+
+    @Shadow public abstract void setDisplayObjective(final net.minecraft.world.scores.DisplaySlot $$0,
+            @org.jetbrains.annotations.Nullable final net.minecraft.world.scores.Objective $$1);
 
     @Override
     public Optional<Objective> objective(final String name) {
@@ -80,14 +84,14 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
     public void addObjective(final Objective objective) throws IllegalArgumentException {
         Objects.requireNonNull(objective);
 
-        ((ServerScoreboardBridge) this).bridge$addObjective(objective);
+        ((ServerScoreboardBridge) this).bridge$addAPIObjective(objective);
     }
 
     @Override
     public void updateDisplaySlot(@Nullable final Objective objective, final DisplaySlot displaySlot) throws IllegalStateException {
         Objects.requireNonNull(displaySlot);
-
-        ((ServerScoreboardBridge) this).bridge$updateDisplaySlot(objective, displaySlot);
+        final net.minecraft.world.scores.Objective mcObjective = ((net.minecraft.world.scores.Scoreboard) (Object) this).getObjective(objective.name());
+        this.setDisplayObjective((net.minecraft.world.scores.DisplaySlot) (Object) displaySlot, mcObjective);
     }
 
     @Override
@@ -101,7 +105,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
     public void removeObjective(final Objective objective) {
         Objects.requireNonNull(objective);
 
-        ((ServerScoreboardBridge) this).bridge$removeObjective(objective);
+        ((ServerScoreboardBridge) this).bridge$removeAPIObjective(objective);
     }
 
     @Override
@@ -114,7 +118,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
     }
 
     @Override
-    public Set<org.spongepowered.api.scoreboard.Score> scores(final Component name) {
+    public Set<org.spongepowered.api.scoreboard.Score> scores(final String name) {
         Objects.requireNonNull(name);
 
         final Set<org.spongepowered.api.scoreboard.Score> scores = new HashSet<>();
@@ -125,7 +129,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
     }
 
     @Override
-    public void removeScores(final Component name) {
+    public void removeScores(final String name) {
         Objects.requireNonNull(name);
 
         for (final net.minecraft.world.scores.Objective objective: ((ScoreboardAccessor) this).accessor$objectivesByName().values()) {

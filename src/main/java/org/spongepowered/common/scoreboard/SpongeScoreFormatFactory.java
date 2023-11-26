@@ -22,13 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.scores;
+package org.spongepowered.common.scoreboard;
 
-import org.spongepowered.common.scoreboard.SpongeScore;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.minecraft.network.chat.numbers.BlankFormat;
+import net.minecraft.network.chat.numbers.FixedFormat;
+import net.minecraft.network.chat.numbers.StyledFormat;
+import org.spongepowered.api.scoreboard.ScoreFormat;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
-public interface ScoreBridge {
+public class SpongeScoreFormatFactory implements ScoreFormat.Factory {
 
-    void bridge$setSpongeScore(SpongeScore score);
+    @Override
+    public ScoreFormat blank() {
+        return (ScoreFormat) BlankFormat.INSTANCE;
+    }
 
-    SpongeScore bridge$getSpongeScore();
+    @Override
+    public ScoreFormat fixed(final Component component) {
+        return (ScoreFormat) new FixedFormat(SpongeAdventure.asVanilla(component));
+    }
+
+    @Override
+    public ScoreFormat styled(final Style style) {
+        return (ScoreFormat) new StyledFormat(SpongeAdventure.asVanilla(style));
+    }
 }

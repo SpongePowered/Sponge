@@ -255,7 +255,6 @@
         "world.scores.ObjectiveMixin",
         "world.scores.PlayerTeamMixin",
         "world.scores.ScoreboardMixin",
-        "world.scores.ScoreMixin",
         "world.ticks.LevelTicksMixin",
         "world.ticks.ScheduledTickMixin"
     ],

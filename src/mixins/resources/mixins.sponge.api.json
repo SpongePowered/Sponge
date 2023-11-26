@@ -35,6 +35,7 @@
         "minecraft.network.chat.ChatTypeMixin_API",
         "minecraft.network.chat.ChatTypeMixin_API$BoundMixin_API",
         "minecraft.network.chat.MessageSignatureMixin_API",
+        "minecraft.network.chat.NumberFormatMixin_API",
         "minecraft.network.protocol.status.ServerStatus_FaviconMixin_API",
         "minecraft.network.protocol.status.ServerStatus_PlayersMixin_API",
         "minecraft.network.protocol.status.ServerStatus_VersionMixin_API",

@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.scores;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,16 +40,14 @@ import java.util.Map;
 @Mixin(Scoreboard.class)
 public interface ScoreboardAccessor {
 
-    @Accessor("objectivesByName") Map<String, Objective> accessor$objectivesByName();
+    @Accessor("objectivesByName") Object2ObjectMap<String, Objective> accessor$objectivesByName();
 
-    @Accessor("objectivesByCriteria") Map<ObjectiveCriteria, List<Objective>> accessor$objectivesByCriteria();
-
-    @Accessor("playerScores") Map<String, Map<Objective, Score>> accessor$playerScores();
+    @Accessor("objectivesByCriteria") Reference2ObjectMap<ObjectiveCriteria, List<Objective>> accessor$objectivesByCriteria();
 
     @Accessor("displayObjectives") Map<DisplaySlot, Objective> accessor$displayObjectives();
 
-    @Accessor("teamsByName") Map<String, PlayerTeam> accessor$teamsByName();
+    @Accessor("teamsByName") Object2ObjectMap<String, PlayerTeam> accessor$teamsByName();
 
-    @Accessor("teamsByPlayer") Map<String, PlayerTeam> accessor$teamsByPlayer();
+    @Accessor("teamsByPlayer") Object2ObjectMap<String, PlayerTeam> accessor$teamsByPlayer();
 
 }
