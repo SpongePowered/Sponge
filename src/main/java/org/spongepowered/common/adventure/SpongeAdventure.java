@@ -515,7 +515,7 @@ public final class SpongeAdventure {
             return HoverEvent.showItem(
                 SpongeAdventure.asAdventure(itemRegistry.getKey(((HoverEvent_ItemStackInfoAccessor) value).accessor$item())),
                 ((HoverEvent_ItemStackInfoAccessor) value).accessor$count(),
-                SpongeAdventure.asBinaryTagHolder(((HoverEvent_ItemStackInfoAccessor) value).accessor$tag())
+                SpongeAdventure.asBinaryTagHolder(((HoverEvent_ItemStackInfoAccessor) value).accessor$tag().orElse(null))
             );
         }
         throw new IllegalArgumentException(event.toString());
