@@ -115,6 +115,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract WorldData shadow$getWorldData();
     @Shadow protected abstract void loadLevel(); // has overrides!
     @Shadow public abstract boolean shadow$haveTime();
+    @Shadow private volatile boolean isSaving;
     // @formatter:on
 
     private final ChatDecorator impl$spongeDecorator = new SpongeChatDecorator();
@@ -228,24 +229,28 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         ci.cancel();
     }
 
-    @ModifyConstant(method = "tickServer", constant = @Constant(intValue = 6000, ordinal = 0))
-    private int getSaveTickInterval(final int tickInterval) {
+    @ModifyConstant(method = "tickServer", constant = @Constant(intValue = 0, ordinal = 0))
+    private int getSaveTickInterval(final int zero) {
         if (!this.shadow$isDedicatedServer()) {
-            return tickInterval;
+            return zero;
         } else if (!this.shadow$isRunning()) {
             // Don't autosave while server is stopping
-            return this.tickCount + 1;
+            return Integer.MAX_VALUE;
         }
 
         final int autoPlayerSaveInterval = SpongeConfigs.getCommon().get().world.playerAutoSaveInterval;
         if (autoPlayerSaveInterval > 0 && (this.tickCount % autoPlayerSaveInterval == 0)) {
+            this.isSaving = true;
             this.shadow$getPlayerList().saveAll();
+            this.isSaving = false;
         }
 
+        this.isSaving = true;
         this.saveAllChunks(true, false, false);
+        this.isSaving = false;
 
         // force check to fail as we handle everything above
-        return this.tickCount + 1;
+        return Integer.MAX_VALUE;
     }
 
     /**
