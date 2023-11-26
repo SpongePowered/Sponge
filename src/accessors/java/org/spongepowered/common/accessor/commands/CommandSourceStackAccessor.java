@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.accessor.commands;
 
-import com.mojang.brigadier.ResultConsumer;
+import net.minecraft.commands.CommandResultCallback;
 import net.minecraft.commands.CommandSigningContext;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
@@ -41,14 +41,24 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
-import java.util.function.IntConsumer;
-
 @Mixin(CommandSourceStack.class)
 public interface CommandSourceStackAccessor {
 
     @Invoker("<init>")
-    static CommandSourceStack invoker$new(final CommandSource $$0, final Vec3 $$1, final Vec2 $$2, final ServerLevel $$3, final int $$4, final String $$5, final Component $$6, final MinecraftServer $$7,
-            @Nullable final Entity $$8, final boolean $$9, @Nullable final ResultConsumer<CommandSourceStack> $$10, final EntityAnchorArgument.Anchor $$11, CommandSigningContext $$12, TaskChainer $$13, IntConsumer $$14) {
+    static CommandSourceStack invoker$new(
+            final CommandSource $$0,
+            final Vec3 $$1,
+            final Vec2 $$2,
+            final ServerLevel $$3,
+            final int $$4,
+            final String $$5,
+            final Component $$6, final MinecraftServer $$7,
+            @Nullable final Entity $$8,
+            final boolean $$9,
+            final CommandResultCallback $$10,
+            final EntityAnchorArgument.Anchor $$11,
+            final CommandSigningContext $$12,
+            TaskChainer $$13) {
         throw new UntransformedInvokerError();
     }
 

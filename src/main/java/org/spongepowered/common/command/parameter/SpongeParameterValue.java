@@ -24,11 +24,8 @@
  */
 package org.spongepowered.common.command.parameter;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
-import net.minecraft.commands.BrigadierExceptions;
-import net.minecraft.network.chat.MutableComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
