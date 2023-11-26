@@ -168,6 +168,7 @@
         "world.entity.vehicle.MinecartCommandBlockMixin",
         "world.entity.vehicle.MinecartFurnaceMixin",
         "world.entity.vehicle.MinecartTNTMixin",
+        "world.entity.vehicle.VehicleEntityMixin",
         "world.food.FoodDataMixin",
         "world.inventory.StonecutterMenuMixin",
         "world.item.ChorusFruitItemMixin",

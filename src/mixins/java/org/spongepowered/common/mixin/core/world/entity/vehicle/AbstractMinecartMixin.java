@@ -24,33 +24,21 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartLike;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.world.entity.vehicle.AbstractMinecartBridge;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.ArrayList;
-
 @Mixin(AbstractMinecart.class)
-public abstract class AbstractMinecartMixin extends EntityMixin implements AbstractMinecartBridge {
+public abstract class AbstractMinecartMixin extends VehicleEntityMixin implements AbstractMinecartBridge {
 
     protected double impl$maxSpeed = Constants.Entity.Minecart.DEFAULT_MAX_SPEED;
     private boolean impl$slowWhenEmpty = true;
@@ -107,23 +95,6 @@ public abstract class AbstractMinecartMixin extends EntityMixin implements Abstr
     )
     private boolean impl$applyDragIfEmpty(final AbstractMinecart self) {
         return !this.impl$slowWhenEmpty || this.shadow$isVehicle();
-    }
-
-    @Inject(method = "hurt",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/vehicle/AbstractMinecart;ejectPassengers()V"
-        ),
-        cancellable = true)
-    private void impl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(this);
-            frame.pushCause(source);
-            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.currentCause(), (MinecartLike) this, new ArrayList<>(), 0, amount);
-            SpongeCommon.post(event);
-            if (event.isCancelled()) {
-                cir.setReturnValue(true);
-            }
-        }
     }
 
     @Override
