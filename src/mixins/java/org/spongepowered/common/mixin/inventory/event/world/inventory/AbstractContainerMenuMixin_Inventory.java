@@ -81,6 +81,8 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Shadow protected abstract void shadow$updateDataSlotListeners(int $$0, int $$1);
     @Shadow protected abstract void shadow$synchronizeDataSlotToRemote(int $$0, int $$1);
     @Shadow protected abstract void shadow$synchronizeCarriedToRemote();
+
+    @Shadow public abstract void shadow$sendAllDataToRemote();
     //@formatter:on
 
     private boolean impl$isClicking; // Menu Callbacks are only called when clicking in a container
@@ -168,6 +170,10 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             return;
         }
         this.bridge$detectAndSendChanges(false, false);
+        this.impl$broadcastDataSlots();
+        this.shadow$sendAllDataToRemote();
+        this.impl$captureSuccess = true; // Detect mod overrides
+        ci.cancel();
     }
 
     // broadcastChanges
@@ -230,17 +236,19 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 for (final ContainerListener listener : this.containerListeners) {
                     listener.slotChanged(((AbstractContainerMenu) (Object) this), i, oldStack);
                 }
-                final ItemStack remoteStack = this.remoteSlots.get(i);
-                if (!ItemStack.matches(remoteStack, newStack)) {
-                    this.remoteSlots.set(i, newStack.copy());
-                    if (this.synchronizer != null) {
-                        this.synchronizer.sendSlotChange(((AbstractContainerMenu) (Object) this), i, newStack);
+                if(synchronize) {
+                    final ItemStack remoteStack = this.remoteSlots.get(i);
+                    if (!ItemStack.matches(remoteStack, newStack)) {
+                        this.remoteSlots.set(i, newStack.copy());
+                        if (this.synchronizer != null) {
+                            this.synchronizer.sendSlotChange(((AbstractContainerMenu) (Object) this), i, newStack);
+                        }
                     }
                 }
             }
         }
 
-        if(synchronize) {
+        if (synchronize) {
             this.shadow$synchronizeCarriedToRemote();
             this.impl$broadcastDataSlots();
         }
