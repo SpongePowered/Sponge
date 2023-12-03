@@ -285,6 +285,12 @@
             "name": "Display Entities Test",
             "entrypoint": "org.spongepowered.test.entity.DisplayEntityTest",
             "description": "Testing Display Entities"
+        },
+        {
+            "id": "clickcontainereventcancelledtest",
+            "name": "Click Container Event Cancelled Test",
+            "entrypoint": "org.spongepowered.test.interact.ClickContainerEventCancelledTest",
+            "description": "Testing Cancelling Click Container Primary Event"
         }
     ]
 }

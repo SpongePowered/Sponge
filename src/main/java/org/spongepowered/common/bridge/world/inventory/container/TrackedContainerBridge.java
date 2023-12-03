@@ -28,5 +28,5 @@ public interface TrackedContainerBridge {
 
     boolean bridge$capturePossible();
 
-    void bridge$detectAndSendChanges(boolean captureOnly);
+    void bridge$detectAndSendChanges(boolean capture, boolean synchronize);
 }
