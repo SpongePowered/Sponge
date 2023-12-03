@@ -81,7 +81,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Shadow protected abstract void shadow$updateDataSlotListeners(int $$0, int $$1);
     @Shadow protected abstract void shadow$synchronizeDataSlotToRemote(int $$0, int $$1);
     @Shadow protected abstract void shadow$synchronizeCarriedToRemote();
-
     @Shadow public abstract void shadow$sendAllDataToRemote();
     //@formatter:on
 
@@ -170,7 +169,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             return;
         }
         this.bridge$detectAndSendChanges(false, false);
-        this.impl$broadcastDataSlots();
+        this.impl$broadcastDataSlots(false);
         this.shadow$sendAllDataToRemote();
         this.impl$captureSuccess = true; // Detect mod overrides
         ci.cancel();
@@ -236,7 +235,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 for (final ContainerListener listener : this.containerListeners) {
                     listener.slotChanged(((AbstractContainerMenu) (Object) this), i, oldStack);
                 }
-                if(synchronize) {
+                if (synchronize) {
                     final ItemStack remoteStack = this.remoteSlots.get(i);
                     if (!ItemStack.matches(remoteStack, newStack)) {
                         this.remoteSlots.set(i, newStack.copy());
@@ -250,7 +249,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
         if (synchronize) {
             this.shadow$synchronizeCarriedToRemote();
-            this.impl$broadcastDataSlots();
+            this.impl$broadcastDataSlots(true);
         }
     }
 
@@ -268,13 +267,15 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         }
     }
 
-    private void impl$broadcastDataSlots() {
+    private void impl$broadcastDataSlots(boolean synchronize) {
         for(int j = 0; j < this.dataSlots.size(); ++j) {
             final DataSlot dataSlot = this.dataSlots.get(j);
             if (dataSlot.checkAndClearUpdateFlag()) {
                 this.shadow$updateDataSlotListeners(j, dataSlot.get());
             }
-            this.shadow$synchronizeDataSlotToRemote(j, dataSlot.get());
+            if (synchronize) {
+                this.shadow$synchronizeDataSlotToRemote(j, dataSlot.get());
+            }
         }
     }
 
