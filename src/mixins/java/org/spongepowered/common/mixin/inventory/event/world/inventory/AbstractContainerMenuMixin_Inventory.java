@@ -267,7 +267,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         }
     }
 
-    private void impl$broadcastDataSlots(boolean synchronize) {
+    private void impl$broadcastDataSlots(final boolean synchronize) {
         for(int j = 0; j < this.dataSlots.size(); ++j) {
             final DataSlot dataSlot = this.dataSlots.get(j);
             if (dataSlot.checkAndClearUpdateFlag()) {
