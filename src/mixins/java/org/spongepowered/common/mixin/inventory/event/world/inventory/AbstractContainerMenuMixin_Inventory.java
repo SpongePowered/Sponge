@@ -163,7 +163,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
     }
 
-    @Inject(method = "broadcastFullState", at = @At("HEAD"))
+    @Inject(method = "broadcastFullState", at = @At("HEAD"), cancellable = true)
     private void impl$broadcastFullStateWithTransactions(final CallbackInfo ci) {
         if (!PhaseTracker.SERVER.onSidedThread()) {
             return;
