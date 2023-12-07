@@ -429,6 +429,7 @@
         "minecraft.world.level.storage.LevelDataMixin_API",
         "minecraft.world.level.storage.PrimaryLevelDataMixin_API",
         "minecraft.world.level.storage.ServerLevelDataMixin_API",
+        "minecraft.world.scores.DisplaySlotMixin_API",
         "minecraft.world.scores.PlayerTeamMixin_API",
         "minecraft.world.scores.Team_CollisionRuleMixin_API",
         "minecraft.world.scores.Team_VisibilityMixin_API",

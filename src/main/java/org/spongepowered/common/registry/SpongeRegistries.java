@@ -63,7 +63,6 @@ public final class SpongeRegistries {
         holder.createFrozenRegistry(RegistryTypes.CHUNK_REGENERATE_FLAG, SpongeRegistryLoader.chunkRegenerateFlag());
         holder.createFrozenRegistry(RegistryTypes.DAMAGE_MODIFIER_TYPE, SpongeRegistryLoader.damageModifierType());
         holder.createFrozenRegistry(RegistryTypes.DISMOUNT_TYPE, SpongeRegistryLoader.dismountType());
-        holder.createFrozenRegistry(RegistryTypes.DISPLAY_SLOT, SpongeRegistryLoader.displaySlot());
         holder.createFrozenRegistry(RegistryTypes.GOAL_EXECUTOR_TYPE, SpongeRegistryLoader.goalExecutorType());
         holder.createFrozenRegistry(RegistryTypes.GOAL_TYPE, SpongeRegistryLoader.goalType());
         holder.createFrozenRegistry(RegistryTypes.MATTER_TYPE, SpongeRegistryLoader.matterType());

@@ -22,52 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.scoreboard;
+package org.spongepowered.common.mixin.api.minecraft.world.scores;
 
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.ChatFormatting;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
-import org.spongepowered.common.adventure.SpongeAdventure;
+import net.minecraft.world.scores.DisplaySlot;
+import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Optional;
 
-public final class SpongeDisplaySlot implements DisplaySlot {
-
-    private final int id;
-    private final @Nullable ChatFormatting formatting;
-
-    private @Nullable NamedTextColor color;
-
-    public static int slotIdFromFormatting(final ChatFormatting formatting) {
-        return formatting.getId() + 3;
-    }
-
-    public SpongeDisplaySlot(final int id) {
-        this(id, null);
-    }
-
-    public SpongeDisplaySlot(final ChatFormatting color) {
-        this(SpongeDisplaySlot.slotIdFromFormatting(color), color);
-    }
-
-    private SpongeDisplaySlot(final int id, final @Nullable ChatFormatting color) {
-        this.id = id;
-        this.formatting = color;
-    }
+@Mixin(DisplaySlot.class)
+public abstract class DisplaySlotMixin_API implements org.spongepowered.api.scoreboard.displayslot.DisplaySlot {
 
     @Override
-    @NonNull
     public Optional<NamedTextColor> teamColor() {
-        if (this.color == null) {
-            this.color = SpongeAdventure.asAdventureNamed(this.formatting);
-        }
-        return Optional.ofNullable(this.color);
+        return Optional.ofNullable(switch ((DisplaySlot) (Object)this) {
+            case LIST, SIDEBAR, BELOW_NAME -> null;
+            case TEAM_BLACK -> NamedTextColor.BLACK;
+            case TEAM_DARK_BLUE -> NamedTextColor.DARK_BLUE;
+            case TEAM_DARK_GREEN -> NamedTextColor.DARK_GREEN;
+            case TEAM_DARK_AQUA -> NamedTextColor.DARK_AQUA;
+            case TEAM_DARK_RED -> NamedTextColor.DARK_RED;
+            case TEAM_DARK_PURPLE -> NamedTextColor.DARK_PURPLE;
+            case TEAM_GOLD -> NamedTextColor.GOLD;
+            case TEAM_GRAY -> NamedTextColor.GRAY;
+            case TEAM_DARK_GRAY -> NamedTextColor.DARK_GRAY;
+            case TEAM_BLUE -> NamedTextColor.BLUE;
+            case TEAM_GREEN -> NamedTextColor.GREEN;
+            case TEAM_AQUA -> NamedTextColor.AQUA;
+            case TEAM_RED -> NamedTextColor.RED;
+            case TEAM_LIGHT_PURPLE -> NamedTextColor.LIGHT_PURPLE;
+            case TEAM_YELLOW -> NamedTextColor.YELLOW;
+            case TEAM_WHITE -> NamedTextColor.WHITE;
+        });
     }
-
-    public int index() {
-        return this.id;
-    }
-
 }

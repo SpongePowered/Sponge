@@ -91,8 +91,6 @@ import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientations;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
-import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.ban.BanTypes;
@@ -165,8 +163,6 @@ import org.spongepowered.common.map.decoration.SpongeMapDecorationBannerType;
 import org.spongepowered.common.map.decoration.SpongeMapDecorationType;
 import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
 import org.spongepowered.common.registry.RegistryLoader;
-import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
-import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
 import org.spongepowered.common.util.SpongeOrientation;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeChunkRegenerateFlag;
@@ -271,18 +267,6 @@ public final class SpongeRegistryLoader {
                 DismountTypes.DERAIL,
                 DismountTypes.PLAYER
         )));
-    }
-
-    public static RegistryLoader<DisplaySlot> displaySlot() {
-        return RegistryLoader.of(l -> {
-            // See Scoreboard.getDisplaySlotByName
-            l.add(0, DisplaySlots.LIST, k -> new SpongeDisplaySlot(0));
-            l.add(1, DisplaySlots.SIDEBAR, k -> new SpongeDisplaySlot(1));
-            l.add(2, DisplaySlots.BELOW_NAME, k -> new SpongeDisplaySlot(2));
-
-            SpongeDisplaySlotFactory.ColorMapping.COLOR_TO_DISPLAY_SLOT_MAP.forEach((color, s) ->
-                            l.add(SpongeDisplaySlot.slotIdFromFormatting(color), s, k -> new SpongeDisplaySlot(color)));
-        });
     }
 
     public static RegistryLoader<GoalExecutorType> goalExecutorType() {

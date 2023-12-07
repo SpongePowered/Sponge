@@ -89,6 +89,7 @@ import net.minecraft.world.level.block.state.properties.Tilt;
 import net.minecraft.world.level.block.state.properties.WallSide;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.minecraft.world.ticks.TickPriority;
@@ -244,6 +245,7 @@ public final class VanillaRegistryLoader {
         this.automaticSerializedName(RegistryTypes.BILLBOARD_TYPE, Display.BillboardConstraints.values());
         this.automaticSerializedName(RegistryTypes.TEXT_ALIGNMENT, Display.TextDisplay.Align.values());
         this.automaticName(RegistryTypes.LIGHT_TYPE, LightLayer.values());
+        this.naming(RegistryTypes.DISPLAY_SLOT, DisplaySlot.values(), d -> d.getSerializedName().replace(".", "_"));
     }
 
     private static RegistryLoader<Criterion> criterion() {
