@@ -41,6 +41,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.value.CollectionValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.util.OptBool;
@@ -54,6 +55,7 @@ import org.spongepowered.common.util.TypeTokenUtil;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -201,6 +203,13 @@ public class DataProviderRegistrator {
 
         @SuppressWarnings({"unchecked", "UnstableApiUsage"})
         protected <K, V extends Value<K>> MutableRegistrator<T> register(final MutableRegistration<T, K> registration) {
+            final DataProvider<?, ?> provider = registration.build(this.target);
+            this.registrationBuilder.dataKey(provider.key()).provider(provider);
+            return this;
+        }
+
+        @SuppressWarnings({"unchecked", "UnstableApiUsage"})
+        protected <K, V extends Value<K>, L> MutableRegistrator<T> register(final MutableCollectionRegistration<T, K, L> registration) {
             final DataProvider<?, ?> provider = registration.build(this.target);
             this.registrationBuilder.dataKey(provider.key()).provider(provider);
             return this;
@@ -400,6 +409,15 @@ public class DataProviderRegistrator {
                     }
                     return super.supports(dataHolder);
                 }
+
+                @Override
+                public <TE> DataTransactionResult offerSingle(final DataHolder.Mutable dataHolder, final TE element) {
+                    if (registration instanceof MutableCollectionRegistration<?, ?, ?> haha && haha.single != null) {
+                        ((BiConsumer<H, TE>)haha.single).accept((H) dataHolder, element);
+                        return DataTransactionResult.successNoData();
+                    }
+                    return DataTransactionResult.failNoData();
+                }
             };
 
 
@@ -426,6 +444,12 @@ public class DataProviderRegistrator {
             return registration;
         }
 
+        public <NE extends CollectionValue<?, V>, V extends Collection<VE>, VE> MutableCollectionRegistration<H, V, VE> createCollection(final Key<? extends NE> key) {
+            final MutableCollectionRegistration<H, V, VE> registration = new MutableCollectionRegistration<H, V, VE>(this.registrator, key);
+            this.registrator.register(registration);
+            return registration;
+        }
+
         /**
          * Creates a new {@link MutableRegistrator}
          * @return The registrator
@@ -440,6 +464,33 @@ public class DataProviderRegistrator {
          */
         public <NT> ImmutableRegistrator<NT> asImmutable(final Class<NT> target) {
             return new ImmutableRegistrator<>(this.registrator.registrationBuilder, target);
+        }
+    }
+
+    public static final class MutableCollectionRegistration<H, E, V> extends MutableRegistrationBase<H, E, MutableCollectionRegistration<H, E, V>> {
+
+        private final MutableRegistrator<H> registrator;
+
+        @Nullable BiConsumer<H, V> single;
+
+        private MutableCollectionRegistration(final MutableRegistrator<H> registrator, final Key<? extends Value<E>> key) {
+            super(key);
+            this.registrator = registrator;
+        }
+
+        public <NE> MutableRegistration<H, NE> create(final DefaultedRegistryReference<? extends Key<? extends Value<NE>>> suppliedKey) {
+            return this.create(suppliedKey.get());
+        }
+
+        public <NE> MutableRegistration<H, NE> create(final Key<? extends Value<NE>> key) {
+            final MutableRegistration<H, NE> registration = new MutableRegistration<>(this.registrator, key);
+            this.registrator.register(registration);
+            return registration;
+        }
+
+        public MutableCollectionRegistration<H, E, V> single(BiConsumer<H, V> single) {
+            this.single = single;
+            return this;
         }
     }
 
