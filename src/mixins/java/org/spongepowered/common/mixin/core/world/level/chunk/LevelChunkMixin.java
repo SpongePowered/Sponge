@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.level.chunk;
 import com.google.common.base.MoreObjects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -41,7 +42,11 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
 import net.minecraft.world.ticks.LevelChunkTicks;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,10 +57,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.data.DataHolderProcessor;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.CacheKeyBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
@@ -73,7 +82,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
-public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkBridge, CacheKeyBridge {
+public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkBridge, CacheKeyBridge, SpongeMutableDataHolder, SpongeDataHolderBridge, DataCompoundHolder {
 
     // @formatter:off
     @Shadow @Final private Level level;
@@ -91,6 +100,7 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
     private long impl$cacheKey;
     private Map<Integer, PlayerTracker> impl$trackedIntBlockPositions = new HashMap<>();
     private Map<Short, PlayerTracker> impl$trackedShortBlockPositions = new HashMap<>();
+    private @Nullable CompoundTag impl$compound;
 
     public LevelChunkMixin(
         final ChunkPos $$0,
@@ -372,6 +382,31 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
             return true;
         }
         return false;
+    }
+
+    @Override
+    public CompoundTag data$getCompound() {
+        return this.impl$compound;
+    }
+
+    @Override
+    public void data$setCompound(final CompoundTag nbt) {
+        this.impl$compound = nbt;
+    }
+
+
+    @Override
+    public <E> DataTransactionResult bridge$offer(final Key<@NonNull ? extends Value<E>> key, final E value) {
+        final DataTransactionResult result = DataHolderProcessor.bridge$offer(this, key, value);
+        this.unsaved = true;
+        return result;
+    }
+
+    @Override
+    public <E> DataTransactionResult bridge$remove(final Key<@NonNull ? extends Value<E>> key) {
+        final DataTransactionResult result = DataHolderProcessor.bridge$remove(this, key);
+        this.unsaved = true;
+        return result;
     }
 
 }

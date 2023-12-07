@@ -63,6 +63,7 @@ import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
@@ -97,7 +98,8 @@ public final class CustomDataTest {
         BLOCKENTITY,
         PLAYER,
         USER,
-        BLOCK
+        BLOCK,
+        CHUNK
     }
 
     @Listener
@@ -157,6 +159,12 @@ public final class CustomDataTest {
                             final Integer oldNumber = player.world().get(player.blockPosition(), this.myDataKey).orElse(0);
                             player.sendActionBar(Component.text(oldNumber));
                             player.world().offer(player.blockPosition(), this.myDataKey, oldNumber + number);
+                            break;
+                        case CHUNK:
+                            final Integer oldNumber2 = player.world().chunk(player.location().chunkPosition()).get(this.myDataKey).orElse(0);
+                            player.sendActionBar(Component.text(oldNumber2));
+                            player.world().chunk(player.location().chunkPosition()).offer(this.myDataKey, oldNumber2 + number);
+                            break;
                     }
                     return CommandResult.success();
                 })
@@ -175,7 +183,7 @@ public final class CustomDataTest {
                 .build();
 
 
-        final DataStore dataStore = DataStore.of(this.myDataKey, DataQuery.of("mykey"), ItemStack.class, User.class, ServerPlayer.class, BlockEntity.class, Entity.class);
+        final DataStore dataStore = DataStore.of(this.myDataKey, DataQuery.of("mykey"), ItemStack.class, User.class, ServerPlayer.class, BlockEntity.class, Entity.class, WorldChunk.class);
         final DataRegistration myRegistration = DataRegistration.builder()
                 .dataKey(this.myDataKey)
                 .store(dataStore)
