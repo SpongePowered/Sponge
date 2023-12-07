@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import com.mojang.datafixers.util.Either;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
@@ -52,6 +54,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.level.ServerChunkCacheAccessor;
 import org.spongepowered.common.accessor.world.level.chunk.storage.ChunkStorageAccessor;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.DistanceManagerBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
@@ -62,6 +65,8 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.math.vector.Vector3i;
+
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin implements ChunkMapBridge {
@@ -195,4 +200,10 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         }
     }
 
+    @Inject(method = "schedule", at = @At("HEAD"), cancellable = true)
+    private void impl$onSchedule(final CallbackInfoReturnable<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> cir) {
+        if (!((ServerLevelBridge) this.level).bridge$isLoaded()) {
+            cir.setReturnValue(ChunkHolder.UNLOADED_CHUNK_FUTURE);
+        }
+    }
 }

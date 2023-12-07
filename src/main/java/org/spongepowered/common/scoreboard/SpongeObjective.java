@@ -252,7 +252,6 @@ public final class SpongeObjective implements Objective {
 
     public static final class Builder implements Objective.Builder {
 
-        private static final int MAX_NAME_LENGTH = 16;
         private @Nullable String name;
         private @Nullable Component displayName;
         private @Nullable Criterion criterion;
@@ -260,12 +259,7 @@ public final class SpongeObjective implements Objective {
 
         @Override
         public Objective.Builder name(final String name) {
-            Objects.requireNonNull(name);
-            if (org.spongepowered.common.scoreboard.SpongeObjective.Builder.MAX_NAME_LENGTH < name.length()) {
-                throw new IllegalStateException(String.format("name '%s' is too long: %s characters over limit of %s",
-                        name, org.spongepowered.common.scoreboard.SpongeObjective.Builder.MAX_NAME_LENGTH - name.length(), org.spongepowered.common.scoreboard.SpongeObjective.Builder.MAX_NAME_LENGTH));
-            }
-            this.name = name;
+            this.name = Objects.requireNonNull(name);
             return this;
         }
 

@@ -414,10 +414,11 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             target = "Lnet/minecraft/server/players/PlayerList;broadcastAll(Lnet/minecraft/network/protocol/Packet;)V"
         )
     )
-    private void impl$sendScoreboard(final PlayerList playerList, final Packet<?> addPlayer,
+    private void impl$onlySendSelfAddPlayerOnVanished(final PlayerList playerList, final Packet<?> addPlayer,
         final Connection playerConnection, final net.minecraft.server.level.ServerPlayer serverPlayer
     ) {
         if (((VanishableBridge) serverPlayer).bridge$vanishState().invisible()) {
+            playerConnection.send(addPlayer);
             return;
         }
         playerList.broadcastAll(addPlayer);
@@ -427,17 +428,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         method = "placeNewPlayer",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket;createPlayerInitializing(Ljava/util/Collection;)Lnet/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket;"
-        ),
-        slice = @Slice(
-            from = @At(
-                value = "INVOKE",
-                target = "Lnet/minecraft/server/level/ServerPlayer;sendServerStatus(Lnet/minecraft/network/protocol/status/ServerStatus;)V"
-            ),
-            to = @At(
-                value = "INVOKE",
-                target = "Lnet/minecraft/server/level/ServerLevel;addNewPlayer(Lnet/minecraft/server/level/ServerPlayer;)V"
-            )
+            target = "Lnet/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket;createPlayerInitializing(Ljava/util/Collection;)Lnet/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket;",
+            ordinal = 0
         )
     )
     private ClientboundPlayerInfoUpdatePacket impl$onlySendAddPlayerForUnvanishedPlayers(final Collection<net.minecraft.server.level.ServerPlayer> $$0) {

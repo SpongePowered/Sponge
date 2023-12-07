@@ -32,7 +32,6 @@ import org.spongepowered.common.accessor.world.scores.ObjectiveAccessor;
 import org.spongepowered.common.accessor.world.scores.ScoreAccessor;
 import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.bridge.world.scores.ScoreBridge;
-import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,9 +50,6 @@ public final class SpongeScore implements Score {
     public SpongeScore(final Component name) {
         this.name = name;
         this.legacyName = LegacyComponentSerializer.legacySection().serialize(name);
-        if (this.legacyName.length() > Constants.Scoreboards.SCORE_NAME_LENGTH) {
-            throw new IllegalArgumentException(String.format("The score name %s is too long! It must be at most %s characters.", this.legacyName, Constants.Scoreboards.SCORE_NAME_LENGTH));
-        }
     }
 
     @Override

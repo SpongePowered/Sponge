@@ -33,8 +33,9 @@ import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDelayPacke
 import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDistancePacket;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 
 public final class PlayerOwnBorderListener implements BorderChangeListener {
 
@@ -81,7 +82,10 @@ public final class PlayerOwnBorderListener implements BorderChangeListener {
      * This method is for cleaning up the player reference once they disconnect.
      */
     public void onPlayerDisconnect() {
-        ((ServerPlayer) this.player).worldBorder().ifPresent(border -> ((WorldBorderAccessor) border).accessor$listeners().remove(this));
+        final @Nullable WorldBorder border = ((ServerPlayerBridge) this.player).bridge$getWorldBorder();
+        if (border != null) {
+            ((WorldBorderAccessor) border).accessor$listeners().remove(this);
+        }
     }
 
     private void sendBorderPacket(final Packet<ClientGamePacketListener> packet) {

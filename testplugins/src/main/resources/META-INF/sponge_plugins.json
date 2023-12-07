@@ -291,6 +291,12 @@
             "name": "Sign Test",
             "entrypoint": "org.spongepowered.test.sign.SignTest",
             "description": "Testing Sign Changes"
+        },
+        {
+            "id": "clickcontainereventcancelledtest",
+            "name": "Click Container Event Cancelled Test",
+            "entrypoint": "org.spongepowered.test.interact.ClickContainerEventCancelledTest",
+            "description": "Testing Cancelling Click Container Primary Event"
         }
     ]
 }

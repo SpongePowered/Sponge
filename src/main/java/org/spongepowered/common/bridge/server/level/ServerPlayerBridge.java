@@ -35,6 +35,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.SkinPart;
@@ -110,4 +111,7 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
 
     void bridge$setGameModeNoEvent(final GameType gameType);
 
+    @Nullable WorldBorder bridge$getWorldBorder();
+
+    void bridge$replaceWorldBorder(final @Nullable WorldBorder border);
 }
