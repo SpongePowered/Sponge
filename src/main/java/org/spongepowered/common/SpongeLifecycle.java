@@ -130,8 +130,7 @@ public final class SpongeLifecycle implements Lifecycle {
 
         // TODO we might want to move more registration to here
 
-        // Plugin registry values
-        this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
+
     }
 
     @Override
@@ -148,6 +147,8 @@ public final class SpongeLifecycle implements Lifecycle {
                 holder.registryHolder().freezeSpongeRootRegistry();
             }
             case RELOADABLE -> {
+                // Plugin registry values
+                this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
                 // Freeze Dynamic Registries - Values are now available
                 holder.registryHolder().freezeSpongeDynamicRegistries();
             }
