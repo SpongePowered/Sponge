@@ -34,6 +34,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.RandomSource;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
@@ -43,6 +44,7 @@ import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -64,6 +66,11 @@ import java.util.concurrent.CompletionException;
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginPacketListenerImplBridge, ConnectionHolderBridge {
 
+    // @formatter:off
+
+    //Vanilla is creating a non-thread safe one while a thread safe one should be used instead
+    @Shadow @Final @Mutable private static RandomSource RANDOM = RandomSource.createThreadSafe();
+
     @Shadow @Final public Connection connection;
     @Shadow com.mojang.authlib.GameProfile gameProfile;
     @Shadow @Final MinecraftServer server;
@@ -73,6 +80,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     @Shadow protected abstract com.mojang.authlib.GameProfile shadow$createFakeProfile(com.mojang.authlib.GameProfile profile);
     @Shadow public abstract void shadow$disconnect(Component reason);
     @Shadow protected abstract void shadow$placeNewPlayer(final ServerPlayer param0);
+    // @formatter:on
 
     private boolean impl$accepted = false;
 
