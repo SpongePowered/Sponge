@@ -383,38 +383,41 @@ public final class VolumeStreamUtils {
             final ChunkPos pos = chunk.getPos();
 
             final int xStart = pos.x == minCursor.chunkX ? minCursor.xOffset : 0;
+            final int xEnd = pos.x == maxCursor.chunkX ? maxCursor.xOffset : 15;
             final int zStart = pos.z == minCursor.chunkZ ? minCursor.zOffset : 0;
+            final int zEnd = pos.z == maxCursor.chunkZ ? maxCursor.zOffset : 15;
 
             final int chunkMinX = pos.x << 4;
             final int chunkMinZ = pos.z << 4;
 
-            return null; // TODO fix me
-//            return Arrays.stream(chunk.getSections())
-//                .filter(Objects::nonNull)
-//                .filter(chunkSection -> chunkSection.bottomBlockY() >= minCursor.ySection && chunkSection.bottomBlockY() <= maxCursor.ySection)
-//                .flatMap(
-//                chunkSection -> IntStream.range(zStart, zEnd)
-//                    .mapToObj(z -> IntStream.range(xStart, xEnd)
-//                        .mapToObj(x -> {
-//                            final int sectionY = chunkSection.bottomBlockY();
-//                            final int yStart = sectionY == minCursor.ySection ? minCursor.yOffset : 0;
-//                            final int yEnd = sectionY == maxCursor.ySection ? maxCursor.yOffset + 1 : 16; // plus 1 because of IntStream range exclusive
-//                            return IntStream.range(yStart, yEnd)
-//                                .mapToObj(y ->
-//                                    {
-//                                        final int adjustedX = x + chunkMinX;
-//                                        final int adjustedY = y + sectionY;
-//                                        final int adjustedZ = z + chunkMinZ;
-//
-//                                        final BlockPos blockPos = new BlockPos(adjustedX, adjustedY, adjustedZ);
-//                                        final T apply = Objects.requireNonNull(elementAccessor.apply(chunk, chunkSection, blockPos), "Element cannot be null");
-//                                        return new AbstractMap.SimpleEntry<>(blockPos, apply);
-//                                    }
-//                                );
-//                        }))
-//                    .flatMap(Function.identity())
-//                    .flatMap(Function.identity())
-//            );
+            final LevelChunkSection[] sections = chunk.getSections();
+
+            return IntStream.range(0, sections.length)
+                .filter(i -> {
+                    final int sectionY = SectionPos.sectionToBlockCoord(chunk.getSectionYFromSectionIndex(i));
+                    return sectionY >= minCursor.ySection && sectionY <= maxCursor.ySection;
+                })
+                .mapToObj(i -> IntStream.rangeClosed(zStart, zEnd)
+                    .mapToObj(z -> IntStream.rangeClosed(xStart, xEnd)
+                        .mapToObj(x -> {
+                            final LevelChunkSection chunkSection = sections[i];
+                            final int sectionY = SectionPos.sectionToBlockCoord(chunk.getSectionYFromSectionIndex(i));
+                            final int yStart = sectionY == minCursor.ySection ? minCursor.yOffset : 0;
+                            final int yEnd = sectionY == maxCursor.ySection ? maxCursor.yOffset : 15;
+                            return IntStream.rangeClosed(yStart, yEnd)
+                                .mapToObj(y -> {
+                                    final int adjustedX = x + chunkMinX;
+                                    final int adjustedY = y + sectionY;
+                                    final int adjustedZ = z + chunkMinZ;
+
+                                    final BlockPos blockPos = new BlockPos(adjustedX, adjustedY, adjustedZ);
+                                    final T apply = Objects.requireNonNull(elementAccessor.apply(chunk, chunkSection, blockPos), "Element cannot be null");
+                                    return new AbstractMap.SimpleEntry<>(blockPos, apply);
+                                });
+                        })))
+                    .flatMap(Function.identity())
+                    .flatMap(Function.identity())
+                    .flatMap(Function.identity());
         };
     }
 
@@ -551,8 +554,8 @@ public final class VolumeStreamUtils {
 
         // Generate the chunk position stream to iterate on, whether they're accessed immediately
         // or lazily is up to the stream options.
-        final Stream<Section> sectionStream = IntStream.range(chunkMin.getX(), chunkMax.getX() + 1)
-            .mapToObj(x -> IntStream.range(chunkMin.getZ(), chunkMax.getZ() + 1).mapToObj(z -> new ChunkPos(x, z)))
+        final Stream<Section> sectionStream = IntStream.rangeClosed(chunkMin.getX(), chunkMax.getX())
+            .mapToObj(x -> IntStream.rangeClosed(chunkMin.getZ(), chunkMax.getZ()).mapToObj(z -> new ChunkPos(x, z)))
             .flatMap(Function.identity())
             .map(pos -> chunkAccessor.apply(ref, pos));
 
