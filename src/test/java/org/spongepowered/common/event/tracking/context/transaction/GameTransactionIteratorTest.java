@@ -35,13 +35,13 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.StubPhaseState;
 import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
-import org.spongepowered.common.test.UnitTestExtension;
+import org.spongepowered.common.launch.SpongeExtension;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
 
 @SuppressWarnings("deprecation")
-@ExtendWith(UnitTestExtension.class)
+@ExtendWith(SpongeExtension.class)
 public class GameTransactionIteratorTest {
 
     @Test

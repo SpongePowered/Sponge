@@ -1,0 +1,13 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "org.spongepowered.common.launch.mixin",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "priority": 11111,
+    "mixins": [
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

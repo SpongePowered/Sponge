@@ -24,6 +24,7 @@ val asmVersion: String by project
 val checkerVersion: String by project
 val log4jVersion: String by project
 val modlauncherVersion: String by project
+val java9hacksVersion: String by project
 
 dependencies {
     // AccessWidener transformer
@@ -40,7 +41,7 @@ dependencies {
 
     compileOnly("net.sf.jopt-simple:jopt-simple:5.0.4")
     compileOnly("org.ow2.asm:asm-commons:$asmVersion")
-    compileOnly("cpw.mods:grossjava9hacks:1.3.3") {
+    compileOnly("cpw.mods:grossjava9hacks:$java9hacksVersion") {
         exclude(group="org.apache.logging.log4j")
     }
     // Configurate dependencies, also to be provided by the platform

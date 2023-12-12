@@ -25,8 +25,11 @@ version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVer
 val vanillaBootstrapLibrariesConfig = configurations.register("bootstrapLibraries")
 val vanillaLibrariesConfig = configurations.register("libraries")
 val mlTransformersConfig = configurations.register("mlTransformers")
-val vanillaAppLaunchConfig = configurations.register("applaunch") {
+val vanillaAppLaunchBaseConfig = configurations.register("applaunch-base") {
     extendsFrom(vanillaBootstrapLibrariesConfig.get())
+}
+val vanillaAppLaunchConfig = configurations.register("applaunch") {
+    extendsFrom(vanillaAppLaunchBaseConfig.get())
     extendsFrom(configurations.minecraft.get())
     extendsFrom(mlTransformersConfig.get())
 }
@@ -112,11 +115,13 @@ val vanillaMixins by sourceSets.register("mixins") {
     spongeImpl.applyNamedDependencyOnOutput(project, vanillaMain, this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, vanillaLaunch, this, project, this.implementationConfigurationName)
 }
+val vanillaAppLaunchBase by sourceSets.register("applaunch-base")
 val vanillaAppLaunch by sourceSets.register("applaunch") {
     // implementation (compile) dependencies
     spongeImpl.applyNamedDependencyOnOutput(commonProject, applaunch.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(commonProject, launch.get(), vanillaLaunch, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, vanillaInstaller, this, project, this.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(project, vanillaAppLaunchBase, this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, this, vanillaLaunch, project, vanillaLaunch.implementationConfigurationName)
     // runtime dependencies - literally add the rest of the project, because we want to launch the game
     spongeImpl.applyNamedDependencyOnOutput(project, vanillaMixins, this, project, this.runtimeOnlyConfigurationName)
@@ -139,7 +144,9 @@ val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementa
 configurations.named(vanillaInstaller.implementationConfigurationName) {
     extendsFrom(vanillaInstallerConfig.get())
 }
-
+configurations.named(vanillaAppLaunchBase.implementationConfigurationName) {
+    extendsFrom(vanillaAppLaunchBaseConfig.get())
+}
 configurations.named(vanillaAppLaunch.implementationConfigurationName) {
     extendsFrom(vanillaAppLaunchConfig.get())
     extendsFrom(launchConfig.get())
@@ -245,6 +252,7 @@ dependencies {
     val log4jVersion: String by project
     val mixinVersion: String by project
     val modlauncherVersion: String by project
+    val java9hacksVersion: String by project
     val tinyLogVersion: String by project
 
     api(project(":", configuration = "launch"))
@@ -279,6 +287,7 @@ dependencies {
         isTransitive = false
     }
 
+    val appLaunchBase = vanillaAppLaunchBaseConfig.name
     val appLaunch = vanillaAppLaunchConfig.name
 
     val bootstrapLibraries = vanillaBootstrapLibrariesConfig.name
@@ -327,14 +336,14 @@ dependencies {
     // Launch Dependencies - Needed to bootstrap the engine(s)
     // Not needing to be source-visible past the init phase
     // The ModLauncher compatibility launch layer
-    appLaunch("cpw.mods:modlauncher:$modlauncherVersion") {
+    appLaunchBase("cpw.mods:modlauncher:$modlauncherVersion") {
         exclude(group = "org.apache.logging.log4j")
         exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
     }
-    appLaunch("org.ow2.asm:asm-commons:$asmVersion")
-    appLaunch("cpw.mods:grossjava9hacks:1.3.3") {
+    appLaunchBase("cpw.mods:grossjava9hacks:$java9hacksVersion") {
         exclude(group = "org.apache.logging.log4j")
     }
+    appLaunch("org.ow2.asm:asm-commons:$asmVersion")
     appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
     appLaunch("com.lmax:disruptor:3.4.4")
     "applaunchCompileOnly"("org.jetbrains:annotations:23.1.0")
@@ -396,6 +405,7 @@ tasks {
     val vanillaAppLaunchJar by registering(Jar::class) {
         archiveClassifier.set("applaunch")
         manifest.from(vanillaManifest)
+        from(vanillaAppLaunchBase.output)
         from(vanillaAppLaunch.output)
     }
     val vanillaLaunchJar by registering(Jar::class) {
@@ -494,6 +504,7 @@ tasks {
         from(vanillaInstaller.output)
         from(vanillaInstallerJava8.output)
         from(vanillaInstallerJava9.output)
+        from(vanillaAppLaunchBase.output)
         from(vanillaAppLaunch.output)
         from(vanillaLaunch.output)
         from(vanillaMixins.output)
