@@ -104,6 +104,7 @@ import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
+import org.spongepowered.common.bridge.data.TransientBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
@@ -137,7 +138,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, CommandSourceProviderBridge, DataCompoundHolder {
+public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, CommandSourceProviderBridge, DataCompoundHolder, TransientBridge {
 
     // @formatter:off
 
@@ -231,12 +232,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract int shadow$getPortalCooldown();
 
     @Shadow public abstract boolean shadow$onGround();
-
+    @Shadow @Nullable protected abstract String shadow$getEncodeId();
     // @formatter:on
 
     private boolean impl$isConstructing = true;
     private VanishState impl$vanishState = VanishState.unvanished();
-    private boolean impl$transient = false;
+    protected boolean impl$transient = false;
     private boolean impl$shouldFireRepositionEvent = true;
     private WeakReference<ServerWorld> impl$originalDestinationWorld = null;
     private boolean impl$customPortal = false;
@@ -439,6 +440,11 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 trackerAccessor.accessor$updatePlayer(entityPlayerMP);
             }
         }
+    }
+
+    @Override
+    public boolean bridge$isTransient() {
+        return this.shadow$getEncodeId() == null;
     }
 
     @Override

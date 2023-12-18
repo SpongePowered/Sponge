@@ -906,4 +906,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     public void bridge$replaceWorldBorder(final @Nullable WorldBorder border) {
         this.impl$worldBorder = border;
     }
+
+    @Override
+    public boolean bridge$isTransient() {
+        return this.impl$transient;
+    }
 }

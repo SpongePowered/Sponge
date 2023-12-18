@@ -94,6 +94,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.client.server.IntegratedPlayerListBridge;
+import org.spongepowered.common.bridge.data.TransientBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
@@ -673,4 +674,10 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         this.shadow$broadcastChatMessage($$0, filter, $$2, boundChatType);
     }
 
+    @Inject(method = "save", at = @At("HEAD"), cancellable = true)
+    private void impl$onSave(final net.minecraft.server.level.ServerPlayer player, final CallbackInfo ci) {
+        if (((TransientBridge) player).bridge$isTransient()) {
+            ci.cancel();
+        }
+    }
 }

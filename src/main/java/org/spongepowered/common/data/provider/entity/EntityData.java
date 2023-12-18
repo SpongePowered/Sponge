@@ -197,9 +197,6 @@ public final class EntityData {
                             h.getTags().clear();
                             h.getTags().addAll(v);
                         })
-                    .create(Keys.TRANSIENT)
-                        .get(h -> ((EntityAccessor) h).invoker$getEncodeId() == null)
-                        .set((h, v) -> ((EntityBridge) h).bridge$setTransient(v))
                     .create(Keys.VEHICLE)
                         .get(h -> (org.spongepowered.api.entity.Entity) h.getVehicle())
                         .set((h, v) -> h.startRiding((Entity) v, true))

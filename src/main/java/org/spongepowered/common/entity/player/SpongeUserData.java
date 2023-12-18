@@ -70,6 +70,7 @@ import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
+import org.spongepowered.common.bridge.data.TransientBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.world.entity.player.BedLocationHolderBridge;
@@ -107,7 +108,7 @@ import java.util.function.Supplier;
  *  There should be no difference between the two.
  */
 public final class SpongeUserData implements Identifiable, DataSerializable, BedLocationHolderBridge, SpongeMutableDataHolder,
-        DataCompoundHolder, VanishableBridge, GameProfileHolderBridge, User, BridgeSubject {
+        DataCompoundHolder, VanishableBridge, GameProfileHolderBridge, User, BridgeSubject, TransientBridge {
 
     private final Map<ResourceKey, RespawnLocation> spawnLocations = Maps.newHashMap();
 
@@ -124,6 +125,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     private boolean vanishIgnoresCollision;
     private boolean vanishPreventsTargeting;
     private final GameProfile profile;
+    private boolean isTransient;
 
     private @Nullable SpongeUserInventory inventory; // lazy load when accessing inventory
     private @Nullable PlayerEnderChestContainer enderChest; // lazy load when accessing inventory
@@ -623,4 +625,13 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         return this.uniqueId().toString();
     }
 
+    @Override
+    public boolean bridge$isTransient() {
+        return this.isTransient;
+    }
+
+    @Override
+    public void bridge$setTransient(final boolean value) {
+        this.isTransient = value;
+    }
 }

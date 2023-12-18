@@ -69,8 +69,6 @@ public interface EntityBridge {
     default void bridge$onCancelledBlockChange(final EntityTickContext phaseContext) {
     }
 
-    void bridge$setTransient(boolean value);
-
     boolean bridge$dismountRidingEntity(DismountType type);
 
     Entity bridge$changeDimension(ServerLevel targetWorld, PortalLogic teleporter);
