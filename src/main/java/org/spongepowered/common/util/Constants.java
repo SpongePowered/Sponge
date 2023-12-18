@@ -533,7 +533,7 @@ public final class Constants {
         public static final String ITEM_UNBREAKABLE = "Unbreakable";
         public static final String CUSTOM_MODEL_DATA = "CustomModelData";
         public static final String CUSTOM_POTION_COLOR = "CustomPotionColor";
-        public static final String CUSTOM_POTION_EFFECTS = "CustomPotionEffects";
+        public static final String CUSTOM_POTION_EFFECTS = "custom_potion_effects";
         public static final String LOCK = "Lock";
 
         public static final class Book {
