@@ -203,6 +203,7 @@ public final class EntityData {
                     .create(Keys.VEHICLE)
                         .get(h -> (org.spongepowered.api.entity.Entity) h.getVehicle())
                         .set((h, v) -> h.startRiding((Entity) v, true))
+                        .delete(h -> h.stopRiding())
                     .create(Keys.VELOCITY)
                         .get(h -> VecHelper.toVector3d(h.getDeltaMovement()))
                         .set((h, v) -> {
