@@ -24,42 +24,78 @@
  */
 package org.spongepowered.forge.mixin.core.commands;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.server.command.CommandHelper;
+import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.function.Function;
 
 @Mixin(Commands.class)
 public abstract class CommandsMixin_Forge {
 
-    // @formatter:off
-    @Shadow @Final private CommandDispatcher<CommandSourceStack> dispatcher;
-    // @formatter:on
+    private WeakHashMap<ServerPlayer, Map<CommandNode<CommandSourceStack>, List<CommandNode<SharedSuggestionProvider>>>> impl$playerNodeCache;
+    private SpongeCommandManager impl$commandManager;
 
     // The event fired by Forge is fired in SpongeForgeCommandManager at the appropriate time.
-    @Inject(method = "performCommand",
-            slice = @Slice(from = @At("HEAD"),
-                    to = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/CommandDispatcher;"
-                            + "parse(Lcom/mojang/brigadier/StringReader;Ljava/lang/Object;)Lcom/mojang/brigadier/ParseResults;", remap = false)),
-            at = @At(value = "FIELD", opcode = Opcodes.GETFIELD,
-                    target = "Lnet/minecraft/commands/Commands;dispatcher:Lcom/mojang/brigadier/CommandDispatcher;"),
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION,
-            cancellable = true)
-    private void forge$redirectToSpongeCommandManager(final CommandSourceStack commandSourceStack,
-            final String command,
-            final CallbackInfoReturnable<Integer> cir,
-            final StringReader stringReader) throws CommandSyntaxException {
-        cir.setReturnValue(this.dispatcher.execute(stringReader, commandSourceStack));
+    @Redirect(method = "performCommand",
+        at = @At(value = "INVOKE", target = "Lnet/minecraftforge/eventbus/api/IEventBus;post(Lnet/minecraftforge/eventbus/api/Event;)Z"))
+    private boolean forge$redirectToSpongeCommandManager(IEventBus instance, Event event) {
+        return false;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Redirect(method = "sendCommands", at = @At(
+        value = "INVOKE",
+        target = "Lnet/minecraftforge/server/command/CommandHelper;mergeCommandNode(Lcom/mojang/brigadier/tree/CommandNode;Lcom/mojang/brigadier/tree/CommandNode;Ljava/util/Map;Ljava/lang/Object;Lcom/mojang/brigadier/Command;Ljava/util/function/Function;)V",
+        remap = false
+    ))
+    private <S, T> void impl$addNonBrigSuggestions(
+        final CommandNode<S> sourceChild,
+        final CommandNode<T> sourceNode,
+        final Map<CommandNode<S>, CommandNode<T>> resultNode,
+        final S sourceToResult,
+        final Command<T> canUse,
+        final Function<SuggestionProvider<S>, SuggestionProvider<T>> execute,
+        final ServerPlayer player
+    ) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(player);
+            frame.addContext(EventContextKeys.SUBJECT, (Subject) player);
+            final CommandCause sourceToUse = ((CommandSourceStackBridge) sourceToResult).bridge$withCurrentCause();
+            try {
+                this.impl$playerNodeCache.put(player, new IdentityHashMap<>());
+                // We use this because the redirects should be a 1:1 mapping (which is what this map is for).
+                final IdentityHashMap<CommandNode<S>, CommandNode<T>> idMap = new IdentityHashMap<>(resultNode);
+                CommandHelper.<S, T>mergeCommandNode(sourceChild, sourceNode, idMap, sourceToResult, canUse, execute);
+            } finally {
+                this.impl$playerNodeCache.remove(player);
+            }
+            for (final CommandNode<SharedSuggestionProvider> node : this.impl$commandManager.getNonBrigadierSuggestions(sourceToUse)) {
+                sourceNode.addChild((CommandNode<T>) node);
+            }
+        }
     }
 
 }

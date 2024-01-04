@@ -29,7 +29,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.common.util.VecHelper;

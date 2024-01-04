@@ -44,7 +44,6 @@ import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
-import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
@@ -106,7 +105,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.CommandUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -202,16 +200,6 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             final StringReader command,
             final Object source) {
         return SpongeCommandManager.get(this.server).getDispatcher().parse(command, (CommandSourceStack) source, true);
-    }
-
-    /**
-     * Specifically hooks the reach distance to use the forge hook.
-     */
-    @Redirect(
-            method = "handleInteract",
-            at = @At( value = "FIELD",target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;MAX_INTERACTION_DISTANCE:D"))
-    private double impl$getPlatformReach(final ServerboundInteractPacket packet) {
-        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, packet.getTarget(this.player.serverLevel()));
     }
 
     @Inject(method = "handleMovePlayer",

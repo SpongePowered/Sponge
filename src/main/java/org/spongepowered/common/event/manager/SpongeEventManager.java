@@ -46,6 +46,7 @@ import org.spongepowered.api.event.item.inventory.container.InteractContainerEve
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.filter.FilterGenerator;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
@@ -63,7 +64,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +77,7 @@ import java.util.stream.Stream;
 public abstract class SpongeEventManager implements EventManager {
 
     private static final NoExceptionClosable NULL_CLOSABLE = new NoExceptionClosable();
-    protected static final MethodHandles.Lookup OWN_LOOKUP = MethodHandles.lookup();
+    private static final MethodHandles.Lookup OWN_LOOKUP = MethodHandles.lookup();
 
     public final ListenerChecker checker;
     private final Object lock;
@@ -89,13 +89,11 @@ public abstract class SpongeEventManager implements EventManager {
      */
     protected final LoadingCache<EventType<?>, RegisteredListener.Cache> handlersCache =
             Caffeine.newBuilder().initialCapacity(150).build(this::bakeHandlers);
-    private final Map<PluginContainer, AnnotatedEventListener.Factory> pluginFactories;
     private final Set<Object> registeredListeners;
 
     public SpongeEventManager() {
         this.lock = new Object();
         this.handlersByEvent = HashMultimap.create();
-        this.pluginFactories = new IdentityHashMap<>();
         this.registeredListeners = new ReferenceOpenHashSet<>();
         this.checker = new ListenerChecker(ShouldFire.class);
 
@@ -225,10 +223,10 @@ public abstract class SpongeEventManager implements EventManager {
         }
     }
 
-    protected abstract AnnotatedEventListener.Factory computeFactory(final PluginContainer key);
+    protected abstract MethodHandles.@Nullable Lookup getLookup(final PluginContainer plugin, final Class<?> handle);
 
     private void registerListener(final PluginContainer plugin, final Object listenerObject,
-                                  final MethodHandles.@Nullable Lookup lookup) {
+                                  final MethodHandles.@Nullable Lookup customLookup) {
         Objects.requireNonNull(plugin, "plugin");
         Objects.requireNonNull(listenerObject, "listener");
 
@@ -244,7 +242,16 @@ public abstract class SpongeEventManager implements EventManager {
 
         final Class<?> handle = listenerObject.getClass();
 
-        final AnnotatedEventListener.Factory handlerFactory = this.pluginFactories.computeIfAbsent(plugin, this::computeFactory);
+        MethodHandles.@Nullable Lookup lookup = customLookup;
+        if (lookup == null) {
+            lookup = this.getLookup(plugin, handle);
+            if (lookup == null) {
+                SpongeCommon.logger().warn("No lookup found for listener {}. Using Sponge's lookup as fallback.", handle.getName());
+                lookup = SpongeEventManager.OWN_LOOKUP;
+            }
+        }
+
+        final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory(FilterGenerator::create);
 
         try {
             final List<ListenerClassVisitor.DiscoveredMethod> methods = ListenerClassVisitor.getEventListenerMethods(handle);
@@ -268,7 +275,7 @@ public abstract class SpongeEventManager implements EventManager {
                 }
             }
         } catch (final IOException ioe) {
-            SpongeCommon.logger().warn("Exception trying to register superclass listeners", ioe);
+            SpongeCommon.logger().warn("Exception trying to register class listeners", ioe);
         } catch (final NoSuchMethodException nsme) {
             SpongeCommon.logger().warn("Discovered method listener somehow not found for class " + handle.getName(), nsme);
         } catch (final ClassNotFoundException e) {

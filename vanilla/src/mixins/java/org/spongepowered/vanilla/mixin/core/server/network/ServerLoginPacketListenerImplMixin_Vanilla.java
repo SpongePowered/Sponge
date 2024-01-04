@@ -49,8 +49,8 @@ import org.spongepowered.common.network.channel.TransactionStore;
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements ServerLoginPacketListener {
 
-    @Shadow @Final private MinecraftServer server;
-    @Shadow private ServerLoginPacketListenerImpl.State state;
+    @Shadow @Final MinecraftServer server;
+    @Shadow ServerLoginPacketListenerImpl.State state;
 
     // Handshake phase:
     // 1. Sync registered plugin channels

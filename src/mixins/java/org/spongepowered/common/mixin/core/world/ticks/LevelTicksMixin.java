@@ -54,8 +54,7 @@ public abstract class LevelTicksMixin<T> implements LevelTicksBridge<T> {
         method = "schedule",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/ticks/LevelChunkTicks;schedule(Lnet/minecraft/world/ticks/ScheduledTick;)V",
-            remap = false
+            target = "Lnet/minecraft/world/ticks/LevelChunkTicks;schedule(Lnet/minecraft/world/ticks/ScheduledTick;)V"
         )
     )
     private void impl$associateScheduledTickData(ScheduledTick<T> param0, CallbackInfo ci) {

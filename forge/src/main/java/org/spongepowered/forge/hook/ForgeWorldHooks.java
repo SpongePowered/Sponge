@@ -31,7 +31,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import org.spongepowered.common.hooks.WorldHooks;
 
 public class ForgeWorldHooks implements WorldHooks {
@@ -44,7 +44,7 @@ public class ForgeWorldHooks implements WorldHooks {
             if (item.hasCustomEntity(stack)) {
                 final Entity newEntity = item.createEntity(entity.level, entity, stack);
                 if (newEntity != null) {
-                    entity.remove();
+                    entity.remove(Entity.RemovalReason.DISCARDED);
                     return newEntity;
                 }
             }
@@ -59,6 +59,6 @@ public class ForgeWorldHooks implements WorldHooks {
 
     @Override
     public void postLoadWorld(final ServerLevel world) {
-        MinecraftForge.EVENT_BUS.post(new WorldEvent.Load(world));
+         MinecraftForge.EVENT_BUS.post(new LevelEvent.Load(world));
     }
 }

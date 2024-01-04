@@ -45,7 +45,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
@@ -53,7 +52,6 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
-import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerImplBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 
@@ -61,7 +59,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletionException;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
-public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginPacketListenerImplBridge, ConnectionHolderBridge {
+public abstract class ServerLoginPacketListenerImplMixin implements ConnectionHolderBridge {
 
     // @formatter:off
     @Shadow @Final Connection connection;
@@ -172,8 +170,12 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         this.shadow$disconnect(reason);
     }
 
-    @Override
-    public boolean bridge$fireAuthEvent() {
+    @Inject(method = "startClientVerification(Lcom/mojang/authlib/GameProfile;)V",
+            at = @At(
+                    value = "FIELD",
+                    target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;state:Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;"),
+            cancellable = true)
+    private void impl$handleAuthEventCancellation(final CallbackInfo ci) {
         final net.kyori.adventure.text.Component disconnectMessage = net.kyori.adventure.text.Component.text("You are not allowed to log in to this server.");
         final Cause cause = Cause.of(EventContext.empty(), this);
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
@@ -181,25 +183,6 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         SpongeCommon.post(event);
         if (event.isCancelled()) {
             this.impl$disconnectClient(event.message());
-        }
-        return event.isCancelled();
-    }
-
-    @ModifyArg(method = "handleHello",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;startClientVerification(Lcom/mojang/authlib/GameProfile;)V"))
-    private GameProfile impl$fireAuthEventOffline(GameProfile $$0) {
-        this.authenticatedProfile = $$0;
-        if (this.bridge$fireAuthEvent()) {
-            return null;
-        }
-        return $$0;
-    }
-
-    @Inject(method = "startClientVerification(Lcom/mojang/authlib/GameProfile;)V", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$handleAuthEventCancellation(GameProfile $$0, final CallbackInfo ci) {
-        if ($$0 == null) {
             ci.cancel();
         }
     }

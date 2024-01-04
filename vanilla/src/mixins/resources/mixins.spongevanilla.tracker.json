@@ -1,11 +1,12 @@
 {
-    "required": true,
-    "minVersion": "0.8",
-    "package": "org.spongepowered.vanilla.mixin.tracker",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
-    "priority": 1302,
-    "mixins": [
-        "server.level.ServerPlayerGameModeMixin_Vanilla_Tracker"
-    ]
+  "required": true,
+  "minVersion": "0.8",
+  "package": "org.spongepowered.vanilla.mixin.tracker",
+  "target": "@env(DEFAULT)",
+  "compatibilityLevel": "JAVA_8",
+  "priority": 1302,
+  "mixins": [
+    "server.level.ServerPlayerGameModeMixin_Vanilla_Tracker",
+    "world.level.block.BlocksMixin_Tracker"
+  ]
 }

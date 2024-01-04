@@ -25,6 +25,7 @@
 package org.spongepowered.forge.mixin.core.minecraftforge;
 
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.BusBuilderImpl;
 import net.minecraftforge.eventbus.api.BusBuilder;
 import net.minecraftforge.eventbus.api.IEventBus;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,7 +40,7 @@ public abstract class MinecraftForgeMixin_Forge {
     @Redirect(method = "<clinit>", at = @At(value = "INVOKE",
             target = "Lnet/minecraftforge/eventbus/api/BusBuilder;build()Lnet/minecraftforge/eventbus/api/IEventBus;", remap = false))
     private static IEventBus forge$substituteForgeEventBus(final BusBuilder builder) {
-        return new ForgeEventManager(new SpongeEventBus(builder));
+        return new ForgeEventManager(new SpongeEventBus((BusBuilderImpl) builder));
     }
 
 }

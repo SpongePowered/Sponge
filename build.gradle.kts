@@ -145,6 +145,19 @@ val mixins by sourceSets.registering {
     }
 }
 
+sourceSets.configureEach {
+    val sourceSet = this
+    val isMain = "main".equals(sourceSet.name)
+
+    val sourcesJarName: String = if (isMain) "sourcesJar" else (sourceSet.name + "SourcesJar")
+    tasks.register(sourcesJarName, Jar::class.java) {
+        group = "build"
+        val classifier = if (isMain) "sources" else (sourceSet.name + "-sources")
+        archiveClassifier.set(classifier)
+        from(sourceSet.allJava)
+    }
+}
+
 dependencies {
     // api
     api("org.spongepowered:spongeapi:$apiVersion")
@@ -404,11 +417,12 @@ allprojects {
 
 tasks {
     val jar by existing
-    val sourceJar by existing
+    val sourcesJar by existing
     val mixinsJar by existing
     val accessorsJar by existing
     val launchJar by existing
     val applaunchJar by existing
+
     shadowJar {
         mergeServiceFiles()
         archiveClassifier.set("dev")
@@ -420,7 +434,7 @@ tasks {
             from(commonManifest)
         }
         from(jar)
-        from(sourceJar)
+        from(sourcesJar)
         from(mixinsJar)
         from(accessorsJar)
         from(launchJar)
@@ -430,20 +444,25 @@ tasks {
         }
     }
 }
+
 publishing {
     publications {
         register("sponge", MavenPublication::class) {
             from(components["java"])
+            artifact(tasks["sourcesJar"])
 
-            artifact(tasks["sourceJar"])
             artifact(tasks["mixinsJar"])
+            artifact(tasks["mixinsSourcesJar"])
+
             artifact(tasks["accessorsJar"])
+            artifact(tasks["accessorsSourcesJar"])
+
             artifact(tasks["launchJar"])
+            artifact(tasks["launchSourcesJar"])
+
             artifact(tasks["applaunchJar"])
-            artifact(tasks["applaunchSourceJar"])
-            artifact(tasks["launchSourceJar"])
-            artifact(tasks["mixinsSourceJar"])
-            artifact(tasks["accessorsSourceJar"])
+            artifact(tasks["applaunchSourcesJar"])
+
             pom {
                 artifactId = project.name.lowercase()
                 this.name.set(project.name)

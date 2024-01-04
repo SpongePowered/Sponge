@@ -39,7 +39,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
-@Plugin("key-test")
+@Plugin("key_test")
 public class KeyTest implements LoadableModule {
 
     private final PluginContainer container;

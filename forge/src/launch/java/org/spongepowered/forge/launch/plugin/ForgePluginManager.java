@@ -24,14 +24,13 @@
  */
 package org.spongepowered.forge.launch.plugin;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Singleton;
 import net.minecraftforge.fml.ModList;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
-import org.spongepowered.forge.accessor.fml.ModListAccessor;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -41,16 +40,18 @@ public final class ForgePluginManager implements SpongePluginManager {
 
     @Override
     public Optional<PluginContainer> fromInstance(final Object instance) {
-        return (Optional<PluginContainer>) (Object) ModList.get().getModContainerByObject(Objects.requireNonNull(instance, "instance"));
+        return ModList.get().getModContainerByObject(Objects.requireNonNull(instance, "instance")).map(ForgePluginContainer::of);
     }
 
     @Override
     public Optional<PluginContainer> plugin(final String id) {
-        return (Optional<PluginContainer>) (Object) ModList.get().getModContainerById(Objects.requireNonNull(id, "id"));
+        return ModList.get().getModContainerById(Objects.requireNonNull(id, "id")).map(ForgePluginContainer::of);
     }
 
     @Override
     public Collection<PluginContainer> plugins() {
-        return Collections.unmodifiableCollection((Collection<PluginContainer>) (Object) ((ModListAccessor) ModList.get()).accessor$mods());
+        final ImmutableList.Builder<PluginContainer> builder = ImmutableList.builder();
+        ModList.get().forEachModInOrder(mod -> builder.add(ForgePluginContainer.of(mod)));
+        return builder.build();
     }
 }
