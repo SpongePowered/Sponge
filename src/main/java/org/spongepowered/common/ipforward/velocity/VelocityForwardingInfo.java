@@ -45,6 +45,7 @@ import org.spongepowered.api.network.channel.raw.handshake.RawHandshakeDataChann
 import org.spongepowered.common.accessor.network.ConnectionAccessor;
 import org.spongepowered.common.accessor.server.network.ServerLoginPacketListenerImplAccessor;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerImplBridge;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -95,6 +96,12 @@ public class VelocityForwardingInfo {
                         ((InetSocketAddress) connection.getRemoteAddress()).getPort()));
 
                 ((ServerLoginPacketListenerImplAccessor) mcConn).accessor$gameProfile(VelocityForwardingInfo.createProfile(response));
+
+                if (((ServerLoginPacketListenerImplBridge) mcConn).bridge$fireAuthEvent()) {
+                    return;
+                }
+
+                ((ServerLoginPacketListenerImplAccessor) mcConn).accessor$state(ServerLoginPacketListenerImpl.State.NEGOTIATING);
         }).exceptionally(err -> {
             if (!(err instanceof NoResponseException)) { // Handled above
                 VelocityForwardingInfo.LOGGER.error("Failed to process velocity forwarding info", err);

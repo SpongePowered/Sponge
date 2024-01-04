@@ -65,6 +65,8 @@ public abstract class ServerLoginPacketListenerImplMixin_IpForward {
             this.ipForward$sentVelocityForwardingRequest = true;
 
             VelocityForwardingInfo.sendQuery((ServerLoginPacketListenerImpl) (Object) this);
+
+            info.cancel();
         }
     }
 
