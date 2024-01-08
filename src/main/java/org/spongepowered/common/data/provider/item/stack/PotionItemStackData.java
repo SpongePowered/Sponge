@@ -59,7 +59,8 @@ public final class PotionItemStackData {
                             tag.putInt(Constants.Item.CUSTOM_POTION_COLOR, v.rgb());
                         })
                         .delete(h -> h.removeTagKey(Constants.Item.CUSTOM_POTION_COLOR))
-                        .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION || h.getItem() == Items.LINGERING_POTION)
+                        .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION
+                                || h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
                             final List<MobEffectInstance> effects = PotionUtils.getMobEffects(h);
