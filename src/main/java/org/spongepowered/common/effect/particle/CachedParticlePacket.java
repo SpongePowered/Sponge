@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.effect.particle;
 
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.protocol.Packet;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.List;
@@ -32,4 +34,6 @@ import java.util.List;
 interface CachedParticlePacket {
 
     void process(Vector3d position, List<Packet<?>> output);
+
+    @Nullable ParticleOptions particleOptions();
 }

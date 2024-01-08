@@ -29,6 +29,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.accessor.world.entity.AreaEffectCloudAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.PotionEffectUtil;
 import org.spongepowered.common.util.SpongeTicks;
@@ -56,12 +57,8 @@ public final class AreaEffectCloudData {
                             return true;
                         })
                     .create(Keys.PARTICLE_EFFECT)
-                        .get(h -> {
-                            throw new MissingImplementationException("AreaEffectCloudData", "PARTICLE_EFFECT::getter");
-                        })
-                        .set((h, v) -> {
-                            throw new MissingImplementationException("AreaEffectCloudData", "PARTICLE_EFFECT::setter");
-                        })
+                        .get(h -> SpongeParticleHelper.spongeParticleOptions(h.getParticle()))
+                        .set((h, v) -> h.setParticle(SpongeParticleHelper.vanillaParticleOptions(v)))
                     .create(Keys.RADIUS)
                         .get(h -> (double) h.getRadius())
                         .set((h, v) -> h.setRadius(v.floatValue()))
