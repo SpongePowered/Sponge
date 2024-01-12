@@ -37,6 +37,7 @@ import net.minecraft.world.entity.HasCustomInventoryScreen;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
@@ -54,8 +55,11 @@ import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.ExplicitInventoryOmittedTransaction;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -149,6 +153,17 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         try (final EffectTransactor ignored = transactor.logCloseInventory(player, true)) {
             this.player.containerMenu.removed(player);
             this.player.containerMenu.broadcastChanges();
+        }
+    }
+
+    @Inject(method = "handleRenameItem",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AnvilMenu;setItemName(Ljava/lang/String;)V", shift = At.Shift.BEFORE))
+    private void impl$onHandleRenameItem(final CallbackInfo ci) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        final ExplicitInventoryOmittedTransaction transaction = new ExplicitInventoryOmittedTransaction(this.player.containerMenu);
+        transactor.logTransaction(transaction);
+        try (EffectTransactor ignored = transactor.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {
         }
     }
 
