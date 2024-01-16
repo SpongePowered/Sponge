@@ -38,6 +38,7 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
@@ -149,6 +150,16 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         try (final EffectTransactor ignored = transactor.logCloseInventory(player, true)) {
             this.player.containerMenu.removed(player);
             this.player.containerMenu.broadcastChanges();
+        }
+    }
+
+    @Redirect(method = "handleRenameItem(Lnet/minecraft/network/protocol/game/ServerboundRenameItemPacket;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AnvilMenu;setItemName(Ljava/lang/String;)V"))
+    private void impl$onHandleRenameItem(final AnvilMenu menu, final String name) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        try (EffectTransactor ignored = transactor.logIgnoredInventory(this.player.containerMenu)) {
+            menu.setItemName(name);
         }
     }
 
