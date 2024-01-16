@@ -79,6 +79,7 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Con
 import org.spongepowered.common.event.tracking.context.transaction.inventory.CraftingPreviewTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.CraftingTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.DropFromPlayerInventoryTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.ExplicitInventoryOmittedTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.OpenMenuTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlaceRecipeTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
@@ -406,5 +407,11 @@ interface TransactionSink {
         @Nullable final RecipeHolder<CraftingRecipe> lastRecipe) {
         final CraftingTransaction transaction = new CraftingTransaction(player, craftedStack, craftInv, lastRecipe);
         this.logTransaction(transaction);
+    }
+
+    default EffectTransactor logIgnoredInventory(AbstractContainerMenu containerMenu) {
+        final ExplicitInventoryOmittedTransaction transaction = new ExplicitInventoryOmittedTransaction(containerMenu);
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 }
