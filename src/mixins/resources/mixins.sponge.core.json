@@ -217,6 +217,7 @@
         "world.level.levelgen.NoiseGeneratorSettingsMixin",
         "world.level.levelgen.WorldOptionsMixin",
         "world.level.levelgen.flat.FlatLayerInfoMixin",
+        "world.level.levelgen.flat.FlatLevelGeneratorSettingsMixin",
         "world.level.levelgen.structure.LegacyStructureDataHandlerMixin",
         "world.level.portal.PortalShapeMixin",
         "world.level.saveddata.MapIdTrackerMixin",
