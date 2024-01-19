@@ -30,6 +30,8 @@ import net.minecraft.server.players.UserBanListEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanService;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.io.File;
@@ -37,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Redirects all calls to the {@link BanService}.
@@ -81,7 +84,8 @@ public class SpongeUserBanList extends UserBanList {
 
     @Override
     public void add(final UserBanListEntry entry) {
-        Sponge.server().serviceProvider().banService().add((Ban) entry).join();
+        final CompletableFuture<Optional<? extends Ban>> completableFuture = Sponge.server().serviceProvider().banService().add((Ban) entry);
+        ((MinecraftServerBridge) SpongeCommon.server()).bridge$spongeMainThreadExecutor().managedBlock(completableFuture::isDone);
     }
 
     @Override
@@ -91,7 +95,8 @@ public class SpongeUserBanList extends UserBanList {
 
     @Override
     public void remove(final com.mojang.authlib.GameProfile entry) {
-        Sponge.server().serviceProvider().banService().pardon(SpongeGameProfile.of(entry)).join();
+        final CompletableFuture<Boolean> completableFuture = Sponge.server().serviceProvider().banService().pardon(SpongeGameProfile.of(entry));
+        ((MinecraftServerBridge) SpongeCommon.server()).bridge$spongeMainThreadExecutor().managedBlock(completableFuture::isDone);
     }
 
 }
