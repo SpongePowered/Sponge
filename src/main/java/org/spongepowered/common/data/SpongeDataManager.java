@@ -70,6 +70,7 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotDataBuilder;
+import org.spongepowered.common.data.datasync.entity.EntityAirSupplyConverter;
 import org.spongepowered.common.data.datasync.entity.EntityBabyConverter;
 import org.spongepowered.common.data.datasync.entity.EntityCustomNameConverter;
 import org.spongepowered.common.data.datasync.entity.EntityCustomNameVisibleConverter;
@@ -339,6 +340,7 @@ public final class SpongeDataManager implements DataManager {
 
     public void registerDefaultProviders() {
         this.dataProviderRegistry.registerDefaultProviders();
+        new EntityAirSupplyConverter();
         new EntityBabyConverter();
         new EntityCustomNameConverter();
         new EntityCustomNameVisibleConverter();
