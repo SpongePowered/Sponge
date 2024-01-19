@@ -109,6 +109,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
         final Tristate useBlock = event.useBlockResult();
         ((ServerPlayerGameModeBridge) this).bridge$setInteractBlockRightClickCancelled(event.isCancelled());
         if (event.isCancelled()) {
+            player.inventoryMenu.sendAllDataToRemote();
             return InteractionResult.FAIL;
         }
         // Sponge end
