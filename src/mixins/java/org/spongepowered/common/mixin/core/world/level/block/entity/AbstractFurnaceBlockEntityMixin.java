@@ -53,6 +53,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.block.entity.AbstractFurnaceBlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -60,7 +61,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
-public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlockEntityMixin {
+public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlockEntityMixin implements AbstractFurnaceBlockEntityBridge {
 
     // @Formatter:off
     @Shadow protected NonNullList<ItemStack> items;
@@ -80,9 +81,9 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         final ItemStackSnapshot shrinkedFuel = ItemStackUtil.snapshotOf(ItemStackUtil.cloneDefensive(itemStack, itemStack.getCount() - 1));
 
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(fuel, shrinkedFuel);
-        final var recipe = ((AbstractFurnaceBlockEntityMixin) (Object) entity).impl$getCurrentRecipe();
+        final var recipe = ((AbstractFurnaceBlockEntityMixin) (Object) entity).bridge$getCurrentRecipe();
         final CookingEvent.ConsumeFuel event = SpongeEventFactory.createCookingEventConsumeFuel(cause, (FurnaceBlockEntity) entity, Optional.of(fuel),
-                Optional.of((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()), Collections.singletonList(transaction));
+                recipe.map(r -> (CookingRecipe) r.value()), recipe.map(r -> (ResourceKey) (Object) r.id()), Collections.singletonList(transaction));
         SpongeCommon.post(event);
         if (event.isCancelled()) {
             ((AbstractFurnaceBlockEntityMixin) (Object) entity).cookingTotalTime = 0;
@@ -100,8 +101,9 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         }
     }
 
-    private RecipeHolder<? extends AbstractCookingRecipe> impl$getCurrentRecipe() {
-        return this.quickCheck.getRecipeFor((AbstractFurnaceBlockEntity) (Object) this, this.level).orElse(null);
+    @Override
+    public Optional<? extends RecipeHolder<? extends AbstractCookingRecipe>> bridge$getCurrentRecipe() {
+        return this.quickCheck.getRecipeFor((AbstractFurnaceBlockEntity) (Object) this, this.level);
     }
 
     // Interrupt-Active - e.g. a player removing the currently smelting item
@@ -144,9 +146,9 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         if (this.cookingProgress > 0) {
             final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.items.get(1));
             final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-            final var recipe = this.impl$getCurrentRecipe();
+            final var recipe = this.bridge$getCurrentRecipe();
             final CookingEvent.Interrupt event = SpongeEventFactory.createCookingEventInterrupt(cause, (FurnaceBlockEntity) this, Optional.of(fuel),
-                                                                                            Optional.ofNullable((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()));
+                    recipe.map(r -> (CookingRecipe) r.value()), recipe.map(r -> (ResourceKey) (Object) r.id()));
             SpongeCommon.post(event);
         }
     }

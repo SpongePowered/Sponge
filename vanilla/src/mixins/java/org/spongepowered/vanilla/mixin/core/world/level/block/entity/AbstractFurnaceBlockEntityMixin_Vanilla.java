@@ -53,6 +53,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.block.entity.AbstractFurnaceBlockEntityAccessor;
+import org.spongepowered.common.bridge.block.entity.AbstractFurnaceBlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.level.block.entity.BaseContainerBlockEntityMixin;
@@ -61,17 +62,13 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
-public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContainerBlockEntityMixin {
+public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContainerBlockEntityMixin implements AbstractFurnaceBlockEntityBridge {
 
     // @formatter:off
     @Shadow protected NonNullList<ItemStack> items;
     @Shadow int cookingProgress;
     @Shadow @Final private RecipeManager.CachedCheck<Container, ? extends AbstractCookingRecipe> quickCheck;
     // @formatter:on
-
-    private RecipeHolder<? extends AbstractCookingRecipe> impl$getCurrentRecipe() {
-        return this.quickCheck.getRecipeFor((AbstractFurnaceBlockEntity) (Object) this, this.level).orElse(null);
-    }
 
     // Tick up and Start
     @Redirect(method = "serverTick",
@@ -107,10 +104,10 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla extends BaseContai
         final int clampedCookTime = Mth.clamp(newCookTime, zero, totalCookTime);
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(((AbstractFurnaceBlockEntityMixin_Vanilla) (Object) entity).items.get(1));
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-        final var recipe = ((AbstractFurnaceBlockEntityMixin_Vanilla) (Object) entity).impl$getCurrentRecipe();
+        final var recipe = ((AbstractFurnaceBlockEntityMixin_Vanilla) (Object) entity).bridge$getCurrentRecipe();
         final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf(((AbstractFurnaceBlockEntityMixin_Vanilla) (Object) entity).items.get(0));
         final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entity, cooking, Optional.of(fuel),
-                Optional.of((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()));
+                recipe.map(r -> (CookingRecipe) r.value()), recipe.map(r -> (ResourceKey) (Object) r.id()));
         SpongeCommon.post(event);
         if (event.isCancelled()) {
             return ((AbstractFurnaceBlockEntityMixin_Vanilla) (Object) entity).cookingProgress; // dont tick down
