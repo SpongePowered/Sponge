@@ -30,6 +30,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -422,6 +423,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default boolean doesContainerCaptureEntitySpawn(final C context, final Entity entityIn) {
+        return false;
+    }
+
+    default boolean captureModifiedContainer(final AbstractContainerMenu container) {
         return false;
     }
 }
