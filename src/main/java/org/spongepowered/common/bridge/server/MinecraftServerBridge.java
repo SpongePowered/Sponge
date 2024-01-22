@@ -26,6 +26,7 @@ package org.spongepowered.common.bridge.server;
 
 import com.google.inject.Injector;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.Difficulty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
@@ -47,4 +48,5 @@ public interface MinecraftServerBridge {
 
     SpongeUserManager bridge$userManager();
 
+    BlockableEventLoop<Runnable> bridge$spongeMainThreadExecutor();
 }
