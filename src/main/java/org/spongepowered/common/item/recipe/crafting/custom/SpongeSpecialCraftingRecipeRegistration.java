@@ -37,6 +37,7 @@ import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
+import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +72,9 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
     }
 
     public static SpongeSpecialRecipe get(final String id, final CraftingBookCategory category) {
-        return SpongeSpecialCraftingRecipeRegistration.RECIPES.get(id); // TODO: category?
+        // TODO: category?
+        return SpongeSpecialCraftingRecipeRegistration.RECIPES.getOrDefault(id,
+                new SpongeSpecialRecipe(ResourceLocation.tryParse(id), CraftingBookCategory.MISC, (x, y) -> false, null, null));
     }
 
     @Override
@@ -81,6 +84,7 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
 
     @Override
     public void serializeShape(final JsonObject json) {
+        json.addProperty(Constants.Recipe.SPONGE_ID, this.recipe.id());
     }
 
     @Override

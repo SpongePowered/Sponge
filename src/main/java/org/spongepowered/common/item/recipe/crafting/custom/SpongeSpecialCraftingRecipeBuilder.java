@@ -71,7 +71,7 @@ public final class SpongeSpecialCraftingRecipeBuilder extends AbstractResourceKe
     @Override
     public EndStep result(ItemStack result) {
         final ItemStack copy = result.copy();
-        this.resultFunction = inv -> copy;
+        this.resultFunction = inv -> copy.copy();
         return this;
     }
 
