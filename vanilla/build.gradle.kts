@@ -66,9 +66,11 @@ val vanillaInstallerJava9 by sourceSets.register("installerJava9") {
         options.release.set(9)
     }
 
-    configurations.configureEach {
-        attributes {
-            attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
+    sequenceOf(runtimeClasspathConfigurationName, compileClasspathConfigurationName).map(configurations::named).forEach {
+        it.configure {
+            attributes {
+                attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
+            }
         }
     }
 
