@@ -10,18 +10,18 @@ pluginManagement {
     plugins {
         // Default plugin versions
         id("org.spongepowered.gradle.vanilla") version "0.2.1-SNAPSHOT"
-        id("com.github.johnrengelman.shadow") version "8.1.0"
-        id("org.spongepowered.gradle.sponge.dev") version "2.1.1"
+        id("com.github.johnrengelman.shadow") version "8.1.1"
+        id("org.spongepowered.gradle.sponge.dev") version "2.2.0"
         id("net.kyori.indra.licenser.spotless") version "3.1.3"
         id("implementation-structure")
         id("org.jetbrains.gradle.plugin.idea-ext") version "1.1.7"
-        id("com.github.ben-manes.versions") version "0.49.0"
+        id("com.github.ben-manes.versions") version "0.51.0"
     }
 }
 
 plugins {
     id("org.spongepowered.gradle.vanilla")
-    id("org.gradle.toolchains.foojay-resolver-convention") version("0.7.0")
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
 dependencyResolutionManagement {
