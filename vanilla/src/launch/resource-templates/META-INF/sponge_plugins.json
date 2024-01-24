@@ -8,7 +8,7 @@
         {
             "id": "minecraft",
             "name": "Minecraft",
-            "version": "${minecraftVersion}",
+            "version": "{{ minecraftVersion }}",
             "entrypoint": "org.spongepowered.common.launcher.Launcher",
             "links": {
                 "homepage": "https://www.minecraft.net"
@@ -24,7 +24,7 @@
             "loader": "java_plain",
             "id": "spongeapi",
             "name": "SpongeAPI",
-            "version": "${apiVersion}",
+            "version": "{{ apiVersion }}",
             "entrypoint": "org.spongepowered.api.Sponge",
             "description": "The Minecraft API specification",
             "links": {
@@ -42,7 +42,7 @@
         {
             "id": "sponge",
             "name": "Sponge",
-            "version": "${minecraftVersion}-${apiVersion}",
+            "version": "{{ minecraftVersion }}-{{ apiVersion }}",
             "entrypoint": "org.spongepowered.common.SpongeCommon",
             "description": "The common Sponge implementation",
             "links": {
@@ -59,18 +59,18 @@
             "dependencies": [
                 {
                     "id": "minecraft",
-                    "version": "${minecraftVersion}"
+                    "version": "{{ minecraftVersion }}"
                 },
                 {
                     "id": "spongeapi",
-                    "version": "${apiVersion}"
+                    "version": "{{ apiVersion }}"
                 }
             ]
         },
         {
             "id": "spongevanilla",
             "name": "SpongeVanilla",
-            "version": "${version}",
+            "version": "{{ version }}",
             "entrypoint": "org.spongepowered.vanilla.SpongeVanilla",
             "description": "Vanilla Minecraft with Sponge",
             "links": {
@@ -87,7 +87,7 @@
             "dependencies": [
                 {
                     "id": "sponge",
-                    "version": "${minecraftVersion}-${apiVersion}"
+                    "version": "{{ minecraftVersion }}-{{ apiVersion }}"
                 }
             ]
         }

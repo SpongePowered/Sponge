@@ -1,11 +1,8 @@
-import org.jetbrains.gradle.ext.TaskTriggersConfig
-import org.spongepowered.gradle.impl.GenerateResourceTemplates
-
 plugins {
     id("org.spongepowered.gradle.vanilla")
     alias(libs.plugins.shadow)
     id("implementation-structure")
-    id("templated-resources")
+    alias(libs.plugins.blossom)
     eclipse
 }
 
@@ -368,21 +365,22 @@ val vanillaManifest = java.manifest {
     System.getenv()["GIT_BRANCH"]?.apply { attributes("Git-Branch" to this) }
 }
 
+vanillaLaunch.apply {
+    blossom.resources {
+        property("apiVersion", apiVersion)
+        property("minecraftVersion", minecraftVersion)
+        property("version", provider { project.version.toString() })
+    }
+}
+vanillaInstaller.apply {
+    blossom.javaSources {
+        property("minecraftVersion", minecraftVersion)
+    }
+}
+
 tasks {
     jar {
         manifest.from(vanillaManifest)
-    }
-
-    named("templateLaunchResources", GenerateResourceTemplates::class) {
-        inputs.property("version.api", apiVersion)
-        inputs.property("version.minecraft", minecraftVersion)
-        inputs.property("version.vanilla", project.version)
-
-        expand(
-            "apiVersion" to apiVersion,
-            "minecraftVersion" to minecraftVersion,
-            "version" to project.version
-        )
     }
 
     val vanillaInstallerJar by registering(Jar::class) {
@@ -420,31 +418,6 @@ tasks {
     val integrationTest by registering {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         dependsOn("integrationTestServer", "integrationTestClient")
-    }
-
-    val installerTemplateSource = project.file("src/installer/templates")
-    val installerTemplateDest = project.layout.buildDirectory.dir("generated/sources/installerTemplates")
-    val generateInstallerTemplates by registering(Copy::class) {
-        group = "sponge"
-        description = "Generate classes from templates for the SpongeVanilla installer"
-        val properties = mutableMapOf(
-                "minecraftVersion" to minecraftVersion
-        )
-        inputs.properties(properties)
-
-        // Copy template
-        from(installerTemplateSource)
-        into(installerTemplateDest)
-        expand(properties)
-    }
-    vanillaInstaller.java.srcDir(generateInstallerTemplates.map { it.outputs })
-
-    // Generate templates on IDE import as well
-    (rootProject.idea.project as? ExtensionAware)?.also {
-        (it.extensions["settings"] as ExtensionAware).extensions.getByType(TaskTriggersConfig::class).afterSync(generateInstallerTemplates)
-    }
-    project.eclipse {
-        synchronizationTasks(generateInstallerTemplates)
     }
 
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")

@@ -30,9 +30,5 @@ gradlePlugin {
             id = "implementation-structure"
             implementationClass = "org.spongepowered.gradle.impl.SpongeImplementationPlugin"
         }
-        templateResources {
-            id = "templated-resources"
-            implementationClass = "org.spongepowered.gradle.impl.TemplatedResourcesPlugin"
-        }
     }
 }

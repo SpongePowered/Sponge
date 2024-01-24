@@ -16,7 +16,7 @@ buildscript {
 plugins {
     alias(libs.plugins.shadow)
     id("implementation-structure")
-    id("templated-resources")
+    alias(libs.plugins.blossom)
     id("net.smoofyuniverse.loom") version "1.1-SNAPSHOT"
 }
 
@@ -429,14 +429,14 @@ tasks {
     assemble {
         dependsOn(universalJar)
     }
+}
 
-    templateResources {
-        val props = mutableMapOf(
-                "version" to project.version,
-                "description" to project.description
-        )
-        inputs.properties(props)
-        expand(props)
+sourceSets {
+    main {
+        blossom.resources {
+            property("version", project.provider { project.version.toString() })
+            property("description", project.description.toString())
+        }
     }
 }
 
