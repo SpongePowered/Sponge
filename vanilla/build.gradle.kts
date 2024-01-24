@@ -3,7 +3,7 @@ import org.spongepowered.gradle.impl.GenerateResourceTemplates
 
 plugins {
     id("org.spongepowered.gradle.vanilla")
-    id("com.github.johnrengelman.shadow")
+    alias(libs.plugins.shadow)
     id("implementation-structure")
     id("templated-resources")
     eclipse
@@ -249,16 +249,7 @@ minecraft {
             .forEach { accessWideners(it) }
 }
 
-val asmVersion: String by project
 dependencies {
-    val guavaVersion: String by project
-    val forgeAutoRenamingToolVersion: String by project
-    val jlineVersion: String by project
-    val log4jVersion: String by project
-    val mixinVersion: String by project
-    val modlauncherVersion: String by project
-    val tinyLogVersion: String by project
-
     api(project(":", configuration = "launch"))
     implementation(project(":", configuration = "accessors"))
     implementation(project(commonProject.path))
@@ -271,19 +262,18 @@ dependencies {
     installer(platform(apiLibs.configurate.bom))
     installer(apiLibs.configurate.hocon)
     installer(apiLibs.configurate.core)
-    installer("org.spongepowered:configurate-jackson")
-    installer("net.sf.jopt-simple:jopt-simple:5.0.4")
-    installer("org.tinylog:tinylog-api:$tinyLogVersion")
-    installer("org.tinylog:tinylog-impl:$tinyLogVersion")
+    installer(libs.configurate.jackson)
+    installer(libs.joptSimple)
+    installer(libs.tinylog.api)
+    installer(libs.tinylog.impl)
     // Override ASM versions, and explicitly declare dependencies so ASM is excluded from the manifest.
-    val asmExclusions = sequenceOf("-commons", "-tree", "-analysis", "")
-            .map { "asm$it" }
+    val asmExclusions = sequenceOf(libs.asm.asProvider(), libs.asm.commons, libs.asm.tree, libs.asm.analysis)
             .onEach {
-                installer("org.ow2.asm:$it:$asmVersion")
+                installer(it)
             }.toSet()
-    installer("net.minecraftforge:ForgeAutoRenamingTool:$forgeAutoRenamingToolVersion") {
+    installer(libs.forgeAutoRenamingTool) {
         exclude(group = "net.sf.jopt-simple")
-        asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
+        asmExclusions.forEach { exclude(group = it.get().group, module = it.get().name) } // Use our own ASM version
     }
     mlTransformersConfig.name(rootProject.project(":modlauncher-transformers"))
 
@@ -301,53 +291,53 @@ dependencies {
 
     libraries("org.spongepowered:spongeapi:$apiVersion")
     libraries(platform(apiLibs.adventure.bom))
-    libraries("net.kyori:adventure-serializer-configurate4") {
+    libraries(libs.adventure.serializerConfigurate4) {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    libraries("javax.inject:javax.inject:1")
-    libraries("org.spongepowered:configurate-jackson") {
+    libraries(libs.javaxInject)
+    libraries(libs.configurate.jackson) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
     // Databases
-    libraries("com.zaxxer:HikariCP:2.6.3")
+    libraries(libs.db.hikariCp)
 
     // Libraries needed during applaunch phase and runtime
-    bootstrapLibraries("net.minecrell:terminalconsoleappender:1.3.0")
-    bootstrapLibraries("org.jline:jline-terminal:$jlineVersion")
-    bootstrapLibraries("org.jline:jline-reader:$jlineVersion")
-    bootstrapLibraries("org.jline:jline-terminal-jansi:$jlineVersion")
+    bootstrapLibraries(libs.terminalConsoleAppender)
+    bootstrapLibraries(libs.jline.terminal)
+    bootstrapLibraries(libs.jline.reader)
+    bootstrapLibraries(libs.jline.terminalJansi)
     // Must be on the base ClassLoader since ModLauncher has a dependency on log4j
-    bootstrapLibraries("org.apache.logging.log4j:log4j-jpl:$log4jVersion")
+    bootstrapLibraries(libs.log4j.jpl)
 
     bootstrapLibraries(platform(apiLibs.configurate.bom))
-    bootstrapLibraries("org.spongepowered:configurate-core") {
+    bootstrapLibraries(apiLibs.configurate.core) {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    bootstrapLibraries("org.spongepowered:configurate-hocon") {
+    bootstrapLibraries(apiLibs.configurate.hocon) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    bootstrapLibraries("org.apache.logging.log4j:log4j-api:$log4jVersion")
-    bootstrapLibraries("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    bootstrapLibraries("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
+    bootstrapLibraries(libs.log4j.api)
+    bootstrapLibraries(libs.log4j.core)
+    bootstrapLibraries(libs.log4j.slf4j2)
 
     // Mixin and dependencies
-    bootstrapLibraries("org.spongepowered:mixin:$mixinVersion")
-    bootstrapLibraries("org.ow2.asm:asm-util:$asmVersion")
-    bootstrapLibraries("org.ow2.asm:asm-tree:$asmVersion")
-    bootstrapLibraries("com.google.guava:guava:$guavaVersion")
+    bootstrapLibraries(libs.mixin)
+    bootstrapLibraries(libs.asm.util)
+    bootstrapLibraries(libs.asm.tree)
+    bootstrapLibraries(libs.guava)
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     // Not needing to be source-visible past the init phase
     // The ModLauncher compatibility launch layer
-    appLaunch("cpw.mods:modlauncher:$modlauncherVersion") {
+    appLaunch(libs.modlauncher) {
         exclude(group = "org.apache.logging.log4j")
         exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
     }
-    appLaunch("org.ow2.asm:asm-commons:$asmVersion")
-    appLaunch("cpw.mods:grossjava9hacks:1.3.3") {
+    appLaunch(libs.asm.commons)
+    appLaunch(libs.grossJava9Hacks) {
         exclude(group = "org.apache.logging.log4j")
     }
     appLaunch(apiLibs.pluginSpi) {
@@ -355,7 +345,7 @@ dependencies {
         exclude(group = "com.google.code.gson", module = "gson")
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")
     }
-    appLaunch("com.lmax:disruptor:3.4.4")
+    appLaunch(libs.lmaxDisruptor)
 
     testplugins?.also {
         vanillaAppLaunchRuntime(project(it.path)) {
@@ -498,7 +488,7 @@ tasks {
                     "Launcher-Agent-Class" to "org.spongepowered.vanilla.installer.Agent"
             ))
             attributes(
-                mapOf("Implementation-Version" to asmVersion),
+                mapOf("Implementation-Version" to libs.versions.asm.get()),
                 "org/objectweb/asm/"
             )
             from(vanillaManifest)
