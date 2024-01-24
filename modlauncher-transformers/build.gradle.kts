@@ -19,9 +19,7 @@ indraSpotlessLicenser {
     property("url", projectUrl)
 }
 
-val apiConfigurateVersion: String by project
 val asmVersion: String by project
-val apiCheckerVersion: String by project
 val log4jVersion: String by project
 val modlauncherVersion: String by project
 
@@ -45,8 +43,8 @@ dependencies {
     }
     // Configurate dependencies, also to be provided by the platform
     //  making use of this project
-    compileOnly(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
-    compileOnly("org.spongepowered:configurate-core") {
+    compileOnly(platform(apiLibs.configurate.bom))
+    compileOnly(apiLibs.configurate.core) {
         exclude(group = "org.checkerframework", module="checker-qual") // We use our own version
     }
     compileOnly("org.spongepowered:configurate-jackson") {
@@ -55,5 +53,5 @@ dependencies {
     }
 
     // And finally, compile only annotations
-    compileOnly("org.checkerframework:checker-qual:$apiCheckerVersion")
+    compileOnly(apiLibs.checkerQual)
 }

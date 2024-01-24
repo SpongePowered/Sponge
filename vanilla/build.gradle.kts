@@ -251,11 +251,7 @@ minecraft {
 
 val asmVersion: String by project
 dependencies {
-    val apiAdventureVersion: String by project
-    val apiConfigurateVersion: String by project
-    val apiGsonVersion: String by project
     val guavaVersion: String by project
-    val apiPluginSpiVersion: String by project
     val forgeAutoRenamingToolVersion: String by project
     val jlineVersion: String by project
     val log4jVersion: String by project
@@ -271,10 +267,11 @@ dependencies {
     vanillaMixinsImplementation(project(commonProject.path))
 
     val installer = vanillaInstallerConfig.name
-    installer("com.google.code.gson:gson:$apiGsonVersion")
-    installer("org.spongepowered:configurate-hocon:$apiConfigurateVersion")
-    installer("org.spongepowered:configurate-core:$apiConfigurateVersion")
-    installer("org.spongepowered:configurate-jackson:$apiConfigurateVersion")
+    installer(apiLibs.gson)
+    installer(platform(apiLibs.configurate.bom))
+    installer(apiLibs.configurate.hocon)
+    installer(apiLibs.configurate.core)
+    installer("org.spongepowered:configurate-jackson")
     installer("net.sf.jopt-simple:jopt-simple:5.0.4")
     installer("org.tinylog:tinylog-api:$tinyLogVersion")
     installer("org.tinylog:tinylog-impl:$tinyLogVersion")
@@ -303,7 +300,7 @@ dependencies {
     // Libraries only needed on the TCL (during main game lifecycle)
 
     libraries("org.spongepowered:spongeapi:$apiVersion")
-    libraries(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
+    libraries(platform(apiLibs.adventure.bom))
     libraries("net.kyori:adventure-serializer-configurate4") {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
@@ -324,7 +321,7 @@ dependencies {
     // Must be on the base ClassLoader since ModLauncher has a dependency on log4j
     bootstrapLibraries("org.apache.logging.log4j:log4j-jpl:$log4jVersion")
 
-    bootstrapLibraries(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
+    bootstrapLibraries(platform(apiLibs.configurate.bom))
     bootstrapLibraries("org.spongepowered:configurate-core") {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
@@ -353,7 +350,7 @@ dependencies {
     appLaunch("cpw.mods:grossjava9hacks:1.3.3") {
         exclude(group = "org.apache.logging.log4j")
     }
-    appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion") {
+    appLaunch(apiLibs.pluginSpi) {
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.code.gson", module = "gson")
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")

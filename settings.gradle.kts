@@ -31,6 +31,11 @@ dependencyResolutionManagement {
             name = "sponge"
         }
     }
+    versionCatalogs {
+        register("apiLibs") {
+            from(files("SpongeAPI/gradle/libs.versions.toml"))
+        }
+    }
 }
 
 rootProject.name = "Sponge"

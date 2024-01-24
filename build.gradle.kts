@@ -19,12 +19,7 @@ val apiVersion: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
 
-val apiAdventureVersion: String by project
-val apiConfigurateVersion: String by project
-val apiGsonVersion: String by project
-val apiCheckerVersion: String by project
 val guavaVersion: String by project
-val apiPluginSpiVersion: String by project
 val asmVersion: String by project
 val log4jVersion: String by project
 val modlauncherVersion: String by project
@@ -176,7 +171,7 @@ dependencies {
     implementation("org.ow2.asm:asm-tree:$asmVersion")
 
     // Implementation-only Adventure
-    implementation(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
+    implementation(platform(apiLibs.adventure.bom))
     implementation("net.kyori:adventure-serializer-configurate4") {
         exclude(group = "org.jetbrains", module = "annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
@@ -184,13 +179,13 @@ dependencies {
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig("org.spongepowered:spongeapi:$apiVersion")
-    launchConfig("org.spongepowered:plugin-spi:$apiPluginSpiVersion") {
+    launchConfig(apiLibs.pluginSpi) {
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.code.gson", module = "gson")
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")
     }
     launchConfig("org.spongepowered:mixin:$mixinVersion")
-    launchConfig("org.checkerframework:checker-qual:$apiCheckerVersion")
+    launchConfig(apiLibs.checkerQual)
     launchConfig("com.google.guava:guava:$guavaVersion") {
         exclude(group = "com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
@@ -198,22 +193,22 @@ dependencies {
         exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
-    launchConfig("com.google.code.gson:gson:$apiGsonVersion")
+    launchConfig(apiLibs.gson)
     launchConfig("org.ow2.asm:asm-tree:$asmVersion")
     launchConfig("org.ow2.asm:asm-util:$asmVersion")
 
     // Applaunch -- initialization that needs to occur without game access
-    applaunchConfig("org.checkerframework:checker-qual:$apiCheckerVersion")
+    applaunchConfig(apiLibs.checkerQual)
     applaunchConfig("org.apache.logging.log4j:log4j-api:$log4jVersion")
     applaunchConfig("com.google.guava:guava:$guavaVersion"){
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    applaunchConfig(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
-    applaunchConfig("org.spongepowered:configurate-core") {
+    applaunchConfig(platform(apiLibs.configurate.bom))
+    applaunchConfig(apiLibs.configurate.core) {
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
-    applaunchConfig("org.spongepowered:configurate-hocon") {
+    applaunchConfig(apiLibs.configurate.hocon) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
@@ -228,9 +223,11 @@ dependencies {
     add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 
     // Tests
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+    testImplementation(platform(apiLibs.junit.bom))
+    testImplementation(apiLibs.junit.api)
+    testImplementation(apiLibs.junit.params)
+    testRuntimeOnly(apiLibs.junit.engine)
+    testRuntimeOnly(apiLibs.junit.launcher)
 
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion") {
@@ -309,7 +306,7 @@ allprojects {
                     delegateBuildRunToGradle = false
                     testRunner = org.jetbrains.gradle.ext.ActionDelegationConfig.TestRunner.PLATFORM
                 }
-                (this as ExtensionAware).extensions.getByType(org.jetbrains.gradle.ext.IdeaCompilerConfiguration::class).run {
+                extensions.getByType(org.jetbrains.gradle.ext.IdeaCompilerConfiguration::class).run {
                     addNotNullAssertions = false
                     useReleaseOption = JavaVersion.current().isJava10Compatible
                     parallelCompilation = true
