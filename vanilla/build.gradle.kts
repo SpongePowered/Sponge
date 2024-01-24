@@ -8,6 +8,7 @@ plugins {
 
 val commonProject = parent!!
 val apiVersion: String by project
+val apiJavaTarget: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
 val organization: String by project
@@ -66,7 +67,7 @@ val vanillaInstallerJava9 by sourceSets.register("installerJava9") {
     sequenceOf(runtimeClasspathConfigurationName, compileClasspathConfigurationName).map(configurations::named).forEach {
         it.configure {
             attributes {
-                attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
+                attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, apiJavaTarget.toInt())
             }
         }
     }
@@ -180,7 +181,7 @@ minecraft {
         }
 
         configureEach {
-            targetVersion(17)
+            targetVersion(apiJavaTarget.toInt())
             workingDirectory(project.file("run/"))
             if (org.spongepowered.gradle.vanilla.internal.util.IdeConfigurer.isIdeaImport()) { // todo(zml): promote to API... eventually
                 // IntelliJ does not properly report its compatibility

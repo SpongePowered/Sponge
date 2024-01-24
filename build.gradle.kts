@@ -16,6 +16,7 @@ plugins {
 
 val commonProject = project
 val apiVersion: String by project
+val apiJavaTarget: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
 
@@ -307,11 +308,12 @@ allprojects {
     }
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-        if (JavaVersion.current() < JavaVersion.VERSION_17) {
+        val targetJavaVersion = JavaVersion.toVersion(apiJavaTarget.toInt())
+        sourceCompatibility = targetJavaVersion
+        targetCompatibility = targetJavaVersion
+        if (JavaVersion.current() < targetJavaVersion) {
             toolchain {
-                languageVersion.set(JavaLanguageVersion.of(17))
+                languageVersion.set(JavaLanguageVersion.of(apiJavaTarget.toInt()))
             }
         }
     }
@@ -345,7 +347,7 @@ allprojects {
         withType(JavaCompile::class).configureEach {
             options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
             options.encoding = "UTF-8"
-            options.release.set(17)
+            options.release.set(apiJavaTarget.toInt())
             if (project.name != "testplugins" && System.getProperty("idea.sync.active") != null) {
                 options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
             }
