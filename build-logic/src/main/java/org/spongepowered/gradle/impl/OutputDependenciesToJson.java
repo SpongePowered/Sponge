@@ -276,11 +276,11 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
         }
 
         @Input
-        public Provider<Set<ModuleComponentIdentifier>> getIds() {
+        public Provider<Set<String>> getIds() {
             return this.getArtifacts().map(set -> set.stream()
               .map(art -> art.getId().getComponentIdentifier())
               .filter(id -> id instanceof ModuleComponentIdentifier)
-              .map(art -> (ModuleComponentIdentifier) art)
+              .map(art -> art.getDisplayName())
               .collect(Collectors.toSet()));
         }
 
