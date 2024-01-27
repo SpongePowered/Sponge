@@ -1,6 +1,6 @@
 plugins {
     id "java-gradle-plugin"
-    id "org.spongepowered.gradle.sponge.dev" version "2.1.1"
+    alias apiLibs.plugins.spongeGradle.convention
 }
 
 indra {
@@ -10,8 +10,8 @@ indra {
 }
 
 dependencies {
-    api("com.google.code.gson:gson:2.9.1")
-    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.7")
+    api(apiLibs.gson)
+    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:${apiLibs.versions.ideaExt.get()}")
 }
 
 indraSpotlessLicenser {
@@ -29,10 +29,6 @@ gradlePlugin {
         impl {
             id = "implementation-structure"
             implementationClass = "org.spongepowered.gradle.impl.SpongeImplementationPlugin"
-        }
-        templateResources {
-            id = "templated-resources"
-            implementationClass = "org.spongepowered.gradle.impl.TemplatedResourcesPlugin"
         }
     }
 }

@@ -14,9 +14,9 @@ buildscript {
 }
 
 plugins {
-    id("com.github.johnrengelman.shadow")
+    alias(libs.plugins.shadow)
     id("implementation-structure")
-    id("templated-resources")
+    alias(libs.plugins.blossom)
     id("net.smoofyuniverse.loom") version "1.1-SNAPSHOT"
 }
 
@@ -210,11 +210,6 @@ dependencies {
         }
     })
 
-    val apiAdventureVersion: String by project
-    val apiConfigurateVersion: String by project
-    val apiPluginSpiVersion: String by project
-    val log4jVersion: String by project
-
     api(project(":", configuration = "launch")) {
         exclude(group = "org.spongepowered", module = "mixin")
     }
@@ -228,27 +223,27 @@ dependencies {
     forgeMixins.implementationConfigurationName(project(commonProject.path))
 
     val serviceLibraries = serviceLibrariesConfig.name
-    serviceLibraries("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
+    serviceLibraries(apiLibs.pluginSpi)
     serviceLibraries(project(transformersProject.path))
-    serviceLibraries(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
-    serviceLibraries("org.spongepowered:configurate-core") {
+    serviceLibraries(platform(apiLibs.configurate.bom))
+    serviceLibraries(apiLibs.configurate.core) {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    serviceLibraries("org.spongepowered:configurate-hocon") {
+    serviceLibraries(apiLibs.configurate.hocon) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    serviceLibraries("org.spongepowered:configurate-jackson") {
+    serviceLibraries(libs.configurate.jackson) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
     val gameLibraries = gameLibrariesConfig.name
     gameLibraries("org.spongepowered:spongeapi:$apiVersion")
-    gameLibraries("javax.inject:javax.inject:1")
-    gameLibraries("com.zaxxer:HikariCP:2.7.8")
-    gameLibraries(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
-    gameLibraries("net.kyori:adventure-serializer-configurate4")
+    gameLibraries(libs.javaxInject)
+    gameLibraries(libs.db.hikariCp)
+    gameLibraries(platform(apiLibs.adventure.bom))
+    gameLibraries(libs.adventure.serializerConfigurate4)
 
     val serviceShadedLibraries = serviceShadedLibrariesConfig.name
     serviceShadedLibraries(project(transformersProject.path)) { isTransitive = false }
@@ -434,14 +429,14 @@ tasks {
     assemble {
         dependsOn(universalJar)
     }
+}
 
-    templateResources {
-        val props = mutableMapOf(
-                "version" to project.version,
-                "description" to project.description
-        )
-        inputs.properties(props)
-        expand(props)
+sourceSets {
+    main {
+        blossom.resources {
+            property("version", project.provider { project.version.toString() })
+            property("description", project.description.toString())
+        }
     }
 }
 

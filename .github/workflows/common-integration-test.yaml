@@ -1,0 +1,49 @@
+name: "common / integration test"
+
+on:
+  workflow_call:
+    inputs:
+      distribution:
+        type: string
+        required: false
+        default: "SpongeVanilla"
+
+jobs:
+  integrationTest:
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-latest, macos-latest]
+        java: [17, 21]
+    runs-on: "${{ matrix.os }}"
+    steps:
+      - name: Check out repository to use the build.gradle.kts as a hash file
+        uses: actions/checkout@v4.1.1
+        with:
+          path: code
+      - name: Download ${{ inputs.distribution }} libraries as an additional hash file
+        uses: actions/download-artifact@v4.1.1
+        with:
+          name: ${{ inputs.distribution }} installer libraries
+          path: "${{ github.workspace }}/code/libraries.json"
+      - name: "Setup JDK ${{ matrix.java }}"
+        uses: actions/setup-java@v4.0.0
+        with:
+          distribution: temurin
+          java-version: "${{ matrix.java }}"
+      - uses: actions/cache@v4.0.0
+        with:
+          path: "${{ github.workspace}}/libraries"
+          key: "${{runner.os}}-${{matrix.java}}-it-libraries-${{ hashFiles('code/build.gradle.kts') }}-${{ github.workspace }}/code/libraries.json"
+          restore-keys: "${{runner.os}}-${{matrix.java}}-it-libraries-"
+      - name: Download ${{ inputs.distribution }} server
+        uses: actions/download-artifact@v4.1.1
+        with:
+          name: ${{ inputs.distribution }} Production Jar
+      - name: Run ${{ inputs.distribution }} Test (windows)
+        if: "runner.os == 'Windows'"
+        run: java "-Dmixin.debug.verbose=true" -jar $(gci | Where-Object NameString -Match "-universal.jar") --launchTarget sponge_server_it
+      - name: Run ${{ inputs.distribution }} Test (other)
+        if: "runner.os != 'Windows'"
+        run: java -Dmixin.debug.verbose=true -jar *-universal.jar --launchTarget sponge_server_it

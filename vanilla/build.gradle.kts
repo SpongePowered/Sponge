@@ -1,16 +1,14 @@
-import org.jetbrains.gradle.ext.TaskTriggersConfig
-import org.spongepowered.gradle.impl.GenerateResourceTemplates
-
 plugins {
     id("org.spongepowered.gradle.vanilla")
-    id("com.github.johnrengelman.shadow")
+    alias(libs.plugins.shadow)
     id("implementation-structure")
-    id("templated-resources")
+    alias(libs.plugins.blossom)
     eclipse
 }
 
 val commonProject = parent!!
 val apiVersion: String by project
+val apiJavaTarget: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
 val organization: String by project
@@ -66,9 +64,11 @@ val vanillaInstallerJava9 by sourceSets.register("installerJava9") {
         options.release.set(9)
     }
 
-    configurations.configureEach {
-        attributes {
-            attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
+    sequenceOf(runtimeClasspathConfigurationName, compileClasspathConfigurationName).map(configurations::named).forEach {
+        it.configure {
+            attributes {
+                attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, apiJavaTarget.toInt())
+            }
         }
     }
 
@@ -181,7 +181,7 @@ minecraft {
         }
 
         configureEach {
-            targetVersion(17)
+            targetVersion(apiJavaTarget.toInt())
             workingDirectory(project.file("run/"))
             if (org.spongepowered.gradle.vanilla.internal.util.IdeConfigurer.isIdeaImport()) { // todo(zml): promote to API... eventually
                 // IntelliJ does not properly report its compatibility
@@ -247,20 +247,7 @@ minecraft {
             .forEach { accessWideners(it) }
 }
 
-val asmVersion: String by project
 dependencies {
-    val apiAdventureVersion: String by project
-    val apiConfigurateVersion: String by project
-    val apiGsonVersion: String by project
-    val guavaVersion: String by project
-    val apiPluginSpiVersion: String by project
-    val forgeAutoRenamingToolVersion: String by project
-    val jlineVersion: String by project
-    val log4jVersion: String by project
-    val mixinVersion: String by project
-    val modlauncherVersion: String by project
-    val tinyLogVersion: String by project
-
     api(project(":", configuration = "launch"))
     implementation(project(":", configuration = "accessors"))
     implementation(project(commonProject.path))
@@ -269,22 +256,22 @@ dependencies {
     vanillaMixinsImplementation(project(commonProject.path))
 
     val installer = vanillaInstallerConfig.name
-    installer("com.google.code.gson:gson:$apiGsonVersion")
-    installer("org.spongepowered:configurate-hocon:$apiConfigurateVersion")
-    installer("org.spongepowered:configurate-core:$apiConfigurateVersion")
-    installer("org.spongepowered:configurate-jackson:$apiConfigurateVersion")
-    installer("net.sf.jopt-simple:jopt-simple:5.0.4")
-    installer("org.tinylog:tinylog-api:$tinyLogVersion")
-    installer("org.tinylog:tinylog-impl:$tinyLogVersion")
+    installer(apiLibs.gson)
+    installer(platform(apiLibs.configurate.bom))
+    installer(apiLibs.configurate.hocon)
+    installer(apiLibs.configurate.core)
+    installer(libs.configurate.jackson)
+    installer(libs.joptSimple)
+    installer(libs.tinylog.api)
+    installer(libs.tinylog.impl)
     // Override ASM versions, and explicitly declare dependencies so ASM is excluded from the manifest.
-    val asmExclusions = sequenceOf("-commons", "-tree", "-analysis", "")
-            .map { "asm$it" }
+    val asmExclusions = sequenceOf(libs.asm.asProvider(), libs.asm.commons, libs.asm.tree, libs.asm.analysis)
             .onEach {
-                installer("org.ow2.asm:$it:$asmVersion")
+                installer(it)
             }.toSet()
-    installer("net.minecraftforge:ForgeAutoRenamingTool:$forgeAutoRenamingToolVersion") {
+    installer(libs.forgeAutoRenamingTool) {
         exclude(group = "net.sf.jopt-simple")
-        asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
+        asmExclusions.forEach { exclude(group = it.get().group, module = it.get().name) } // Use our own ASM version
     }
     mlTransformersConfig.name(rootProject.project(":modlauncher-transformers"))
 
@@ -301,62 +288,62 @@ dependencies {
     // Libraries only needed on the TCL (during main game lifecycle)
 
     libraries("org.spongepowered:spongeapi:$apiVersion")
-    libraries(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
-    libraries("net.kyori:adventure-serializer-configurate4") {
+    libraries(platform(apiLibs.adventure.bom))
+    libraries(libs.adventure.serializerConfigurate4) {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    libraries("javax.inject:javax.inject:1")
-    libraries("org.spongepowered:configurate-jackson") {
+    libraries(libs.javaxInject)
+    libraries(libs.configurate.jackson) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
     // Databases
-    libraries("com.zaxxer:HikariCP:2.6.3")
+    libraries(libs.db.hikariCp)
 
     // Libraries needed during applaunch phase and runtime
-    bootstrapLibraries("net.minecrell:terminalconsoleappender:1.3.0")
-    bootstrapLibraries("org.jline:jline-terminal:$jlineVersion")
-    bootstrapLibraries("org.jline:jline-reader:$jlineVersion")
-    bootstrapLibraries("org.jline:jline-terminal-jansi:$jlineVersion")
+    bootstrapLibraries(libs.terminalConsoleAppender)
+    bootstrapLibraries(libs.jline.terminal)
+    bootstrapLibraries(libs.jline.reader)
+    bootstrapLibraries(libs.jline.terminalJansi)
     // Must be on the base ClassLoader since ModLauncher has a dependency on log4j
-    bootstrapLibraries("org.apache.logging.log4j:log4j-jpl:$log4jVersion")
+    bootstrapLibraries(libs.log4j.jpl)
 
-    bootstrapLibraries(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
-    bootstrapLibraries("org.spongepowered:configurate-core") {
+    bootstrapLibraries(platform(apiLibs.configurate.bom))
+    bootstrapLibraries(apiLibs.configurate.core) {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    bootstrapLibraries("org.spongepowered:configurate-hocon") {
+    bootstrapLibraries(apiLibs.configurate.hocon) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    bootstrapLibraries("org.apache.logging.log4j:log4j-api:$log4jVersion")
-    bootstrapLibraries("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    bootstrapLibraries("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
+    bootstrapLibraries(libs.log4j.api)
+    bootstrapLibraries(libs.log4j.core)
+    bootstrapLibraries(libs.log4j.slf4j2)
 
     // Mixin and dependencies
-    bootstrapLibraries("org.spongepowered:mixin:$mixinVersion")
-    bootstrapLibraries("org.ow2.asm:asm-util:$asmVersion")
-    bootstrapLibraries("org.ow2.asm:asm-tree:$asmVersion")
-    bootstrapLibraries("com.google.guava:guava:$guavaVersion")
+    bootstrapLibraries(libs.mixin)
+    bootstrapLibraries(libs.asm.util)
+    bootstrapLibraries(libs.asm.tree)
+    bootstrapLibraries(libs.guava)
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     // Not needing to be source-visible past the init phase
     // The ModLauncher compatibility launch layer
-    appLaunch("cpw.mods:modlauncher:$modlauncherVersion") {
+    appLaunch(libs.modlauncher) {
         exclude(group = "org.apache.logging.log4j")
         exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
     }
-    appLaunch("org.ow2.asm:asm-commons:$asmVersion")
-    appLaunch("cpw.mods:grossjava9hacks:1.3.3") {
+    appLaunch(libs.asm.commons)
+    appLaunch(libs.grossJava9Hacks) {
         exclude(group = "org.apache.logging.log4j")
     }
-    appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion") {
+    appLaunch(apiLibs.pluginSpi) {
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.code.gson", module = "gson")
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")
     }
-    appLaunch("com.lmax:disruptor:3.4.4")
+    appLaunch(libs.lmaxDisruptor)
 
     testplugins?.also {
         vanillaAppLaunchRuntime(project(it.path)) {
@@ -379,21 +366,22 @@ val vanillaManifest = java.manifest {
     System.getenv()["GIT_BRANCH"]?.apply { attributes("Git-Branch" to this) }
 }
 
+vanillaLaunch.apply {
+    blossom.resources {
+        property("apiVersion", apiVersion)
+        property("minecraftVersion", minecraftVersion)
+        property("version", provider { project.version.toString() })
+    }
+}
+vanillaInstaller.apply {
+    blossom.javaSources {
+        property("minecraftVersion", minecraftVersion)
+    }
+}
+
 tasks {
     jar {
         manifest.from(vanillaManifest)
-    }
-
-    named("templateLaunchResources", GenerateResourceTemplates::class) {
-        inputs.property("version.api", apiVersion)
-        inputs.property("version.minecraft", minecraftVersion)
-        inputs.property("version.vanilla", project.version)
-
-        expand(
-            "apiVersion" to apiVersion,
-            "minecraftVersion" to minecraftVersion,
-            "version" to project.version
-        )
     }
 
     val vanillaInstallerJar by registering(Jar::class) {
@@ -431,31 +419,6 @@ tasks {
     val integrationTest by registering {
         group = LifecycleBasePlugin.VERIFICATION_GROUP
         dependsOn("integrationTestServer", "integrationTestClient")
-    }
-
-    val installerTemplateSource = project.file("src/installer/templates")
-    val installerTemplateDest = project.layout.buildDirectory.dir("generated/sources/installerTemplates")
-    val generateInstallerTemplates by registering(Copy::class) {
-        group = "sponge"
-        description = "Generate classes from templates for the SpongeVanilla installer"
-        val properties = mutableMapOf(
-                "minecraftVersion" to minecraftVersion
-        )
-        inputs.properties(properties)
-
-        // Copy template
-        from(installerTemplateSource)
-        into(installerTemplateDest)
-        expand(properties)
-    }
-    vanillaInstaller.java.srcDir(generateInstallerTemplates.map { it.outputs })
-
-    // Generate templates on IDE import as well
-    (rootProject.idea.project as? ExtensionAware)?.also {
-        (it.extensions["settings"] as ExtensionAware).extensions.getByType(TaskTriggersConfig::class).afterSync(generateInstallerTemplates)
-    }
-    project.eclipse {
-        synchronizationTasks(generateInstallerTemplates)
     }
 
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")
@@ -499,7 +462,7 @@ tasks {
                     "Launcher-Agent-Class" to "org.spongepowered.vanilla.installer.Agent"
             ))
             attributes(
-                mapOf("Implementation-Version" to asmVersion),
+                mapOf("Implementation-Version" to libs.versions.asm.get()),
                 "org/objectweb/asm/"
             )
             from(vanillaManifest)
