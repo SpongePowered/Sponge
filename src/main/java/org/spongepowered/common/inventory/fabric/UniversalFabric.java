@@ -71,5 +71,6 @@ public interface UniversalFabric extends Fabric, InventoryBridge {
 
     @Override default void fabric$markDirty() {
         InventoryTranslators.getTranslator(this.getClass()).markDirty(this);
+        this.fabric$captureContainer();
     }
 }

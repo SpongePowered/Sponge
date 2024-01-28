@@ -24,14 +24,55 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
+import com.google.common.collect.Sets;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.inventory.util.InventoryUtil;
+
+import java.util.Set;
 
 public class PluginPhaseContext<P extends PluginPhaseContext<P>> extends PhaseContext<P> {
 
+    private @MonotonicNonNull Set<AbstractContainerMenu> modifiedContainers;
+
+    private boolean closing;
 
     protected PluginPhaseContext(final IPhaseState<P> phaseState, final PhaseTracker tracker) {
         super(phaseState, tracker);
+    }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        this.modifiedContainers = null;
+        this.closing = false;
+    }
+
+    @Override
+    public boolean captureModifiedContainer(final AbstractContainerMenu container) {
+        if (this.closing) {
+            return false;
+        }
+
+        if (this.modifiedContainers == null) {
+            this.modifiedContainers = Sets.newHashSet();
+        }
+
+        this.modifiedContainers.add(container);
+        return true;
+    }
+
+    @Override
+    public void close() {
+        this.closing = true;
+
+        if (this.modifiedContainers != null) {
+            InventoryUtil.postContainerEvents(this.modifiedContainers, this.getTransactor());
+        }
+
+        super.close();
     }
 }

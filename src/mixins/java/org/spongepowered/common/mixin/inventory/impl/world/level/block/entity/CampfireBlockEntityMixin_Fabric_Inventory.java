@@ -84,5 +84,6 @@ public abstract class CampfireBlockEntityMixin_Fabric_Inventory implements Fabri
     @Override
     public void fabric$markDirty() {
         this.shadow$markUpdated();
+        this.fabric$captureContainer();
     }
 }

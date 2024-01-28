@@ -198,6 +198,11 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     public void bridge$detectAndSendChanges(final boolean capture, final boolean synchronize) {
         // Code-Flow changed from vanilla completely!
 
+        final PhaseContext<?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
+        if (phaseContext.captureModifiedContainer((AbstractContainerMenu) (Object) this)) {
+            return;
+        }
+
         final SpongeInventoryMenu menu = ((MenuBridge)this).bridge$getMenu();
         // We first collect all differences and check if cancelled for readonly menu changes
         final List<Integer> changes = new ArrayList<>();
