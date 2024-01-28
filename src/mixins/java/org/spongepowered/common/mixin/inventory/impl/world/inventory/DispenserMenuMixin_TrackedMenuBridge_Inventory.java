@@ -22,39 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.inventory.event.world.inventory;
+package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 
 import net.minecraft.world.Container;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.DispenserMenu;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.inventory.fabric.Fabric;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedMenuBridge;
 
-@Mixin(Slot.class)
-public abstract class SlotMixin_Inventory {
+@Mixin(DispenserMenu.class)
+public abstract class DispenserMenuMixin_TrackedMenuBridge_Inventory {
 
-    // @formatter:off
-    @Shadow @Final public Container container;
-    // @formatter:on
-
-    @Inject(method = "onQuickCraft(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)V", at = @At("HEAD"))
-    private void inventory$onQuickCraft(final ItemStack slotStack, final ItemStack stackTaken, final CallbackInfo ci) {
-        if (PhaseTracker.SERVER.onSidedThread()) {
-            final PhaseContext<@NonNull ?> ctx = PhaseTracker.SERVER.getPhaseContext();
-            ctx.getTransactor().logShiftCraftingResult((Slot) (Object) this, stackTaken);
+    @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;)V", at = @At("RETURN"))
+    private void inventory$attachContainerMenu(final int $$0, final Inventory $$1, final Container $$2, final CallbackInfo ci) {
+        if ($$2 instanceof final TrackedMenuBridge trackedMenu) {
+            trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }
-    }
-
-    @Inject(method = "setChanged", at = @At("HEAD"))
-    public void inventory$onSetChanged(final CallbackInfo ci) {
-        ((Fabric) this.container).fabric$captureContainer();
     }
 }
