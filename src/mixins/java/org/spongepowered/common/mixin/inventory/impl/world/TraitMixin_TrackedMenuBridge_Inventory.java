@@ -29,9 +29,9 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.MerchantContainer;
 import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,7 +47,7 @@ import java.util.WeakHashMap;
         AbstractMinecartContainer.class,
         BaseContainerBlockEntity.class,
         CompoundContainer.class,
-        CraftingContainer.class,
+        TransientCraftingContainer.class,
         CustomInventory.class,
         Inventory.class,
         MerchantContainer.class,
