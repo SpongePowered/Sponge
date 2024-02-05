@@ -22,34 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.world.entity;
+package org.spongepowered.forge.mixin.core.server.level;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.common.util.ITeleporter;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.bridge.world.entity.EntityBridge;
-import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.world.portal.PortalLogic;
+import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 
-@Mixin(Entity.class)
-public abstract class EntityMixin_Forge implements PlatformEntityBridge {
-
-    /**
-     * @author dualspiral - 8th August 2021, Minecraft 1.16.5
-     * @reason Redirects to our handling so we have common logic with Vanilla.
-     */
-    @Overwrite
-    @Nullable
-    public Entity changeDimension(final ServerLevel level, final ITeleporter teleporter) {
-        return ((EntityBridge) this).bridge$changeDimension(level, (PortalLogic) teleporter);
-    }
+@Mixin(ServerLevel.class)
+public abstract class ServerLevelMixin_Forge implements PlatformServerLevelBridge {
 
     @Override
-    public void bridge$revive() {
-        ((Entity) (Object) this).revive();
+    public void bridge$removeEntity(Entity entity, boolean keepData) {
+        if (entity instanceof net.minecraft.server.level.ServerPlayer) {
+            // Forge uses both removeEntity and removePlayer in ServerPlayer#changeDimension for some reason
+            ((ServerLevel) (Object) this).removePlayer((net.minecraft.server.level.ServerPlayer) entity, keepData);
+        } else {
+            ((ServerLevel) (Object) this).removeEntity(entity, keepData);
+        }
     }
 
 }

@@ -136,6 +136,7 @@ import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
+import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.type.SpongeSkinPart;
 import org.spongepowered.common.entity.EntityUtil;
@@ -501,11 +502,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     protected final Entity impl$performGameWinLogic() {
         this.shadow$unRide();
-        this.shadow$getLevel().removePlayerImmediately((net.minecraft.server.level.ServerPlayer) (Object) this);
+        ((PlatformServerLevelBridge) this.shadow$getLevel()).bridge$removeEntity((net.minecraft.server.level.ServerPlayer) (Object) this, true);
         if (!this.wonGame) {
             this.wonGame = true;
             this.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.WIN_GAME, this.seenCredits ? 0.0F : 1.0F));
@@ -524,8 +524,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         final PlayerList playerlist = this.server.getPlayerList();
         playerlist.sendPlayerPermissionLevel((net.minecraft.server.level.ServerPlayer) (Object) this);
-        currentWorld.removePlayerImmediately((net.minecraft.server.level.ServerPlayer) (Object) this);
-        this.removed = false;
+        ((PlatformServerLevelBridge) currentWorld).bridge$removeEntity((net.minecraft.server.level.ServerPlayer) (Object) this, true);
+        this.bridge$revive();
     }
 
     @SuppressWarnings("ConstantConditions")
