@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.world.item.trading.MerchantOffer;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
@@ -45,9 +46,9 @@ import java.util.Optional;
 
 public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> implements TradeOffer.Builder, DataBuilder<TradeOffer> {
 
-    private ItemStackSnapshot firstItem = ItemStackSnapshot.empty();
+    @MonotonicNonNull private ItemStackSnapshot firstItem;
     private @Nullable ItemStackSnapshot secondItem;
-    private ItemStackSnapshot sellingItem = ItemStackSnapshot.empty();
+    @MonotonicNonNull private ItemStackSnapshot sellingItem;
     private int useCount;
     private int maxUses;
     private boolean allowsExperience;
@@ -152,9 +153,9 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     @Override
     public SpongeTradeOfferBuilder reset() {
-        this.firstItem = ItemStackSnapshot.empty();
+        this.firstItem = null;
         this.secondItem = null;
-        this.sellingItem = ItemStackSnapshot.empty();
+        this.sellingItem = null;
         this.useCount = Constants.Item.TradeOffer.DEFAULT_USE_COUNT;
         this.maxUses = Constants.Item.TradeOffer.DEFAULT_MAX_USES;
         this.allowsExperience = true;
