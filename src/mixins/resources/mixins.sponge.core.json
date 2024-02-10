@@ -152,6 +152,7 @@
         "world.entity.projectile.LargeFireballMixin",
         "world.entity.projectile.LlamaSpitMixin",
         "world.entity.projectile.ProjectileMixin",
+        "world.entity.projectile.ProjectileUtilMixin",
         "world.entity.projectile.ShulkerBulletMixin",
         "world.entity.projectile.SmallFireballMixin",
         "world.entity.projectile.SnowballMixin",

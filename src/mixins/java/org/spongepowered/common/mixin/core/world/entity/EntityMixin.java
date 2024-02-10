@@ -45,6 +45,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
@@ -62,6 +63,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.scores.Team;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
@@ -163,6 +165,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public double zo;
     @Shadow private int remainingFireTicks;
     @Shadow protected UUID uuid;
+    @Shadow private EntityDimensions dimensions;
 
     @Shadow protected abstract void shadow$unsetRemoved();
     @Shadow public abstract void shadow$setRemoved(Entity.RemovalReason reason);
@@ -963,18 +966,26 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         final Vec3 afterCollide = this.shadow$collide(originalMove);
         if (ShouldFire.COLLIDE_BLOCK_EVENT_MOVE && !originalMove.equals(afterCollide)) {
             // We had a collision! Try to find the colliding block
-            // TODO this is not 100% accurate as the collision happens with the bb potentially colliding with multiple blocks
-            // TODO maybe actually check for blocks in bb?
-            Vec3 pos0 = this.position.add(originalMove);
-            BlockPos pos = new BlockPos((int) pos0.x, (int) pos0.y, (int) pos0.z);
-            if (this.blockPosition.equals(pos)) {
-                // retry with bigger move for entities with big bounding box - e.g. minecart
-                pos0 = this.position.add(originalMove.normalize());
-                pos = new BlockPos((int) pos0.x, (int) pos0.y, (int) pos0.z);
+            final Vec3 position = new Vec3(this.shadow$getX() + afterCollide.x, this.shadow$getY() + afterCollide.y, this.shadow$getZ() + afterCollide.z);
+            final AABB boundingBox = this.dimensions.makeBoundingBox(position)
+                    .expandTowards(originalMove.x - afterCollide.x, originalMove.y - afterCollide.y, originalMove.z - afterCollide.z);
+
+            Optional<Vec3> closestPoint = Optional.empty();
+            for (final VoxelShape shape : this.shadow$level().getBlockCollisions((Entity) (Object) this, boundingBox)) {
+                final Optional<Vec3> shapeClosestPoint = shape.closestPointTo(position);
+                if (shapeClosestPoint.isPresent()) {
+                    if (!closestPoint.isPresent()) {
+                        closestPoint = shapeClosestPoint;
+                    } else if (position.distanceToSqr(closestPoint.get()) > position.distanceToSqr(shapeClosestPoint.get())) {
+                        closestPoint = shapeClosestPoint;
+                    }
+                }
             }
+
+            final BlockPos pos = closestPoint.map(p -> BlockPos.containing(p.x, p.y, p.z)).orElse(BlockPos.containing(position.x, position.y, position.z));
             final BlockState state = this.shadow$level().getBlockState(pos);
             final org.spongepowered.api.util.Direction dir = org.spongepowered.api.util.Direction.closest(new Vector3d(originalMove.x, originalMove.y, originalMove.z));
-            if (SpongeCommonEventFactory.handleCollideBlockEvent(state.getBlock(), this.shadow$level(), pos, state,
+            if (!state.isAir() && SpongeCommonEventFactory.handleCollideBlockEvent(state.getBlock(), this.shadow$level(), pos, state,
                     (Entity) (Object) this, dir, SpongeCommonEventFactory.CollisionType.MOVE)) {
                 return originalMove;
             }
@@ -1024,7 +1035,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             )
     ) // doBlockCollisions
     private void impl$onCheckInsideBlocksCollide(final BlockState blockState, final Level worldIn, final BlockPos pos, final Entity entityIn) {
-        if (!ShouldFire.COLLIDE_BLOCK_EVENT_INSIDE || worldIn.isClientSide) {
+        if (!ShouldFire.COLLIDE_BLOCK_EVENT_INSIDE || worldIn.isClientSide || blockState.isAir()) {
             blockState.entityInside(worldIn, pos, entityIn);
             return;
         }
