@@ -31,7 +31,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -130,7 +130,7 @@ public final class SpongeForgeMod {
     }
 
     @SubscribeEvent
-    public void onServerStoppedEvent(final ServerStoppedEvent event) {
+    public void onServerStoppingEvent(final ServerStoppingEvent event) {
         final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.callStoppingEngineEvent((Server) event.getServer());
     }
