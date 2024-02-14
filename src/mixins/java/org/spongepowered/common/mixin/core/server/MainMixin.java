@@ -24,32 +24,18 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import com.mojang.serialization.Dynamic;
-import joptsimple.OptionSet;
-import joptsimple.OptionSpec;
 import net.minecraft.server.Main;
-import net.minecraft.server.WorldLoader;
-import net.minecraft.server.dedicated.DedicatedServerSettings;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 
 
 @Mixin(Main.class)
 public abstract class MainMixin {
-
-    @Inject(method = "lambda$main$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource;getLevelDataAndDimensions(Lcom/mojang/serialization/Dynamic;Lnet/minecraft/world/level/WorldDataConfiguration;Lnet/minecraft/core/Registry;Lnet/minecraft/core/RegistryAccess$Frozen;)Lnet/minecraft/world/level/storage/LevelDataAndDimensions;"))
-    private static void impl$captureBootstrapOps(final Dynamic $$0x, final OptionSet $$1x, final OptionSpec $$2x, final DedicatedServerSettings $$3x,
-            final OptionSpec $$4x, final WorldLoader.DataLoadContext $$5x, final CallbackInfoReturnable<WorldLoader.DataLoadOutput> cir) {
-        SpongeWorldManager.bootstrapOps = $$0x;
-    }
 
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/repository/ServerPacksSource;createPackRepository(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;)Lnet/minecraft/server/packs/repository/PackRepository;"))
     private static PackRepository impl$configurePackRepository(LevelStorageSource.LevelStorageAccess levelSave) {

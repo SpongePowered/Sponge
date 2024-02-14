@@ -103,6 +103,9 @@ public final class SpongeRegistries {
 
 
     public static void registerGlobalRegistriesDimensionLayer(final SpongeRegistryHolder holder, final RegistryAccess.Frozen registryAccess, final FeatureFlagSet featureFlags) {
+        if (holder.findRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE).isPresent()) {
+            return; // Already done
+        }
         final RegistryAccess.ImmutableRegistryAccess builtInRegistryAccess = new RegistryAccess.ImmutableRegistryAccess(BuiltInRegistries.REGISTRY.stream().toList());
         final CommandBuildContext cbCtx = CommandBuildContext.configurable(builtInRegistryAccess, featureFlags);
         holder.createFrozenRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, CommandRegistryLoader.clientCompletionKey(cbCtx));

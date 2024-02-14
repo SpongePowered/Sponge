@@ -76,6 +76,7 @@ public final class SpongeLifecycle implements Lifecycle {
     private final Game game;
     private final Injector injector;
     private FeatureFlagSet featureFlags;
+    public boolean establishedPluginRegistries = false;
 
     @Inject
     public SpongeLifecycle(final Game game, final Injector injector) {
@@ -127,16 +128,12 @@ public final class SpongeLifecycle implements Lifecycle {
         // TODO marker for this in API?
         this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.BuiltInImpl<>(Cause.of(EventContext.empty(), this.game), this.game,
                 (org.spongepowered.api.registry.Registry<Trigger<?>>) BuiltInRegistries.TRIGGER_TYPES));
-
-        // TODO we might want to move more registration to here
-
-
     }
 
     @Override
     public void establishGlobalRegistries(final RegistryAccess.Frozen registryAccess, final RegistryLayer layer) {
         final SpongeRegistryHolder holder = (SpongeRegistryHolder) this.game;
-
+        SpongeCommon.logger().info("Layer {}", layer);
         switch (layer)
         {
             // WORLDGEN ->
@@ -147,10 +144,14 @@ public final class SpongeLifecycle implements Lifecycle {
                 holder.registryHolder().freezeSpongeRootRegistry();
             }
             case RELOADABLE -> {
-                // Plugin registry values
-                this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
-                // Freeze Dynamic Registries - Values are now available
-                holder.registryHolder().freezeSpongeDynamicRegistries();
+                if (!this.establishedPluginRegistries) {
+                    // Plugin registry values
+                    this.game.eventManager().post(new AbstractRegisterRegistryValueEvent.GameScopedImpl(Cause.of(EventContext.empty(), this.game), this.game));
+                    // Freeze Dynamic Registries - Values are now available
+                    holder.registryHolder().freezeSpongeDynamicRegistries();
+
+                    this.establishedPluginRegistries = true;
+                }
             }
         }
     }

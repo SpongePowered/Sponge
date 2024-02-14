@@ -128,8 +128,6 @@ import java.util.stream.Collectors;
 
 public abstract class SpongeWorldManager implements WorldManager {
 
-    public static Dynamic<?> bootstrapOps;
-
     private final MinecraftServer server;
     private final Path defaultWorldDirectory, customWorldsDirectory;
     private final Map<net.minecraft.resources.ResourceKey<Level>, ServerLevel> worlds;
@@ -401,7 +399,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         try {
             final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
             try {
-                levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), storageSource);
+                levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), storageSource.getDataTag());
             } catch (final Exception ex) {
                 return FutureUtil.completedWithException(ex);
             }
@@ -754,9 +752,9 @@ public abstract class SpongeWorldManager implements WorldManager {
         ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().load();
     }
 
-    private PrimaryLevelData getOrCreateLevelData(final LevelStorageSource.LevelStorageAccess storageSource, final LevelStem levelStem, final String directoryName) {
+    private PrimaryLevelData getOrCreateLevelData(final Dynamic<?> dynamicLevelData, final LevelStem levelStem, final String directoryName) {
         final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
-        @Nullable PrimaryLevelData levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), storageSource);
+        @Nullable PrimaryLevelData levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), dynamicLevelData);
         if (levelData != null) {
             return levelData;
         }
@@ -778,10 +776,9 @@ public abstract class SpongeWorldManager implements WorldManager {
     }
 
     @Nullable
-    private PrimaryLevelData loadLevelData(final RegistryAccess.Frozen access, final WorldDataConfiguration datapackConfig, final LevelStorageSource.LevelStorageAccess storageSource) {
-        // TODO storageSource no longer required?
-        final LevelDataAndDimensions dataTag = LevelStorageSource.getLevelDataAndDimensions(SpongeWorldManager.bootstrapOps, datapackConfig, access.registryOrThrow(Registries.LEVEL_STEM), access);
-        return dataTag == null ? null : (PrimaryLevelData) dataTag.worldData();
+    private PrimaryLevelData loadLevelData(final RegistryAccess.Frozen access, final WorldDataConfiguration datapackConfig, final Dynamic<?> dataTag) {
+        final LevelDataAndDimensions levelData = LevelStorageSource.getLevelDataAndDimensions(dataTag, datapackConfig, access.registryOrThrow(Registries.LEVEL_STEM), access);
+        return levelData == null ? null : (PrimaryLevelData) levelData.worldData();
     }
 
     private ServerLevel createLevel(
@@ -792,7 +789,13 @@ public abstract class SpongeWorldManager implements WorldManager {
             final ChunkProgressListener chunkStatusListener) throws IOException {
         final String directoryName = this.getDirectoryName(worldKey);
         final LevelStorageSource.LevelStorageAccess storageSource = this.getLevelStorageAccess(worldKey);
-        final PrimaryLevelData levelData = this.getOrCreateLevelData(storageSource, levelStem, directoryName);
+        Dynamic<?> dataTag;
+        try {
+            dataTag = storageSource.getDataTag();
+        } catch (IOException e) {
+            dataTag = ((MinecraftServerAccessor) this.server).accessor$storageSource().getDataTag(); // Fallback to overworld level.dat
+        }
+        final PrimaryLevelData levelData = this.getOrCreateLevelData(dataTag, levelStem, directoryName);
         ((ResourceKeyBridge) levelData).bridge$setKey(worldKey);
         return this.createLevel(registryKey, levelStem, worldKey, worldTypeKey, storageSource, levelData, ImmutableList.of(), chunkStatusListener);
     }
@@ -1007,21 +1010,6 @@ public abstract class SpongeWorldManager implements WorldManager {
 
     public static net.minecraft.resources.ResourceKey<Level> createRegistryKey(final ResourceKey key) {
         return net.minecraft.resources.ResourceKey.create(Registries.DIMENSION, (ResourceLocation) (Object) key);
-    }
-
-
-
-    private LevelStorageSource.LevelStorageAccess createStorageSource(final ResourceKey key) throws IOException {
-        if (DefaultWorldKeys.DEFAULT.equals(key)) {
-            LevelStorageSource.createDefault(this.defaultWorldDirectory.getParent()).createAccess(this.defaultWorldDirectory.getFileName().toString());
-        }
-        if (DefaultWorldKeys.THE_NETHER.equals(key)) {
-            return LevelStorageSource.createDefault(this.defaultWorldDirectory).createAccess("DIM-1");
-        }
-        if (DefaultWorldKeys.THE_END.equals(key)) {
-            return LevelStorageSource.createDefault(this.defaultWorldDirectory).createAccess("DIM1");
-        }
-        return LevelStorageSource.createDefault(this.customWorldsDirectory).createAccess(key.namespace() + File.separator + key.value());
     }
 
     private String getDirectoryName(final ResourceKey key) {
