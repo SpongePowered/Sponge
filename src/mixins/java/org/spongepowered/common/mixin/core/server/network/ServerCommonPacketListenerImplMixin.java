@@ -28,10 +28,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPacket;
-import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
-import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -56,11 +53,6 @@ public abstract class ServerCommonPacketListenerImplMixin {
 
     @Nullable public ResourcePack impl$lastReceivedPack;
 
-    @Inject(method = "handleResourcePackResponse", at = @At("HEAD"))
-    public void impl$handleResourcePackResponse(final ServerboundResourcePackPacket packet, final CallbackInfo callbackInfo) {
-        PacketUtils.ensureRunningOnSameThread(packet, (ServerGamePacketListener) this, this.server);
-    }
-
     @Inject(
             method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V",
             at = @At("HEAD")
@@ -70,8 +62,7 @@ public abstract class ServerCommonPacketListenerImplMixin {
 
     }
 
-    public void impl$modifyClientBoundPacket(final Packet<?> packet)
-    {
+    public void impl$modifyClientBoundPacket(final Packet<?> packet) {
         if (packet instanceof ClientboundResourcePackPacket) {
             final ResourcePack pack = ((ClientboundResourcePackPacketBridge) packet).bridge$getSpongePack();
             this.impl$lastReceivedPack = pack;
