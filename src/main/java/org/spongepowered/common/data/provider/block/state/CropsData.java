@@ -40,9 +40,9 @@ public final class CropsData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
-                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, CropBlock.AGE))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, ((CropBlock) h.getBlock()).getAgeProperty()))
                         .get(h -> h.getValue(((CropBlock) h.getBlock()).getAgeProperty()))
-                        .set((h, v) -> BoundedUtil.setInteger(h, v, CropBlock.AGE))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, ((CropBlock) h.getBlock()).getAgeProperty()))
                         .supports(h -> h.getBlock() instanceof CropBlock);
     }
     // @formatter:on
