@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.minecraft.network;
 
 
-import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
@@ -46,6 +45,7 @@ import org.spongepowered.common.network.channel.ChannelBuffers;
 import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -552,7 +552,7 @@ public abstract class FriendlyByteBufMixin_API extends ByteBuf {
     }
 
     public ChannelBuf cbuf$writeUTF(final String data) {
-        final byte[] bytes = data.getBytes(Charsets.UTF_8);
+        final byte[] bytes = data.getBytes(StandardCharsets.UTF_8);
         if (bytes.length > Constants.Networking.MAX_STRING_LENGTH_BYTES) {
             throw new EncoderException("String too big (was " + data.length() + " bytes encoded, max "
                                        + Constants.Networking.MAX_STRING_LENGTH_BYTES + ")");
@@ -575,7 +575,7 @@ public abstract class FriendlyByteBufMixin_API extends ByteBuf {
         final short length = this.readShort();
         final byte[] bytes = new byte[length];
         this.readBytes(bytes);
-        return new String(bytes, Charsets.UTF_8);
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     public String cbuf$getUTF(final int index) {
@@ -584,7 +584,7 @@ public abstract class FriendlyByteBufMixin_API extends ByteBuf {
         final short length = this.readShort();
         final byte[] bytes = new byte[length];
         this.readBytes(bytes);
-        final String data = new String(bytes, Charsets.UTF_8);
+        final String data = new String(bytes, StandardCharsets.UTF_8);
         this.readerIndex(oldIndex);
         return data;
     }

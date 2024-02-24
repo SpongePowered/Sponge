@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.profile;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -89,11 +88,11 @@ public final class SpongeGameProfile implements GameProfile {
     }
 
     private static String decodeBase64(final String value) {
-        return new String(java.util.Base64.getDecoder().decode(value.getBytes(StandardCharsets.UTF_8)), Charsets.UTF_8);
+        return new String(Base64.getDecoder().decode(value.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
     }
 
     private static String encodeBase64(final String value) {
-        return new String(Base64.getEncoder().encode(value.getBytes(StandardCharsets.UTF_8)), Charsets.UTF_8);
+        return new String(Base64.getEncoder().encode(value.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
     }
 
     private static SpongeProfileProperty withoutSignature(final ProfileProperty property) {
