@@ -22,15 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.item.crafting;
+package org.spongepowered.common.item.recipe;
 
-import net.minecraft.world.item.crafting.ShapelessRecipe;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import java.util.Optional;
 
-@Mixin(ShapelessRecipe.class)
-public interface ShapelessRecipeAccessor {
-
-    @Accessor("group") String accessor$group();
+public interface ResultFunctionRecipe {
+    Optional<String> resultFunctionId();
 
 }

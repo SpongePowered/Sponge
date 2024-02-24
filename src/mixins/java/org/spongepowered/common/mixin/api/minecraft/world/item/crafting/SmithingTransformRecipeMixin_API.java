@@ -22,11 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.recipe.cooking;
+package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.item.crafting.SmithingTransformRecipe;
+import org.spongepowered.api.item.recipe.smithing.SmithingRecipe;
+import org.spongepowered.asm.mixin.Mixin;
 
-public interface ResultFunctionRecipe {
-    @Nullable String resultFunctionId();
+@Mixin(SmithingTransformRecipe.class)
+public abstract class SmithingTransformRecipeMixin_API implements SmithingRecipe {
+
 
 }

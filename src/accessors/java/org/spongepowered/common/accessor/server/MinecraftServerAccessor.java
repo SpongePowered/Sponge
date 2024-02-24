@@ -66,7 +66,7 @@ public interface MinecraftServerAccessor {
 
     @Accessor("progressListenerFactory") ChunkProgressListenerFactory accessor$progressListenerFactory();
 
-    @Accessor("nextTickTime") void accessor$nextTickTime(final long nextTickTime);
+    @Accessor("nextTickTimeNanos") void accessor$nextTickTimeNanos(final long nextTickTime);
 
     @Invoker("isSpawningMonsters") boolean invoker$isSpawningMonsters();
 

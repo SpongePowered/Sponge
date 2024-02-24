@@ -22,28 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.client.gui.screens.worldselection;
+package org.spongepowered.common.mixin.core.world.item.crafting;
 
-import com.mojang.serialization.DynamicOps;
-import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryOps;
+import com.mojang.datafixers.kinds.App;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.server.SpongeWorldManager;
+import org.spongepowered.common.item.recipe.crafting.shapeless.SpongeShapelessRecipe;
 
-@Mixin(WorldOpenFlows.class)
-public abstract class WorldOpenFlowsMixin {
+import java.util.function.Function;
 
-    @Redirect(method = "lambda$loadWorldStem$1",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/resources/RegistryOps;"))
-    private static <T> RegistryOps<T> impl$captureBootstrapOps(final DynamicOps<T> $$0, final HolderLookup.Provider $$1) {
-        final RegistryOps<T> ops = RegistryOps.create($$0, $$1);
-        SpongeWorldManager.bootstrapOps = (RegistryOps<Tag>) ops;
-        return ops;
+@Mixin(ShapelessRecipe.Serializer.class)
+public abstract class ShapelessRecipe_SerializerMixin {
+
+
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE",
+            target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"))
+    private static Codec<ShapelessRecipe> impl$onCreateCodec(
+            final Function<RecordCodecBuilder.Instance<ShapelessRecipe>, ? extends App<RecordCodecBuilder.Mu<ShapelessRecipe>, ShapelessRecipe>> builder) {
+        final var mcMapCodec = RecordCodecBuilder.mapCodec(builder);
+        return Codec.mapEither(SpongeShapelessRecipe.SPONGE_CODEC, mcMapCodec).xmap(to -> to.map(si -> si, i -> i),
+                fr -> {
+                    if (fr instanceof SpongeShapelessRecipe si) {
+                        return Either.left(si);
+                    }
+                    return Either.right(fr);
+                }).codec();
     }
-
-
 }

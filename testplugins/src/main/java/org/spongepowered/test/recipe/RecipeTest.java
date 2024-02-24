@@ -312,7 +312,7 @@ public final class RecipeTest implements LoadableModule {
                     final int blacks = grid.query(QueryTypes.ITEM_TYPE, ItemTypes.BLACK_WOOL).capacity();
                     final int whites = grid.query(QueryTypes.ITEM_TYPE, ItemTypes.WHITE_WOOL).capacity();
                     return blacks > whites ? ItemStack.of(ItemTypes.BLACK_WOOL, 3) : ItemStack.of(ItemTypes.WHITE_WOOL, 3);
-                }, ItemStack.empty())
+                }, ItemStack.of(ItemTypes.GRAY_WOOL))
                 .key(ResourceKey.of(this.plugin, "black_or_white"))
                 .build();
 

@@ -28,7 +28,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.SaplingBlock;
-import net.minecraft.world.level.block.grower.AbstractTreeGrower;
+import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,11 +46,11 @@ public class SaplingBlockMixin_Tracker {
     @Redirect(method = "advanceTree",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/grower/AbstractTreeGrower;growTree(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/util/RandomSource;)Z"
+            target = "Lnet/minecraft/world/level/block/grower/TreeGrower;growTree(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/util/RandomSource;)Z"
         )
     )
     private boolean tracker$wrapTreeGrowth(
-        final AbstractTreeGrower instance, final ServerLevel level, final ChunkGenerator generator,
+        final TreeGrower instance, final ServerLevel level, final ChunkGenerator generator,
         final BlockPos pos, final BlockState state, final RandomSource random
     ) {
         if (((LevelBridge) level).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_ALL) {

@@ -25,8 +25,7 @@
 package org.spongepowered.common.mixin.core.network.protocol.game;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.common.ClientboundResourcePackPacket;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,16 +38,16 @@ import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
 import java.net.URISyntaxException;
 
-@Mixin(ClientboundResourcePackPacket.class)
-public abstract class ClientboundResourcePackPacketMixin implements ClientboundResourcePackPacketBridge {
+@Mixin(ClientboundResourcePackPushPacket.class)
+public abstract class ClientboundResourcePackPushPacketMixin implements ClientboundResourcePackPacketBridge {
 
     @Shadow private String url;
     @Shadow private String hash;
 
     private ResourcePack impl$pack;
 
-    @Inject(method = "<init>(Ljava/lang/String;Ljava/lang/String;ZLnet/minecraft/network/chat/Component;)V", at = @At("RETURN") , remap = false)
-    private void impl$setResourcePackOrThrowException(final String url, final String hash, final boolean required, @Nullable final Component prompt, final CallbackInfo ci) {
+    @Inject(method = "<init>(Ljava/util/UUID;Ljava/lang/String;Ljava/lang/String;ZLnet/minecraft/network/chat/Component;)V", at = @At("RETURN") , remap = false)
+    private void impl$setResourcePackOrThrowException(final UUID uuid, final String url, final String hash, final boolean required, final Component prompt, final CallbackInfo ci) {
         try {
             this.impl$pack = SpongeResourcePack.create(url, hash, prompt == null ? net.kyori.adventure.text.Component.empty() : SpongeAdventure.asAdventure(prompt));
         } catch (final URISyntaxException e) {

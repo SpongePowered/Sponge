@@ -24,62 +24,53 @@
  */
 package org.spongepowered.common.item.recipe.stonecutting;
 
-import com.google.gson.JsonObject;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.StonecutterRecipe;
 import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
-import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
-import org.spongepowered.common.util.Constants;
 
+import java.util.Collections;
 import java.util.function.Function;
 
-public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistration {
+public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistration<StonecutterRecipe> implements
+        SpongeRecipeRegistration.ResultFunctionRegistration<Container> {
 
     // Vanilla Recipe
     private final Ingredient ingredient;
-    private final Item result;
-    private final int count;
 
     // Sponge Recipe
     private final ItemStack spongeResult;
     private Function<Container, ItemStack> resultFunction;
 
-    public SpongeStonecuttingRecipeRegistration(ResourceLocation key, RecipeSerializer<?> serializer, String group, Ingredient ingredient,
+    public SpongeStonecuttingRecipeRegistration(ResourceLocation key, String group, Ingredient ingredient,
             ItemStack spongeResult, Function<Container, ItemStack> resultFunction,
             DataPack<RecipeRegistration> pack, final RecipeCategory category) {
-        super(key, serializer, spongeResult.getItem(), group, pack, category);
+        super(key, group, pack, category, RecipeSerializer.STONECUTTER);
         this.ingredient = ingredient;
-        this.result = spongeResult.getItem();
-        this.count = spongeResult.getCount();
         this.spongeResult = spongeResult;
         this.resultFunction = resultFunction;
     }
 
     @Override
-    public void serializeShape(JsonObject json) {
-        json.add(Constants.Recipe.STONECUTTING_INGREDIENT, this.ingredient.toJson(false));
+    public Recipe recipe() {
+        this.ensureCached();
+        if (SpongeRecipeRegistration.isVanillaSerializer(this.spongeResult, this.resultFunction, null, Collections.singleton(this.ingredient))) {
+            return (StoneCutterRecipe) new StonecutterRecipe(this.group, this.ingredient, this.spongeResult);
+        }
+        return (StoneCutterRecipe) new SpongeStonecuttingRecipe(
+                this.group, this.ingredient, this.spongeResult, this.resultFunction == null ? null : this.key.toString());
     }
 
     @Override
-    public void serializeResult(JsonObject json) {
-        final Registry<Item> itemRegistry = BuiltInRegistries.ITEM;
-        json.addProperty(Constants.Recipe.RESULT, itemRegistry.getKey(this.result).toString());
-        json.addProperty(Constants.Recipe.COUNT, this.count);
-
-        if (this.spongeResult != null) {
-            json.add(Constants.Recipe.SPONGE_RESULT, IngredientResultUtil.serializeItemStack(this.spongeResult));
-        }
-        if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, IngredientResultUtil.cacheResultFunction(this.id(), this.resultFunction));
-        }
+    public Function<Container, ItemStack> resultFunction() {
+        return this.resultFunction;
     }
 }

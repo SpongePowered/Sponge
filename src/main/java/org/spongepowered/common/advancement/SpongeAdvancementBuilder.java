@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.FrameType;
 import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -45,6 +44,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.SpongeCriterionUtil;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -109,15 +109,15 @@ public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder
 
     @Override
     public AdvancementTemplate build0() {
-        final Tuple<Map<String, Criterion<?>>, String[][]> result = SpongeCriterionUtil.toVanillaCriteriaData(this.criterion);
+        final Tuple<Map<String, Criterion<?>>, List<List<String>>> result = SpongeCriterionUtil.toVanillaCriteriaData(this.criterion);
         final AdvancementRewards rewards = AdvancementRewards.EMPTY;
 
         var displayInfo = Optional.ofNullable(this.displayInfo).map(di -> new net.minecraft.advancements.DisplayInfo(
                 ItemStackUtil.fromSnapshotToNative(di.icon()),
                 SpongeAdventure.asVanilla(di.title()),
                 SpongeAdventure.asVanilla(di.description()),
-                this.backgroundPath,
-                (FrameType) (Object) di.type(),
+                Optional.ofNullable(this.backgroundPath),
+                (net.minecraft.advancements.AdvancementType) (Object) di.type(),
                 di.doesShowToast(),
                 di.doesAnnounceToChat(),
                 di.isHidden()));

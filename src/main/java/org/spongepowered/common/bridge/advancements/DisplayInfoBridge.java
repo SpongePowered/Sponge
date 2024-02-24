@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.bridge.advancements;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.Advancement;
 
 public interface DisplayInfoBridge {
@@ -33,7 +32,4 @@ public interface DisplayInfoBridge {
 
     void bridge$setAdvancement(Advancement advancement);
 
-    @Nullable String bridge$getBackground();
-
-    void bridge$setBackground(@Nullable String background);
 }

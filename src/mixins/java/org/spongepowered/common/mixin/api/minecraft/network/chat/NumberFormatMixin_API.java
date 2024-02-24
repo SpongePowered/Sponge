@@ -22,24 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.scores;
+package org.spongepowered.common.mixin.api.minecraft.network.chat;
 
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.Score;
+import net.minecraft.network.chat.numbers.NumberFormat;
+import org.spongepowered.api.scoreboard.ScoreFormat;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(Score.class)
-public interface ScoreAccessor {
-
-    @Accessor("objective") Objective accessor$objective();
-
-    @Accessor("count") int accessor$count();
-
-    @Accessor("count") void accessor$count(final int count);
-
-    @Accessor("forceUpdate") boolean accessor$forceUpdate();
-
-    @Accessor("forceUpdate") void accessor$forceUpdate(final boolean forceUpdate);
+@Mixin(NumberFormat.class)
+public interface NumberFormatMixin_API extends ScoreFormat {
 
 }

@@ -22,16 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.scores;
+package org.spongepowered.common.mixin.core.world.item.crafting;
 
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
 
-@Mixin(Objective.class)
-public interface ObjectiveAccessor {
+@Mixin(ShapelessRecipe.class)
+public abstract class ShapelessRecipeMixin implements RecipeResultBridge {
 
-    @Accessor("scoreboard") Scoreboard accessor$scoreboard();
+    // @formatter=off
+    @Shadow @Final ItemStack result;
 
+    // @formatter=on
+
+
+    @Override
+    public ItemStack bridge$result() {
+        return this.result;
+    }
 }

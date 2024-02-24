@@ -31,8 +31,8 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.WildcardTypeName;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.FrameType;
 import net.minecraft.commands.Commands.CommandSelection;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.RegistryAccess;
@@ -305,7 +305,7 @@ public final class GeneratorMain {
             new EnumEntriesValidator<>(
                  "advancement",
                  "AdvancementTypes",
-                 FrameType.class,
+                 AdvancementType.class,
                  "getName",
                  "sponge"
             ),

@@ -39,7 +39,7 @@ public class SpongeCriterionBuilder extends AbstractCriterionBuilder<Advancement
         CriterionTriggerInstance trigger = (CriterionTriggerInstance) this.trigger;
         CriterionTrigger type = (CriterionTrigger) this.type;
         if (this.trigger == null) {
-            trigger = SpongeDummyTrigger.Instance.dummy();
+            trigger = SpongeDummyTrigger.TriggerInstance.dummy();
             type = SpongeDummyTrigger.DUMMY_TRIGGER;
         }
 

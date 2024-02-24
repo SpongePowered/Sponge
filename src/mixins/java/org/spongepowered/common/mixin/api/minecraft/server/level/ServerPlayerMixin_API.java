@@ -45,7 +45,7 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientboundResourcePackPacket;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
@@ -119,6 +119,7 @@ import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -129,6 +130,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
 public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements ServerPlayer {
@@ -270,7 +272,9 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public void sendResourcePack(final ResourcePack pack) {
-        this.connection.send(new ClientboundResourcePackPacket(((SpongeResourcePack) Objects.requireNonNull(pack, "pack")).getUrlString(), pack.hash().orElse(""), false, SpongeAdventure.asVanilla(pack.prompt())));
+        Objects.requireNonNull(pack, "pack");
+        final UUID uuid = UUID.nameUUIDFromBytes(pack.name().getBytes(StandardCharsets.UTF_8));
+        this.connection.send(new ClientboundResourcePackPushPacket(uuid, ((SpongeResourcePack) pack).getUrlString(), pack.hash().orElse(""), false, SpongeAdventure.asVanilla(pack.prompt())));
     }
 
     @Override

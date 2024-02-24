@@ -25,6 +25,8 @@
 package org.spongepowered.common.world;
 
 import com.google.common.base.Preconditions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion.BlockInteraction;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -154,7 +156,11 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         final Vector3d origin = this.location.position();
         final net.minecraft.world.level.Explosion explosion = new net.minecraft.world.level.Explosion((net.minecraft.world.level.Level) world,
                 (Entity) this.sourceExplosive, null, null, origin.x(), origin.y(), origin.z(), this.radius,
-                this.canCauseFire, this.shouldBreakBlocks ? BlockInteraction.DESTROY : BlockInteraction.KEEP);
+                this.canCauseFire, this.shouldBreakBlocks ? BlockInteraction.DESTROY : BlockInteraction.KEEP,
+                // TODO configurable explosion particles & sound?
+                ParticleTypes.EXPLOSION,
+                ParticleTypes.EXPLOSION_EMITTER,
+                SoundEvents.GENERIC_EXPLODE);
         ((ExplosionBridge) explosion).bridge$setShouldBreakBlocks(this.shouldBreakBlocks);
         ((ExplosionBridge) explosion).bridge$setShouldDamageEntities(this.shouldDamageEntities);
         ((ExplosionBridge) explosion).bridge$setShouldPlaySmoke(this.shouldSmoke);

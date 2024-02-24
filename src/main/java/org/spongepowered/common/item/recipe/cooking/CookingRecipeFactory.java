@@ -22,13 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.scores;
+package org.spongepowered.common.item.recipe.cooking;
 
-import org.spongepowered.common.scoreboard.SpongeScore;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.CookingBookCategory;
+import net.minecraft.world.item.crafting.Ingredient;
 
-public interface ScoreBridge {
+import java.util.Optional;
 
-    void bridge$setSpongeScore(SpongeScore score);
+public interface CookingRecipeFactory<T extends AbstractCookingRecipe> {
 
-    SpongeScore bridge$getSpongeScore();
+    default T create(String spongeType, String group, CookingBookCategory category, Ingredient ingredient, ItemStack result, float experience,
+            int cookingTime,
+            ItemStack spongeResult, final Optional<String> resultFunctionId) {
+        return this.create(group, category, ingredient, spongeResult.isEmpty() ? result : spongeResult, experience, cookingTime, resultFunctionId.orElse(null));
+    }
+
+    T create(String group, CookingBookCategory category, Ingredient ingredient, ItemStack result, float experience, int cookingTime,
+            final String resultFunctionId);
 }

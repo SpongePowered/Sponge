@@ -22,26 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.item.crafting;
+package org.spongepowered.common.mixin.core.world.item.crafting;
 
+import com.mojang.datafixers.kinds.App;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.item.recipe.crafting.shaped.SpongeShapedRecipe;
 
-import java.util.List;
+import java.util.function.Function;
 
 @Mixin(ShapedRecipe.Serializer.class)
-public interface ShapedRecipe_SerializerAccessor {
+public abstract class ShapedRecipe_SerializerMixin {
 
-
-    @Accessor("PATTERN_CODEC")
-    static Codec<List<String>> accessor$PATTERN_CODEC() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Accessor("SINGLE_CHARACTER_STRING_CODEC")
-    static Codec<String> accessor$SINGLE_CHARACTER_STRING_CODEC() {
-        throw new UnsupportedOperationException();
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"))
+    private static Codec<ShapedRecipe> impl$onCreateCodec(final Function<RecordCodecBuilder.Instance<ShapedRecipe>, ? extends App<RecordCodecBuilder.Mu<ShapedRecipe>, ShapedRecipe>> builder) {
+        final var mcMapCodec = RecordCodecBuilder.mapCodec(builder);
+        return Codec.mapEither(SpongeShapedRecipe.SPONGE_CODEC, mcMapCodec).xmap(to -> to.map(si -> si, i -> i),
+                fr -> {
+                    if (fr instanceof SpongeShapedRecipe si) {
+                        return Either.left(si);
+                    }
+                    return Either.right(fr);
+                }).codec();
     }
 }

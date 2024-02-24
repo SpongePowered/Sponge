@@ -22,12 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.client.gui.screens.worldselection;
+package org.spongepowered.common.bridge.world.item.crafting;
 
-import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.world.item.ItemStack;
 
-@Mixin(CreateWorldScreen.class)
-public abstract class CreateWorldScreenMixin {
+public interface RecipeResultBridge {
+
+    ItemStack bridge$result();
+    default ItemStack bridge$spongeResult() {
+        final ItemStack result = this.bridge$result();
+        return result.hasTag() ? result : ItemStack.EMPTY;
+    }
 
 }

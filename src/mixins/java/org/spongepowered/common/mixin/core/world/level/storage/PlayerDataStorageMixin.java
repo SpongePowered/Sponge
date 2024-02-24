@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.level.storage;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.PlayerDataStorage;
@@ -68,12 +69,12 @@ public abstract class PlayerDataStorageMixin {
         ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().readPlayerData(compound, null, creationTime);
     }
 
-    @Redirect(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NbtIo;readCompressed(Ljava/io/File;)Lnet/minecraft/nbt/CompoundTag;"))
-    private CompoundTag impl$wrapFileRead(final File param0) throws IOException {
+    @Redirect(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NbtIo;readCompressed(Ljava/nio/file/Path;Lnet/minecraft/nbt/NbtAccounter;)Lnet/minecraft/nbt/CompoundTag;"))
+    private CompoundTag impl$wrapFileRead(final Path path, final NbtAccounter accounter) throws IOException {
         try {
-            return NbtIo.readCompressed(param0);
+            return NbtIo.readCompressed(path, accounter);
         } catch (final IOException exception) {
-            FileUtil.copyCorruptedFile(param0);
+            FileUtil.copyCorruptedFile(path);
             // handled below.
             throw exception;
         }
@@ -89,7 +90,7 @@ public abstract class PlayerDataStorageMixin {
 
     @Inject(method = "save",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/nbt/NbtIo;writeCompressed(Lnet/minecraft/nbt/CompoundTag;Ljava/io/File;)V",
+            target = "Lnet/minecraft/nbt/NbtIo;writeCompressed(Lnet/minecraft/nbt/CompoundTag;Ljava/nio/file/Path;)V",
             shift = At.Shift.AFTER))
     private void impl$saveSpongePlayerData(final Player player, final CallbackInfo callbackInfo) {
         ((SpongeServer) Sponge.server()).getPlayerDataManager().saveSpongePlayerData(player.getUUID());

@@ -22,22 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.item.crafting;
+package org.spongepowered.common.scoreboard;
 
-import net.minecraft.world.item.crafting.Ingredient;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.minecraft.network.chat.numbers.BlankFormat;
+import net.minecraft.network.chat.numbers.FixedFormat;
+import net.minecraft.network.chat.numbers.StyledFormat;
+import org.spongepowered.api.scoreboard.ScoreFormat;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
-import java.util.stream.Stream;
+public class SpongeScoreFormatFactory implements ScoreFormat.Factory {
 
-@Mixin(Ingredient.class)
-public interface IngredientAccessor {
-
-    @Invoker("fromValues")
-    static Ingredient invoker$fromValues(final Stream<? extends Ingredient.Value> stream) {
-        throw new UntransformedInvokerError();
+    @Override
+    public ScoreFormat blank() {
+        return (ScoreFormat) BlankFormat.INSTANCE;
     }
 
+    @Override
+    public ScoreFormat fixed(final Component component) {
+        return (ScoreFormat) new FixedFormat(SpongeAdventure.asVanilla(component));
+    }
 
+    @Override
+    public ScoreFormat styled(final Style style) {
+        return (ScoreFormat) new StyledFormat(SpongeAdventure.asVanilla(style));
+    }
 }

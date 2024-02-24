@@ -58,13 +58,11 @@ public class SpongeIngredient extends Ingredient {
     private static final Codec<ItemStack> STACK_CODEC = ExtraCodecs.xor(ItemStack.CODEC, LEGACY_STACK_CODEC).xmap(to -> to.map(i -> i, i -> i), Either::left);
 
     private static final Codec<SpongeRawIngredient> RAW_CODEC = RecordCodecBuilder.create(
-            builder -> {
-                return builder.group(
-                        ExtraCodecs.strictOptionalField(Codec.STRING, SpongeItemList.INGREDIENT_TYPE, "vanilla").forGetter(raw -> raw.type),
-                        ExtraCodecs.strictOptionalField(Codec.list(STACK_CODEC), SpongeItemList.INGREDIENT_ITEM, List.of()).forGetter(raw -> raw.stacks),
-                        ExtraCodecs.strictOptionalField(Codec.STRING, SpongePredicateItemList.INGREDIENT_PREDICATE).forGetter(raw -> raw.predicateId)
-                ).apply(builder, SpongeRawIngredient::new);
-            }
+            builder -> builder.group(
+                    ExtraCodecs.strictOptionalField(Codec.STRING, SpongeItemList.INGREDIENT_TYPE, "vanilla").forGetter(raw -> raw.type),
+                    ExtraCodecs.strictOptionalField(Codec.list(STACK_CODEC), SpongeItemList.INGREDIENT_ITEM, List.of()).forGetter(raw -> raw.stacks),
+                    ExtraCodecs.strictOptionalField(Codec.STRING, SpongePredicateItemList.INGREDIENT_PREDICATE).forGetter(raw -> raw.predicateId)
+            ).apply(builder, SpongeRawIngredient::new)
     );
 
     public static final Codec<SpongeIngredient> CODEC = RAW_CODEC.flatXmap(raw -> {

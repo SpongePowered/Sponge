@@ -24,20 +24,17 @@
  */
 package org.spongepowered.common.item.recipe.crafting.custom;
 
-import com.google.gson.JsonObject;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
+import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
-import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
-import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +42,7 @@ import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
-public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistration {
+public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistration<SpongeSpecialRecipe> {
 
     public static final Map<String, SpongeSpecialRecipe> RECIPES = new HashMap<>();
 
@@ -61,7 +58,7 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
             Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction,
             Function<CraftingGridInventory, ItemStack> resultFunction,
             DataPack<RecipeRegistration> pack, final RecipeCategory recipeCategory) {
-        super(key, null, Items.AIR, "", pack, recipeCategory);
+        super(key, "", pack, recipeCategory, null);
 
         this.biPredicate = biPredicate;
         this.remainingItemsFunction = remainingItemsFunction;
@@ -78,16 +75,8 @@ public class SpongeSpecialCraftingRecipeRegistration extends SpongeRecipeRegistr
     }
 
     @Override
-    public RecipeSerializer<?> type() {
-        return SpongeRecipeSerializers.SPONGE_SPECIAL;
-    }
-
-    @Override
-    public void serializeShape(final JsonObject json) {
-        json.addProperty(Constants.Recipe.SPONGE_ID, this.recipe.id());
-    }
-
-    @Override
-    public void serializeResult(final JsonObject json) {
+    public Recipe recipe() {
+        this.ensureCached();
+        return (SpecialCraftingRecipe) (Object) this.recipe;
     }
 }

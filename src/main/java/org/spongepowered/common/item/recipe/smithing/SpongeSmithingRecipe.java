@@ -24,28 +24,57 @@
  */
 package org.spongepowered.common.item.recipe.smithing;
 
+import static org.spongepowered.common.util.Constants.Recipe.SPONGE_TYPE;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.item.recipe.cooking.ResultFunctionRecipe;
+import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
+import org.spongepowered.common.bridge.world.item.crafting.SmithingRecipeBridge;
+import org.spongepowered.common.item.recipe.ResultFunctionRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
+import org.spongepowered.common.util.Constants;
+
+import java.util.Optional;
 
 public class SpongeSmithingRecipe extends SmithingTransformRecipe implements ResultFunctionRecipe {
 
+    public static final MapCodec<SpongeSmithingRecipe> SPONGE_CODEC =  RecordCodecBuilder.mapCodec(
+            $$0 -> $$0.group(
+                            Codec.STRING.fieldOf(SPONGE_TYPE).forGetter(a -> "custom"),
+                            Ingredient.CODEC.fieldOf("template").forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$template()),
+                            Ingredient.CODEC.fieldOf(Constants.Recipe.SMITHING_BASE_INGREDIENT).forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$base()),
+                            Ingredient.CODEC.fieldOf(Constants.Recipe.SMITHING_ADDITION_INGREDIENT).forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$addition()),
+                            ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge) $$0x).bridge$result()),
+                            ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter($$0x -> ((RecipeResultBridge) $$0x).bridge$spongeResult()),
+                            IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(ResultFunctionRecipe::resultFunctionId)
+                    )
+                    .apply($$0, SpongeSmithingRecipe::of)
+    );
+
     private final String resultFunctionId;
 
-    public SpongeSmithingRecipe(final Ingredient template, final Ingredient base, final Ingredient addition, final ItemStack resultIn, final String resultFunctionId) {
-        super(template, base, addition, resultIn);
+    public static SpongeSmithingRecipe of(final String spongeType, final Ingredient template, final Ingredient base,
+            final Ingredient addition, final ItemStack resultIn, final ItemStack spongeResult, final Optional<String> resultFunctionId)
+    {
+        return new SpongeSmithingRecipe(template, base, addition, spongeResult.isEmpty() ? resultIn : spongeResult, resultFunctionId.orElse(null));
+    }
+
+    public SpongeSmithingRecipe(final Ingredient template, final Ingredient base,
+            final Ingredient addition, final ItemStack spongeResult, final String resultFunctionId) {
+        super(template, base, addition, spongeResult);
         this.resultFunctionId = resultFunctionId;
     }
 
-    @Nullable @Override
-    public String resultFunctionId() {
-        return this.resultFunctionId;
+    @Override
+    public Optional<String> resultFunctionId() {
+        return Optional.ofNullable(this.resultFunctionId);
     }
 
     @Override
@@ -73,5 +102,6 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
         }
         return super.getResultItem($$1);
     }
+
 
 }

@@ -22,24 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.item.crafting;
+package org.spongepowered.common.mixin.core.advancements;
 
-import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.core.Registry;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedInvokerError;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.advancement.criterion.SpongeDummyTrigger;
+import org.spongepowered.common.advancement.criterion.SpongeScoreTrigger;
 
-import java.util.List;
 
-@Mixin(ShapedRecipe.class)
-public interface ShapedRecipeAccessor {
+@Mixin(CriteriaTriggers.class)
+public abstract class CriteriaTriggersMixin {
 
-    @Invoker("shrink")
-    static String[] invoker$shrink(final List<String> pattern) {
-        throw new UntransformedInvokerError();
+    @Inject(method = "bootstrap", at = @At("HEAD"))
+    private static void onBootstrap(final Registry<CriterionTrigger<?>> $$0, final CallbackInfoReturnable<CriterionTrigger<?>> cir)
+    {
+        final var loadMe1 = SpongeDummyTrigger.DUMMY_TRIGGER; // register sponge trigger
+        final var loadMe2 =   SpongeScoreTrigger.SCORE_TRIGGER; // register sponge trigger
     }
-
-    @Accessor("group") String accessor$group();
-
 }

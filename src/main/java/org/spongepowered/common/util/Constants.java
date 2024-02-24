@@ -606,6 +606,7 @@ public final class Constants {
         public static final String CATEGORY = "category";
         public static final String COUNT = "count";
 
+        public static final String SPONGE_TYPE = "sponge:type";
         public static final String SPONGE_ID = "sponge:id";
         public static final String SPONGE_RESULT = "sponge:result";
         public static final String SPONGE_RESULTFUNCTION = "sponge:result_function";

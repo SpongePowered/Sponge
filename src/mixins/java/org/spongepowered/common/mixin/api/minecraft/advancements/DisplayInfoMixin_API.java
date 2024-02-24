@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.minecraft.advancements;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.advancements.FrameType;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementType;
@@ -48,7 +47,7 @@ import org.spongepowered.math.vector.Vector2d;
 @Implements(@Interface(iface = org.spongepowered.api.advancement.DisplayInfo.class, prefix = "displayInfo$", remap = Remap.NONE))
 public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spongepowered.api.advancement.DisplayInfo {
 
-    @Shadow @Final private FrameType frame;
+    @Shadow @Final private net.minecraft.advancements.AdvancementType type;
     @Shadow @Final private net.minecraft.network.chat.Component title;
     @Shadow @Final private net.minecraft.network.chat.Component description;
     @Shadow @Final private boolean showToast;
@@ -80,7 +79,7 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
     @SuppressWarnings("ConstantConditions")
     @Override
     public AdvancementType type() {
-        return (AdvancementType) (Object) this.frame;
+        return (AdvancementType) (Object) this.type;
     }
 
     @Override

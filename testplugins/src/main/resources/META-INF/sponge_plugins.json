@@ -293,6 +293,18 @@
             "description": "Testing Sign Changes"
         },
         {
+            "id": "customregistrytest",
+            "name": "Custom Registry Test",
+            "entrypoint": "org.spongepowered.test.customregistry.CustomRegistryTest",
+            "description": "Testing Custom Registry"
+        },
+        {
+            "id": "scoreboardtest",
+            "name": "Scoreboard Test",
+            "entrypoint": "org.spongepowered.test.scoreboard.ScoreboardTest",
+            "description": "Testing Custom Registry"
+        },
+        {
             "id": "clickcontainereventcancelledtest",
             "name": "Click Container Event Cancelled Test",
             "entrypoint": "org.spongepowered.test.interact.ClickContainerEventCancelledTest",

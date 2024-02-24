@@ -65,7 +65,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.scores.Team;
+import net.minecraft.world.scores.PlayerTeam;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.property.ProfileProperty;
@@ -164,7 +164,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     @Override
-    public Team getTeam() {
+    public PlayerTeam getTeam() {
         return this.level().getScoreboard().getPlayersTeam(this.fakeProfile.getName());
     }
 
@@ -503,7 +503,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     @Override
     public void performRangedAttack(final LivingEntity target, final float distanceFactor) {
         // Borrowed from Skeleton
-        final Arrow entitytippedarrow = new Arrow(this.level(), this);
+        final Arrow entitytippedarrow = new Arrow(this.level(), this, new ItemStack(Items.ARROW));
         final double d0 = target.getX() - this.getX();
         final double d1 = target.getBoundingBox().minY + target.getBbHeight() / 3.0F - entitytippedarrow.getY();
         final double d2 = target.getZ() - this.getZ();

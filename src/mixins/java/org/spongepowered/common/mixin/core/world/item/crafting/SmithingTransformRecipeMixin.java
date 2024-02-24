@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.item.crafting;
 
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import org.spongepowered.asm.mixin.Final;
@@ -38,6 +39,7 @@ public abstract class SmithingTransformRecipeMixin implements SmithingRecipeBrid
     @Shadow @Final Ingredient template;
     @Shadow @Final Ingredient base;
     @Shadow @Final Ingredient addition;
+    @Shadow @Final ItemStack result;
     // @formatter=on
 
     @Override
@@ -54,4 +56,10 @@ public abstract class SmithingTransformRecipeMixin implements SmithingRecipeBrid
     public Ingredient bridge$addition() {
         return this.addition;
     }
+
+    @Override
+    public ItemStack bridge$result() {
+        return this.result;
+    }
+
 }

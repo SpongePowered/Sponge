@@ -31,9 +31,9 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
+import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.advancements.FrameType;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
@@ -99,7 +99,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
         }
 
         final Set<AdvancementCriterion> andCriteria = new HashSet<>();
-        for (final String[] array : requirements.requirements()) {
+        for (final List<String> array : requirements.requirements()) {
             final Set<AdvancementCriterion> orCriteria = new HashSet<>();
             for (final String name : array) {
                 DefaultedAdvancementCriterion criterion = criteriaMap.get(name);
@@ -116,8 +116,8 @@ public abstract class AdvancementMixin implements AdvancementBridge {
     private ImmutableList<Component> impl$generateToastText() {
         final ImmutableList.Builder<Component> toastText = ImmutableList.builder();
         if (this.display.isPresent()) {
-            final FrameType frameType = this.display.get().getFrame();
-            toastText.add(Component.translatable("advancements.toast." + frameType.getName(), SpongeAdventure.asAdventureNamed(frameType.getChatColor())));
+            final AdvancementType frameType = this.display.get().getType();
+            toastText.add(Component.translatable("advancements.toast." + frameType.getSerializedName(), SpongeAdventure.asAdventureNamed(frameType.getChatColor())));
             toastText.add(SpongeAdventure.asAdventure(this.display.get().getTitle()));
         } // else no display
         return toastText.build();

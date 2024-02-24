@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public final class SpongeCriterionUtil {
 
@@ -73,19 +72,13 @@ public final class SpongeCriterionUtil {
         }
     }
 
-    public static Tuple<Map<String, Criterion<?>>, String[][]> toVanillaCriteriaData(final AdvancementCriterion criterion) {
+    public static Tuple<Map<String, Criterion<?>>, List<List<String>>> toVanillaCriteriaData(final AdvancementCriterion criterion) {
         final Map<String, Criterion<?>> criteria = new LinkedHashMap<>();
         if (criterion instanceof SpongeEmptyCriterion) {
-            return new Tuple<>(criteria, new String[0][0]);
+            return new Tuple<>(criteria, Collections.emptyList());
         }
-        final List<List<String>> andReq = SpongeCriterionUtil.collectCriteria(criterion, criteria);
-        ;
-        final String[][] idsArray = new String[andReq.size()][];
-        for (int i = 0; i < andReq.size(); i++) {
-            List<String> orReq = andReq.get(i);
-            idsArray[i] = orReq.toArray(new String[0]);
-        }
-        return new Tuple<>(criteria, idsArray);
+
+        return new Tuple<>(criteria, SpongeCriterionUtil.collectCriteria(criterion, criteria));
     }
 
     private static List<List<String>> collectCriteria(final AdvancementCriterion criterion, final Map<String, Criterion<?>> criteria) {
@@ -96,7 +89,7 @@ public final class SpongeCriterionUtil {
         } else if (criterion instanceof SpongeOrCriterion) {
             // OR List of AND Criteria of OR Criteria
             final List<List<List<String>>> andRequirementsList = ((SpongeOperatorCriterion) criterion).criteria().stream().map(c -> SpongeCriterionUtil
-                    .collectCriteria(c, criteria)).collect(Collectors.toList());
+                    .collectCriteria(c, criteria)).toList();
             List<List<String>> finalList = new ArrayList<>();
             // For every AND Criteria
             for (List<List<String>> andRequirements : andRequirementsList) {
@@ -120,8 +113,7 @@ public final class SpongeCriterionUtil {
                 }
             }
             requirements.addAll(finalList);
-        } else if (criterion instanceof SpongeScoreCriterion) {
-            final SpongeScoreCriterion scoreCriterion = (SpongeScoreCriterion) criterion;
+        } else if (criterion instanceof final SpongeScoreCriterion scoreCriterion) {
             for (int i = 0; i < scoreCriterion.goal(); i++) {
                 final DefaultedAdvancementCriterion internalCriterion = scoreCriterion.internalCriteria.get(i);
                 criteria.put(internalCriterion.name(), ((Criterion) (Object) internalCriterion));
