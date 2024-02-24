@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
@@ -55,7 +56,9 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
 import org.spongepowered.common.event.tracking.phase.tick.TileEntityTickContext;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
@@ -93,6 +96,57 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     }
 
     // Injects/Redirects -------------------------------------------------------------------------
+
+    @Redirect(method = "doClick",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/player/Inventory;setItem(ILnet/minecraft/world/item/ItemStack;)V"
+        ),
+        slice = @Slice(
+            from = @At(value = "FIELD",
+                target = "Lnet/minecraft/world/inventory/ClickType;SWAP:Lnet/minecraft/world/inventory/ClickType;"
+            ),
+            to = @At(value = "FIELD",
+                target = "Lnet/minecraft/world/inventory/ClickType;CLONE:Lnet/minecraft/world/inventory/ClickType;"
+            )
+        )
+    )
+    private void impl$handleUnviewedSlotSwap(final Inventory inv, final int index, final ItemStack newStack) {
+        if (!PhaseTracker.SERVER.onSidedThread() || inv.player.inventoryMenu == inv.player.containerMenu ||  Inventory.isHotbarSlot(index)) {
+            inv.setItem(index, newStack);
+        } else {
+            final ItemStackSnapshot oldItem = ItemStackUtil.snapshotOf(inv.getItem(index));
+            final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(newStack);
+            inv.setItem(index, newStack);
+            impl$captureSwap(index, inv, oldItem, newItem);
+        }
+    }
+    @Redirect(method = "doClick",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/item/ItemStack;split(I)Lnet/minecraft/world/item/ItemStack;"
+            ),
+            slice = @Slice(
+                    from = @At(value = "FIELD",
+                            target = "Lnet/minecraft/world/inventory/ClickType;SWAP:Lnet/minecraft/world/inventory/ClickType;"
+                    ),
+                    to = @At(value = "FIELD",
+                            target = "Lnet/minecraft/world/inventory/ClickType;CLONE:Lnet/minecraft/world/inventory/ClickType;"
+                    )
+            )
+    )
+    private ItemStack impl$handleUnviewedSlotSwap2(final ItemStack origin, final int splitOff, int $$0, int index, ClickType $$2, Player $$3) {
+        Inventory inv = $$3.getInventory();
+        if (!PhaseTracker.SERVER.onSidedThread() || inv.player.inventoryMenu == inv.player.containerMenu || Inventory.isHotbarSlot(index)) {
+            return origin.split(splitOff);
+        } else {
+            final ItemStackSnapshot oldItem = ItemStackUtil.snapshotOf(origin);
+            final ItemStack newStack = origin.split(splitOff);
+            final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(newStack);
+            impl$captureSwap(index, inv, oldItem, newItem);
+            return newStack;
+        }
+    }
 
     @Redirect(method = "doClick",
         at = @At(
@@ -298,6 +352,15 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 SpongeCommon.logger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
             }
         }
+    }
+
+    private void impl$captureSwap(int index, Inventory inv, ItemStackSnapshot oldItem, ItemStackSnapshot newItem) {
+        final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = phaseContext.getTransactor();
+        final org.spongepowered.api.item.inventory.Slot adapter = ((InventoryAdapter) inv.player.getInventory()).inventoryAdapter$getSlot(index).get();
+        final SlotTransaction newTransaction = new SlotTransaction(adapter, oldItem, newItem);
+        transactor.logSlotTransaction(phaseContext, newTransaction, (AbstractContainerMenu) (Object) this);
+        transactor.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 
 }

@@ -92,7 +92,10 @@ public final class PacketPhaseUtil {
                 final org.spongepowered.api.item.inventory.Slot slot = slotTransaction.slot();
                 final ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.original() : slotTransaction.custom().get();
                 if (containerMenu == null || slot.viewedSlot() == slot) {
-                    slot.set(snapshot.createStack());
+                    final org.spongepowered.api.item.inventory.ItemStack stack = snapshot.createStack();
+                    slot.set(stack);
+                    if (player instanceof net.minecraft.server.level.ServerPlayer p)
+                        p.connection.send(new ClientboundContainerSetSlotPacket(-2, player.inventoryMenu.getStateId(), ((SlotAdapter) slot).getOrdinal(), ItemStackUtil.toNative(stack)));
                 } else {
                     final int slotNumber = ((SlotAdapter) slot).getOrdinal();
                     final Slot nmsSlot = containerMenu.getSlot(slotNumber);
