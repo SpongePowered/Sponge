@@ -37,6 +37,7 @@ import org.spongepowered.common.bridge.network.protocol.game.ClientboundResource
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
 import java.net.URISyntaxException;
+import java.util.UUID;
 
 @Mixin(ClientboundResourcePackPushPacket.class)
 public abstract class ClientboundResourcePackPushPacketMixin implements ClientboundResourcePackPacketBridge {
