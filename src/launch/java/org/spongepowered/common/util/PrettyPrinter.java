@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.base.Strings;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -121,7 +120,7 @@ public class PrettyPrinter {
 
         @Override
         public String toString() {
-            return Strings.repeat(new String(this.hrChars), PrettyPrinter.this.width + 2);
+            return new String(this.hrChars).repeat(PrettyPrinter.this.width + 2);
         }
 
     }
@@ -209,7 +208,7 @@ public class PrettyPrinter {
         }
 
         void updateFormat() {
-            final String spacing = Strings.repeat(" ", this.colSpacing);
+            final String spacing = " ".repeat(this.colSpacing);
             final StringBuilder format = new StringBuilder();
             boolean addSpacing = false;
             for (final Column column : this.columns) {
@@ -727,7 +726,7 @@ public class PrettyPrinter {
      * @return fluent interface
      */
     public PrettyPrinter add(final StackTraceElement[] stackTrace, final int indent) {
-        final String margin = Strings.repeat(" ", indent);
+        final String margin = " ".repeat(indent);
         for (final StackTraceElement st : stackTrace) {
             this.add("%s%s", margin, st);
         }
@@ -752,7 +751,7 @@ public class PrettyPrinter {
      * @return fluent interface
      */
     public PrettyPrinter add(final Object object, final int indent) {
-        final String margin = Strings.repeat(" ", indent);
+        final String margin = " ".repeat(indent);
         return this.append(object, indent, margin);
     }
 
