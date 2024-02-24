@@ -25,13 +25,13 @@
 package org.spongepowered.common.network.status;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import net.minecraft.network.Connection;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.network.status.StatusClient;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 
 import java.net.InetSocketAddress;
+import java.util.Objects;
 import java.util.Optional;
 
 public class SpongeStatusClient implements StatusClient {
@@ -67,7 +67,7 @@ public class SpongeStatusClient implements StatusClient {
         }
 
         SpongeStatusClient that = (SpongeStatusClient) o;
-        return Objects.equal(this.connection, that.connection);
+        return Objects.equals(this.connection, that.connection);
 
     }
 

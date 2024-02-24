@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -32,6 +31,7 @@ import org.spongepowered.api.data.persistence.DataSerializable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 final class SimpleData implements DataSerializable {
 
@@ -80,7 +80,7 @@ final class SimpleData implements DataSerializable {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.testInt, this.testDouble, this.testString, this.testList);
+        return Objects.hash(this.testInt, this.testDouble, this.testString, this.testList);
     }
 
     @Override
@@ -92,9 +92,9 @@ final class SimpleData implements DataSerializable {
             return false;
         }
         final SimpleData that = (SimpleData) other;
-        return Objects.equal(this.testInt, that.testInt)
-                && Objects.equal(this.testDouble, that.testDouble)
-                && Objects.equal(this.testString, that.testString)
+        return Objects.equals(this.testInt, that.testInt)
+                && Objects.equals(this.testDouble, that.testDouble)
+                && Objects.equals(this.testString, that.testString)
                 && Arrays.equals(this.testList, that.testList);
     }
 }

@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
@@ -43,6 +42,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
@@ -80,7 +80,7 @@ public class SpongeFavicon implements Favicon {
         }
 
         SpongeFavicon that = (SpongeFavicon) o;
-        return Objects.equal(this.encoded, that.encoded);
+        return Objects.equals(this.encoded, that.encoded);
 
     }
 

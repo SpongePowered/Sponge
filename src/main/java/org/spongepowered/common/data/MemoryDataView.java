@@ -714,8 +714,8 @@ public class MemoryDataView implements DataView {
         }
         final MemoryDataView other = (MemoryDataView) obj;
 
-        return com.google.common.base.Objects.equal(this.map.entrySet(), other.map.entrySet())
-            && com.google.common.base.Objects.equal(this.path, other.path);
+        return Objects.equals(this.map.entrySet(), other.map.entrySet())
+                && Objects.equals(this.path, other.path);
     }
 
     @Override

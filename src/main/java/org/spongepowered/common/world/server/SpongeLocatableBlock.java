@@ -179,9 +179,9 @@ public final class SpongeLocatableBlock implements LocatableBlock {
             return false;
         }
         final SpongeLocatableBlock that = (SpongeLocatableBlock) o;
-        return com.google.common.base.Objects.equal(this.blockState, that.blockState) &&
-               com.google.common.base.Objects.equal(this.position, that.position) &&
-               com.google.common.base.Objects.equal(this.world, that.world);
+        return Objects.equals(this.blockState, that.blockState) &&
+                Objects.equals(this.position, that.position) &&
+                Objects.equals(this.world, that.world);
     }
 
     @Override

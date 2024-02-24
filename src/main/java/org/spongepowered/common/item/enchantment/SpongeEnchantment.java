@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.enchantment;
 
-import com.google.common.base.Objects;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -32,6 +31,8 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.registry.RegistryTypes;
+
+import java.util.Objects;
 
 public final class SpongeEnchantment implements Enchantment {
 
@@ -70,7 +71,7 @@ public final class SpongeEnchantment implements Enchantment {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.enchantmentType, this.level);
+        return Objects.hash(this.enchantmentType, this.level);
     }
 
     @Override
@@ -85,7 +86,7 @@ public final class SpongeEnchantment implements Enchantment {
 
         final SpongeEnchantment other = (SpongeEnchantment) object;
 
-        return Objects.equal(this.enchantmentType, other.enchantmentType) && Objects.equal(this.level, other.level);
+        return Objects.equals(this.enchantmentType, other.enchantmentType) && Objects.equals(this.level, other.level);
     }
 
 }

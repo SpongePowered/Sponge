@@ -26,7 +26,6 @@ package org.spongepowered.common.item;
 
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -54,6 +53,7 @@ import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -329,15 +329,15 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         }
         final SpongeItemStackSnapshot that = (SpongeItemStackSnapshot) o;
         return this.quantity == that.quantity &&
-               this.damageValue == that.damageValue &&
-               Objects.equal(this.itemType, that.itemType) &&
-               Objects.equal(this.compound, that.compound) &&
-               Objects.equal(this.creatorUniqueId, that.creatorUniqueId);
+                this.damageValue == that.damageValue &&
+                Objects.equals(this.itemType, that.itemType) &&
+                Objects.equals(this.compound, that.compound) &&
+                Objects.equals(this.creatorUniqueId, that.creatorUniqueId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.itemType, this.quantity, this.damageValue, this.compound, this.creatorUniqueId);
+        return Objects.hash(this.itemType, this.quantity, this.damageValue, this.compound, this.creatorUniqueId);
     }
 
     @Override
