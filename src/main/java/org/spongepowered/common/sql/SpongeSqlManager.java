@@ -28,7 +28,6 @@ package org.spongepowered.common.sql;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.benmanes.caffeine.cache.RemovalListener;
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -48,6 +47,7 @@ import java.nio.file.Paths;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.CompletionException;
@@ -213,16 +213,16 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
                 return false;
             }
             final ConnectionInfo that = (ConnectionInfo) o;
-            return Objects.equal(this.user, that.user)
-                    && Objects.equal(this.password, that.password)
-                    && Objects.equal(this.driverClassName, that.driverClassName)
-                    && Objects.equal(this.authlessUrl, that.authlessUrl)
-                    && Objects.equal(this.fullUrl, that.fullUrl);
+            return Objects.equals(this.user, that.user)
+                    && Objects.equals(this.password, that.password)
+                    && Objects.equals(this.driverClassName, that.driverClassName)
+                    && Objects.equals(this.authlessUrl, that.authlessUrl)
+                    && Objects.equals(this.fullUrl, that.fullUrl);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(this.user, this.password, this.driverClassName, this.authlessUrl, this.fullUrl);
+            return Objects.hash(this.user, this.password, this.driverClassName, this.authlessUrl, this.fullUrl);
         }
 
         /**

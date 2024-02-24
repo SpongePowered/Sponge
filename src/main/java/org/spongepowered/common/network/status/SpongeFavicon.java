@@ -27,9 +27,7 @@ package org.spongepowered.common.network.status;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
@@ -41,8 +39,10 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
@@ -80,7 +80,7 @@ public class SpongeFavicon implements Favicon {
         }
 
         SpongeFavicon that = (SpongeFavicon) o;
-        return Objects.equal(this.encoded, that.encoded);
+        return Objects.equals(this.encoded, that.encoded);
 
     }
 
@@ -107,7 +107,7 @@ public class SpongeFavicon implements Favicon {
             ImageIO.write(favicon, "PNG", new ByteBufOutputStream(buf));
             ByteBuf base64 = Base64.encode(buf);
             try {
-                return SpongeFavicon.FAVICON_PREFIX + base64.toString(Charsets.UTF_8);
+                return SpongeFavicon.FAVICON_PREFIX + base64.toString(StandardCharsets.UTF_8);
             } finally {
                 base64.release();
             }
@@ -118,7 +118,7 @@ public class SpongeFavicon implements Favicon {
 
     private static BufferedImage decode(String encoded) throws IOException {
         checkArgument(encoded.startsWith(SpongeFavicon.FAVICON_PREFIX), "Unknown favicon format");
-        ByteBuf base64 = Unpooled.copiedBuffer(encoded.substring(SpongeFavicon.FAVICON_PREFIX.length()), Charsets.UTF_8);
+        ByteBuf base64 = Unpooled.copiedBuffer(encoded.substring(SpongeFavicon.FAVICON_PREFIX.length()), StandardCharsets.UTF_8);
         try {
             ByteBuf buf = Base64.decode(base64);
             try {

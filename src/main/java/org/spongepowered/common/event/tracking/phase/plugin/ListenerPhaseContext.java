@@ -120,7 +120,7 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
                 return false;
             }
             final CapturePlayer that = (CapturePlayer) o;
-            return com.google.common.base.Objects.equal(this.player, that.player);
+            return Objects.equals(this.player, that.player);
         }
 
         @Override

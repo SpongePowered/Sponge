@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.ipforward.server.network;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Charsets;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.network.Connection;
@@ -46,6 +45,7 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.network.ConnectionBridge_IpForward;
 import org.spongepowered.common.ipforward.velocity.VelocityForwardingInfo;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
@@ -86,7 +86,7 @@ public abstract class ServerLoginPacketListenerImplMixin_IpForward {
             if (((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID() != null) {
                 uuid = ((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID();
             } else {
-                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + $$0.getName()).getBytes(Charsets.UTF_8));
+                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + $$0.getName()).getBytes(StandardCharsets.UTF_8));
             }
 
             $$0 = new GameProfile(uuid, $$0.getName());

@@ -27,7 +27,6 @@ package org.spongepowered.common.entity.player.tab;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.world.entity.player.ProfilePublicKey;
@@ -38,6 +37,7 @@ import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.profile.GameProfile;
 
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -145,7 +145,7 @@ public final class SpongeTabListEntry implements TabListEntry {
         }
 
         final TabListEntry that = (TabListEntry) other;
-        return Objects.equal(this.profile.uniqueId(), that.profile().uniqueId());
+        return Objects.equals(this.profile.uniqueId(), that.profile().uniqueId());
     }
 
     @Override

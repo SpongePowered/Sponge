@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -37,6 +36,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -47,7 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class UsernameCache {
 
-    private static final Charset CHARSET = Charsets.UTF_8;
+    private static final Charset CHARSET = StandardCharsets.UTF_8;
 
     private final Map<UUID, String> usernameByUniqueId;
     private final Gson gson;
