@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity.player;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
@@ -97,6 +96,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -596,10 +596,10 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("isOnline", this.isOnline())
-            .add("profile", this.profile())
-            .toString();
+        return new StringJoiner(", ", SpongeUserData.class.getSimpleName() + "[", "]")
+                .add("isOnline=" + this.isOnline())
+                .add("profile=" + this.profile())
+                .toString();
     }
 
     @Override

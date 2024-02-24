@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.network.status;
 
-import com.google.common.base.MoreObjects;
 import net.minecraft.network.Connection;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.network.status.StatusClient;
@@ -33,6 +32,7 @@ import org.spongepowered.common.bridge.network.ConnectionBridge;
 import java.net.InetSocketAddress;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 public class SpongeStatusClient implements StatusClient {
 
@@ -78,8 +78,8 @@ public class SpongeStatusClient implements StatusClient {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .addValue(this.connection)
+        return new StringJoiner(", ", SpongeStatusClient.class.getSimpleName() + "[", "]")
+                .add("connection=" + this.connection)
                 .toString();
     }
 }

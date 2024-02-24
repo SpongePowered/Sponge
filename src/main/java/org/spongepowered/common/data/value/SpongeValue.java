@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.value;
 
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.key.SpongeKey;
+
+import java.util.StringJoiner;
 
 public abstract class SpongeValue<E> implements Value<E> {
 
@@ -52,9 +53,9 @@ public abstract class SpongeValue<E> implements Value<E> {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("key", this.key)
-                .add("element", this.element)
+        return new StringJoiner(", ", SpongeValue.class.getSimpleName() + "[", "]")
+                .add("key=" + this.key)
+                .add("element=" + this.element)
                 .toString();
     }
 }

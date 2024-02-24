@@ -25,7 +25,6 @@
 package org.spongepowered.common.world.server;
 
 
-import com.google.common.base.MoreObjects;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
@@ -47,6 +46,7 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Function;
 
 public final class SpongeLocatableBlock implements LocatableBlock {
@@ -191,10 +191,10 @@ public final class SpongeLocatableBlock implements LocatableBlock {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("blockState", this.blockState)
-            .add("world", this.world)
-            .add("position", this.position)
-            .toString();
+        return new StringJoiner(", ", SpongeLocatableBlock.class.getSimpleName() + "[", "]")
+                .add("blockState=" + this.blockState)
+                .add("world=" + this.world)
+                .add("position=" + this.position)
+                .toString();
     }
 }

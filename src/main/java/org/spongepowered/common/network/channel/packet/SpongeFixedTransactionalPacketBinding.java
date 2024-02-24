@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.network.channel.packet;
 
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.network.channel.packet.FixedTransactionalPacketBinding;
 import org.spongepowered.api.network.channel.packet.Packet;
 import org.spongepowered.api.network.channel.packet.RequestPacket;
 import org.spongepowered.common.network.PacketUtil;
 
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 
 public final class SpongeFixedTransactionalPacketBinding<P extends RequestPacket<R>, R extends Packet>
@@ -55,10 +55,10 @@ public final class SpongeFixedTransactionalPacketBinding<P extends RequestPacket
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("opcode", this.opcode())
-                .add("requestPacketType", this.packetType())
-                .add("responsePacketType", this.responsePacketType)
+        return new StringJoiner(", ", SpongeFixedTransactionalPacketBinding.class.getSimpleName() + "[", "]")
+                .add("opcode=" + this.opcode())
+                .add("requestPacketType=" + this.packetType())
+                .add("responsePacketType=" + this.responsePacketType)
                 .toString();
     }
 }

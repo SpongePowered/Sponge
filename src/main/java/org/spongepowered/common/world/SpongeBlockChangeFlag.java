@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.world;
 
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.util.Constants;
+
+import java.util.StringJoiner;
 
 /**
  * A flag of sorts that determines whether a block change will perform various
@@ -359,15 +360,15 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("rawFlag", this.rawFlag)
-            .add("notifyNeighbors", this.updateNeighbors)
-            .add("notifyClients", this.notifyClients)
-            .add("performBlockPhysics", this.performBlockPhysics)
-            .add("updateNeighboringShapes", this.updateNeighborShapes)
-            .add("ignoreRender", this.ignoreRender)
-            .add("forceReRender", this.forceReRender)
-            .toString();
+        return new StringJoiner(", ", SpongeBlockChangeFlag.class.getSimpleName() + "[", "]")
+                .add("rawFlag=" + this.rawFlag)
+                .add("notifyNeighbors=" + this.updateNeighbors)
+                .add("notifyClients=" + this.notifyClients)
+                .add("performBlockPhysics=" + this.performBlockPhysics)
+                .add("updateNeighboringShapes=" + this.updateNeighborShapes)
+                .add("ignoreRender=" + this.ignoreRender)
+                .add("forceReRender=" + this.forceReRender)
+                .toString();
     }
 
     public SpongeBlockChangeFlag asNestedNeighborUpdates() {

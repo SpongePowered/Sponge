@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.adapter.impl;
 
-import com.google.common.base.MoreObjects;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
@@ -37,6 +36,7 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 
 public class QueryResultAdapter implements InventoryAdapter, DefaultImplementedAdapterInventory, InventoryBridge, Inventory {
@@ -117,12 +117,12 @@ public class QueryResultAdapter implements InventoryAdapter, DefaultImplementedA
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("capacity", this.capacity())
-                .add("children", this.children().size())
-                .add("parent", ((this.parent == this) ? "self" : this.parent.getClass().getSimpleName()))
-                .add("fabric", this.fabric.getClass().getSimpleName())
-                .add("lens",  this.lens.getClass().getSimpleName())
+        return new StringJoiner(", ", QueryResultAdapter.class.getSimpleName() + "[", "]")
+                .add("capacity=" + this.capacity())
+                .add("children=" + this.children().size())
+                .add("parent=" + ((this.parent == this) ? "self" : this.parent.getClass().getSimpleName()))
+                .add("fabric=" + this.fabric.getClass().getSimpleName())
+                .add("lens=" + this.lens.getClass().getSimpleName())
                 .toString();
     }
 }

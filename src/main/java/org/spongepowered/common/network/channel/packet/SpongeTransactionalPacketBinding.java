@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.network.channel.packet;
 
-import com.google.common.base.MoreObjects;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionSide;
@@ -41,6 +40,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class SpongeTransactionalPacketBinding<P extends RequestPacket<R>, R extends Packet>
@@ -128,9 +128,9 @@ public class SpongeTransactionalPacketBinding<P extends RequestPacket<R>, R exte
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("opcode", this.opcode())
-                .add("requestPacketType", this.packetType())
+        return new StringJoiner(", ", SpongeTransactionalPacketBinding.class.getSimpleName() + "[", "]")
+                .add("opcode=" + this.opcode())
+                .add("requestPacketType=" + this.packetType())
                 .toString();
     }
 }

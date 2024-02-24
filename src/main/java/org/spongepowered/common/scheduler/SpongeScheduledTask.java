@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.scheduler;
 
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 
+import java.util.StringJoiner;
 import java.util.UUID;
 
 /**
@@ -120,8 +120,8 @@ public final class SpongeScheduledTask implements ScheduledTask {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("task", this.task)
+        return new StringJoiner(", ", SpongeScheduledTask.class.getSimpleName() + "[", "]")
+                .add("task=" + this.task)
                 .toString();
     }
 

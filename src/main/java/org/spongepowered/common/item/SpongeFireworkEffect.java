@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -38,6 +37,7 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 public class SpongeFireworkEffect implements FireworkEffect {
 
@@ -122,12 +122,12 @@ public class SpongeFireworkEffect implements FireworkEffect {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("shape", this.shape)
-                .add("trails", this.trails)
-                .add("flickers", this.flicker)
-                .add("colors", this.colors)
-                .add("fades", this.fades)
+        return new StringJoiner(", ", SpongeFireworkEffect.class.getSimpleName() + "[", "]")
+                .add("shape=" + this.shape)
+                .add("trails=" + this.trails)
+                .add("flickers=" + this.flicker)
+                .add("colors=" + this.colors)
+                .add("fades=" + this.fades)
                 .toString();
     }
 }

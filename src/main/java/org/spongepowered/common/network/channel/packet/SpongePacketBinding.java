@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.network.channel.packet;
 
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.network.channel.packet.Packet;
 import org.spongepowered.api.network.channel.packet.PacketBinding;
 import org.spongepowered.common.network.PacketUtil;
 
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 
 public abstract class SpongePacketBinding<P extends Packet> implements PacketBinding<P> {
@@ -59,9 +59,9 @@ public abstract class SpongePacketBinding<P extends Packet> implements PacketBin
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("opcode", this.opcode)
-                .add("packetType", this.packetType.getName())
+        return new StringJoiner(", ", SpongePacketBinding.class.getSimpleName() + "[", "]")
+                .add("opcode=" + this.opcode)
+                .add("packetType=" + this.packetType.getName())
                 .toString();
     }
 }
