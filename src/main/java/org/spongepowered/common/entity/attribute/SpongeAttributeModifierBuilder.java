@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.entity.attribute;
 
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.attribute.AttributeOperation;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public final class SpongeAttributeModifierBuilder implements AttributeModifier.Builder {
@@ -42,19 +42,19 @@ public final class SpongeAttributeModifierBuilder implements AttributeModifier.B
 
     @Override
     public AttributeModifier.Builder id(final UUID id) {
-        this.id = Preconditions.checkNotNull(id, "Modifier id cannot be null");
+        this.id = Objects.requireNonNull(id, "Modifier id cannot be null");
         return this;
     }
 
     @Override
     public AttributeModifier.Builder name(final String name) {
-        this.name = Preconditions.checkNotNull(name, "Name cannot be null");
+        this.name = Objects.requireNonNull(name, "Name cannot be null");
         return this;
     }
 
     @Override
     public AttributeModifier.Builder operation(final AttributeOperation operation) {
-        this.operation = Preconditions.checkNotNull(operation, "Operation cannot be null");
+        this.operation = Objects.requireNonNull(operation, "Operation cannot be null");
         return this;
     }
 
@@ -66,8 +66,8 @@ public final class SpongeAttributeModifierBuilder implements AttributeModifier.B
 
     @Override
     public AttributeModifier build() {
-        Preconditions.checkNotNull(this.name, "Name must be set");
-        Preconditions.checkNotNull(this.operation, "Operation must be set");
+        Objects.requireNonNull(this.name, "Name must be set");
+        Objects.requireNonNull(this.operation, "Operation must be set");
         return (AttributeModifier) new net.minecraft.world.entity.ai.attributes.AttributeModifier(this.id, this.name, this.amount, (net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation) (Object) this.operation);
     }
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.crafting.shaped;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Lists;
@@ -54,6 +53,7 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -77,7 +77,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
 
     @Override
     public AisleStep aisle(final String... aisle) {
-        checkNotNull(aisle, "aisle");
+        Objects.requireNonNull(aisle, "aisle");
         this.aisle.clear();
         this.ingredientMap.clear();
         this.reverseIngredientMap.clear();
@@ -152,13 +152,13 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
 
     @Override
     public EndStep result(ItemStackSnapshot result) {
-        checkNotNull(result, "result");
+        Objects.requireNonNull(result, "result");
         return this.result(result.createStack());
     }
 
     @Override
     public EndStep result(final ItemStack result) {
-        checkNotNull(result, "result");
+        Objects.requireNonNull(result, "result");
         this.result = result.copy();
         this.resultFunction = null;
         return this;

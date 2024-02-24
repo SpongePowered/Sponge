@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.entity.ai.goal.builtin.creature;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.world.entity.PathfinderMob;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.RandomWalkingGoal;
 import org.spongepowered.api.entity.living.Creature;
+
+import java.util.Objects;
 
 public final class SpongeRandomWalkingGoalBuilder implements RandomWalkingGoal.Builder {
 
@@ -65,7 +66,7 @@ public final class SpongeRandomWalkingGoalBuilder implements RandomWalkingGoal.B
 
     @Override
     public RandomWalkingGoal build(Creature owner) {
-        Preconditions.checkNotNull(owner);
+        Objects.requireNonNull(owner);
         return (RandomWalkingGoal) new net.minecraft.world.entity.ai.goal.RandomStrollGoal((PathfinderMob) owner, this.speed, this.executionChance);
     }
 }

@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.registry;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
+
+import java.util.Objects;
 
 public final class SpongeResourceKeyBuilder implements ResourceKey.Builder {
 
@@ -38,14 +39,14 @@ public final class SpongeResourceKeyBuilder implements ResourceKey.Builder {
 
     @Override
     public ResourceKey.Builder namespace(String namespace) {
-        checkNotNull(namespace, "Namespace cannot be null");
+        Objects.requireNonNull(namespace, "Namespace cannot be null");
         this.namespace = namespace;
         return this;
     }
 
     @Override
     public ResourceKey.Builder value(String value) {
-        checkNotNull(value, "Value cannot be null");
+        Objects.requireNonNull(value, "Value cannot be null");
         this.value = value;
         return this;
     }

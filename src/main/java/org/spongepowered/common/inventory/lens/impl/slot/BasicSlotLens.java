@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -39,6 +38,7 @@ import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Base Lens for Slots
@@ -83,7 +83,7 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
 
     @Override
     public ItemStack getStack(Fabric fabric) {
-        return checkNotNull(fabric, "Target inventory").fabric$getStack(this.base);
+        return Objects.requireNonNull(fabric, "Target inventory").fabric$getStack(this.base);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class BasicSlotLens extends AbstractLens implements SlotLens {
 
     @Override
     public boolean setStack(Fabric fabric, ItemStack stack) {
-        checkNotNull(fabric, "Target inventory").fabric$setStack(this.base, stack);
+        Objects.requireNonNull(fabric, "Target inventory").fabric$setStack(this.base, stack);
         return true;
     }
 

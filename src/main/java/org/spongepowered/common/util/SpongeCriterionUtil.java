@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.advancements.Criterion;
@@ -43,6 +42,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -51,7 +51,7 @@ public final class SpongeCriterionUtil {
     public static AdvancementCriterion build(final Class<? extends OperatorCriterion> type,
             final Function<Set<AdvancementCriterion>, AdvancementCriterion> function,
             final AdvancementCriterion criterion, final Iterable<AdvancementCriterion> criteria) {
-        checkNotNull(criteria, "criteria");
+        Objects.requireNonNull(criteria, "criteria");
         final List<AdvancementCriterion> builder = new ArrayList<>();
         SpongeCriterionUtil.build(type, criterion, builder);
         for (final AdvancementCriterion criterion1 : criteria) {
@@ -64,7 +64,7 @@ public final class SpongeCriterionUtil {
         if (criterion instanceof SpongeEmptyCriterion) {
             return;
         }
-        checkNotNull(criterion, "criterion");
+        Objects.requireNonNull(criterion, "criterion");
         if (type.isInstance(criterion)) {
             criteria.addAll(((OperatorCriterion) criterion).criteria());
         } else {

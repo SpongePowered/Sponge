@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.stonecutting;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.data.recipes.RecipeCategory;
@@ -46,6 +45,7 @@ import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, StoneCutterRecipe.Builder> implements
@@ -80,7 +80,7 @@ public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedB
 
     @Override
     public EndStep result(final ItemStack result) {
-        checkNotNull(result, "result");
+        Objects.requireNonNull(result, "result");
         this.result = result;
         this.resultFunction = null;
         return this;
@@ -88,7 +88,7 @@ public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedB
 
     @Override
     public EndStep result(Function<Inventory, ItemStack> resultFunction, ItemStack exemplaryResult) {
-        checkNotNull(exemplaryResult, "exemplaryResult");
+        Objects.requireNonNull(exemplaryResult, "exemplaryResult");
         checkState(!exemplaryResult.isEmpty(), "exemplaryResult must not be empty");
 
         this.result = exemplaryResult;

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.advancement.criterion;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.AdvancementProgress;
@@ -32,6 +31,7 @@ import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.CriterionProgress;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -70,7 +70,7 @@ public abstract class SpongeOperatorCriterionProgress implements ImplementationB
                 time = time1;
             }
         }
-        checkNotNull(time); // Should be impossible
+        Objects.requireNonNull(time); // Should be impossible
         return time;
     }
 

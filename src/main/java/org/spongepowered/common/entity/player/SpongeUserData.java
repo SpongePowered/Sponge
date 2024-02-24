@@ -25,7 +25,6 @@
 package org.spongepowered.common.entity.player;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
@@ -96,6 +95,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -477,8 +477,8 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     @Override
     public boolean setLocation(final ResourceKey key, final Vector3d position) {
-        Preconditions.checkNotNull(key);
-        Preconditions.checkNotNull(position);
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(position);
 
         final Optional<ServerPlayer> player = this.player();
         if (player.isPresent()) {
@@ -503,7 +503,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     @Override
     public void setRotation(final Vector3d rotation) {
-        Preconditions.checkNotNull(rotation, "Rotation was null!");
+        Objects.requireNonNull(rotation, "Rotation was null!");
         final Optional<ServerPlayer> playerOpt = this.player();
         if (playerOpt.isPresent()) {
             playerOpt.get().setRotation(rotation);

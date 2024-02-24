@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import org.spongepowered.api.util.Direction;
@@ -54,7 +53,7 @@ public final class DirectionUtil {
     }
 
     public static Direction getFor(final net.minecraft.core.Direction facing) {
-        checkNotNull(facing);
+        Objects.requireNonNull(facing);
         switch (facing) {
             case UP:
                 return Direction.UP;

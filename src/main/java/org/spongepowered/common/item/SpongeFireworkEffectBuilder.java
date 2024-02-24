@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.api.item.FireworkEffect;
@@ -34,6 +33,7 @@ import org.spongepowered.api.util.Color;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public final class SpongeFireworkEffectBuilder implements FireworkEffect.Builder {
@@ -58,21 +58,21 @@ public final class SpongeFireworkEffectBuilder implements FireworkEffect.Builder
 
     @Override
     public SpongeFireworkEffectBuilder color(final Color color) {
-        checkNotNull(color);
+        Objects.requireNonNull(color);
         this.colors.add(color);
         return this;
     }
 
     @Override
     public SpongeFireworkEffectBuilder colors(final Color... colors) {
-        checkNotNull(colors);
+        Objects.requireNonNull(colors);
         Collections.addAll(this.colors, colors);
         return this;
     }
 
     @Override
     public SpongeFireworkEffectBuilder colors(final Iterable<Color> colors) {
-        checkNotNull(colors);
+        Objects.requireNonNull(colors);
         for (final Color color : colors) {
             this.colors.add(color);
         }
@@ -81,21 +81,21 @@ public final class SpongeFireworkEffectBuilder implements FireworkEffect.Builder
 
     @Override
     public SpongeFireworkEffectBuilder fade(final Color color) {
-        checkNotNull(color);
+        Objects.requireNonNull(color);
         this.fades.add(color);
         return this;
     }
 
     @Override
     public SpongeFireworkEffectBuilder fades(final Color... colors) {
-        checkNotNull(colors);
+        Objects.requireNonNull(colors);
         Collections.addAll(this.fades, colors);
         return this;
     }
 
     @Override
     public SpongeFireworkEffectBuilder fades(final Iterable<Color> colors) {
-        checkNotNull(colors);
+        Objects.requireNonNull(colors);
         for (final Color color : colors) {
             this.fades.add(color);
         }
@@ -104,7 +104,7 @@ public final class SpongeFireworkEffectBuilder implements FireworkEffect.Builder
 
     @Override
     public SpongeFireworkEffectBuilder shape(final FireworkShape shape) {
-        checkNotNull(shape);
+        Objects.requireNonNull(shape);
         this.shape = () -> shape;
         return this;
     }

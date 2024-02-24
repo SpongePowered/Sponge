@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
@@ -333,8 +332,8 @@ public final class PhaseTracker implements CauseStackManager {
             // Maybe? I don't think this is wise.
             return;
         }
-        checkNotNull(state, "State cannot be null!");
-        checkNotNull(phaseContext, "PhaseContext cannot be null!");
+        Objects.requireNonNull(state, "State cannot be null!");
+        Objects.requireNonNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
         if (this == PhaseTracker.SERVER && SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             if (this.stack.size() > 6) {
@@ -509,7 +508,7 @@ public final class PhaseTracker implements CauseStackManager {
 
     @Override
     public CauseStackManager pushCause(final Object obj) {
-        checkNotNull(obj, "obj");
+        Objects.requireNonNull(obj, "obj");
         this.enforceMainThread();
         this.cached_cause = null;
         if (this.cause.peek() == obj) {
@@ -543,7 +542,7 @@ public final class PhaseTracker implements CauseStackManager {
         if (dupeCause > 0) {
             // Make sure to just decrement the duplicate causes.
             this.duplicateCauses[size] = dupeCause - 1;
-            return checkNotNull(this.cause.peek());
+            return Objects.requireNonNull(this.cause.peek());
         }
         if (size <= this.min_depth) {
             throw new IllegalStateException("Cause stack corruption, tried to pop more objects off than were pushed since last frame (Size was "
@@ -602,7 +601,7 @@ public final class PhaseTracker implements CauseStackManager {
 
     @Override
     public void popCauseFrame(final StackFrame oldFrame) {
-        checkNotNull(oldFrame, "oldFrame");
+        Objects.requireNonNull(oldFrame, "oldFrame");
         this.enforceMainThread();
         final @Nullable SpongeCauseStackFrame frame = this.frames.peek();
         if (frame != oldFrame) {
@@ -707,8 +706,8 @@ public final class PhaseTracker implements CauseStackManager {
 
     @Override
     public <T> CauseStackManager addContext(final EventContextKey<T> key, final T value) {
-        checkNotNull(key, "key");
-        checkNotNull(value, "value");
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(value, "value");
         this.enforceMainThread();
         this.cached_ctx = null;
         final @Nullable Object existing = this.ctx.put(key, value);
@@ -720,14 +719,14 @@ public final class PhaseTracker implements CauseStackManager {
 
     @Override
     public <T> Optional<T> context(final EventContextKey<T> key) {
-        checkNotNull(key, "key");
+        Objects.requireNonNull(key, "key");
         this.enforceMainThread();
         return Optional.ofNullable((T) this.ctx.get(key));
     }
 
     @Override
     public <T> Optional<T> removeContext(final EventContextKey<T> key) {
-        checkNotNull(key, "key");
+        Objects.requireNonNull(key, "key");
         this.enforceMainThread();
         this.cached_ctx = null;
         final Object existing = this.ctx.remove(key);
@@ -773,7 +772,7 @@ public final class PhaseTracker implements CauseStackManager {
 
 
     private void registerPhaseContextProvider(final PhaseContext<?> context) {
-        checkNotNull(context.state.getFrameModifier(), "Consumer");
+        Objects.requireNonNull(context.state.getFrameModifier(), "Consumer");
         // Reset our cached objects
         this.pendingProviders.compareAndSet(false, true); //I Reset the cache
         this.cached_cause = null; // Reset the cache

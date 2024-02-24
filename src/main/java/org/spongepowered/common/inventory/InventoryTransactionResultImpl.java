@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
@@ -39,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 
 public class InventoryTransactionResultImpl implements InventoryTransactionResult, InventoryTransactionResult.Poll {
@@ -50,7 +50,7 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
     private final Type type;
 
     InventoryTransactionResultImpl(org.spongepowered.common.inventory.InventoryTransactionResultImpl.Builder builder) {
-        this.type = checkNotNull(builder.resultType, "Result type");
+        this.type = Objects.requireNonNull(builder.resultType, "Result type");
         this.rejected = builder.rejected != null ? ImmutableList.copyOf(builder.rejected) : Collections.emptyList();
         this.slotTransactions = builder.slotTransactions != null ? ImmutableList.copyOf(builder.slotTransactions) : Collections.emptyList();
         this.polled = builder.polled != null ? ImmutableList.copyOf(builder.polled) : Collections.emptyList();
@@ -122,7 +122,7 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
 
         @Override
         public InventoryTransactionResult.Builder type(final InventoryTransactionResult.Type type) {
-            this.resultType = checkNotNull(type, "Type cannot be null!");
+            this.resultType = Objects.requireNonNull(type, "Type cannot be null!");
             return this;
         }
 
@@ -185,8 +185,8 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
 
         @Override
         public InventoryTransactionResult.Builder from(InventoryTransactionResult value) {
-            checkNotNull(value, "InventoryTransactionResult cannot be null!");
-            this.resultType = checkNotNull(value.type(), "ResultType cannot be null!");
+            Objects.requireNonNull(value, "InventoryTransactionResult cannot be null!");
+            this.resultType = Objects.requireNonNull(value.type(), "ResultType cannot be null!");
             this.slotTransactions = new ArrayList<>(value.slotTransactions());
             this.rejected = new ArrayList<>(value.rejectedItems());
             return this;

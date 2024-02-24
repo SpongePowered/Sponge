@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
@@ -77,7 +76,7 @@ final class PhaseStack {
     }
 
     PhaseStack push(IPhaseState<?> state, PhaseContext<?> context) {
-        checkNotNull(context, "Tuple cannot be null!");
+        Objects.requireNonNull(context, "Tuple cannot be null!");
         checkArgument(context.state == state, "Illegal IPhaseState not matching PhaseContext: %s", context);
         checkArgument(context.isComplete(), "Phase context must be complete: %s", context);
         this.phases.push(context);

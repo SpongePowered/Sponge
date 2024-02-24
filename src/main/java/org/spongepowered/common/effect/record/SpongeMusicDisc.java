@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.effect.record;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -35,6 +34,8 @@ import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.common.accessor.world.item.RecordItemAccessor;
 import org.spongepowered.math.vector.Vector3i;
+
+import java.util.Objects;
 
 public final class SpongeMusicDisc implements MusicDisc {
 
@@ -62,7 +63,7 @@ public final class SpongeMusicDisc implements MusicDisc {
     }
 
     public static ClientboundLevelEventPacket createPacket(final Vector3i position, final @Nullable MusicDisc recordType) {
-        checkNotNull(position, "position");
+        Objects.requireNonNull(position, "position");
         final BlockPos pos = new BlockPos(position.x(), position.y(), position.z());
         // see RecordItem.useOn
         return new ClientboundLevelEventPacket(SpongeMusicDisc.EFFECT_ID, pos, recordType == null ? 0 :

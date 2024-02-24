@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.crafting.shapeless;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.core.NonNullList;
@@ -48,6 +47,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -100,7 +100,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
 
     @Override
     public EndStep result(final ItemStackSnapshot result) {
-        checkNotNull(result, "result");
+        Objects.requireNonNull(result, "result");
         this.result = result.createStack();
         this.resultFunction = null;
         return this;
@@ -108,7 +108,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
 
     @Override
     public EndStep result(org.spongepowered.api.item.inventory.ItemStack result) {
-        checkNotNull(result, "result");
+        Objects.requireNonNull(result, "result");
         this.result = result;
         this.resultFunction = null;
         return this;

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world.server;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -59,10 +58,10 @@ public final class SpongeLocatableBlock implements LocatableBlock {
     private @Nullable ServerLocation location;
 
     SpongeLocatableBlock(final SpongeLocatableBlockBuilder builder) {
-        this.blockState = checkNotNull(builder.blockState.get(), "blockstate");
-        this.position = checkNotNull(builder.position.get(), "position");
-        this.world = checkNotNull(builder.world.get(), "world");
-        this.worldRef = new WeakReference<>(checkNotNull(builder.worldReference.get(), "reference"));
+        this.blockState = Objects.requireNonNull(builder.blockState.get(), "blockstate");
+        this.position = Objects.requireNonNull(builder.position.get(), "position");
+        this.world = Objects.requireNonNull(builder.world.get(), "world");
+        this.worldRef = new WeakReference<>(Objects.requireNonNull(builder.worldReference.get(), "reference"));
     }
 
     SpongeLocatableBlock(final ServerWorld world, final int x, final int y, final int z) {

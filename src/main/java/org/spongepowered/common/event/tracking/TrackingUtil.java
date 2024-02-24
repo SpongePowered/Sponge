@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -85,6 +84,7 @@ import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -108,7 +108,7 @@ public final class TrackingUtil {
 
     public static void tickEntity(final Consumer<net.minecraft.world.entity.Entity> consumer, final net.minecraft.world.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
-        checkNotNull(entity, "Cannot capture on a null ticking entity!");
+        Objects.requireNonNull(entity, "Cannot capture on a null ticking entity!");
         if (!((TrackableBridge) entity).bridge$shouldTick()) {
             return;
         }
@@ -147,7 +147,7 @@ public final class TrackingUtil {
 
     @SuppressWarnings({"unused", "try"})
     public static void tickTileEntity(final TrackedWorldBridge mixinWorldServer, final TickingBlockEntity tile) {
-        checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
+        Objects.requireNonNull(tile, "Cannot capture on a null ticking tile entity!");
         final Optional<BlockEntity> tickingBlockEntity = getTickingBlockEntity(tile);
         if (!tickingBlockEntity.isPresent()) {
             return;

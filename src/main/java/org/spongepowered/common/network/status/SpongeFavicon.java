@@ -25,7 +25,6 @@
 package org.spongepowered.common.network.status;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Charsets;
@@ -53,12 +52,12 @@ public class SpongeFavicon implements Favicon {
     private final BufferedImage decoded;
 
     public SpongeFavicon(BufferedImage decoded) throws IOException {
-        this.decoded = checkNotNull(decoded, "decoded");
+        this.decoded = java.util.Objects.requireNonNull(decoded, "decoded");
         this.encoded = SpongeFavicon.encode(decoded);
     }
 
     public SpongeFavicon(String encoded) throws IOException {
-        this.encoded = checkNotNull(encoded, "encoded");
+        this.encoded = java.util.Objects.requireNonNull(encoded, "encoded");
         this.decoded = SpongeFavicon.decode(encoded);
     }
 

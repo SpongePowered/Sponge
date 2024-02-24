@@ -33,6 +33,7 @@ import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeTextValueParameter;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public final class SpongeTextParameterBuilder implements VariableValueParameters.TextBuilder {
@@ -42,7 +43,7 @@ public final class SpongeTextParameterBuilder implements VariableValueParameters
 
     @Override
     public VariableValueParameters.@NonNull TextBuilder serializer(final @NonNull ComponentSerializer<Component, ? extends Component, String> serializer) {
-        Preconditions.checkNotNull(serializer, "The serializer cannot be null");
+        Objects.requireNonNull(serializer, "The serializer cannot be null");
         return this.serializerSupplier(() -> serializer);
     }
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -274,7 +273,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
 
     protected PhaseContext(final IPhaseState<P> state, final PhaseTracker tracker) {
         this.state = state;
-        this.createdTracker = checkNotNull(tracker, "Null PhaseTracker!");
+        this.createdTracker = Objects.requireNonNull(tracker, "Null PhaseTracker!");
     }
 
     @Override

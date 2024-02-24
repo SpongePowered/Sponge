@@ -35,6 +35,7 @@ import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeCommon;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -46,7 +47,7 @@ public class UserSubject extends SpongeSubject {
     private final UserCollection collection;
 
     public UserSubject(final GameProfile player, final UserCollection users) {
-        this.player = Preconditions.checkNotNull(player);
+        this.player = Objects.requireNonNull(player);
         this.data = new SingleParentMemorySubjectData(this) {
             @Override
             public SubjectReference parent() {

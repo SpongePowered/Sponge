@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataManipulator;
@@ -32,6 +31,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 final class ImmutableDataManipulator extends SpongeDataManipulator implements DataManipulator.Immutable {
@@ -49,7 +49,7 @@ final class ImmutableDataManipulator extends SpongeDataManipulator implements Da
 
     @Override
     public Immutable without(final Key<?> key) {
-        checkNotNull(key, "key");
+        Objects.requireNonNull(key, "key");
         if (!this.values.containsKey(key)) {
             return this;
         }

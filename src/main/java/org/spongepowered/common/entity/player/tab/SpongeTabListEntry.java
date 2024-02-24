@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity.player.tab;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
@@ -60,10 +59,10 @@ public final class SpongeTabListEntry implements TabListEntry {
             final ProfilePublicKey.Data profilePublicKey) {
         checkState(list instanceof SpongeTabList, "list is not a SpongeTabList");
         this.list = (SpongeTabList) list;
-        this.profile = checkNotNull(profile, "profile");
+        this.profile = java.util.Objects.requireNonNull(profile, "profile");
         this.displayName = displayName;
         this.latency = latency;
-        this.gameMode = checkNotNull(gameMode, "game mode");
+        this.gameMode = java.util.Objects.requireNonNull(gameMode, "game mode");
         this.profilePublicKey = profilePublicKey;
     }
 
@@ -108,7 +107,7 @@ public final class SpongeTabListEntry implements TabListEntry {
 
     @Override
     public TabListEntry setGameMode(final GameMode gameMode) {
-        this.gameMode = checkNotNull(gameMode, "game mode");
+        this.gameMode = java.util.Objects.requireNonNull(gameMode, "game mode");
         this.sendUpdate(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE);
         return this;
     }

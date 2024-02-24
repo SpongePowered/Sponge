@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.fluid;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -150,7 +149,7 @@ public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@
         if (this.keyValues == null) {
             this.keyValues = new LinkedHashMap<>();
         }
-        this.keyValues.put(checkNotNull(key, "Key cannot be null!"), checkNotNull(value, "Value cannot be null!"));
+        this.keyValues.put(Objects.requireNonNull(key, "Key cannot be null!"), Objects.requireNonNull(value, "Value cannot be null!"));
         return this;
     }
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.persistence.DataQuery.of;
 
 import com.google.common.collect.BiMap;
@@ -89,6 +88,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -1383,7 +1383,7 @@ public final class Constants {
     public static final class DirectionFunctions {
 
         public static net.minecraft.core.Direction getFor(final Direction direction) {
-            switch (checkNotNull(direction)) {
+            switch (Objects.requireNonNull(direction)) {
                 case UP:
                     return net.minecraft.core.Direction.UP;
                 case DOWN:
@@ -1402,7 +1402,7 @@ public final class Constants {
         }
 
         public static Direction getFor(final net.minecraft.core.Direction facing) {
-            switch (checkNotNull(facing)) {
+            switch (Objects.requireNonNull(facing)) {
                 case UP:
                     return Direction.UP;
                 case DOWN:

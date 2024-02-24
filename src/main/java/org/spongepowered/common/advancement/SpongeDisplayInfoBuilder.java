@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.advancement;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
@@ -33,6 +32,8 @@ import org.spongepowered.api.advancement.AdvancementTypes;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.adventure.SpongeAdventure;
+
+import java.util.Objects;
 
 public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
 
@@ -50,28 +51,28 @@ public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
 
     @Override
     public DisplayInfo.Builder type(final AdvancementType advancementType) {
-        checkNotNull(advancementType, "advancementType");
+        Objects.requireNonNull(advancementType, "advancementType");
         this.advancementType = advancementType;
         return this;
     }
 
     @Override
     public DisplayInfo.Builder description(final Component description) {
-        checkNotNull(description, "description");
+        Objects.requireNonNull(description, "description");
         this.description = description;
         return this;
     }
 
     @Override
     public DisplayInfo.Builder title(final Component title) {
-        checkNotNull(title, "title");
+        Objects.requireNonNull(title, "title");
         this.title = title;
         return this;
     }
 
     @Override
     public DisplayInfo.Builder icon(final ItemStackSnapshot itemStackSnapshot) {
-        checkNotNull(itemStackSnapshot, "itemStackSnapshot");
+        Objects.requireNonNull(itemStackSnapshot, "itemStackSnapshot");
         this.icon = itemStackSnapshot;
         return this;
     }

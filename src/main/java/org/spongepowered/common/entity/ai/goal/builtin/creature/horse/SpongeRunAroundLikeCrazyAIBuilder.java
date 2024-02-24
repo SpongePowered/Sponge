@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.entity.ai.goal.builtin.creature.horse;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.horse.RunAroundLikeCrazyGoal;
 import org.spongepowered.api.entity.living.animal.horse.HorseLike;
+
+import java.util.Objects;
 
 public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCrazyGoal.Builder {
 
@@ -46,7 +46,7 @@ public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCra
 
     @Override
     public RunAroundLikeCrazyGoal.Builder from(RunAroundLikeCrazyGoal value) {
-        checkNotNull(value);
+        Objects.requireNonNull(value);
 
         return this.speed(value.speed());
     }
@@ -59,7 +59,7 @@ public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCra
 
     @Override
     public RunAroundLikeCrazyGoal build(HorseLike owner) {
-        Preconditions.checkNotNull(owner);
+        Objects.requireNonNull(owner);
         return (RunAroundLikeCrazyGoal) new net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal((net.minecraft.world.entity.animal.horse.Horse) owner, this.speed);
     }
 }

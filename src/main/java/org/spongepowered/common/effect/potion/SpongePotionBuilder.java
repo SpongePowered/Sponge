@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.effect.potion;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.world.effect.MobEffect;
@@ -62,7 +61,7 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
 
     @Override
     public PotionEffect.Builder from(final PotionEffect holder) {
-        this.potionType = checkNotNull(holder).type();
+        this.potionType = Objects.requireNonNull(holder).type();
         this.duration = holder.duration();
         this.amplifier = holder.amplifier();
         this.isAmbient = holder.isAmbient();
@@ -73,7 +72,7 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
 
     @Override
     protected Optional<PotionEffect> buildContent(final DataView container) throws InvalidDataException {
-        checkNotNull(container);
+        Objects.requireNonNull(container);
         if (!container.contains(Constants.Item.Potions.POTION_TYPE) || !container.contains(Constants.Item.Potions.POTION_DURATION)
             || !container.contains(Constants.Item.Potions.POTION_AMPLIFIER) || !container.contains(Constants.Item.Potions.POTION_AMBIANCE)
             || !container.contains(Constants.Item.Potions.POTION_SHOWS_PARTICLES)) {

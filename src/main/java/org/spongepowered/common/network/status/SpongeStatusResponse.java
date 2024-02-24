@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.network.status;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -52,6 +51,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -147,7 +147,7 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
 
         @Override
         public void setName(String name) {
-            this.name = checkNotNull(name, "name");
+            this.name = Objects.requireNonNull(name, "name");
         }
 
         @Override
@@ -177,7 +177,7 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
 
     @Override
     public void setDescription(final Component description) {
-        this.description = SpongeAdventure.asVanilla(checkNotNull(description, "description"));
+        this.description = SpongeAdventure.asVanilla(Objects.requireNonNull(description, "description"));
     }
 
     @Override

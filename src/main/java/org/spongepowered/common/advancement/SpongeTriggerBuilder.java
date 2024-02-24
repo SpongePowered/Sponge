@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.advancement;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
@@ -72,7 +71,7 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
     @Override
     @SuppressWarnings("rawtypes")
     public <T extends FilteredTriggerConfiguration & DataSerializable> Trigger.Builder<T> dataSerializableConfig(final Class<T> dataConfigClass) {
-        checkNotNull(dataConfigClass, "dataConfigClass");
+        requireNonNull(dataConfigClass, "dataConfigClass");
         this.configType = dataConfigClass;
         this.constructor = new DataSerializableConstructor(dataConfigClass);
         return (Trigger.Builder<T>) this;
@@ -93,8 +92,8 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
     @Override
     public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> typeSerializableConfig(final TypeToken<T> configType,
             final ConfigurationOptions options) {
-        checkNotNull(configType, "configType");
-        checkNotNull(options, "options");
+        requireNonNull(configType, "configType");
+        requireNonNull(options, "options");
         this.configType = configType.getType();
         this.constructor = new ConfigurateConstructor<>(configType.getType(), options);
         return (Trigger.Builder<T>) this;
@@ -115,8 +114,8 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
     @SuppressWarnings("rawtypes")
     public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> typeSerializableConfig(final Class<T> configClass,
             final ConfigurationOptions options) {
-        checkNotNull(configClass, "configClass");
-        checkNotNull(options, "options");
+        requireNonNull(configClass, "configClass");
+        requireNonNull(options, "options");
         this.configType = configClass;
         this.constructor = new ConfigurateConstructor(configClass, options);
         return (Trigger.Builder<T>) this;
@@ -132,7 +131,7 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
     @SuppressWarnings("rawtypes")
     @Override
     public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> jsonSerializableConfig(final Class<T> configClass, final Gson gson) {
-        checkNotNull(configClass, "configClass");
+        requireNonNull(configClass, "configClass");
         this.configType = configClass;
         this.constructor = new JsonConstructor(configClass, gson);
         return (Trigger.Builder<T>) this;
@@ -158,7 +157,7 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
 
     @Override
     public Trigger.Builder<C> name(final String name) {
-        checkNotNull(name, "name");
+        requireNonNull(name, "name");
         this.name = name;
         return this;
     }

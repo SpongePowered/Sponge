@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import net.kyori.adventure.text.Component;
@@ -111,13 +110,13 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
     @Override
     public boolean validateRawData(final DataView container) {
-        Preconditions.checkNotNull(container);
+        Objects.requireNonNull(container);
         return false;
     }
 
     @Override
     public void setRawData(final DataView container) throws InvalidDataException {
-        Preconditions.checkNotNull(container);
+        Objects.requireNonNull(container);
 
         if (this.shadow$isEmpty()) {
             throw new IllegalArgumentException("Cannot set data on empty item stacks!");
@@ -146,8 +145,8 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     }
 
     public Collection<AttributeModifier> itemStack$attributeModifiers(final AttributeType attributeType, final EquipmentType equipmentType) {
-        Preconditions.checkNotNull(attributeType, "Attribute type cannot be null");
-        Preconditions.checkNotNull(equipmentType, "Equipment type cannot be null");
+        Objects.requireNonNull(attributeType, "Attribute type cannot be null");
+        Objects.requireNonNull(equipmentType, "Equipment type cannot be null");
 
         final ImmutableList.Builder<AttributeModifier> builder = ImmutableList.builder();
 
@@ -158,9 +157,9 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     }
 
     public void itemStack$addAttributeModifier(final AttributeType attributeType, final AttributeModifier modifier, final EquipmentType equipmentType) {
-        Preconditions.checkNotNull(attributeType, "Attribute type cannot be null");
-        Preconditions.checkNotNull(modifier, "Attribute modifier cannot be null");
-        Preconditions.checkNotNull(equipmentType, "Equipment type cannot be null");
+        Objects.requireNonNull(attributeType, "Attribute type cannot be null");
+        Objects.requireNonNull(modifier, "Attribute modifier cannot be null");
+        Objects.requireNonNull(equipmentType, "Equipment type cannot be null");
 
         this.shadow$addAttributeModifier((Attribute) attributeType, (net.minecraft.world.entity.ai.attributes.AttributeModifier) modifier, ((EquipmentSlot) (Object) equipmentType));
     }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
@@ -53,6 +52,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
@@ -65,7 +65,7 @@ import java.util.function.Supplier;
 public final class DataUtil {
 
     public static DataView checkDataExists(final DataView dataView, final DataQuery query) throws InvalidDataException {
-        if (!checkNotNull(dataView).contains(checkNotNull(query))) {
+        if (!Objects.requireNonNull(dataView).contains(Objects.requireNonNull(query))) {
             throw new InvalidDataException("Missing data for query: " + query.asString('.'));
         }
         return dataView;
@@ -183,7 +183,7 @@ public final class DataUtil {
             @org.checkerframework.checker.nullness.qual.Nullable E original, @org.checkerframework.checker.nullness.qual.Nullable E replacement) {
         @org.checkerframework.checker.nullness.qual.Nullable final V originalValue = original == null ? null : Value.genericImmutableOf(key, original);
         @org.checkerframework.checker.nullness.qual.Nullable final V value = replacement == null ? null : Value.genericImmutableOf(key, replacement);
-        return checkNotNull(function.merge(originalValue, value), "merged").get();
+        return Objects.requireNonNull(function.merge(originalValue, value), "merged").get();
     }
 
     public static <E, V extends Value<E>> E merge(MergeFunction function, Key<V> key,
@@ -197,7 +197,7 @@ public final class DataUtil {
         @org.checkerframework.checker.nullness.qual.Nullable final E replacementElement = replacement.get();
         @org.checkerframework.checker.nullness.qual.Nullable final V originalValue = originalElement == null ? null : Value.genericImmutableOf(key, originalElement);
         @org.checkerframework.checker.nullness.qual.Nullable final V replacementValue = replacementElement == null ? null : Value.genericImmutableOf(key, replacementElement);
-        return checkNotNull(function.merge(originalValue, replacementValue), "merged").get();
+        return Objects.requireNonNull(function.merge(originalValue, replacementValue), "merged").get();
     }
 
     private DataUtil() {
