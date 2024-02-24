@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.manager;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
@@ -51,10 +50,10 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
 
     RegisteredListener(
             final PluginContainer plugin, final EventType<T> eventType, final Order order, final EventListener<? super T> listener, final boolean beforeModifications) {
-        this.plugin = checkNotNull(plugin, "plugin");
-        this.eventType = checkNotNull(eventType, "eventType");
-        this.order = checkNotNull(order, "order");
-        this.listener = checkNotNull(listener, "listener");
+        this.plugin = Objects.requireNonNull(plugin, "plugin");
+        this.eventType = Objects.requireNonNull(eventType, "eventType");
+        this.order = Objects.requireNonNull(order, "order");
+        this.listener = Objects.requireNonNull(listener, "listener");
         this.beforeModifications = beforeModifications;
     }
 

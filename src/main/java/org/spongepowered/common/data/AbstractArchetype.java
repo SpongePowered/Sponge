@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
@@ -72,7 +71,7 @@ public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> im
 
     @Override
     public void setRawData(final DataView container) throws InvalidDataException {
-        checkNotNull(container, "Raw data cannot be null!");
+        Objects.requireNonNull(container, "Raw data cannot be null!");
         final CompoundTag copy = NBTTranslator.INSTANCE.translate(container);
         final boolean valid = this.getValidator().validate(copy);
         if (valid) {

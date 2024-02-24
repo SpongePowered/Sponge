@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.inventory;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.TransientCraftingContainer;
@@ -41,6 +40,7 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Mixin(TransientCraftingContainer.class)
@@ -54,7 +54,7 @@ public abstract class TransientCraftingContainerMixin_Inventory_API implements C
 
     @Override
     public Optional<CraftingRecipe> recipe(ServerWorld world) {
-        return Sponge.server().recipeManager().findMatchingRecipe((Inventory) this.menu, checkNotNull(world, "world")).map(CraftingRecipe.class::cast);
+        return Sponge.server().recipeManager().findMatchingRecipe((Inventory) this.menu, Objects.requireNonNull(world, "world")).map(CraftingRecipe.class::cast);
     }
 
     @Override

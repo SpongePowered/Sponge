@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -33,6 +32,7 @@ import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -54,7 +54,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
 
     @Override
     public SpongeSubject get(final String identifier) {
-        checkNotNull(identifier, "identifier");
+        Objects.requireNonNull(identifier, "identifier");
         if (!this.subjects.containsKey(identifier)) {
             this.subjects.putIfAbsent(identifier, new DataFactorySubject(identifier, this.dataFactory));
         }

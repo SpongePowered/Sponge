@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.advancement;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
@@ -46,6 +45,7 @@ import org.spongepowered.common.util.SpongeCriterionUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder<AdvancementTemplate, AdvancementTemplate.Builder> implements AdvancementTemplate.Builder.RootStep {
@@ -86,7 +86,7 @@ public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder
 
     @Override
     public AdvancementTemplate.Builder criterion(AdvancementCriterion criterion) {
-        checkNotNull(criterion, "criterion");
+        Objects.requireNonNull(criterion, "criterion");
         this.criterion = criterion;
         return this;
     }

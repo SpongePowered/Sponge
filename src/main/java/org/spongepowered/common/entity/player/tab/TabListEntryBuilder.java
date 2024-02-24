@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity.player.tab;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
@@ -33,6 +32,8 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.profile.GameProfile;
+
+import java.util.Objects;
 
 
 public final class TabListEntryBuilder implements TabListEntry.Builder {
@@ -45,13 +46,13 @@ public final class TabListEntryBuilder implements TabListEntry.Builder {
 
     @Override
     public TabListEntry.Builder list(TabList list) {
-        this.list = checkNotNull(list, "list");
+        this.list = Objects.requireNonNull(list, "list");
         return this;
     }
 
     @Override
     public TabListEntry.Builder profile(GameProfile profile) {
-        this.profile = checkNotNull(profile, "profile");
+        this.profile = Objects.requireNonNull(profile, "profile");
         return this;
     }
 
@@ -69,7 +70,7 @@ public final class TabListEntryBuilder implements TabListEntry.Builder {
 
     @Override
     public TabListEntry.Builder gameMode(GameMode gameMode) {
-        this.gameMode = checkNotNull(gameMode, "game mode");
+        this.gameMode = Objects.requireNonNull(gameMode, "game mode");
         return this;
     }
 
@@ -84,11 +85,11 @@ public final class TabListEntryBuilder implements TabListEntry.Builder {
 
     @Override
     public TabListEntry.Builder from(TabListEntry value) {
-        this.list = checkNotNull(value.list(), "list");
-        this.profile = checkNotNull(value.profile(), "profile");
+        this.list = Objects.requireNonNull(value.list(), "list");
+        this.profile = Objects.requireNonNull(value.profile(), "profile");
         this.displayName = value.displayName().orElse(null);
         this.latency = value.latency();
-        this.gameMode = checkNotNull(value.gameMode(), "game mode");
+        this.gameMode = Objects.requireNonNull(value.gameMode(), "game mode");
         return this;
     }
 

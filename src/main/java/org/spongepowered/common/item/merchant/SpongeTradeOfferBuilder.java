@@ -25,7 +25,6 @@
 package org.spongepowered.common.item.merchant;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.world.item.trading.MerchantOffer;
@@ -42,6 +41,7 @@ import org.spongepowered.common.accessor.world.item.trading.MerchantOfferAccesso
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> implements TradeOffer.Builder, DataBuilder<TradeOffer> {
@@ -63,7 +63,7 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     @Override
     public TradeOffer.Builder firstBuyingItem(final ItemStack item) {
-        checkNotNull(item, "Buying item cannot be null");
+        Objects.requireNonNull(item, "Buying item cannot be null");
         this.firstItem = item.createSnapshot();
         return this;
     }
@@ -137,7 +137,7 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     @Override
     public TradeOffer.Builder from(final TradeOffer offer) {
-        checkNotNull(offer, "Trade offer cannot be null");
+        Objects.requireNonNull(offer, "Trade offer cannot be null");
         // Assumes the offer's values don't need to be validated
         this.firstItem = offer.firstBuyingItem();
         this.secondItem = offer.secondBuyingItem().orElse(null);

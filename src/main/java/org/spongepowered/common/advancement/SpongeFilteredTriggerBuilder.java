@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.advancement;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
+
+import java.util.Objects;
 
 @SuppressWarnings("unchecked")
 public class SpongeFilteredTriggerBuilder<C extends FilteredTriggerConfiguration> implements FilteredTrigger.Builder<C> {
@@ -37,7 +38,7 @@ public class SpongeFilteredTriggerBuilder<C extends FilteredTriggerConfiguration
 
     @Override
     public <T extends FilteredTriggerConfiguration> FilteredTrigger.Builder<T> config(final T config) {
-        checkNotNull(config, "config");
+        Objects.requireNonNull(config, "config");
         this.config = (C) config;
         return (FilteredTrigger.Builder<T>) this;
     }

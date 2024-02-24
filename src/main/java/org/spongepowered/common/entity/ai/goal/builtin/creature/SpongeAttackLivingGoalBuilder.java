@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.entity.ai.goal.builtin.creature;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.AttackLivingGoal;
 import org.spongepowered.api.entity.living.Creature;
+
+import java.util.Objects;
 
 public final class SpongeAttackLivingGoalBuilder implements AttackLivingGoal.Builder {
 
@@ -66,7 +67,7 @@ public final class SpongeAttackLivingGoalBuilder implements AttackLivingGoal.Bui
 
     @Override
     public AttackLivingGoal build(Creature owner) {
-        Preconditions.checkNotNull(owner);
+        Objects.requireNonNull(owner);
         return (AttackLivingGoal) new MeleeAttackGoal((PathfinderMob) owner, this.speed, this.longMemory);
     }
 }

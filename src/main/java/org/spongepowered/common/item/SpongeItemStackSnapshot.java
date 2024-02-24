@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -79,7 +78,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @SuppressWarnings({"EqualsBetweenInconvertibleTypes", "ConstantConditions"})
     public SpongeItemStackSnapshot(final ItemStack itemStack) {
-        checkNotNull(itemStack);
+        java.util.Objects.requireNonNull(itemStack);
         if (ItemStackUtil.toNative(itemStack) == net.minecraft.world.item.ItemStack.EMPTY) {
             this.itemType = itemStack.type();
             this.quantity = 0;
@@ -132,9 +131,9 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
                                    final int quantity,
                                    final ImmutableList<DataManipulator.Immutable> manipulators,
                                    final @Nullable CompoundTag compound) {
-        this.itemType = checkNotNull(itemType);
+        this.itemType = java.util.Objects.requireNonNull(itemType);
         this.quantity = quantity;
-        this.manipulators = checkNotNull(manipulators);
+        this.manipulators = java.util.Objects.requireNonNull(manipulators);
         this.privateStack = ItemStackUtil.fromNative(new net.minecraft.world.item.ItemStack((Item) this.itemType, this.quantity));
         final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         final ImmutableSet.Builder<org.spongepowered.api.data.value.Value.Immutable<?>> valueBuilder = ImmutableSet.builder();

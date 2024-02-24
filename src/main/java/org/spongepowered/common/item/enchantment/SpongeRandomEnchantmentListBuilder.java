@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.enchantment;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import net.minecraft.Util;
@@ -39,6 +38,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class SpongeRandomEnchantmentListBuilder implements Enchantment.RandomListBuilder {
@@ -90,12 +90,12 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
 
     @Override
     public List<Enchantment> build() throws IllegalStateException {
-        checkNotNull(this.seed, "The random seed cannot be null");
-        checkNotNull(this.option, "The option cannot be null");
-        checkNotNull(this.level, "The level cannot be null");
+        Objects.requireNonNull(this.seed, "The random seed cannot be null");
+        Objects.requireNonNull(this.option, "The option cannot be null");
+        Objects.requireNonNull(this.level, "The level cannot be null");
         List<EnchantmentInstance> enchantments;
         if (this.pool == null || this.pool.isEmpty()) {
-            checkNotNull(this.item, "The item cannot be null");
+            Objects.requireNonNull(this.item, "The item cannot be null");
             this.randomSource.setSeed(this.seed + this.option);
             enchantments = EnchantmentHelper.selectEnchantment(this.randomSource,
                                         ItemStackUtil.toNative(this.item), this.level, this.treasure);

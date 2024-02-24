@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
@@ -34,6 +33,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.level.block.entity.StructureBlockEntityBridge;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
+
+import java.util.Objects;
 
 @Mixin(StructureBlockEntity.class)
 public abstract class StructureBlockEntityMixin extends BlockEntityMixin implements StructureBlockEntityBridge {
@@ -76,7 +77,7 @@ public abstract class StructureBlockEntityMixin extends BlockEntityMixin impleme
     @SuppressWarnings("ConstantConditions")
     @Override
     public void bridge$setMode(final StructureMode mode) {
-        this.mode = (net.minecraft.world.level.block.state.properties.StructureMode) (Object) checkNotNull(mode, "mode");
+        this.mode = (net.minecraft.world.level.block.state.properties.StructureMode) (Object) Objects.requireNonNull(mode, "mode");
     }
 
     @Override
@@ -86,7 +87,7 @@ public abstract class StructureBlockEntityMixin extends BlockEntityMixin impleme
 
     @Override
     public void bridge$setPosition(final Vector3i position) {
-        this.structurePos = VecHelper.toBlockPos(checkNotNull(position, "position"));
+        this.structurePos = VecHelper.toBlockPos(Objects.requireNonNull(position, "position"));
     }
 
     @Override
@@ -106,7 +107,7 @@ public abstract class StructureBlockEntityMixin extends BlockEntityMixin impleme
 
     @Override
     public void bridge$setSize(final Vector3i size) {
-        this.structureSize = VecHelper.toBlockPos(checkNotNull(size, "size"));
+        this.structureSize = VecHelper.toBlockPos(Objects.requireNonNull(size, "size"));
     }
 
 }

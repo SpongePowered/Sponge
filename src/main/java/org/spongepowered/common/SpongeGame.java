@@ -50,6 +50,7 @@ import org.spongepowered.common.util.LocaleCache;
 
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Objects;
 
 @Singleton
 public final class SpongeGame implements Game, SpongeRegistryHolder {
@@ -170,7 +171,7 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
 
     @Override
     public Locale locale(final String locale) {
-        return LocaleCache.getLocale(Preconditions.checkNotNull(locale));
+        return LocaleCache.getLocale(Objects.requireNonNull(locale));
     }
 
     @Override

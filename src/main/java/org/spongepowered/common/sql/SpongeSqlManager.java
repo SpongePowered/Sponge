@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.sql;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -140,7 +139,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
 
     @Override
     public DataSource dataSource(final PluginContainer plugin, final String jdbcConnection) throws SQLException {
-        checkNotNull(this.connectionCache);
+        java.util.Objects.requireNonNull(this.connectionCache);
 
         final String jdbcConnectionString = this.connectionUrlFromAlias(jdbcConnection).orElse(jdbcConnection);
         final ConnectionInfo info = ConnectionInfo.fromUrl(plugin, jdbcConnectionString);

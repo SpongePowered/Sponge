@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.persistence;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.persistence.DataQuery.of;
 
 import com.google.common.collect.Lists;
@@ -53,6 +52,7 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public final class NBTTranslator implements DataTranslator<CompoundTag> {
 
@@ -62,7 +62,7 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
     public static final String BOOLEAN_IDENTIFIER = "$Boolean";
 
     private static CompoundTag containerToCompound(final DataView container) {
-        checkNotNull(container);
+        Objects.requireNonNull(container);
         CompoundTag compound = new CompoundTag();
         NBTTranslator.containerToCompound(container, compound);
         return compound;
@@ -71,8 +71,8 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
     private static void containerToCompound(final DataView container, final CompoundTag compound) {
         // We don't need to get deep values since all nested DataViews will be found
         // from the instance of checks.
-        checkNotNull(container);
-        checkNotNull(compound);
+        Objects.requireNonNull(container);
+        Objects.requireNonNull(compound);
         for (Map.Entry<DataQuery, Object> entry : container.values(false).entrySet()) {
             Object value = entry.getValue();
             String key = entry.getKey().asString('.');
@@ -90,7 +90,7 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static Tag getBaseFromObject(final Object value) {
-        checkNotNull(value);
+        Objects.requireNonNull(value);
         if (value instanceof Boolean) {
             return ByteTag.valueOf((Boolean) value);
         } else if (value instanceof Byte) {
@@ -169,7 +169,7 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
     }
 
     private static DataContainer getViewFromCompound(CompoundTag compound) {
-        checkNotNull(compound);
+        Objects.requireNonNull(compound);
         DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
         NBTTranslator.INSTANCE.addTo(compound, container);
         return container;
@@ -177,9 +177,9 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static void setInternal(Tag base, byte type, DataView view, String key) {
-        checkNotNull(base);
-        checkNotNull(view);
-        checkNotNull(key);
+        Objects.requireNonNull(base);
+        Objects.requireNonNull(view);
+        Objects.requireNonNull(key);
         checkArgument(!key.isEmpty());
         checkArgument(type > Constants.NBT.TAG_END && type <= Constants.NBT.TAG_LONG_ARRAY);
         switch (type) {

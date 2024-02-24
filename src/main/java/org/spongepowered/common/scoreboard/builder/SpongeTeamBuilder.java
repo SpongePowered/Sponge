@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.scoreboard.builder;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
@@ -38,6 +37,7 @@ import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -62,7 +62,7 @@ public final class SpongeTeamBuilder implements Team.Builder {
 
     @Override
     public Team.Builder name(final String name) {
-        this.name = checkNotNull(name, "Name cannot be null!");
+        this.name = Objects.requireNonNull(name, "Name cannot be null!");
         if (this.displayName == null) {
             this.displayName = Component.text(this.name);
         }
@@ -71,26 +71,26 @@ public final class SpongeTeamBuilder implements Team.Builder {
 
     @Override
     public Team.Builder color(final NamedTextColor color) {
-        checkNotNull(color, "Color cannot be null!");
+        Objects.requireNonNull(color, "Color cannot be null!");
         this.color = color;
         return this;
     }
 
     @Override
     public Team.Builder displayName(final Component displayName) throws IllegalArgumentException {
-        this.displayName = checkNotNull(displayName, "DisplayName cannot be null!");
+        this.displayName = Objects.requireNonNull(displayName, "DisplayName cannot be null!");
         return this;
     }
 
     @Override
     public Team.Builder prefix(final Component prefix) {
-        this.prefix = checkNotNull(prefix, "Prefix cannot be null!");
+        this.prefix = Objects.requireNonNull(prefix, "Prefix cannot be null!");
         return this;
     }
 
     @Override
     public Team.Builder suffix(final Component suffix) {
-        this.suffix = checkNotNull(suffix, "Suffix cannot be null!");
+        this.suffix = Objects.requireNonNull(suffix, "Suffix cannot be null!");
         return this;
     }
 
@@ -108,28 +108,28 @@ public final class SpongeTeamBuilder implements Team.Builder {
 
     @Override
     public Team.Builder nameTagVisibility(final Visibility visibility) {
-        checkNotNull(visibility, "Visibility cannot be null!");
+        Objects.requireNonNull(visibility, "Visibility cannot be null!");
         this.nameTagVisibility = () -> visibility;
         return this;
     }
 
     @Override
     public Team.Builder deathTextVisibility(final Visibility visibility) {
-        checkNotNull(visibility, "Visibility cannot be null!");
+        Objects.requireNonNull(visibility, "Visibility cannot be null!");
         this.deathMessageVisibility = () -> visibility;
         return this;
     }
 
     @Override
     public Team.Builder collisionRule(final CollisionRule rule) {
-        checkNotNull(rule, "Collision rule cannot be null!");
+        Objects.requireNonNull(rule, "Collision rule cannot be null!");
         this.collisionRule = () -> rule;
         return this;
     }
 
     @Override
     public Team.Builder members(final Set<Component> members) {
-        this.members = new HashSet<>(checkNotNull(members, "Members cannot be null!"));
+        this.members = new HashSet<>(Objects.requireNonNull(members, "Members cannot be null!"));
         return this;
     }
 

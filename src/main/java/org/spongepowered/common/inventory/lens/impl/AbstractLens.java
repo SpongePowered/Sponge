@@ -25,7 +25,6 @@
 package org.spongepowered.common.inventory.lens.impl;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Key;
@@ -43,6 +42,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class AbstractLens implements Lens {
 
@@ -70,7 +70,7 @@ public abstract class AbstractLens implements Lens {
     public AbstractLens(final int base, final int size, final Class<? extends Inventory> adapterType) {
         checkArgument(base >= 0, "Invalid offset: %s", base);
         checkArgument(size > 0, "Invalid size: %s", size);
-        checkNotNull(adapterType, "adapterType");
+        Objects.requireNonNull(adapterType, "adapterType");
 
         this.base = base;
         this.size = size;
@@ -78,7 +78,7 @@ public abstract class AbstractLens implements Lens {
     }
 
     protected void addChild(final Lens lens, final KeyValuePair... keyValuePairs) {
-        checkNotNull(lens, "Attempted to register a null lens");
+        Objects.requireNonNull(lens, "Attempted to register a null lens");
 
         if (!this.children.contains(lens)) {
             this.children.add(lens);
