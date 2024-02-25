@@ -47,10 +47,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.level.block.entity.AbstractFurnaceBlockEntityAccessor;
 import org.spongepowered.common.bridge.block.entity.AbstractFurnaceBlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.vanilla.accessor.world.level.block.entity.AbstractFurnaceBlockEntityAccessor_Vanilla;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -71,7 +71,7 @@ public abstract class AbstractFurnaceBlockEntityMixin_Vanilla implements Abstrac
             target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/core/NonNullList;I)Z",
             ordinal = 1))
     private static boolean vanillaImpl$checkIfCanSmelt(final RegistryAccess registryAccess, @Nullable final Recipe<?> recipe, final NonNullList<ItemStack> slots, final int maxStackSize, final Level level, final BlockPos entityPos, final BlockState state, final AbstractFurnaceBlockEntity entity) {
-        if (!AbstractFurnaceBlockEntityAccessor.invoker$canBurn(registryAccess, recipe, slots, maxStackSize)) {
+        if (!AbstractFurnaceBlockEntityAccessor_Vanilla.invoker$canBurn(registryAccess, recipe, slots, maxStackSize)) {
             return false;
         }
 
