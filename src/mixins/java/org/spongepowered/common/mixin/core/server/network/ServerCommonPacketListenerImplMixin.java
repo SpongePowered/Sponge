@@ -56,11 +56,6 @@ public abstract class ServerCommonPacketListenerImplMixin {
 
     @Nullable public ResourcePack impl$lastReceivedPack;
 
-    @Inject(method = "handleResourcePackResponse", at = @At("HEAD"))
-    public void impl$handleResourcePackResponse(final ServerboundResourcePackPacket packet, final CallbackInfo callbackInfo) {
-        PacketUtils.ensureRunningOnSameThread(packet, (ServerGamePacketListener) this, this.server);
-    }
-
     @Inject(
             method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V",
             at = @At("HEAD")
