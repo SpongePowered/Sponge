@@ -169,6 +169,14 @@ dependencies {
         exclude(group = "org.jetbrains", module = "annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
+    implementation(libs.adventure.serializerAnsi) {
+        exclude(group = "org.jetbrains", module = "annotations")
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
+    implementation(libs.ansi) {
+        exclude(group = "org.jetbrains", module = "annotations")
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig("org.spongepowered:spongeapi:$apiVersion")
