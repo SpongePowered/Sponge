@@ -308,6 +308,15 @@ dependencies {
     bootstrapLibraries(libs.jline.terminalJansi)
     // Must be on the base ClassLoader since ModLauncher has a dependency on log4j
     bootstrapLibraries(libs.log4j.jpl)
+    bootstrapLibraries(platform(apiLibs.adventure.bom))
+    bootstrapLibraries(libs.adventure.serializerAnsi) {
+        exclude(group = "org.jetbrains", module = "annotations")
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
+    bootstrapLibraries(libs.ansi) {
+        exclude(group = "org.jetbrains", module = "annotations")
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
 
     bootstrapLibraries(platform(apiLibs.configurate.bom))
     bootstrapLibraries(apiLibs.configurate.core) {

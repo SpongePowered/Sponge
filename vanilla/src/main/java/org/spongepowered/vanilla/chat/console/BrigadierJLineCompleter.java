@@ -28,13 +28,17 @@ import com.mojang.brigadier.Message;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.ComponentUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jline.reader.Candidate;
 import org.jline.reader.Completer;
 import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 
 import java.util.List;
@@ -84,11 +88,14 @@ final class BrigadierJLineCompleter<S> implements Completer {
 
     private static Candidate candidateFromSuggestion(final ParseResults<?> result, final Suggestion suggestion) {
         final Message tooltip = suggestion.getTooltip();
+        final Component componentTooltip = tooltip == null
+                ? null
+                : SpongeAdventure.asAdventure(ComponentUtils.fromMessage(tooltip));
         return new Candidate(
             suggestion.getText(),
             suggestion.getText(),
             null,
-            tooltip == null ? null : tooltip.getString(),
+            ANSIComponentSerializer.ansi().serializeOrNull(componentTooltip),
             null,
             null,
             result.getExceptions().isEmpty()
