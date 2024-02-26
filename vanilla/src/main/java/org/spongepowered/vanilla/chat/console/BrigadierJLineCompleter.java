@@ -30,6 +30,7 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer;
+import net.kyori.adventure.translation.GlobalTranslator;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.ComponentUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -42,6 +43,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
@@ -90,7 +92,9 @@ final class BrigadierJLineCompleter<S> implements Completer {
         final Message tooltip = suggestion.getTooltip();
         final Component componentTooltip = tooltip == null
                 ? null
-                : SpongeAdventure.asAdventure(ComponentUtils.fromMessage(tooltip));
+                : GlobalTranslator.render(
+                        SpongeAdventure.asAdventure(ComponentUtils.fromMessage(tooltip)),
+                        Locale.getDefault());
         return new Candidate(
             suggestion.getText(),
             suggestion.getText(),
