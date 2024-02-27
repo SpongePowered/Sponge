@@ -37,7 +37,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -47,15 +46,14 @@ public final class AsyncScheduler extends SpongeScheduler {
     // Locking mechanism
     private final Lock lock = new ReentrantLock();
     private final Condition condition = this.lock.newCondition();
-    private final AtomicBoolean stateChanged = new AtomicBoolean(false);
+    private boolean stateChanged;
     // The dynamic thread pooling executor of asynchronous tasks.
     private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
-                                                                                   .setNameFormat("Sponge-AsyncScheduler-%d")
-                                                                                   .build());
+            .setNameFormat("Sponge-AsyncScheduler-%d")
+            .build());
     private volatile boolean running = true;
 
     // Adjustable timeout for pending Tasks
-    private long minimumTimeout = Long.MAX_VALUE;
     private long lastProcessingTimestamp;
 
     public AsyncScheduler() {
@@ -70,51 +68,48 @@ public final class AsyncScheduler extends SpongeScheduler {
     private void mainLoop() {
         this.lastProcessingTimestamp = System.nanoTime();
         while (this.running) {
-            this.recalibrateMinimumTimeout();
             this.runTick();
         }
     }
 
-    private void recalibrateMinimumTimeout() {
-        this.lock.lock();
-        try {
-            final Set<ScheduledTask> tasks = this.tasks();
-            this.minimumTimeout = Long.MAX_VALUE;
-            final long now = System.nanoTime();
-            for (final ScheduledTask tmpTask : tasks) {
-                final SpongeScheduledTask task = (SpongeScheduledTask) tmpTask;
-                if (task.state() == SpongeScheduledTask.ScheduledTaskState.EXECUTING) {
-                    // bail out for this task. We'll signal when we complete the task.
-                    continue;
-                }
-                // Recalibrate the wait delay for processing tasks before new
-                // tasks cause the scheduler to process pending tasks.
-                if (task.task.delay == 0 && task.task.interval == 0) {
-                    this.minimumTimeout = 0;
-                }
-                // The time since the task last executed or was added to the map
-                final long timeSinceLast = now - task.timestamp();
+    private long recalibrateMinimumTimeout() {
+        long minimumTimeout = Long.MAX_VALUE;
+        final long now = System.nanoTime();
+        boolean present = false;
+        for (final SpongeScheduledTask task : this.activeTasks()) {
+            present = true;
+            if (task.state() == SpongeScheduledTask.ScheduledTaskState.EXECUTING) {
+                // bail out for this task. We'll signal when we complete the task.
+                continue;
+            }
+            // Recalibrate the wait delay for processing tasks before new
+            // tasks cause the scheduler to process pending tasks.
+            if (task.task.delay == 0 && task.task.interval == 0) {
+                minimumTimeout = 0;
+            }
+            // The time since the task last executed or was added to the map
+            final long timeSinceLast = now - task.timestamp();
 
-                if (task.task.delay > 0 && task.state() == SpongeScheduledTask.ScheduledTaskState.WAITING) {
-                    // There is an delay and the task hasn't run yet
-                    this.minimumTimeout = Math.min(task.task.delay - timeSinceLast, this.minimumTimeout);
-                }
-                if (task.task.interval > 0 && task.state().isActive) {
-                    // The task repeats and has run after the initial delay
-                    this.minimumTimeout = Math.min(task.task.interval - timeSinceLast, this.minimumTimeout);
-                }
-                if (this.minimumTimeout <= 0) {
-                    break;
-                }
+            if (task.task.delay > 0 && task.state() == SpongeScheduledTask.ScheduledTaskState.WAITING) {
+                // There is an delay and the task hasn't run yet
+                minimumTimeout = Math.min(task.task.delay - timeSinceLast, minimumTimeout);
             }
-            if (!tasks.isEmpty()) {
-                final long latency = System.nanoTime() - this.lastProcessingTimestamp;
-                this.minimumTimeout -= (latency <= 0) ? 0 : latency;
-                this.minimumTimeout = (this.minimumTimeout < 0) ? 0 : this.minimumTimeout;
+            if (task.task.interval > 0 && task.state().isActive) {
+                // The task repeats and has run after the initial delay
+                minimumTimeout = Math.min(task.task.interval - timeSinceLast, minimumTimeout);
             }
-        } finally {
-            this.lock.unlock();
+            if (minimumTimeout <= 0) {
+                break;
+            }
         }
+        if (present) {
+            final long latency = System.nanoTime() - this.lastProcessingTimestamp;
+            if (latency > 0)
+                minimumTimeout -= latency;
+
+            minimumTimeout = Math.max(0, minimumTimeout);
+        }
+        return minimumTimeout;
     }
 
     @Override
@@ -134,11 +129,11 @@ public final class AsyncScheduler extends SpongeScheduler {
         try {
             // If we have something that has indicated it needs to change,
             // don't await, just continue.
-            if (!this.stateChanged.get()) {
-                this.condition.await(this.minimumTimeout, TimeUnit.NANOSECONDS);
+            if (!this.stateChanged) {
+                this.condition.awaitNanos(this.recalibrateMinimumTimeout());
             }
             // We're processing now. Set to false.
-            this.stateChanged.set(false);
+            this.stateChanged = false;
         } catch (final InterruptedException ignored) {
             // The taskMap has been modified; there is work to do.
             // Continue on without handling the Exception.
@@ -162,7 +157,7 @@ public final class AsyncScheduler extends SpongeScheduler {
         if (task.state() == SpongeScheduledTask.ScheduledTaskState.RUNNING) {
             this.lock.lock();
             try {
-                this.stateChanged.set(true);
+                this.stateChanged = true;
                 this.condition.signalAll();
             } finally {
                 this.lock.unlock();

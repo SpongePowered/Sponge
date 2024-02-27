@@ -38,17 +38,20 @@ import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,8 +65,8 @@ public abstract class SpongeScheduler implements Scheduler {
     private final String tag;
 
     // The simple queue of all pending (and running) ScheduledTasks
-    private final Map<UUID, SpongeScheduledTask> tasks = new ConcurrentHashMap<>();
-    private long sequenceNumber = 0L;
+    private final ConcurrentMap<UUID, SpongeScheduledTask> tasks = new ConcurrentHashMap<>();
+    private final AtomicLong sequenceNumber = new AtomicLong();
 
     SpongeScheduler(final String tag) {
         this.tag = tag;
@@ -170,7 +173,7 @@ public abstract class SpongeScheduler implements Scheduler {
         }
 
         final SpongeScheduledTask scheduledTask = new SpongeScheduledTask(this, (SpongeTask) task,
-                name + "-" + this.tag + "-#" + this.sequenceNumber++);
+                name + "-" + this.tag + "-#" + this.sequenceNumber.getAndIncrement());
         this.addTask(scheduledTask);
         return scheduledTask;
     }
@@ -186,6 +189,10 @@ public abstract class SpongeScheduler implements Scheduler {
         } finally {
             this.finallyPostTick();
         }
+    }
+
+    protected Collection<SpongeScheduledTask> activeTasks() {
+        return Collections.unmodifiableCollection(this.tasks.values());
     }
 
     /**
