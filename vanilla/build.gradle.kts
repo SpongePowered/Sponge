@@ -303,10 +303,6 @@ dependencies {
         exclude(group = "org.jetbrains", module = "annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    libraries(libs.ansi) {
-        exclude(group = "org.jetbrains", module = "annotations")
-        exclude(group = "org.checkerframework", module = "checker-qual")
-    }
 
     // Databases
     libraries(libs.db.hikariCp)
