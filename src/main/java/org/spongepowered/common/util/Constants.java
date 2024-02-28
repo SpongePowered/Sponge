@@ -1061,26 +1061,6 @@ public final class Constants {
             }
         }
 
-        public static List<Enchantment> getItemEnchantments(final net.minecraft.world.item.ItemStack itemStack) {
-            if (!itemStack.isEnchanted()) {
-                return Collections.emptyList();
-            }
-            final List<Enchantment> enchantments = Lists.newArrayList();
-            final ListTag list = itemStack.getEnchantmentTags();
-            for (int i = 0; i < list.size(); i++) {
-                final CompoundTag compound = list.getCompound(i);
-                final short enchantmentId = compound.getShort(Item.ITEM_ENCHANTMENT_ID);
-                final short level = compound.getShort(Item.ITEM_ENCHANTMENT_LEVEL);
-                final Registry<net.minecraft.world.item.enchantment.Enchantment> enchantmentRegistry = SpongeCommon.vanillaRegistry(Registries.ENCHANTMENT);
-                final EnchantmentType enchantmentType = (EnchantmentType) enchantmentRegistry.byId(enchantmentId);
-                if (enchantmentType == null) {
-                    continue;
-                }
-                enchantments.add(new SpongeEnchantment(enchantmentType, level));
-            }
-            return enchantments;
-        }
-
         public static ListTag newDoubleNBTList(final double... numbers) {
             final ListTag nbttaglist = new ListTag();
 
