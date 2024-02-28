@@ -72,6 +72,7 @@ public final class HideFlagsItemStackData {
                                 h.set(DataComponents.UNBREAKABLE, new Unbreakable(v));
                             } // else TODO not supported?
                         });
+        // TODO missing show_in_tooltip (DYED_COLOR, more?)
     }
     // @formatter:on
 

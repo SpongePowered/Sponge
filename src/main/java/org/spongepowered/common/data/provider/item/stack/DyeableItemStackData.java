@@ -24,15 +24,17 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.world.item.DyeableLeatherItem;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.DyedItemColor;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-public final class IDyeableArmorItemStackData {
+public final class DyeableItemStackData {
 
-    private IDyeableArmorItemStackData() {
+    private DyeableItemStackData() {
     }
 
     // @formatter:off
@@ -40,20 +42,10 @@ public final class IDyeableArmorItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.COLOR)
-                        .get(h -> {
-                            final int color = ((DyeableLeatherItem) h.getItem()).getColor(h);
-                            return color == -1 ? null : Color.ofRgb(color);
-                        })
-                        .set((h, v) -> {
-                            final DyeableLeatherItem item = (DyeableLeatherItem) h.getItem();
-                            if (v == null) {
-                                item.clearColor(h);
-                            } else {
-                                item.setColor(h, (((v.red() << 8) + v.green()) << 8) + v.blue());
-                            }
-                        })
-                        .delete(h -> ((DyeableLeatherItem) h.getItem()).clearColor(h))
-                        .supports(h -> h.getItem() instanceof DyeableLeatherItem);
+                        .get(h -> h.has(DataComponents.DYED_COLOR) ? Color.ofRgb(h.get(DataComponents.DYED_COLOR).rgb()) : null)
+                        .set((h, v) -> h.update(DataComponents.DYED_COLOR, new DyedItemColor(0, true), prev -> new DyedItemColor(v.rgb(), prev.showInTooltip())))
+                        .delete(h -> h.set(DataComponents.DYED_COLOR, null))
+                        .supports(h -> h.is(ItemTags.DYEABLE));
     }
     // @formatter:on
 }
