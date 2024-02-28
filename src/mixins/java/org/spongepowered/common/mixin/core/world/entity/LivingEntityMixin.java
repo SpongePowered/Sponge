@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -112,7 +113,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow @Nullable private DamageSource lastDamageSource;
     @Shadow private long lastDamageStamp;
 
-    @Shadow public abstract AttributeInstance shadow$getAttribute(Attribute attribute);
+    @Shadow public abstract AttributeInstance shadow$getAttribute(Holder<Attribute> attribute);
     @Shadow public abstract void shadow$setHealth(float health);
     @Shadow public abstract void shadow$setAbsorptionAmount(float amount);
     @Shadow public abstract void shadow$setItemInHand(InteractionHand hand, @Nullable ItemStack stack);

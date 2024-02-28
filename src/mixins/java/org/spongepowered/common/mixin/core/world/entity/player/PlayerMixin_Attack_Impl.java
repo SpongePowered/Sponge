@@ -150,11 +150,8 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
 
                 final List<DamageFunction> originalFunctions = new ArrayList<>();
 
-                final MobType creatureAttribute = targetEntity instanceof LivingEntity
-                    ? ((LivingEntity) targetEntity).getMobType()
-                    : MobType.UNDEFINED;
                 final List<DamageFunction> enchantmentModifierFunctions = DamageEventUtil
-                    .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), creatureAttribute, attackStrength);
+                    .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), targetEntity.getType(), attackStrength);
                 // This is kept for the post-damage event handling
                 final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream()
                     .map(ModifierFunction::modifier)

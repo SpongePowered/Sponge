@@ -216,7 +216,7 @@ public abstract class MobMixin extends LivingEntityMixin {
         if (targetEntity instanceof LivingEntity) {
             // Sponge Start - Gather modifiers
             originalFunctions.addAll(DamageEventUtil
-                .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), ((LivingEntity) targetEntity).getMobType(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
+                .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), targetEntity.getType(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
             // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
             knockbackModifier += EnchantmentHelper.getKnockbackBonus((Mob) (Object) this);
         }
