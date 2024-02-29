@@ -285,7 +285,7 @@
         "minecraft.world.entity.vehicle.MinecartMixin_API",
         "minecraft.world.entity.vehicle.MinecartSpawnerMixin_API",
         "minecraft.world.entity.vehicle.MinecartTNTMixin_API",
-        "minecraft.world.item.ArmorMaterialsMixin_API",
+        "minecraft.world.item.ArmorMaterialMixin_API",
         "minecraft.world.item.DyeColorMixin_API",
         "minecraft.world.item.FireworkExplosion_ShapeMixin_API",
         "minecraft.world.item.ItemCooldownsMixin_API",

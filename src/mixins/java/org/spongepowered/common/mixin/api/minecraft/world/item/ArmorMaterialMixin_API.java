@@ -22,15 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.item;
+package org.spongepowered.common.mixin.api.minecraft.world.item;
 
-import net.minecraft.world.item.ArmorMaterials;
+import org.spongepowered.api.data.type.ArmorMaterial;
+import org.spongepowered.api.item.recipe.crafting.Ingredient;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(ArmorMaterials.class)
-public interface ArmorMaterialsAccessor {
+import java.util.Optional;
+import java.util.function.Supplier;
 
-    @Accessor("name") String accessor$name();
+@Mixin(net.minecraft.world.item.ArmorMaterial.class)
+@Implements(@Interface(iface = ArmorMaterial.class, prefix = "armorMaterial$"))
+public abstract class ArmorMaterialMixin_API implements ArmorMaterial {
+
+    // @formatter:off
+    @Shadow @Final private Supplier<net.minecraft.world.item.crafting.Ingredient> repairIngredient;
+
+    // @formatter:on
+
+    @Override
+    public Optional<Ingredient> repairIngredient() {
+        final net.minecraft.world.item.crafting.Ingredient repairMaterial = this.repairIngredient.get();
+        return Optional.ofNullable(((Ingredient) (Object) repairMaterial));
+    }
 
 }

@@ -136,7 +136,6 @@
         "world.inventory.ResultSlotAccessor",
         "world.inventory.SlotAccessor",
         "world.item.AdventureModePredicateAccessor",
-        "world.item.ArmorMaterialsAccessor",
         "world.item.DiggerItemAccessor",
         "world.item.ItemCooldowns_CooldownInstanceAccessor",
         "world.item.RecordItemAccessor",

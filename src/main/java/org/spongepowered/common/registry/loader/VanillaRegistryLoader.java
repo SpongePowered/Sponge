@@ -100,7 +100,6 @@ import org.spongepowered.api.scoreboard.criteria.Criteria;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.common.accessor.world.entity.animal.MushroomCow_MushroomTypeAccessor;
 import org.spongepowered.common.accessor.world.entity.boss.enderdragon.phases.EnderDragonPhaseAccessor;
-import org.spongepowered.common.accessor.world.item.ArmorMaterialsAccessor;
 import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.registry.RegistryLoader;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
@@ -145,7 +144,6 @@ public final class VanillaRegistryLoader {
     }
 
     private void loadEnumRegistries() {
-        this.knownName(RegistryTypes.ARMOR_MATERIAL, ArmorMaterials.values(), am -> ((ArmorMaterialsAccessor) (Object) am).accessor$name());
         this.automaticSerializedName(RegistryTypes.ATTACHMENT_SURFACE, AttachFace.values());
         this.automaticSerializedName(RegistryTypes.BAMBOO_LEAVES_TYPE, BambooLeaves.values());
         this.automaticSerializedName(RegistryTypes.BELL_ATTACHMENT_TYPE, BellAttachType.values());
