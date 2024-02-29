@@ -1251,7 +1251,6 @@ public final class Constants {
         public static final boolean DEFAULT_TRACKS_PLAYERS = true;
         public static final boolean DEFAULT_UNLIMITED_TRACKING = false;
         public static final boolean DEFAULT_MAP_LOCKED = false;
-        public static final String MAP_PREFIX = "map_";
         public static final int MAP_SIZE = 16384;
         public static final int MAP_MAX_INDEX = 127;
         public static final int MAP_PIXELS = 128;

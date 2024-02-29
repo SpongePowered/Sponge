@@ -24,18 +24,17 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.world.DefaultWorldKeys;
 import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
 
 
 public final class MapInfoItemStackData {
@@ -50,21 +49,15 @@ public final class MapInfoItemStackData {
 					.create(Keys.MAP_INFO)
 						.supports(item -> item.getItem() instanceof MapItem)
 						.get(itemStack -> {
-							if (itemStack.getTag() == null) {
+							final MapId mapId = itemStack.get(DataComponents.MAP_ID);
+							if (mapId == null) {
 								return null;
 							}
-
-							return (MapInfo) ((Level)Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get())
-									.getMapData(Constants.Map.MAP_PREFIX + itemStack.getTag().getInt(Constants.Map.MAP_ID));
+							final Level level = (Level)Sponge.server().worldManager().world(DefaultWorldKeys.DEFAULT).get();
+							return (MapInfo) level.getMapData(mapId);
 						}) // Nullable
-						.set((itemStack, mapInfo) -> {
-							@Nullable CompoundTag nbt = itemStack.getTag();
-							if (nbt == null) {
-								nbt = new CompoundTag();
-							}
-							nbt.putInt(Constants.Map.MAP_ID, ((MapItemSavedDataBridge)mapInfo).bridge$getMapId());
-							itemStack.setTag(nbt);
-						});
+						.set((itemStack, mapInfo) -> itemStack.set(DataComponents.MAP_ID,
+								new MapId(((MapItemSavedDataBridge)mapInfo).bridge$getMapId())));
 	}
 	// @formatter:on
 }
