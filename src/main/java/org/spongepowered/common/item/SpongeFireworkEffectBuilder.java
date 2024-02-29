@@ -26,6 +26,8 @@ package org.spongepowered.common.item;
 
 
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import net.minecraft.world.item.component.FireworkExplosion;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
@@ -111,7 +113,11 @@ public final class SpongeFireworkEffectBuilder implements FireworkEffect.Builder
 
     @Override
     public FireworkEffect build() {
-        return new SpongeFireworkEffect(this.flicker, this.trail, this.colors, this.fades, this.shape.get());
+        return (FireworkEffect) (Object) new FireworkExplosion(
+                (FireworkExplosion.Shape) (Object) this.shape.get(),
+                new IntArrayList(this.colors.stream().map(Color::rgb).toList()),
+                new IntArrayList(this.fades.stream().map(Color::rgb).toList()),
+                this.trail, this.flicker);
     }
 
     @Override

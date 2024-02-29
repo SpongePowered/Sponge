@@ -22,9 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item;
+package org.spongepowered.common.mixin.api.minecraft.world.item.component;
 
-import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.world.item.component.FireworkExplosion;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -33,73 +34,47 @@ import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.StringJoiner;
 
-public class SpongeFireworkEffect implements FireworkEffect {
+@Mixin(FireworkExplosion.class)
+public abstract class FireworkExplosionMixin_API implements FireworkEffect {
 
-    private final boolean flicker;
-    private final boolean trails;
-    private final ImmutableList<Color> colors;
-    private final ImmutableList<Color> fades;
-    private final FireworkShape shape;
-
-    SpongeFireworkEffect(final boolean flicker, final boolean trails, final Iterable<Color> colors, final Iterable<Color> fades, final FireworkShape shape) {
-        this.flicker = flicker;
-        this.trails = trails;
-        this.colors = ImmutableList.copyOf(colors);
-        this.fades = ImmutableList.copyOf(fades);
-        this.shape = shape;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || this.getClass() != o.getClass()) {
-            return false;
-        }
-        final SpongeFireworkEffect that = (SpongeFireworkEffect) o;
-        return this.flicker == that.flicker &&
-                this.trails == that.trails &&
-                Objects.equals(this.colors, that.colors) &&
-                Objects.equals(this.fades, that.fades) &&
-                Objects.equals(this.shape, that.shape);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(this.flicker, this.trails, this.colors, this.fades, this.shape);
-    }
+    // @formatter:off
+    @Shadow @Final private boolean hasTwinkle;
+    @Shadow @Final private boolean hasTrail;
+    @Shadow @Final private IntList colors;
+    @Shadow @Final private IntList fadeColors;
+    @Shadow @Final private FireworkExplosion.Shape shape;
+    // @formatter:on
 
     @Override
     public boolean flickers() {
-        return this.flicker;
+        return this.hasTwinkle;
     }
 
     @Override
     public boolean hasTrail() {
-        return this.trails;
+        return this.hasTrail;
     }
 
     @Override
     public List<Color> colors() {
-        return this.colors;
+        return this.colors.intStream().mapToObj(Color::ofRgb).toList();
     }
 
     @Override
     public List<Color> fadeColors() {
-        return this.fades;
+        return this.fadeColors.intStream().mapToObj(Color::ofRgb).toList();
     }
 
     @Override
     public FireworkShape shape() {
-        return this.shape;
+        return (FireworkShape) (Object) this.shape;
     }
 
     @Override
@@ -115,19 +90,9 @@ public class SpongeFireworkEffect implements FireworkEffect {
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Item.Fireworks.FIREWORK_SHAPE, resourceKey)
                 .set(Constants.Item.Fireworks.FIREWORK_COLORS, this.colors)
-                .set(Constants.Item.Fireworks.FIREWORK_FADE_COLORS, this.fades)
-                .set(Constants.Item.Fireworks.FIREWORK_TRAILS, this.trails)
-                .set(Constants.Item.Fireworks.FIREWORK_FLICKERS, this.flicker);
+                .set(Constants.Item.Fireworks.FIREWORK_FADE_COLORS, this.fadeColors())
+                .set(Constants.Item.Fireworks.FIREWORK_TRAILS, this.hasTrail)
+                .set(Constants.Item.Fireworks.FIREWORK_FLICKERS, this.hasTwinkle);
     }
 
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", SpongeFireworkEffect.class.getSimpleName() + "[", "]")
-                .add("shape=" + this.shape)
-                .add("trails=" + this.trails)
-                .add("flickers=" + this.flicker)
-                .add("colors=" + this.colors)
-                .add("fades=" + this.fades)
-                .toString();
-    }
 }
