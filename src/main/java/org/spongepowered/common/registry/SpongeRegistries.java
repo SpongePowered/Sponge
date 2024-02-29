@@ -107,7 +107,7 @@ public final class SpongeRegistries {
             return; // Already done
         }
         final RegistryAccess.ImmutableRegistryAccess builtInRegistryAccess = new RegistryAccess.ImmutableRegistryAccess(BuiltInRegistries.REGISTRY.stream().toList());
-        final CommandBuildContext cbCtx = CommandBuildContext.configurable(builtInRegistryAccess, featureFlags);
+        final CommandBuildContext cbCtx = CommandBuildContext.simple(builtInRegistryAccess, featureFlags);
         holder.createFrozenRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, CommandRegistryLoader.clientCompletionKey(cbCtx));
         holder.createFrozenRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, CommandRegistryLoader.valueParameter(cbCtx));
 
