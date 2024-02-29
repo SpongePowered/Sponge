@@ -35,7 +35,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.Connection;
 import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
@@ -94,7 +93,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundMoveVehiclePacketAccessor;
 import org.spongepowered.common.accessor.server.level.ServerPlayerGameModeAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
@@ -120,7 +118,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPacketListenerImplMixin implements ConnectionHolderBridge, ServerGamePacketListenerImplBridge {
+public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPacketListenerImplMixin implements ServerGamePacketListenerImplBridge {
 
     // @formatter:off
     @Shadow public net.minecraft.server.level.ServerPlayer player;
@@ -145,11 +143,6 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         if (packet instanceof ClientboundPlayerInfoUpdatePacket infoPacket) {
             ((SpongeTabList) ((ServerPlayer) this.player).tabList()).updateEntriesOnSend(infoPacket);
         }
-    }
-
-    @Override
-    public Connection bridge$getConnection() {
-        return this.connection;
     }
 
     @Override
