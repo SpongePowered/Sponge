@@ -27,6 +27,8 @@ package org.spongepowered.common.item.recipe.crafting.custom;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -48,6 +50,11 @@ public final class SpongeSpecialCraftingRecipeSerializer<T extends SpongeSpecial
     @Override
     public Codec<T> codec() {
         return this.codec;
+    }
+
+    @Override
+    public StreamCodec<RegistryFriendlyByteBuf, T> streamCodec() {
+        throw new UnsupportedOperationException("custom serializer needs client side support");
     }
 
     public T fromNetwork(FriendlyByteBuf $$0) {
