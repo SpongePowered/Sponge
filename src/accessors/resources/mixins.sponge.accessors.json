@@ -146,6 +146,7 @@
         "world.level.block.AbstractSkullBlockAccessor",
         "world.level.block.BaseFireBlockAccessor",
         "world.level.block.BedBlockAccessor",
+        "world.level.block.CropBlockAccessor",
         "world.level.block.DispenserBlockAccessor",
         "world.level.block.EnderChestBlockAccessor",
         "world.level.block.entity.AbstractFurnaceBlockEntityAccessor",

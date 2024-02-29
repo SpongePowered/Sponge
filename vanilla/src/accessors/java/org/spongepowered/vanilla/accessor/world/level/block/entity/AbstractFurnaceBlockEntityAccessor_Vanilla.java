@@ -22,34 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.block.entity;
+package org.spongepowered.vanilla.accessor.world.level.block.entity;
 
-import net.minecraft.world.Container;
-import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
-public interface AbstractFurnaceBlockEntityAccessor {
+public interface AbstractFurnaceBlockEntityAccessor_Vanilla {
 
-    @Accessor("litTime") int accessor$litTime();
-
-    @Accessor("litTime") void accessor$litTime(final int litTime);
-
-    @Accessor("litDuration") int accessor$litDuration();
-
-    @Accessor("litDuration") void accessor$litDuration(final int litDuration);
-
-    @Accessor("cookingProgress") int accessor$cookingProgress();
-
-    @Accessor("cookingProgress") void accessor$cookingProgress(final int cookingProgress);
-
-    @Accessor("cookingTotalTime") int accessor$cookingTotalTime();
-
-    @Accessor("cookingTotalTime") void accessor$cookingTotalTime(final int cookingTotalTime);
-
-    @Accessor("quickCheck")  RecipeManager.CachedCheck<Container, ? extends AbstractCookingRecipe> accessor$quickCheck();
-
+    @Invoker("canBurn")
+    static boolean invoker$canBurn(final RegistryAccess registryAccess, @Nullable final RecipeHolder<?> var0, final NonNullList<ItemStack> var1, final int var2) {
+        throw new UntransformedInvokerError();
+    }
 }

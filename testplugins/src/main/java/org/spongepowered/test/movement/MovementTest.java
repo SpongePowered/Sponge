@@ -66,6 +66,7 @@ public final class MovementTest implements LoadableModule {
     boolean printMoveEntityEvents = false;
     boolean printRotationEvents = false;
     boolean cancelMovement = false;
+    boolean cancelRotation = false;
     boolean teleportOnMove = false;
     boolean cancelUnnaturalMovement = false;
 
@@ -83,6 +84,7 @@ public final class MovementTest implements LoadableModule {
     public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
 
         final Command.Parameterized toggleAllMovement = Command.builder().executor(this::toggleMovement).build();
+        final Command.Parameterized toggleAllRotation = Command.builder().executor(this::toggleRotation).build();
         final Command.Parameterized toggleUnnaturalMovement = Command.builder().executor(this::toggleUnnatural).build();
         final Command.Parameterized teleportOnMove = Command.builder().executor(this::teleportOnMove).build();
         final Command.Parameterized setPos = Command.builder().addParameter(CommonParameters.POSITION).executor(this::setPos).build();
@@ -90,6 +92,7 @@ public final class MovementTest implements LoadableModule {
 
         event.register(this.plugin, Command.builder()
                 .addChild(toggleAllMovement, "toggleAllMovement")
+                .addChild(toggleAllRotation, "toggleAllRotation")
                 .addChild(toggleUnnaturalMovement, "toggleUnnaturalMovement")
                 .addChild(teleportOnMove, "teleportOnMove")
                 .addChild(setPos, "setpos")
@@ -130,6 +133,13 @@ public final class MovementTest implements LoadableModule {
         return CommandResult.success();
     }
 
+    private CommandResult toggleRotation(CommandContext context) {
+        this.cancelRotation = !this.cancelRotation;
+        final Component newState = Component.text(this.cancelRotation ? "ON" : "OFF", this.cancelRotation ? NamedTextColor.GREEN : NamedTextColor.RED);
+        context.sendMessage(Identity.nil(), Component.text("Cancel Player All Rotation : ").append(newState));
+        return CommandResult.success();
+    }
+
     private CommandResult toggleUnnatural(CommandContext context) {
         this.cancelUnnaturalMovement = !this.cancelUnnaturalMovement;
         final Component newState = Component.text(this.cancelUnnaturalMovement ? "ON" : "OFF", this.cancelUnnaturalMovement ? NamedTextColor.GREEN : NamedTextColor.RED);
@@ -157,6 +167,10 @@ public final class MovementTest implements LoadableModule {
                     pluginLogger.log(Level.INFO, MovementTest.marker, "/ - " + o);
                 }
                 pluginLogger.log(Level.INFO, MovementTest.marker, "/");
+            }
+            if (MovementTest.this.cancelRotation) {
+                event.setCancelled(true);
+                return;
             }
         }
 

@@ -102,6 +102,15 @@ val vanillaLaunch by sourceSets.register("launch") {
         extendsFrom(vanillaAppLaunchConfig.get())
     }
 }
+val vanillaAccessors by sourceSets.register("accessors") {
+    spongeImpl.applyNamedDependencyOnOutput(commonProject, mixins.get(), this, project, this.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(commonProject, launch.get(), this, project, this.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(commonProject, applaunch.get(), this, project, this.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(commonProject, main.get(), this, project, this.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(project, vanillaMain, this, project, this.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(project, vanillaLaunch, this, project, this.implementationConfigurationName)
+}
 val vanillaMixins by sourceSets.register("mixins") {
     // implementation (compile) dependencies
     spongeImpl.applyNamedDependencyOnOutput(commonProject, mixins.get(), this, project, this.implementationConfigurationName)
@@ -111,6 +120,7 @@ val vanillaMixins by sourceSets.register("mixins") {
     spongeImpl.applyNamedDependencyOnOutput(commonProject, main.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, vanillaMain, this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, vanillaLaunch, this, project, this.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(project, vanillaAccessors, this, project, this.implementationConfigurationName)
 }
 val vanillaAppLaunch by sourceSets.register("applaunch") {
     // implementation (compile) dependencies
@@ -125,6 +135,7 @@ val vanillaAppLaunch by sourceSets.register("applaunch") {
     spongeImpl.applyNamedDependencyOnOutput(commonProject, main.get(), this, project, this.runtimeOnlyConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.runtimeOnlyConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, vanillaMain, this, project, this.runtimeOnlyConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(project, vanillaAccessors, this, project, this.runtimeOnlyConfigurationName)
 
     configurations.named(runtimeClasspathConfigurationName) {
         extendsFrom(vanillaLibrariesConfig.get())
@@ -145,7 +156,9 @@ sourceSets.configureEach {
         from(sourceSet.allJava)
     }
 }
-
+val vanillaAccessorsImplementation by configurations.named(vanillaAccessors.implementationConfigurationName) {
+    extendsFrom(vanillaAppLaunchConfig.get())
+}
 val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementationConfigurationName) {
     extendsFrom(vanillaAppLaunchConfig.get())
     extendsFrom(vanillaLibrariesConfig.get())
@@ -253,6 +266,7 @@ dependencies {
     implementation(project(commonProject.path))
 
     mlpatcherConfig.name(project(":modlauncher-patcher"))
+    vanillaAccessorsImplementation(project(commonProject.path))
     vanillaMixinsImplementation(project(commonProject.path))
 
     val installer = vanillaInstallerConfig.name
@@ -410,6 +424,11 @@ tasks {
         manifest.from(vanillaManifest)
         from(vanillaLaunch.output)
     }
+    val vanillaAccessorsJar by registering(Jar::class) {
+        archiveClassifier.set("accessors")
+        manifest.from(vanillaManifest)
+        from(vanillaAccessors.output)
+    }
     val vanillaMixinsJar by registering(Jar::class) {
         archiveClassifier.set("mixins")
         manifest.from(vanillaManifest)
@@ -478,6 +497,7 @@ tasks {
         from(vanillaInstallerJava9.output)
         from(vanillaAppLaunch.output)
         from(vanillaLaunch.output)
+        from(vanillaAccessors.output)
         from(vanillaMixins.output)
         /*dependencies {
             // include(project(":"))
@@ -506,6 +526,7 @@ val shadowJar by tasks.existing
 val vanillaInstallerJar by tasks.existing
 val vanillaAppLaunchJar by tasks.existing
 val vanillaLaunchJar by tasks.existing
+val vanillaAccessorsJar by tasks.existing
 val vanillaMixinsJar by tasks.existing
 
 publishing {
@@ -516,9 +537,11 @@ publishing {
             artifact(vanillaInstallerJar.get())
             artifact(vanillaAppLaunchJar.get())
             artifact(vanillaLaunchJar.get())
+            artifact(vanillaAccessorsJar.get())
             artifact(vanillaMixinsJar.get())
             artifact(tasks["applaunchSourcesJar"])
             artifact(tasks["launchSourcesJar"])
+            artifact(tasks["accessorsSourcesJar"])
             artifact(tasks["mixinsSourcesJar"])
             pom {
                 artifactId = project.name.lowercase()
