@@ -239,8 +239,8 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
 
         final Vector3d originalToPosition = new Vector3d(packetIn.getX(this.player.getX()),
                 packetIn.getY(this.player.getY()), packetIn.getZ(this.player.getZ()));
-        final Vector3d originalToRotation = new Vector3d(packetIn.getYRot(this.player.getYRot()),
-                packetIn.getXRot(this.player.getXRot()), 0);
+        final Vector3d originalToRotation = new Vector3d(packetIn.getXRot(this.player.getXRot()),
+                packetIn.getYRot(this.player.getYRot()), 0);
 
         // common checks and throws are done here.
         final @Nullable Vector3d toPosition;
@@ -277,10 +277,12 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
             // The position is absolute so the momentum will be reset by the client.
             // The rotation is relative so the head movement is still smooth.
             // The client thinks its current rotation is originalToRotation so the new rotation is relative to that.
-            this.player.absMoveTo(fromPosition.x(), fromPosition.y(), fromPosition.z(),
-                    (float) originalToRotation.x(), (float) originalToRotation.y());
+            // The rotation values can be out of "valid" range so set them directly to the same value the client has.
+            this.player.absMoveTo(fromPosition.x(), fromPosition.y(), fromPosition.z());
+            this.player.setXRot((float) originalToRotation.x());
+            this.player.setYRot((float) originalToRotation.y());
             this.shadow$teleport(fromPosition.x(), fromPosition.y(), fromPosition.z(),
-                    (float) toRotation.x(), (float) toRotation.y(),
+                    (float) toRotation.y(), (float) toRotation.x(),
                     EnumSet.of(RelativeMovement.X_ROT, RelativeMovement.Y_ROT));
             ci.cancel();
             return;
@@ -291,10 +293,12 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
             // Notify the client about the new position and new rotation.
             // Both are relatives so the client will keep its momentum.
             // The client thinks its current position is originalToPosition so the new position is relative to that.
-            this.player.absMoveTo(originalToPosition.x(), originalToPosition.y(), originalToPosition.z(),
-                    (float) originalToRotation.x(), (float) originalToRotation.y());
+            // The rotation values can be out of "valid" range so set them directly to the same value the client has.
+            this.player.absMoveTo(originalToPosition.x(), originalToPosition.y(), originalToPosition.z());
+            this.player.setXRot((float) originalToRotation.x());
+            this.player.setYRot((float) originalToRotation.y());
             this.shadow$teleport(toPosition.x(), toPosition.y(), toPosition.z(),
-                    (float) toRotation.x(), (float) toRotation.y(),
+                    (float) toRotation.y(), (float) toRotation.x(),
                     EnumSet.allOf(RelativeMovement.class));
             ci.cancel();
         }
