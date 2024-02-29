@@ -83,12 +83,12 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
             return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }
 
-        if (this.getResultItem($$1).hasTag()) {
-            final ItemStack itemStack = this.getResultItem($$1).copy();
-            CompoundTag compoundnbt = $$0.getItem(0).getTag();
-            if (compoundnbt != null) {
-                final CompoundTag merged = itemStack.getTag().merge(compoundnbt.copy());
-                itemStack.setTag(merged);
+        final ItemStack resultItem = this.getResultItem($$1);
+        if (!resultItem.getComponents().isEmpty()) {
+            final ItemStack itemStack = resultItem.copy();
+            var patch = $$0.getItem(0).getComponentsPatch();
+            if (!patch.isEmpty()) {
+                itemStack.applyComponents(patch);
                 return itemStack;
             }
         }
