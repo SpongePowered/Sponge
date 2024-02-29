@@ -55,12 +55,11 @@ import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -258,11 +257,11 @@ public final class VanillaRegistryLoader {
 
     private static RegistryLoader<FireworkShape> fireworkShape() {
         return RegistryLoader.of(l -> {
-            l.add(FireworkRocketItem.Shape.BURST.getId(), FireworkShapes.BURST, () -> (FireworkShape) (Object) FireworkRocketItem.Shape.BURST);
-            l.add(FireworkRocketItem.Shape.CREEPER.getId(), FireworkShapes.CREEPER, () -> (FireworkShape) (Object) FireworkRocketItem.Shape.CREEPER);
-            l.add(FireworkRocketItem.Shape.LARGE_BALL.getId(), FireworkShapes.LARGE_BALL, () -> (FireworkShape) (Object) FireworkRocketItem.Shape.LARGE_BALL);
-            l.add(FireworkRocketItem.Shape.SMALL_BALL.getId(), FireworkShapes.SMALL_BALL, () -> (FireworkShape) (Object) FireworkRocketItem.Shape.SMALL_BALL);
-            l.add(FireworkRocketItem.Shape.STAR.getId(), FireworkShapes.STAR, () -> (FireworkShape) (Object) FireworkRocketItem.Shape.STAR);
+            l.add(FireworkExplosion.Shape.BURST.getId(), FireworkShapes.BURST, () -> (FireworkShape) (Object) FireworkExplosion.Shape.BURST);
+            l.add(FireworkExplosion.Shape.CREEPER.getId(), FireworkShapes.CREEPER, () -> (FireworkShape) (Object) FireworkExplosion.Shape.CREEPER);
+            l.add(FireworkExplosion.Shape.LARGE_BALL.getId(), FireworkShapes.LARGE_BALL, () -> (FireworkShape) (Object) FireworkExplosion.Shape.LARGE_BALL);
+            l.add(FireworkExplosion.Shape.SMALL_BALL.getId(), FireworkShapes.SMALL_BALL, () -> (FireworkShape) (Object) FireworkExplosion.Shape.SMALL_BALL);
+            l.add(FireworkExplosion.Shape.STAR.getId(), FireworkShapes.STAR, () -> (FireworkShape) (Object) FireworkExplosion.Shape.STAR);
         });
     }
 
