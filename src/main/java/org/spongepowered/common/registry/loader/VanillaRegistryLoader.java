@@ -151,9 +151,9 @@ public final class VanillaRegistryLoader {
         this.automaticSerializedName(RegistryTypes.BELL_ATTACHMENT_TYPE, BellAttachType.values());
         this.manualName(RegistryTypes.ATTRIBUTE_OPERATION, AttributeModifier.Operation.values(), map -> {
             // names come from net.minecraft.world.level.storage.loot.functions.SetAttributesFunction.Modifier#operationFromString
-            map.put(AttributeModifier.Operation.ADDITION, "addition");
-            map.put(AttributeModifier.Operation.MULTIPLY_BASE, "multiply_base");
-            map.put(AttributeModifier.Operation.MULTIPLY_TOTAL, "multiply_total");
+            map.put(AttributeModifier.Operation.ADD_VALUE, "addition");
+            map.put(AttributeModifier.Operation.ADD_MULTIPLIED_BASE, "multiply_base");
+            map.put(AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, "multiply_total");
         });
         this.knownName(RegistryTypes.BOAT_TYPE, Boat.Type.values(), Boat.Type::getName);
         this.automaticSerializedName(RegistryTypes.CHEST_ATTACHMENT_TYPE, ChestType.values());
