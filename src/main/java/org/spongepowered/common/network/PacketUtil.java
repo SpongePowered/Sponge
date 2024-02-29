@@ -75,33 +75,34 @@ public final class PacketUtil {
     }
 
     public static net.minecraft.network.protocol.Packet<?> createPlayPayload(final ResourceKey channel, final ChannelBuf payload, final EngineConnectionSide<?> side) {
-        if (side == EngineConnectionSide.CLIENT) {
-            return new ServerboundCustomPayloadPacket(new CustomPacketPayload() {
-                @Override
-                public void write(FriendlyByteBuf var1) {
-                    var1.writeBytes((FriendlyByteBuf)payload);
-                }
-
-                @Override
-                public ResourceLocation id() {
-                    return (ResourceLocation) (Object) channel;
-                }
-            });
-        } else if (side == EngineConnectionSide.SERVER) {
-            return new ClientboundCustomPayloadPacket(new CustomPacketPayload() {
-                @Override
-                public void write(FriendlyByteBuf var1) {
-                    var1.writeBytes((FriendlyByteBuf)payload);
-                }
-
-                @Override
-                public ResourceLocation id() {
-                    return (ResourceLocation) (Object) channel;
-                }
-            });
-        } else {
+        // TODO fix me
+//        if (side == EngineConnectionSide.CLIENT) {
+//            return new ServerboundCustomPayloadPacket(new CustomPacketPayload() {
+//                @Override
+//                public void write(FriendlyByteBuf var1) {
+//                    var1.writeBytes((FriendlyByteBuf)payload);
+//                }
+//
+//                @Override
+//                public ResourceLocation id() {
+//                    return (ResourceLocation) (Object) channel;
+//                }
+//            });
+//        } else if (side == EngineConnectionSide.SERVER) {
+//            return new ClientboundCustomPayloadPacket(new CustomPacketPayload() {
+//                @Override
+//                public void write(FriendlyByteBuf var1) {
+//                    var1.writeBytes((FriendlyByteBuf)payload);
+//                }
+//
+//                @Override
+//                public ResourceLocation id() {
+//                    return (ResourceLocation) (Object) channel;
+//                }
+//            });
+//        } else {
             throw new UnsupportedOperationException();
-        }
+//        }
     }
 
     // TODO: Use Lmbda instead?

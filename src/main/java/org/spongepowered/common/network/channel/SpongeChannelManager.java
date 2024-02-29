@@ -37,6 +37,10 @@ import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.query.Query;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.channel.Channel;
 import org.spongepowered.api.network.channel.ChannelBuf;
@@ -281,27 +285,12 @@ public final class SpongeChannelManager implements ChannelManager {
     }
 
     public boolean handlePlayPayload(final EngineConnection connection, final CustomPacketPayload payload) {
-        final ResourceKey channel = (ResourceKey) (Object) payload.id();
-        final ChannelBuf buf = this.bufferAllocator.buffer();
-        payload.write((FriendlyByteBuf) buf);
-
-        return this.handlePlayPayload(connection, channel, buf);
-    }
-
-    public boolean handlePlayPayload(final EngineConnection connection, final ServerboundCustomPayloadPacket packet) {
-        final ResourceKey channel = (ResourceKey) (Object) packet.payload().id();
-        final ChannelBuf payload = this.bufferAllocator.buffer();
-        packet.payload().write((FriendlyByteBuf) payload);
-
-        return this.handlePlayPayload(connection, channel, payload);
-    }
-
-    public boolean handlePlayPayload(final EngineConnection connection, final ClientboundCustomPayloadPacket packet) {
-        final ResourceKey channel = (ResourceKey) (Object) packet.payload().id();
-        final ChannelBuf payload = this.bufferAllocator.buffer();
-        packet.payload().write((FriendlyByteBuf) payload);
-
-        return this.handlePlayPayload(connection, channel, payload);
+//        final ResourceKey channel = (ResourceKey) (Object) payload.id();
+//        final ChannelBuf buf = this.bufferAllocator.buffer();
+//        payload.write((FriendlyByteBuf) buf);
+//
+//        return this.handlePlayPayload(connection, channel, buf);
+        return false; // TODO fix me
     }
 
     private void handleRegisterChannel(final EngineConnection connection, final ChannelBuf payload,
