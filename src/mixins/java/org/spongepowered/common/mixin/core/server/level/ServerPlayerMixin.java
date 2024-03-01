@@ -488,7 +488,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Override
     protected final void impl$onChangingDimension(final ServerLevel target) {
-        if (this.shadow$level() == target) {
+        if (this.shadow$level() != target) {
             this.isChangingDimension = true;
         }
     }
@@ -573,7 +573,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         // Sponge Start: teleport here after all data is sent to avoid any potential "stuttering" due to slow packets.
         final net.minecraft.world.phys.Vec3 finalPos = this.shadow$position();
-        this.shadow$moveTo(finalPos.x, finalPos.y, finalPos.z);
+        this.shadow$teleportTo(finalPos.x, finalPos.y, finalPos.z);
+        this.connection.resetPosition();
         // Sponge End
 
         for (final MobEffectInstance effectinstance : this.shadow$getActiveEffects()) {
