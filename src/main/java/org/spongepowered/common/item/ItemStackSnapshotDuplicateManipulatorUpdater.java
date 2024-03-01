@@ -33,14 +33,15 @@ import org.spongepowered.common.util.Constants;
 
 public final class ItemStackSnapshotDuplicateManipulatorUpdater implements DataContentUpdater {
 
+    public static final DataContentUpdater INSTANCE = new ItemStackSnapshotDuplicateManipulatorUpdater();
     @Override
     public int inputVersion() {
-        return Constants.Sponge.ItemStackSnapshot.DUPLICATE_MANIPULATOR_DATA_VERSION;
+        return Constants.ItemStack.Data.DUPLICATE_MANIPULATOR_DATA_VERSION;
     }
 
     @Override
     public int outputVersion() {
-        return Constants.Sponge.ItemStackSnapshot.REMOVED_DUPLICATE_DATA;
+        return Constants.ItemStack.Data.REMOVED_DUPLICATE_DATA;
     }
 
     @Override

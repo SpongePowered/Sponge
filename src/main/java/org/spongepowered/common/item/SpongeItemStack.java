@@ -25,27 +25,41 @@
 package org.spongepowered.common.item;
 
 
+import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.TypedDataComponent;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.JavaOps;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.attribute.type.AttributeType;
@@ -56,8 +70,8 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.data.DataUpdaterDelegate;
 import org.spongepowered.common.data.persistence.NBTTranslator;
-import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.Preconditions;
 
@@ -167,15 +181,15 @@ public final class SpongeItemStack  {
         @Override
         public ItemStack.Builder fromContainer(final DataView container) {
             Objects.requireNonNull(container);
-            if (!container.contains(Constants.ItemStack.TYPE, Constants.ItemStack.COUNT)) {
+            if (!container.contains(Constants.ItemStack.V2.TYPE, Constants.ItemStack.V2.COUNT)) {
                 return this;
             }
             this.reset();
 
-            final int count = container.getInt(Constants.ItemStack.COUNT).get();
+            final int count = container.getInt(Constants.ItemStack.V2.COUNT).get();
             this.quantity(count);
 
-            final ItemType itemType = container.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE, SpongeCommon.game()).get();
+            final ItemType itemType = container.getRegistryValue(Constants.ItemStack.V2.TYPE, RegistryTypes.ITEM_TYPE, SpongeCommon.game()).get();
             this.itemType(itemType);
 
             if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
@@ -184,9 +198,10 @@ public final class SpongeItemStack  {
                     compound.remove(Constants.Sponge.Data.V2.SPONGE_DATA);
                 }
                 if (!compound.isEmpty()) {
-                    this.components = compound;
+                    this.components = net.minecraft.world.item.ItemStack.parse(SpongeCommon.server().registryAccess(), compound).map(
+                            net.minecraft.world.item.ItemStack::getComponents).orElse(DataComponentMap.EMPTY);
                 } else {
-                    this.components = null;
+                    this.components = DataComponentMap.EMPTY;
                 }
             }
             if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
@@ -211,7 +226,8 @@ public final class SpongeItemStack  {
             }
 
             if (snapshot instanceof SpongeItemStackSnapshot) {
-                this.components = ((SpongeItemStackSnapshot) snapshot).getCompound().orElse(null);
+
+                this.components = ((SpongeItemStackSnapshot) snapshot).getComponents();
             }
 
             return this;
@@ -227,11 +243,8 @@ public final class SpongeItemStack  {
             this.itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockTypeKey)));
             this.quantity(1);
             if (blockSnapshot instanceof SpongeBlockSnapshot) {
-                final Optional<CompoundTag> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
-                if (compound.isPresent()) {
-                    this.components = new CompoundTag();
-                    this.components.put(Constants.Item.BLOCK_ENTITY_TAG, compound.get());
-                }
+                ((SpongeBlockSnapshot) blockSnapshot).getCompound().ifPresent(compoundTag ->
+                        this.components = DataComponentMap.builder().set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(compoundTag)).build());
                 // todo probably needs more testing, but this'll do donkey...
             } else { // TODO handle through the API specifically handling the rest of the data stuff
                 //            blockSnapshot.getContainers().forEach(this::itemData);
@@ -263,34 +276,7 @@ public final class SpongeItemStack  {
 
         @Override
         protected Optional<ItemStack> buildContent(final DataView container) throws InvalidDataException {
-            Objects.requireNonNull(container);
-            if (!container.contains(Constants.ItemStack.TYPE, Constants.ItemStack.COUNT)) {
-                return Optional.empty();
-            }
-            final int count = container.getInt(Constants.ItemStack.COUNT).get();
-            final ItemType itemType =
-                container.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE, SpongeCommon.game()).orElseThrow(() -> new IllegalStateException(
-                    "Unable to find item with id: "));
-            final net.minecraft.world.item.ItemStack itemStack = new net.minecraft.world.item.ItemStack((Item) itemType, count);
-            if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-                final CompoundTag compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
-                if (!compound.isEmpty()) {
-                    BuilderImpl.fixEnchantmentData(itemType, compound);
-                    itemStack.setTag(compound);
-                }
-            }
-            if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
-                final List<DataView> views = container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get();
-                //            final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
-                //            final List<Mutable<?, ?>> manipulators = transaction.deserializedManipulators;
-                //            for (final Mutable<?, ?> manipulator : manipulators) {
-                //                ((CustomDataHolderBridge) itemStack).bridge$offerCustom(manipulator, MergeFunction.IGNORE_ALL);
-                //            }
-                //            if (!transaction.failedData.isEmpty()) {
-                //                ((CustomDataHolderBridge) itemStack).bridge$addFailedData(transaction.failedData);
-                //            }
-            }
-            return Optional.of((ItemStack) (Object) itemStack);
+            return SpongeItemStack.createItemStack(container);
         }
 
         @Override
@@ -311,24 +297,13 @@ public final class SpongeItemStack  {
                 return ((ItemStack) (Object) net.minecraft.world.item.ItemStack.EMPTY);
             }
 
-            final ItemStack stack = (ItemStack) (Object) new net.minecraft.world.item.ItemStack((Item) this.type, this.quantity);
-            if (this.components != null && !this.components.isEmpty()) {
-                ((net.minecraft.world.item.ItemStack) (Object) stack).setTag(this.components.copy());
-            }
-            //        if (this.itemDataSet != null) {
-            //            this.itemDataSet.forEach(stack::offer);
-            //        }
+            final net.minecraft.world.item.ItemStack mcStack = new net.minecraft.world.item.ItemStack((Item) this.type, this.quantity);
+            mcStack.applyComponents(this.components);
+            final ItemStack stack = (ItemStack) (Object) mcStack;
 
             if (this.keyValues != null) {
                 this.keyValues.forEach((key, value) -> stack.offer((Key) key, value));
             }
-            if (this.components != null && this.components.contains(Constants.Forge.FORGE_CAPS, Constants.NBT.TAG_COMPOUND)) {
-                final CompoundTag compoundTag = this.components.getCompound(Constants.Forge.FORGE_CAPS);
-                if (compoundTag != null) {
-                    PlatformHooks.INSTANCE.getItemHooks().setCapabilitiesFromSpongeBuilder((net.minecraft.world.item.ItemStack) (Object) stack, compoundTag);
-                }
-            }
-
             return stack;
         }
 
@@ -363,4 +338,73 @@ public final class SpongeItemStack  {
             return (ItemStack) (Object) net.minecraft.world.item.ItemStack.EMPTY;
         }
     }
+
+    private static <T> void fillComponents(DataContainer container, TypedDataComponent<T> component) {
+        final ResourceLocation componentTypeKey = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component.type());
+        final DataResult<Object> value = component.type().codec().encodeStart(JavaOps.INSTANCE, component.value());
+        container.set(DataQuery.of(':', componentTypeKey.toString()), value.result().orElse(null));
+
+    }
+    @NotNull
+    public static DataContainer getDataContainer(final net.minecraft.world.item.ItemStack mcStack) {
+        final ResourceLocation key = BuiltInRegistries.ITEM.getKey(mcStack.getItem());
+        final DataContainer container = DataContainer.createNew()
+                .set(Queries.CONTENT_VERSION, ((ItemStack) (Object) mcStack).contentVersion())
+                .set(Constants.ItemStack.TYPE, key)
+                .set(Constants.ItemStack.COUNT, mcStack.getCount());
+        // Cleanup Old Custom Data
+        SpongeItemStack.cleanupOldCustomData(mcStack);
+        // Serialize all DataComponents...
+        DataContainer components = DataContainer.createNew();
+        mcStack.getComponents().forEach(tdc -> SpongeItemStack.fillComponents(components, tdc));
+        container.set(Constants.ItemStack.COMPONENTS, components);
+        // TODO handle Sponge/Plugin Data, register our own DataComponentTypes?
+        return container;
+    }
+
+    private static void cleanupOldCustomData(final net.minecraft.world.item.ItemStack stack) {
+        final CompoundTag unsafe = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe();
+        unsafe.remove(Constants.Sponge.Data.V2.SPONGE_DATA); // and its V2.CUSTOM_MANIPULATOR_TAG_LIST
+        Constants.NBT.filterSpongeCustomData(unsafe); // FORGE_DATA > V2.SPONGE_DATA also removes it if empty
+    }
+
+    // TODO updater for old (maybe V2?) Constants.Sponge.DATA_MANIPULATORS
+    public static final ImmutableList<DataContentUpdater> STACK_UPDATERS = ImmutableList.of(
+                    ItemStackSnapshotDuplicateManipulatorUpdater.INSTANCE,
+                    ItemStackDataComponentsUpdater.INSTANCE);
+
+    @NotNull
+    public static Optional<ItemStack> createItemStack(final DataView container) {
+        Objects.requireNonNull(container);
+
+        final Integer version = container.getInt(Queries.CONTENT_VERSION).orElse(1);
+        final DataUpdaterDelegate delegate = new DataUpdaterDelegate(STACK_UPDATERS, version, Constants.ItemStack.Data.CURRENT_VERSION);
+        final DataView updatedContainer = delegate.update(container);
+
+        if (!updatedContainer.contains(Constants.ItemStack.TYPE, Constants.ItemStack.COUNT)) {
+            return Optional.empty();
+        }
+
+        final int count = updatedContainer.getInt(Constants.ItemStack.COUNT).get();
+
+        final ItemType itemType = updatedContainer.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE)
+                .orElseThrow(() -> new IllegalStateException("Unable to find item with id: "));
+        final var mcStack = new net.minecraft.world.item.ItemStack((Item) itemType, count);
+        if (!mcStack.isEmpty()) { // ignore components when the stack is empty anyways
+            // TODO v3 Data
+            container.getView(Constants.ItemStack.COMPONENTS).ifPresent(components -> {
+                final CompoundTag compound = NBTTranslator.INSTANCE.translate(components);
+                // TODO check if enchantment-data is still broken
+                // BuilderImpl.fixEnchantmentData(itemType, compound);
+
+                final DataResult<Pair<DataComponentPatch, Tag>> decoded = DataComponentPatch.CODEC.decode(NbtOps.INSTANCE, compound);
+                // TODO handle errors? e.g. missing custom DataComponentType
+                decoded.result().map(Pair::getFirst).ifPresent(mcStack::applyComponents);
+            });
+        }
+        return Optional.of((ItemStack) (Object) mcStack);
+    }
+
+
+
 }

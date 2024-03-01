@@ -29,14 +29,12 @@ import static org.spongepowered.api.data.persistence.DataQuery.of;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Lists;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import jdk.jfr.Percentage;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
@@ -73,20 +71,14 @@ import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.api.data.type.StructureModes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
-import org.spongepowered.api.item.enchantment.Enchantment;
-import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.item.enchantment.SpongeEnchantment;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.net.InetSocketAddress;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -387,13 +379,6 @@ public final class Constants {
 
             public static final int POTION_V2 = 2;
             public static final int CURRENT_VERSION = Potion.POTION_V2;
-        }
-
-        public static final class ItemStackSnapshot {
-
-            public static final int DUPLICATE_MANIPULATOR_DATA_VERSION = 1;
-            public static final int REMOVED_DUPLICATE_DATA = 2;
-            public static final int CURRENT_VERSION = ItemStackSnapshot.REMOVED_DUPLICATE_DATA;
         }
 
         public static final class BlockState {
@@ -1193,13 +1178,29 @@ public final class Constants {
 
     public static final class ItemStack {
 
-        // ItemStacks
-        public static final DataQuery COUNT = of("Count");
-        public static final DataQuery TYPE = of("ItemType");
-        public static final DataQuery DAMAGE_VALUE = of("UnsafeDamage");
-        public static final String ATTRIBUTE_MODIFIERS = "AttributeModifiers";
-        public static final String ATTRIBUTE_NAME = "AttributeName";
-        public static final String ATTRIBUTE_SLOT = "Slot";
+        public static final DataQuery COUNT = of("count");
+        public static final DataQuery TYPE = of("id");
+        public static final DataQuery COMPONENTS = of("components");
+        public static final DataQuery CUSTOM_DATA = of("minecraft:custom_data");
+        public static final DataQuery DAMAGE = of("minecraft:damage");
+
+        @Deprecated
+        public static final class V2 {
+
+            public static final DataQuery DAMAGE_VALUE = of("UnsafeDamage");
+            // ItemStacks
+            public static final DataQuery COUNT = of("Count");
+            public static final DataQuery TYPE = of("ItemType");
+        }
+
+        // Previously only ItemStackSnapshot
+        public static final class Data {
+
+            public static final int DUPLICATE_MANIPULATOR_DATA_VERSION = 1;
+            public static final int REMOVED_DUPLICATE_DATA = 2;
+            public static final int DATA_COMPONENTS = 3;
+            public static final int CURRENT_VERSION = Data.DATA_COMPONENTS;
+        }
     }
 
     public static final class Map {
