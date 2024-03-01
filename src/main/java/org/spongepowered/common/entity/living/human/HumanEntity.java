@@ -272,8 +272,9 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     @Override
-    protected float ridingOffset(Entity $$0) {
-        return Constants.Entity.Player.PLAYER_Y_OFFSET;
+    public Vec3 getVehicleAttachmentPoint(final Entity $$0) {
+        // TODO  Constants.Entity.Player.PLAYER_Y_OFFSET;
+        return super.getVehicleAttachmentPoint($$0);
     }
 
     @Override
