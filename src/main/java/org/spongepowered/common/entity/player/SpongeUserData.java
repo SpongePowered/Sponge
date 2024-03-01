@@ -209,7 +209,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
             this.enderChest = new SpongeUserInventoryEnderchest(this);
             if (this.compound.contains(Constants.Entity.Player.ENDERCHEST_INVENTORY, 9)) {
                 final ListTag nbttaglist1 = this.compound.getList(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
-                this.enderChest.fromTag(nbttaglist1);
+                this.enderChest.fromTag(nbttaglist1, SpongeCommon.server().registryAccess());
             }
         }
         return this;
@@ -243,7 +243,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         this.loadEnderInventory();
 
         compound.put(Constants.Entity.Player.INVENTORY, this.inventory.writeList(new ListTag()));
-        compound.put(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.createTag());
+        compound.put(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.createTag(SpongeCommon.server().registryAccess()));
         compound.putInt(Constants.Entity.Player.SELECTED_ITEM_SLOT, this.inventory.currentItem);
 
         compound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(this.x, this.y, this.z));
