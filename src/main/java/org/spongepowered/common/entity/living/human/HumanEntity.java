@@ -38,6 +38,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -59,12 +60,15 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -120,23 +124,23 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     @Override
-    protected void defineSynchedData() {
+    protected void defineSynchedData(SynchedEntityData.Builder $$0) {
         // LivingEntity
-        this.entityData.define(LivingEntityAccessor.accessor$DATA_LIVING_ENTITY_FLAGS(), (byte) 0);
-        this.entityData.define(LivingEntityAccessor.accessor$DATA_HEALTH_ID(), 1.0F);
-        this.entityData.define(LivingEntityAccessor.accessor$DATA_EFFECT_COLOR_ID(), 0);
-        this.entityData.define(LivingEntityAccessor.accessor$DATA_EFFECT_AMBIENCE_ID(), Boolean.FALSE);
-        this.entityData.define(LivingEntityAccessor.accessor$DATA_ARROW_COUNT_ID(), 0);
-        this.entityData.define(LivingEntityAccessor.accessor$DATA_STINGER_COUNT_ID(), 0);
-        this.entityData.define(LivingEntityAccessor.accessor$SLEEPING_POS_ID(), Optional.empty());
+        $$0.define(LivingEntityAccessor.accessor$DATA_LIVING_ENTITY_FLAGS(), (byte) 0);
+        $$0.define(LivingEntityAccessor.accessor$DATA_HEALTH_ID(), 1.0F);
+        $$0.define(LivingEntityAccessor.accessor$DATA_EFFECT_COLOR_ID(), 0);
+        $$0.define(LivingEntityAccessor.accessor$DATA_EFFECT_AMBIENCE_ID(), Boolean.FALSE);
+        $$0.define(LivingEntityAccessor.accessor$DATA_ARROW_COUNT_ID(), 0);
+        $$0.define(LivingEntityAccessor.accessor$DATA_STINGER_COUNT_ID(), 0);
+        $$0.define(LivingEntityAccessor.accessor$SLEEPING_POS_ID(), Optional.empty());
 
         // Player
-        this.entityData.define(PlayerAccessor.accessor$DATA_PLAYER_ABSORPTION_ID(), 0.0F);
-        this.entityData.define(PlayerAccessor.accessor$DATA_SCORE_ID(), 0);
-        this.entityData.define(PlayerAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), (byte) 0);
-        this.entityData.define(PlayerAccessor.accessor$DATA_PLAYER_MAIN_HAND(), (byte) 1);
-        this.entityData.define(PlayerAccessor.accessor$DATA_SHOULDER_LEFT(), new CompoundTag());
-        this.entityData.define(PlayerAccessor.accessor$DATA_SHOULDER_RIGHT(), new CompoundTag());
+        $$0.define(PlayerAccessor.accessor$DATA_PLAYER_ABSORPTION_ID(), 0.0F);
+        $$0.define(PlayerAccessor.accessor$DATA_SCORE_ID(), 0);
+        $$0.define(PlayerAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), (byte) 0);
+        $$0.define(PlayerAccessor.accessor$DATA_PLAYER_MAIN_HAND(), (byte) 1);
+        $$0.define(PlayerAccessor.accessor$DATA_SHOULDER_LEFT(), new CompoundTag());
+        $$0.define(PlayerAccessor.accessor$DATA_SHOULDER_RIGHT(), new CompoundTag());
     }
 
     @Override
@@ -307,7 +311,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         float f = (float) this.getAttribute(Attributes.ATTACK_DAMAGE).getValue();
         int i = 0;
 
-        f += EnchantmentHelper.getDamageBonus(this.getItemInHand(InteractionHand.MAIN_HAND), this.getMobType());
+        f += EnchantmentHelper.getDamageBonus(this.getItemInHand(InteractionHand.MAIN_HAND), this.getType());
         i += EnchantmentHelper.getKnockbackBonus(this);
 
         final boolean flag = entityIn.hurt(this.damageSources().mobAttack(this), f);
@@ -322,7 +326,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
             final int j = EnchantmentHelper.getFireAspect(this);
 
             if (j > 0) {
-                entityIn.setSecondsOnFire(j * 4);
+                entityIn.igniteForSeconds(j * 4);
             }
 
             this.doEnchantDamageEffects(this, entityIn);
@@ -502,34 +506,18 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
     @Override
     public void performRangedAttack(final LivingEntity target, final float distanceFactor) {
-        // Borrowed from Skeleton
-        final Arrow entitytippedarrow = new Arrow(this.level(), this, new ItemStack(Items.ARROW));
+        final ItemStack itemstack = this.getItemInHand(InteractionHand.OFF_HAND);
+        final Arrow arrow = new Arrow(this.level(), this, itemstack.getItem() instanceof ArrowItem ? itemstack : new ItemStack(Items.ARROW));
         final double d0 = target.getX() - this.getX();
-        final double d1 = target.getBoundingBox().minY + target.getBbHeight() / 3.0F - entitytippedarrow.getY();
+        final double d1 = target.getBoundingBox().minY + target.getBbHeight() / 3.0F - arrow.getY();
         final double d2 = target.getZ() - this.getZ();
         final double d3 = Math.sqrt(d0 * d0 + d2 * d2);
-        entitytippedarrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.level().getDifficulty().getId() * 4);
-        // These names are wrong
-        final int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.PUNCH_ARROWS, this);
-        final int j = EnchantmentHelper.getEnchantmentLevel(Enchantments.FLAMING_ARROWS, this);
-        entitytippedarrow.setBaseDamage(distanceFactor * 2.0F + this.random.nextGaussian() * 0.25D + this.level().getDifficulty().getId() * 0.11F);
+        arrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.level().getDifficulty().getId() * 4);
 
-        if (i > 0) {
-            entitytippedarrow.setBaseDamage(entitytippedarrow.getBaseDamage() + i * 0.5D + 0.5D);
-        }
-
-        if (j > 0) {
-            entitytippedarrow.setKnockback(j);
-        }
-
-        final ItemStack itemstack = this.getItemInHand(InteractionHand.OFF_HAND);
-
-        if (itemstack.getItem() == Items.TIPPED_ARROW) {
-            entitytippedarrow.setEffectsFromItem(itemstack);
-        }
+        arrow.setEnchantmentEffectsFromEntity(this, distanceFactor);
 
         this.playSound(SoundEvents.ARROW_SHOOT, 1.0F, 1.0F / (this.random.nextFloat() * 0.4F + 0.8F));
-        this.level().addFreshEntity(entitytippedarrow);
+        this.level().addFreshEntity(arrow);
     }
 
     @Override
