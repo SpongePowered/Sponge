@@ -334,7 +334,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                 gameType == null ? defaultLevelData.getGameType() : gameType,
                 hardcore == null ? defaultLevelData.isHardcore() : hardcore,
                 difficulty == null ? defaultLevelData.getDifficulty() : difficulty,
-                commands == null ? defaultLevelData.getAllowCommands() : commands,
+                commands == null ? defaultLevelData.isAllowCommands() : commands,
                 new GameRules(),
                 defaultLevelData.getDataConfiguration());
     }
@@ -859,7 +859,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                         levelData.setSpawn(ServerLevel.END_SPAWN_POINT, 0);
                     }
                 } else if (levelData.worldGenOptions().generateBonusChest()) {
-                    final BlockPos pos = new BlockPos(levelData.getXSpawn(), levelData.getYSpawn(), levelData.getZSpawn());
+                    final BlockPos pos = levelData.getSpawnPos();
                     final ConfiguredFeature<?, ?> bonusChestFeature = SpongeCommon.vanillaRegistry(Registries.CONFIGURED_FEATURE).get(MiscOverworldFeatures.BONUS_CHEST);
                     bonusChestFeature.place(world, world.getChunkSource().getGenerator(), world.random, pos);
                 }
@@ -884,7 +884,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         this.server.getPlayerList().addWorldborderListener(world);
 
         if (levelData.getCustomBossEvents() != null) {
-            ((ServerLevelBridge) world).bridge$getBossBarManager().load(levelData.getCustomBossEvents());
+            ((ServerLevelBridge) world).bridge$getBossBarManager().load(levelData.getCustomBossEvents(), world.registryAccess());
         }
 
         return world;
