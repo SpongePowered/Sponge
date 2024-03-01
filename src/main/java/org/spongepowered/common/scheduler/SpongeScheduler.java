@@ -47,13 +47,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class SpongeScheduler implements Scheduler {
-    private static final AtomicInteger TASK_CREATED_COUNTER = new AtomicInteger();
+    private static final AtomicLong TASK_CREATED_COUNTER = new AtomicLong();
 
     private static final int TICK_DURATION_MS = 50;
     static final long TICK_DURATION_NS = TimeUnit.NANOSECONDS
@@ -92,7 +91,7 @@ public abstract class SpongeScheduler implements Scheduler {
                 ? -(timestamp(true) - sp.delay)
                 :  timestamp(false) + sp.delay;
 
-        final UUID uuid = new UUID(number, 0);
+        final UUID uuid = new UUID(number, System.identityHashCode(this));
         final SpongeScheduledTask sc = new SpongeScheduledTask(this,
                 "%s-%s-#%s".formatted(name, this.tag, number), uuid,
                 sp, start,

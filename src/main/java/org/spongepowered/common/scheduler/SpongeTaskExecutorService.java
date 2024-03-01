@@ -26,7 +26,6 @@ package org.spongepowered.common.scheduler;
 
 import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.ScheduledTaskFuture;
 import org.spongepowered.api.scheduler.Task;

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.scheduler;
 
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledTask;
@@ -39,8 +41,6 @@ import java.lang.invoke.VarHandle;
 import java.util.UUID;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
-
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 public class SpongeScheduledTask implements ScheduledTask, DelayedRunnable {
     private final SpongeScheduler scheduler;
