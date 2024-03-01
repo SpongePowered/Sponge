@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.vehicle.VehicleEntity;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartLike;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
@@ -52,7 +52,7 @@ public abstract class VehicleEntityMixin extends EntityMixin {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
             frame.pushCause(source);
-            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.currentCause(), (MinecartLike) this, new ArrayList<>(), 0, amount);
+            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.currentCause(), (Entity) this, new ArrayList<>(), 0, amount);
             SpongeCommon.post(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);

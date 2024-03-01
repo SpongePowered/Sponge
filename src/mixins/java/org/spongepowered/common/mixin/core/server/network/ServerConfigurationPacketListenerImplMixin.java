@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.server.network;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
@@ -41,7 +40,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
-import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 
@@ -51,7 +49,7 @@ import java.util.concurrent.CompletionException;
 
 
 @Mixin(ServerConfigurationPacketListenerImpl.class)
-public abstract class ServerConfigurationPacketListenerImplMixin extends ServerCommonPacketListenerImplMixin implements ConnectionHolderBridge {
+public abstract class ServerConfigurationPacketListenerImplMixin extends ServerCommonPacketListenerImplMixin {
 
     // @formatter:off
     @Shadow @Final private GameProfile gameProfile;
@@ -60,11 +58,6 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
     // @formatter:on
 
     private boolean impl$skipBanService;
-
-    @Override
-    public Connection bridge$getConnection() {
-        return this.connection;
-    }
 
     @Inject(method = "handleConfigurationFinished", cancellable = true, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/util/thread/BlockableEventLoop;)V"))
