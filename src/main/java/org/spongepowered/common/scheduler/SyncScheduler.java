@@ -24,30 +24,35 @@
  */
 package org.spongepowered.common.scheduler;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.DelayQueue;
+
 public abstract class SyncScheduler extends SpongeScheduler {
 
-    // The number of ticks elapsed since this scheduler began.
-    private long counter = 0L;
+    private final DelayQueue<DelayedRunnable> workQueue = new DelayQueue<>();
+    private volatile long timestamp;
 
     SyncScheduler(final String tag) {
         super(tag);
+    }
+
+    @Override
+    protected BlockingQueue<DelayedRunnable> getWorkQueue() {
+        return workQueue;
     }
 
     /**
      * The hook to update the Ticks known by the SyncScheduler.
      */
     public void tick() {
-        this.counter++;
-        this.runTick();
+        this.timestamp = System.nanoTime();
+        for (Runnable task; (task = this.workQueue.poll()) != null; task.run());
     }
 
     @Override
     protected long timestamp(final boolean tickBased) {
         // The task is based on minecraft ticks, so we generate
         // a timestamp based on the elapsed ticks
-        if (tickBased) {
-            return this.counter * SpongeScheduler.TICK_DURATION_NS;
-        }
-        return super.timestamp(false);
+        return tickBased ? this.timestamp : super.timestamp(false);
     }
 }

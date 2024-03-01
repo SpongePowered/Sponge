@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.scheduler;
 
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.ScheduledTaskFuture;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scheduler.TaskExecutorService;
 import org.spongepowered.api.scheduler.TaskFuture;
 
-import java.time.Duration;
 import java.time.temporal.TemporalUnit;
 import java.util.List;
 import java.util.concurrent.AbstractExecutorService;
@@ -102,7 +101,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final FutureTask<T> runnable = new FutureTask<>(command, result);
         final Task task = this.createTask(runnable)
                 .build();
-        return new SpongeScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, this.submitTask(task));
     }
 
     @Override
@@ -110,7 +109,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final FutureTask<T> runnable = new FutureTask<>(command);
         final Task task = this.createTask(runnable)
                 .build();
-        return new SpongeScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, this.submitTask(task));
     }
 
     @Override
@@ -119,7 +118,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
                 .build();
-        return new SpongeScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, this.submitTask(task));
     }
 
     @Override
@@ -128,7 +127,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
                 .build();
-        return new SpongeScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, this.submitTask(task));
     }
 
     @Override
@@ -137,7 +136,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
                 .build();
-        return new SpongeScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, this.submitTask(task));
     }
 
     @Override
@@ -146,7 +145,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
                 .build();
-        return new SpongeScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, this.submitTask(task));
     }
 
     @Override
@@ -156,10 +155,10 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
                 .delay(initialDelay, unit)
                 .interval(period, unit)
                 .build();
-        final SpongeScheduledTask scheduledTask = this.submitTask(task);
+        final DelayedRunnable scheduledTask = this.submitTask(task);
         // A repeatable task needs to be able to cancel itself
         runnable.setTask(scheduledTask);
-        return new SpongeScheduledFuture<>(runnable, scheduledTask, this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, scheduledTask);
     }
 
     @Override
@@ -169,10 +168,10 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
                 .delay(initialDelay, unit)
                 .interval(period, unit)
                 .build();
-        final SpongeScheduledTask scheduledTask = this.submitTask(task);
+        final DelayedRunnable scheduledTask = this.submitTask(task);
         // A repeatable task needs to be able to cancel itself
         runnable.setTask(scheduledTask);
-        return new SpongeScheduledFuture<>(runnable, scheduledTask, this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, scheduledTask);
     }
 
     @Override
@@ -191,20 +190,19 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         return this.taskBuilderProvider.get().execute(command);
     }
 
-    private SpongeScheduledTask submitTask(final Task task) {
+    private DelayedRunnable submitTask(final Task task) {
         return this.scheduler.submit(task);
     }
 
     private static class SpongeScheduledFuture<V> implements org.spongepowered.api.scheduler.ScheduledTaskFuture<V> {
 
         private final FutureTask<V> runnable;
-        private final SpongeScheduledTask task;
-        private final SpongeScheduler scheduler;
+        private final DelayedRunnable task;
 
-        SpongeScheduledFuture(final FutureTask<V> runnable, final SpongeScheduledTask task, final SpongeScheduler scheduler) {
+        SpongeScheduledFuture(final FutureTask<V> runnable,
+                              final DelayedRunnable task) {
             this.runnable = runnable;
             this.task = task;
-            this.scheduler = scheduler;
         }
 
         @Override
@@ -214,38 +212,17 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
 
         @Override
         public boolean isPeriodic() {
-            final Duration interval = this.task.task.interval();
-            return interval.toMillis() > 0;
+            return this.task.isPeriodic();
         }
 
         @Override
         public long getDelay(final TimeUnit unit) {
-            // Since these tasks are scheduled through
-            // SchedulerExecutionService, they are
-            // always nanotime-based, not tick-based.
-            return unit.convert(this.task.nextExecutionTimestamp() - this.scheduler.timestamp(false), TimeUnit.NANOSECONDS);
+            return this.task.getDelay(unit);
         }
 
-        @SuppressWarnings("rawtypes")
         @Override
         public int compareTo(final Delayed other) {
-            // Since delay may return different values for each call,
-            // this check is required to correctly implement Comparable
-            if (other == this) {
-                return 0;
-            }
-
-            // If we are considering other sponge tasks, we can order by
-            // their internal tasks
-            if (other instanceof SpongeScheduledFuture) {
-                final SpongeScheduledTask otherTask = ((SpongeScheduledFuture) other).task;
-                return ComparisonChain.start()
-                        .compare(this.task.nextExecutionTimestamp(), otherTask.nextExecutionTimestamp())
-                        .compare(this.task.uniqueId(), otherTask.uniqueId())
-                        .result();
-            }
-
-            return Long.compare(this.getDelay(TimeUnit.NANOSECONDS), other.getDelay(TimeUnit.NANOSECONDS));
+            return this.task.compareTo(other);
         }
 
         @Override
@@ -255,7 +232,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
 
         @Override
         public boolean cancel(final boolean mayInterruptIfRunning) {
-            this.task.cancel(); //Ensure Sponge is not going to try to run a cancelled task.
+            this.task.cancel(); // Ensure Sponge is not going to try to run a cancelled task.
             return this.runnable.cancel(mayInterruptIfRunning);
         }
 
@@ -264,7 +241,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
             // It might be externally cancelled, the runnable would never
             // run in that case
             return this.runnable.isCancelled() ||
-                    (this.task.state() == SpongeScheduledTask.ScheduledTaskState.CANCELED && !this.runnable.isDone());
+                    (this.task.isCancelled() && !this.runnable.isDone());
         }
 
         @Override

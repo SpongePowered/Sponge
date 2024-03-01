@@ -37,24 +37,21 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public final class SpongeTask implements Task {
+public class SpongeTask implements Task {
 
     private final PluginContainer plugin;
     private final Consumer<ScheduledTask> executor;
 
     final long delay; // nanos
     final long interval; // nanos
-    final boolean tickBasedDelay;
-    final boolean tickBasedInterval;
 
-    SpongeTask(final PluginContainer plugin, final Consumer<ScheduledTask> executor, final long delay,
-            final long interval, final boolean tickBasedDelay, final boolean tickBasedInterval) {
+    SpongeTask(final PluginContainer plugin,
+               final Consumer<ScheduledTask> executor,
+               final long delay, final long interval) {
         this.plugin = plugin;
         this.executor = executor;
         this.delay = delay;
         this.interval = interval;
-        this.tickBasedDelay = tickBasedDelay;
-        this.tickBasedInterval = tickBasedInterval;
     }
 
     @Override
@@ -64,12 +61,12 @@ public final class SpongeTask implements Task {
 
     @Override
     public Duration delay() {
-        return Duration.ofNanos(this.delay);
+        return Duration.ofNanos(Math.abs(this.delay));
     }
 
     @Override
     public Duration interval() {
-        return Duration.ofNanos(this.interval);
+        return Duration.ofNanos(Math.abs(this.interval));
     }
 
     public Consumer<ScheduledTask> executor() {
@@ -92,8 +89,6 @@ public final class SpongeTask implements Task {
 
         private long delay;
         private long interval;
-        private boolean tickBasedDelay;
-        private boolean tickBasedInterval;
 
         @Override
         public Task.Builder execute(final Consumer<ScheduledTask> executor) {
@@ -108,7 +103,6 @@ public final class SpongeTask implements Task {
                 throw new IllegalArgumentException("Delay must be equal to or greater than zero!");
             }
             this.delay = Objects.requireNonNull(unit, "unit").getDuration().toNanos() * delay;
-            this.tickBasedDelay = false;
             return this;
         }
 
@@ -119,7 +113,6 @@ public final class SpongeTask implements Task {
                 throw new IllegalArgumentException("Delay must be equal to or greater than zero!");
             }
             this.delay = Objects.requireNonNull(unit, "unit").toNanos(delay);
-            this.tickBasedDelay = false;
             return this;
         }
 
@@ -129,22 +122,19 @@ public final class SpongeTask implements Task {
             if (delay.ticks() < 0) {
                 throw new IllegalArgumentException("Delay must be equal to or greater than zero!");
             }
-            this.delay = delay.ticks() * SpongeScheduler.TICK_DURATION_NS;
-            this.tickBasedDelay = true;
+            this.delay = -delay.ticks() * SpongeScheduler.TICK_DURATION_NS;
             return this;
         }
 
         @Override
         public Task.Builder delay(final Duration delay) {
             this.delay = Objects.requireNonNull(delay, "delay").toNanos();
-            this.tickBasedDelay = false;
             return this;
         }
 
         @Override
         public Task.Builder interval(final Duration interval) {
             this.interval = Objects.requireNonNull(interval, "interval").toNanos();
-            this.tickBasedInterval = false;
             return this;
         }
 
@@ -154,7 +144,6 @@ public final class SpongeTask implements Task {
                 throw new IllegalArgumentException("Delay must be equal to or greater than zero!");
             }
             this.interval = Objects.requireNonNull(unit, "unit").getDuration().toNanos() * delay;
-            this.tickBasedInterval = false;
             return this;
         }
 
@@ -164,7 +153,6 @@ public final class SpongeTask implements Task {
                 throw new IllegalArgumentException("Interval must be equal to or greater than zero!");
             }
             this.interval = Objects.requireNonNull(unit, "unit").toNanos(interval);
-            this.tickBasedInterval = false;
             return this;
         }
 
@@ -174,8 +162,7 @@ public final class SpongeTask implements Task {
             if (interval.ticks() < 0) {
                 throw new IllegalArgumentException("Interval must be equal to or greater than zero!");
             }
-            this.interval = interval.ticks() * SpongeScheduler.TICK_DURATION_NS;
-            this.tickBasedInterval = true;
+            this.interval = -(interval.ticks() * SpongeScheduler.TICK_DURATION_NS);
             return this;
         }
 
@@ -193,8 +180,6 @@ public final class SpongeTask implements Task {
             this.plugin = task.plugin();
             this.interval = task.interval;
             this.delay = task.delay;
-            this.tickBasedDelay = task.tickBasedDelay;
-            this.tickBasedInterval = task.tickBasedInterval;
             return this;
         }
 
@@ -204,8 +189,6 @@ public final class SpongeTask implements Task {
             this.plugin = null;
             this.interval = 0;
             this.delay = 0;
-            this.tickBasedDelay = false;
-            this.tickBasedInterval = false;
             return this;
         }
 
@@ -214,7 +197,7 @@ public final class SpongeTask implements Task {
             Objects.requireNonNull(this.executor, "executor");
             Objects.requireNonNull(this.plugin, "plugin");
 
-            return new SpongeTask(this.plugin, this.executor, this.delay, this.interval, this.tickBasedDelay, this.tickBasedInterval);
+            return new SpongeTask(this.plugin, this.executor, this.delay, this.interval);
         }
     }
 }
