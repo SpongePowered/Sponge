@@ -75,7 +75,7 @@ public abstract class SynchedEntityDataMixin {
             // Really silly reasons......
             // I don't know, ask Grum....
             if (this.entity != null && this.entity.level() != null && !this.entity.level().isClientSide && !((EntityBridge) this.entity).bridge$isConstructing()) { // We only want to spam the server world ;)
-                final Optional<DataParameterConverter<T>> converter = ((EntityDataAccessorBridge) key).bridge$getDataConverter();
+                final Optional<DataParameterConverter<T>> converter = ((EntityDataAccessorBridge) (Object) key).bridge$getDataConverter();
                 // At this point it is changing
                 if (converter.isPresent()) {
                     // Ok, we have a key ready to use the converter
