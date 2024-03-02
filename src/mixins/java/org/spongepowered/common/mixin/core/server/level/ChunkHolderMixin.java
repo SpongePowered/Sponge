@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
-import com.mojang.datafixers.util.Either;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
+import net.minecraft.server.level.ChunkResult;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.chunk.ChunkEvent;
@@ -77,7 +77,7 @@ abstract class ChunkHolderMixin {
     }
 
     @Inject(method = "getOrScheduleFuture", at = @At("HEAD"), cancellable = true)
-    private void impl$onGetOrScheduleFuture(final ChunkStatus $$0, final ChunkMap chunkMap, final CallbackInfoReturnable<CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> cir) {
+    private void impl$onGetOrScheduleFuture(final ChunkStatus $$0, final ChunkMap chunkMap, final CallbackInfoReturnable<CompletableFuture<ChunkResult<ChunkAccess>>> cir) {
         if (!((ServerLevelBridge) ((ChunkMapAccessor) chunkMap).accessor$level()).bridge$isLoaded()) {
             cir.setReturnValue(ChunkHolder.UNLOADED_CHUNK_FUTURE);
         }
