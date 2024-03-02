@@ -209,7 +209,6 @@ public final class Constants {
         public static final class EntityArchetype {
 
             public static final int BASE_VERSION = 1;
-            public static final String REQUIRES_EXTRA_INITIAL_SPAWN = "RequireInitialSpawn";
             public static final String ENTITY_ID = "Id";
             public static final DataQuery ENTITY_TYPE = of("EntityType");
             public static final DataQuery ENTITY_DATA = of("EntityData");

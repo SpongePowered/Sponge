@@ -32,7 +32,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -147,22 +146,11 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
         compound.put(Constants.Entity.ENTITY_POSITION, pos);
         compound.remove(Constants.Entity.ENTITY_UUID);
 
-        final boolean requiresInitialSpawn;
-        if (compound.contains(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN)) {
-            requiresInitialSpawn = compound.getBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
-            compound.remove(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
-        } else {
-            requiresInitialSpawn = true;
-        }
-
         final @Nullable Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(compound, level, e -> {
             e.moveTo(location.x(), location.y(), location.z());
             if (e instanceof Mob mobentity) {
                 mobentity.yHeadRot = mobentity.getYRot();
                 mobentity.yBodyRot = mobentity.getXRot();
-                if (requiresInitialSpawn) {
-                    mobentity.finalizeSpawn(level, level.getCurrentDifficultyAt(e.blockPosition()), MobSpawnType.COMMAND, null, compound);
-                }
             }
             return e;
         });

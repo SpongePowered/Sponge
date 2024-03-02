@@ -144,7 +144,6 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         }
         this.position = new Vector3d(mcEntity.getX(), mcEntity.getY(), mcEntity.getZ());
         SpongeEntityArchetypeBuilder.stripCompound(compound);
-        compound.putBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN, true);
         this.position = entity.position();
         this.compound = compound;
         return this;
