@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.server.packs.repository;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.server.packs.PackLocationInfo;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackCompatibility;
@@ -39,17 +40,15 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 public abstract class PackMixin_API implements org.spongepowered.api.resource.pack.Pack {
 
     // @formatter:off
-    @Shadow @Final private net.minecraft.network.chat.Component title;
-
+    @Shadow @Final private PackLocationInfo location;
+    @Shadow @Final private Pack.Metadata metadata;
     @Shadow public abstract String shadow$getId();
     @Shadow public abstract PackCompatibility shadow$getCompatibility();
     @Shadow public abstract boolean shadow$isRequired();
     @Shadow public abstract boolean shadow$isFixedPosition();
+    @Shadow public abstract PackResources shadow$open();
     // @formatter:on
 
-    @Shadow public abstract PackResources shadow$open();
-
-    @Shadow @Final private Pack.Info info;
 
     @Override
     public String id() {
@@ -63,12 +62,12 @@ public abstract class PackMixin_API implements org.spongepowered.api.resource.pa
 
     @Override
     public Component title() {
-        return SpongeAdventure.asAdventure(this.title);
+        return SpongeAdventure.asAdventure(this.location.title());
     }
 
     @Override
     public Component description() {
-        return SpongeAdventure.asAdventure(this.info.description());
+        return SpongeAdventure.asAdventure(this.metadata.description());
     }
 
     @Override
