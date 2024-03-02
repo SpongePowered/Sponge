@@ -121,7 +121,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow public abstract int shadow$getUseItemRemainingTicks();
     @Shadow public abstract float shadow$getAbsorptionAmount();
     @Shadow public abstract float shadow$getHealth();
-    @Shadow public abstract boolean shadow$hasEffect(MobEffect potion);
+    @Shadow public abstract boolean shadow$hasEffect(Holder<MobEffect> potion);
     @Shadow public abstract ItemStack shadow$getItemBySlot(EquipmentSlot slotIn);
     @Shadow public abstract ItemStack shadow$getMainHandItem();
     @Shadow public abstract CombatTracker shadow$getCombatTracker();
@@ -219,7 +219,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             // without using our mixin redirects in EntityFallingBlockMixin.
             if ((damageSource.getDirectEntity() instanceof FallingBlock || damageSource.is(DamageTypeTags.DAMAGES_HELMET)) && !helmet.isEmpty()) {
                 helmet.hurtAndBreak((int) (event.baseDamage() * 4.0F + this.random.nextFloat() * event.baseDamage() * 2.0F),
-                        (LivingEntity) (Object) this, (entity) -> entity.broadcastBreakEvent(EquipmentSlot.HEAD)
+                        (LivingEntity) (Object) this, EquipmentSlot.HEAD
                 );
             }
 
