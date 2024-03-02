@@ -24,23 +24,18 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.network.Filterable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.WritableBookContent;
+import net.minecraft.world.item.component.WrittenBookContent;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.NBTCollectors;
 
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Collections;
 
 public final class BookItemStackData {
 
@@ -53,78 +48,73 @@ public final class BookItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.AUTHOR)
                         .get(h -> {
-                            final CompoundTag tag = h.getTag();
-                            if (tag == null) {
+                            final WrittenBookContent content = h.get(DataComponents.WRITTEN_BOOK_CONTENT);
+                            if (content == null) {
                                 return null;
                             }
-                            return LegacyComponentSerializer.legacySection().deserialize(tag.getString(Constants.Item.Book.ITEM_BOOK_AUTHOR));
+                            return LegacyComponentSerializer.legacySection().deserialize(content.author());
                         })
-                        .set((h, v) -> h.addTagElement(Constants.Item.Book.ITEM_BOOK_AUTHOR, StringTag.valueOf(LegacyComponentSerializer.legacySection().serialize(v))))
+                        .set((h, v) -> {
+                            final WrittenBookContent content = h.get(DataComponents.WRITTEN_BOOK_CONTENT);
+                            // TODO handle missing data?
+                            final String author = LegacyComponentSerializer.legacySection().serialize(v);
+                            h.set(DataComponents.WRITTEN_BOOK_CONTENT,
+                                    new WrittenBookContent(content.title(), author, content.generation(), content.pages(), content.resolved()));
+                        })
                         .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.GENERATION)
                         .get(h -> {
-                            final CompoundTag tag = h.getTag();
-                            if (tag == null) {
+                            final WrittenBookContent content = h.get(DataComponents.WRITTEN_BOOK_CONTENT);
+                            if (content == null) {
                                 return null;
                             }
-                            return tag.getInt(Constants.Item.Book.ITEM_BOOK_GENERATION);
+                            return content.generation();
                         })
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.addTagElement(Constants.Item.Book.ITEM_BOOK_GENERATION, IntTag.valueOf(v));
+                            final WrittenBookContent content = h.get(DataComponents.WRITTEN_BOOK_CONTENT);
+                            // TODO handle missing data?
+                            h.set(DataComponents.WRITTEN_BOOK_CONTENT,
+                                    new WrittenBookContent(content.title(), content.author(), v, content.pages(), content.resolved()));
                             return true;
                         })
                         .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.PAGES)
-                        .get(h -> BookItemStackData.get(h, iv -> GsonComponentSerializer.gson().deserialize(iv)))
-                        .setAnd((h, v) -> BookItemStackData.set(h, v, ih -> GsonComponentSerializer.gson().serialize(ih)))
-                        .deleteAnd(BookItemStackData::delete)
+                        .get(h -> {
+                            final WrittenBookContent content = h.get(DataComponents.WRITTEN_BOOK_CONTENT);
+                            if (content == null) {
+                                return null;
+                            }
+                            return content.pages().stream().map(Filterable::raw).map(SpongeAdventure::asAdventure).toList();
+                        })
+                        .set((h, v) -> {
+                            final WrittenBookContent content = h.get(DataComponents.WRITTEN_BOOK_CONTENT);
+                            // TODO handle missing data?
+                            var pages = v.stream().map(SpongeAdventure::asVanilla).map(Filterable::passThrough).toList();
+                            h.set(DataComponents.WRITTEN_BOOK_CONTENT,
+                                    new WrittenBookContent(content.title(), content.author(), content.generation(), pages, content.resolved()));
+                        })
+                        .delete(h -> {
+                            final WrittenBookContent content = h.get(DataComponents.WRITTEN_BOOK_CONTENT);
+                            // TODO handle missing data?
+                            h.set(DataComponents.WRITTEN_BOOK_CONTENT,
+                                    new WrittenBookContent(content.title(), content.author(), content.generation(), Collections.emptyList(), content.resolved()));
+                        })
                         .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.PLAIN_PAGES)
-                        .get(h -> BookItemStackData.get(h, iv -> iv))
-                        .setAnd((h, v) -> BookItemStackData.set(h, v, iv -> iv))
-                        .deleteAnd(BookItemStackData::delete)
+                        .get(h -> {
+                            final WritableBookContent content = h.get(DataComponents.WRITABLE_BOOK_CONTENT);
+                            if (content == null) {
+                                return null;
+                            }
+                            return content.pages().stream().map(Filterable::raw).toList();
+                        })
+                        .set((h, v) -> h.set(DataComponents.WRITABLE_BOOK_CONTENT, new WritableBookContent(v.stream().map(Filterable::passThrough).toList())))
+                        .delete(h -> h.set(DataComponents.WRITABLE_BOOK_CONTENT, new WritableBookContent(Collections.emptyList())))
                         .supports(h -> h.getItem() == Items.WRITABLE_BOOK);
     }
     // @formatter:on
 
-    private static <V> List<V> get(final ItemStack holder, final Function<String, V> predicate) {
-        final CompoundTag tag = holder.getTag();
-        if (tag == null || !tag.contains(Constants.Item.Book.ITEM_BOOK_PAGES)) {
-            return null;
-        }
-        final ListTag list = tag.getList(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_STRING);
-        return list.stream()
-                .map(Tag::getAsString)
-                .map(predicate)
-                .collect(Collectors.toList());
-    }
-
-    private static <V> boolean set(final ItemStack holder, final List<V> value, final Function<V, String> predicate) {
-        final ListTag list = value.stream()
-                .map(predicate)
-                .collect(NBTCollectors.toStringTagList());
-
-        holder.addTagElement(Constants.Item.Book.ITEM_BOOK_PAGES, list);
-        final CompoundTag compound = holder.getOrCreateTag();
-        if (!compound.contains(Constants.Item.Book.ITEM_BOOK_TITLE)) {
-            compound.putString(Constants.Item.Book.ITEM_BOOK_TITLE, Constants.Item.Book.INVALID_TITLE);
-        }
-        if (!compound.contains(Constants.Item.Book.ITEM_BOOK_AUTHOR)) {
-            compound.putString(Constants.Item.Book.ITEM_BOOK_AUTHOR, Constants.Item.Book.INVALID_TITLE);
-        }
-        compound.putBoolean(Constants.Item.Book.ITEM_BOOK_RESOLVED, true);
-        return false;
-    }
-
-    private static boolean delete(final ItemStack holder) {
-        final CompoundTag tag = holder.getTag();
-        if (tag != null && tag.contains(Constants.Item.Book.ITEM_BOOK_PAGES, Constants.NBT.TAG_LIST)) {
-            tag.remove(Constants.Item.Book.ITEM_BOOK_PAGES);
-            return true;
-        }
-        return false;
-    }
 }
