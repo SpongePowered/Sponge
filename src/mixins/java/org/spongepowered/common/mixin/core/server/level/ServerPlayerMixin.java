@@ -578,7 +578,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         // Sponge End
 
         for (final MobEffectInstance effectinstance : this.shadow$getActiveEffects()) {
-            this.connection.send(new ClientboundUpdateMobEffectPacket(this.shadow$getId(), effectinstance));
+            this.connection.send(new ClientboundUpdateMobEffectPacket(this.shadow$getId(), effectinstance, false));
         }
 
         if (isNetherPortal) { // Sponge: only play the sound if we've got a vanilla teleporter that reports a nether portal

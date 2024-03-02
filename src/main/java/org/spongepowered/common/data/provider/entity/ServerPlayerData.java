@@ -162,7 +162,7 @@ public final class ServerPlayerData {
             playerList.sendAllPlayerInfo(h);
             playerList.sendPlayerPermissionLevel(h);
             for(MobEffectInstance $$6 : h.getActiveEffects()) {
-                h.connection.send(new ClientboundUpdateMobEffectPacket(h.getId(), $$6));
+                h.connection.send(new ClientboundUpdateMobEffectPacket(h.getId(), $$6, false));
             }
             h.connection.send(new ClientboundSetExperiencePacket(h.experienceProgress, h.totalExperience, h.experienceLevel));
 
