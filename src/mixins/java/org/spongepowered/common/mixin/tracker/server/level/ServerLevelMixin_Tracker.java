@@ -577,7 +577,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 final CompoundTag nbt = new CompoundTag();
                 // Some mods like OpenComputers assert if attempting to save robot while moving
                 try {
-                    tileEntity.saveWithFullMetadata();
+                    tileEntity.saveWithFullMetadata(tileEntity.getLevel().registryAccess());
                     builder.addUnsafeCompound(nbt);
                 } catch (final Throwable t) {
                     // ignore
