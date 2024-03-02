@@ -36,7 +36,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
@@ -186,7 +185,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                     }
 
                     isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.shadow$onGround() && !this.shadow$onClimbable() && !this.shadow$isInWater() && !this.shadow$hasEffect(
-                        MobEffects.BLINDNESS) && !this.shadow$isPassenger() && targetEntity instanceof LivingEntity;
+                        MobEffects.BLINDNESS.value()) && !this.shadow$isPassenger() && targetEntity instanceof LivingEntity;
                     isCriticalAttack = isCriticalAttack && !this.shadow$isSprinting();
                     final EventHooks.CriticalHitResult criticalResult = PlatformHooks.INSTANCE.getEventHooks().callCriticalHitEvent((net.minecraft.world.entity.player.Player) (Object) this, targetEntity, isCriticalAttack, isCriticalAttack ? 0.5F : 0.0F);
                     isCriticalAttack = criticalResult.criticalHit;
@@ -245,7 +244,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
 
                         if (fireAspectModifier > 0 && !targetEntity.isOnFire()) {
                             litEntityOnFire = true;
-                            targetEntity.setSecondsOnFire(1);
+                            targetEntity.igniteForSeconds(1);
                         }
                     }
 
@@ -378,7 +377,7 @@ public abstract class PlayerMixin_Attack_Impl extends LivingEntityMixin {
                             this.shadow$awardStat(Stats.DAMAGE_DEALT, Math.round(f5 * 10.0F));
 
                             if (fireAspectModifier > 0) {
-                                targetEntity.setSecondsOnFire(fireAspectModifier * 4);
+                                targetEntity.igniteForSeconds(fireAspectModifier * 4);
                             }
 
                             if (this.shadow$level() instanceof ServerWorld && f5 > 2.0F) {
