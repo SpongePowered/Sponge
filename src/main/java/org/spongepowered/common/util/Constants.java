@@ -513,9 +513,6 @@ public final class Constants {
         public static final String ITEM_ORIGINAL_NAME = "SpongeOriginalName";
         public static final String ITEM_ENCHANTMENT_ID = "id";
         public static final String ITEM_ENCHANTMENT_LEVEL = "lvl";
-        public static final String ITEM_BREAKABLE_BLOCKS = "CanDestroy";
-
-        public static final String ITEM_PLACEABLE_BLOCKS = "CanPlaceOn";
         public static final String ITEM_HIDE_FLAGS = "HideFlags";
         public static final String ITEM_UNBREAKABLE = "Unbreakable";
         public static final String CUSTOM_POTION_EFFECTS = "custom_potion_effects";

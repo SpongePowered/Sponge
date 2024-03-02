@@ -24,22 +24,20 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.critereon.BlockPredicate;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.AdventureModePredicate;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.item.AdventureModePredicateAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.NBTCollectors;
-import org.spongepowered.common.util.NBTStreams;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -53,44 +51,36 @@ public final class BlockTypeItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.BREAKABLE_BLOCK_TYPES)
-                        .get(h -> BlockTypeItemStackData.get(h, Constants.Item.ITEM_BREAKABLE_BLOCKS))
-                        .set((h, v) -> BlockTypeItemStackData.set(h, Constants.Item.ITEM_BREAKABLE_BLOCKS, v))
+                        .get(h -> BlockTypeItemStackData.get(h, DataComponents.CAN_BREAK))
+                        .set((h, v) -> BlockTypeItemStackData.set(h, DataComponents.CAN_BREAK, v))
                     .create(Keys.PLACEABLE_BLOCK_TYPES)
-                        .get(h -> BlockTypeItemStackData.get(h, Constants.Item.ITEM_PLACEABLE_BLOCKS))
-                        .set((h, v) -> BlockTypeItemStackData.set(h, Constants.Item.ITEM_PLACEABLE_BLOCKS, v));
+                        .get(h -> BlockTypeItemStackData.get(h, DataComponents.CAN_PLACE_ON))
+                        .set((h, v) -> BlockTypeItemStackData.set(h, DataComponents.CAN_PLACE_ON, v));
     }
     // @formatter:on
 
-    private static Set<BlockType> get(final ItemStack stack, final String nbtKey) {
-        final CompoundTag tag = stack.getTag();
-        if (tag == null) {
-            return null;
+    private static Set<BlockType> get(final ItemStack stack, final DataComponentType<AdventureModePredicate> component) {
+        // TODO change API type to predicates
+        final AdventureModePredicate predicate = stack.get(component);
+        if (predicate != null) {
+            return ((AdventureModePredicateAccessor) predicate).accessor$predicates().stream()
+                    .flatMap(p -> p.blocks().orElse(HolderSet.direct()).stream())
+                    .map(Holder::value).map(BlockType.class::cast)
+                    .collect(Collectors.toSet());
         }
-        final ListTag list = tag.getList(nbtKey, Constants.NBT.TAG_STRING);
-        if (list.isEmpty()) {
-            return null;
-        }
-        final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
-        return NBTStreams.toStrings(list)
-                .map(ResourceLocation::tryParse)
-                .filter(Objects::nonNull)
-                .map(key -> (BlockType) blockRegistry.getOptional(key).orElse(null))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+        return null;
     }
 
-    private static boolean set(final ItemStack stack, final String nbtKey, final Set<? extends BlockType> value) {
+    private static boolean set(final ItemStack stack, final DataComponentType<AdventureModePredicate> component, final Set<? extends BlockType> value) {
         if (value.isEmpty()) {
-            stack.removeTagKey(nbtKey);
+            stack.remove(component);
             return true;
         }
 
-        final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
-        final CompoundTag tag = stack.getOrCreateTag();
-        final ListTag list = value.stream()
-                .map(type -> blockRegistry.getKey((Block) type).toString())
-                .collect(NBTCollectors.toStringTagList());
-        tag.put(nbtKey, list);
+        final AdventureModePredicate prev = stack.get(component);
+        final BlockPredicate blockPredicate = BlockPredicate.Builder.block().of(value.stream().map(Block.class::cast).toList()).build();
+        final AdventureModePredicate predicate = new AdventureModePredicate(List.of(blockPredicate), prev == null || prev.showInTooltip());
+        stack.set(component, predicate);
         return true;
     }
 }
