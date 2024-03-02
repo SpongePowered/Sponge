@@ -30,6 +30,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -137,7 +138,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
             final ItemStack copiedStack = stackIn.copy();
             if (useBlock != Tristate.FALSE && !flag1) { // Sponge check useBlock
                 final AbstractContainerMenu lastOpenContainer = playerIn.containerMenu;
-                final InteractionResult result = blockstate.use(worldIn, playerIn, handIn, blockRaytraceResultIn);
+                final ItemInteractionResult result = blockstate.useItemOn(playerIn.getItemInHand(handIn), worldIn, playerIn, handIn, blockRaytraceResultIn);
                 if (result.consumesAction() && lastOpenContainer != playerIn.containerMenu) {
                     final Vector3i pos = VecHelper.toVector3i(blockRaytraceResultIn.getBlockPos());
                     final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
@@ -152,7 +153,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                 }
                 if (result.consumesAction()) {
                     CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(playerIn, blockpos, copiedStack);
-                    return result;
+                    return result.result();
                 }
             }
 
