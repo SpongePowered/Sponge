@@ -377,24 +377,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ((ServerPlayerBridge) playerIn).bridge$setConnectionMessageToSend(message);
     }
 
-    @Redirect(method = "placeNewPlayer", at = @At(value = "NEW", target = "(IZLjava/util/Set;IIIZZZLnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;)Lnet/minecraft/network/protocol/game/ClientboundLoginPacket;"))
-    private ClientboundLoginPacket impl$usePerWorldViewDistance(
-            final int playerId,
-            final boolean hardcore,
-            final Set levels,
-            final int maxPlayers,
-            final int chunkRadius,
-            final int simulationDistance,
-            final boolean reducedDebugInfo,
-            final boolean showDeathScreen,
-            final boolean limitedCrafting,
-            final CommonPlayerSpawnInfo info,
-            final Connection conn,
-            final net.minecraft.server.level.ServerPlayer player,
-            final CommonListenerCookie clc) {
-        final Integer viewDistance = ((PrimaryLevelDataBridge) player.serverLevel().getLevelData()).bridge$viewDistance().orElse(chunkRadius);
-        return new ClientboundLoginPacket(playerId, hardcore, levels, maxPlayers, viewDistance, simulationDistance, reducedDebugInfo,
-                showDeathScreen, limitedCrafting, info);
+    @Redirect(method = "placeNewPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/server/players/PlayerList;viewDistance:I"))
+    private int impl$usePerWorldViewDistance(final PlayerList instance, final Connection $$0, final net.minecraft.server.level.ServerPlayer $$1, final CommonListenerCookie $$2) {
+        return ((PrimaryLevelDataBridge) $$1.serverLevel().getLevelData()).bridge$viewDistance().orElse( instance.getViewDistance());
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))
