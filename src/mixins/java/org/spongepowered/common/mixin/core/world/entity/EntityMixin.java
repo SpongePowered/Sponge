@@ -29,6 +29,7 @@ import net.minecraft.BlockUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -1205,13 +1206,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Redirect(
-        method = "gameEvent(Lnet/minecraft/world/level/gameevent/GameEvent;Lnet/minecraft/world/entity/Entity;)V",
+        method = "gameEvent(Lnet/minecraft/core/Holder;Lnet/minecraft/world/entity/Entity;)V",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/Level;gameEvent(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/gameevent/GameEvent;Lnet/minecraft/world/phys/Vec3;)V"
+            target = "Lnet/minecraft/world/level/Level;gameEvent(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/Holder;Lnet/minecraft/world/phys/Vec3;)V"
         )
     )
-    private void impl$ignoreGameEventIfVanished(final Level instance, final Entity entity, final GameEvent gameEvent, final Vec3 vec) {
+    private void impl$ignoreGameEventIfVanished(final Level instance, final Entity entity, final Holder<GameEvent> gameEvent, final Vec3 vec) {
         if (entity instanceof VanishableBridge && ((VanishableBridge) entity).bridge$vanishState().triggerVibrations()) {
             instance.gameEvent(entity, gameEvent, vec);
         }
