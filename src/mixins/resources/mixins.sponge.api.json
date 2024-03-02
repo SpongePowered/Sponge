@@ -339,6 +339,7 @@
         "minecraft.world.level.block.RotationMixin_API",
         "minecraft.world.level.block.entity.AbstractFurnaceBlockEntityMixin_API",
         "minecraft.world.level.block.entity.BannerBlockEntityMixin_API",
+        "minecraft.world.level.block.entity.BannerPatternLayers_LayerMixin_API",
         "minecraft.world.level.block.entity.BannerPatternMixin_API",
         "minecraft.world.level.block.entity.BarrelBlockEntityMixin_API",
         "minecraft.world.level.block.entity.BaseContainerBlockEntityMixin_API",

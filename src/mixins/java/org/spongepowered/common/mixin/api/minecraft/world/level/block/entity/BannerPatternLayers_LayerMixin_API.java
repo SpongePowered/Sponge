@@ -22,8 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.meta;
+package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
@@ -32,26 +36,26 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
-public final class SpongePatternLayer implements BannerPatternLayer {
+@Mixin(BannerPatternLayers.Layer.class)
+public abstract class BannerPatternLayers_LayerMixin_API implements BannerPatternLayer {
 
-    private final BannerPatternShape id;
-    private final DyeColor color;
+    @Shadow @Final private Holder<BannerPattern> pattern;
 
-    public SpongePatternLayer(final BannerPatternShape id, final DyeColor color) {
-        this.id = id;
-        this.color = color;
-    }
+    @Shadow @Final private net.minecraft.world.item.DyeColor color;
 
     @Override
     public BannerPatternShape shape() {
-        return this.id;
+        return (BannerPatternShape) (Object) this.pattern.value();
     }
 
     @Override
     public DyeColor color() {
-        return this.color;
+        return (DyeColor) (Object) this.color;
     }
 
     @Override
@@ -61,12 +65,12 @@ public final class SpongePatternLayer implements BannerPatternLayer {
 
     @Override
     public DataContainer toContainer() {
-        final ResourceKey idKey = Sponge.game().registry(RegistryTypes.BANNER_PATTERN_SHAPE).valueKey(this.id);
-        final ResourceKey colorKey = Sponge.game().registry(RegistryTypes.DYE_COLOR).valueKey(this.color);
+        final ResourceKey idKey = (ResourceKey) (Object) BuiltInRegistries.BANNER_PATTERN.getKey(this.pattern.value());
+        final ResourceKey colorKey = Sponge.game().registry(RegistryTypes.DYE_COLOR).valueKey(this.color());
         return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.contentVersion())
-            .set(Constants.TileEntity.Banner.SHAPE, idKey)
-            .set(Constants.TileEntity.Banner.COLOR, colorKey);
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
+                .set(Constants.TileEntity.Banner.SHAPE, idKey)
+                .set(Constants.TileEntity.Banner.COLOR, colorKey);
     }
 
 }
