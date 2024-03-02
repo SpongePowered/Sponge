@@ -54,7 +54,6 @@
         "stats.StatsCounterAccessor",
         "util.datafix.schemas.V100Accessor",
         "world.CompoundContainerAccessor",
-        "world.LockCodeAccessor",
         "world.damagesource.CombatTrackerAccessor",
         "world.entity.AgableMobAccessor",
         "world.entity.AreaEffectCloudAccessor",

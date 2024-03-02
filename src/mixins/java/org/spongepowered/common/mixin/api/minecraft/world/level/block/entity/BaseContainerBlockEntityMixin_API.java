@@ -55,7 +55,7 @@ public abstract class BaseContainerBlockEntityMixin_API extends BlockEntityMixin
     public DataContainer toContainer() {
         final DataContainer container = super.toContainer();
         if (this.lockKey != null) {
-            container.set(Constants.TileEntity.LOCK_CODE, ((LockCodeAccessor) this.lockKey).accessor$key());
+            container.set(Constants.TileEntity.LOCK_CODE, this.lockKey.key());
         }
         final List<DataView> items = Lists.newArrayList();
         for (int i = 0; i < ((Container) this).getContainerSize(); i++) {
