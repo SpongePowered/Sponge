@@ -24,20 +24,15 @@
  */
 package org.spongepowered.common.accessor.world.entity;
 
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AreaEffectCloud;
+import net.minecraft.world.item.alchemy.PotionContents;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
-
-import java.util.List;
 
 @Mixin(AreaEffectCloud.class)
 public interface AreaEffectCloudAccessor {
 
-    @Accessor("effects") List<MobEffectInstance> accessor$effects();
-
-    @Accessor("effects") @Mutable void accessor$effects(final List<MobEffectInstance> effects);
+    @Accessor("potionContents") PotionContents accessor$potionContents();
 
     @Accessor("waitTime") int accessor$waitTime();
 
