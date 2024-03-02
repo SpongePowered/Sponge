@@ -76,7 +76,8 @@ public final class PluginRepositorySource implements RepositorySource {
                 }
             }
 
-            final PluginPackResources packResources = new PluginPackResources(id, pluginContainer, fileSystemSupplier);
+            final PackLocationInfo info = new PackLocationInfo(id, Component.literal(id), PackSource.DEFAULT, Optional.empty());
+            final PluginPackResources packResources = new PluginPackResources(info, pluginContainer, fileSystemSupplier);
             final Pack.ResourcesSupplier packSupplier = new Pack.ResourcesSupplier() {
 
                 @Override
@@ -89,7 +90,6 @@ public final class PluginRepositorySource implements RepositorySource {
                     return packResources;
                 }
             };
-            final PackLocationInfo info = new PackLocationInfo(id, Component.literal(id), PackSource.DEFAULT, Optional.empty());
             final Pack pack = Pack.readMetaAndCreate(info, packSupplier, PackType.SERVER_DATA, PLUGIN_SELECTION_CONFIG);
             ((PackRepositoryBridge_Vanilla) this.repository).bridge$registerResourcePack(pluginContainer, pack);
             callback.accept(pack);
