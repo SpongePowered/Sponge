@@ -144,7 +144,7 @@ public final class ServerPlayerData {
             h.serverLevel().getChunkSource().addEntity(h);
             // Reconnect local player
             h.connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(
-                    h.level().dimensionTypeId(),
+                    h.level().dimensionTypeRegistration(),
                     h.level().dimension(),
                     BiomeManager.obfuscateSeed(h.serverLevel().getSeed()),
                     h.gameMode.getGameModeForPlayer(),

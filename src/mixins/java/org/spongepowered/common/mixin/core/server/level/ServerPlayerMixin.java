@@ -510,7 +510,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     protected final void impl$prepareForPortalTeleport(final ServerLevel currentWorld, final ServerLevel targetWorld) {
         final LevelData levelData = targetWorld.getLevelData();
-        this.connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(targetWorld.dimensionTypeId(), targetWorld.dimension(),
+        this.connection.send(new ClientboundRespawnPacket(new CommonPlayerSpawnInfo(targetWorld.dimensionTypeRegistration(), targetWorld.dimension(),
                 BiomeManager.obfuscateSeed(targetWorld.getSeed()), this.gameMode.getGameModeForPlayer(),
                 this.gameMode.getPreviousGameModeForPlayer(), targetWorld.isDebug(), targetWorld.isFlat(), this.shadow$getLastDeathLocation(), this.shadow$getPortalCooldown()),
                 ClientboundRespawnPacket.KEEP_ALL_DATA));
