@@ -38,7 +38,6 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.world.LockCodeAccessor;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
