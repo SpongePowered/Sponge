@@ -24,16 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.level.chunk;
 
-import com.mojang.datafixers.util.Either;
-import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatusTasks;
+import net.minecraft.world.level.chunk.status.ToFullChunk;
+import net.minecraft.world.level.chunk.status.WorldGenContext;
 import net.minecraft.world.level.levelgen.blending.Blender;
-import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.world.level.chunk.SpongeUnloadedChunkException;
@@ -41,10 +39,9 @@ import org.spongepowered.common.world.level.chunk.SpongeUnloadedChunkException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Function;
 
-@Mixin(ChunkStatus.class)
-public abstract class ChunkStatusMixin {
+@Mixin(ChunkStatusTasks.class)
+public abstract class ChunkStatusTasksMixin {
 
     /**
      * @author aromaa - December 17th, 2023 - 1.19.4
@@ -61,20 +58,19 @@ public abstract class ChunkStatusMixin {
      * See IOWorkerMixin#createOldDataForRegion
      */
     @Overwrite
-    private static CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> lambda$static$6(
-            final ChunkStatus $$0, final Executor $$1, final ServerLevel $$2, final ChunkGenerator $$3, final StructureTemplateManager $$4,
-            final ThreadedLevelLightEngine $$5, final Function<ChunkAccess, CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> $$6,
-            final List<ChunkAccess> $$7, final ChunkAccess $$8) {
-            final WorldGenRegion $$9 = new WorldGenRegion($$2, $$7, $$0, -1);
+    static CompletableFuture<ChunkAccess> generateBiomes(final WorldGenContext $$0, final ChunkStatus $$1, final Executor $$2,
+            final ToFullChunk $$3, final List<ChunkAccess> $$4, final ChunkAccess $$5) {
+        ServerLevel $$6 = $$0.level();
+        WorldGenRegion $$7 = new WorldGenRegion($$6, $$4, $$1, -1);
         try { //Sponge: Add try
-            return $$3.createBiomes($$1, $$2.getChunkSource().randomState(), Blender.of($$9), $$2.structureManager().forWorldGenRegion($$9), $$8)
-                    .thenApply($$0x -> Either.left($$0x));
+            return $$0.generator().createBiomes($$2, $$6.getChunkSource().randomState(), Blender.of($$7), $$6.structureManager().forWorldGenRegion($$7), $$5);
         } catch (final Exception e) { //Sponge start: Add catch
             if (e.getCause() != SpongeUnloadedChunkException.INSTANCE) {
                 throw e;
             }
 
-            return ChunkHolder.UNLOADED_CHUNK_FUTURE;
+            // TODO what to return here? return ChunkHolder.UNLOADED_CHUNK_FUTURE;
+            return null;
         } //Sponge end
     }
 }
