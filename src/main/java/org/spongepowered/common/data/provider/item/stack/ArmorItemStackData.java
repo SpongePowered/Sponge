@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ArmorMaterial;
@@ -43,28 +42,24 @@ public final class ArmorItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.ARMOR_MATERIAL)
                         .get(h -> {
-                            final Item item = h.getItem();
-                            if (item instanceof ArmorItem) {
-                                final net.minecraft.world.item.ArmorMaterial armor = ((ArmorItem) item).getMaterial();
-                                if (armor instanceof org.spongepowered.api.data.type.ArmorMaterial) {
-                                    return (ArmorMaterial) armor;
-                                }
+                            if (h.getItem() instanceof ArmorItem armorItem) {
+                                return (ArmorMaterial) (Object) armorItem.getMaterial().value();
                             }
                             return null;
                         })
                         .supports(h -> h.getItem() instanceof ArmorItem)
                     .create(Keys.DAMAGE_ABSORPTION)
                         .get(h -> {
-                            if (h.getItem() instanceof ArmorItem) {
-                                return (double) ((ArmorItem) h.getItem()).getDefense();
+                            if (h.getItem() instanceof ArmorItem armorItem) {
+                                return (double) armorItem.getDefense();
                             }
                             return null;
                         })
                         .supports(h -> h.getItem() instanceof ArmorItem)
                     .create(Keys.EQUIPMENT_TYPE)
                         .get(h -> {
-                            if (h.getItem() instanceof ArmorItem) {
-                                switch (((ArmorItem) h.getItem()).getEquipmentSlot()) {
+                            if (h.getItem() instanceof ArmorItem armorItem) {
+                                switch (armorItem.getEquipmentSlot()) {
                                     case FEET:
                                         return EquipmentTypes.FEET.get();
                                     case LEGS:
