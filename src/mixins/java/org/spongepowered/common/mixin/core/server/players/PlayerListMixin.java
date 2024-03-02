@@ -38,9 +38,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundDisconnectPacket;
-import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import net.minecraft.network.protocol.game.CommonPlayerSpawnInfo;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -129,7 +127,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -151,12 +148,13 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow @Final private PlayerDataStorage playerIo;
 
     @Shadow public abstract MinecraftServer shadow$getServer();
-    @Shadow @Nullable public abstract CompoundTag shadow$load(net.minecraft.server.level.ServerPlayer playerIn);
+    @Shadow public abstract Optional<CompoundTag> shadow$load(final net.minecraft.server.level.ServerPlayer $$0);
     @Shadow public abstract boolean shadow$canBypassPlayerLimit(com.mojang.authlib.GameProfile param0);
     @Shadow protected abstract boolean shadow$verifyChatTrusted(final PlayerChatMessage $$0);
     @Shadow protected abstract void shadow$broadcastChatMessage(final PlayerChatMessage $$0, final Predicate<net.minecraft.server.level.ServerPlayer> $$1,
         final net.minecraft.server.level.@Nullable ServerPlayer $$2, final ChatType.Bound $$4);
     // @formatter:on
+
 
     private boolean impl$isGameMechanicRespawn = false;
     private boolean impl$isDuringSystemMessageEvent = false;
@@ -248,12 +246,12 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Redirect(method = "placeNewPlayer",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/players/PlayerList;load(Lnet/minecraft/server/level/ServerPlayer;)Lnet/minecraft/nbt/CompoundTag;"
+            target = "Lnet/minecraft/server/players/PlayerList;load(Lnet/minecraft/server/level/ServerPlayer;)Ljava/util/Optional;"
         )
     )
-    private CompoundTag impl$setPlayerDataForNewPlayers(final PlayerList playerList, final net.minecraft.server.level.ServerPlayer playerIn) {
-        final CompoundTag compound = this.shadow$load(playerIn);
-        if (compound == null) {
+    private Optional<CompoundTag> impl$setPlayerDataForNewPlayers(final PlayerList playerList, final net.minecraft.server.level.ServerPlayer playerIn) {
+        final Optional<CompoundTag> compound = this.shadow$load(playerIn);
+        if (compound.isEmpty()) {
             ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().setPlayerInfo(playerIn.getUUID(), Instant.now(), Instant.now());
         }
         return compound;
@@ -628,7 +626,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final Component sender = SpongeAdventure.asAdventure($$4.name());
         final Component target = $$4.targetName() == null ? null : SpongeAdventure.asAdventure($$4.targetName());
         final Registry<ChatType> chatTypeRegistry = SpongeCommon.vanillaRegistry(Registries.CHAT_TYPE);
-        final var chatType = RegistryTypes.CHAT_TYPE.defaultReferenced((org.spongepowered.api.ResourceKey) (Object) chatTypeRegistry.getKey($$4.chatType()));
+        final var chatType = RegistryTypes.CHAT_TYPE.defaultReferenced((org.spongepowered.api.ResourceKey) (Object) chatTypeRegistry.getKey($$4.chatType().value()));
 
         final Predicate<net.minecraft.server.level.ServerPlayer> filter;
         final ChatType.Bound boundChatType;
