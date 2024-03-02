@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.item.component.CustomData;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityArchetype;
-import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 
 public final class SpawnEggItemStackData {
 
@@ -47,14 +46,12 @@ public final class SpawnEggItemStackData {
                     .get(stack -> {
                         final Item item = stack.getItem();
                         final SpawnEggItem eggItem = (SpawnEggItem) item;
-                        final @Nullable CompoundTag tag = stack.getTag();
-                        final EntityType<?> type = eggItem.getType(tag);
-                        final EntityArchetype.Builder builder = EntityArchetype.builder()
-                            .type((org.spongepowered.api.entity.EntityType<?>) type);
-                        if (tag != null && tag.contains(Constants.Item.ENTITY_TAG, Constants.NBT.TAG_COMPOUND)) {
-                            final CompoundTag entityData = tag.getCompound(Constants.Item.ENTITY_TAG);
-                            builder.entityData(NBTTranslator.INSTANCE.translate(entityData));
-                        }
+                        final EntityType<?> type = eggItem.getType(stack);
+                        final var tag = stack.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY).getUnsafe();
+
+                        final EntityArchetype.Builder builder = EntityArchetype.builder().type((org.spongepowered.api.entity.EntityType<?>) type);
+                        ((SpongeEntityArchetypeBuilder)builder).entityData(tag);
+
                         return builder.build();
                     })
             .asImmutable(ItemStack.class)
@@ -63,9 +60,7 @@ public final class SpawnEggItemStackData {
                     .get(stack -> {
                         final Item item = stack.getItem();
                         final SpawnEggItem eggItem = (SpawnEggItem) item;
-                        final @Nullable CompoundTag tag = stack.getTag();
-                        final EntityType<?> type = eggItem.getType(tag);
-                        return (org.spongepowered.api.entity.EntityType) type;
+                        return (org.spongepowered.api.entity.EntityType) eggItem.getType(stack);
                     })
         ;
     }
