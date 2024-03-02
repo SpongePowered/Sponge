@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.item;
 
 import com.google.common.collect.Sets;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.EmptyMapItem;
@@ -33,6 +33,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
@@ -51,7 +52,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector2i;
 
 import java.util.Optional;
@@ -99,9 +99,7 @@ public abstract class EmptyMapItemMixin {
             final int id = ((MapItemSavedDataBridge) optMapInfo.get()).bridge$getMapId();
 
             final ItemStack newMap = new ItemStack(Items.FILLED_MAP, 1);
-            final CompoundTag nbt = newMap.getOrCreateTag();
-            nbt.putInt(Constants.Map.MAP_ID, id);
-
+            newMap.set(DataComponents.MAP_ID, new MapId(id));
             return newMap;
         }
     }
