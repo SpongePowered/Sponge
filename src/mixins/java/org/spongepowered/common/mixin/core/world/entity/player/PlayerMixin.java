@@ -259,11 +259,11 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
      */
     @Redirect(method = "mayUseItemAt",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/item/ItemStack;hasAdventureModePlaceTagForBlock(Lnet/minecraft/core/Registry;Lnet/minecraft/world/level/block/state/pattern/BlockInWorld;)Z"))
-    private boolean impl$callChangeBlockPre(final ItemStack stack, final Registry<Block> registry, final BlockInWorld cachedBlockInfo) {
+            target = "Lnet/minecraft/world/item/ItemStack;canPlaceOnBlockInAdventureMode(Lnet/minecraft/world/level/block/state/pattern/BlockInWorld;)Z"))
+    private boolean impl$callChangeBlockPre(final ItemStack stack, final BlockInWorld cachedBlockInfo) {
         // Lazy evaluation, if the stack isn't placeable anyways, might as well not
         // call the logic.
-        if (!stack.hasAdventureModePlaceTagForBlock(registry, cachedBlockInfo)) {
+        if (!stack.canPlaceOnBlockInAdventureMode(cachedBlockInfo)) {
             return false;
         }
         // If we're going to throw an event, then do it.
