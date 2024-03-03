@@ -199,7 +199,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         final HoverEvent.ShowItem event = HoverEvent.ShowItem.of(
             SpongeAdventure.asAdventure(SpongeCommon.vanillaRegistry(Registries.ITEM).getKey(this.shadow$getItem())),
             this.shadow$getCount(),
-            SpongeAdventure.asBinaryTagHolder(this.shadow$getTag())
+            null // TODO requires adventure change SpongeAdventure.asBinaryTagHolder(this.shadow$getTag())
         );
         return HoverEvent.showItem(Objects.requireNonNull(op, "op").apply(event));
     }
