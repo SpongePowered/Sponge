@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
 import org.spongepowered.common.map.decoration.SpongeMapDecorationType;
 import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
@@ -104,7 +105,7 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
                 .set(Constants.Map.DECORATION_Y, this.y)
                 .set(Constants.Map.DECORATION_ROTATION, (byte) MapUtil.normalizeDecorationOrientation(this.rot));
         if (this.shadow$name() != null) {
-            data.set(Constants.Map.NAME, Component.Serializer.toJson(this.shadow$name()));
+            data.set(Constants.Map.NAME, Component.Serializer.toJson(this.shadow$name(), SpongeCommon.server().registryAccess()));
         }
         return data;
     }
