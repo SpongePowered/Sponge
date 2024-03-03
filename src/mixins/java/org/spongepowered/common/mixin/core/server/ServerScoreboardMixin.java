@@ -203,8 +203,8 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
                             score.owner(),
                             objective.getName(),
                             score.value(),
-                            score.display(),
-                            score.numberFormatOverride());
+                            Optional.ofNullable(score.display()),
+                            Optional.ofNullable(score.numberFormatOverride()));
                     player.connection.send(packetIn);
                 }
             }
