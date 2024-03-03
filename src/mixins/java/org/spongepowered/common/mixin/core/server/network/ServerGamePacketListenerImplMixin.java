@@ -50,6 +50,7 @@ import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.RelativeMovement;
@@ -458,7 +459,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             // TODO is this still needed?
             // Sponge Start - While Vanilla does some strip formatting, it doesn't catch everything. This patches an exploit that allows color
             // signs to be created.
-            newLines.add(Component.text(SharedConstants.filterText(line.filtered())));
+            newLines.add(Component.text(StringUtil.filterText(line.filtered())));
         }
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
