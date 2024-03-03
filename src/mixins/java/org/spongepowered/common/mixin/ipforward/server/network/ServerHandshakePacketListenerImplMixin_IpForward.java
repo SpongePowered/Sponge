@@ -33,6 +33,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.handshake.ClientIntent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
+import net.minecraft.network.protocol.login.LoginProtocols;
 import net.minecraft.server.network.ServerHandshakePacketListenerImpl;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -73,7 +74,7 @@ public abstract class ServerHandshakePacketListenerImplMixin_IpForward {
                         ServerHandshakePacketListenerImplMixin_IpForward.ipForward$GSON.fromJson(split[3], Property[].class));
                 }
             } else {
-                this.connection.setClientboundProtocolAfterHandshake(ClientIntent.LOGIN);
+                this.connection.setupOutboundProtocol(LoginProtocols.CLIENTBOUND);
                 final Component error = Component.literal("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!")
                             .withStyle(ChatFormatting.RED);
                 this.connection.send(new ClientboundLoginDisconnectPacket(error));
