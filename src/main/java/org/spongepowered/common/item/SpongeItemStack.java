@@ -37,7 +37,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.JavaOps;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -391,20 +390,20 @@ public final class SpongeItemStack  {
                 .orElseThrow(() -> new IllegalStateException("Unable to find item with id: "));
         final var mcStack = new net.minecraft.world.item.ItemStack((Item) itemType, count);
         if (!mcStack.isEmpty()) { // ignore components when the stack is empty anyways
-            // TODO v3 Data
-            container.getView(Constants.ItemStack.COMPONENTS).ifPresent(components -> {
-                final CompoundTag compound = NBTTranslator.INSTANCE.translate(components);
-                // TODO check if enchantment-data is still broken
-                // BuilderImpl.fixEnchantmentData(itemType, compound);
-
-                final DataResult<Pair<DataComponentPatch, Tag>> decoded = DataComponentPatch.CODEC.decode(NbtOps.INSTANCE, compound);
-                // TODO handle errors? e.g. missing custom DataComponentType
-                decoded.result().map(Pair::getFirst).ifPresent(mcStack::applyComponents);
-            });
+            mcStack.applyComponents(SpongeItemStack.patchFromData(container));
         }
         return Optional.of((ItemStack) (Object) mcStack);
     }
 
+    public static DataComponentPatch patchFromData(final DataView container) {
+        // TODO update data?
+        return container.getView(Constants.ItemStack.COMPONENTS).flatMap(components -> {
+            final CompoundTag compound = NBTTranslator.INSTANCE.translate(components);
+            // TODO check if enchantment-data is still broken
+            // BuilderImpl.fixEnchantmentData(itemType, compound);
+            return DataComponentPatch.CODEC.decode(NbtOps.INSTANCE, compound).result().map(Pair::getFirst);
+        }).orElse(DataComponentPatch.EMPTY);
+    }
 
 
 }

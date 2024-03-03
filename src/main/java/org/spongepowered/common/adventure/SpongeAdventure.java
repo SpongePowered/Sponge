@@ -64,6 +64,7 @@ import net.kyori.adventure.util.TriState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -734,12 +735,13 @@ public final class SpongeAdventure {
         }
     }
 
-    public static @Nullable BinaryTagHolder asBinaryTagHolder(final @Nullable CompoundTag tag) {
-        if (tag == null) {
+    public static @Nullable BinaryTagHolder asBinaryTagHolder(final DataComponentMap components) {
+        if (components == null) {
             return null;
         }
         try {
-            return BinaryTagHolder.encode(tag, SpongeAdventure.NBT_CODEC);
+            // TODO requires Adventure Change
+            return BinaryTagHolder.encode(null, SpongeAdventure.NBT_CODEC);
         } catch (final IOException e) {
             return null;
         }

@@ -44,6 +44,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
@@ -283,9 +284,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public HoverEvent<HoverEvent.ShowItem> asHoverEvent(final UnaryOperator<HoverEvent.ShowItem> op) {
         final ResourceKey resourceKey = Sponge.game().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
-        // TODO requires adventure change
-//        final CompoundTag tag = this.getComponents().orElse(null);
-//        return HoverEvent.showItem(op.apply(HoverEvent.ShowItem.of(resourceKey, this.quantity(), SpongeAdventure.asBinaryTagHolder(tag))));
-        return null;
+        return HoverEvent.showItem(op.apply(HoverEvent.ShowItem.of(resourceKey, this.quantity(), SpongeAdventure.asBinaryTagHolder(this.getComponents()))));
     }
 }
