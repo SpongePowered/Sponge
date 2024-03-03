@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.state;
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.MapCodec;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -42,13 +42,9 @@ import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 @Mixin(BlockState.class)
 public abstract class BlockStateMixin extends BlockBehaviour.BlockStateBase implements BlockStateBridge {
 
-    protected BlockStateMixin(Block p_i231870_1_,
-        ImmutableMap<Property<?>, Comparable<?>> p_i231870_2_,
-        MapCodec<BlockState> p_i231870_3_
-    ) {
-        super(p_i231870_1_, p_i231870_2_, p_i231870_3_);
+    protected BlockStateMixin(Block $$0, Reference2ObjectArrayMap<Property<?>, Comparable<?>> $$1, MapCodec<BlockState> $$2) {
+        super($$0, $$1, $$2);
     }
-
 
     @Override
     public boolean bridge$hasTileEntity() {
