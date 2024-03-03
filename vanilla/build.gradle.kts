@@ -312,6 +312,12 @@ dependencies {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
+    libraries(platform(apiLibs.adventure.bom))
+    libraries(libs.adventure.serializerAnsi) {
+        exclude(group = "org.jetbrains", module = "annotations")
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
+
     // Databases
     libraries(libs.db.hikariCp)
 

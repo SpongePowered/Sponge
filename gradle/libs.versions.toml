@@ -41,6 +41,7 @@ javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 accessWidener = { module = "net.fabricmc:access-widener", version = "2.1.0" }
 
 # Sponge
+adventure-serializerAnsi = { module = "net.kyori:adventure-text-serializer-ansi" } # version inherited from bom in API catalog
 adventure-serializerConfigurate4 = { module = "net.kyori:adventure-serializer-configurate4" } # version inherited from bom in API catalog
 configurate-jackson = { module = "org.spongepowered:configurate-jackson" } # version inherited from bom in API catalog
 db-h2 = { module = "com.h2database:h2", version = "1.4.196" }
