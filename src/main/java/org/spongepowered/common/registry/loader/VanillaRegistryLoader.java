@@ -169,6 +169,7 @@ public final class VanillaRegistryLoader {
         this.manualName(RegistryTypes.EQUIPMENT_GROUP, EquipmentSlot.Type.values(), map -> {
             map.put(EquipmentSlot.Type.ARMOR, "worn");
             map.put(EquipmentSlot.Type.HAND, "held");
+            map.put(EquipmentSlot.Type.BODY, "body");
         });
         this.manualName(RegistryTypes.EQUIPMENT_TYPE, EquipmentSlot.values(), map -> {
             map.put(EquipmentSlot.CHEST, "chest");
