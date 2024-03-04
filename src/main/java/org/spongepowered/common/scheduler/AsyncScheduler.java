@@ -26,31 +26,30 @@ package org.spongepowered.common.scheduler;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.logging.log4j.Level;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
+import java.util.function.IntFunction;
 
 public final class AsyncScheduler extends SpongeScheduler implements AutoCloseable {
-    private static final long KEEP_ALIVE_MILLIS = 12L;
+    private static final int NCPU = Runtime.getRuntime().availableProcessors();
+    private static final long KEEP_ALIVE_MILLIS = 10L;
     private final ThreadPoolExecutor executor;
     private final BlockingQueue<DelayedRunnable> workQueue
             = new DelayQueue<>();
 
     public AsyncScheduler() {
         super("A");
-        this.executor = new ThreadPoolExecutor(1, Integer.MAX_VALUE,
+        this.executor = new ThreadPoolExecutor(NCPU, Integer.MAX_VALUE,
                 KEEP_ALIVE_MILLIS, TimeUnit.MILLISECONDS,
-                new DelayQueueAsRunnable<>(workQueue),
+                new DelayQueueAsRunnable(workQueue),
                 new ThreadFactoryBuilder()
                         .setNameFormat("Sponge-AsyncScheduler-%d")
                         .build()
@@ -63,9 +62,10 @@ public final class AsyncScheduler extends SpongeScheduler implements AutoCloseab
     }
 
     @Override
-    public DelayedRunnable submit(Task task) {
+    public SpongeScheduledTask submit(Task task) {
+        SpongeScheduledTask sst = super.submit(task);
         this.executor.prestartCoreThread();
-        return super.submit(task);
+        return sst;
     }
 
     public <T> CompletableFuture<T> submit(final Callable<T> callable) {
@@ -77,7 +77,7 @@ public final class AsyncScheduler extends SpongeScheduler implements AutoCloseab
         exec.execute(() -> {
             try {
                 ret.complete(call.call());
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 ret.completeExceptionally(e);
             }
         });
@@ -104,6 +104,195 @@ public final class AsyncScheduler extends SpongeScheduler implements AutoCloseab
             }
         } catch (InterruptedException e) {
             SpongeCommon.logger().error("The async scheduler was interrupted while awaiting shutdown!");
+
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private record DelayQueueAsRunnable(
+            BlockingQueue<DelayedRunnable> src
+    ) implements BlockingQueue<Runnable> {
+
+        @Override
+        public Runnable poll() {
+            return this.src.poll();
+        }
+
+        @Override
+        public boolean add(final Runnable runnable) {
+            return this.src.add(
+                    new DelayedRunnable.NoDelayRunnable(runnable));
+        }
+
+        @Override
+        public boolean offer(final Runnable runnable) {
+            return this.src.offer(
+                    new DelayedRunnable.NoDelayRunnable(runnable));
+        }
+
+        @Override
+        public void put(final Runnable runnable) throws InterruptedException {
+            this.src.put(new DelayedRunnable.NoDelayRunnable(runnable));
+        }
+
+        @Override
+        public boolean offer(final Runnable runnable,
+                             final long timeout,
+                             final TimeUnit unit
+        ) throws InterruptedException {
+            return this.src.offer(
+                    new DelayedRunnable.NoDelayRunnable(runnable),
+                    timeout, unit);
+        }
+
+        @Override
+        public @NotNull Runnable take() throws InterruptedException {
+            return this.src.take();
+        }
+
+        @Override
+        public Runnable poll(final long timeout,
+                             final TimeUnit unit
+        ) throws InterruptedException {
+            return this.src.poll(timeout, unit);
+        }
+
+        @Override
+        public Runnable remove() {
+            return this.src.remove();
+        }
+
+        @Override
+        public Runnable peek() {
+            return this.src.peek();
+        }
+
+        @Override
+        public int size() {
+            return this.src.size();
+        }
+
+        @Override
+        public void clear() {
+            this.src.clear();
+        }
+
+        @Override
+        public int remainingCapacity() {
+            return this.src.remainingCapacity();
+        }
+
+        @Override
+        public boolean remove(final Object o) {
+            return this.src.remove(o);
+        }
+
+        @Override
+        public DelayedRunnable element() {
+            return this.src.element();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return this.src.isEmpty();
+        }
+
+        @Override
+        public boolean contains(final Object o) {
+            return this.src.contains(o);
+        }
+
+        @Override
+        public int drainTo(final Collection<? super Runnable> c) {
+            return this.src.drainTo(c);
+        }
+
+        @Override
+        public int drainTo(final Collection<? super Runnable> c,
+                           final int maxElements) {
+            return this.src.drainTo(c, maxElements);
+        }
+
+        @Override
+        public boolean containsAll(final Collection<?> c) {
+            return this.src.containsAll(c);
+        }
+
+        @Override
+        public boolean addAll(final Collection<? extends Runnable> c) {
+            Objects.requireNonNull(c);
+            if (c == this)
+                throw new IllegalArgumentException();
+            boolean modified = false;
+            for (Runnable e : c)
+                if (add(e))
+                    modified = true;
+            return modified;
+        }
+
+        @Override
+        public boolean removeAll(final Collection<?> c) {
+            return this.src.removeAll(c);
+        }
+
+        @Override
+        public boolean retainAll(final Collection<?> c) {
+            return this.src.retainAll(c);
+        }
+
+        @Override
+        public Object[] toArray() {
+            return this.src.toArray();
+        }
+
+        @Override
+        public <T> T[] toArray(final T[] a) {
+            return this.src.toArray(a);
+        }
+
+        @Override
+        public <T> T[] toArray(final IntFunction<T[]> generator) {
+            return this.src.toArray(generator);
+        }
+
+        @Override
+        public Iterator<Runnable> iterator() {
+            return new Itr<>(this.src.iterator());
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            return this.src.equals(o);
+        }
+
+        @Override
+        public String toString() {
+            return this.src.toString();
+        }
+
+        private record Itr<E extends Runnable>(
+                Iterator<E> src
+        ) implements Iterator<Runnable> {
+
+            @Override
+            public boolean hasNext() {
+                return this.src.hasNext();
+            }
+
+            @Override
+            public Runnable next() {
+                return this.src.next();
+            }
+
+            @Override
+            public void remove() {
+                this.src.remove();
+            }
+
+            @Override
+            public void forEachRemaining(final Consumer<? super Runnable> action) {
+                this.src.forEachRemaining(action);
+            }
         }
     }
 }

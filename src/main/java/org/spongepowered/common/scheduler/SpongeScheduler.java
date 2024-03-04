@@ -34,7 +34,6 @@ import org.spongepowered.plugin.PluginContainer;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -48,8 +47,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public abstract class SpongeScheduler implements Scheduler {
     private static final AtomicLong TASK_CREATED_COUNTER = new AtomicLong();
@@ -67,29 +66,23 @@ public abstract class SpongeScheduler implements Scheduler {
         this.tag = tag;
     }
 
-    protected long timestamp(final boolean tickBased) {
-        return System.nanoTime();
-    }
-
     protected abstract BlockingQueue<DelayedRunnable> getWorkQueue();
 
     @Override
-    public DelayedRunnable submit(Task task) {
+    public SpongeScheduledTask submit(Task task) {
         final String name =
                 task.plugin().metadata().id() +
-                "-" +
-                TASK_CREATED_COUNTER.incrementAndGet();
+                        "-" +
+                        TASK_CREATED_COUNTER.incrementAndGet();
         return this.submit(task, name);
     }
 
     @Override
-    public DelayedRunnable submit(Task task, String name) {
+    public SpongeScheduledTask submit(Task task, String name) {
         final long number = this.sequenceNumber.getAndIncrement();
         final SpongeTask sp = (SpongeTask) task;
 
-        final long start = sp.delay < 0
-                ? -(timestamp(true) - sp.delay)
-                :  timestamp(false) + sp.delay;
+        final long start = System.nanoTime() + sp.delayNanos();
 
         final UUID uuid = new UUID(number, System.identityHashCode(this));
         final SpongeScheduledTask sc = new SpongeScheduledTask(this,
@@ -119,18 +112,15 @@ public abstract class SpongeScheduler implements Scheduler {
 
     @Override
     public Set<ScheduledTask> findTasks(final String pattern) {
-        final Pattern searchPattern = Pattern.compile(Objects.requireNonNull(pattern, "pattern"));
-        final Set<ScheduledTask> matchingTasks = this.tasks();
+        final Pattern searchPattern = Pattern.compile(
+                Objects.requireNonNull(pattern, "pattern"));
 
-        final Iterator<ScheduledTask> it = matchingTasks.iterator();
-        while (it.hasNext()) {
-            final Matcher matcher = searchPattern.matcher(it.next().name());
-            if (!matcher.matches()) {
-                it.remove();
-            }
-        }
-
-        return matchingTasks;
+        return cachedTasks
+                .values()
+                .stream()
+                .filter(x -> {
+                    return searchPattern.matcher(x.name()).matches();
+                }).collect(Collectors.toSet());
     }
 
     @Override
@@ -140,19 +130,16 @@ public abstract class SpongeScheduler implements Scheduler {
 
     @Override
     public Set<ScheduledTask> tasks(final PluginContainer plugin) {
-        final String testOwnerId = Objects.requireNonNull(plugin, "plugin").metadata().id();
-
-        final Set<ScheduledTask> allTasks = this.tasks();
-        final Iterator<ScheduledTask> it = allTasks.iterator();
-
-        while (it.hasNext()) {
-            final String taskOwnerId = it.next().task().plugin().metadata().id();
-            if (!testOwnerId.equals(taskOwnerId)) {
-                it.remove();
-            }
-        }
-
-        return allTasks;
+        final String testOwnerId = Objects
+                .requireNonNull(plugin, "plugin")
+                .metadata().id();
+        return cachedTasks
+                .values()
+                .stream()
+                .filter(x -> {
+                    final String taskOwnerId = x.task().plugin().metadata().id();
+                    return testOwnerId.equals(taskOwnerId);
+                }).collect(Collectors.toSet());
     }
     @Override
     public TaskExecutorService executor(PluginContainer plugin) {

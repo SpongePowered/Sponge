@@ -27,7 +27,6 @@ package org.spongepowered.common.scheduler;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
@@ -39,26 +38,20 @@ import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.UUID;
-import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
-public class SpongeScheduledTask implements ScheduledTask, DelayedRunnable {
-    private final SpongeScheduler scheduler;
+public final class SpongeScheduledTask implements ScheduledTask, DelayedRunnable {
+    private final Scheduler scheduler;
     private final String name;
     private final UUID uuid;
-    private final SpongeTask src;
+    private final TaskExecutor src;
     private volatile boolean cancelled = false;
-
-    /*
-     * Negative value - time in ticks
-     * This is done for atomic access of the getDelay() method
-     */
     private volatile long time;
     private final Cyclic cyclic;
 
-    SpongeScheduledTask(final SpongeScheduler scheduler,
+    SpongeScheduledTask(final Scheduler scheduler,
                         final String name, final UUID uuid,
-                        final SpongeTask src,
+                        final TaskExecutor src,
                         final long start,
                         final Cyclic cyclic) {
         this.scheduler = scheduler;
@@ -72,36 +65,36 @@ public class SpongeScheduledTask implements ScheduledTask, DelayedRunnable {
     public void run() {
         if (this.isCancelled())
             return;
-        final SpongeTask x = this.src;
-
-        try (final @Nullable PhaseContext<@NonNull ?> context = PluginPhase.State.SCHEDULED_TASK
+        final TaskExecutor x = this.src;
+        try (final PhaseContext<@NonNull ?> context = PluginPhase.State.SCHEDULED_TASK
                 .createPhaseContext(PhaseTracker.getInstance())
                 .source(this)
                 .container(x.plugin())) {
             context.buildAndSwitch();
             try {
-                x.executor().accept(this);
+                x.accept(this);
             } catch (final Throwable t) {
                 SpongeCommon.logger().error("The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
                         name, x.plugin().metadata().id(), t);
             }
-        }
-
-        if (isPeriodic()) {
-            final long q = x.interval;
-            this.time = q < 0
-                    ? -(this.scheduler.timestamp(true) - q)
-                    :  this.scheduler.timestamp(false) + q;
-            this.cyclic.enqueue(this);
-        } else {
-            this.cyclic.finish();
+        } finally {
+            if (isPeriodic()) {
+                final long q = x.intervalNanos();
+                if (x.tickBased())
+                    this.time += q;
+                else
+                    this.time = System.nanoTime() + q;
+                this.cyclic.enqueue(this);
+            } else {
+                this.cyclic.finish();
+            }
         }
     }
 
     @Override
     public long getDelay(TimeUnit unit) {
-        final long p = this.time, now = this.scheduler.timestamp(p < 0);
-        return unit.convert(Math.abs(p) - now, NANOSECONDS);
+        return unit.convert(
+                this.time - System.nanoTime(), NANOSECONDS);
     }
 
     @Override
@@ -129,16 +122,8 @@ public class SpongeScheduledTask implements ScheduledTask, DelayedRunnable {
     }
 
     @Override
-    public int compareTo(Delayed other) {
-        if (other == this) return 0;
-        return Long.compare(
-                this.getDelay(TimeUnit.NANOSECONDS),
-                other.getDelay(TimeUnit.NANOSECONDS));
-    }
-
-    @Override
     public boolean isPeriodic() {
-        return this.src.interval != 0;
+        return this.src.intervalNanos() != 0;
     }
 
     @Override

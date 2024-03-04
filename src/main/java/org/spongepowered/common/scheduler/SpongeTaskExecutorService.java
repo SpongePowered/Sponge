@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.scheduler;
 
-import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.ScheduledTaskFuture;
@@ -43,7 +42,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
-class SpongeTaskExecutorService extends AbstractExecutorService implements TaskExecutorService {
+class SpongeTaskExecutorService
+        extends AbstractExecutorService
+        implements TaskExecutorService {
 
     private final Supplier<Task.Builder> taskBuilderProvider;
     private final SpongeScheduler scheduler;
@@ -67,7 +68,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
 
     @Override
     public List<Runnable> shutdownNow() {
-        return ImmutableList.of();
+        return List.of();
     }
 
     @Override
@@ -154,7 +155,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
                 .delay(initialDelay, unit)
                 .interval(period, unit)
                 .build();
-        final DelayedRunnable scheduledTask = this.submitTask(task);
+        final SpongeScheduledTask scheduledTask = this.submitTask(task);
         // A repeatable task needs to be able to cancel itself
         runnable.setTask(scheduledTask);
         return new SpongeScheduledFuture<>(runnable, scheduledTask);
@@ -167,7 +168,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
                 .delay(initialDelay, unit)
                 .interval(period, unit)
                 .build();
-        final DelayedRunnable scheduledTask = this.submitTask(task);
+        final SpongeScheduledTask scheduledTask = this.submitTask(task);
         // A repeatable task needs to be able to cancel itself
         runnable.setTask(scheduledTask);
         return new SpongeScheduledFuture<>(runnable, scheduledTask);
@@ -189,17 +190,17 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         return this.taskBuilderProvider.get().execute(command);
     }
 
-    private DelayedRunnable submitTask(final Task task) {
+    private SpongeScheduledTask submitTask(final Task task) {
         return this.scheduler.submit(task);
     }
 
     private static class SpongeScheduledFuture<V> implements org.spongepowered.api.scheduler.ScheduledTaskFuture<V> {
 
         private final FutureTask<V> runnable;
-        private final DelayedRunnable task;
+        private final SpongeScheduledTask task;
 
         SpongeScheduledFuture(final FutureTask<V> runnable,
-                              final DelayedRunnable task) {
+                              final SpongeScheduledTask task) {
             this.runnable = runnable;
             this.task = task;
         }
@@ -250,12 +251,15 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
 
         @Override
         public V get() throws InterruptedException, ExecutionException {
+            System.out.println("LOOOCK");
             return this.runnable.get();
         }
 
         @Override
         public V get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            System.out.println("LCOK TIMEOUR");
             return this.runnable.get(timeout, unit);
+
         }
     }
 

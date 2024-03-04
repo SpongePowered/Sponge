@@ -24,30 +24,28 @@
  */
 package org.spongepowered.common.scheduler;
 
+import org.spongepowered.api.scheduler.ScheduledTask;
+import org.spongepowered.api.scheduler.Task;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.DelayQueue;
+import java.time.Duration;
+import java.util.function.Consumer;
 
-public abstract class SyncScheduler extends SpongeScheduler {
+public interface TaskExecutor
+        extends Consumer<ScheduledTask>, Task {
 
-    private final BlockingQueue<DelayedRunnable> workQueue
-            = new DelayQueue<>();
-
-    SyncScheduler(final String tag) {
-        super(tag);
+    @Override
+    default Duration delay() {
+        return Duration.ofNanos(this.delayNanos());
     }
 
     @Override
-    protected BlockingQueue<DelayedRunnable> getWorkQueue() {
-        return workQueue;
+    default Duration interval() {
+        return Duration.ofNanos(this.intervalNanos());
     }
 
-    /**
-     * The hook to update the Ticks known by the SyncScheduler.
-     */
-    public void tick() {
-        for (Runnable task;
-             (task = this.workQueue.poll()) != null;
-             task.run());
-    }
+    long delayNanos();
+
+    long intervalNanos();
+
+    boolean tickBased();
 }
