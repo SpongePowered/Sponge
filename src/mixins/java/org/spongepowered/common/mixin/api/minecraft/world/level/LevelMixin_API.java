@@ -135,7 +135,6 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             EntityTypeTest<net.minecraft.world.entity.Entity, T> entityTypeTest,
             net.minecraft.world.phys.AABB param1,
             @Nullable Predicate<? super T> param2);
-    @Shadow public abstract ResourceKey<Level> dimension();
 
     // @formatter:on
 
