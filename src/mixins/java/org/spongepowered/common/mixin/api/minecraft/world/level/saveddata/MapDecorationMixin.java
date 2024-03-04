@@ -36,6 +36,7 @@ import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -48,7 +49,7 @@ public abstract class MapDecorationMixin implements MapDecorationBridge {
     private String impl$key = Constants.Map.DECORATION_KEY_PREFIX + UUID.randomUUID().toString();
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void impl$setPersistenceOnInit(final MapDecoration.Type typeIn, final byte x, final byte y, final byte rot, final Component name, final CallbackInfo ci) {
+    public void impl$setPersistenceOnInit(final MapDecoration.Type typeIn, final byte x, final byte y, final byte rot, final Optional<Component> name, final CallbackInfo ci) {
         // All of the below types have no reason to be saved to disk
         // This is because they can/should be calculated when needed
         // Furthermore if a sponge plugin adds a MapDecoration, isPersistent
