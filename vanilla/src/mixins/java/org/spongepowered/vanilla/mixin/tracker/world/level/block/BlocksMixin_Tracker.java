@@ -30,6 +30,7 @@ import net.minecraft.world.level.block.Blocks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.accessor.world.level.block.state.BlockBehaviourAccessor;
 import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
 
 @Mixin(Blocks.class)
@@ -42,7 +43,7 @@ public abstract class BlocksMixin_Tracker {
             )
     )
     private static ResourceLocation impl$initializeTrackerState(final Block block) {
-        final boolean randomlyTicking = block.isRandomlyTicking(block.defaultBlockState());
+        final boolean randomlyTicking = ((BlockBehaviourAccessor) block).invoker$isRandomlyTicking(block.defaultBlockState());
 
         // TODO Not the best check but the tracker options only matter during block ticks...
         if (randomlyTicking) {
