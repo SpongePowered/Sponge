@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.world.level.block.entity;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -54,7 +55,7 @@ public interface HopperBlockEntityAccessor {
     }
 
     @Invoker("getContainerAt")
-    static Container invoker$getContainerAt(Level var0, double var1, double var3, double var5) {
+    static Container invoker$getContainerAt(Level var0, BlockPos blockPos) {
         throw new UntransformedInvokerError();
     }
 

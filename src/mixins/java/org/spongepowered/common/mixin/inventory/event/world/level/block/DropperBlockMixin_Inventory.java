@@ -89,7 +89,7 @@ public abstract class DropperBlockMixin_Inventory {
                 final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, sourceInv, i, itemstack);
                 final Direction enumfacing = worldIn.getBlockState(pos).getValue(DispenserBlock.FACING);
                 final BlockPos blockpos = pos.relative(enumfacing);
-                final Container iinventory = HopperBlockEntityAccessor.invoker$getContainerAt(worldIn, blockpos.getX(), blockpos.getY(), blockpos.getZ());
+                final Container iinventory = HopperBlockEntityAccessor.invoker$getContainerAt(worldIn, blockpos);
                 InventoryEventFactory.callTransferPost(capture, sourceInv, ((Inventory) iinventory), itemstack, sourceSlotTransaction);
             }
         }
