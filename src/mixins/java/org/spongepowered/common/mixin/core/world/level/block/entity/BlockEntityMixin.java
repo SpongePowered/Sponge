@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -85,7 +86,7 @@ public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoun
     }
 
     @Inject(method = "load", at = @At("RETURN"))
-    private void impl$readSpongeData(final CompoundTag compound, final CallbackInfo ci) {
+    private void impl$readSpongeData(final CompoundTag compound, HolderLookup.Provider $$1, final CallbackInfo ci) {
         // TODO If we are in Forge data is already present
         this.data$setCompound(compound); // For vanilla we set the incoming nbt
         // Deserialize custom data...
