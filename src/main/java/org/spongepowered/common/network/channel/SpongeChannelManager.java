@@ -47,6 +47,7 @@ import org.spongepowered.api.network.channel.packet.basic.BasicPacketChannel;
 import org.spongepowered.api.network.channel.raw.RawDataChannel;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
@@ -265,6 +266,11 @@ public final class SpongeChannelManager implements ChannelManager {
     private void handleChannelRegistry(final EngineConnection connection, final ChannelBuf payload) {
         final Set<ResourceKey> registered = ConnectionUtil.getRegisteredChannels(connection);
         registered.clear();
+
+        if (payload.available() == 0) {
+            SpongeCommon.logger().warn("Skipped empty payload");
+            return;
+        }
 
         final int count = payload.readVarInt();
         for (int i = 0; i < count; i++) {
