@@ -48,8 +48,8 @@ public interface HopperBlockEntityAccessor {
         throw new UntransformedInvokerError();
     }
 
-    @Invoker("isEmptyContainer")
-    static boolean invoker$isEmptyContainer(final Container inventory, final Direction side) {
+    @Invoker("getSlots")
+    static int[] invoker$getSlots(final Container inventory, final Direction side) {
         throw new UntransformedInvokerError();
     }
 

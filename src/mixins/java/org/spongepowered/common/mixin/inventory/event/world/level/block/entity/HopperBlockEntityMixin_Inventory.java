@@ -50,6 +50,8 @@ import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 
+import java.util.stream.IntStream;
+
 @Mixin(HopperBlockEntity.class)
 public abstract class HopperBlockEntityMixin_Inventory {
 
@@ -59,13 +61,17 @@ public abstract class HopperBlockEntityMixin_Inventory {
 
     @Redirect(method = "suckInItems",
             at = @At(value = "INVOKE",
-                     target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;isEmptyContainer(Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Z"))
-    private static boolean impl$throwTransferPreIfNotEmpty(final Container inventory, final Direction facing, final Level level, final Hopper hopper) {
-        final boolean result = HopperBlockEntityAccessor.invoker$isEmptyContainer(inventory, facing);
-        if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
-            return result;
+                     target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;getSlots(Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)[I"))
+    private static int[] impl$throwTransferPreIfNotEmpty(final Container inventory, final Direction facing, final Level level, final Hopper hopper) {
+        final var slots = HopperBlockEntityAccessor.invoker$getSlots(inventory, facing);
+        final boolean isEmpty = IntStream.of(slots).allMatch(slot -> inventory.getItem(slot).isEmpty());
+        if (isEmpty || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
+            return slots;
         }
-        return InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(inventory), InventoryUtil.toInventory(hopper)).isCancelled();
+        if (InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(inventory), InventoryUtil.toInventory(hopper)).isCancelled()) {
+            return new int[]{};
+        }
+        return slots;
     }
 
     // Capture Transactions
