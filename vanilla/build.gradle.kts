@@ -466,7 +466,7 @@ tasks {
                     "Superclass-Transformer" to "common.superclasschange,vanilla.superclasschange",
                     "Access-Widener" to "common.accesswidener",
                     "MixinConfigs" to mixinConfigs.joinToString(","),
-                    "Main-Class" to "org.spongepowered.vanilla.installer.VersionCheckingMain",
+                    "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
                     "Launch-Target" to "sponge_server_prod",
                     "Multi-Release" to true,
                     "Premain-Class" to "org.spongepowered.vanilla.installer.Agent",
