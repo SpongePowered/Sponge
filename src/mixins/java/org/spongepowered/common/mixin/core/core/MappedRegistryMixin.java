@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.core;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
@@ -74,15 +75,15 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
     }
 
 
-    @Inject(method = "registerMapping", at = @At("TAIL"))
-    private void impl$cacheRegistryEntry(final int p_243537_1_, final net.minecraft.resources.ResourceKey<T> p_243537_2_, final T p_243537_3_,
-            final Lifecycle p_243537_4_, final CallbackInfoReturnable<Holder<T>> cir) {
+    @Inject(method = "register", at = @At("TAIL"))
+    private void impl$cacheRegistryEntry(final net.minecraft.resources.ResourceKey<T> $$0, final T $$1,
+            final RegistrationInfo $$3, final CallbackInfoReturnable<Holder<T>> cir) {
 
         final net.minecraft.resources.ResourceKey<? extends Registry<T>> resourceKey = ((MappedRegistry<T>) (Object) this).key();
         final ResourceKey root = (ResourceKey) (Object) ((ResourceKeyAccessor<T>) resourceKey).accessor$registryName();
         final ResourceKey location = (ResourceKey) (Object) resourceKey.location();
         this.bridge$register(new SpongeRegistryEntry<>(new SpongeRegistryType<>(root, location),
-                (ResourceKey) (Object) p_243537_2_.location(), p_243537_3_));
+                (ResourceKey) (Object) $$0.location(), $$1));
     }
 
     @Override
