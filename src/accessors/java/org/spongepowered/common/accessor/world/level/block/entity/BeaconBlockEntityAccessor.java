@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.world.level.block.entity;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -41,12 +42,12 @@ public interface BeaconBlockEntityAccessor {
         throw new UntransformedAccessorError();
     }
 
-    @Accessor("primaryPower") @Nullable MobEffect accessor$primaryPower();
+    @Accessor("primaryPower") @Nullable Holder<MobEffect> accessor$primaryPower();
 
-    @Accessor("primaryPower") void accessor$primaryPower(final @Nullable MobEffect primaryPower);
+    @Accessor("primaryPower") void accessor$primaryPower(final @Nullable Holder<MobEffect> primaryPower);
 
-    @Accessor("secondaryPower") @Nullable MobEffect accessor$secondaryPower();
+    @Accessor("secondaryPower") @Nullable Holder<MobEffect> accessor$secondaryPower();
 
-    @Accessor("secondaryPower") void accessor$secondaryPower(final @Nullable MobEffect secondaryPower);
+    @Accessor("secondaryPower") void accessor$secondaryPower(final @Nullable Holder<MobEffect> secondaryPower);
 
 }
