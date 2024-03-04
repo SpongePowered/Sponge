@@ -105,11 +105,15 @@ public abstract class HopperBlockEntityMixin_Inventory {
                      ordinal = 1))
     private static void imlp$throwTransferEventsWhenPullingItems(final Hopper hopper, final Container iInventory, final int index,
             final Direction direction,
-            final CallbackInfoReturnable<Boolean> cir, final ItemStack itemStack, final ItemStack itemStack1, final ItemStack itemStack2) {
+            final CallbackInfoReturnable<Boolean> cir, final ItemStack itemStack, final int oldCount, final ItemStack itemstack2) {
         // after putStackInInventoryAllSlots if the transfer worked
-        if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack2.isEmpty()) {
+        if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemstack2.isEmpty()) {
             // Capture Insert in Origin
             final TrackedInventoryBridge capture = InventoryUtil.forCapture(hopper);
+            final int newCount = itemStack.getCount();
+            itemstack2.setCount(oldCount);
+            var itemStack1 = itemstack2.copy();
+            itemstack2.setCount(newCount);
             final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, InventoryUtil.toInventory(iInventory), index, itemStack1);
             // Call event
             InventoryEventFactory.callTransferPost(capture, InventoryUtil.toInventory(iInventory), InventoryUtil.toInventory(hopper), itemStack1, sourceSlotTransaction);
