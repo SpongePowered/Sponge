@@ -37,7 +37,7 @@ public abstract class LivingEntityMixin_Vanilla extends EntityMixin_Vanilla {
             method = "updateFallFlying",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/item/ItemStack;hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Consumer;)V",
+                    target = "Lnet/minecraft/world/item/ItemStack;hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/EquipmentSlot;)V",
                     shift = At.Shift.AFTER
             )
     )
