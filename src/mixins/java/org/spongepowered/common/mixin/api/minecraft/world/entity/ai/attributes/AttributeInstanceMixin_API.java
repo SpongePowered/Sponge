@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.ai.attributes;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import org.spongepowered.api.entity.attribute.Attribute;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
@@ -47,7 +48,7 @@ import java.util.UUID;
 public abstract class AttributeInstanceMixin_API implements Attribute {
 
     // @formatter:off
-    @Shadow public abstract net.minecraft.world.entity.ai.attributes.Attribute shadow$getAttribute();
+    @Shadow public abstract Holder<net.minecraft.world.entity.ai.attributes.Attribute> shadow$getAttribute();
     @Shadow public abstract double shadow$getBaseValue();
     @Shadow public abstract void shadow$setBaseValue(double baseValue);
     @Shadow public abstract double shadow$getValue();
@@ -62,7 +63,7 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
 
     @Override
     public AttributeType type() {
-        return (AttributeType) this.shadow$getAttribute();
+        return (AttributeType) this.shadow$getAttribute().value();
     }
 
     @Override
