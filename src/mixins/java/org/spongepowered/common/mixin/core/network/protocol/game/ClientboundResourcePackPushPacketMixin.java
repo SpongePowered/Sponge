@@ -37,6 +37,7 @@ import org.spongepowered.common.bridge.network.protocol.game.ClientboundResource
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
 import java.net.URISyntaxException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(ClientboundResourcePackPushPacket.class)
@@ -47,10 +48,10 @@ public abstract class ClientboundResourcePackPushPacketMixin implements Clientbo
 
     private ResourcePack impl$pack;
 
-    @Inject(method = "<init>(Ljava/util/UUID;Ljava/lang/String;Ljava/lang/String;ZLnet/minecraft/network/chat/Component;)V", at = @At("RETURN") , remap = false)
-    private void impl$setResourcePackOrThrowException(final UUID uuid, final String url, final String hash, final boolean required, final Component prompt, final CallbackInfo ci) {
+    @Inject(method = "<init>", at = @At("RETURN") , remap = false)
+    private void impl$setResourcePackOrThrowException(final UUID uuid, final String url, final String hash, final boolean required, final Optional<Component> prompt, final CallbackInfo ci) {
         try {
-            this.impl$pack = SpongeResourcePack.create(url, hash, prompt == null ? net.kyori.adventure.text.Component.empty() : SpongeAdventure.asAdventure(prompt));
+            this.impl$pack = SpongeResourcePack.create(url, hash, prompt.isEmpty() ? net.kyori.adventure.text.Component.empty() : SpongeAdventure.asAdventure(prompt));
         } catch (final URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
