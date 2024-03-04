@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.effect;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffect;
 import org.spongepowered.api.ResourceKey;
@@ -43,7 +44,7 @@ import org.spongepowered.common.util.SpongeTicks;
 public abstract class MobEffectInstanceMixin_API implements PotionEffect {
 
     // @formatter:off
-    @Shadow @Final private MobEffect effect;
+    @Shadow @Final private Holder<MobEffect> effect;
     @Shadow private int duration;
     @Shadow private int amplifier;
     @Shadow private boolean ambient;
@@ -53,7 +54,7 @@ public abstract class MobEffectInstanceMixin_API implements PotionEffect {
 
     @Override
     public PotionEffectType type() {
-        return (PotionEffectType) this.effect;
+        return (PotionEffectType) this.effect.value();
     }
 
     @Override
