@@ -274,7 +274,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     public void sendResourcePack(final ResourcePack pack) {
         Objects.requireNonNull(pack, "pack");
         final UUID uuid = UUID.nameUUIDFromBytes(pack.name().getBytes(StandardCharsets.UTF_8));
-        this.connection.send(new ClientboundResourcePackPushPacket(uuid, ((SpongeResourcePack) pack).getUrlString(), pack.hash().orElse(""), false, SpongeAdventure.asVanilla(pack.prompt())));
+        this.connection.send(new ClientboundResourcePackPushPacket(uuid, ((SpongeResourcePack) pack).getUrlString(), pack.hash().orElse(""), false, Optional.ofNullable(SpongeAdventure.asVanilla(pack.prompt()))));
     }
 
     @Override
