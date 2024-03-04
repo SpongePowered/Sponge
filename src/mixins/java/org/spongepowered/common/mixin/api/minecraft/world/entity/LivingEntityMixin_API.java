@@ -50,7 +50,6 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
 
     // @formatter:off
     @Shadow public abstract float shadow$getHealth();
-    @Shadow public abstract boolean addEffect(MobEffectInstance p_195064_1_);
     @Shadow public abstract AttributeMap shadow$getAttributes();
 
     // @formatter:on
