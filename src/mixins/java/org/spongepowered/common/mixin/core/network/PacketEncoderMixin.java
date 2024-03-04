@@ -39,9 +39,10 @@ import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
 @Mixin(PacketEncoder.class)
 public class PacketEncoderMixin<T extends PacketListener> {
 
-    @Inject(method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;Lio/netty/buffer/ByteBuf;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/StreamCodec;encode(Ljava/lang/Object;Ljava/lang/Object;)V"))
-    private void applyLocaleToBuffer(final ChannelHandlerContext ctx, final Packet<T> $$1, final ByteBuf $$2, final CallbackInfo ci) {
-        ((FriendlyByteBufBridge) $$2).bridge$setLocale(ctx.channel().attr(SpongeAdventure.CHANNEL_LOCALE).get()); // TODO check if this correct
-    }
+    // TODO find out how we can still translate serverside see FriendlyByteBufMixin
+//    @Inject(method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;Lio/netty/buffer/ByteBuf;)V",
+//            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/StreamCodec;encode(Ljava/lang/Object;Ljava/lang/Object;)V"))
+//    private void applyLocaleToBuffer(final ChannelHandlerContext ctx, final Packet<T> $$1, final ByteBuf $$2, final CallbackInfo ci) {
+//        ((FriendlyByteBufBridge) $$2).bridge$setLocale(ctx.channel().attr(SpongeAdventure.CHANNEL_LOCALE).get()); // TODO check if this correct, it is not
+//    }
 }
