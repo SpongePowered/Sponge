@@ -30,7 +30,6 @@ import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(BaseContainerBlockEntity.class)
 public interface BaseContainerBlockEntityAccessor {
@@ -39,6 +38,6 @@ public interface BaseContainerBlockEntityAccessor {
 
     @Accessor("lockKey") void accessor$lockKey(final LockCode lockKey);
 
-    @Invoker("setCustomName") void invoker$setCustomName(final @Nullable Component customName);
+    @Accessor("name") void accessor$setCustomName(final @Nullable Component customName);
 
 }

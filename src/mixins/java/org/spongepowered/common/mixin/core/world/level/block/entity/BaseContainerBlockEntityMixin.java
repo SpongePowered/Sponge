@@ -35,6 +35,6 @@ public abstract class BaseContainerBlockEntityMixin extends BlockEntityMixin imp
 
     @Override
     public void bridge$setCustomDisplayName(final Component customName) {
-        ((BaseContainerBlockEntityAccessor) this).invoker$setCustomName(customName);
+        ((BaseContainerBlockEntityAccessor) this).accessor$setCustomName(customName);
     }
 }
