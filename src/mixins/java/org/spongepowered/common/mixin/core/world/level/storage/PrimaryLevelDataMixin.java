@@ -81,9 +81,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
 
     // @formatter:off
     @Shadow private LevelSettings settings;
-    @Shadow private int xSpawn;
-    @Shadow private int ySpawn;
-    @Shadow private int zSpawn;
+    @Shadow private BlockPos spawnPos;
     @Shadow private float spawnAngle;
 
     @Shadow public abstract boolean shadow$isDifficultyLocked();
@@ -408,10 +406,11 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public String toString() {
         return new StringJoiner(", ", PrimaryLevelData.class.getSimpleName() + "[", "]")
+
                 .add("key=" + this.impl$key)
                 .add("worldType=" + this.impl$dimensionType)
                 .add("uniqueId=" + this.impl$uniqueId)
-                .add("spawn=" + new Vector3i(this.xSpawn, this.ySpawn, this.zSpawn))
+                .add("spawn=" + VecHelper.toVector3i(this.spawnPos))
                 .add("gameType=" + ((ServerLevelData) this).getGameType())
                 .add("hardcore=" + ((LevelData) this).isHardcore())
                 .add("difficulty=" + ((LevelData) this).getDifficulty())
