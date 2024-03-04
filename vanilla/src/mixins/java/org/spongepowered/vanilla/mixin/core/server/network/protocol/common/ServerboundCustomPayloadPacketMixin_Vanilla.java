@@ -42,25 +42,25 @@ public abstract class ServerboundCustomPayloadPacketMixin_Vanilla {
     @Shadow @Final private static int MAX_PAYLOAD_SIZE;
     // @formatter: on
 
-    @Inject(method = "readPayload", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/common/ServerboundCustomPayloadPacket;readUnknownPayload(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/network/FriendlyByteBuf;)Lnet/minecraft/network/protocol/common/custom/DiscardedPayload;"), cancellable = true)
-    private static void impl$onReadUnknownPayload(ResourceLocation id, FriendlyByteBuf buf, final CallbackInfoReturnable<CustomPacketPayload> cir) {
-        int readableBytes = buf.readableBytes();
-        if (readableBytes >= 0 && readableBytes <= ServerboundCustomPayloadPacketMixin_Vanilla.MAX_PAYLOAD_SIZE) {
-            final var payload = new FriendlyByteBuf(buf.readBytes(readableBytes));
-
-            cir.setReturnValue(new CustomPacketPayload() {
-                @Override
-                public void write(FriendlyByteBuf buf) {
-                    buf.writeBytes(payload.copy());
-                }
-
-                @Override
-                public ResourceLocation id() {
-                    return id;
-                }
-            });
-        } else {
-            throw new IllegalArgumentException("Payload may not be larger than " + ServerboundCustomPayloadPacketMixin_Vanilla.MAX_PAYLOAD_SIZE + " bytes");
-        }
-    }
+//    @Inject(method = "readPayload", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/common/ServerboundCustomPayloadPacket;readUnknownPayload(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/network/FriendlyByteBuf;)Lnet/minecraft/network/protocol/common/custom/DiscardedPayload;"), cancellable = true)
+//    private static void impl$onReadUnknownPayload(ResourceLocation id, FriendlyByteBuf buf, final CallbackInfoReturnable<CustomPacketPayload> cir) {
+//        int readableBytes = buf.readableBytes();
+//        if (readableBytes >= 0 && readableBytes <= ServerboundCustomPayloadPacketMixin_Vanilla.MAX_PAYLOAD_SIZE) {
+//            final var payload = new FriendlyByteBuf(buf.readBytes(readableBytes));
+//
+//            cir.setReturnValue(new CustomPacketPayload() {
+//                @Override
+//                public void write(FriendlyByteBuf buf) {
+//                    buf.writeBytes(payload.copy());
+//                }
+//
+//                @Override
+//                public ResourceLocation id() {
+//                    return id;
+//                }
+//            });
+//        } else {
+//            throw new IllegalArgumentException("Payload may not be larger than " + ServerboundCustomPayloadPacketMixin_Vanilla.MAX_PAYLOAD_SIZE + " bytes");
+//        }
+//    }
 }
