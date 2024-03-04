@@ -178,6 +178,7 @@ public final class VanillaRegistryLoader {
             map.put(EquipmentSlot.LEGS, "legs");
             map.put(EquipmentSlot.MAINHAND, "main_hand");
             map.put(EquipmentSlot.OFFHAND, "off_hand");
+            map.put(EquipmentSlot.BODY, "body");
         });
         this.knownName(RegistryTypes.FOX_TYPE, Fox.Type.values(), Fox.Type::getSerializedName);
         this.knownName(RegistryTypes.GAME_MODE, GameType.values(), GameType::getName);
