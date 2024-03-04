@@ -93,7 +93,7 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
 
     @Override
     public void data$setCompound(final CompoundTag nbt) {
-        this.components.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
+        this.components.set(DataComponents.CUSTOM_DATA, nbt == null ? CustomData.EMPTY : CustomData.of(nbt));
     }
 
     // Add our manipulators when creating copies from this ItemStack:
