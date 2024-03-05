@@ -193,6 +193,20 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
             .logContainerSet((ServerPlayer) (Object) this);
     }
 
+    @Inject(
+        method = "openHorseInventory",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/level/ServerPlayer;initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V",
+            shift = At.Shift.AFTER
+        )
+    )
+    private void impl$afterOpenHorseInventory(final AbstractHorse $$0, final Container $$1, final CallbackInfo ci) {
+        PhaseTracker.SERVER.getPhaseContext()
+            .getTransactor()
+            .logContainerSet((ServerPlayer) (Object) this);
+    }
+
     @Inject(method = "openMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V"))
     private void impl$onOpenMenu(final MenuProvider $$0, final CallbackInfoReturnable<OptionalInt> cir) {
         this.inventory$menuProvider = $$0;
@@ -248,10 +262,12 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
             target = "(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;Lnet/minecraft/world/entity/animal/horse/AbstractHorse;)Lnet/minecraft/world/inventory/HorseInventoryMenu;"
         )
     )
-    private HorseInventoryMenu impl$transactHorseInventoryMenuCreationWithEffect(final int $$0, final net.minecraft.world.entity.player.Inventory $$1, final Container $$2, final AbstractHorse $$3) {
+    private HorseInventoryMenu impl$transactHorseInventoryMenuCreationWithEffect(
+        final int $$0, final net.minecraft.world.entity.player.Inventory $$1, final Container $$2, final AbstractHorse $$3
+    ) {
         try (final EffectTransactor ignored = PhaseTracker.SERVER.getPhaseContext()
-                .getTransactor()
-                .logOpenInventory((ServerPlayer) (Object) this)
+            .getTransactor()
+            .logOpenInventory((ServerPlayer) (Object) this)
         ) {
             return new HorseInventoryMenu($$0, $$1, $$2, $$3);
         }

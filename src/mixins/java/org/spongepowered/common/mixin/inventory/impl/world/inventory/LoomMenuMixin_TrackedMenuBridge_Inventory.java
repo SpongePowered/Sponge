@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedMenuBridge;
 
 @Mixin(LoomMenu.class)
-public class LoomMenuMixin_TrackedMenuBridge_Inventory {
+public abstract class LoomMenuMixin_TrackedMenuBridge_Inventory {
 
     // @formatter:off
     @Shadow @Final private Container inputContainer;

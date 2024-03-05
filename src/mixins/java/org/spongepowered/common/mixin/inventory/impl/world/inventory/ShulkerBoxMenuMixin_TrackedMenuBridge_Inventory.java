@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedMenuBridge;
 
 @Mixin(ShulkerBoxMenu.class)
-public class ShulkerBoxMenuMixin_TrackedMenuBridge_Inventory {
+public abstract class ShulkerBoxMenuMixin_TrackedMenuBridge_Inventory {
 
     @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;)V", at = @At("RETURN"))
     private void inventory$attachContainerMenu(final int $$0, final Inventory $$1, final Container $$2, final CallbackInfo ci) {

@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedMenuBridge;
 
 @Mixin(StonecutterMenu.class)
-public class StonecutterMenuMixin_TrackedMenuBridge_Inventory {
+public abstract class StonecutterMenuMixin_TrackedMenuBridge_Inventory {
 
     // @formatter:off
     @Shadow @Final public Container container;
