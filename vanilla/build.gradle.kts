@@ -45,18 +45,6 @@ val main = commonProject.sourceSets.named("main")
 // Vanilla source sets
 val vanillaInstaller by sourceSets.register("installer")
 
-val vanillaInstallerJava8 by sourceSets.register("installerLegacy8") {
-    this.java.setSrcDirs(setOf("src/installer/java8"))
-    compileClasspath += vanillaInstaller.compileClasspath
-    compileClasspath += vanillaInstaller.runtimeClasspath
-
-    tasks.named(compileJavaTaskName, JavaCompile::class) {
-        options.release.set(8)
-    }
-
-    dependencies.add(implementationConfigurationName, objects.fileCollection().from(vanillaInstaller.output.classesDirs))
-}
-
 val vanillaInstallerJava9 by sourceSets.register("installerJava9") {
     this.java.setSrcDirs(setOf("src/installer/java9"))
 
@@ -416,7 +404,6 @@ tasks {
             )
         }
         from(vanillaInstaller.output)
-        from(vanillaInstallerJava8.output)
         from(vanillaInstallerJava9.output)
     }
 
@@ -479,7 +466,7 @@ tasks {
                     "Superclass-Transformer" to "common.superclasschange,vanilla.superclasschange",
                     "Access-Widener" to "common.accesswidener",
                     "MixinConfigs" to mixinConfigs.joinToString(","),
-                    "Main-Class" to "org.spongepowered.vanilla.installer.VersionCheckingMain",
+                    "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
                     "Launch-Target" to "sponge_server_prod",
                     "Multi-Release" to true,
                     "Premain-Class" to "org.spongepowered.vanilla.installer.Agent",
@@ -499,7 +486,6 @@ tasks {
         from(commonProject.sourceSets.named("applaunch").map {it.output })
         from(sourceSets.main.map {it.output })
         from(vanillaInstaller.output)
-        from(vanillaInstallerJava8.output)
         from(vanillaInstallerJava9.output)
         from(vanillaAppLaunch.output)
         from(vanillaLaunch.output)
