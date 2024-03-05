@@ -306,6 +306,7 @@
         "minecraft.world.item.crafting.ShapedRecipeMixin_API",
         "minecraft.world.item.crafting.ShapelessRecipeMixin_API",
         "minecraft.world.item.crafting.SingleItemRecipeMixin_API",
+        "minecraft.world.item.crafting.SmithingTransformRecipeMixin_API",
         "minecraft.world.item.crafting.StonecutterRecipeMixin_API",
         "minecraft.world.item.enchantment.EnchantmentMixin_API",
         "minecraft.world.item.trading.MerchantOfferMixin_API",
