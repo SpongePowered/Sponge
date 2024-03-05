@@ -35,6 +35,7 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.HorseInventoryMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -237,6 +238,22 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
             .logOpenInventory((ServerPlayer) (Object) this)
         ) {
             return menuProvider.createMenu(var1, var2, var3);
+        }
+    }
+
+    @Redirect(
+        method = "openHorseInventory",
+        at = @At(
+            value = "NEW",
+            target = "(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;Lnet/minecraft/world/entity/animal/horse/AbstractHorse;)Lnet/minecraft/world/inventory/HorseInventoryMenu;"
+        )
+    )
+    private HorseInventoryMenu impl$transactHorseInventoryMenuCreationWithEffect(final int $$0, final net.minecraft.world.entity.player.Inventory $$1, final Container $$2, final AbstractHorse $$3) {
+        try (final EffectTransactor ignored = PhaseTracker.SERVER.getPhaseContext()
+                .getTransactor()
+                .logOpenInventory((ServerPlayer) (Object) this)
+        ) {
+            return new HorseInventoryMenu($$0, $$1, $$2, $$3);
         }
     }
 

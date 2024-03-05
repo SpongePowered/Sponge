@@ -40,6 +40,10 @@ public class ChestMenuMixin_TrackedMenuBridge_Inventory {
 
     @Inject(method = "<init>(Lnet/minecraft/world/inventory/MenuType;ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;I)V", at = @At("RETURN"))
     private void inventory$attachContainerMenu(final MenuType<?> $$0, final int $$1, final Inventory $$2, final Container $$3, final int $$4, final CallbackInfo ci) {
+        if ($$2 instanceof final TrackedMenuBridge trackedMenu) {
+            trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
+        }
+
         if ($$3 instanceof final TrackedMenuBridge trackedMenu) {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }

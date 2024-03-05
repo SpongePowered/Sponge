@@ -39,6 +39,10 @@ public abstract class DispenserMenuMixin_TrackedMenuBridge_Inventory {
 
     @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;)V", at = @At("RETURN"))
     private void inventory$attachContainerMenu(final int $$0, final Inventory $$1, final Container $$2, final CallbackInfo ci) {
+        if ($$1 instanceof final TrackedMenuBridge trackedMenu) {
+            trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
+        }
+
         if ($$2 instanceof final TrackedMenuBridge trackedMenu) {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }
