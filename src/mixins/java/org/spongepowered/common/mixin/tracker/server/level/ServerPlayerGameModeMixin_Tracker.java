@@ -137,23 +137,35 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
             final boolean flag1 = playerIn.isSecondaryUseActive() && flag;
             final ItemStack copiedStack = stackIn.copy();
             if (useBlock != Tristate.FALSE && !flag1) { // Sponge check useBlock
-                final AbstractContainerMenu lastOpenContainer = playerIn.containerMenu;
                 final ItemInteractionResult result = blockstate.useItemOn(playerIn.getItemInHand(handIn), worldIn, playerIn, handIn, blockRaytraceResultIn);
-                if (result.consumesAction() && lastOpenContainer != playerIn.containerMenu) {
-                    final Vector3i pos = VecHelper.toVector3i(blockRaytraceResultIn.getBlockPos());
-                    final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
-                    try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                        frame.pushCause(playerIn);
-                        frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld) (worldIn)).createSnapshot(pos));
-                        ((ContainerBridge) playerIn.containerMenu).bridge$setOpenLocation(location);
-                        if (!InventoryEventFactory.callInteractContainerOpenEvent(playerIn)) {
-                            return InteractionResult.FAIL;
-                        }
-                    }
-                }
+
                 if (result.consumesAction()) {
                     CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(playerIn, blockpos, copiedStack);
                     return result.result();
+                }
+
+                if (result == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION && handIn == InteractionHand.MAIN_HAND) {
+                    final AbstractContainerMenu lastOpenContainer = playerIn.containerMenu; // Sponge
+                    final InteractionResult result2 = blockstate.useWithoutItem(worldIn, playerIn, blockRaytraceResultIn);
+                    if (result2.consumesAction()) {
+                        // Sponge Start
+                        if (lastOpenContainer != playerIn.containerMenu) {
+                            final Vector3i pos = VecHelper.toVector3i(blockRaytraceResultIn.getBlockPos());
+                            final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
+                            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                                frame.pushCause(playerIn);
+                                frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld) (worldIn)).createSnapshot(pos));
+                                ((ContainerBridge) playerIn.containerMenu).bridge$setOpenLocation(location);
+                                if (!InventoryEventFactory.callInteractContainerOpenEvent(playerIn)) {
+                                    return InteractionResult.FAIL;
+                                }
+                            }
+                        }
+                        // Sponge End
+
+                        CriteriaTriggers.DEFAULT_BLOCK_USE.trigger(playerIn, blockpos);
+                        return result2;
+                    }
                 }
             }
 
