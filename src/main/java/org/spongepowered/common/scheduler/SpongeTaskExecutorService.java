@@ -25,21 +25,11 @@
 package org.spongepowered.common.scheduler;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.scheduler.ScheduledTask;
-import org.spongepowered.api.scheduler.ScheduledTaskFuture;
-import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.scheduler.TaskExecutorService;
-import org.spongepowered.api.scheduler.TaskFuture;
+import org.spongepowered.api.scheduler.*;
 
 import java.time.temporal.TemporalUnit;
 import java.util.List;
-import java.util.concurrent.AbstractExecutorService;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 class SpongeTaskExecutorService
@@ -47,9 +37,9 @@ class SpongeTaskExecutorService
         implements TaskExecutorService {
 
     private final Supplier<Task.Builder> taskBuilderProvider;
-    private final SpongeScheduler scheduler;
+    private final AbstractScheduler scheduler;
 
-    SpongeTaskExecutorService(final Supplier<Task.Builder> taskBuilderProvider, final SpongeScheduler scheduler) {
+    SpongeTaskExecutorService(final Supplier<Task.Builder> taskBuilderProvider, final AbstractScheduler scheduler) {
         this.taskBuilderProvider = taskBuilderProvider;
         this.scheduler = scheduler;
     }
@@ -155,7 +145,7 @@ class SpongeTaskExecutorService
                 .delay(initialDelay, unit)
                 .interval(period, unit)
                 .build();
-        final SpongeScheduledTask scheduledTask = this.submitTask(task);
+        final AbstractScheduledTask scheduledTask = this.submitTask(task);
         // A repeatable task needs to be able to cancel itself
         runnable.setTask(scheduledTask);
         return new SpongeScheduledFuture<>(runnable, scheduledTask);
@@ -168,7 +158,7 @@ class SpongeTaskExecutorService
                 .delay(initialDelay, unit)
                 .interval(period, unit)
                 .build();
-        final SpongeScheduledTask scheduledTask = this.submitTask(task);
+        final AbstractScheduledTask scheduledTask = this.submitTask(task);
         // A repeatable task needs to be able to cancel itself
         runnable.setTask(scheduledTask);
         return new SpongeScheduledFuture<>(runnable, scheduledTask);
@@ -190,17 +180,17 @@ class SpongeTaskExecutorService
         return this.taskBuilderProvider.get().execute(command);
     }
 
-    private SpongeScheduledTask submitTask(final Task task) {
+    private AbstractScheduledTask submitTask(final Task task) {
         return this.scheduler.submit(task);
     }
 
     private static class SpongeScheduledFuture<V> implements org.spongepowered.api.scheduler.ScheduledTaskFuture<V> {
 
         private final FutureTask<V> runnable;
-        private final SpongeScheduledTask task;
+        private final AbstractScheduledTask task;
 
         SpongeScheduledFuture(final FutureTask<V> runnable,
-                              final SpongeScheduledTask task) {
+                              final AbstractScheduledTask task) {
             this.runnable = runnable;
             this.task = task;
         }
@@ -251,13 +241,11 @@ class SpongeTaskExecutorService
 
         @Override
         public V get() throws InterruptedException, ExecutionException {
-            System.out.println("LOOOCK");
             return this.runnable.get();
         }
 
         @Override
         public V get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-            System.out.println("LCOK TIMEOUR");
             return this.runnable.get(timeout, unit);
 
         }

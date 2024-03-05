@@ -38,7 +38,7 @@ import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 
-public final class AsyncScheduler extends SpongeScheduler implements AutoCloseable {
+public final class AsyncScheduler extends SpongeScheduler {
     private static final int NCPU = Runtime.getRuntime().availableProcessors();
     private static final long KEEP_ALIVE_MILLIS = 10L;
     private final ThreadPoolExecutor executor;
@@ -57,26 +57,22 @@ public final class AsyncScheduler extends SpongeScheduler implements AutoCloseab
     }
 
     @Override
-    protected BlockingQueue<DelayedRunnable> getWorkQueue() {
-        return this.workQueue;
+    public void submit(DelayedRunnable task) {
+        workQueue.add(task);
     }
 
     @Override
-    public SpongeScheduledTask submit(Task task) {
-        SpongeScheduledTask sst = super.submit(task);
+    public AbstractScheduledTask submit(Task task) {
+        AbstractScheduledTask sst = super.submit(task);
         this.executor.prestartCoreThread();
         return sst;
     }
 
     public <T> CompletableFuture<T> submit(final Callable<T> callable) {
-        return this.asyncFailableFuture(callable, this.executor);
-    }
-
-    private <T> CompletableFuture<T> asyncFailableFuture(Callable<T> call, Executor exec) {
         final CompletableFuture<T> ret = new CompletableFuture<>();
-        exec.execute(() -> {
+        execute(() -> {
             try {
-                ret.complete(call.call());
+                ret.complete(callable.call());
             } catch (final Throwable e) {
                 ret.completeExceptionally(e);
             }
@@ -108,6 +104,7 @@ public final class AsyncScheduler extends SpongeScheduler implements AutoCloseab
             Thread.currentThread().interrupt();
         }
     }
+
 
     private record DelayQueueAsRunnable(
             BlockingQueue<DelayedRunnable> src
@@ -143,6 +140,18 @@ public final class AsyncScheduler extends SpongeScheduler implements AutoCloseab
             return this.src.offer(
                     new DelayedRunnable.NoDelayRunnable(runnable),
                     timeout, unit);
+        }
+
+        @Override
+        public boolean addAll(final Collection<? extends Runnable> c) {
+            Objects.requireNonNull(c);
+            if (c == this)
+                throw new IllegalArgumentException();
+            boolean modified = false;
+            for (Runnable e : c)
+                if (add(e))
+                    modified = true;
+            return modified;
         }
 
         @Override
@@ -216,18 +225,6 @@ public final class AsyncScheduler extends SpongeScheduler implements AutoCloseab
         @Override
         public boolean containsAll(final Collection<?> c) {
             return this.src.containsAll(c);
-        }
-
-        @Override
-        public boolean addAll(final Collection<? extends Runnable> c) {
-            Objects.requireNonNull(c);
-            if (c == this)
-                throw new IllegalArgumentException();
-            boolean modified = false;
-            for (Runnable e : c)
-                if (add(e))
-                    modified = true;
-            return modified;
         }
 
         @Override

@@ -26,75 +26,60 @@ package org.spongepowered.common.scheduler;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public final class SpongeScheduledTask implements ScheduledTask, DelayedRunnable {
-    private final Scheduler scheduler;
+public class SpongeScheduledTask implements AbstractScheduledTask {
+    private final AbstractScheduler scheduler;
     private final String name;
     private final UUID uuid;
-    private final TaskExecutor src;
+    private final TaskProcedure src;
     private volatile boolean cancelled = false;
-    private volatile long time;
-    private final Cyclic cyclic;
+    private long time;
 
-    SpongeScheduledTask(final Scheduler scheduler,
+    SpongeScheduledTask(final AbstractScheduler scheduler,
                         final String name, final UUID uuid,
-                        final TaskExecutor src,
-                        final long start,
-                        final Cyclic cyclic) {
+                        final TaskProcedure src,
+                        final long start) {
         this.scheduler = scheduler;
         this.name = name;
         this.uuid = uuid;
         this.src = src;
         this.time = start;
-        this.cyclic = cyclic;
     }
     @Override
     public void run() {
-        if (this.isCancelled())
+        if (this.isCancelled()) {
             return;
-        final TaskExecutor x = this.src;
-        try (final PhaseContext<@NonNull ?> context = PluginPhase.State.SCHEDULED_TASK
-                .createPhaseContext(PhaseTracker.getInstance())
-                .source(this)
-                .container(x.plugin())) {
-            context.buildAndSwitch();
-            try {
-                x.accept(this);
-            } catch (final Throwable t) {
-                SpongeCommon.logger().error("The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
-                        name, x.plugin().metadata().id(), t);
-            }
+        }
+        final TaskProcedure x = this.src;
+        try {
+            x.execute(this);
+        } catch (final Exception ex) {
+            SpongeCommon.logger().error(
+                    "The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
+                    name(), x.plugin().metadata().id(),
+                    ex);
         } finally {
             if (isPeriodic()) {
-                final long q = x.intervalNanos();
-                if (x.tickBased())
-                    this.time += q;
-                else
-                    this.time = System.nanoTime() + q;
-                this.cyclic.enqueue(this);
-            } else {
-                this.cyclic.finish();
+                this.time += x.interval().toNanos();
+                VarHandle.releaseFence();
+                this.scheduler.submit(this);
             }
         }
     }
 
     @Override
     public long getDelay(TimeUnit unit) {
-        return unit.convert(
-                this.time - System.nanoTime(), NANOSECONDS);
+        VarHandle.acquireFence();
+        final long r = this.time;
+        return unit.convert(r - System.nanoTime(), NANOSECONDS);
     }
 
     @Override
@@ -109,11 +94,8 @@ public final class SpongeScheduledTask implements ScheduledTask, DelayedRunnable
 
     @Override
     public boolean cancel() {
-        final boolean cancelled = !this.cancelled ||
+        return !(boolean) CANCELLED.getOpaque(this) ||
                 CANCELLED.compareAndSet(this, false, true);
-        if (cancelled)
-            this.cyclic.finish();
-        return cancelled;
     }
 
     @Override
@@ -123,7 +105,7 @@ public final class SpongeScheduledTask implements ScheduledTask, DelayedRunnable
 
     @Override
     public boolean isPeriodic() {
-        return this.src.intervalNanos() != 0;
+        return !this.src.interval().isZero();
     }
 
     @Override
@@ -136,7 +118,7 @@ public final class SpongeScheduledTask implements ScheduledTask, DelayedRunnable
         return this.name;
     }
 
-
+    // VarHandle mechanic
     private static final VarHandle CANCELLED;
     static {
         try {

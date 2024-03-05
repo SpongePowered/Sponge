@@ -38,8 +38,8 @@ public abstract class SyncScheduler extends SpongeScheduler {
     }
 
     @Override
-    protected BlockingQueue<DelayedRunnable> getWorkQueue() {
-        return workQueue;
+    public void submit(DelayedRunnable task) {
+        this.workQueue.add(task);
     }
 
     /**
@@ -49,5 +49,10 @@ public abstract class SyncScheduler extends SpongeScheduler {
         for (Runnable task;
              (task = this.workQueue.poll()) != null;
              task.run());
+    }
+
+    @Override
+    public void close() throws Exception {
+        throw new UnsupportedOperationException();
     }
 }

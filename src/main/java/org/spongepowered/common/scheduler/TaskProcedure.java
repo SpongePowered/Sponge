@@ -27,25 +27,8 @@ package org.spongepowered.common.scheduler;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 
-import java.time.Duration;
-import java.util.function.Consumer;
 
-public interface TaskExecutor
-        extends Consumer<ScheduledTask>, Task {
+public interface TaskProcedure extends Task {
 
-    @Override
-    default Duration delay() {
-        return Duration.ofNanos(this.delayNanos());
-    }
-
-    @Override
-    default Duration interval() {
-        return Duration.ofNanos(this.intervalNanos());
-    }
-
-    long delayNanos();
-
-    long intervalNanos();
-
-    boolean tickBased();
+    void execute(ScheduledTask task) throws Exception;
 }

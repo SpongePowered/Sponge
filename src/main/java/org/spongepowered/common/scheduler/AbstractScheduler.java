@@ -24,10 +24,16 @@
  */
 package org.spongepowered.common.scheduler;
 
-public interface Cyclic {
+import org.spongepowered.api.scheduler.Scheduler;
+import org.spongepowered.api.scheduler.Task;
 
-    void enqueue(DelayedRunnable command);
+public interface AbstractScheduler extends Scheduler, AutoCloseable {
 
+    void submit(DelayedRunnable task);
 
-    void finish();
+    @Override
+    AbstractScheduledTask submit(Task task);
+
+    @Override
+    AbstractScheduledTask submit(Task task, String name);
 }

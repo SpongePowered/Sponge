@@ -24,31 +24,10 @@
  */
 package org.spongepowered.common.scheduler;
 
-import org.jetbrains.annotations.NotNull;
+import org.spongepowered.api.scheduler.ScheduledTask;
 
-import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
+public interface AbstractScheduledTask
+        extends ScheduledTask, DelayedRunnable {
 
-public interface DelayedRunnable extends Delayed, Runnable {
-
-
-    @Override
-    default int compareTo(@NotNull final Delayed other) {
-        return other == this ? 0 : Long.compare(
-                this.getDelay(TimeUnit.NANOSECONDS),
-                other.getDelay(TimeUnit.NANOSECONDS)
-        );
-    }
-    record NoDelayRunnable(Runnable origin) implements DelayedRunnable {
-
-        @Override
-        public void run() {
-            this.origin.run();
-        }
-
-        @Override
-        public long getDelay(@NotNull TimeUnit unit) {
-            return 0;
-        }
-    }
+    boolean isPeriodic();
 }

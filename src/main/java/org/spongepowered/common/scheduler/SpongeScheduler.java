@@ -25,40 +25,21 @@
 package org.spongepowered.common.scheduler;
 
 import org.spongepowered.api.scheduler.ScheduledTask;
-import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scheduler.TaskExecutorService;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public abstract class SpongeScheduler implements Scheduler {
+public abstract class SpongeScheduler implements AbstractScheduler {
     private static final AtomicLong TASK_CREATED_COUNTER = new AtomicLong();
-
-    private static final int TICK_DURATION_MS = 50;
-    static final long TICK_DURATION_NS = TimeUnit.NANOSECONDS
-            .convert(SpongeScheduler.TICK_DURATION_MS, TimeUnit.MILLISECONDS);
-
     private final String tag;
-    private final ConcurrentMap<UUID, ScheduledTask> cachedTasks =
+    private final ConcurrentMap<UUID, AbstractScheduledTask> cachedTasks =
             new ConcurrentHashMap<>();
     private final AtomicLong sequenceNumber = new AtomicLong();
 
@@ -66,10 +47,8 @@ public abstract class SpongeScheduler implements Scheduler {
         this.tag = tag;
     }
 
-    protected abstract BlockingQueue<DelayedRunnable> getWorkQueue();
-
     @Override
-    public SpongeScheduledTask submit(Task task) {
+    public AbstractScheduledTask submit(Task task) {
         final String name =
                 task.plugin().metadata().id() +
                         "-" +
@@ -77,31 +56,33 @@ public abstract class SpongeScheduler implements Scheduler {
         return this.submit(task, name);
     }
 
-    @Override
-    public SpongeScheduledTask submit(Task task, String name) {
-        final long number = this.sequenceNumber.getAndIncrement();
-        final SpongeTask sp = (SpongeTask) task;
 
-        final long start = System.nanoTime() + sp.delayNanos();
+    @Override
+    public AbstractScheduledTask submit(Task task, String name) {
+        final long number = this.sequenceNumber.getAndIncrement();
+        final TaskProcedure sp = (TaskProcedure) task;
+
+        final long start = System.nanoTime() + sp.delay().toNanos();
 
         final UUID uuid = new UUID(number, System.identityHashCode(this));
-        final SpongeScheduledTask sc = new SpongeScheduledTask(this,
-                "%s-%s-#%s".formatted(name, this.tag, number), uuid,
-                sp, start,
-                new Cyclic() {
-                    @Override
-                    public void enqueue(DelayedRunnable command) {
-                        getWorkQueue().add(command);
-                    }
 
+        final AbstractScheduledTask scheduledTask =
+                new SpongeScheduledTask(this,
+                        "%s-%s-#%s".formatted(name, this.tag, number), uuid,
+                        sp, start) {
                     @Override
-                    public void finish() {
-                        cachedTasks.remove(uuid);
+                    public void run() {
+                        if (!this.isCancelled()) {
+                            super.run();
+                            if (this.isPeriodic())
+                                return;
+                        }
+                        cachedTasks.remove(uniqueId());
                     }
-                });
-        if (getWorkQueue().add(sc))
-            cachedTasks.put(uuid, sc);
-        return sc;
+        };
+        cachedTasks.put(uuid, scheduledTask);
+        submit(scheduledTask);
+        return scheduledTask;
     }
 
     @Override
@@ -118,9 +99,8 @@ public abstract class SpongeScheduler implements Scheduler {
         return cachedTasks
                 .values()
                 .stream()
-                .filter(x -> {
-                    return searchPattern.matcher(x.name()).matches();
-                }).collect(Collectors.toSet());
+                .filter(x -> searchPattern.matcher(x.name()).matches())
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -163,5 +143,4 @@ public abstract class SpongeScheduler implements Scheduler {
     public Future<?> execute(final Runnable runnable) {
         return this.execute(Executors.callable(runnable));
     }
-
 }
