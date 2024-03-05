@@ -282,7 +282,7 @@ public final class SpongeItemStack  {
         public ItemStack.Builder reset() {
             this.type = null;
             this.quantity = 1;
-            this.components = null;
+            this.components = DataComponentMap.EMPTY;
             return this;
         }
 
