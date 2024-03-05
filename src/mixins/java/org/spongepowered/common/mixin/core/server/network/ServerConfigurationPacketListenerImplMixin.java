@@ -111,7 +111,7 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
 
                     return null;
                 }, SpongeCommon.server()).exceptionally(throwable -> {
-                    SpongeCommon.logger().error("Forcibly disconnecting user {} due to an error during login.", this.gameProfile, throwable);
+                    SpongeCommon.logger().error("Forcibly disconnecting user {}({}) due to an error during login.", this.gameProfile.getName(), this.gameProfile.getId(), throwable);
                     this.shadow$disconnect(Component.literal("Internal Server Error: unable to complete login."));
                     return null;
                 });

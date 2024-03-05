@@ -26,6 +26,7 @@ package org.spongepowered.common.network.channel;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
@@ -239,10 +240,30 @@ public final class SpongeChannelManager implements ChannelManager {
         return future;
     }
 
+    public record SpongeRegisterChannelPayload(Collection<ResourceKey> channels) implements CustomPacketPayload
+    {
+        public static final StreamCodec<FriendlyByteBuf, SpongeRegisterChannelPayload> STREAM_CODEC = CustomPacketPayload.codec(
+                SpongeRegisterChannelPayload::write, SpongeRegisterChannelPayload::new
+        );
+        public static final CustomPacketPayload.Type<SpongeRegisterChannelPayload> TYPE = CustomPacketPayload.createType(Constants.Channels.REGISTER_KEY.value());
+
+        public SpongeRegisterChannelPayload(FriendlyByteBuf $$0) {
+            this(RegisterChannelUtil.decodePayload((ChannelBuf) $$0));
+        }
+
+        private void write(FriendlyByteBuf $$0) {
+            $$0.writeBytes((FriendlyByteBuf) RegisterChannelUtil.encodePayload(this.channels));
+        }
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() {
+            return TYPE;
+        }
+    }
+
     public void sendChannelRegistrations(final EngineConnection connection) {
-        final ChannelBuf payload = RegisterChannelUtil.encodePayload(this.channels.keySet());
-        final Packet<?> mcPacket = PacketUtil.createPlayPayload(Constants.Channels.REGISTER_KEY, payload, connection.side());
-        PacketSender.sendTo(connection, mcPacket);
+        final Packet<?> mcPacket = PacketUtil.createPlayPayload(new SpongeRegisterChannelPayload(this.channels.keySet()), connection.side());
+        // TODO this is currently broken PacketSender.sendTo(connection, mcPacket);/
     }
 
     /**
