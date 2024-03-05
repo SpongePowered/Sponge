@@ -28,6 +28,7 @@ import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+import net.minecraft.world.entity.vehicle.ChestBoat;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MerchantContainer;
 import net.minecraft.world.inventory.ResultContainer;
@@ -45,6 +46,7 @@ import java.util.WeakHashMap;
 
 @Mixin(value = {
         AbstractMinecartContainer.class,
+        ChestBoat.class,
         BaseContainerBlockEntity.class,
         CompoundContainer.class,
         TransientCraftingContainer.class,

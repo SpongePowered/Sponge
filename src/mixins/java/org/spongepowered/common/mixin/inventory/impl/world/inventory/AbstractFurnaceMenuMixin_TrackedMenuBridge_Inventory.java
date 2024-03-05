@@ -44,6 +44,10 @@ public abstract class AbstractFurnaceMenuMixin_TrackedMenuBridge_Inventory {
     @Inject(method = "<init>(Lnet/minecraft/world/inventory/MenuType;Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/inventory/RecipeBookType;ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;Lnet/minecraft/world/inventory/ContainerData;)V", at = @At("RETURN"))
     private void inventory$attachContainerMenu(final MenuType $$0, final RecipeType $$1, final RecipeBookType $$2, final int $$3, final Inventory $$4,
                                                final Container $$5, final ContainerData $$6, final CallbackInfo ci) {
+        if ($$4 instanceof final TrackedMenuBridge trackedMenu) {
+            trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
+        }
+
         if ($$5 instanceof final TrackedMenuBridge trackedMenu) {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }

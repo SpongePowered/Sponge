@@ -28,7 +28,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.EnchantmentMenu;
+import net.minecraft.world.inventory.LoomMenu;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,11 +37,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedMenuBridge;
 
-@Mixin(EnchantmentMenu.class)
-public abstract class EnchantmentMenuMixin_TrackedMenuBridge_Inventory {
+@Mixin(LoomMenu.class)
+public abstract class LoomMenuMixin_TrackedMenuBridge_Inventory {
 
     // @formatter:off
-    @Shadow @Final private Container enchantSlots;
+    @Shadow @Final private Container inputContainer;
+    @Shadow @Final private Container outputContainer;
     // @formatter:on
 
     @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/ContainerLevelAccess;)V", at = @At("RETURN"))
@@ -50,7 +51,11 @@ public abstract class EnchantmentMenuMixin_TrackedMenuBridge_Inventory {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }
 
-        if (this.enchantSlots instanceof final TrackedMenuBridge trackedMenu) {
+        if (this.inputContainer instanceof final TrackedMenuBridge trackedMenu) {
+            trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
+        }
+
+        if (this.outputContainer instanceof final TrackedMenuBridge trackedMenu) {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }
     }
