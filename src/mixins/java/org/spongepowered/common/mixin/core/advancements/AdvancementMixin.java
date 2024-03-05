@@ -106,7 +106,9 @@ public abstract class AdvancementMixin implements AdvancementBridge {
                 if (criterion == null && criteria.get(name) != null) { // internal removed by scoreCriterion
                     criterion = criteriaMap.get(((CriterionBridge) (Object) criteria.get(name)).bridge$getScoreCriterionName());
                 }
-                orCriteria.add(criterion);
+                if (criterion != null) {
+                    orCriteria.add(criterion);
+                }
             }
             andCriteria.add(OrCriterion.of(orCriteria));
         }
