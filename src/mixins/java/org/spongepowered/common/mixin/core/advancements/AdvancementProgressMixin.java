@@ -169,7 +169,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             }
         }
         // Update the progress map
-        this.bridge$updateProgressMap();
+        // TODO this breaks on client this.bridge$updateProgressMap();
     }
 
     private Map<String, ImplementationBackedCriterionProgress> impl$getProgressMap() {
@@ -214,8 +214,8 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
 
         final Advancement advancement = this.impl$getOptionalAdvancement().orElse(null);
         if (advancement != null) {
-            final ImplementationBackedCriterionProgress bridge = this.impl$progressMap.get(advancement.criterion().name());
-            ci.setReturnValue(bridge != null && ((CriterionProgress) bridge).achieved());
+//            final ImplementationBackedCriterionProgress bridge = this.impl$progressMap.get(advancement.criterion().name());
+//            ci.setReturnValue(bridge != null && ((CriterionProgress) bridge).achieved());
         }
     }
 
