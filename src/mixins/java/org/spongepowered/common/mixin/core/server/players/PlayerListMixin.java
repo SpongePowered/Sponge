@@ -629,7 +629,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final var chatType = RegistryTypes.CHAT_TYPE.defaultReferenced((org.spongepowered.api.ResourceKey) (Object) chatTypeRegistry.getKey($$4.chatType().value()));
 
         final Predicate<net.minecraft.server.level.ServerPlayer> filter;
-        final ChatType.Bound boundChatType;
+        ChatType.Bound boundChatType;
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
             if ($$2 != null) {
@@ -642,7 +642,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                 return; // Do nothing when canceled or audience removed
             }
             boundChatType = ChatType.bind(ResourceKey.create(Registries.CHAT_TYPE, (ResourceLocation) (Object) event.chatType().location()),
-                    this.server.registryAccess(), SpongeAdventure.asVanilla(event.sender())).withTargetName(event.target().map(SpongeAdventure::asVanilla).orElse(null));
+                    this.server.registryAccess(), SpongeAdventure.asVanilla(event.sender()));
+            boundChatType = event.target().map(SpongeAdventure::asVanilla).map(boundChatType::withTargetName).orElse(boundChatType);
 
             filter = event.filter().map(f -> $$1.and((Predicate) f)).orElse($$1);
             if (!isTrusted && event.message() != event.originalMessage()) {
