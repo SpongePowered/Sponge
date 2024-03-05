@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.ResultContainer;
@@ -45,7 +47,11 @@ public abstract class CraftingMenuMixin_TrackedMenuBridge_Inventory {
     // @formatter:on
 
     @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/ContainerLevelAccess;)V", at = @At("RETURN"))
-    private void inventory$attachContainerMenu(final CallbackInfo ci) {
+    private void inventory$attachContainerMenu(final int $$0, final Inventory $$1, final ContainerLevelAccess $$2, final CallbackInfo ci) {
+        if ($$1 instanceof final TrackedMenuBridge trackedMenu) {
+            trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
+        }
+
         if (this.craftSlots instanceof final TrackedMenuBridge trackedMenu) {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }

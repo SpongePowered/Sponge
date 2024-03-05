@@ -27,8 +27,9 @@ package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.CartographyTableMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.EnchantmentMenu;
+import net.minecraft.world.inventory.ResultContainer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,20 +38,25 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedMenuBridge;
 
-@Mixin(EnchantmentMenu.class)
-public abstract class EnchantmentMenuMixin_TrackedMenuBridge_Inventory {
+@Mixin(CartographyTableMenu.class)
+public abstract class CartographyTableMenuMixin_TrackedMenuBridge_Inventory {
 
     // @formatter:off
-    @Shadow @Final private Container enchantSlots;
+    @Shadow @Final public Container container;
+    @Shadow @Final private ResultContainer resultContainer;
     // @formatter:on
 
     @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/ContainerLevelAccess;)V", at = @At("RETURN"))
-    private void inventory$attachContainerMenu(final int $$0, final Inventory $$1, final ContainerLevelAccess $$2, final CallbackInfo ci) {
+    private void inventory$attachContainerMenu(int $$0, Inventory $$1, final ContainerLevelAccess $$2, final CallbackInfo ci) {
         if ($$1 instanceof final TrackedMenuBridge trackedMenu) {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }
 
-        if (this.enchantSlots instanceof final TrackedMenuBridge trackedMenu) {
+        if (this.container instanceof final TrackedMenuBridge trackedMenu) {
+            trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
+        }
+
+        if (this.resultContainer instanceof final TrackedMenuBridge trackedMenu) {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }
     }
