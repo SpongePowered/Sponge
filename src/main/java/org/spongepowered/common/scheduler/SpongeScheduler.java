@@ -72,12 +72,9 @@ public abstract class SpongeScheduler implements AbstractScheduler {
                         sp, start) {
                     @Override
                     public void run() {
-                        if (!this.isCancelled()) {
-                            super.run();
-                            if (this.isPeriodic())
-                                return;
-                        }
-                        cachedTasks.remove(uniqueId());
+                        super.run();
+                        if (this.isCancelled() || !this.isPeriodic())
+                            cachedTasks.remove(uniqueId());
                     }
         };
         cachedTasks.put(uuid, scheduledTask);
