@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.network;
 
 import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalAddress;
 import io.netty.util.concurrent.Future;
@@ -47,6 +48,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeMinecraftVersion;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
@@ -229,5 +231,10 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         if (this.impl$disconnected) {
             cir.setReturnValue(false);
         }
+    }
+
+    @Inject(method = "exceptionCaught", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;disconnect(Lnet/minecraft/network/chat/Component;)V"))
+    private void impl$onExceptionDisconnect(final ChannelHandlerContext $$0, final Throwable $$1, final CallbackInfo ci) {
+        SpongeCommon.logger().error("Disconnected due to error", $$1);
     }
 }
