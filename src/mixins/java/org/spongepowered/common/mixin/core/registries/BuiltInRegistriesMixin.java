@@ -53,7 +53,7 @@ public abstract class BuiltInRegistriesMixin {
     @Inject(method = "lambda$static$15", at = @At(value = "FIELD", target = "Lnet/minecraft/world/item/crafting/RecipeSerializer;SHAPELESS_RECIPE:Lnet/minecraft/world/item/crafting/RecipeSerializer;"))
     private static void impl$staticInitSpongeRecipeSerializers(final Registry $$0, final CallbackInfoReturnable<RecipeSerializer> cir)
     {
-        final var serializer = SpongeRecipeSerializers.SPONGE_SPECIAL;
+//        final var serializer = SpongeRecipeSerializers.SPONGE_SPECIAL;
     }
 
     @Inject(method = "bootStrap", at = @At(value = "HEAD"))
