@@ -28,7 +28,6 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
-import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,8 +42,6 @@ import javax.annotation.Nullable;
 public abstract class BannerBlockEntityMixin extends BlockEntityMixin implements BannerBlockEntityBridge, CustomNameableBridge {
 
     @Shadow private net.minecraft.world.item.DyeColor baseColor;
-    @Shadow private BannerPatternLayers patternsWithBase;
-    @Shadow private BannerPatternLayers itemPatterns;
     @Shadow @Nullable private Component name;
 
     private void impl$markDirtyAndUpdate() {
@@ -69,7 +66,6 @@ public abstract class BannerBlockEntityMixin extends BlockEntityMixin implements
         } catch (final Exception e) {
             this.baseColor = net.minecraft.world.item.DyeColor.BLACK;
         }
-        this.patternsWithBase = this.itemPatterns.withBase(this.baseColor);
         this.impl$markDirtyAndUpdate();
     }
 
