@@ -151,7 +151,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         final var modifiers = ((net.minecraft.world.item.ItemStack) (Object) this).getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
         for (final ItemAttributeModifiers.Entry entry : modifiers.modifiers()) {
             if (entry.attribute().value().equals(attributeType) && entry.slot().test(((EquipmentSlot) (Object) equipmentType))) {
-                builder.add((AttributeModifier) entry.modifier());
+                builder.add((AttributeModifier) (Object) entry.modifier());
             }
         }
 
@@ -176,7 +176,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
         this.shadow$update(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY, component ->
                 component.withModifierAdded(Holder.direct((Attribute) attributeType),
-                                            (net.minecraft.world.entity.ai.attributes.AttributeModifier) modifier,
+                                            (net.minecraft.world.entity.ai.attributes.AttributeModifier) (Object) modifier,
                                             group));
     }
 

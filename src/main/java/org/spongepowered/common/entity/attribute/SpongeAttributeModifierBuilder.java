@@ -68,7 +68,7 @@ public final class SpongeAttributeModifierBuilder implements AttributeModifier.B
     public AttributeModifier build() {
         Objects.requireNonNull(this.name, "Name must be set");
         Objects.requireNonNull(this.operation, "Operation must be set");
-        return (AttributeModifier) new net.minecraft.world.entity.ai.attributes.AttributeModifier(this.id, this.name, this.amount, (net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation) (Object) this.operation);
+        return (AttributeModifier) (Object) new net.minecraft.world.entity.ai.attributes.AttributeModifier(this.id, this.name, this.amount, (net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation) (Object) this.operation);
     }
 
     @Override
