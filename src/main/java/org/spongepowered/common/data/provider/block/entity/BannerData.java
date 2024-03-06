@@ -46,7 +46,7 @@ public final class BannerData {
         registrator
                 .asMutable(BannerBlockEntity.class)
                     .create(Keys.BANNER_PATTERN_LAYERS)
-                        .get(h -> h.getPatternsWithBase().layers().stream().map(BannerPatternLayer.class::cast).toList())
+                        .get(h -> h.getPatterns().layers().stream().map(BannerPatternLayer.class::cast).toList())
                         .setAnd((h, v) -> {
                             final Level world = h.getLevel();
                             if (world != null && !world.isClientSide) { // This avoids a client crash because clientside.
