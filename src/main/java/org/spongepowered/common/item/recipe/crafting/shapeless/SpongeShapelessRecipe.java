@@ -63,7 +63,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
                             Codec.STRING.fieldOf(Constants.Recipe.SPONGE_TYPE).forGetter(t -> "custom"), // important to fail early when decoding vanilla recipes
                             ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(ShapelessRecipe::getGroup),
                             CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapelessRecipe::category),
-                            ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
+                            ItemStack.CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
                             Ingredient.CODEC_NONEMPTY
                                     .listOf()
                                     .fieldOf(Constants.Recipe.SHAPELESS_INGREDIENTS)
@@ -81,7 +81,6 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
                                             DataResult::success
                                     )
                                     .forGetter(ShapelessRecipe::getIngredients),
-                            ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$spongeResult()),
                             IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(SpongeShapelessRecipe::resultFunctionId),
                             IngredientResultUtil.CACHED_REMAINING_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_REMAINING_ITEMS).forGetter(SpongeShapelessRecipe::remainingItemsFunctionId)
                     )
@@ -99,12 +98,10 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
            final CraftingBookCategory category,
            final ItemStack recipeOutputIn,
            final NonNullList<Ingredient> recipeItemsIn,
-           final ItemStack spongeResultStack,
            final Optional<String> resultFunctionId,
            final Optional<String> remainingItemsFunctionId)
     {
-        return new SpongeShapelessRecipe(groupIn, category, recipeItemsIn,
-                spongeResultStack.isEmpty() ? recipeOutputIn : spongeResultStack,
+        return new SpongeShapelessRecipe(groupIn, category, recipeItemsIn, recipeOutputIn,
                 resultFunctionId.orElse(null), remainingItemsFunctionId.orElse(null));
     }
 

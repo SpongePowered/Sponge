@@ -30,7 +30,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -51,8 +50,7 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
                             Ingredient.CODEC.fieldOf("template").forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$template()),
                             Ingredient.CODEC.fieldOf(Constants.Recipe.SMITHING_BASE_INGREDIENT).forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$base()),
                             Ingredient.CODEC.fieldOf(Constants.Recipe.SMITHING_ADDITION_INGREDIENT).forGetter($$0x -> ((SmithingRecipeBridge) $$0x).bridge$addition()),
-                            ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge) $$0x).bridge$result()),
-                            ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter($$0x -> ((RecipeResultBridge) $$0x).bridge$spongeResult()),
+                            ItemStack.CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge) $$0x).bridge$result()),
                             IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(ResultFunctionRecipe::resultFunctionId)
                     )
                     .apply($$0, SpongeSmithingRecipe::of)
@@ -61,9 +59,9 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
     private final String resultFunctionId;
 
     public static SpongeSmithingRecipe of(final String spongeType, final Ingredient template, final Ingredient base,
-            final Ingredient addition, final ItemStack resultIn, final ItemStack spongeResult, final Optional<String> resultFunctionId)
+            final Ingredient addition, final ItemStack resultIn, final Optional<String> resultFunctionId)
     {
-        return new SpongeSmithingRecipe(template, base, addition, spongeResult.isEmpty() ? resultIn : spongeResult, resultFunctionId.orElse(null));
+        return new SpongeSmithingRecipe(template, base, addition, resultIn, resultFunctionId.orElse(null));
     }
 
     public SpongeSmithingRecipe(final Ingredient template, final Ingredient base,
