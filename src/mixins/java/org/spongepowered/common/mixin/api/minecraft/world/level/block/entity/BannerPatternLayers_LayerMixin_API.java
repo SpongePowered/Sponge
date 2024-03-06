@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import org.spongepowered.api.ResourceKey;
@@ -65,7 +66,7 @@ public abstract class BannerPatternLayers_LayerMixin_API implements BannerPatter
 
     @Override
     public DataContainer toContainer() {
-        final ResourceKey idKey = (ResourceKey) (Object) BuiltInRegistries.BANNER_PATTERN.getKey(this.pattern.value());
+        final ResourceKey idKey = Sponge.game().registry(RegistryTypes.BANNER_PATTERN_SHAPE).valueKey(this.shape());
         final ResourceKey colorKey = Sponge.game().registry(RegistryTypes.DYE_COLOR).valueKey(this.color());
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
