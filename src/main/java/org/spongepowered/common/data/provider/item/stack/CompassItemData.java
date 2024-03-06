@@ -29,7 +29,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.LodestoneTarget;
+import net.minecraft.world.item.component.LodestoneTracker;
 import net.minecraft.world.level.Level;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -37,6 +37,8 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
+
+import java.util.Optional;
 
 final class CompassItemData {
 
@@ -48,17 +50,18 @@ final class CompassItemData {
             .asMutable(ItemStack.class)
                 .create(Keys.LODESTONE)
                     .get(stack -> {
-                        final LodestoneTarget component = stack.get(DataComponents.LODESTONE_TARGET);
+                        final LodestoneTracker component = stack.get(DataComponents.LODESTONE_TRACKER);
                         if (component != null) {
                             return null;
                         }
-                        return ServerLocation.of((ServerWorld) SpongeCommon.server().getLevel(component.pos().dimension()),
-                                VecHelper.toVector3d(component.pos().pos()));
+                        final GlobalPos globalPos = component.target().get();
+                        return ServerLocation.of((ServerWorld) SpongeCommon.server().getLevel(globalPos.dimension()),
+                                VecHelper.toVector3d(globalPos.pos()));
                     })
                     .set((stack, location) -> {
                         final ResourceKey<Level> dim = ((ServerLevel) location.world()).dimension();
-                        stack.set(DataComponents.LODESTONE_TARGET, new LodestoneTarget(new GlobalPos(dim, VecHelper.toBlockPos(location)), true));
+                        stack.set(DataComponents.LODESTONE_TRACKER, new LodestoneTracker(Optional.of(new GlobalPos(dim, VecHelper.toBlockPos(location))), true));
                     })
-                    .delete(stack -> stack.remove(DataComponents.LODESTONE_TARGET));
+                    .delete(stack -> stack.remove(DataComponents.LODESTONE_TRACKER));
     }
 }
