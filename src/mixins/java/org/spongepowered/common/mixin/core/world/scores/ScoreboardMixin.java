@@ -38,9 +38,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
-import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.bridge.world.scores.ScoreboardBridge;
-import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.SpongeScore;
 
 @SuppressWarnings("ConstantConditions")
@@ -88,8 +86,7 @@ public abstract class ScoreboardMixin implements ScoreboardBridge {
     @Inject(method = "resetSinglePlayerScore", at = @At("RETURN"))
     public void impl$onResetScore(final ScoreHolder holder, final Objective mcObjective, final CallbackInfo ci) {
         if (this instanceof ServerScoreboardBridge ssb) {
-            final SpongeObjective objective = ((ObjectiveBridge) mcObjective).bridge$getSpongeObjective();
-            objective.removeScore(holder.getScoreboardName());
+            ssb.bridge$removeMCScore(holder, mcObjective);
         }
     }
 }

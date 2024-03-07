@@ -27,6 +27,8 @@ package org.spongepowered.common.bridge.server;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.scores.ScoreHolder;
+import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -56,6 +58,10 @@ public interface ServerScoreboardBridge {
     void bridge$removeAPIObjective(Objective objective);
 
     void bridge$removeMCObjective(net.minecraft.world.scores.Objective mcObjective);
+
+    void bridge$removeMCScore(ScoreHolder holder, net.minecraft.world.scores.Objective mcObjective);
+
+    void bridge$removeAPIScore(Objective spongeObjective, Score spongeScore);
 
     void bridge$registerTeam(Team spongeTeam);
 

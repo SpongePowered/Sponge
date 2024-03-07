@@ -33,8 +33,10 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -50,6 +52,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
+import org.spongepowered.common.scoreboard.SpongeScore;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
@@ -139,6 +142,14 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     public void bridge$removeMCObjective(final net.minecraft.world.scores.Objective mcObjective) {
         if (!this.impl$apiCall) {
             this.bridge$removeAPIObjective(((ObjectiveBridge) mcObjective).bridge$getSpongeObjective());
+        }
+    }
+
+    @Override
+    public void bridge$removeMCScore(final ScoreHolder holder, final net.minecraft.world.scores.Objective mcObjective) {
+        if (!this.impl$apiCall) {
+            final SpongeObjective objective = ((ObjectiveBridge) mcObjective).bridge$getSpongeObjective();
+            objective.removeScore(holder.getScoreboardName());
         }
     }
 
@@ -322,5 +333,15 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         for (final net.minecraft.world.scores.Objective objective : this.getObjectives()) {
             player.connection.send(new ClientboundSetObjectivePacket(objective, 1));
         }
+    }
+
+    @Override
+    public void bridge$removeAPIScore(final Objective spongeObjective, final Score spongeScore) {
+        this.impl$apiCall = true;
+        final ScoreHolder holder = ((SpongeScore) spongeScore).holder;
+        final net.minecraft.world.scores.Objective mcObjective = this.getObjective(spongeObjective.name());
+        this.resetSinglePlayerScore(holder, mcObjective);
+        ((SpongeScore) spongeScore).unregister(mcObjective);
+        this.impl$apiCall = false;
     }
 }

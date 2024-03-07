@@ -40,6 +40,7 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 
 import java.util.HashMap;
@@ -209,16 +210,12 @@ public final class SpongeObjective implements Objective {
 
     @Override
     public boolean removeScore(final Score spongeScore) {
-        final ScoreHolder holder = ((SpongeScore) spongeScore).holder;
-
         if (!this.scores.containsKey(spongeScore.name())) {
             return false;
         }
 
         for (final net.minecraft.world.scores.Scoreboard scoreboard : this.scoreboards) {
-            final net.minecraft.world.scores.Objective mcObjective = scoreboard.getObjective(this.name);
-            scoreboard.resetSinglePlayerScore(holder, mcObjective);
-            ((SpongeScore) spongeScore).unregister(mcObjective);
+            ((ServerScoreboardBridge) scoreboard).bridge$removeAPIScore(this, spongeScore);
         }
 
         this.scores.remove(spongeScore.name());
