@@ -45,29 +45,6 @@ val main = commonProject.sourceSets.named("main")
 // Vanilla source sets
 val vanillaInstaller by sourceSets.register("installer")
 
-val vanillaInstallerJava9 by sourceSets.register("installerJava9") {
-    this.java.setSrcDirs(setOf("src/installer/java9"))
-
-    tasks.named(compileJavaTaskName, JavaCompile::class) {
-        options.release.set(9)
-    }
-
-    sequenceOf(runtimeClasspathConfigurationName, compileClasspathConfigurationName).map(configurations::named).forEach {
-        it.configure {
-            attributes {
-                attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, apiJavaTarget.toInt())
-            }
-        }
-    }
-
-    configurations.named(implementationConfigurationName) {
-        extendsFrom(vanillaInstallerConfig.get())
-    }
-}
-
-
-dependencies.add(vanillaInstaller.implementationConfigurationName, vanillaInstallerJava9.output)
-
 val vanillaMain by sourceSets.named("main") {
     // implementation (compile) dependencies
     spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.implementationConfigurationName)
@@ -404,7 +381,6 @@ tasks {
             )
         }
         from(vanillaInstaller.output)
-        from(vanillaInstallerJava9.output)
     }
 
     val vanillaAppLaunchJar by registering(Jar::class) {
@@ -486,7 +462,6 @@ tasks {
         from(commonProject.sourceSets.named("applaunch").map {it.output })
         from(sourceSets.main.map {it.output })
         from(vanillaInstaller.output)
-        from(vanillaInstallerJava9.output)
         from(vanillaAppLaunch.output)
         from(vanillaLaunch.output)
         from(vanillaAccessors.output)
