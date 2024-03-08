@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -78,6 +77,7 @@ import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.FluidTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TileEntityTickContext;
+import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -107,7 +107,7 @@ public final class TrackingUtil {
     public static final int WIDTH = 40;
 
     public static void tickEntity(final Consumer<net.minecraft.world.entity.Entity> consumer, final net.minecraft.world.entity.Entity entity) {
-        checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
+        Preconditions.checkArgument(entity instanceof Entity, String.format("Entity %s is not an instance of SpongeAPI's Entity!", entity));
         Objects.requireNonNull(entity, "Cannot capture on a null ticking entity!");
         if (!((TrackableBridge) entity).bridge$shouldTick()) {
             return;

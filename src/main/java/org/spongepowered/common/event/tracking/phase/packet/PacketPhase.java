@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -98,6 +97,7 @@ import org.spongepowered.common.event.tracking.phase.packet.player.StopSleepingP
 import org.spongepowered.common.event.tracking.phase.packet.player.UnknownPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.UseItemPacketState;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -228,7 +228,7 @@ public final class PacketPhase {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public PhaseContext<?> populateContext(final Packet<?> packet, final ServerPlayer entityPlayerMP, final IPhaseState<?> state, final PhaseContext<?> context) {
         Objects.requireNonNull(packet, "Packet cannot be null!");
-        checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
+        Preconditions.checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
         ((PacketState) state).populateContext(entityPlayerMP, packet, (PacketContext) context);
         return context;
     }

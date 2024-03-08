@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.spongepowered.api.data.persistence.DataQuery.of;
 
 import com.google.common.collect.Lists;
@@ -49,6 +48,7 @@ import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.List;
 import java.util.Map;
@@ -180,8 +180,8 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
         Objects.requireNonNull(base);
         Objects.requireNonNull(view);
         Objects.requireNonNull(key);
-        checkArgument(!key.isEmpty());
-        checkArgument(type > Constants.NBT.TAG_END && type <= Constants.NBT.TAG_LONG_ARRAY);
+        Preconditions.checkArgument(!key.isEmpty());
+        Preconditions.checkArgument(type > Constants.NBT.TAG_END && type <= Constants.NBT.TAG_LONG_ARRAY);
         switch (type) {
             case Constants.NBT.TAG_BYTE:
                 if (key.contains(NBTTranslator.BOOLEAN_IDENTIFIER)) {

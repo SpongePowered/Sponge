@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.generation;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -154,7 +153,7 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
         public ItemStackGenerator.Builder from(final ItemStackGenerator value) {
             this.reset();
             Objects.requireNonNull(value, "ItemStackGenerator cannot be null!");
-            checkArgument(value instanceof SpongeItemStackGenerator, "Cannot use from on a non-Sponge implemented ItemStackGenerator!");
+            Preconditions.checkArgument(value instanceof SpongeItemStackGenerator, "Cannot use from on a non-Sponge implemented ItemStackGenerator!");
             final SpongeItemStackGenerator generator = (SpongeItemStackGenerator) value;
             this.consumers.addAll(generator.biConsumers);
             this.baseItem = new WeightedTable<>();

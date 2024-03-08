@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.lens.impl;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Key;
@@ -34,6 +33,7 @@ import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.property.KeyValuePair;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,16 +60,16 @@ public abstract class AbstractLens implements Lens {
     private int maxOrdinal = 0;
 
     public AbstractLens(final int base, final int size) {
-        checkArgument(base >= 0, "Invalid offset: %s", base);
-        checkArgument(size > 0, "Invalid size: %s", size);
+        Preconditions.checkArgument(base >= 0, String.format("Invalid offset: %s", base));
+        Preconditions.checkArgument(size > 0, String.format("Invalid size: %s", size));
 
         this.base = base;
         this.size = size;
     }
 
     public AbstractLens(final int base, final int size, final Class<? extends Inventory> adapterType) {
-        checkArgument(base >= 0, "Invalid offset: %s", base);
-        checkArgument(size > 0, "Invalid size: %s", size);
+        Preconditions.checkArgument(base >= 0, String.format("Invalid offset: %s", base));
+        Preconditions.checkArgument(size > 0, String.format("Invalid size: %s", size));
         Objects.requireNonNull(adapterType, "adapterType");
 
         this.base = base;

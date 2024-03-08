@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.effect.particle;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.Sponge;
@@ -38,6 +37,7 @@ import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.DataDeserializer;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.HashMap;
 import java.util.List;
@@ -112,7 +112,7 @@ public final class SpongeParticleEffectBuilder extends AbstractDataBuilder<Parti
 
     @Override
     public ParticleEffect build() {
-        checkArgument(this.type != null, "ParticleType must be set");
+        Preconditions.checkArgument(this.type != null, "ParticleType must be set");
         return new SpongeParticleEffect(this.type, this.options);
     }
 }

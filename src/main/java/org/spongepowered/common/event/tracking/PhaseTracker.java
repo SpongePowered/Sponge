@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
@@ -59,6 +58,7 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.ThreadUtil;
 
@@ -325,16 +325,16 @@ public final class PhaseTracker implements CauseStackManager {
         if (phaseContext.createdTracker != this && Thread.currentThread() != this.getSidedThread()) {
             // lol no, report the block change properly
             new PrettyPrinter(60).add("Illegal Async PhaseTracker Access").centre().hr()
-                .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
-                .add()
-                .add(new Exception("Async Block Change Detected"))
-                .log(SpongeCommon.logger(), Level.ERROR);
+                    .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
+                    .add()
+                    .add(new Exception("Async Block Change Detected"))
+                    .log(SpongeCommon.logger(), Level.ERROR);
             // Maybe? I don't think this is wise.
             return;
         }
         Objects.requireNonNull(state, "State cannot be null!");
         Objects.requireNonNull(phaseContext, "PhaseContext cannot be null!");
-        checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
+        Preconditions.checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
         if (this == PhaseTracker.SERVER && SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             if (this.stack.size() > 6) {
                 if (this.stack.checkForRunaways(state, phaseContext)) {

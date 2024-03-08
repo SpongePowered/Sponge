@@ -38,4 +38,17 @@ public class Preconditions {
             throw new IllegalStateException();
         }
     }
+
+    public static void checkArgument(final boolean expression, final String errorMessage) {
+        if (!expression) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    public static void checkArgument(final boolean expression) {
+        if (!expression) {
+            // TODO we should ideally always have a message
+            throw new IllegalArgumentException();
+        }
+    }
 }

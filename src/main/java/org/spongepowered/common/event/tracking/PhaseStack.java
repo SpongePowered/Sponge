@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -77,8 +77,8 @@ final class PhaseStack {
 
     PhaseStack push(IPhaseState<?> state, PhaseContext<?> context) {
         Objects.requireNonNull(context, "Tuple cannot be null!");
-        checkArgument(context.state == state, "Illegal IPhaseState not matching PhaseContext: %s", context);
-        checkArgument(context.isComplete(), "Phase context must be complete: %s", context);
+        Preconditions.checkArgument(context.state == state, String.format("Illegal IPhaseState not matching PhaseContext: %s", context));
+        Preconditions.checkArgument(context.isComplete(), String.format("Phase context must be complete: %s", context));
         this.phases.push(context);
         return this;
     }

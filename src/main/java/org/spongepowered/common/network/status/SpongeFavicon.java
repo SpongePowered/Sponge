@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.network.status;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.base.MoreObjects;
 import io.netty.buffer.ByteBuf;
@@ -99,8 +98,8 @@ public class SpongeFavicon implements Favicon {
     private static final String FAVICON_PREFIX = "data:image/png;base64,";
 
     private static String encode(BufferedImage favicon) throws IOException {
-        checkArgument(favicon.getWidth() == 64, "favicon must be 64 pixels wide");
-        checkArgument(favicon.getHeight() == 64, "favicon must be 64 pixels high");
+        Preconditions.checkArgument(favicon.getWidth() == 64, "favicon must be 64 pixels wide");
+        Preconditions.checkArgument(favicon.getHeight() == 64, "favicon must be 64 pixels high");
 
         ByteBuf buf = Unpooled.buffer();
         try {
@@ -117,7 +116,7 @@ public class SpongeFavicon implements Favicon {
     }
 
     private static BufferedImage decode(String encoded) throws IOException {
-        checkArgument(encoded.startsWith(SpongeFavicon.FAVICON_PREFIX), "Unknown favicon format");
+        Preconditions.checkArgument(encoded.startsWith(SpongeFavicon.FAVICON_PREFIX), "Unknown favicon format");
         ByteBuf base64 = Unpooled.copiedBuffer(encoded.substring(SpongeFavicon.FAVICON_PREFIX.length()), StandardCharsets.UTF_8);
         try {
             ByteBuf buf = Base64.decode(base64);

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.lens.impl.comp;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -34,6 +33,7 @@ import org.spongepowered.common.inventory.lens.impl.SlotBasedLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.property.KeyValuePair;
+import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.math.vector.Vector2i;
 
 public class Inventory2DLens extends SlotBasedLens {
@@ -55,8 +55,8 @@ public class Inventory2DLens extends SlotBasedLens {
     protected Inventory2DLens(final int base, final int width, final int height, final int rowStride, final int xBase, final int yBase, final Class<? extends Inventory> adapterType, final SlotLensProvider slots) {
         super(base, width * height, rowStride, adapterType, slots);
 
-        checkArgument(width > 0, "Invalid width: %s", width);
-        checkArgument(height > 0, "Invalid height: %s", height);
+        Preconditions.checkArgument(width > 0, String.format("Invalid width: %s", width));
+        Preconditions.checkArgument(height > 0, String.format("Invalid height: %s", height));
 
         this.width = width;
         this.height = height;

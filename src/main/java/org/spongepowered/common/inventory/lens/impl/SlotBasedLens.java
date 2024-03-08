@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.inventory.lens.impl;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.property.KeyValuePair;
+import org.spongepowered.common.util.Preconditions;
 
 /**
  * Lenses for inventory based on slots.
@@ -43,7 +43,7 @@ public abstract class SlotBasedLens extends AbstractLens {
 
     public SlotBasedLens(int base, int size, int stride, Class<? extends Inventory> adapterType, SlotLensProvider slots) {
         super(base, size, adapterType);
-        checkArgument(stride > 0, "Invalid stride: %s", stride);
+        Preconditions.checkArgument(stride > 0, String.format("Invalid stride: %s", stride));
         this.stride = stride;
         this.init(slots);
     }

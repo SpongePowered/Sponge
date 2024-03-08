@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -91,7 +90,7 @@ public final class SpongeItemStack  {
 
         @Override
         public ItemStack.Builder quantity(final int quantity) throws IllegalArgumentException {
-            checkArgument(quantity >= 0, "Quantity must not be smaller than 0");
+            Preconditions.checkArgument(quantity >= 0, "Quantity must not be smaller than 0");
             this.quantity = quantity;
             return this;
         }
