@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.map;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BannerBlock;
@@ -42,6 +41,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;

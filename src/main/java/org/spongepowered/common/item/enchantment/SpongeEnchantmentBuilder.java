@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.enchantment;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
@@ -72,8 +70,8 @@ public final class SpongeEnchantmentBuilder extends AbstractDataBuilder<Enchantm
 
     @Override
     public Enchantment.Builder level(final int level) {
-        checkArgument(level >= Short.MIN_VALUE, "The specified level must be greater than %s (was %s)!", Short.MIN_VALUE, level);
-        checkArgument(level <= Short.MAX_VALUE, "The specified level must not be greater than %s (was %s)!", Short.MAX_VALUE, level);
+        Preconditions.checkArgument(level >= Short.MIN_VALUE, String.format("The specified level must be greater than %s (was %s)!", Short.MIN_VALUE, level));
+        Preconditions.checkArgument(level <= Short.MAX_VALUE, String.format("The specified level must not be greater than %s (was %s)!", Short.MAX_VALUE, level));
         this.level = level;
         return this;
     }

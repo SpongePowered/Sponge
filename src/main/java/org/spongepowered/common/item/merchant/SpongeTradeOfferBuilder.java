@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.merchant;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import net.minecraft.world.item.trading.MerchantOffer;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -83,14 +82,14 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     @Override
     public TradeOffer.Builder uses(final int uses) {
-        checkArgument(uses >= 0, "Usage count cannot be negative");
+        Preconditions.checkArgument(uses >= 0, "Usage count cannot be negative");
         this.useCount = uses;
         return this;
     }
 
     @Override
     public TradeOffer.Builder maxUses(final int maxUses) {
-        checkArgument(maxUses > 0, "Max usage count must be greater than 0");
+        Preconditions.checkArgument(maxUses > 0, "Max usage count must be greater than 0");
         this.maxUses = maxUses;
         return this;
     }

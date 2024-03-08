@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
@@ -81,7 +80,7 @@ public class MemoryDataView implements DataView {
     }
 
     private MemoryDataView(final DataView parent, final DataQuery path, final DataView.SafetyMode safety) {
-        checkArgument(path.parts().size() >= 1, "Path must have at least one part");
+        Preconditions.checkArgument(path.parts().size() >= 1, "Path must have at least one part");
         this.parent = parent;
         this.container = parent.container();
         this.path = parent.currentPath().then(path);
@@ -231,7 +230,7 @@ public class MemoryDataView implements DataView {
         Objects.requireNonNull(value, "value");
         Preconditions.checkState(this.container != null);
         Preconditions.checkState(!path.parts().isEmpty(), "The path is empty");
-        checkArgument(value != this, "Cannot set a DataView to itself.");
+        Preconditions.checkArgument(value != this, "Cannot set a DataView to itself.");
 
         final List<String> parts = path.parts();
         final String key = parts.get(0);
@@ -251,7 +250,7 @@ public class MemoryDataView implements DataView {
 
         final Object serialized = DataSerializer.serialize(this.safetyMode(), value);
 
-        checkArgument(this.isEmpty() || !this.equals(serialized), "Cannot insert self-referencing DataView!");
+        Preconditions.checkArgument(this.isEmpty() || !this.equals(serialized), "Cannot insert self-referencing DataView!");
         if (serialized instanceof DataView) {
             // always have to copy a data view to avoid overwriting existing
             // views and to set the interior path correctly.
@@ -292,7 +291,7 @@ public class MemoryDataView implements DataView {
 
         final int sz = queryParts.size();
 
-        checkArgument(sz != 0, "The size of the query must be at least 1");
+        Preconditions.checkArgument(sz != 0, "The size of the query must be at least 1");
 
         final String key = queryParts.get(0);
         final DataQuery keyQuery = DataQuery.of(key);
