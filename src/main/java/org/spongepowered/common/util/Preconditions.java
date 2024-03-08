@@ -22,30 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.advancements;
+package org.spongepowered.common.util;
 
+public class Preconditions {
 
-import net.minecraft.advancements.DisplayInfo;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.advancement.Advancement;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
-import org.spongepowered.common.util.Preconditions;
-
-@Mixin(DisplayInfo.class)
-public abstract class DisplayInfoMixin implements DisplayInfoBridge {
-
-    @Nullable private Advancement impl$advancement;
-
-    @Override
-    public Advancement bridge$getAdvancement() {
-        Preconditions.checkState(this.impl$advancement != null, "The advancement is not yet initialized");
-        return this.impl$advancement;
+    public static void checkState(final boolean expression, final String errorMessage) {
+        if (!expression) {
+            throw new IllegalStateException(errorMessage);
+        }
     }
 
-    @Override
-    public void bridge$setAdvancement(Advancement advancement) {
-        this.impl$advancement = advancement;
+    public static void checkState(final boolean expression) {
+        if (!expression) {
+            // TODO we should ideally always have a message
+            throw new IllegalStateException();
+        }
     }
-
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity.player.tab;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -32,6 +31,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Objects;
 
@@ -76,9 +76,9 @@ public final class TabListEntryBuilder implements TabListEntry.Builder {
 
     @Override
     public TabListEntry build() {
-        checkState(this.list != null, "list must be set");
-        checkState(this.profile != null, "profile must be set");
-        checkState(this.gameMode != null, "game mode must be set");
+        Preconditions.checkState(this.list != null, "list must be set");
+        Preconditions.checkState(this.profile != null, "profile must be set");
+        Preconditions.checkState(this.gameMode != null, "game mode must be set");
 
         return new SpongeTabListEntry(this.list, this.profile, this.displayName, this.latency, this.gameMode, null);
     }

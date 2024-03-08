@@ -25,7 +25,6 @@
 package org.spongepowered.common.data;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
@@ -47,6 +46,7 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.common.data.builder.Coerce;
 import org.spongepowered.common.registry.provider.KeyProvider;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,7 +73,7 @@ public class MemoryDataView implements DataView {
     private final DataView.SafetyMode safety;
 
     MemoryDataView(final DataView.SafetyMode safety) {
-        checkState(this instanceof DataContainer, "Cannot construct a root MemoryDataView without a container!");
+        Preconditions.checkState(this instanceof DataContainer, "Cannot construct a root MemoryDataView without a container!");
         this.path = DataQuery.of();
         this.parent = this;
         this.container = (DataContainer) this;
@@ -229,8 +229,8 @@ public class MemoryDataView implements DataView {
     public DataView set(final DataQuery path, final Object value) {
         Objects.requireNonNull(path, "path");
         Objects.requireNonNull(value, "value");
-        checkState(this.container != null);
-        checkState(!path.parts().isEmpty(), "The path is empty");
+        Preconditions.checkState(this.container != null);
+        Preconditions.checkState(!path.parts().isEmpty(), "The path is empty");
         checkArgument(value != this, "Cannot set a DataView to itself.");
 
         final List<String> parts = path.parts();

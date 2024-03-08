@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.scoreboard.builder;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -35,6 +34,7 @@ import org.spongepowered.api.scoreboard.CollisionRules;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -167,8 +167,8 @@ public final class SpongeTeamBuilder implements Team.Builder {
 
     @Override
     public Team build() throws IllegalStateException {
-        checkState(this.name != null, "Name cannot be null!");
-        checkState(this.displayName != null, "DisplayName cannot be null!");
+        Preconditions.checkState(this.name != null, "Name cannot be null!");
+        Preconditions.checkState(this.displayName != null, "DisplayName cannot be null!");
 
         final Team team = (Team) new PlayerTeam(null, this.name);
         team.setDisplayName(this.displayName);
@@ -180,7 +180,7 @@ public final class SpongeTeamBuilder implements Team.Builder {
         team.setNameTagVisibility(this.nameTagVisibility.get());
         team.setDeathMessageVisibility(this.deathMessageVisibility.get());
         team.setCollisionRule(this.collisionRule.get());
-        for (final Component member: this.members) {
+        for (final Component member : this.members) {
             team.addMember(member);
         }
 

@@ -25,7 +25,6 @@
 package org.spongepowered.common.item.generation;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -38,6 +37,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.util.RandomProvider;
 import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -146,7 +146,7 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
 
         @Override
         public SpongeItemStackGenerator build() {
-            checkState(this.baseItem != null || !this.consumers.isEmpty(), "Must have at least a defined amount of consumers or a base item type!");
+            Preconditions.checkState(this.baseItem != null || !this.consumers.isEmpty(), "Must have at least a defined amount of consumers or a base item type!");
             return new SpongeItemStackGenerator(this);
         }
 

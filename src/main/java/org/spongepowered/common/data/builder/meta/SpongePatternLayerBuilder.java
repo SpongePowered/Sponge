@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.builder.meta;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
@@ -37,6 +36,7 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -100,8 +100,8 @@ public final class SpongePatternLayerBuilder extends AbstractDataBuilder<BannerP
 
     @Override
     public BannerPatternLayer build() {
-        checkState(this.shape != null);
-        checkState(this.color != null);
+        Preconditions.checkState(this.shape != null);
+        Preconditions.checkState(this.color != null);
         return new SpongePatternLayer(this.shape, this.color);
     }
 }

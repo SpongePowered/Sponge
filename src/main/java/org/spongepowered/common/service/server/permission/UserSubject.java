@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.players.ServerOpListEntry;
 import org.spongepowered.api.Sponge;
@@ -34,6 +33,7 @@ import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Objects;
 import java.util.Optional;

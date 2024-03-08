@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.crafting.shaped;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
@@ -46,6 +45,7 @@ import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -114,7 +114,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
     public RowsStep.ResultStep row(final int skip, final Ingredient... ingredients) {
         final int columns = ingredients.length + skip;
         if (!this.aisle.isEmpty()) {
-            checkState(this.aisle.get(0).length() == columns, "The rows have an inconsistent width.");
+            Preconditions.checkState(this.aisle.get(0).length() == columns, "The rows have an inconsistent width.");
         }
         final StringBuilder row = new StringBuilder();
         for (int i = 0; i < skip; i++) {
@@ -185,19 +185,19 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
 
     @Override
     public RecipeRegistration build0() {
-        checkState(!this.aisle.isEmpty(), "aisle has not been set");
-        checkState(!this.ingredientMap.isEmpty(), "no ingredients set");
-        checkState(!this.result.isEmpty(), "no result set");
+        Preconditions.checkState(!this.aisle.isEmpty(), "aisle has not been set");
+        Preconditions.checkState(!this.ingredientMap.isEmpty(), "no ingredients set");
+        Preconditions.checkState(!this.result.isEmpty(), "no result set");
 
         final Iterator<String> aisleIterator = this.aisle.iterator();
         String aisleRow = aisleIterator.next();
         final int width = aisleRow.length();
 
-        checkState(width > 0, "The aisle cannot be empty.");
+        Preconditions.checkState(width > 0, "The aisle cannot be empty.");
 
         while (aisleIterator.hasNext()) {
             aisleRow = aisleIterator.next();
-            checkState(aisleRow.length() == width, "The aisle has an inconsistent width.");
+            Preconditions.checkState(aisleRow.length() == width, "The aisle has an inconsistent width.");
         }
 
         final Map<Character, net.minecraft.world.item.crafting.Ingredient> ingredientsMap = this.ingredientMap.entrySet().stream().collect(
@@ -206,7 +206,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
         // Default space to Empty Ingredient
 //        ingredientsMap.putIfAbsent(' ', net.minecraft.item.crafting.Ingredient.EMPTY);
         final ShapedRecipePattern pattern = ShapedRecipePattern.of(ingredientsMap, this.aisle);
-        return new SpongeShapedCraftingRecipeRegistration((ResourceLocation)(Object) key, this.group, pattern,
+        return new SpongeShapedCraftingRecipeRegistration((ResourceLocation) (Object) key, this.group, pattern,
                 ItemStackUtil.toNative(this.result), this.resultFunction, this.remainingItemsFunction, this.pack, this.recipeCategory, this.craftingBookCategory);
     }
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.crafting.shapeless;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -45,6 +44,7 @@ import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.List;
 import java.util.Objects;
@@ -135,7 +135,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
 
     @Override
     public RecipeRegistration build0() {
-        checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
+        Preconditions.checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
         return new SpongeShapelessCraftingRecipeRegistration((ResourceLocation) (Object) key, this.group, this.ingredients,
                 ItemStackUtil.toNative(this.result), this.resultFunction, this.remainingItemsFunction, this.pack,
                 this.recipeCategory, this.craftingBookCategory);

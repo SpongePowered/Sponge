@@ -25,12 +25,12 @@
 package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.common.util.TypeTokenUtil;
 
 import java.lang.reflect.Type;
@@ -58,7 +58,7 @@ public final class SpongeEventContextKeyBuilder<T> extends AbstractResourceKeyed
 
     @Override
     public EventContextKey<T> build0() {
-        checkState(this.typeClass != null, "Allowed type cannot be null!");
+        Preconditions.checkState(this.typeClass != null, "Allowed type cannot be null!");
         return new SpongeEventContextKey<>(this);
     }
 

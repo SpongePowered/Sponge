@@ -25,7 +25,6 @@
 package org.spongepowered.common.network.status;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
 import io.netty.buffer.ByteBuf;
@@ -34,6 +33,7 @@ import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
 import org.spongepowered.api.network.status.Favicon;
+import org.spongepowered.common.util.Preconditions;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -123,8 +123,8 @@ public class SpongeFavicon implements Favicon {
             ByteBuf buf = Base64.decode(base64);
             try {
                 BufferedImage result = ImageIO.read(new ByteBufInputStream(buf));
-                checkState(result.getWidth() == 64, "favicon must be 64 pixels wide");
-                checkState(result.getHeight() == 64, "favicon must be 64 pixels high");
+                Preconditions.checkState(result.getWidth() == 64, "favicon must be 64 pixels wide");
+                Preconditions.checkState(result.getHeight() == 64, "favicon must be 64 pixels high");
                 return result;
             } finally {
                 buf.release();

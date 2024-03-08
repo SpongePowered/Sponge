@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.ipforward.server.network;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -44,6 +43,7 @@ import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.network.ConnectionBridge_IpForward;
 import org.spongepowered.common.ipforward.velocity.VelocityForwardingInfo;
+import org.spongepowered.common.util.Preconditions;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -63,7 +63,7 @@ public abstract class ServerLoginPacketListenerImplMixin_IpForward {
     @Inject(method = "handleHello", at = @At("HEAD"), cancellable = true)
     private void ipForward$sendVelocityIndicator(final ServerboundHelloPacket packet, final CallbackInfo info) {
         if (!this.server.usesAuthentication() && SpongeConfigs.getCommon().get().ipForwarding.mode == IpForwardingCategory.Mode.MODERN) {
-            checkState(!this.ipForward$sentVelocityForwardingRequest, "Sent additional login start message!");
+            Preconditions.checkState(!this.ipForward$sentVelocityForwardingRequest, "Sent additional login start message!");
             this.ipForward$sentVelocityForwardingRequest = true;
 
             this.requestedUsername = packet.name();

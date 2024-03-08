@@ -25,7 +25,6 @@
 package org.spongepowered.common.item;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -58,6 +57,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -309,7 +309,7 @@ public final class SpongeItemStack  {
         @SuppressWarnings({"unchecked", "rawtypes", "ConstantConditions"})
         @Override
         public ItemStack build() throws IllegalStateException {
-            checkState(this.type != null, "Item type has not been set");
+            Preconditions.checkState(this.type != null, "Item type has not been set");
 
             if (this.type == null || this.quantity <= 0) {
                 // If either type is none(air) or quantity is 0 return the vanilla EMPTY item

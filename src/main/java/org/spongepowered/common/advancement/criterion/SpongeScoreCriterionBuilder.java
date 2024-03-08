@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.advancement.criterion;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
+import org.spongepowered.common.util.Preconditions;
 
 public class SpongeScoreCriterionBuilder extends AbstractCriterionBuilder<ScoreAdvancementCriterion, ScoreAdvancementCriterion.Builder>
         implements ScoreAdvancementCriterion.Builder {
@@ -58,7 +58,7 @@ public class SpongeScoreCriterionBuilder extends AbstractCriterionBuilder<ScoreA
 
     @Override
     public ScoreAdvancementCriterion.Builder goal(final int goal) {
-        checkState(goal > 0, "The goal must be greater than zero.");
+        Preconditions.checkState(goal > 0, "The goal must be greater than zero.");
         this.goal = goal;
         return this;
     }

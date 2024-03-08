@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.cause.entity.damage;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -35,6 +34,7 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
+import org.spongepowered.common.util.Preconditions;
 
 public class SpongeDamageSourceBuilder implements DamageSource.Builder {
 
@@ -48,12 +48,12 @@ public class SpongeDamageSourceBuilder implements DamageSource.Builder {
     @SuppressWarnings("ConstantConditions")
     @Override
     public DamageSource build() throws IllegalStateException {
-        checkState(this.damageType != null, "DamageType was null!");
+        Preconditions.checkState(this.damageType != null, "DamageType was null!");
         if (this.location != null) {
-            checkState(this.blockSnapshot != null, "BlockSnapshot is null");
+            Preconditions.checkState(this.blockSnapshot != null, "BlockSnapshot is null");
         }
         if (this.blockSnapshot != null) {
-            checkState(this.location != null, "ServerLocation is null");
+            Preconditions.checkState(this.location != null, "ServerLocation is null");
         }
 
         final var source = new net.minecraft.world.damagesource.DamageSource(this.damageType, directEntity, causingEntity);

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.advancement;
 
-import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.gson.Gson;
@@ -40,6 +39,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.event.advancement.CriterionEvent;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
+import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
@@ -49,7 +49,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Type;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -165,9 +164,9 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
     @SuppressWarnings("rawtypes")
     @Override
     public Trigger<C> build() {
-        Objects.requireNonNull(this.name, "name");
-        checkState(!this.name.isEmpty(), "The name cannot be empty!");
-        checkState(this.configType != null, "The configType must be set");
+        requireNonNull(this.name, "name");
+        Preconditions.checkState(!this.name.isEmpty(), "The name cannot be empty!");
+        Preconditions.checkState(this.configType != null, "The configType must be set");
         return (Trigger<C>) new SpongeCriterionTrigger(this.configType, (Function) this.constructor, (Consumer) this.eventHandler, this.name);
     }
 
