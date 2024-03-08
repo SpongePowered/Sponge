@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity.player.tab;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
 import net.kyori.adventure.text.Component;
@@ -35,6 +34,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.EnumSet;
 import java.util.Objects;
@@ -57,12 +57,12 @@ public final class SpongeTabListEntry implements TabListEntry {
     public SpongeTabListEntry(
         final TabList list, final GameProfile profile, @Nullable final Component displayName, final int latency, final GameMode gameMode,
             final ProfilePublicKey.Data profilePublicKey) {
-        checkState(list instanceof SpongeTabList, "list is not a SpongeTabList");
+        Preconditions.checkState(list instanceof SpongeTabList, "list is not a SpongeTabList");
         this.list = (SpongeTabList) list;
-        this.profile = java.util.Objects.requireNonNull(profile, "profile");
+        this.profile = Objects.requireNonNull(profile, "profile");
         this.displayName = displayName;
         this.latency = latency;
-        this.gameMode = java.util.Objects.requireNonNull(gameMode, "game mode");
+        this.gameMode = Objects.requireNonNull(gameMode, "game mode");
         this.profilePublicKey = profilePublicKey;
     }
 

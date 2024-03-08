@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.service.game.pagination;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.service.pagination.PaginationList;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Objects;
 
@@ -104,7 +104,7 @@ public final class SpongePaginationBuilder implements PaginationList.Builder {
 
     @Override
     public PaginationList build() {
-        checkState(this.contents != null, "The contents of the pagination list cannot be null!");
+        Preconditions.checkState(this.contents != null, "The contents of the pagination list cannot be null!");
 
         if (this.paginationList == null) {
             this.paginationList = new SpongePaginationList(this.service, this.contents, this.title, this.header, this.footer, this.paginationSpacer,

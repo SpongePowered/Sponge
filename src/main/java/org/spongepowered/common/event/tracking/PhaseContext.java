@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -38,6 +37,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.util.MemoizedSupplier;
+import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Deque;
@@ -85,7 +85,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
     private @Nullable Object source;
 
     public P source(final Object owner) {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        Preconditions.checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.source = owner;
         return (P) this;
     }

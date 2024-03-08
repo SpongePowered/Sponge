@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -38,6 +37,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.common.util.VecHelper;
 
 public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
@@ -75,19 +75,19 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
 
     @Override
     public GrowablePhaseContext buildAndSwitch() {
-        checkState(this.pos != null, "BlockPos is null");
-        checkState(this.blockState != null, "BlockState is null");
+        Preconditions.checkState(this.pos != null, "BlockPos is null");
+        Preconditions.checkState(this.blockState != null, "BlockState is null");
         if (this.usedItem == null) {
             this.usedItem = ItemStackSnapshot.empty(); // No used item when growing naturally
         }
-        checkState(this.world != null, "World is null");
+        Preconditions.checkState(this.world != null, "World is null");
         this.priorContext = this.createdTracker.getPhaseContext();
-        checkState(this.priorContext != null, "Prior context is null");
+        Preconditions.checkState(this.priorContext != null, "Prior context is null");
         final SpongeBlockSnapshot.BuilderImpl builder = SpongeBlockSnapshot.BuilderImpl.pooled()
-            .world(((ServerLevel) this.world))
-            .position(VecHelper.toVector3i(this.pos))
-            .blockState(this.blockState)
-            .flag(BlockChangeFlags.NONE.withPhysics(true).withUpdateNeighbors(true).withNotifyObservers(true));
+                .world(((ServerLevel) this.world))
+                .position(VecHelper.toVector3i(this.pos))
+                .blockState(this.blockState)
+                .flag(BlockChangeFlags.NONE.withPhysics(true).withUpdateNeighbors(true).withNotifyObservers(true));
         this.priorContext.applyOwnerIfAvailable(builder::creator);
         this.priorContext.applyNotifierIfAvailable(builder::notifier);
         this.snapshot = builder.build();

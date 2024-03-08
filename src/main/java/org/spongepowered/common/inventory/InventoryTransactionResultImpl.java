@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -33,6 +32,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -179,7 +179,7 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
 
         @Override
         public InventoryTransactionResult.Poll build() {
-            checkState(this.resultType != null, "ResultType cannot be null!");
+            Preconditions.checkState(this.resultType != null, "ResultType cannot be null!");
             return new InventoryTransactionResultImpl(this);
         }
 

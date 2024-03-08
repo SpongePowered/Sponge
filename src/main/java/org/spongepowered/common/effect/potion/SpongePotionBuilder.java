@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.effect.potion;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -40,6 +40,7 @@ import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -141,11 +142,11 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
 
     @Override
     public PotionEffect build() throws IllegalStateException {
-        checkState(this.potionType != null, "Potion type has not been set");
+        Preconditions.checkState(this.potionType != null, "Potion type has not been set");
         if (this.duration.ticks() <= 0) {
             throw new IllegalStateException("Duration has not been set");
         }
-        return (PotionEffect) new net.minecraft.world.effect.MobEffectInstance((MobEffect) this.potionType,
+        return (PotionEffect) new MobEffectInstance((MobEffect) this.potionType,
                 (int) this.duration.ticks(),
                 this.amplifier,
                 this.isAmbient,

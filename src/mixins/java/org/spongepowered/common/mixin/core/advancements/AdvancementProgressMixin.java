@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.advancements;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
@@ -65,6 +64,7 @@ import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.util.Preconditions;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -86,8 +86,8 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
 
     @Override
     public Advancement bridge$getAdvancement() {
-        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
-        checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
+        Preconditions.checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
+        Preconditions.checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
 
         final var advancement = SpongeCommon.server().getAdvancements().get(this.impl$advancementKey);
         if (advancement == null) {
@@ -98,26 +98,26 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
 
     @Override
     public ResourceLocation bridge$getAdvancementKey() {
-        checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
+        Preconditions.checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
         return this.impl$advancementKey;
     }
 
     @Override
     public PlayerAdvancements bridge$getPlayerAdvancements() {
-        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
-        checkState(this.impl$playerAdvancements != null, "The playerAdvancements is not yet initialized");
+        Preconditions.checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
+        Preconditions.checkState(this.impl$playerAdvancements != null, "The playerAdvancements is not yet initialized");
         return this.impl$playerAdvancements;
     }
 
     @Override
     public void bridge$setPlayerAdvancements(PlayerAdvancements playerAdvancements) {
-        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
+        Preconditions.checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         this.impl$playerAdvancements = playerAdvancements;
     }
 
     @Override
     public void bridge$setAdvancementId(ResourceLocation key) {
-        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
+        Preconditions.checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         this.impl$advancementKey = key;
     }
 
@@ -173,7 +173,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
     }
 
     private Map<String, ImplementationBackedCriterionProgress> impl$getProgressMap() {
-        checkState(this.impl$progressMap != null, "progressMap isn't initialized");
+        Preconditions.checkState(this.impl$progressMap != null, "progressMap isn't initialized");
         return this.impl$progressMap;
     }
 
@@ -341,9 +341,9 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
      * @return The advancement
      */
     private Optional<Advancement> getOptionalAdvancement() {
-        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
-        checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
-        final net.minecraft.advancements.AdvancementHolder advancement = SpongeCommon.server().getAdvancements().get(this.impl$advancementKey);
+        Preconditions.checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
+        Preconditions.checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
+        final AdvancementHolder advancement = SpongeCommon.server().getAdvancements().get(this.impl$advancementKey);
         return Optional.ofNullable(advancement).map(AdvancementHolder::value).map(Advancement.class::cast);
     }
 }

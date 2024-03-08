@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.advancement;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Objects;
 
@@ -45,7 +45,7 @@ public class SpongeFilteredTriggerBuilder<C extends FilteredTriggerConfiguration
 
     @Override
     public FilteredTrigger<C> build() {
-        checkState(this.config != null, "The config must be set");
+        Preconditions.checkState(this.config != null, "The config must be set");
         return new SpongeFilteredTrigger(this.config);
     }
 

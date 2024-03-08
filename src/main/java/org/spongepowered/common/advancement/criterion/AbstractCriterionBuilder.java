@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.advancement.criterion;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -32,6 +31,7 @@ import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Objects;
 
@@ -63,7 +63,7 @@ public abstract class AbstractCriterionBuilder<T extends AdvancementCriterion, B
 
     @Override
     public T build() {
-        checkState(this.name != null, "The name must be set");
+        Preconditions.checkState(this.name != null, "The name must be set");
         return this.build0();
     }
 

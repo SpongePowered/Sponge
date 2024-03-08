@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -35,6 +34,7 @@ import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.common.command.parameter.subcommand.SpongeSubcommandParameterBuilder;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.HashMap;

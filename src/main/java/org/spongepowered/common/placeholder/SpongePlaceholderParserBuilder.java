@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.placeholder;
 
-import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.placeholder.PlaceholderContext;
 import org.spongepowered.api.placeholder.PlaceholderParser;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.function.Function;
 

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.map;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,6 +38,7 @@ import org.spongepowered.common.map.decoration.SpongeMapDecorationType;
 import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MapUtil;
+import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.math.vector.Vector2i;
 
 @Mixin(MapDecoration.class)
@@ -69,7 +69,7 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
         Preconditions.checkState(MapUtil.isInMapDecorationBounds(position.y()), "y position out of bounds");
         this.x = (byte) position.x();
         this.y = (byte) position.y();
-        ((MapDecorationBridge)this).bridge$markAllDirty();
+        ((MapDecorationBridge) this).bridge$markAllDirty();
     }
 
     @Override

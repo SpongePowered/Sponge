@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.ticks;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.util.Ticks;
 import net.minecraft.core.BlockPos;
@@ -40,6 +39,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.ticks.LevelTicksBridge;
 import org.spongepowered.common.bridge.world.ticks.TickNextTickDataBridge;
+import org.spongepowered.common.util.Preconditions;
 
 import java.time.Duration;
 
@@ -63,14 +63,14 @@ public abstract class ScheduledTickMixin<T> implements TickNextTickDataBridge<T>
 
     @Override
     public void bridge$setWorld(final Level world) {
-        checkState(this.impl$location == null, "World already known");
+        Preconditions.checkState(this.impl$location == null, "World already known");
         final BlockPos position = this.pos;
         this.impl$location = ServerLocation.of((ServerWorld) world, position.getX(), position.getY(), position.getZ());
     }
 
     @Override
     public ServerLocation bridge$getLocation() {
-        checkState(this.impl$location != null, "Unable to determine location at this time");
+        Preconditions.checkState(this.impl$location != null, "Unable to determine location at this time");
         return this.impl$location;
     }
 

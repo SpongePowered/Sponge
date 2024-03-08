@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.advancement;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.AdvancementTypes;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Objects;
 
@@ -98,12 +99,12 @@ public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
     @SuppressWarnings("ConstantConditions")
     @Override
     public DisplayInfo build() {
-        checkState(this.title != null, "Title has not been set");
-        checkState(this.icon != null, "Icon has not been set");
+        Preconditions.checkState(this.title != null, "Title has not been set");
+        Preconditions.checkState(this.icon != null, "Icon has not been set");
         final net.minecraft.network.chat.Component title = SpongeAdventure.asVanilla(this.title);
         final net.minecraft.network.chat.Component description = SpongeAdventure.asVanilla(this.description);
         final net.minecraft.advancements.AdvancementType frameType = (net.minecraft.advancements.AdvancementType) (Object) this.advancementType;
-        final net.minecraft.world.item.ItemStack icon = (net.minecraft.world.item.ItemStack) (Object) this.icon.createStack();
+        final ItemStack icon = (ItemStack) (Object) this.icon.createStack();
         return (DisplayInfo) new net.minecraft.advancements.DisplayInfo(icon, title, description, null,
                 frameType, this.showToast, this.announceToChat, this.hidden);
     }

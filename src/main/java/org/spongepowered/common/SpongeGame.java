@@ -25,7 +25,6 @@
 package org.spongepowered.common;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Client;
@@ -47,6 +46,7 @@ import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.server.ServerConsoleSystemSubject;
 import org.spongepowered.common.util.LocaleCache;
+import org.spongepowered.common.util.Preconditions;
 
 import java.nio.file.Path;
 import java.util.Locale;

@@ -25,7 +25,6 @@
 package org.spongepowered.common.item.enchantment;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -35,6 +34,7 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -80,8 +80,8 @@ public final class SpongeEnchantmentBuilder extends AbstractDataBuilder<Enchantm
 
     @Override
     public Enchantment build() {
-        checkState(this.enchantmentType != null, "The enchantment type must be set!");
-        checkState(this.level != null, "The level of the enchantment must be set!");
+        Preconditions.checkState(this.enchantmentType != null, "The enchantment type must be set!");
+        Preconditions.checkState(this.level != null, "The level of the enchantment must be set!");
         return new SpongeEnchantment(this.enchantmentType, this.level);
     }
 

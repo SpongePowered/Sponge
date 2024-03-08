@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.recipe.smithing;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
@@ -44,6 +43,7 @@ import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -115,7 +115,7 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
     @Override
     public EndStep result(Function<Inventory, ItemStack> resultFunction, ItemStack exemplaryResult) {
         Objects.requireNonNull(exemplaryResult, "exemplaryResult");
-        checkState(!exemplaryResult.isEmpty(), "exemplaryResult must not be empty");
+        Preconditions.checkState(!exemplaryResult.isEmpty(), "exemplaryResult must not be empty");
 
         this.result = exemplaryResult;
         this.resultFunction = (inv) -> ItemStackUtil.toNative(resultFunction.apply(InventoryUtil.toInventory(inv)));

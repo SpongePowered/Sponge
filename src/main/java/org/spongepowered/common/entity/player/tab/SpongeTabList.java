@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity.player.tab;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
@@ -43,6 +42,7 @@ import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoUpdatePacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.profile.SpongeGameProfile;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -133,7 +133,7 @@ public final class SpongeTabList implements TabList {
     @Override
     public TabList addEntry(final TabListEntry entry) throws IllegalArgumentException {
         Objects.requireNonNull(entry, "builder");
-        checkState(entry.list().equals(this), "the provided tab list entry was not created for this tab list");
+        Preconditions.checkState(entry.list().equals(this), "the provided tab list entry was not created for this tab list");
 
         this.addEntry(entry, true);
 

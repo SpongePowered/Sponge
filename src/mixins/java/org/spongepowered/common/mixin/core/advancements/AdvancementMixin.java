@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.advancements;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
@@ -51,6 +50,7 @@ import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -127,7 +127,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
 
     @Override
     public AdvancementCriterion bridge$getCriterion() {
-        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
+        Preconditions.checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         return this.impl$criterion;
     }
 
@@ -140,7 +140,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
 
     @Override
     public List<Component> bridge$getToastText() {
-        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
+        Preconditions.checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         return this.impl$toastText;
     }
 

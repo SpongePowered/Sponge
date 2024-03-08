@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.gson.stream.JsonWriter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.common.util.Preconditions;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -100,7 +100,7 @@ public final class DataViewJsonWriter extends JsonWriter {
 
     @Override
     public JsonWriter endArray() {
-        checkState(!this.stack.isEmpty() && this.pendingKey == null && this.pop() instanceof List);
+        Preconditions.checkState(!this.stack.isEmpty() && this.pendingKey == null && this.pop() instanceof List);
         return this;
     }
 
@@ -113,7 +113,7 @@ public final class DataViewJsonWriter extends JsonWriter {
 
         Object parent = this.peek();
         if (parent instanceof DataView) {
-            checkState(this.pendingKey != null);
+            Preconditions.checkState(this.pendingKey != null);
             ((DataView) parent).createView(this.pendingKey);
             this.pendingKey = null;
             return this;
@@ -125,13 +125,13 @@ public final class DataViewJsonWriter extends JsonWriter {
 
     @Override
     public JsonWriter endObject() {
-        checkState(!this.stack.isEmpty() && this.pendingKey == null && this.pop() instanceof DataView);
+        Preconditions.checkState(!this.stack.isEmpty() && this.pendingKey == null && this.pop() instanceof DataView);
         return this;
     }
 
     @Override
     public JsonWriter name(String name) {
-        checkState(!this.stack.isEmpty() && this.pendingKey == null && this.peek() instanceof DataView);
+        Preconditions.checkState(!this.stack.isEmpty() && this.pendingKey == null && this.peek() instanceof DataView);
         this.pendingKey = DataQuery.of(name);
         return this;
     }
