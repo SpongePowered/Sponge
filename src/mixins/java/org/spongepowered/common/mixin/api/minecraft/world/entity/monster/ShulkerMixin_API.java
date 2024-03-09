@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
-import static java.util.Objects.requireNonNull;
-
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
@@ -36,6 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.projectile.ProjectileUtil;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.animal.AbstractGolemMixin_API;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -56,6 +55,6 @@ public abstract class ShulkerMixin_API extends AbstractGolemMixin_API implements
     @Override
     public <T extends Projectile> Optional<T> launchProjectileTo(final EntityType<T> projectileType, final Entity target) {
         return ProjectileUtil
-                .launchWithArgs(requireNonNull(projectileType, "projectileType"), Shulker.class, this, null, requireNonNull(target, "target"));
+                .launchWithArgs(Objects.requireNonNull(projectileType, "projectileType"), Shulker.class, this, null, Objects.requireNonNull(target, "target"));
     }
 }

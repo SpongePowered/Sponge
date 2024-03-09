@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.server.network;
 
-import static java.util.Objects.requireNonNull;
-
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
@@ -39,6 +37,7 @@ import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.net.InetSocketAddress;
+import java.util.Objects;
 
 @Mixin(value = ServerCommonPacketListenerImpl.class, priority = 999)
 public abstract class ServerCommonPacketListenerImplMixin_API implements ServerSideConnection {
@@ -57,7 +56,7 @@ public abstract class ServerCommonPacketListenerImplMixin_API implements ServerS
 
     @Override
     public void close(final Component reason) {
-        requireNonNull(reason, "reason");
+        Objects.requireNonNull(reason, "reason");
         this.shadow$disconnect(SpongeAdventure.asVanilla(reason));
     }
 

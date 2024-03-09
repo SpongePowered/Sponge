@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.holder;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.DataHolder;
@@ -58,7 +56,7 @@ public interface SpongeDataHolder extends DataHolder {
      * @return The data provider
      */
     default <V extends Value<E>, E> DataProvider<V, E> impl$getProviderFor(final Key<V> key, final DataHolder dataHolder) {
-        requireNonNull(key, "key");
+        Objects.requireNonNull(key, "key");
         return SpongeDataManager.getProviderRegistry().getProvider(key, dataHolder.getClass());
     }
 

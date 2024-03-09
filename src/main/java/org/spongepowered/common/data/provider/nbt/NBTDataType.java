@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.data.provider.nbt;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.base.MoreObjects;
+
+import java.util.Objects;
 
 public final class NBTDataType {
 
     private final String name;
 
     public NBTDataType(final String name) {
-        requireNonNull(name, "name");
+        Objects.requireNonNull(name, "name");
         this.name = name;
     }
 
