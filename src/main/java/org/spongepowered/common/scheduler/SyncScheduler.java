@@ -24,35 +24,86 @@
  */
 package org.spongepowered.common.scheduler;
 
+import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.DelayQueue;
+import java.util.concurrent.*;
 
-public abstract class SyncScheduler extends SpongeScheduler {
+public class SyncScheduler extends SpongeScheduler {
 
-    private final BlockingQueue<DelayedRunnable> workQueue
-            = new DelayQueue<>();
+    private final BlockingQueue<RunnableScheduledFuture<?>>
+            ticksQueue = new DelayQueue<>(),
+            timedQueue = new DelayQueue<>();
+    private long timestamp;
 
-    SyncScheduler(final String tag) {
+
+    protected SyncScheduler(final String tag) {
         super(tag);
     }
 
     @Override
-    public void submit(DelayedRunnable task) {
-        this.workQueue.add(task);
+    public ScheduledFuture<?> scheduleAtTick(Runnable command, long ticks) {
+        final RunnableScheduledFuture<?> f = new SchedFutureTask<>(
+                command, null,
+                () -> timestamp,
+                ticks * TICK_DURATION_NS);
+        this.ticksQueue.add(f);
+        return f;
     }
 
-    /**
-     * The hook to update the Ticks known by the SyncScheduler.
-     */
+    @Override
+    public ScheduledFuture<?> scheduleAtTime(Runnable command, long nanos) {
+        final RunnableScheduledFuture<?> f = new SchedFutureTask<>(
+                command, null,
+                Clock.REAL_TIME,
+                nanos);
+        this.timedQueue.add(f);
+        return f;
+    }
+
     public void tick() {
+        timestamp += TICK_DURATION_NS;
         for (Runnable task;
-             (task = this.workQueue.poll()) != null;
+             (task = this.ticksQueue.poll()) != null;
+             task.run());
+        for (Runnable task;
+             (task = this.timedQueue.poll()) != null;
              task.run());
     }
+
 
     @Override
     public void close() throws Exception {
         throw new UnsupportedOperationException();
+    }
+
+
+    private static class SchedFutureTask<V>
+            extends FutureTask<V>
+            implements RunnableScheduledFuture<V> {
+        private final Clock clock;
+        private final long delay;
+        SchedFutureTask(Runnable runnable, V result,
+                        Clock clock, long delay) {
+            super(runnable, result);
+            this.clock = clock;
+            this.delay = delay;
+        }
+        @Override
+        public boolean isPeriodic() {
+            return false;
+        }
+
+        @Override
+        public long getDelay(@NotNull TimeUnit unit) {
+            return unit.convert(
+                    this.delay - clock.currentNanos(),
+                    TimeUnit.NANOSECONDS);
+        }
+        @Override
+        public int compareTo(@NotNull Delayed o) {
+            return Long.compare(
+                    this.getDelay(TimeUnit.NANOSECONDS),
+                    o.getDelay(TimeUnit.NANOSECONDS));
+        }
     }
 }

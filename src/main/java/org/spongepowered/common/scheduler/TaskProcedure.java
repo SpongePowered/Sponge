@@ -27,8 +27,25 @@ package org.spongepowered.common.scheduler;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 
+import java.time.Duration;
 
 public interface TaskProcedure extends Task {
 
     void execute(ScheduledTask task) throws Exception;
+
+
+
+    Time intervalTime();
+
+    Time delayTime();
+
+    @Override
+    default Duration delay() {
+        return delayTime().toDuration();
+    }
+
+    @Override
+    default Duration interval() {
+        return intervalTime().toDuration();
+    }
 }

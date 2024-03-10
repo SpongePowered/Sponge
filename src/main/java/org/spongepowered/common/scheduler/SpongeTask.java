@@ -45,13 +45,12 @@ public final class SpongeTask implements TaskProcedure {
 
     private final PluginContainer plugin;
     private final Consumer<ScheduledTask> executor;
-    private final Duration delay, interval;
+    private final Time delay, interval;
 
 
     SpongeTask(final PluginContainer plugin,
                final Consumer<ScheduledTask> executor,
-               final Duration delay,
-               final Duration interval) {
+               final Time delay, final Time interval) {
         this.plugin = plugin;
         this.executor = executor;
         this.delay = delay;
@@ -79,13 +78,13 @@ public final class SpongeTask implements TaskProcedure {
     }
 
     @Override
-    public Duration delay() {
-        return this.delay;
+    public Time intervalTime() {
+        return this.interval;
     }
 
     @Override
-    public Duration interval() {
-        return this.interval;
+    public Time delayTime() {
+        return this.delay;
     }
 
     @Override
@@ -98,12 +97,12 @@ public final class SpongeTask implements TaskProcedure {
     }
 
     public static final class BuilderImpl implements Task.Builder {
-        private static final int TICK_DURATION_MS = 50;
-        private static final long TICK_DURATION_NS = TimeUnit.NANOSECONDS
-                .convert(TICK_DURATION_MS, TimeUnit.MILLISECONDS);
+
         private @Nullable Consumer<ScheduledTask> executor;
         private @Nullable PluginContainer plugin;
-        private Duration delay = Duration.ZERO, interval = Duration.ZERO;
+
+        private Time delay = Time.ZERO;
+        private Time interval = Time.ZERO;
 
         @Override
         public Task.Builder execute(final Consumer<ScheduledTask> executor) {
@@ -113,53 +112,57 @@ public final class SpongeTask implements TaskProcedure {
 
         @Override
         public Task.Builder delay(final long delay, final TemporalUnit unit) {
-            Objects.requireNonNull(unit);
+            Objects.requireNonNull(unit, "unit");
             if (delay < 0) {
                 throw new IllegalArgumentException("Delay must be equal to or greater than zero!");
             }
-            this.delay = Duration.of(delay, unit);
+            this.delay = new Time.RealTime(unit.getDuration().toNanos() * delay);
             return this;
         }
 
         @Override
         public Task.Builder delay(final long delay, final TimeUnit unit) {
-            Objects.requireNonNull(unit);
+            Objects.requireNonNull(unit, "unit");
             if (delay < 0) {
                 throw new IllegalArgumentException("Delay must be equal to or greater than zero!");
             }
-            this.delay = Duration.of(delay, unit.toChronoUnit());
+            this.delay = new Time.RealTime(unit.toNanos(delay));
             return this;
         }
 
         @Override
         public Task.Builder delay(final Ticks delay) {
-            Objects.requireNonNull(delay);
+            Objects.requireNonNull(delay, "delay");
             if (delay.ticks() < 0) {
                 throw new IllegalArgumentException("Delay must be equal to or greater than zero!");
             }
-            this.delay = Duration.ofNanos(delay.ticks() * TICK_DURATION_NS);
+            this.delay = new Time.TickTime(
+                    delay.ticks() * SpongeScheduler.TICK_DURATION_NS);
             return this;
         }
 
         @Override
         public Task.Builder delay(final Duration delay) {
-            this.delay = Objects.requireNonNull(delay, "delay");
+            Objects.requireNonNull(delay, "delay");
+            this.delay = new Time.RealTime(delay.toNanos());
             return this;
         }
 
         @Override
         public Task.Builder interval(final Duration interval) {
-            this.interval = Objects.requireNonNull(interval, "interval");
+            Objects.requireNonNull(interval, "interval");
+            this.interval = new Time.RealTime(interval.toNanos());
             return this;
         }
 
         @Override
-        public Task.Builder interval(final long interval, final TemporalUnit unit) {
+        public Task.Builder interval(final long delay, final TemporalUnit unit) {
             Objects.requireNonNull(unit, "unit");
-            if (interval < 0) {
+            if (delay < 0) {
                 throw new IllegalArgumentException("Delay must be equal to or greater than zero!");
             }
-            this.interval = Duration.of(interval, unit);
+            this.interval = new Time.RealTime(
+                    unit.getDuration().toNanos() * delay);
             return this;
         }
 
@@ -169,7 +172,7 @@ public final class SpongeTask implements TaskProcedure {
             if (interval < 0) {
                 throw new IllegalArgumentException("Interval must be equal to or greater than zero!");
             }
-            this.interval = Duration.of(interval, unit.toChronoUnit());
+            this.interval = new Time.RealTime(unit.toNanos(interval));
             return this;
         }
 
@@ -179,7 +182,8 @@ public final class SpongeTask implements TaskProcedure {
             if (interval.ticks() < 0) {
                 throw new IllegalArgumentException("Interval must be equal to or greater than zero!");
             }
-            this.interval = Duration.ofNanos(interval.ticks() * TICK_DURATION_NS);
+            this.interval = new Time.TickTime(
+                    interval.ticks() * SpongeScheduler.TICK_DURATION_NS);
             return this;
         }
 
@@ -191,7 +195,9 @@ public final class SpongeTask implements TaskProcedure {
 
         @Override
         public Task.Builder from(final Task value) {
-            final SpongeTask task = (SpongeTask) Objects.requireNonNull(value, "value");
+
+            final SpongeTask task = (SpongeTask)
+                    Objects.requireNonNull(value, "value");
             this.executor = task.executor;
             this.plugin = task.plugin();
             this.interval = task.interval;
@@ -203,8 +209,8 @@ public final class SpongeTask implements TaskProcedure {
         public Task.Builder reset() {
             this.executor = null;
             this.plugin = null;
-            this.interval = Duration.ZERO;
-            this.delay = Duration.ZERO;
+            this.interval = Time.ZERO;
+            this.delay = Time.ZERO;
             return this;
         }
 
@@ -213,7 +219,8 @@ public final class SpongeTask implements TaskProcedure {
             Objects.requireNonNull(this.executor, "executor");
             Objects.requireNonNull(this.plugin, "plugin");
 
-            return new SpongeTask(this.plugin, this.executor, this.delay, this.interval);
+            return new SpongeTask(this.plugin, this.executor,
+                    this.delay, this.interval);
         }
     }
 }

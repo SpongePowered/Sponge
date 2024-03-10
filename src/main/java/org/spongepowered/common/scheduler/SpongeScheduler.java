@@ -27,6 +27,7 @@ package org.spongepowered.common.scheduler;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scheduler.TaskExecutorService;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -37,49 +38,20 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public abstract class SpongeScheduler implements AbstractScheduler {
+
     private static final AtomicLong TASK_CREATED_COUNTER = new AtomicLong();
-    private final String tag;
-    private final ConcurrentMap<UUID, AbstractScheduledTask> cachedTasks =
-            new ConcurrentHashMap<>();
+    static final int TICK_DURATION_MS = 50;
+    static final long TICK_DURATION_NS = TimeUnit
+            .NANOSECONDS
+            .convert(TICK_DURATION_MS, TimeUnit.MILLISECONDS);
+
     private final AtomicLong sequenceNumber = new AtomicLong();
+    private final String tag;
+    private final ConcurrentMap<UUID, ScheduledTask> cachedTasks
+            = new ConcurrentHashMap<>();
 
-    SpongeScheduler(final String tag) {
+    protected SpongeScheduler(final String tag) {
         this.tag = tag;
-    }
-
-    @Override
-    public AbstractScheduledTask submit(Task task) {
-        final String name =
-                task.plugin().metadata().id() +
-                        "-" +
-                        TASK_CREATED_COUNTER.incrementAndGet();
-        return this.submit(task, name);
-    }
-
-
-    @Override
-    public AbstractScheduledTask submit(Task task, String name) {
-        final long number = this.sequenceNumber.getAndIncrement();
-        final TaskProcedure sp = (TaskProcedure) task;
-
-        final long start = System.nanoTime() + sp.delay().toNanos();
-
-        final UUID uuid = new UUID(number, System.identityHashCode(this));
-
-        final AbstractScheduledTask scheduledTask =
-                new SpongeScheduledTask(this,
-                        "%s-%s-#%s".formatted(name, this.tag, number), uuid,
-                        sp, start) {
-                    @Override
-                    public void run() {
-                        super.run();
-                        if (this.isCancelled() || !this.isPeriodic())
-                            cachedTasks.remove(uniqueId());
-                    }
-        };
-        cachedTasks.put(uuid, scheduledTask);
-        submit(scheduledTask);
-        return scheduledTask;
     }
 
     @Override
@@ -124,10 +96,69 @@ public abstract class SpongeScheduler implements AbstractScheduler {
         return new SpongeTaskExecutorService(() -> Task.builder().plugin(plugin), this);
     }
 
+    @Override
+    public AbstractScheduledTask submit(Task task) {
+        final String name =
+                task.plugin().metadata().id() +
+                        "-" +
+                        TASK_CREATED_COUNTER.incrementAndGet();
+        return this.submit(task, name);
+    }
+    @Override
+    public AbstractScheduledTask submit(Task task, String name) {
+        final SpongeTask st = (SpongeTask) task;
+
+        final long number = this.sequenceNumber.getAndIncrement();
+
+        final UUID uuid = new UUID(number, System.identityHashCode(this));
+
+        final ScheduledTaskEnvelope sched = new ScheduledTaskEnvelope(
+                this, task,
+                "%s-%s-#%s".formatted(name, this.tag, number), uuid) {
+            @Override
+            public boolean cancel() {
+                boolean cancelled = super.cancel();
+                if (cancelled)
+                    cachedTasks.remove(uniqueId());
+                return cancelled;
+            }
+        };
+        cachedTasks.put(sched.uniqueId(), sched);
+        exec(sched, st, true);
+        return sched;
+    }
+    private void exec(ScheduledTaskEnvelope task, SpongeTask procedure, boolean first) {
+        if (task.isCancelled()) {
+            return;
+        }
+        final Time time = first ? procedure.delayTime() : procedure.intervalTime();
+        final long nanos = time.timeNanos();;
+        if (!first && nanos == 0) {
+            this.cachedTasks.remove(task.uniqueId());
+            return;
+        }
+        final Runnable command = () -> {
+            if (task.isCancelled()) {
+                return;
+            }
+            try {
+                procedure.execute(task);
+                this.exec(task, procedure, false);
+            } catch (final ExecutionException ex) {
+                SpongeCommon.logger().error(
+                        "The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
+                        task.name(), procedure.plugin().metadata().id(),
+                        ex);
+            }
+        };
+
+        task.delayed = time.tickBased()
+                ? scheduleAtTick(command, nanos)
+                : scheduleAtTime(command, nanos);
+    }
     protected Collection<ScheduledTask> activeTasks() {
         return Collections.unmodifiableCollection(this.cachedTasks.values());
     }
-
     public <V> Future<V> execute(final Callable<V> callable) {
         final FutureTask<V> runnable = new FutureTask<>(callable);
         this.submit(new SpongeTask.BuilderImpl()

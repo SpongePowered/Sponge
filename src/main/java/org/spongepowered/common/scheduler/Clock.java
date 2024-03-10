@@ -24,27 +24,11 @@
  */
 package org.spongepowered.common.scheduler;
 
-import org.spongepowered.api.scheduler.Scheduler;
-import org.spongepowered.api.scheduler.Task;
-
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-public interface AbstractScheduler extends Scheduler, AutoCloseable {
-
-    ScheduledFuture<?> scheduleAtTick(Runnable command, long ticks);
-
-    ScheduledFuture<?> scheduleAtTime(Runnable command, long nanos);
+@FunctionalInterface
+public interface Clock {
 
 
-    @Override
-    AbstractScheduledTask submit(Task task);
+    long currentNanos();
 
-    @Override
-    AbstractScheduledTask submit(Task task, String name);
-
-    default ScheduledFuture<?>
-    scheduleAtTime(Runnable command, long time, TimeUnit unit) {
-        return scheduleAtTime(command, unit.convert(time, TimeUnit.NANOSECONDS));
-    }
+    Clock REAL_TIME = System::nanoTime;
 }

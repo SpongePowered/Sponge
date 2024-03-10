@@ -24,31 +24,40 @@
  */
 package org.spongepowered.common.scheduler;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.Delayed;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-public interface DelayedRunnable extends Delayed, Runnable {
+public interface Time {
+
+    Time ZERO = new RealTime(0);
+
+    boolean tickBased();
 
 
-    @Override
-    default int compareTo(@NotNull final Delayed other) {
-        return other == this ? 0 : Long.compare(
-                this.getDelay(TimeUnit.NANOSECONDS),
-                other.getDelay(TimeUnit.NANOSECONDS)
-        );
+    long timeNanos();
+
+
+    default long convert(TimeUnit unit) {
+        return unit.convert(timeNanos(), TimeUnit.NANOSECONDS);
     }
-    record NoDelayRunnable(Runnable origin) implements DelayedRunnable {
+
+    default Duration toDuration() {
+        return Duration.ofNanos(timeNanos());
+    }
+
+
+    record RealTime(long timeNanos) implements Time {
 
         @Override
-        public void run() {
-            this.origin.run();
+        public boolean tickBased() {
+            return false;
         }
+    }
+    record TickTime(long timeNanos) implements Time {
 
         @Override
-        public long getDelay(@NotNull TimeUnit unit) {
-            return 0;
+        public boolean tickBased() {
+            return true;
         }
     }
 }

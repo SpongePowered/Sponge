@@ -24,22 +24,31 @@
  */
 package org.spongepowered.common.scheduler;
 
+import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.scheduler.*;
+import org.spongepowered.api.scheduler.ScheduledTask;
+import org.spongepowered.api.scheduler.ScheduledTaskFuture;
+import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.scheduler.TaskExecutorService;
+import org.spongepowered.api.scheduler.TaskFuture;
 
 import java.time.temporal.TemporalUnit;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.AbstractExecutorService;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
-class SpongeTaskExecutorService
-        extends AbstractExecutorService
-        implements TaskExecutorService {
+class SpongeTaskExecutorService extends AbstractExecutorService implements TaskExecutorService {
 
     private final Supplier<Task.Builder> taskBuilderProvider;
-    private final AbstractScheduler scheduler;
+    private final SpongeScheduler scheduler;
 
-    SpongeTaskExecutorService(final Supplier<Task.Builder> taskBuilderProvider, final AbstractScheduler scheduler) {
+    SpongeTaskExecutorService(final Supplier<Task.Builder> taskBuilderProvider, final SpongeScheduler scheduler) {
         this.taskBuilderProvider = taskBuilderProvider;
         this.scheduler = scheduler;
     }
@@ -58,7 +67,7 @@ class SpongeTaskExecutorService
 
     @Override
     public List<Runnable> shutdownNow() {
-        return List.of();
+        return ImmutableList.of();
     }
 
     @Override
@@ -202,7 +211,7 @@ class SpongeTaskExecutorService
 
         @Override
         public boolean isPeriodic() {
-            return this.task.isPeriodic();
+            return !this.task.task().interval().isZero();
         }
 
         @Override
@@ -222,7 +231,7 @@ class SpongeTaskExecutorService
 
         @Override
         public boolean cancel(final boolean mayInterruptIfRunning) {
-            this.task.cancel(); // Ensure Sponge is not going to try to run a cancelled task.
+            this.task.cancel(); //Ensure Sponge is not going to try to run a cancelled task.
             return this.runnable.cancel(mayInterruptIfRunning);
         }
 
@@ -247,7 +256,6 @@ class SpongeTaskExecutorService
         @Override
         public V get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             return this.runnable.get(timeout, unit);
-
         }
     }
 

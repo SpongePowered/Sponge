@@ -24,72 +24,32 @@
  */
 package org.spongepowered.common.scheduler;
 
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.common.SpongeCommon;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.util.UUID;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
-public class SpongeScheduledTask implements AbstractScheduledTask {
-    private final AbstractScheduler scheduler;
+public class ScheduledTaskEnvelope implements AbstractScheduledTask {
+    private final Scheduler scheduler;
+
+    private final Task task;
     private final String name;
     private final UUID uuid;
-    private final TaskProcedure src;
-    private volatile boolean cancelled = false;
-    private long time;
+    private volatile boolean cancelled;
+    volatile Delayed delayed;
 
-    SpongeScheduledTask(final AbstractScheduler scheduler,
-                        final String name, final UUID uuid,
-                        final TaskProcedure src,
-                        final long start) {
+    public ScheduledTaskEnvelope(Scheduler scheduler,
+                                 Task task,
+                                 String name, UUID uuid) {
         this.scheduler = scheduler;
+        this.task = task;
         this.name = name;
         this.uuid = uuid;
-        this.src = src;
-        this.time = start;
-    }
-    @Override
-    public void run() {
-        if (this.isCancelled()) {
-            return;
-        }
-        final TaskProcedure x = this.src;
-        try {
-            x.execute(this);
-        } catch (final Exception ex) {
-            SpongeCommon.logger().error(
-                    "The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
-                    name(), x.plugin().metadata().id(),
-                    ex);
-        } finally {
-            if (isPeriodic()) {
-                this.time += x.interval().toNanos();
-                VarHandle.releaseFence();
-                this.scheduler.submit(this);
-            }
-        }
-    }
-
-    @Override
-    public long getDelay(TimeUnit unit) {
-        VarHandle.acquireFence();
-        final long r = this.time;
-        return unit.convert(r - System.nanoTime(), NANOSECONDS);
-    }
-
-    @Override
-    public Scheduler scheduler() {
-        return this.scheduler;
-    }
-
-    @Override
-    public Task task() {
-        return this.src;
     }
 
     @Override
@@ -104,8 +64,13 @@ public class SpongeScheduledTask implements AbstractScheduledTask {
     }
 
     @Override
-    public boolean isPeriodic() {
-        return !this.src.interval().isZero();
+    public Scheduler scheduler() {
+        return this.scheduler;
+    }
+
+    @Override
+    public Task task() {
+        return this.task;
     }
 
     @Override
@@ -118,12 +83,18 @@ public class SpongeScheduledTask implements AbstractScheduledTask {
         return this.name;
     }
 
+    @Override
+    public long getDelay(@NotNull TimeUnit unit) {
+        return this.delayed.getDelay(unit);
+    }
+
     // VarHandle mechanic
     private static final VarHandle CANCELLED;
+
     static {
         try {
             MethodHandles.Lookup l = MethodHandles.lookup();
-            CANCELLED = l.findVarHandle(SpongeScheduledTask.class,
+            CANCELLED = l.findVarHandle(ScheduledTaskEnvelope.class,
                     "cancelled", boolean.class);
         } catch (ReflectiveOperationException e) {
             throw new ExceptionInInitializerError(e);
