@@ -27,30 +27,23 @@ package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.EnchantmentMenu;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.inventory.ShulkerBoxMenu;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedMenuBridge;
 
-@Mixin(EnchantmentMenu.class)
-public abstract class EnchantmentMenuMixin_TrackedMenuBridge_Inventory {
+@Mixin(ShulkerBoxMenu.class)
+public abstract class ShulkerBoxMenuMixin_TrackedMenuBridge_Inventory {
 
-    // @formatter:off
-    @Shadow @Final private Container enchantSlots;
-    // @formatter:on
-
-    @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/inventory/ContainerLevelAccess;)V", at = @At("RETURN"))
-    private void inventory$attachContainerMenu(final int $$0, final Inventory $$1, final ContainerLevelAccess $$2, final CallbackInfo ci) {
+    @Inject(method = "<init>(ILnet/minecraft/world/entity/player/Inventory;Lnet/minecraft/world/Container;)V", at = @At("RETURN"))
+    private void inventory$attachContainerMenu(final int $$0, final Inventory $$1, final Container $$2, final CallbackInfo ci) {
         if ($$1 instanceof final TrackedMenuBridge trackedMenu) {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }
 
-        if (this.enchantSlots instanceof final TrackedMenuBridge trackedMenu) {
+        if ($$2 instanceof final TrackedMenuBridge trackedMenu) {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }
     }

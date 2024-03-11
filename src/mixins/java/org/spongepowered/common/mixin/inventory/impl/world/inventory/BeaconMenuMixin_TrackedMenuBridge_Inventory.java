@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.BeaconMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,7 +45,11 @@ public abstract class BeaconMenuMixin_TrackedMenuBridge_Inventory {
     // @formatter:on
 
     @Inject(method = "<init>(ILnet/minecraft/world/Container;Lnet/minecraft/world/inventory/ContainerData;Lnet/minecraft/world/inventory/ContainerLevelAccess;)V", at = @At("RETURN"))
-    private void inventory$attachContainerMenu(final CallbackInfo ci) {
+    private void inventory$attachContainerMenu(final int $$0, final Container $$1, final ContainerData $$2, final ContainerLevelAccess $$3, final CallbackInfo ci) {
+        if ($$1 instanceof final TrackedMenuBridge trackedMenu) {
+            trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
+        }
+
         if (this.beacon instanceof final TrackedMenuBridge trackedMenu) {
             trackedMenu.bridge$trackContainerMenu((AbstractContainerMenu) (Object) this);
         }
