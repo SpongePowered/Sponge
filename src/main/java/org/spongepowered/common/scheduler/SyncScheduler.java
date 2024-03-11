@@ -25,7 +25,11 @@
 package org.spongepowered.common.scheduler;
 
 import org.jetbrains.annotations.NotNull;
-import java.util.concurrent.*;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
 
 public class SyncScheduler extends SpongeScheduler {
     private final BlockingQueue<SchedFutureTask>

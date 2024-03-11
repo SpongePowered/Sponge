@@ -28,7 +28,6 @@ import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 
 import java.util.concurrent.Delayed;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 interface AbstractScheduler extends Scheduler, AutoCloseable {
