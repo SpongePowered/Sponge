@@ -53,10 +53,8 @@ public abstract class SpongeScheduler implements AbstractScheduler {
 
     private static final AtomicLong TASK_CREATED_COUNTER = new AtomicLong();
     static final int TICK_DURATION_MS = 50;
-    static final long TICK_DURATION_NS = TimeUnit
-            .NANOSECONDS
+    static final long TICK_DURATION_NS = TimeUnit.NANOSECONDS
             .convert(TICK_DURATION_MS, TimeUnit.MILLISECONDS);
-
     private final AtomicLong sequenceNumber = new AtomicLong();
     private final String tag;
     private final ConcurrentMap<UUID, ScheduledTask> cachedTasks
@@ -77,7 +75,7 @@ public abstract class SpongeScheduler implements AbstractScheduler {
         final Pattern searchPattern = Pattern.compile(
                 Objects.requireNonNull(pattern, "pattern"));
 
-        return cachedTasks
+        return this.cachedTasks
                 .values()
                 .stream()
                 .filter(x -> searchPattern.matcher(x.name()).matches())
@@ -86,7 +84,7 @@ public abstract class SpongeScheduler implements AbstractScheduler {
 
     @Override
     public Set<ScheduledTask> tasks() {
-        return new HashSet<>(cachedTasks.values());
+        return new HashSet<>(this.cachedTasks.values());
     }
 
     @Override
@@ -94,7 +92,7 @@ public abstract class SpongeScheduler implements AbstractScheduler {
         final String testOwnerId = Objects
                 .requireNonNull(plugin, "plugin")
                 .metadata().id();
-        return cachedTasks
+        return this.cachedTasks
                 .values()
                 .stream()
                 .filter(x -> {
@@ -127,8 +125,8 @@ public abstract class SpongeScheduler implements AbstractScheduler {
         final ScheduledTaskEnvelope sched = new ScheduledTaskEnvelope(
                 this, st,
                 "%s-%s-#%s".formatted(name, this.tag, number), uuid);
-        cachedTasks.put(sched.uniqueId(), sched);
-        exec(sched, st, true);
+        this.cachedTasks.put(sched.uniqueId(), sched);
+        this.exec(sched, st, true);
         return sched;
     }
     private void exec(final ScheduledTaskEnvelope sched,
@@ -142,8 +140,9 @@ public abstract class SpongeScheduler implements AbstractScheduler {
         }
         final Runnable command = () -> {
             try {
-                if (!sched.isCancelled())
+                if (!sched.isCancelled()) {
                     task.execute(sched);
+                }
             } catch (final Exception ex) {
                 SpongeCommon.logger().error(
                         "The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",

@@ -29,35 +29,36 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class AsyncScheduler extends SpongeScheduler {
     private static final int NCPU = Runtime.getRuntime().availableProcessors();
     private final ScheduledExecutorService scheduler =
-            Executors.newScheduledThreadPool(
-                    NCPU, new ThreadFactoryBuilder()
-                            .setNameFormat("Sponge-AsyncScheduler-%d")
-                            .build()
-
-            );
-
+            Executors.newScheduledThreadPool(NCPU, new ThreadFactoryBuilder()
+                    .setNameFormat("Sponge-AsyncScheduler-%d")
+                    .build());
     public AsyncScheduler() {
         super("A");
     }
 
     @Override
     public ScheduledFuture<?> scheduleAtTick(Runnable command, long ticksAsNanos) {
-        return scheduler.schedule(command, ticksAsNanos, TimeUnit.NANOSECONDS);
+        return this.scheduler.schedule(command, ticksAsNanos, TimeUnit.NANOSECONDS);
     }
 
     @Override
     public ScheduledFuture<?> scheduleAtTime(Runnable command, long nanos) {
-        return scheduler.schedule(command, nanos, TimeUnit.NANOSECONDS);
+        return this.scheduler.schedule(command, nanos, TimeUnit.NANOSECONDS);
     }
 
     public <T> CompletableFuture<T> submit(final Callable<T> callable) {
         final CompletableFuture<T> ret = new CompletableFuture<>();
-        execute(() -> {
+        super.execute(() -> {
             try {
                 ret.complete(callable.call());
             } catch (final Throwable e) {
@@ -68,7 +69,7 @@ public class AsyncScheduler extends SpongeScheduler {
     }
     @Override
     public void close() {
-        final ExecutorService scheduler = this.scheduler;
+        final ScheduledExecutorService scheduler = this.scheduler;
         if (scheduler.isTerminated()) {
             return;
         }
@@ -77,7 +78,7 @@ public class AsyncScheduler extends SpongeScheduler {
             if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
                 new PrettyPrinter()
                         .add("Sponge async scheduler failed to shut down in 5 seconds! Tasks that may have been active:")
-                        .addWithIndices(activeTasks())
+                        .addWithIndices(super.activeTasks())
                         .add()
                         .add("We will now attempt immediate shutdown.")
                         .log(SpongeCommon.logger(), Level.WARN);

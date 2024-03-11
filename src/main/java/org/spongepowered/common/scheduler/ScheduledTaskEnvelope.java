@@ -92,7 +92,6 @@ public class ScheduledTaskEnvelope implements AbstractScheduledTask {
         return this.delayed.compareTo(other);
     }
 
-
     // VarHandle mechanic
     private static final VarHandle CANCELLED;
 

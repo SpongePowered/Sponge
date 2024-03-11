@@ -37,7 +37,8 @@ import java.util.concurrent.TimeUnit;
 
 public class SyncScheduler extends SpongeScheduler {
     private final BlockingQueue<RunnableScheduledFuture<?>>
-            ticksQueue = new DelayQueue<>(),
+            ticksQueue = new DelayQueue<>();
+    private final BlockingQueue<RunnableScheduledFuture<?>>
             timedQueue = new DelayQueue<>();
     private long timestamp;
 
@@ -50,7 +51,7 @@ public class SyncScheduler extends SpongeScheduler {
         @Override
         public long timeNanos() {
             VarHandle.acquireFence();
-            return timestamp;
+            return SyncScheduler.this.timestamp;
         }
     };
 
@@ -79,7 +80,7 @@ public class SyncScheduler extends SpongeScheduler {
     }
 
     public void tick() {
-        timestamp += TICK_DURATION_NS;
+        this.timestamp += TICK_DURATION_NS;
         VarHandle.releaseFence();
         for (Runnable task;
              (task = this.ticksQueue.poll()) != null;
@@ -119,9 +120,7 @@ public class SyncScheduler extends SpongeScheduler {
         }
         @Override
         public int compareTo(@NotNull Delayed other) {
-            if (other == this)
-                return 0;
-            return Long.compare(
+            return other == this ? 0 : Long.compare(
                     this.getDelay(TimeUnit.NANOSECONDS),
                     other.getDelay(TimeUnit.NANOSECONDS));
         }

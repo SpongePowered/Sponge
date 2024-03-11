@@ -45,6 +45,6 @@ interface AbstractScheduler extends Scheduler, AutoCloseable {
 
     default ScheduledFuture<?>
     scheduleAtTime(Runnable command, long time, TimeUnit unit) {
-        return scheduleAtTime(command, unit.convert(time, TimeUnit.NANOSECONDS));
+        return this.scheduleAtTime(command, unit.convert(time, TimeUnit.NANOSECONDS));
     }
 }

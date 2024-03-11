@@ -47,7 +47,6 @@ public final class SpongeTask implements TaskProcedure {
     private final Consumer<ScheduledTask> executor;
     private final Time delay, interval;
 
-
     SpongeTask(final PluginContainer plugin,
                final Consumer<ScheduledTask> executor,
                final Time delay, final Time interval) {
@@ -221,8 +220,7 @@ public final class SpongeTask implements TaskProcedure {
             Objects.requireNonNull(this.executor, "executor");
             Objects.requireNonNull(this.plugin, "plugin");
 
-            return new SpongeTask(this.plugin, this.executor,
-                    this.delay, this.interval);
+            return new SpongeTask(this.plugin, this.executor, this.delay, this.interval);
         }
     }
 }
