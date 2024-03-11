@@ -126,17 +126,7 @@ public abstract class SpongeScheduler implements AbstractScheduler {
 
         final ScheduledTaskEnvelope sched = new ScheduledTaskEnvelope(
                 this, st,
-                "%s-%s-#%s".formatted(name, this.tag, number), uuid) {
-            @Override
-            public boolean cancel() {
-                boolean cancelled = super.cancel();
-                if (cancelled) {
-                    // fast remove
-                    cachedTasks.remove(uniqueId());
-                }
-                return cancelled;
-            }
-        };
+                "%s-%s-#%s".formatted(name, this.tag, number), uuid);
         cachedTasks.put(sched.uniqueId(), sched);
         exec(sched, st, true);
         return sched;

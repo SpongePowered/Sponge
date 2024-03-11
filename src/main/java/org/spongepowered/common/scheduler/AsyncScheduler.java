@@ -29,27 +29,20 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class AsyncScheduler extends SpongeScheduler {
     private static final int NCPU = Runtime.getRuntime().availableProcessors();
-    private final ScheduledExecutorService scheduler;
+    private final ScheduledExecutorService scheduler =
+            Executors.newScheduledThreadPool(
+                    NCPU, new ThreadFactoryBuilder()
+                            .setNameFormat("Sponge-AsyncScheduler-%d")
+                            .build()
+
+            );
 
     public AsyncScheduler() {
         super("A");
-        final ScheduledThreadPoolExecutor scheduler =
-                new ScheduledThreadPoolExecutor(NCPU, new ThreadFactoryBuilder()
-                        .setNameFormat("Sponge-AsyncScheduler-%d")
-                        .build()
-                );
-        scheduler.setRemoveOnCancelPolicy(true);
-        this.scheduler = scheduler;
     }
 
     @Override
@@ -91,7 +84,7 @@ public class AsyncScheduler extends SpongeScheduler {
 
                 scheduler.shutdownNow();
             }
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             SpongeCommon.logger().error("The async scheduler was interrupted while awaiting shutdown!");
 
             Thread.currentThread().interrupt();
