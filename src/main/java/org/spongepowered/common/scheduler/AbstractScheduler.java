@@ -30,18 +30,18 @@ import org.spongepowered.api.scheduler.Task;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public interface AbstractScheduler extends Scheduler, AutoCloseable {
-
-    ScheduledFuture<?> scheduleAtTick(Runnable command, long ticks);
-
-    ScheduledFuture<?> scheduleAtTime(Runnable command, long nanos);
-
-
+interface AbstractScheduler extends Scheduler, AutoCloseable {
     @Override
     AbstractScheduledTask submit(Task task);
 
     @Override
     AbstractScheduledTask submit(Task task, String name);
+
+
+    // basic operations
+    ScheduledFuture<?> scheduleAtTick(Runnable command, long ticks);
+
+    ScheduledFuture<?> scheduleAtTime(Runnable command, long nanos);
 
     default ScheduledFuture<?>
     scheduleAtTime(Runnable command, long time, TimeUnit unit) {

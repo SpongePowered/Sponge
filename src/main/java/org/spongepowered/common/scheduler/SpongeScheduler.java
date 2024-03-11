@@ -31,8 +31,20 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -113,13 +125,15 @@ public abstract class SpongeScheduler implements AbstractScheduler {
         final UUID uuid = new UUID(number, System.identityHashCode(this));
 
         final ScheduledTaskEnvelope sched = new ScheduledTaskEnvelope(
-                this, task,
+                this, st,
                 "%s-%s-#%s".formatted(name, this.tag, number), uuid) {
             @Override
             public boolean cancel() {
                 boolean cancelled = super.cancel();
-                if (cancelled)
+                if (cancelled) {
+                    // fast remove
                     cachedTasks.remove(uniqueId());
+                }
                 return cancelled;
             }
         };
@@ -127,32 +141,29 @@ public abstract class SpongeScheduler implements AbstractScheduler {
         exec(sched, st, true);
         return sched;
     }
-    private void exec(ScheduledTaskEnvelope task, SpongeTask procedure, boolean first) {
-        if (task.isCancelled()) {
-            return;
-        }
-        final Time time = first ? procedure.delayTime() : procedure.intervalTime();
-        final long nanos = time.timeNanos();;
-        if (!first && nanos == 0) {
-            this.cachedTasks.remove(task.uniqueId());
+    private void exec(final ScheduledTaskEnvelope sched,
+                      final TaskProcedure task,
+                      final boolean first) {
+        final Time time = first ? task.delayTime() : task.intervalTime();
+        final long nanos = time.timeNanos();
+        if ((!first && nanos == 0) || sched.isCancelled()) {
+            this.cachedTasks.remove(sched.uniqueId());
             return;
         }
         final Runnable command = () -> {
-            if (task.isCancelled()) {
-                return;
-            }
             try {
-                procedure.execute(task);
-                this.exec(task, procedure, false);
-            } catch (final ExecutionException ex) {
+                if (!sched.isCancelled())
+                    task.execute(sched);
+            } catch (final Exception ex) {
                 SpongeCommon.logger().error(
                         "The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
-                        task.name(), procedure.plugin().metadata().id(),
+                        sched.name(), task.plugin().metadata().id(),
                         ex);
+            } finally {
+                this.exec(sched, task, false);
             }
         };
-
-        task.delayed = time.tickBased()
+        sched.delayed = time.tickBased()
                 ? scheduleAtTick(command, nanos)
                 : scheduleAtTime(command, nanos);
     }

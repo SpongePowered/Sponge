@@ -35,26 +35,25 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
 public class ScheduledTaskEnvelope implements AbstractScheduledTask {
-    private final Scheduler scheduler;
+    private final AbstractScheduler scheduler;
 
-    private final Task task;
+    private final TaskProcedure task;
     private final String name;
     private final UUID uuid;
     private volatile boolean cancelled;
-    volatile Delayed delayed;
+    volatile Delayed delayed; // init ?
 
-    public ScheduledTaskEnvelope(Scheduler scheduler,
-                                 Task task,
-                                 String name, UUID uuid) {
+    ScheduledTaskEnvelope(AbstractScheduler scheduler,
+                          TaskProcedure task,
+                          String name, UUID uuid) {
         this.scheduler = scheduler;
         this.task = task;
         this.name = name;
         this.uuid = uuid;
     }
-
     @Override
     public boolean cancel() {
-        return !(boolean) CANCELLED.getOpaque(this) ||
+        return !(boolean) CANCELLED.getOpaque(this) &&
                 CANCELLED.compareAndSet(this, false, true);
     }
 
@@ -87,6 +86,12 @@ public class ScheduledTaskEnvelope implements AbstractScheduledTask {
     public long getDelay(@NotNull TimeUnit unit) {
         return this.delayed.getDelay(unit);
     }
+
+    @Override
+    public int compareTo(@NotNull Delayed other) {
+        return this.delayed.compareTo(other);
+    }
+
 
     // VarHandle mechanic
     private static final VarHandle CANCELLED;

@@ -24,21 +24,9 @@
  */
 package org.spongepowered.common.scheduler;
 
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.scheduler.ScheduledTask;
 
 import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
 
-public interface AbstractScheduledTask
-        extends ScheduledTask, Delayed {
-
-    @Override
-    default int compareTo(@NotNull Delayed other) {
-        if (other == this)
-            return 0;
-        return Long.compare(
-                this.getDelay(TimeUnit.NANOSECONDS),
-                other.getDelay(TimeUnit.NANOSECONDS));
-    }
+interface AbstractScheduledTask extends ScheduledTask, Delayed {
 }

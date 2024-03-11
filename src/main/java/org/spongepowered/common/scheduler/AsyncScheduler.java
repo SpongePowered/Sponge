@@ -29,7 +29,13 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class AsyncScheduler extends SpongeScheduler {
     private static final int NCPU = Runtime.getRuntime().availableProcessors();
@@ -47,9 +53,8 @@ public class AsyncScheduler extends SpongeScheduler {
     }
 
     @Override
-    public ScheduledFuture<?> scheduleAtTick(Runnable command, long ticks) {
-        return scheduler.schedule(command,
-                ticks * TICK_DURATION_MS, TimeUnit.MILLISECONDS);
+    public ScheduledFuture<?> scheduleAtTick(Runnable command, long ticksAsNanos) {
+        return scheduler.schedule(command, ticksAsNanos, TimeUnit.NANOSECONDS);
     }
 
     @Override

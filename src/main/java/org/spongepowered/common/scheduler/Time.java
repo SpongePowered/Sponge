@@ -30,6 +30,16 @@ import java.util.concurrent.TimeUnit;
 public interface Time {
 
     Time ZERO = new RealTime(0);
+    Time REAL_TIME = new Time() {
+        @Override
+        public boolean tickBased() {
+            return false;
+        }
+        @Override
+        public long timeNanos() {
+            return System.nanoTime();
+        }
+    };
 
     boolean tickBased();
 
