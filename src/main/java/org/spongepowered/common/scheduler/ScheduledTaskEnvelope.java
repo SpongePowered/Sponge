@@ -27,20 +27,17 @@ package org.spongepowered.common.scheduler;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
-
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 import java.util.UUID;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ScheduledTaskEnvelope implements AbstractScheduledTask {
     private final AbstractScheduler scheduler;
-
     private final TaskProcedure task;
     private final String name;
     private final UUID uuid;
-    private volatile boolean cancelled;
+    private final AtomicBoolean cancelled = new AtomicBoolean();
     volatile Delayed delayed; // init ?
 
     ScheduledTaskEnvelope(AbstractScheduler scheduler,
@@ -53,13 +50,13 @@ public class ScheduledTaskEnvelope implements AbstractScheduledTask {
     }
     @Override
     public boolean cancel() {
-        return !(boolean) CANCELLED.getOpaque(this) &&
-                CANCELLED.compareAndSet(this, false, true);
+        return !this.cancelled.getOpaque() &&
+                this.cancelled.compareAndSet(false, true);
     }
 
     @Override
     public boolean isCancelled() {
-        return this.cancelled;
+        return this.cancelled.get();
     }
 
     @Override
@@ -90,18 +87,5 @@ public class ScheduledTaskEnvelope implements AbstractScheduledTask {
     @Override
     public int compareTo(@NotNull Delayed other) {
         return this.delayed.compareTo(other);
-    }
-
-    // VarHandle mechanic
-    private static final VarHandle CANCELLED;
-
-    static {
-        try {
-            MethodHandles.Lookup l = MethodHandles.lookup();
-            CANCELLED = l.findVarHandle(ScheduledTaskEnvelope.class,
-                    "cancelled", boolean.class);
-        } catch (ReflectiveOperationException e) {
-            throw new ExceptionInInitializerError(e);
-        }
     }
 }

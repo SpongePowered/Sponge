@@ -27,7 +27,7 @@ package org.spongepowered.common.scheduler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-interface Time {
+public interface Time {
 
     Time ZERO = new RealTime(0);
     Time REAL_TIME = new Time() {

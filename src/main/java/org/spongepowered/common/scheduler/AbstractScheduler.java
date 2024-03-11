@@ -27,6 +27,7 @@ package org.spongepowered.common.scheduler;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 
+import java.util.concurrent.Delayed;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -39,11 +40,11 @@ interface AbstractScheduler extends Scheduler, AutoCloseable {
 
 
     // basic operations
-    ScheduledFuture<?> scheduleAtTick(Runnable command, long ticks);
+    Delayed scheduleAtTick(Runnable command, long ticks);
 
-    ScheduledFuture<?> scheduleAtTime(Runnable command, long nanos);
+    Delayed scheduleAtTime(Runnable command, long nanos);
 
-    default ScheduledFuture<?>
+    default Delayed
     scheduleAtTime(Runnable command, long time, TimeUnit unit) {
         return this.scheduleAtTime(command, unit.convert(time, TimeUnit.NANOSECONDS));
     }

@@ -120,7 +120,7 @@ public abstract class SpongeScheduler implements AbstractScheduler {
 
         final long number = this.sequenceNumber.getAndIncrement();
 
-        final UUID uuid = new UUID(number, System.identityHashCode(this));
+        final UUID uuid = UUID.randomUUID();
 
         final ScheduledTaskEnvelope sched = new ScheduledTaskEnvelope(
                 this, st,

@@ -25,22 +25,14 @@
 package org.spongepowered.common.scheduler;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.lang.invoke.VarHandle;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.RunnableScheduledFuture;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class SyncScheduler extends SpongeScheduler {
-    private final BlockingQueue<RunnableScheduledFuture<?>>
+    private final BlockingQueue<SchedFutureTask>
             ticksQueue = new DelayQueue<>();
-    private final BlockingQueue<RunnableScheduledFuture<?>>
+    private final BlockingQueue<SchedFutureTask>
             timedQueue = new DelayQueue<>();
-    private long timestamp;
+    private volatile long timestamp;
 
     private final Time ticked = new Time() {
         @Override
@@ -50,7 +42,6 @@ public class SyncScheduler extends SpongeScheduler {
 
         @Override
         public long timeNanos() {
-            VarHandle.acquireFence();
             return SyncScheduler.this.timestamp;
         }
     };
@@ -60,28 +51,27 @@ public class SyncScheduler extends SpongeScheduler {
     }
 
     @Override
-    public ScheduledFuture<?> scheduleAtTick(Runnable command, long ticksAsNanos) {
+    public Delayed scheduleAtTick(Runnable command, long ticksAsNanos) {
         final Time clock = this.ticked;
-        final RunnableScheduledFuture<?> f = new SchedFutureTask<>(
-                command, null,
-                clock, ticksAsNanos + clock.timeNanos());
+        final SchedFutureTask f = new SchedFutureTask(
+                command, clock,
+                ticksAsNanos + clock.timeNanos());
         this.ticksQueue.add(f);
         return f;
     }
 
     @Override
-    public ScheduledFuture<?> scheduleAtTime(Runnable command, long nanos) {
+    public Delayed scheduleAtTime(Runnable command, long nanos) {
         final Time clock = Time.REAL_TIME;
-        final RunnableScheduledFuture<?> f = new SchedFutureTask<>(
-                command, null,
-                clock, nanos + clock.timeNanos());
+        final SchedFutureTask f = new SchedFutureTask(
+                command, clock,
+                nanos + clock.timeNanos());
         this.timedQueue.add(f);
         return f;
     }
 
     public void tick() {
         this.timestamp += TICK_DURATION_NS;
-        VarHandle.releaseFence();
         for (Runnable task;
              (task = this.ticksQueue.poll()) != null;
              task.run());
@@ -95,21 +85,14 @@ public class SyncScheduler extends SpongeScheduler {
         throw new UnsupportedOperationException();
     }
 
-    private static class SchedFutureTask<V>
-            extends FutureTask<V>
-            implements RunnableScheduledFuture<V> {
-        private final Time clock;
-        private final long timeStamp;
-
-        SchedFutureTask(Runnable runnable, V result,
-                        Time clock, long timeStamp) {
-            super(runnable, result);
-            this.clock = clock;
-            this.timeStamp = timeStamp;
-        }
+    private record SchedFutureTask(
+            Runnable command,
+            Time clock,
+            long timeStamp
+    ) implements Runnable, Delayed {
         @Override
-        public boolean isPeriodic() {
-            return false;
+        public void run() {
+            this.command.run();
         }
 
         @Override

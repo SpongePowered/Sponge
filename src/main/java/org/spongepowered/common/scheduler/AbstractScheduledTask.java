@@ -28,5 +28,5 @@ import org.spongepowered.api.scheduler.ScheduledTask;
 
 import java.util.concurrent.Delayed;
 
-interface AbstractScheduledTask extends ScheduledTask, Delayed {
+public interface AbstractScheduledTask extends ScheduledTask, Delayed {
 }
