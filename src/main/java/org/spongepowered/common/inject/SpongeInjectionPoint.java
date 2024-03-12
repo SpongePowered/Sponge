@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.inject;
 
-import com.google.common.base.MoreObjects;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.StringJoiner;
 
 public final class SpongeInjectionPoint implements AnnotatedElement {
 
@@ -70,10 +70,10 @@ public final class SpongeInjectionPoint implements AnnotatedElement {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("source", this.source)
-                .add("type", this.type)
-                .add("annotations", Arrays.toString(this.annotations))
+        return new StringJoiner(", ", SpongeInjectionPoint.class.getSimpleName() + "[", "]")
+                .add("source=" + this.source)
+                .add("type=" + this.type)
+                .add("annotations=" + Arrays.toString(this.annotations))
                 .toString();
     }
 }

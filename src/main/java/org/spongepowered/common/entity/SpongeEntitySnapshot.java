@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity;
 
-import com.google.common.base.MoreObjects;
 import net.minecraft.nbt.CompoundTag;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -56,6 +55,7 @@ import org.spongepowered.math.vector.Vector3i;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableDataHolder<EntitySnapshot>, DataContainerHolder.Immutable<EntitySnapshot> {
@@ -294,12 +294,12 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("uniqueId", this.uniqueId)
-                .add("entityType", this.entityType)
-                .add("position", this.position)
-                .add("rotation", this.rotation)
-                .add("scale", this.scale)
+        return new StringJoiner(", ", SpongeEntitySnapshot.class.getSimpleName() + "[", "]")
+                .add("uniqueId=" + this.uniqueId)
+                .add("entityType=" + this.entityType)
+                .add("position=" + this.position)
+                .add("rotation=" + this.rotation)
+                .add("scale=" + this.scale)
                 .toString();
     }
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
-import com.google.common.base.MoreObjects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -44,6 +43,8 @@ import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridg
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
+
+import java.util.StringJoiner;
 
 @Mixin(net.minecraft.world.level.block.entity.BlockEntity.class)
 public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoundHolder {
@@ -96,23 +97,21 @@ public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoun
     public String toString() {
         final ResourceKey key = (ResourceKey) (Object) BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(this.type);
 
-        return MoreObjects.toStringHelper(this)
-                // Double check some mods are registering their tile entities and doing some "interesting"
-                // things with doing a to string on a tile entity not actually functionally valid in the game "yet".
-            .add("type", key)
-            .add("world", this.level)
-            .add("pos", this.worldPosition)
-            .add("blockstate", this.blockState)
-            .toString();
+        return new StringJoiner(", ", BlockEntityMixin.class.getSimpleName() + "[", "]")
+                .add("type=" + key)
+                .add("world=" + this.level)
+                .add("pos=" + this.worldPosition)
+                .add("blockstate=" + this.blockState)
+                .toString();
     }
 
-    protected MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {
+    protected StringJoiner getPrettyPrinterStringHelper() {
         final ResourceKey key = (ResourceKey) (Object) BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(this.type);
 
-        return MoreObjects.toStringHelper(this)
-            .add("type", key)
-            .add("world", ((ServerWorld) this.level).key())
-            .add("pos", this.worldPosition);
+        return new StringJoiner(", ", BlockEntityMixin.class.getSimpleName() + "[", "]")
+                .add("type=" + key)
+                .add("world=" + ((ServerWorld) this.level).key())
+                .add("pos=" + this.worldPosition);
     }
 
     @Override

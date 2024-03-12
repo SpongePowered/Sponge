@@ -25,7 +25,6 @@
 package org.spongepowered.common.data;
 
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -55,6 +54,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -719,11 +719,11 @@ public class MemoryDataView implements DataView {
 
     @Override
     public String toString() {
-        final MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper(this);
+        final StringJoiner helper = new StringJoiner(", ", MemoryDataView.class.getSimpleName() + "[", "]");
         if (!this.path.toString().isEmpty()) {
-            helper.add("path", this.path);
+            helper.add("path=" + this.path);
         }
-        helper.add("safety", this.safety.name());
-        return helper.add("map", this.map).toString();
+        helper.add("safety=" + this.safety.name());
+        return helper.add("map=" + this.map).toString();
     }
 }

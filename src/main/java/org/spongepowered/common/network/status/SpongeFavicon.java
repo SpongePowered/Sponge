@@ -25,7 +25,6 @@
 package org.spongepowered.common.network.status;
 
 
-import com.google.common.base.MoreObjects;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
@@ -42,6 +41,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import javax.imageio.ImageIO;
 
@@ -90,8 +90,8 @@ public class SpongeFavicon implements Favicon {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .addValue(this.decoded)
+        return new StringJoiner(", ", SpongeFavicon.class.getSimpleName() + "[", "]")
+                .add("image=" + this.decoded)
                 .toString();
     }
 

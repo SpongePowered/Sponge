@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.piston;
 
-import com.google.common.base.MoreObjects;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.piston.PistonMovingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.world.level.block.entity.BlockEntityMixin;
+
+import java.util.StringJoiner;
 
 @Mixin(PistonMovingBlockEntity.class)
 public abstract class PistonMovingBlockEntityMixin extends BlockEntityMixin {
@@ -39,10 +40,10 @@ public abstract class PistonMovingBlockEntityMixin extends BlockEntityMixin {
     @Shadow private Direction direction;
 
     @Override
-    public MoreObjects.ToStringHelper getPrettyPrinterStringHelper() {
+    public StringJoiner getPrettyPrinterStringHelper() {
         return super.getPrettyPrinterStringHelper()
-            .add("movedState", this.movedState)
-            .add("direction", this.direction)
+            .add("movedState=" + this.movedState)
+            .add("direction=" + this.direction)
             ;
     }
 }

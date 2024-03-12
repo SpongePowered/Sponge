@@ -37,6 +37,7 @@ import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends PluginPhaseContext<L> {
 
@@ -130,9 +131,9 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
 
         @Override
         public String toString() {
-            return com.google.common.base.MoreObjects.toStringHelper(this)
-                .add("player", this.player)
-                .toString();
+            return new StringJoiner(", ", CapturePlayer.class.getSimpleName() + "[", "]")
+                    .add("player=" + this.player)
+                    .toString();
         }
 
         public void addPlayer(final ServerPlayer playerMP) {

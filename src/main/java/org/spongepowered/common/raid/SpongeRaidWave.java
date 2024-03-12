@@ -25,7 +25,6 @@
 package org.spongepowered.common.raid;
 
 
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.entity.living.monster.raider.Raider;
 import org.spongepowered.api.raid.Raid;
 import org.spongepowered.api.raid.RaidWave;
@@ -33,6 +32,7 @@ import org.spongepowered.common.accessor.world.entity.raid.RaidAccessor;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 public final class SpongeRaidWave implements RaidWave {
 
@@ -108,9 +108,9 @@ public final class SpongeRaidWave implements RaidWave {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("raid", this.raid)
-            .add("wave", this.waveId)
-        .toString();
+        return new StringJoiner(", ", SpongeRaidWave.class.getSimpleName() + "[", "]")
+                .add("raid=" + this.raid)
+                .add("wave=" + this.waveId)
+                .toString();
     }
 }

@@ -43,6 +43,7 @@ import org.spongepowered.common.util.PrettyPrinter;
 import java.util.Deque;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -295,9 +296,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
 
     @Override
     public String toString() {
-        return com.google.common.base.MoreObjects.toStringHelper(this)
-            .add("isCompleted", this.isCompleted)
-            .toString();
+        return new StringJoiner(", ", PhaseContext.class.getSimpleName() + "[", "]")
+                .add("isCompleted=" + this.isCompleted)
+                .toString();
     }
 
     protected P markEmpty() {

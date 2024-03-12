@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common;
 
-import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Client;
@@ -51,6 +50,7 @@ import org.spongepowered.common.util.Preconditions;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 @Singleton
 public final class SpongeGame implements Game, SpongeRegistryHolder {
@@ -223,8 +223,8 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("platform", this.platform)
+        return new StringJoiner(", ", SpongeGame.class.getSimpleName() + "[", "]")
+                .add("platform=" + this.platform)
                 .toString();
     }
 }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator;
 
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
@@ -37,6 +36,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 
 @SuppressWarnings("unchecked")
 abstract class SpongeDataManipulator implements DataManipulator {
@@ -83,9 +83,9 @@ abstract class SpongeDataManipulator implements DataManipulator {
 
     @Override
     public String toString() {
-        final MoreObjects.ToStringHelper builder = MoreObjects.toStringHelper(this);
+        final StringJoiner builder = new StringJoiner(", ", SpongeDataManipulator.class.getSimpleName() + "[", "]");
         for (final Map.Entry<Key<?>, Object> entry : this.values.entrySet()) {
-            builder.add(entry.getKey().key().toString(), entry.getValue());
+            builder.add(entry.getKey().key() + "= " + entry.getValue());
         }
         return builder.toString();
     }

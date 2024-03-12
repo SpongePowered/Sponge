@@ -25,7 +25,6 @@
 package org.spongepowered.common.item;
 
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -56,6 +55,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -261,9 +261,9 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public String toString() {
         final ResourceKey resourceKey = Sponge.game().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
 
-        return MoreObjects.toStringHelper(this)
-                .add("itemType", resourceKey)
-                .add("quantity", this.quantity)
+        return new StringJoiner(", ", SpongeItemStackSnapshot.class.getSimpleName() + "[", "]")
+                .add("itemType=" + resourceKey)
+                .add("quantity=" + this.quantity)
                 .toString();
     }
 

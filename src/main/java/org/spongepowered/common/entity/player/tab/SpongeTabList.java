@@ -25,7 +25,6 @@
 package org.spongepowered.common.entity.player.tab;
 
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import net.kyori.adventure.text.Component;
@@ -51,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 public final class SpongeTabList implements TabList {
@@ -233,11 +233,11 @@ public final class SpongeTabList implements TabList {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("player", this.player)
-                .add("header", this.header)
-                .add("footer", this.footer)
-                .add("entries", this.entries)
+        return new StringJoiner(", ", SpongeTabList.class.getSimpleName() + "[", "]")
+                .add("player=" + this.player)
+                .add("header=" + this.header)
+                .add("footer=" + this.footer)
+                .add("entries=" + this.entries)
                 .toString();
     }
 

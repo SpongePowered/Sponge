@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.base.MoreObjects;
+import java.util.StringJoiner;
 
 public final class ThreadUtil {
 
     public static String getDescription(final Thread thread) {
-        return MoreObjects.toStringHelper(thread)
-                .add("class", thread.getClass())
-                .add("name", thread.getName())
-                .add("priority", thread.getPriority())
-                .add("group", thread.getThreadGroup())
+        return new StringJoiner(", ", thread.getClass().getSimpleName() + "[", "]")
+                .add("class=" + thread.getClass())
+                .add("name=" + thread.getName())
+                .add("priority=" + thread.getPriority())
+                .add("group=" + thread.getThreadGroup())
                 .toString();
     }
 

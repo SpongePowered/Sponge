@@ -32,6 +32,7 @@ import org.spongepowered.common.util.Preconditions;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 
 
@@ -114,8 +115,8 @@ final class PhaseStack {
 
     @Override
     public String toString() {
-        return com.google.common.base.MoreObjects.toStringHelper(this)
-                .add("phases", this.phases)
+        return new StringJoiner(", ", PhaseStack.class.getSimpleName() + "[", "]")
+                .add("phases=" + this.phases)
                 .toString();
     }
 

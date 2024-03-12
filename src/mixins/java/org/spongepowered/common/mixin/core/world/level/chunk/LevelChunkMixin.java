@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.level.chunk;
 
-import com.google.common.base.MoreObjects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -77,6 +76,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -357,10 +357,10 @@ public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkB
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("World", this.level)
-                .add("Position", this.chunkPos.x + ":" + this.chunkPos.z)
-                .add("super", super.toString())
+        return new StringJoiner(", ", LevelChunkMixin.class.getSimpleName() + "[", "]")
+                .add("World=" + this.level)
+                .add("Position=" + this.chunkPos.x + ":" + this.chunkPos.z)
+                .add("super=" + super.toString())
                 .toString();
     }
 

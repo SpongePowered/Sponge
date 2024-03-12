@@ -25,7 +25,6 @@
 package org.spongepowered.common.entity.player.tab;
 
 
-import com.google.common.base.MoreObjects;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.world.entity.player.ProfilePublicKey;
@@ -39,6 +38,7 @@ import org.spongepowered.common.util.Preconditions;
 import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 
 /*
@@ -155,11 +155,11 @@ public final class SpongeTabListEntry implements TabListEntry {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("profile", this.profile)
-                .add("latency", this.latency)
-                .add("displayName", this.displayName)
-                .add("gameMode", this.gameMode)
+        return new StringJoiner(", ", SpongeTabListEntry.class.getSimpleName() + "[", "]")
+                .add("profile=" + this.profile)
+                .add("latency=" + this.latency)
+                .add("displayName=" + this.displayName)
+                .add("gameMode=" + this.gameMode)
                 .toString();
     }
 

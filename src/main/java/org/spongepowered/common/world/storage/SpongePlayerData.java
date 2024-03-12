@@ -30,6 +30,7 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 public final class SpongePlayerData implements DataSerializable {
@@ -81,10 +82,10 @@ public final class SpongePlayerData implements DataSerializable {
 
     @Override
     public String toString() {
-        return com.google.common.base.MoreObjects.toStringHelper(this)
-                .add("uniqueId", this.uniqueId)
-                .add("firstJoined", this.firstJoined)
-                .add("lastJoined", this.lastJoined)
+        return new StringJoiner(", ", SpongePlayerData.class.getSimpleName() + "[", "]")
+                .add("uniqueId=" + this.uniqueId)
+                .add("firstJoined=" + this.firstJoined)
+                .add("lastJoined=" + this.lastJoined)
                 .toString();
     }
 
