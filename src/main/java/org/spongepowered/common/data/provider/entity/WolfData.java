@@ -41,7 +41,7 @@ public final class WolfData {
                 .asMutable(Wolf.class)
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) h.getCollarColor())
-                        .set((h, v) -> h.setCollarColor((net.minecraft.world.item.DyeColor) (Object) v))
+                        .set((h, v) -> ((WolfAccessor)h).invoker$setCollarColor((net.minecraft.world.item.DyeColor) (Object) v))
                     .create(Keys.IS_BEGGING_FOR_FOOD)
                         .get(Wolf::isInterested)
                         .set(Wolf::setIsInterested)

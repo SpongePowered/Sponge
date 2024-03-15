@@ -29,6 +29,7 @@ import net.minecraft.world.entity.animal.CatVariant;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.CatType;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.common.accessor.world.entity.animal.CatAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.MissingImplementationException;
 
@@ -46,7 +47,7 @@ public final class CatData {
                         .set((h, v) -> h.setVariant((CatVariant) (Object) v))
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) h.getCollarColor())
-                        .set((h, v) -> h.setCollarColor((net.minecraft.world.item.DyeColor) (Object) v))
+                        .set((h, v) -> ((CatAccessor)h).invoker$setCollarColor((net.minecraft.world.item.DyeColor) (Object) v))
                     .create(Keys.IS_BEGGING_FOR_FOOD)
                         .get(h -> {
                             throw new MissingImplementationException("CatData", "IS_BEGGING_FOR_FOOD::getter");
@@ -71,9 +72,10 @@ public final class CatData {
                         .set((h, v) -> {
                             throw new MissingImplementationException("CatData", "IS_PURRING::setter");
                         })
+                .asMutable(CatAccessor.class)
                     .create(Keys.IS_RELAXED)
-                        .get(Cat::isRelaxStateOne)
-                        .set(Cat::setRelaxStateOne);
+                        .get(CatAccessor::invoker$isRelaxStateOne)
+                        .set(CatAccessor::invoker$setRelaxStateOne);
     }
     // @formatter:on
 }

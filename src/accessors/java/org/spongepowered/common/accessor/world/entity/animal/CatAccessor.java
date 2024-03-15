@@ -24,32 +24,17 @@
  */
 package org.spongepowered.common.accessor.world.entity.animal;
 
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.item.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
-import org.spongepowered.common.UntransformedAccessorError;
 
-@Mixin(Wolf.class)
-public interface WolfAccessor {
+@Mixin(Cat.class)
+public interface CatAccessor {
 
-    @Accessor("DATA_COLLAR_COLOR") static EntityDataAccessor<Integer> accessor$DATA_COLLAR_COLOR() {
-        throw new UntransformedAccessorError();
-    }
-
-    @Accessor("isWet") boolean accessor$isWet();
-
-    @Accessor("isWet") void accessor$isWet(final boolean isWet);
-
-    @Accessor("isShaking") boolean accessor$isShaking();
-
-    @Accessor("isShaking") void accessor$isShaking(final boolean isShaking);
-
-    @Accessor("shakeAnim") void accessor$shakeAnim(final float shakeAnim);
-
-    @Accessor("shakeAnimO") void accessor$shakeAnimO(final float shakeAnim0);
     @Invoker("setCollarColor") void invoker$setCollarColor(final DyeColor $$0);
 
+    @Invoker("setRelaxStateOne") void invoker$setRelaxStateOne(boolean $$0);
+
+    @Invoker("isRelaxStateOne") boolean invoker$isRelaxStateOne();
 }

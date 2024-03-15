@@ -69,6 +69,7 @@
         "world.entity.MobAccessor",
         "world.entity.ai.targeting.TargetingConditionsAccessor",
         "world.entity.animal.AnimalAccessor",
+        "world.entity.animal.CatAccessor",
         "world.entity.animal.FoxAccessor",
         "world.entity.animal.MushroomCow_MushroomTypeAccessor",
         "world.entity.animal.OcelotAccessor",
