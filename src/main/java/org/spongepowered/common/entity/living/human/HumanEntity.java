@@ -26,14 +26,12 @@ package org.spongepowered.common.entity.living.human;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.ProfileResult;
 import com.mojang.serialization.DataResult;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -63,13 +61,11 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Arrow;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -132,7 +128,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         // LivingEntity
         $$0.define(LivingEntityAccessor.accessor$DATA_LIVING_ENTITY_FLAGS(), (byte) 0);
         $$0.define(LivingEntityAccessor.accessor$DATA_HEALTH_ID(), 1.0F);
-        $$0.define(LivingEntityAccessor.accessor$DATA_EFFECT_COLOR_ID(), 0);
+        $$0.define(LivingEntityAccessor.accessor$DATA_EFFECT_PARTICLES(), List.of());
         $$0.define(LivingEntityAccessor.accessor$DATA_EFFECT_AMBIENCE_ID(), Boolean.FALSE);
         $$0.define(LivingEntityAccessor.accessor$DATA_ARROW_COUNT_ID(), 0);
         $$0.define(LivingEntityAccessor.accessor$DATA_STINGER_COUNT_ID(), 0);
