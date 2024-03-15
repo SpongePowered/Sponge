@@ -81,6 +81,8 @@ public abstract class MobMixin extends LivingEntityMixin {
     // @formatter:on
 
 
+    @Shadow @Final protected float[] handDropChances;
+
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Mob;registerGoals()V"))
     private void impl$registerGoals(final Mob this$0) {
         this.impl$setupGoalSelectors();
