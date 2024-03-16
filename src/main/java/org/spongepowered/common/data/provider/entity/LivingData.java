@@ -156,7 +156,7 @@ public final class LivingData {
                     .create(Keys.MAX_HEALTH)
                         .get(h -> (double) h.getMaxHealth())
                         .set((h, v) -> h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(v))
-                    .create(Keys.POTION_EFFECTS)
+                    .createCollection(Keys.POTION_EFFECTS)
                         .get(h -> {
                             final Collection<MobEffectInstance> effects = h.getActiveEffects();
                             return PotionEffectUtil.copyAsPotionEffects(effects);
@@ -166,6 +166,9 @@ public final class LivingData {
                             for (final PotionEffect effect : v) {
                                 h.addEffect(PotionEffectUtil.copyAsEffectInstance(effect));
                             }
+                        })
+                        .single((h, v) -> {
+                            h.addEffect(PotionEffectUtil.copyAsEffectInstance(v));
                         })
                     .create(Keys.SCALE)
                         .get(h -> (double) h.getScale())

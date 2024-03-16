@@ -235,4 +235,8 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
         }
         return this.deleteAndGetResult((H) dataHolder);
     }
+
+    public <TE> DataTransactionResult offerSingle(final DataHolder.Mutable dataHolder, final TE element) {
+        return DataTransactionResult.failNoData();
+    }
 }

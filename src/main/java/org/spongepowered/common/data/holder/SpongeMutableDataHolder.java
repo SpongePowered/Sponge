@@ -35,6 +35,7 @@ import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.key.SpongeKey;
+import org.spongepowered.common.data.provider.GenericMutableDataProvider;
 import org.spongepowered.common.util.DataUtil;
 
 import java.util.Collection;
@@ -88,6 +89,9 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         final SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>> key0 =
                 (SpongeKey<? extends CollectionValue<E, Collection<E>>, Collection<E>>) key;
         return this.impl$applyTransaction(key0, (p, m) -> {
+            if (p instanceof GenericMutableDataProvider) {
+                return ((GenericMutableDataProvider)p).offerSingle(m, element);
+            }
                     final Collection<E> collection = p.get(m)
                             .map(DataUtil::ensureMutable)
                             .orElseGet(key0.getDefaultValueSupplier());
