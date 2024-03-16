@@ -408,22 +408,9 @@ public class SpongeCommand {
                     return CommandResult.success();
                 })
                 .build();
-        final Parameter.Key<Boolean> dumpAllKey = Parameter.key("dumpAll", Boolean.class);
-        final Command.Parameterized dumpCommand = Command.builder()
-                .addParameter(Parameter.literal(Boolean.class, true, "all").optional().key(dumpAllKey).build())
-                .executor(context -> {
-                    final File file = new File(new File(new File("."), "chunk-dumps"),
-                            "chunk-info-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.txt");
-                    context.sendMessage(Identity.nil(), Component.text("Writing chunk info to: " + file.getAbsolutePath()));
-                    // ChunkSaveHelper.writeChunks(file, context.hasAny(dumpAllKey));
-                    context.sendMessage(Identity.nil(), Component.text("Chunk info complete"));
-                    return CommandResult.success();
-                })
-                .build();
         return Command.builder()
                 .addChild(globalCommand, "global")
                 .addChild(worldCommand, "world")
-                .addChild(dumpCommand, "dump")
                 .permission("sponge.command.chunk")
                 .build();
     }
