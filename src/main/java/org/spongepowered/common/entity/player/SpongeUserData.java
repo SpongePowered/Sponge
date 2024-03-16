@@ -87,9 +87,11 @@ import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
@@ -141,14 +143,14 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         }
 
         final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.server()).accessor$storageSource();
-        final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(profile.getId().toString() + ".dat").toFile();
-        if (!file.exists()) {
+        final Path p = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(profile.getId().toString() + ".dat");
+        if (!Files.exists(p)) {
             return new SpongeUserData(profile, new CompoundTag());
         }
 
         try {
             final CompoundTag compound;
-            try (final FileInputStream in = new FileInputStream(file)) {
+            try (final InputStream in = Files.newInputStream(p)) {
                 compound = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap());
             }
             // See PlayerDataAccess - keep this line up to date.
@@ -157,8 +159,8 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
             return new SpongeUserData(profile, compound);
         } catch (final IOException e) {
             SpongeCommon.logger().warn("Unable to load corrupt user file '{}'!",
-                    file.toPath().relativize(Paths.get("")).toString(), e);
-            FileUtil.copyCorruptedFile(file);
+                    p.relativize(Paths.get("")).toString(), e);
+            FileUtil.copyCorruptedFile(p);
             throw e;
         }
     }
