@@ -136,7 +136,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Shadow @Final private MinecraftServer server;
 
     @Shadow public abstract void levelEvent(@Nullable Player $$0, int $$1, BlockPos $$2, int $$3);
-    @Shadow @Final @Mutable @Nullable private EndDragonFight dragonFight;
+    @Shadow @Nullable private EndDragonFight dragonFight;
 
     // @formatter:on
 
