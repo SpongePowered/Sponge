@@ -86,10 +86,9 @@ import org.spongepowered.common.util.FileUtil;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -425,14 +424,14 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         synchronized (this) {
             final SpongeUserManager userManager = ((SpongeServer) SpongeCommon.server()).userManager();
             final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.server()).accessor$storageSource();
-            final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.uniqueId() + ".dat").toFile();
+            final Path p = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.uniqueId() + ".dat");
             this.writeCompound(this.compound);
-            try (final FileOutputStream out = new FileOutputStream(file)) {
+            try (final OutputStream out = Files.newOutputStream(p)) {
                 NbtIo.writeCompressed(this.compound, out);
                 userManager.unmarkDirty(this);
             } catch (final IOException e) {
                 // We log the message here because the error may be swallowed by a completable future.
-                SpongeCommon.logger().warn("Failed to save user file [{}]!", file, e);
+                SpongeCommon.logger().warn("Failed to save user file [{}]!", p, e);
                 throw e;
             }
         }
