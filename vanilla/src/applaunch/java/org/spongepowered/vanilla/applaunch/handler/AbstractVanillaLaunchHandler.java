@@ -46,8 +46,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -154,21 +156,26 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
     }
 
     protected boolean isTransformable(final URI uri) throws URISyntaxException, IOException {
-        final File file = new File(uri);
+        final Path p = Path.of(uri);
 
         // in Java 8 ONLY, the system classpath contains JVM internals
         // let's make sure those don't get transformed
-        if (file.getAbsolutePath().startsWith(AbstractVanillaLaunchHandler.JAVA_HOME_PATH)) {
+        if (p.toAbsolutePath().startsWith(AbstractVanillaLaunchHandler.JAVA_HOME_PATH)) {
             return false;
         }
 
-        if (file.isDirectory()) {
+        if (!Files.exists(p)) {
+            return false;
+        }
+
+        final BasicFileAttributes basicFileAttributes = Files.readAttributes(p, BasicFileAttributes.class);
+        if (basicFileAttributes.isDirectory()) {
             for (final String test : AbstractVanillaLaunchHandler.NON_TRANSFORMABLE_PATHS) {
-                if (new File(file, test).exists()) {
+                if (Files.exists(p.resolve(test))) {
                     return false;
                 }
             }
-        } else if (file.isFile()) {
+        } else if (basicFileAttributes.isRegularFile()) {
             try (final JarFile jf = new JarFile(new File(uri))) {
                 for (final String test : AbstractVanillaLaunchHandler.NON_TRANSFORMABLE_PATHS) {
                     if (jf.getEntry(test) != null) {
