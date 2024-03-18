@@ -572,6 +572,7 @@ public final class GeneratorMain {
                 $ -> true,
                 RegistryScope.SERVER
             ),
+            new BlockStateDataProviderGenerator(),
             new BlockStatePropertiesGenerator(),
             new BlockStatePropertyKeysGenerator(),
             new RegistryEntriesGenerator<>(
