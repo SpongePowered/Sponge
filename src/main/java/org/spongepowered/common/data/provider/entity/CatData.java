@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.CatVariant;
 import org.spongepowered.api.data.Keys;
@@ -43,8 +44,8 @@ public final class CatData {
         registrator
                 .asMutable(Cat.class)
                     .create(Keys.CAT_TYPE)
-                        .get(h -> (CatType) (Object) h.getVariant())
-                        .set((h, v) -> h.setVariant((CatVariant) (Object) v))
+                        .get(h -> (CatType) (Object) h.getVariant().value())
+                        .set((h, v) -> h.setVariant(Holder.direct((CatVariant) (Object) v)))
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) h.getCollarColor())
                         .set((h, v) -> ((CatAccessor)h).invoker$setCollarColor((net.minecraft.world.item.DyeColor) (Object) v))
