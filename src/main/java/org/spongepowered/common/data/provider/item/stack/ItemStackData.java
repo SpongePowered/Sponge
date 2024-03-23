@@ -43,6 +43,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.item.component.WrittenBookContent;
 import net.minecraft.world.level.block.Block;
@@ -102,9 +103,13 @@ public final class ItemStackData {
                     .create(Keys.CAN_HARVEST)
                         .get(h -> {
                             final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
-                            final Item item = h.getItem();
-                            if (item instanceof DiggerItemAccessor && !(item instanceof PickaxeItem)) {
-                                return blockRegistry.getTag(((DiggerItemAccessor) item).accessor$blocks()).stream().flatMap(HolderSet.ListBacked::stream).map(Holder::value).map(BlockType.class::cast).collect(Collectors.toSet());
+                            final Tool tool = h.get(DataComponents.TOOL);
+                            if (tool != null) {
+                                return tool.rules().stream().map(Tool.Rule::blocks)
+                                        .flatMap(HolderSet::stream)
+                                        .map(Holder::value)
+                                        .map(BlockType.class::cast)
+                                        .collect(Collectors.toSet());
                             }
 
                             final Set<BlockType> blockTypes = blockRegistry.stream()
