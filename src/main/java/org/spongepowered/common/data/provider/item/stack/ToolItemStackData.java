@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.Tool;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.world.item.DiggerItemAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class ToolItemStackData {
@@ -40,12 +41,12 @@ public final class ToolItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.EFFICIENCY)
                         .get(h -> {
-                            if (h.getItem() instanceof DiggerItemAccessor) {
-                                return (double) ((DiggerItemAccessor) h.getItem()).accessor$speed();
+                            final Tool tool = h.get(DataComponents.TOOL);
+                            if (tool!= null) {
+                                return (double) tool.defaultMiningSpeed();
                             }
                             return null;
-                        })
-                        .supports(h -> h.getItem() instanceof DiggerItemAccessor);
+                        });
     }
     // @formatter:on
 }
