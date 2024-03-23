@@ -44,7 +44,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     // @formatter:off
-    @Shadow @Final private net.minecraft.world.item.enchantment.Enchantment.Rarity rarity;
     @Shadow public abstract int shadow$getMinLevel();
     @Shadow public abstract int shadow$getMaxLevel();
     @Shadow public abstract int shadow$getMinCost(int level);
@@ -53,11 +52,14 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
     @Shadow protected abstract String shadow$getOrCreateDescriptionId();
     @Shadow public abstract boolean shadow$isTreasureOnly();
     @Shadow public abstract boolean shadow$isCurse();
+    @Shadow public abstract int shadow$getWeight();
+
     // @formatter:on
+
 
     @Override
     public int weight() {
-        return this.rarity.getWeight();
+        return this.shadow$getWeight();
     }
 
     @Override
