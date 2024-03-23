@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.map.decoration;
 
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.saveddata.maps.MapDecorationType;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.map.decoration.MapDecorationBannerType;
 
@@ -33,7 +34,7 @@ import java.util.function.Supplier;
 public class SpongeMapDecorationBannerType extends SpongeMapDecorationType implements MapDecorationBannerType {
     private final Supplier<DyeColor> bannerColor;
 
-    public SpongeMapDecorationBannerType(final MapDecoration.Type mapDecorationType, final Supplier<DyeColor> bannerColor) {
+    public SpongeMapDecorationBannerType(final Holder<MapDecorationType> mapDecorationType, final Supplier<DyeColor> bannerColor) {
         super(mapDecorationType);
         this.bannerColor = bannerColor;
     }

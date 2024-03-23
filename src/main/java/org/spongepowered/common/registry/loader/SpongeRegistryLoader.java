@@ -616,34 +616,34 @@ public final class SpongeRegistryLoader {
 
     public static RegistryLoader<MapDecorationType> mapDecorationType() {
         return RegistryLoader.of(l -> {
-            l.add(MapDecorationTypes.PLAYER_MARKER, k -> new SpongeMapDecorationType(MapDecoration.Type.PLAYER));
-            l.add(MapDecorationTypes.GREEN_MARKER, k -> new SpongeMapDecorationType(MapDecoration.Type.FRAME));
-            l.add(MapDecorationTypes.RED_MARKER, k -> new SpongeMapDecorationType(MapDecoration.Type.RED_MARKER));
-            l.add(MapDecorationTypes.BLUE_MARKER, k -> new SpongeMapDecorationType(MapDecoration.Type.BLUE_MARKER));
-            l.add(MapDecorationTypes.TARGET_X, k -> new SpongeMapDecorationType(MapDecoration.Type.TARGET_X));
-            l.add(MapDecorationTypes.TARGET_POINT, k -> new SpongeMapDecorationType(MapDecoration.Type.TARGET_POINT));
-            l.add(MapDecorationTypes.PLAYER_OFF_MAP, k -> new SpongeMapDecorationType(MapDecoration.Type.PLAYER_OFF_MAP));
-            l.add(MapDecorationTypes.PLAYER_OFF_LIMITS, k -> new SpongeMapDecorationType(MapDecoration.Type.PLAYER_OFF_LIMITS));
-            l.add(MapDecorationTypes.MANSION, k -> new SpongeMapDecorationType(MapDecoration.Type.MANSION));
-            l.add(MapDecorationTypes.MONUMENT, k -> new SpongeMapDecorationType(MapDecoration.Type.MONUMENT));
+            l.add(MapDecorationTypes.PLAYER_MARKER, k -> new SpongeMapDecorationType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.PLAYER));
+            l.add(MapDecorationTypes.GREEN_MARKER, k -> new SpongeMapDecorationType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.FRAME));
+            l.add(MapDecorationTypes.RED_MARKER, k -> new SpongeMapDecorationType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.RED_MARKER));
+            l.add(MapDecorationTypes.BLUE_MARKER, k -> new SpongeMapDecorationType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.BLUE_MARKER));
+            l.add(MapDecorationTypes.TARGET_X, k -> new SpongeMapDecorationType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.TARGET_X));
+            l.add(MapDecorationTypes.TARGET_POINT, k -> new SpongeMapDecorationType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.TARGET_POINT));
+            l.add(MapDecorationTypes.PLAYER_OFF_MAP, k -> new SpongeMapDecorationType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.PLAYER_OFF_MAP));
+            l.add(MapDecorationTypes.PLAYER_OFF_LIMITS, k -> new SpongeMapDecorationType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.PLAYER_OFF_LIMITS));
+            l.add(MapDecorationTypes.MANSION, k -> new SpongeMapDecorationType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.WOODLAND_MANSION));
+            l.add(MapDecorationTypes.MONUMENT, k -> new SpongeMapDecorationType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.OCEAN_MONUMENT));
             // banners
-            l.add(MapDecorationTypes.BANNER_WHITE, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_WHITE, DyeColors.WHITE));
-            l.add(MapDecorationTypes.BANNER_ORANGE, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_ORANGE, DyeColors.ORANGE));
-            l.add(MapDecorationTypes.BANNER_MAGENTA, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_MAGENTA, DyeColors.MAGENTA));
-            l.add(MapDecorationTypes.BANNER_LIGHT_BLUE, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_LIGHT_BLUE, DyeColors.LIGHT_BLUE));
-            l.add(MapDecorationTypes.BANNER_YELLOW, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_YELLOW, DyeColors.YELLOW));
-            l.add(MapDecorationTypes.BANNER_LIME, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_LIME, DyeColors.LIME));
-            l.add(MapDecorationTypes.BANNER_PINK, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_PINK, DyeColors.PINK));
-            l.add(MapDecorationTypes.BANNER_GRAY, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_GRAY, DyeColors.GRAY));
-            l.add(MapDecorationTypes.BANNER_LIGHT_GRAY, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_LIGHT_GRAY, DyeColors.LIGHT_GRAY));
-            l.add(MapDecorationTypes.BANNER_CYAN, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_CYAN, DyeColors.CYAN));
-            l.add(MapDecorationTypes.BANNER_PURPLE, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_PURPLE, DyeColors.PURPLE));
-            l.add(MapDecorationTypes.BANNER_BLUE, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_BLUE, DyeColors.BLUE));
-            l.add(MapDecorationTypes.BANNER_BROWN, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_BROWN, DyeColors.BROWN));
-            l.add(MapDecorationTypes.BANNER_GREEN, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_GREEN, DyeColors.GREEN));
-            l.add(MapDecorationTypes.BANNER_RED, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_RED, DyeColors.RED));
-            l.add(MapDecorationTypes.BANNER_BLACK, k -> new SpongeMapDecorationBannerType(MapDecoration.Type.BANNER_BLACK, DyeColors.BLACK));
-            l.add(MapDecorationTypes.RED_X, k -> new SpongeMapDecorationType(MapDecoration.Type.RED_X));
+            l.add(MapDecorationTypes.BANNER_WHITE, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.WHITE_BANNER, DyeColors.WHITE));
+            l.add(MapDecorationTypes.BANNER_ORANGE, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.ORANGE_BANNER, DyeColors.ORANGE));
+            l.add(MapDecorationTypes.BANNER_MAGENTA, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.MAGENTA_BANNER, DyeColors.MAGENTA));
+            l.add(MapDecorationTypes.BANNER_LIGHT_BLUE, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.LIGHT_BLUE_BANNER, DyeColors.LIGHT_BLUE));
+            l.add(MapDecorationTypes.BANNER_YELLOW, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.YELLOW_BANNER, DyeColors.YELLOW));
+            l.add(MapDecorationTypes.BANNER_LIME, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.LIME_BANNER, DyeColors.LIME));
+            l.add(MapDecorationTypes.BANNER_PINK, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.PINK_BANNER, DyeColors.PINK));
+            l.add(MapDecorationTypes.BANNER_GRAY, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.GRAY_BANNER, DyeColors.GRAY));
+            l.add(MapDecorationTypes.BANNER_LIGHT_GRAY, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.LIGHT_GRAY_BANNER, DyeColors.LIGHT_GRAY));
+            l.add(MapDecorationTypes.BANNER_CYAN, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.CYAN_BANNER, DyeColors.CYAN));
+            l.add(MapDecorationTypes.BANNER_PURPLE, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.PURPLE_BANNER, DyeColors.PURPLE));
+            l.add(MapDecorationTypes.BANNER_BLUE, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.BLUE_BANNER, DyeColors.BLUE));
+            l.add(MapDecorationTypes.BANNER_BROWN, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.BROWN_BANNER, DyeColors.BROWN));
+            l.add(MapDecorationTypes.BANNER_GREEN, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.GREEN_BANNER, DyeColors.GREEN));
+            l.add(MapDecorationTypes.BANNER_RED, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.RED_BANNER, DyeColors.RED));
+            l.add(MapDecorationTypes.BANNER_BLACK, k -> new SpongeMapDecorationBannerType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.BLACK_BANNER, DyeColors.BLACK));
+            l.add(MapDecorationTypes.RED_X, k -> new SpongeMapDecorationType(net.minecraft.world.level.saveddata.maps.MapDecorationTypes.RED_X));
         });
     }
 

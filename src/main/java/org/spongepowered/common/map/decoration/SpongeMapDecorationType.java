@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.map.decoration;
 
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.core.Holder;
 import org.spongepowered.api.map.decoration.MapDecorationType;
 
 import java.util.HashMap;
@@ -33,20 +33,20 @@ import java.util.Optional;
 
 public class SpongeMapDecorationType implements MapDecorationType {
 
-    private static final Map<MapDecoration.Type, MapDecorationType> VANILLA_TYPE_MAP = new HashMap<>();
+    private static final Map<net.minecraft.world.level.saveddata.maps.MapDecorationType, MapDecorationType> VANILLA_TYPE_MAP = new HashMap<>();
 
-    public static Optional<MapDecorationType> toSpongeType(final MapDecoration.Type vanillaType) {
-        return Optional.ofNullable(SpongeMapDecorationType.VANILLA_TYPE_MAP.get(vanillaType));
+    public static Optional<MapDecorationType> toSpongeType(final Holder<net.minecraft.world.level.saveddata.maps.MapDecorationType> vanillaType) {
+        return Optional.ofNullable(SpongeMapDecorationType.VANILLA_TYPE_MAP.get(vanillaType.value()));
     }
 
-    private final MapDecoration.Type type;
+    private final net.minecraft.world.level.saveddata.maps.MapDecorationType type;
 
-    public SpongeMapDecorationType(final MapDecoration.Type mapDecorationType) {
-        this.type = mapDecorationType;
-        SpongeMapDecorationType.VANILLA_TYPE_MAP.put(mapDecorationType, this);
+    public SpongeMapDecorationType(final Holder<net.minecraft.world.level.saveddata.maps.MapDecorationType> mapDecorationType) {
+        this.type = mapDecorationType.value();
+        SpongeMapDecorationType.VANILLA_TYPE_MAP.put(mapDecorationType.value(), this);
     }
 
-    public MapDecoration.Type getType() {
+    public net.minecraft.world.level.saveddata.maps.MapDecorationType getType() {
         return this.type;
     }
 }
