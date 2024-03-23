@@ -110,7 +110,7 @@ public abstract class FishingHookMixin extends ProjectileMixin {
                         .withParameter(LootContextParams.TOOL, stack)
                         .withParameter(LootContextParams.THIS_ENTITY, (FishingHook) (Object) this)
                         .withLuck((float)this.luck + playerEntity.getLuck());
-                final LootTable lootTable = this.shadow$level().getServer().getLootData().getLootTable(BuiltInLootTables.FISHING);
+                final LootTable lootTable = this.shadow$level().getServer().reloadableRegistries().getLootTable(BuiltInLootTables.FISHING);
                 final List<ItemStack> list = lootTable.getRandomItems(lootcontext$builder.create(LootContextParamSets.FISHING));
                 transactions = list.stream().map(ItemStackUtil::snapshotOf)
                         .map(snapshot -> new Transaction<>(snapshot, snapshot))
