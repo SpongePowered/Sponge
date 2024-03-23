@@ -79,12 +79,12 @@ public final class ItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.APPLICABLE_POTION_EFFECTS)
                         .get(h -> {
-                            if (h.isEdible()) {
-                                final List<Pair<MobEffectInstance,Float>> itemEffects = h.getItem().getFoodProperties().getEffects();
+                            if (h.has(DataComponents.FOOD)) {
+                                final var itemEffects = h.get(DataComponents.FOOD).effects();
                                 final WeightedTable<PotionEffect> effects = new WeightedTable<>();
                                 final ChanceTable<PotionEffect> chance = new ChanceTable<>();
-                                for (final Pair<MobEffectInstance,Float> effect : itemEffects) {
-                                    chance.add((PotionEffect) effect.getFirst(), effect.getSecond());
+                                for (final var effect : itemEffects) {
+                                    chance.add((PotionEffect) effect.effect(), effect.probability());
                                 }
                                 effects.add(new NestedTableEntry<>(1, chance));
                                 return effects;
@@ -108,7 +108,7 @@ public final class ItemStackData {
                             }
 
                             final Set<BlockType> blockTypes = blockRegistry.stream()
-                                    .filter(b -> item.isCorrectToolForDrops(b.defaultBlockState()))
+                                    .filter(b -> h.isCorrectToolForDrops(b.defaultBlockState()))
                                     .map(BlockType.class::cast)
                                     .collect(Collectors.toUnmodifiableSet());
                             return blockTypes.isEmpty() ? null : blockTypes;
@@ -162,35 +162,32 @@ public final class ItemStackData {
                         })
                         .delete(h -> h.remove(DataComponents.LORE))
                     .create(Keys.MAX_DURABILITY)
-                        .get(h -> h.getItem().canBeDepleted() ? h.getItem().getMaxDamage() : null)
-                        .supports(h -> h.getItem().canBeDepleted())
+                        .get(h -> h.getMaxDamage() != 0 ? h.getMaxDamage() : null)
+                        .supports(h -> h.getMaxDamage() != 0)
                     .create(Keys.ITEM_DURABILITY)
                         .get(stack -> stack.getMaxDamage() - stack.getDamageValue())
                         .set((stack, durability) -> stack.setDamageValue(stack.getMaxDamage() - durability))
-                        .supports(h -> h.getItem().canBeDepleted())
+                        .supports(h -> h.getMaxDamage() != 0)
                     .create(Keys.ITEM_RARITY)
                         .get(stack -> (ItemRarity) (Object) stack.getRarity())
                     .create(Keys.REPLENISHED_FOOD)
                         .get(h -> {
-                            if (h.getItem().isEdible()) {
-                                final FoodProperties food = h.getItem().getFoodProperties();
-                                return food == null ? null : food.getNutrition();
+                            final var food = h.get(DataComponents.FOOD);
+                            if (food != null) {
+                                return food.nutrition();
                             }
                             return null;
                         })
-                        .supports(h -> h.getItem().isEdible())
                     .create(Keys.REPLENISHED_SATURATION)
                         .get(h -> {
-                            if (h.getItem().isEdible()) {
-                                final FoodProperties food = h.getItem().getFoodProperties();
-                                if (food != null) {
-                                    // Translate's Minecraft's weird internal value to the actual saturation value
-                                    return food.getSaturationModifier() * food.getNutrition() * 2.0;
-                                }
+                            final var food = h.get(DataComponents.FOOD);
+                            if (food != null) {
+                                // Translate's Minecraft's weird internal value to the actual saturation value
+                                return food.saturationModifier() * food.nutrition() * 2.0;
                             }
                             return null;
                         })
-                    .supports(h -> h.getItem().isEdible());
+                    ;
     }
     // @formatter:on
 
