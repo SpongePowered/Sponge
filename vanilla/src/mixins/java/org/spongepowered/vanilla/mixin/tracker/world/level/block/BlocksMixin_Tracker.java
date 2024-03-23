@@ -24,9 +24,10 @@
  */
 package org.spongepowered.vanilla.mixin.tracker.world.level.block;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.storage.loot.LootTable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -39,10 +40,10 @@ public abstract class BlocksMixin_Tracker {
     @Redirect(method = "<clinit>",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/block/Block;getLootTable()Lnet/minecraft/resources/ResourceLocation;"
+                    target = "Lnet/minecraft/world/level/block/Block;getLootTable()Lnet/minecraft/resources/ResourceKey;"
             )
     )
-    private static ResourceLocation impl$initializeTrackerState(final Block block) {
+    private static ResourceKey<LootTable> impl$initializeTrackerState(final Block block) {
         final boolean randomlyTicking = ((BlockBehaviourAccessor) block).invoker$isRandomlyTicking(block.defaultBlockState());
 
         // TODO Not the best check but the tracker options only matter during block ticks...
