@@ -30,6 +30,7 @@
         "minecraft.entity.boss.WitherEntityMixin_API",
         "minecraft.item.BlockItemMixin_API",
         "minecraft.map.MapDecorationMixin_API",
+        "minecraft.map.MapDecorationTypeMixin_API",
         "minecraft.map.MapInfoMixin_API",
         "minecraft.network.FriendlyByteBufMixin_API",
         "minecraft.network.chat.ChatTypeMixin_API",

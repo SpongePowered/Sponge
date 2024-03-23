@@ -84,14 +84,10 @@ public final class SpongeRegistries {
         holder.createFrozenRegistry(RegistryTypes.DATA_FORMAT, SpongeRegistryLoader.dataFormat());
         holder.createFrozenRegistry(RegistryTypes.MAP_COLOR_TYPE, SpongeRegistryLoader.mapColorType());
         holder.createFrozenRegistry(RegistryTypes.MAP_DECORATION_ORIENTATION, SpongeRegistryLoader.mapDecorationOrientation());
-        holder.createFrozenRegistry(RegistryTypes.MAP_DECORATION_TYPE, SpongeRegistryLoader.mapDecorationType());
         holder.createFrozenRegistry(RegistryTypes.MAP_SHADE, SpongeRegistryLoader.mapShade());
         holder.createFrozenRegistry(RegistryTypes.NOISE_CONFIG, SpongeRegistryLoader.noiseConfig());
 
         SpongeRegistries.registerEarlyDynamicRegistries(holder);
-
-
-
     }
 
     private static void registerEarlyDynamicRegistries(final SpongeRegistryHolder holder) {

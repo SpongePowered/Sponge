@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.saveddata;
 
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.saveddata.maps.MapDecorationType;
+import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,24 +52,19 @@ public abstract class MapDecorationMixin implements MapDecorationBridge {
     private String impl$key = Constants.Map.DECORATION_KEY_PREFIX + UUID.randomUUID().toString();
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void impl$setPersistenceOnInit(final MapDecoration.Type typeIn, final byte x, final byte y, final byte rot, final Optional<Component> name, final CallbackInfo ci) {
+    public void impl$setPersistenceOnInit(final Holder<MapDecorationType> typeIn, final byte x, final byte y, final byte rot, final Optional<Component> name, final CallbackInfo ci) {
         // All of the below types have no reason to be saved to disk
         // This is because they can/should be calculated when needed
         // Furthermore if a sponge plugin adds a MapDecoration, isPersistent
         // should also be changed to true
-        switch (typeIn) {
-            case PLAYER:
-            case PLAYER_OFF_MAP:
-            case PLAYER_OFF_LIMITS:
-            case FRAME: {
-                this.impl$isPersistent = false;
-                break;
-            }
-            default: {
-                this.impl$isPersistent = true;
-                break;
-            }
-
+        if (MapDecorationTypes.PLAYER.equals(typeIn)
+                || MapDecorationTypes.PLAYER_OFF_MAP.equals(typeIn)
+                || MapDecorationTypes.PLAYER_OFF_LIMITS.equals(typeIn)
+                || MapDecorationTypes.FRAME.equals(typeIn)
+        ) {
+            this.impl$isPersistent = false;
+        } else {
+            this.impl$isPersistent = true;
         }
     }
 
