@@ -28,6 +28,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.ExtraCodecs;
@@ -150,7 +151,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingContainer container, final RegistryAccess $$1) {
+    public ItemStack assemble(CraftingContainer container, final HolderLookup.Provider $$1) {
         if (this.resultFunctionId != null) {
             return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply(container);
         }
@@ -158,7 +159,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
     }
 
     @Override
-    public ItemStack getResultItem(final RegistryAccess $$1) {
+    public ItemStack getResultItem(final HolderLookup.Provider $$1) {
 //        if (this.resultFunctionId != null) {
 //            return ItemStack.EMPTY;
 //        }

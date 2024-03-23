@@ -28,12 +28,14 @@ package org.spongepowered.common.item.recipe.crafting.shaped;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
@@ -112,7 +114,7 @@ public class SpongeShapedRecipe extends ShapedRecipe implements ResultFunctionRe
     }
 
     @Override
-    public ItemStack assemble(final CraftingContainer $$0, final RegistryAccess $$1) {
+    public ItemStack assemble(final CraftingContainer $$0, final HolderLookup.Provider $$1) {
         if (this.resultFunctionId != null) {
             return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }
@@ -120,7 +122,7 @@ public class SpongeShapedRecipe extends ShapedRecipe implements ResultFunctionRe
     }
 
     @Override
-    public ItemStack getResultItem(final RegistryAccess $$0) {
+    public ItemStack getResultItem(final HolderLookup.Provider $$0) {
         if (this.resultFunctionId != null) {
             return ItemStack.EMPTY;
         }

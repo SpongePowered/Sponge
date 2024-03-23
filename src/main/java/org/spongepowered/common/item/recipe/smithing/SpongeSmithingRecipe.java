@@ -29,6 +29,7 @@ import static org.spongepowered.common.util.Constants.Recipe.SPONGE_TYPE;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -76,7 +77,7 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
     }
 
     @Override
-    public ItemStack assemble(Container $$0, RegistryAccess $$1) {
+    public ItemStack assemble(Container $$0, HolderLookup.Provider $$1) {
         if (this.resultFunctionId != null) {
             return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply($$0);
         }
@@ -94,7 +95,7 @@ public class SpongeSmithingRecipe extends SmithingTransformRecipe implements Res
     }
 
     @Override
-    public ItemStack getResultItem(RegistryAccess $$1) {
+    public ItemStack getResultItem(HolderLookup.Provider $$1) {
         if (this.resultFunctionId != null) {
             return ItemStack.EMPTY;
         }

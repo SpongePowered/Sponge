@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.item.crafting;
 
 import static org.spongepowered.common.inventory.util.InventoryUtil.toNativeInventory;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.Container;
@@ -50,8 +51,8 @@ import java.util.stream.Collectors;
 public interface RecipeMixin_API<C extends Container> extends Recipe {
 
     // @formatter:off
-    @Shadow ItemStack shadow$assemble(C inv, RegistryAccess registryAccess);
-    @Shadow net.minecraft.world.item.ItemStack shadow$getResultItem(RegistryAccess registryAccess);
+    @Shadow ItemStack shadow$assemble(C inv, HolderLookup.Provider registryAccess);
+    @Shadow net.minecraft.world.item.ItemStack shadow$getResultItem(HolderLookup.Provider registryAccess);
     @Shadow boolean shadow$isSpecial();
     @Shadow boolean shadow$matches(C inv, net.minecraft.world.level.Level worldIn);
     @Shadow NonNullList<ItemStack> shadow$getRemainingItems(C inv);
