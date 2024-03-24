@@ -50,6 +50,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class PluginPackResources extends AbstractPackResources {
 
@@ -90,16 +91,17 @@ public final class PluginPackResources extends AbstractPackResources {
         try {
             final Path root = this.typeRoot(type);
             final Path namespaceDir = root.resolve(namespace).toAbsolutePath();
-            Files.walk(namespaceDir)
-                    .filter(Files::isRegularFile)
-                    .filter(s -> !s.getFileName().toString().endsWith(".mcmeta"))
-                    .map(namespaceDir::relativize)
-                    .map(Object::toString)
+            try (final Stream<Path> stream = Files.walk(namespaceDir)) {
+                stream.filter(Files::isRegularFile)
+                        .filter(s -> !s.getFileName().toString().endsWith(".mcmeta"))
+                        .map(namespaceDir::relativize)
+                        .map(Object::toString)
 // TODO filter needed?                   .filter(p -> filterValidPath(namespace, p, fileNameValidator))
-                    .map(s -> new ResourceLocation(namespace, s))
-                    .forEach(loc -> {
-                        out.accept(loc, this.getResource(type, loc));
-                    });
+                        .map(s -> new ResourceLocation(namespace, s))
+                        .forEach(loc -> {
+                            out.accept(loc, this.getResource(type, loc));
+                        });
+            }
         } catch (final IOException ignored) {
         }
     }
@@ -132,19 +134,20 @@ public final class PluginPackResources extends AbstractPackResources {
         try {
             final @Nullable Path root = this.typeRoot(type);
             if (root != null) {
-                return Files.list(root)
-                        .map(Path::getFileName)
-                        .map(Object::toString)
-                        .filter(s -> {
-                            if (s.equals(s.toLowerCase(Locale.ROOT))) {
-                                return true;
-                            } else {
-                                SpongeCommon.logger().warn("Pack: ignored non-lowercased namespace: {} in {}", s,
-                                        root.toAbsolutePath().toString());
-                                return false;
-                            }
-                        })
-                        .collect(Collectors.toSet());
+                try (final Stream<Path> stream = Files.list(root)) {
+                    return stream.map(Path::getFileName)
+                            .map(Object::toString)
+                            .filter(s -> {
+                                if (s.equals(s.toLowerCase(Locale.ROOT))) {
+                                    return true;
+                                } else {
+                                    SpongeCommon.logger().warn("Pack: ignored non-lowercased namespace: {} in {}", s,
+                                            root.toAbsolutePath().toString());
+                                    return false;
+                                }
+                            })
+                            .collect(Collectors.toSet());
+                }
             }
         } catch (final IOException e) {
             // ignored
