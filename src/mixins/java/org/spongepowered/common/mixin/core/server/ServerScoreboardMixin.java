@@ -274,11 +274,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         if (objective != null) {
             final SpongeObjective spongeObjective = ((ObjectiveBridge) objective).bridge$getSpongeObjective();
             final Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.findScore(lcs.deserialize(name));
-            if (score.isPresent()) {
-                spongeObjective.removeScore(score.get());
-            } else {
-                SpongeCommon.logger().warn("Objective {} did have have the score", name);
-            }
+            score.ifPresent(spongeObjective::removeScore);
         } else {
             final Component textName = lcs.deserialize(name);
             for (final net.minecraft.world.scores.Objective scoreObjective : this.getObjectives()) {
