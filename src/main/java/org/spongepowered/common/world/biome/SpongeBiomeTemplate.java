@@ -101,12 +101,12 @@ public record SpongeBiomeTemplate(ResourceKey key, Biome representedBiome, DataP
 
     public static JsonElement encode(final BiomeTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return Biome.DIRECT_CODEC.encodeStart(ops, (Biome) (Object) template.biome()).getOrThrow(false, e -> {});
+        return Biome.DIRECT_CODEC.encodeStart(ops, (Biome) (Object) template.biome()).getOrThrow();
     }
 
     public static Biome decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return Biome.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+        return Biome.DIRECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static BiomeTemplate decode(final DataPack<BiomeTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {

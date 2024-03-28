@@ -85,8 +85,7 @@ public record SpongeTagTemplate<T extends Taggable<T>>(
                 builder.addOptionalTag(location);
             }
         });
-        return TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(builder.build(), spongeTemplate.replace)).getOrThrow(false, e -> {
-        }).getAsJsonObject();
+        return TagFile.CODEC.encodeStart(JsonOps.INSTANCE, new TagFile(builder.build(), spongeTemplate.replace)).getOrThrow().getAsJsonObject();
     }
 
 }

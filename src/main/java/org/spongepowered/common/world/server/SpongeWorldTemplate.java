@@ -130,7 +130,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
     public static LevelStem decodeStem(final JsonElement pack, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
         SpongeWorldTemplate.fixDimensionDatapack(pack);
-        return LevelStem.CODEC.parse(ops, pack).getOrThrow(false, e -> {});
+        return LevelStem.CODEC.parse(ops, pack).getOrThrow();
     }
 
     public static WorldTemplate decode(final DataPack<WorldTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
@@ -171,8 +171,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
     public static JsonElement serialize(final WorldTemplate s, final RegistryAccess registryAccess) {
         if (s instanceof final SpongeWorldTemplate t) {
             final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-            return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(ops, t.levelStem).getOrThrow(false, e -> {
-            });
+            return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(ops, t.levelStem).getOrThrow();
         }
         throw new IllegalArgumentException("WorldTemplate is not a SpongeWorldTemplate");
     }

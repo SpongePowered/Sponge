@@ -156,7 +156,7 @@ public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Contai
             if (encoded.result().isPresent()) {
                 return encoded.result().get().getAsJsonObject();
             }
-            final DataResult.PartialResult<JsonElement> error = encoded.error().get();
+            final var error = encoded.error().get();
             throw new RuntimeException(error.message());
         } catch (Exception e) {
             throw new RuntimeException("Could not encode recipe " + template.key(), e);

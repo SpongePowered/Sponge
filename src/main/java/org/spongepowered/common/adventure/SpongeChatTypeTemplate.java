@@ -72,12 +72,12 @@ public record SpongeChatTypeTemplate(ResourceKey key, ChatType representedType, 
 
     public static JsonElement encode(final ChatTypeTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return ChatType.DIRECT_CODEC.encodeStart(ops, (ChatType) (Object) template.type()).getOrThrow(false, e -> {});
+        return ChatType.DIRECT_CODEC.encodeStart(ops, (ChatType) (Object) template.type()).getOrThrow();
     }
 
     public static ChatType decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return ChatType.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+        return ChatType.DIRECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static ChatTypeTemplate decode(final DataPack<ChatTypeTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {

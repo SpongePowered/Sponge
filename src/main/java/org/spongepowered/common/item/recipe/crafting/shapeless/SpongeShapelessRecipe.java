@@ -62,7 +62,7 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
     public static final MapCodec<SpongeShapelessRecipe> SPONGE_CODEC = RecordCodecBuilder.mapCodec(
             $$0 -> $$0.group(
                             Codec.STRING.fieldOf(Constants.Recipe.SPONGE_TYPE).forGetter(t -> "custom"), // important to fail early when decoding vanilla recipes
-                            ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(ShapelessRecipe::getGroup),
+                            Codec.STRING.optionalFieldOf("group", "").forGetter(ShapelessRecipe::getGroup),
                             CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapelessRecipe::category),
                             ItemStack.CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
                             Ingredient.CODEC_NONEMPTY

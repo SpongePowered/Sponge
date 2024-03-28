@@ -59,7 +59,7 @@ public class SpongeStonecuttingRecipe extends StonecutterRecipe implements Resul
     public static final MapCodec<SpongeStonecuttingRecipe> SPONGE_CODEC = RecordCodecBuilder.mapCodec(
             $$1 -> $$1.group(
                             Codec.STRING.fieldOf(SPONGE_TYPE).forGetter(a -> "custom"),
-                            ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(SingleItemRecipe::getGroup),
+                            Codec.STRING.optionalFieldOf("group", "").forGetter(SingleItemRecipe::getGroup),
                             Ingredient.CODEC_NONEMPTY.fieldOf(Constants.Recipe.STONECUTTING_INGREDIENT).forGetter($$0x -> $$0x.getIngredients().get(0)),
                             RESULT_CODEC.forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
                             ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$spongeResult()),

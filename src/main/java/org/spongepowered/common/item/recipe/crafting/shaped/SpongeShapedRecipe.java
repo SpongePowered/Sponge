@@ -51,11 +51,11 @@ public class SpongeShapedRecipe extends ShapedRecipe implements ResultFunctionRe
     public static final MapCodec<SpongeShapedRecipe> SPONGE_CODEC = RecordCodecBuilder.mapCodec(
             $$0 -> $$0.group(
                             Codec.STRING.fieldOf(Constants.Recipe.SPONGE_TYPE).forGetter(t -> "custom"), // important to fail early when decoding vanilla recipes
-                            ExtraCodecs.strictOptionalField(Codec.STRING, Constants.Recipe.GROUP, "").forGetter(ShapedRecipe::getGroup),
+                            Codec.STRING.optionalFieldOf(Constants.Recipe.GROUP, "").forGetter(ShapedRecipe::getGroup),
                             CraftingBookCategory.CODEC.fieldOf(Constants.Recipe.CATEGORY).orElse(CraftingBookCategory.MISC).forGetter(ShapedRecipe::category),
                             ShapedRecipePattern.MAP_CODEC.forGetter($$0x -> ((ShapedRecipeBridge) $$0x).bridge$pattern()),
                             ItemStack.CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
-                            ExtraCodecs.strictOptionalField(Codec.BOOL, "show_notification", true).forGetter(ShapedRecipe::showNotification),
+                            Codec.BOOL.optionalFieldOf("show_notification", true).forGetter(ShapedRecipe::showNotification),
                             IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(ResultFunctionRecipe::resultFunctionId),
                             IngredientResultUtil.CACHED_REMAINING_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_REMAINING_ITEMS).forGetter(SpongeShapedRecipe::remainingItemsFunctionId)
                     )

@@ -94,12 +94,12 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
 
     public static JsonElement encode(final WorldTypeTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return SpongeDimensionTypes.DIRECT_CODEC.encodeStart(ops, (DimensionType) (Object) template.worldType()).getOrThrow(false, e -> {});
+        return SpongeDimensionTypes.DIRECT_CODEC.encodeStart(ops, (DimensionType) (Object) template.worldType()).getOrThrow();
     }
 
     public static DimensionType decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return SpongeDimensionTypes.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+        return SpongeDimensionTypes.DIRECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static WorldTypeTemplate decode(final DataPack<WorldTypeTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
@@ -151,7 +151,7 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
         public Builder fromDataPack(final DataView pack) throws IOException {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(pack));
             final DataResult<Holder<DimensionType>> parsed = DimensionType.CODEC.parse(JsonOps.INSTANCE, json);
-            final DimensionType dimensionType = parsed.getOrThrow(false, e -> {}).value();
+            final DimensionType dimensionType = parsed.getOrThrow().value();
 
             this.fromValue((WorldType) (Object) dimensionType);
             return this;

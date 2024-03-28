@@ -78,12 +78,12 @@ public record SpongeNoiseGeneratorConfigTemplate(ResourceKey key, NoiseGenerator
     }
 
     public static JsonElement encode(final NoiseGeneratorConfigTemplate template, final RegistryAccess registryAccess) {
-        return NoiseGeneratorSettings.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, (NoiseGeneratorSettings) (Object) template.config()).getOrThrow(false, e -> {});
+        return NoiseGeneratorSettings.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, (NoiseGeneratorSettings) (Object) template.config()).getOrThrow();
     }
 
     public static NoiseGeneratorSettings decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return NoiseGeneratorSettings.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+        return NoiseGeneratorSettings.DIRECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static NoiseGeneratorConfigTemplate decode(final DataPack<NoiseGeneratorConfigTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {

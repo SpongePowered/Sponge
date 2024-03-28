@@ -73,7 +73,7 @@ public record SpongeCarverTemplate(ResourceKey key, ConfiguredWorldCarver<?> rep
 
     public static JsonElement encode(final Codec<ConfiguredWorldCarver<?>> codec, final ConfiguredWorldCarver<?> carver, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return codec.encodeStart(ops, carver).getOrThrow(false, e -> {});
+        return codec.encodeStart(ops, carver).getOrThrow();
     }
 
     public static JsonElement encode(final CarverTemplate template, final RegistryAccess registryAccess) {
@@ -82,7 +82,7 @@ public record SpongeCarverTemplate(ResourceKey key, ConfiguredWorldCarver<?> rep
 
     public static ConfiguredWorldCarver<?> decode(final Codec<ConfiguredWorldCarver<?>> codec, final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return codec.parse(ops, json).getOrThrow(false, e -> {});
+        return codec.parse(ops, json).getOrThrow();
     }
 
     public static CarverTemplate decode(final DataPack<CarverTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {

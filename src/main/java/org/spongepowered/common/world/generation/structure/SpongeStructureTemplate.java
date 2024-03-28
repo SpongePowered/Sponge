@@ -69,12 +69,12 @@ public record SpongeStructureTemplate(ResourceKey key, Structure representedStru
 
     public static JsonElement encode(final StructureTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return Structure.DIRECT_CODEC.encodeStart(ops, (Structure) template.structure()).getOrThrow(false, e -> {});
+        return Structure.DIRECT_CODEC.encodeStart(ops, (Structure) template.structure()).getOrThrow();
     }
 
     public static net.minecraft.world.level.levelgen.structure.Structure decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return Structure.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+        return Structure.DIRECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static SpongeStructureTemplate decode(final DataPack<StructureTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {

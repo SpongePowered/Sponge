@@ -71,12 +71,12 @@ public record SpongeFeatureTemplate(ResourceKey key, ConfiguredFeature<?, ?> rep
 
     public static JsonElement encode(final FeatureTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return ConfiguredFeature.DIRECT_CODEC.encodeStart(ops, (ConfiguredFeature<?, ?>) (Object) template.feature()).getOrThrow(false, e -> {});
+        return ConfiguredFeature.DIRECT_CODEC.encodeStart(ops, (ConfiguredFeature<?, ?>) (Object) template.feature()).getOrThrow();
     }
 
     public static ConfiguredFeature<?, ?> decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return ConfiguredFeature.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+        return ConfiguredFeature.DIRECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static SpongeFeatureTemplate decode(final DataPack<FeatureTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
