@@ -195,7 +195,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
                 @Nullable BlockEntity te = world.getBlockEntity(pos);
                 if (te != null) {
                     te.setBlockState((net.minecraft.world.level.block.state.BlockState) this.blockState);
-                    te.load(this.compound, world.registryAccess());
+                    te.loadWithComponents(this.compound, world.registryAccess());
                 } else {
                     // Because, some mods will "unintentionally" only obey some of the rules but not all.
                     // In cases like this, we need to directly just say "fuck it" and deserialize from the compound directly.

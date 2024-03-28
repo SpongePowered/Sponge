@@ -262,7 +262,7 @@ public final class VolumeStreamUtils {
                 cloned,
                 () -> String.format(
                     "TileEntityType[%s] creates a null TileEntity!", BlockEntityType.getKey(tile.getType()))
-            ).load(nbt, tile.getLevel().registryAccess()); // TODO NPE possible?
+            ).loadWithComponents(nbt, tile.getLevel().registryAccess()); // TODO NPE possible?
 
             if (level != null) {
                 ((BlockEntityAccessor) cloned).accessor$level(level);

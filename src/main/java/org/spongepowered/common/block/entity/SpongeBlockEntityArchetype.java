@@ -106,7 +106,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
         compound.putInt(Constants.TileEntity.Y_POS, blockpos.getY());
         compound.putInt(Constants.TileEntity.Z_POS, blockpos.getZ());
         tileEntity.setBlockState((net.minecraft.world.level.block.state.BlockState) currentState);
-        tileEntity.load(compound, minecraftWorld.registryAccess());
+        tileEntity.loadWithComponents(compound, minecraftWorld.registryAccess());
         return Optional.of((org.spongepowered.api.block.entity.BlockEntity) tileEntity);
     }
 

@@ -345,7 +345,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
                 .orElseThrow(() -> new IllegalStateException("Failed to create Block Entity at " + this.location(Vector3i.from(x, y, z))));
 
         // Load the data into it.
-        mcNewBlockEntity.load(tag, mcOriginalBlockEntity.getLevel().registryAccess());
+        mcNewBlockEntity.loadWithComponents(tag, mcOriginalBlockEntity.getLevel().registryAccess());
         // Finally, inform minecraft about our actions.
         this.shadow$setBlockEntity(mcNewBlockEntity);
     }
