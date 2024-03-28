@@ -29,7 +29,7 @@
         "commands.arguments.selector.EntitySelectorParserMixin",
         "core.MappedRegistryMixin",
         "core.Vec3iMixin",
-        "core.dispenser.AbstractProjectileDispenseBehaviorMixin",
+        "core.dispenser.ProjectileDispenseBehaviorMixin",
         "data.SpongeDataHolderMixin",
         "item.EmptyMapItemMixin",
         "item.ThrowableInaccurateItemMixin",

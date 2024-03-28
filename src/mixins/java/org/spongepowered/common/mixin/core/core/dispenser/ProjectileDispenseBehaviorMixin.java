@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.core.dispenser;
 
-import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.core.dispenser.ProjectileDispenseBehavior;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -38,8 +38,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(AbstractProjectileDispenseBehavior.class)
-public abstract class AbstractProjectileDispenseBehaviorMixin extends DefaultDispenseItemBehavior {
+@Mixin(ProjectileDispenseBehavior.class)
+public abstract class ProjectileDispenseBehaviorMixin extends DefaultDispenseItemBehavior {
 
     @Redirect(method = "execute", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"))
