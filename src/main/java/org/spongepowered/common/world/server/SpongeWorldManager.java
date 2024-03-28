@@ -734,6 +734,8 @@ public abstract class SpongeWorldManager implements WorldManager {
                     this.prepareWorld(world);
                 } catch (final IOException e) {
                     throw new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e);
+                } catch (final Exception e) {
+                    throw new IllegalStateException(String.format("Failed to create level data for world '%s'!", worldKey), e);
                 }
             }
         }
@@ -754,9 +756,13 @@ public abstract class SpongeWorldManager implements WorldManager {
 
     private PrimaryLevelData getOrCreateLevelData(final Dynamic<?> dynamicLevelData, final LevelStem levelStem, final String directoryName) {
         final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
-        @Nullable PrimaryLevelData levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), dynamicLevelData);
-        if (levelData != null) {
-            return levelData;
+        try {
+            @Nullable PrimaryLevelData levelData = this.loadLevelData(this.server.registryAccess(), defaultLevelData.getDataConfiguration(), dynamicLevelData);
+            if (levelData != null) {
+                return levelData;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load level data from " + directoryName, e);
         }
 
         if (this.server.isDemo()) {
