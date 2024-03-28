@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
@@ -69,9 +70,10 @@ public final class BannerData {
     // @formatter:on
     private static void applyBannerPatternLayers(final BannerBlockEntity h, final List<BannerPatternLayer> v) {
         final DataComponentMap.Builder builder = DataComponentMap.builder();
-        h.collectComponents(builder);
+        builder.addAll(h.collectComponents());
         // TODO base color?
         builder.set(DataComponents.BANNER_PATTERNS, new BannerPatternLayers(v.stream().map(BannerPatternLayers.Layer.class::cast).toList()));
         final DataComponentMap components = builder.build();
-        h.applyComponents(components);}
+        h.applyComponents(components, DataComponentPatch.EMPTY);
+    }
 }
