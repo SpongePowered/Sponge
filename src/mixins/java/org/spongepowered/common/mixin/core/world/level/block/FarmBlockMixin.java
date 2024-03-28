@@ -40,20 +40,18 @@ import org.spongepowered.common.mixin.core.block.BlockMixin;
 public abstract class FarmBlockMixin extends BlockMixin {
 
     // @formatter:off
-    @Shadow public static void turnToDirt(final BlockState state, final Level world, final BlockPos pos) {}
+    @Shadow public static void turnToDirt(final Entity entity, final BlockState state, final Level world, final BlockPos pos) {}
     // @formatter:on
 
     @Redirect(method = "fallOn",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/FarmBlock;turnToDirt(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"
+            target = "Lnet/minecraft/world/level/block/FarmBlock;turnToDirt(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"
         )
     )
-    private void impl$CheckIfGrieferCanGrief(final BlockState state, final Level world, final BlockPos pos,
-                                             final Level worldIn, final BlockPos samePos, final Entity entityIn,
-                                             final float fallDistance) {
-        if (entityIn instanceof GrieferBridge && ((GrieferBridge) entityIn).bridge$canGrief()) {
-            FarmBlockMixin.turnToDirt(state, world, pos);
+    private void impl$CheckIfGrieferCanGrief(Entity entityIn, BlockState state, Level world, BlockPos pos) {
+        if (entityIn instanceof GrieferBridge gb && gb.bridge$canGrief()) {
+            FarmBlockMixin.turnToDirt(entityIn, state, world, pos);
         }
     }
 }
