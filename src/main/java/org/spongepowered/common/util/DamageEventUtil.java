@@ -101,7 +101,7 @@ public final class DamageEventUtil {
             return Optional.empty();
         }
 
-        final DoubleUnaryOperator function = incomingDamage -> -(incomingDamage - CombatRules.getDamageAfterAbsorb((float) incomingDamage, living.getArmorValue(), (float) living.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
+        final DoubleUnaryOperator function = incomingDamage -> -(incomingDamage - CombatRules.getDamageAfterAbsorb((float) incomingDamage, damageSource, living.getArmorValue(), (float) living.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
         final DamageFunction armorModifier;
         try (final CauseStackManager.StackFrame frame = ((Server) living.getServer()).causeStackManager().pushCauseFrame()){
             frame.pushCause(living);
