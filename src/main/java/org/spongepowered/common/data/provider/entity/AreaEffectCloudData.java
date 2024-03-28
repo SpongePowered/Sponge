@@ -47,9 +47,9 @@ public final class AreaEffectCloudData {
         registrator
                 .asMutable(AreaEffectCloud.class)
                     .create(Keys.COLOR)
-                        .get(h -> Color.ofRgb(h.getColor()))
+                        .get(h -> Color.ofRgb(((AreaEffectCloudAccessor) h).accessor$potionContents().getColor()))
                         .set((h, v) -> {
-                            var contents = ((AreaEffectCloudAccessor)h).accessor$potionContents();
+                            var contents = ((AreaEffectCloudAccessor) h).accessor$potionContents();
                             h.setPotionContents(new PotionContents(contents.potion(), Optional.of(v.rgb()), contents.customEffects()));
                         })
                     .create(Keys.DURATION)
