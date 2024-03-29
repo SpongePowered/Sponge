@@ -20,6 +20,7 @@
         "block.BedBlockMixin",
         "block.BlockMixin",
         "block.DyeColorBlockPropertiesMixin",
+        "commands.execution.tasks.ExecuteCommandMixin",
         "commands.CommandsMixin",
         "commands.CommandSourceMixin",
         "commands.CommandSourceStackMixin",
