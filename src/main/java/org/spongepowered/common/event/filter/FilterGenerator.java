@@ -86,12 +86,12 @@ import org.spongepowered.common.event.gen.LoaderClassWriter;
 import org.spongepowered.common.event.manager.ListenerClassVisitor;
 import org.spongepowered.common.util.generator.GeneratorUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -282,13 +282,15 @@ public class FilterGenerator {
         final byte[] data = cw.toByteArray();
 
         if (FilterGenerator.FILTER_DEBUG) {
-            final File outDir = new File(".sponge.debug.out");
-            final File outFile = new File(outDir, name + ".class");
-            if (!outFile.getParentFile().exists()) {
-                outFile.getParentFile().mkdirs();
+            final Path outDir = Path.of(".sponge.debug.out");
+            final Path outFile = outDir.resolve(name + ".class");
+            try {
+                Files.createDirectories(outFile.getParent());
+            } catch (final IOException e) {
+                FilterGenerator.LOGGER.error("Failed to create parent directory", e);
             }
-            try (final FileOutputStream out = new FileOutputStream(outFile)) {
-                out.write(data);
+            try {
+                Files.write(outFile, data);
             } catch (final IOException e) {
                 FilterGenerator.LOGGER.error("Failed to write class to debug directory", e);
             }
