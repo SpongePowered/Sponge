@@ -32,6 +32,7 @@ import org.spongepowered.api.map.decoration.MapDecorationType;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
 import org.spongepowered.common.map.decoration.SpongeMapDecorationType;
@@ -46,9 +47,9 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
 
     // @formatter:off
     @Shadow @Final private MapDecoration.Type type;
-    @Shadow private byte x;
-    @Shadow private byte y;
-    @Shadow private byte rot;
+    @Shadow @Final @Mutable private byte x;
+    @Shadow @Final @Mutable private byte y;
+    @Shadow @Final @Mutable private byte rot;
     @Shadow @Nullable public abstract Component shadow$name();
     // @formatter:on
 
