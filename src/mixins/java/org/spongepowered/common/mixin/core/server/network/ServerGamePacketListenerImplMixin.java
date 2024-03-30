@@ -35,13 +35,11 @@ import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
@@ -129,7 +127,6 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch, Set<RelativeMovement> relativeArguments);
     @Shadow protected abstract CompletableFuture<List<FilteredText>> shadow$filterTextPacket(final List<String> $$0);
-    @Shadow protected abstract void shadow$performChatCommand(final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1);
     @Shadow protected abstract ParseResults<CommandSourceStack> shadow$parseCommand(final String $$0);
     // @formatter:on
 
@@ -498,15 +495,6 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         } else {
             // TODO maybe not ignore this?
             // LOGGER.warn("Player {} just tried to change non-editable sign", $$0.getName().getString());
-        }
-    }
-
-    @Redirect(method = "lambda$handleChatCommand$8", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
-    public void impl$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(this.player);
-            frame.addContext(EventContextKeys.COMMAND, $$0.command());
-            this.shadow$performChatCommand($$0, $$1);
         }
     }
 

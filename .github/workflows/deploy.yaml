@@ -44,8 +44,8 @@ jobs:
           echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
           echo "BUILD_NUMBER=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
       - name: Publish to Sponge Maven & GitHub Packages
-        # run: ./gradlew -s -PenableSpongeForge=true :publish :SpongeVanilla:publish :SpongeForge:publish
-        run: ./gradlew -s -PenableSpongeForge=true :publish :SpongeVanilla:publish
+        run: ./gradlew -s -PenableSpongeForge=true :publish :SpongeVanilla:publish :SpongeForge:publish
+        # run: ./gradlew -s -PenableSpongeForge=true :publish :SpongeVanilla:publish
         env:
           CI_SYSTEM: Github Actions
           GITHUB_USERNAME: "${{ github.actor }}"

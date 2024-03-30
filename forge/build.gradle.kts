@@ -486,6 +486,7 @@ publishing {
             artifact(tasks["applaunchSourcesJar"])
             artifact(tasks["launchSourcesJar"])
             artifact(tasks["mixinsSourcesJar"])
+            artifact(tasks["universalJar"])
 
             pom {
                 artifactId = project.name.toLowerCase()

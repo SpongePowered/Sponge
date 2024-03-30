@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.level.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.FallingBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -40,25 +41,21 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.Random;
-
 @Mixin(FallingBlock.class)
 public abstract class FallingBlockMixin {
 
     @Redirect(
-        method = "tick(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Ljava/util/Random;)V",
+        method = "tick(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/core/BlockPos;getY()I")
     )
-    public int impl$checkFallable(final BlockPos pos, final BlockState state,
-        final ServerLevel world, final BlockPos samePos,
-        final Random random,
-        final CallbackInfo ci
+    public int impl$checkFallable(
+        final BlockPos pos, final BlockState state, final ServerLevel world,
+        final BlockPos samePos, final RandomSource random
     ) {
         if (pos.getY() < 0) {
             return pos.getY();
@@ -73,9 +70,8 @@ public abstract class FallingBlockMixin {
             frame.pushCause(snapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.FALLING_BLOCK);
             final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.currentCause(),
-                ServerLocation.of(
-                    (org.spongepowered.api.world.server.ServerWorld) world, pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D),
-                new Vector3d(0, 0, 0),
+                ServerLocation.of(spongeWorld, pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D),
+                Vector3d.ZERO,
                 fallingBlock
             );
             if (SpongeCommon.post(event)) {
