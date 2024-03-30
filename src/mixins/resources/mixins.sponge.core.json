@@ -241,7 +241,6 @@
         "world.level.dimension.DimensionTypeMixin",
         "world.level.dimension.LevelStemMixin",
         "world.level.entity.PersistentEntitySectionManagerMixin",
-        "world.level.gameevent.vibrations.VibrationListenerMixin",
         "world.level.levelgen.NoiseGeneratorSettingsMixin",
         "world.level.levelgen.WorldDimensionsMixin",
         "world.level.levelgen.WorldOptionsMixin",
