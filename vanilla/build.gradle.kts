@@ -288,6 +288,7 @@ dependencies {
 
     // Libraries needed during applaunch phase and runtime
     bootstrapLibraries(libs.terminalConsoleAppender)
+    bootstrapLibraries(apiLibs.checkerQual)
     bootstrapLibraries(libs.jline.terminal)
     bootstrapLibraries(libs.jline.reader)
     bootstrapLibraries(libs.jline.terminalJansi)
@@ -310,7 +311,9 @@ dependencies {
     bootstrapLibraries(libs.mixin)
     bootstrapLibraries(libs.asm.util)
     bootstrapLibraries(libs.asm.tree)
-    bootstrapLibraries(libs.guava)
+    bootstrapLibraries(libs.guava) {
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     // Not needing to be source-visible past the init phase

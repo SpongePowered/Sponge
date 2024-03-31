@@ -230,7 +230,6 @@ dependencies {
     testImplementation(libs.mockito.junitJupiter) {
         exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
     }
-    testImplementation(libs.mockito.inline)
 }
 
 val organization: String by project
