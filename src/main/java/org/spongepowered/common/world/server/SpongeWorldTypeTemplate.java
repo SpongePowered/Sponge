@@ -106,6 +106,11 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
         }
     }
 
+    @Override
+    public WorldType worldType() {
+        return (WorldType) (Object) this.dimensionType;
+    }
+
     public static final class BuilderImpl extends AbstractDataPackEntryBuilder<WorldType, WorldTypeTemplate, Builder> implements WorldTypeTemplate.Builder {
 
         private static final DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(DimensionType.class);
