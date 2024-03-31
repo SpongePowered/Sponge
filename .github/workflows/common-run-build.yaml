@@ -19,7 +19,7 @@ jobs:
           runtime_version: 17
           publishing_branch_regex: 'api-\d+'
       - name: setup / cache minecraft dependencies
-        uses: actions/cache@v4.0.0
+        uses: "actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9" # v4.0.2
         with:
           path: |
             ${{ github.workspace}}/buildSrc/.gradle/
@@ -37,7 +37,7 @@ jobs:
         env:
           CI_SYSTEM: Github Actions
       - name: Archive artifacts for build
-        uses: actions/upload-artifact@v4.2.0
+        uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
         with:
           name: Sponge Jars
           path: |
@@ -46,17 +46,17 @@ jobs:
             ${{ github.workspace }}/vanilla/build/libs/*.jar
             ${{ github.workspace }}/forge/build/libs/*.jar
       - name: SpongeVanilla Production Jar
-        uses: actions/upload-artifact@v4.2.0
+        uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
         with:
           name: SpongeVanilla Production Jar
           path: "${{ github.workspace }}/vanilla/build/libs/*-universal.jar"
       - name: SpongeForge Production Jar
-        uses: actions/upload-artifact@v4.2.0
+        uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
         with:
           name: SpongeForge Production Jar
           path: "${{ github.workspace }}/forge/build/libs/*-universal.jar"
       - name: SpongeVanilla libraries
-        uses: actions/upload-artifact@v4.2.0
+        uses: "actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3" # v4.3.1
         with:
           name: SpongeVanilla installer libraries
           path: "${{ github.workspace }}/vanilla/build/resources/installer/libraries.json"

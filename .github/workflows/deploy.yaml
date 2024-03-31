@@ -29,7 +29,7 @@ jobs:
         with:
           runtime_version: 17
       - name: setup / minecraft cache
-        uses: actions/cache@v3
+        uses: "actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9" # v4.0.2
         with:
           path: |
             ${{ github.workspace}}/buildSrc/.gradle/
