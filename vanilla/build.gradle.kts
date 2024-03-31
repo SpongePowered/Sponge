@@ -267,7 +267,9 @@ dependencies {
     // Libraries only needed on the TCL (during main game lifecycle)
 
     libraries("org.spongepowered:spongeapi:$apiVersion")
-    libraries(platform(apiLibs.adventure.bom))
+    libraries(platform(apiLibs.adventure.bom)) {
+        exclude(group = "org.jetbrains", module = "annotations")
+    }
     libraries(libs.adventure.serializerConfigurate4) {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
@@ -277,17 +279,21 @@ dependencies {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
-    libraries(platform(apiLibs.adventure.bom))
     libraries(libs.adventure.serializerAnsi) {
         exclude(group = "org.jetbrains", module = "annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
     // Databases
-    libraries(libs.db.hikariCp)
+    libraries(libs.db.hikariCp) {
+        exclude(group = "org.slf4j", module = "slf4j-api")
+    }
 
     // Libraries needed during applaunch phase and runtime
-    bootstrapLibraries(libs.terminalConsoleAppender)
+    bootstrapLibraries(libs.terminalConsoleAppender) {
+        exclude(group = "org.jline", module = "jline-reader")
+        exclude(group = "org.apache.logging.log4j", module = "log4j-core")
+    }
     bootstrapLibraries(apiLibs.checkerQual)
     bootstrapLibraries(libs.jline.terminal)
     bootstrapLibraries(libs.jline.reader)
@@ -305,13 +311,16 @@ dependencies {
     }
     bootstrapLibraries(libs.log4j.api)
     bootstrapLibraries(libs.log4j.core)
-    bootstrapLibraries(libs.log4j.slf4j2)
+    bootstrapLibraries(libs.log4j.slf4j2) {
+        exclude(group = "org.slf4j", module = "slf4j-api")
+    }
 
     // Mixin and dependencies
     bootstrapLibraries(libs.mixin)
     bootstrapLibraries(libs.asm.util)
     bootstrapLibraries(libs.asm.tree)
     bootstrapLibraries(libs.guava) {
+        exclude(group = "com.google.errorprone", module = "error_prone_annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
@@ -319,6 +328,7 @@ dependencies {
     // Not needing to be source-visible past the init phase
     // The ModLauncher compatibility launch layer
     appLaunch(libs.modlauncher) {
+        exclude(group = "org.ow2.asm")
         exclude(group = "org.apache.logging.log4j")
         exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
     }
@@ -330,6 +340,7 @@ dependencies {
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.code.gson", module = "gson")
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")
+        exclude(group = "org.apache.commons", module = "commons-lang3")
     }
     appLaunch(libs.lmaxDisruptor)
 

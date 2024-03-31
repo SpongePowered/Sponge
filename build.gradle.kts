@@ -154,9 +154,15 @@ dependencies {
     implementation(libs.db.hikariCp) {
         exclude(group = "org.slf4j", module = "slf4j-api")
     }
-    implementation(libs.db.maria)
+    implementation(libs.db.maria) {
+        exclude(group = "org.checkerframework", module = "checker-qual")
+        exclude(group = "org.slf4j", module = "slf4j-api")
+        exclude(group = "com.github.ben-manes.caffeine", module = "caffeine")
+    }
     implementation(libs.db.h2)
-    implementation(libs.db.sqlite)
+    implementation(libs.db.sqlite) {
+        exclude(group = "org.slf4j", module = "slf4j-api")
+    }
     implementation(libs.javaxInject)
 
     // ASM - required for generating event listeners
@@ -164,7 +170,9 @@ dependencies {
     implementation(libs.asm.tree)
 
     // Implementation-only Adventure
-    implementation(platform(apiLibs.adventure.bom))
+    implementation(platform(apiLibs.adventure.bom)) {
+        exclude(group = "org.jetbrains", module = "annotations")
+    }
     implementation(libs.adventure.serializerConfigurate4) {
         exclude(group = "org.jetbrains", module = "annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
@@ -180,6 +188,7 @@ dependencies {
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.code.gson", module = "gson")
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")
+        exclude(group = "org.apache.commons", module = "commons-lang3")
     }
     launchConfig(libs.mixin)
     launchConfig(apiLibs.checkerQual)
@@ -197,7 +206,7 @@ dependencies {
     // Applaunch -- initialization that needs to occur without game access
     applaunchConfig(apiLibs.checkerQual)
     applaunchConfig(libs.log4j.api)
-    applaunchConfig(libs.guava){
+    applaunchConfig(libs.guava) {
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
