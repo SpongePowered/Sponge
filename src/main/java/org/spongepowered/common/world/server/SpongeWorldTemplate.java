@@ -221,6 +221,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         @Override
         public Builder reset() {
             super.reset();
+            this.key = null;
             this.data = DataManipulator.mutableOf();
             this.data.set(Keys.WORLD_TYPE, WorldTypes.OVERWORLD.get());
             this.data.set(Keys.CHUNK_GENERATOR, ChunkGenerator.overworld());
@@ -260,7 +261,6 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         @Override
         public Builder from(final ServerWorldProperties properties) {
             final PrimaryLevelDataBridge bridge = (PrimaryLevelDataBridge) properties;
-            this.key = properties.key();
             properties.displayName().ifPresent(name -> this.data.set(Keys.DISPLAY_NAME, name));
             this.data.set(Keys.WORLD_TYPE, properties.worldType());
             if (bridge.bridge$customGameType()) {
