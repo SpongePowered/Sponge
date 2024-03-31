@@ -306,7 +306,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
         final ServerLevel world;
         try {
-            world = this.createLevel(registryKey, levelStem, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
+            world = this.createNonDefaultLevel(registryKey, levelStem, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e));
         }
@@ -731,7 +731,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                 this.prepareWorld(world);
             } else {
                 try {
-                    final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
+                    final ServerLevel world = this.createNonDefaultLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
                     // Ensure that the world border is registered.
                     world.getWorldBorder().applySettings(((PrimaryLevelData) world.getLevelData()).getWorldBorder());
                     this.prepareWorld(world);
@@ -784,7 +784,8 @@ public abstract class SpongeWorldManager implements WorldManager {
         return dataTag == null ? null : (PrimaryLevelData) dataTag.getFirst();
     }
 
-    private ServerLevel createLevel(
+    // Do not call this for the default world, that is handled very special in loadLevel()
+    private ServerLevel createNonDefaultLevel(
             final net.minecraft.resources.ResourceKey<Level> registryKey,
             final LevelStem levelStem,
             final ResourceKey worldKey,
