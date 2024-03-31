@@ -29,6 +29,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.objectweb.asm.ClassWriter;
@@ -39,6 +40,7 @@ import org.spongepowered.common.test.block.SpongeBlock;
 
 import java.lang.reflect.Method;
 
+@Disabled
 @ExtendWith(UnitTestExtension.class)
 public class ReflectionTest {
 

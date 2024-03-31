@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.test.event;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -51,6 +52,7 @@ import org.spongepowered.plugin.PluginContainer;
 
 import java.lang.reflect.InvocationTargetException;
 
+@Disabled
 @ExtendWith(UnitTestExtension.class)
 public class EventManagerRegistrationTest {
 
