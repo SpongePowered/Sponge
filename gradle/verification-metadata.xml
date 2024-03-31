@@ -4,6 +4,7 @@
       <verify-metadata>true</verify-metadata>
       <verify-signatures>false</verify-signatures>
       <trusted-artifacts>
+         <trust group="com.fasterxml.jackson" name="jackson-base" version="2.12.3" reason="WHY"/>
          <trust group="org.junit" name="junit-bom" version="5.7.2" reason="WHY"/>
          <trust group="org.junit" name="junit-bom" version="5.9.0" reason="WHY"/>
          <trust group="org.junit" name="junit-bom" version="5.9.1" reason="WHY"/>
