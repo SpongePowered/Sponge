@@ -148,7 +148,7 @@ public final class VanillaRegistryLoader {
         }, phase -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, ((EnderDragonPhaseAccessor) phase).accessor$name()));
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape());
         this.holder.createRegistry(RegistryTypes.TRIGGER, VanillaRegistryLoader.trigger(), true,
-                (k, trigger) -> CriteriaTriggersAccessor.invoker$register((CriterionTrigger<?>) trigger));
+                (k, trigger) -> CriteriaTriggersAccessor.invoker$register((CriterionTrigger<?>) trigger), false);
         this.knownName(RegistryTypes.GAME_RULE, GameRulesAccessor.accessor$GAME_RULE_TYPES().keySet(), rule -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, rule.getId()));
     }
 

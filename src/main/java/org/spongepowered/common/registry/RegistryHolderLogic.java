@@ -39,7 +39,9 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
+import org.spongepowered.common.accessor.core.MappedRegistryAccessor;
 import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
+import org.spongepowered.common.bridge.core.MappedRegistryBridge;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 
 import java.util.Map;
@@ -81,9 +83,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
         final WritableRegistry root = (WritableRegistry) this.roots.get(new ResourceLocation("minecraft", "root"));
         // Add the dynamic registries. These are server-scoped in Vanilla
 
-        dynamicAccess.registries().forEach(entry -> {
-            root.register(entry.key(), entry.value(), Lifecycle.stable());
-        });
+        dynamicAccess.registries().forEach(entry -> root.register(entry.key(), entry.value(), Lifecycle.stable()));
         root.freeze();
     }
 
@@ -132,15 +132,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
 
     public <T> Registry<T> createRegistry(final RegistryType<T> type, final @Nullable Supplier<Map<ResourceKey, T>> defaultValues,
         final boolean isDynamic) {
-        return this.createRegistry(type, InitialRegistryData.noIds(defaultValues), this.registrySupplier(isDynamic, null));
-    }
-
-    public <T> Registry<T> createRegistry(final RegistryType<T> type, final RegistryLoader<T> loader) {
-        return this.createRegistry(type, loader, false);
-    }
-
-    public <T> Registry<T> createRegistry(final RegistryType<T> type, final RegistryLoader<T> loader, final boolean isDynamic) {
-        return this.createRegistry(type, loader, this.registrySupplier(isDynamic, null));
+        return this.createRegistry(type, InitialRegistryData.noIds(defaultValues), this.registrySupplier(isDynamic, null), false);
     }
 
     @SuppressWarnings("unchecked")
@@ -163,13 +155,14 @@ public final class RegistryHolderLogic implements RegistryHolder {
     }
 
     public <T> Registry<T> createRegistry(final RegistryType<T> type, final @Nullable InitialRegistryData<T> defaultValues,
-            final Function<net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>>, net.minecraft.core.Registry<T>> registrySupplier) {
+            final Function<net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>>, net.minecraft.core.Registry<T>> registrySupplier, final boolean replace) {
         final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(Objects.requireNonNull(type, "type").root());
         if (root == null) {
             throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
         }
         net.minecraft.core.Registry<?> registry = root.get((ResourceLocation) (Object) type.location());
-        if (registry != null) {
+        final boolean exists = registry != null;
+        if (!replace && exists) {
             throw new DuplicateRegistrationException(String.format("Registry '%s' in root '%s' has already been defined", type.location(), type.root()));
         }
         final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>> key;
@@ -202,10 +195,22 @@ public final class RegistryHolderLogic implements RegistryHolder {
                 }
             });
         }
+
+        // This is so wrong and dirty and only because we don't have layered registries...
+        final boolean frozen = ((MappedRegistryAccessor<T>) root).accessor$frozen();
+
+        if (replace && exists) {
+            ((MappedRegistryAccessor<T>) root).accessor$frozen(false);
+            ((MappedRegistryBridge<T>) root).bridge$forceRemoveValue(key);
+        }
+
         ((WritableRegistry) root).register(key, registry, Lifecycle.stable());
         if (registry instanceof CallbackRegistry) {
             ((CallbackRegistry<?>) registry).setCallbackEnabled(true);
         }
+
+        ((MappedRegistryAccessor<T>) root).accessor$frozen(frozen);
+
         return (Registry<T>) registry;
     }
 
