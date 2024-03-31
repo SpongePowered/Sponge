@@ -130,17 +130,17 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public @Nullable ServerLevel bridge$world() {
         if (!Sponge.isServerAvailable()) {
-            return null;
+            throw new IllegalStateException("The server is not available yet!");
         }
 
         final ServerLevel world = SpongeCommon.server().getLevel(SpongeWorldManager.createRegistryKey(this.impl$key));
         if (world == null) {
-            return null;
+            throw new IllegalStateException("The world is not available yet!");
         }
 
         final ServerLevelData levelData = (ServerLevelData) world.getLevelData();
         if (levelData != this) {
-            return null;
+            throw new IllegalStateException(String.format("The reference for the data for key '%s' does not match this object. This object is stale.", this.impl$key));
         }
 
         return world;
@@ -281,7 +281,6 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         if (gameType != null) {
             this.impl$customGameType = true;
         }
-        this.settings = new LevelSettings(this.settings.levelName(),
         this.settings = new LevelSettings(
                 this.settings.levelName(),
                 gameType == null ? this.settings.gameType() : gameType,
@@ -336,10 +335,6 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     }
 
     void impl$updateWorldForDifficultyChange(final ServerLevel world, final boolean isLocked) {
-        if (world == null) {
-            return;
-        }
-
         final MinecraftServer server = world.getServer();
         final Difficulty difficulty = ((LevelData) this).getDifficulty();
 
