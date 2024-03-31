@@ -5,6 +5,7 @@
       <verify-signatures>false</verify-signatures>
       <trusted-artifacts>
          <trust group="org.junit" name="junit-bom" version="5.7.2" reason="WHY"/>
+         <trust group="org.junit" name="junit-bom" version="5.9.0" reason="WHY"/>
          <trust group="org.junit" name="junit-bom" version="5.9.1" reason="WHY"/>
          <trust group="org.spongepowered" name="vanillagradle" reason="FIX THIS"/>
          <trust group="org.spongepowered" name="vanillagradle-downloader-apache-http" reason="FIX THIS"/>
