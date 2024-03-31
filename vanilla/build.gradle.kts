@@ -284,11 +284,6 @@ dependencies {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
-    // Databases
-    libraries(libs.db.hikariCp) {
-        exclude(group = "org.slf4j", module = "slf4j-api")
-    }
-
     // Libraries needed during applaunch phase and runtime
     bootstrapLibraries(libs.terminalConsoleAppender) {
         exclude(group = "org.jline", module = "jline-reader")

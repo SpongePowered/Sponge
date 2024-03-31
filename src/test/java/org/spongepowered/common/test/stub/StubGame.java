@@ -36,7 +36,6 @@ import org.spongepowered.api.network.channel.ChannelManager;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.service.ServiceProvider;
-import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
@@ -125,11 +124,6 @@ public class StubGame extends StubRegistryHolder implements Game {
 
     @Override
     public MetricsConfigManager metricsConfigManager() {
-        return null;
-    }
-
-    @Override
-    public SqlManager sqlManager() {
         return null;
     }
 

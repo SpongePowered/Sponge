@@ -150,19 +150,6 @@ dependencies {
     // api
     api("org.spongepowered:spongeapi:$apiVersion")
 
-    // Database stuffs... likely needs to be looked at
-    implementation(libs.db.hikariCp) {
-        exclude(group = "org.slf4j", module = "slf4j-api")
-    }
-    implementation(libs.db.maria) {
-        exclude(group = "org.checkerframework", module = "checker-qual")
-        exclude(group = "org.slf4j", module = "slf4j-api")
-        exclude(group = "com.github.ben-manes.caffeine", module = "caffeine")
-    }
-    implementation(libs.db.h2)
-    implementation(libs.db.sqlite) {
-        exclude(group = "org.slf4j", module = "slf4j-api")
-    }
     implementation(libs.javaxInject)
 
     // ASM - required for generating event listeners
