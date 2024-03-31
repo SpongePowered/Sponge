@@ -57,8 +57,6 @@ public interface PrimaryLevelDataBridge {
 
     UUID bridge$uniqueId();
 
-    void bridge$setUniqueId(UUID uniqueId);
-
     /**
      * Gets whether the world data supports custom difficulties,
      * @return
@@ -105,19 +103,17 @@ public interface PrimaryLevelDataBridge {
 
     void bridge$populateFromLevelStem(LevelStem dimension);
 
-    void bridge$setMapUUIDIndex(BiMap<Integer, UUID> index);
-
     BiMap<Integer, UUID> bridge$getMapUUIDIndex();
 
     int bridge$getIndexForUniqueId(UUID uuid);
 
     Optional<UUID> bridge$getUniqueIdForIndex(int ownerIndex);
 
-    void bridge$readSpongeLevelData(Dynamic<Tag> impl$spongeLevelData);
-
-    CompoundTag bridge$writeSpongeLevelData();
-
     void bridge$hardcore(boolean hardcore);
 
     void bridge$allowCommands(boolean commands);
+
+    void bridge$readSpongeLevelData(Dynamic<Tag> impl$spongeLevelData);
+
+    CompoundTag bridge$writeSpongeLevelData();
 }

@@ -68,7 +68,25 @@ import java.io.IOException;
 import java.util.OptionalLong;
 import java.util.function.Function;
 
-public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionType, DataPack<WorldTypeTemplate> pack) implements WorldTypeTemplate {
+public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionType, DataPack<WorldTypeTemplate> pack) implements WorldTypeTemplate, SpongeDataHolder {
+
+    public static DimensionType decode(final JsonElement json, final RegistryAccess registryAccess) {
+        final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+        return SpongeDimensionTypes.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+    }
+
+    public static WorldTypeTemplate decode(final DataPack<WorldTypeTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
+        final DimensionType parsed = SpongeWorldTypeTemplate.decode(packEntry, registryAccess);
+        return new SpongeWorldTypeTemplate(key, parsed, pack);
+    }
+
+    public static JsonElement encode(final WorldTypeTemplate template, final RegistryAccess registryAccess) {
+        if (template instanceof final SpongeWorldTypeTemplate t) {
+            final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+            return SpongeDimensionTypes.DIRECT_CODEC.encodeStart(ops, t.dimensionType).getOrThrow(false, e -> {});
+        }
+        throw new IllegalArgumentException("WorldTypeTemplate is not a SpongeWorldTypeTemplate");
+    }
 
     @Override
     public int contentVersion() {
@@ -87,39 +105,14 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
         }
     }
 
-    @Override
-    public WorldType worldType() {
-        return (WorldType) (Object) this.dimensionType;
-    }
-
-    public static JsonElement encode(final WorldTypeTemplate template, final RegistryAccess registryAccess) {
-        final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return SpongeDimensionTypes.DIRECT_CODEC.encodeStart(ops, (DimensionType) (Object) template.worldType()).getOrThrow(false, e -> {});
-    }
-
-    public static DimensionType decode(final JsonElement json, final RegistryAccess registryAccess) {
-        final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return SpongeDimensionTypes.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
-    }
-
-    public static WorldTypeTemplate decode(final DataPack<WorldTypeTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
-        final DimensionType parsed = SpongeWorldTypeTemplate.decode(packEntry, registryAccess);
-        return new SpongeWorldTypeTemplate(key, parsed, pack);
-    }
-
     public static final class BuilderImpl extends AbstractDataPackEntryBuilder<WorldType, WorldTypeTemplate, Builder> implements WorldTypeTemplate.Builder {
 
-        private static DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(DimensionType.class);
+        private static final DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(DimensionType.class);
 
-        private DataManipulator.Mutable manipulator = DataManipulator.mutableOf();
+        private DataManipulator.Mutable data = DataManipulator.mutableOf();
 
         public BuilderImpl() {
             this.reset();
-        }
-
-        @Override
-        public Function<WorldTypeTemplate, WorldType> valueExtractor() {
-            return WorldTypeTemplate::worldType;
         }
 
         @Override
@@ -127,13 +120,13 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
             if (!PROVIDER_LOOKUP.getProvider(key).isSupported(DimensionType.class)) {
                 throw new IllegalArgumentException(key + " is not supported for world types");
             }
-            this.manipulator.set(key, value);
+            this.data.set(key, value);
             return this;
         }
 
         @Override
         public Builder reset() {
-            this.manipulator = DataManipulator.mutableOf();
+            this.data = DataManipulator.mutableOf();
             this.key = null;
             this.pack = DataPacks.WORLD_TYPE;
             final DimensionType defaultOverworld = SpongeCommon.vanillaRegistry(Registries.DIMENSION_TYPE).get(BuiltinDimensionTypes.OVERWORLD);
@@ -143,7 +136,7 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
 
         @Override
         public Builder fromValue(final WorldType type) {
-            this.manipulator.set(type.getValues());
+            this.data.set(type.getValues());
             return this;
         }
 
@@ -159,20 +152,20 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
 
         @Override
         public @NonNull WorldTypeTemplate build0() {
-            @Nullable final WorldTypeEffect effect = this.manipulator.getOrNull(Keys.WORLD_TYPE_EFFECT);
-            final boolean scorching = this.manipulator.require(Keys.SCORCHING);
-            final boolean natural = this.manipulator.require(Keys.NATURAL_WORLD_TYPE);
-            final double coordinateMultiplier = this.manipulator.require(Keys.COORDINATE_MULTIPLIER);
-            final boolean hasSkylight = this.manipulator.require(Keys.HAS_SKYLIGHT);
-            final boolean hasCeiling = this.manipulator.require(Keys.HAS_CEILING);
-            final float ambientLighting = this.manipulator.require(Keys.AMBIENT_LIGHTING);
-            @Nullable final MinecraftDayTime fixedTime = this.manipulator.getOrNull(Keys.FIXED_TIME);
-            final boolean bedsUsable = this.manipulator.require(Keys.BEDS_USABLE);
-            final boolean respawnAnchorsUsable = this.manipulator.require(Keys.RESPAWN_ANCHOR_USABLE);
-            final int floor = this.manipulator.require(Keys.WORLD_FLOOR);
-            final int height = this.manipulator.require(Keys.WORLD_HEIGHT);
-            final int logicalHeight = this.manipulator.require(Keys.WORLD_LOGICAL_HEIGHT);
-            @Nullable final Tag<BlockType> infiniburn = this.manipulator.getOrNull(Keys.INFINIBURN);
+            @Nullable final WorldTypeEffect effect = this.data.getOrNull(Keys.WORLD_TYPE_EFFECT);
+            final boolean scorching = this.data.require(Keys.SCORCHING);
+            final boolean natural = this.data.require(Keys.NATURAL_WORLD_TYPE);
+            final double coordinateMultiplier = this.data.require(Keys.COORDINATE_MULTIPLIER);
+            final boolean hasSkylight = this.data.require(Keys.HAS_SKYLIGHT);
+            final boolean hasCeiling = this.data.require(Keys.HAS_CEILING);
+            final float ambientLighting = this.data.require(Keys.AMBIENT_LIGHTING);
+            @Nullable final MinecraftDayTime fixedTime = this.data.getOrNull(Keys.FIXED_TIME);
+            final boolean bedsUsable = this.data.require(Keys.BEDS_USABLE);
+            final boolean respawnAnchorsUsable = this.data.require(Keys.RESPAWN_ANCHOR_USABLE);
+            final int floor = this.data.require(Keys.WORLD_FLOOR);
+            final int height = this.data.require(Keys.WORLD_HEIGHT);
+            final int logicalHeight = this.data.require(Keys.WORLD_LOGICAL_HEIGHT);
+            @Nullable final Tag<BlockType> infiniburn = this.data.getOrNull(Keys.INFINIBURN);
 
             final boolean piglinSafe = this.manipulator.require(Keys.PIGLIN_SAFE);
             final boolean hasRaids = this.manipulator.require(Keys.HAS_RAIDS);

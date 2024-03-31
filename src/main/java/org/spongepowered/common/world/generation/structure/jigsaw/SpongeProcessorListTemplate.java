@@ -96,18 +96,12 @@ public record SpongeProcessorListTemplate(ResourceKey key, StructureProcessorLis
 
         @Override
         public Function<ProcessorListTemplate, ProcessorList> valueExtractor() {
-            return ProcessorListTemplate::processorList;
+            return value -> (ProcessorList) ((SpongeProcessorListTemplate) value).representedProcessors;
         }
 
         @Override
         public Builder fromValues(final List<Processor> processorList) {
             this.processorList = new StructureProcessorList((List) processorList);
-            return this;
-        }
-
-        @Override
-        public Builder from(final ProcessorListTemplate value) {
-            this.processorList = ((SpongeProcessorListTemplate) value).representedProcessors;
             return this;
         }
 

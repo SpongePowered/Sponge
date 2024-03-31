@@ -54,7 +54,7 @@ public interface LevelStemBridge {
 
     @Nullable Boolean bridge$hardcore();
 
-    @Nullable Boolean bridge$commands();
+    @Nullable Boolean bridge$allowCommands();
 
     @Nullable Boolean bridge$pvp();
 
