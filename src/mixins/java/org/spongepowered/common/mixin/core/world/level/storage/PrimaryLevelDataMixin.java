@@ -58,6 +58,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
+import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -281,10 +282,12 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
             this.impl$customGameType = true;
         }
         this.settings = new LevelSettings(this.settings.levelName(),
+        this.settings = new LevelSettings(
+                this.settings.levelName(),
                 gameType == null ? this.settings.gameType() : gameType,
-                this.settings.allowCommands(),
-                difficulty == null ? this.settings.difficulty() : difficulty,
                 isHardcore == null ? this.settings.hardcore() : isHardcore,
+                difficulty == null ? this.settings.difficulty() : difficulty,
+                allowCommands == null ? this.settings.allowCommands() : allowCommands,
                 this.settings.gameRules(),
                 this.settings.getDataConfiguration());
 
