@@ -37,7 +37,6 @@ import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.BuilderProvider;
 import org.spongepowered.api.registry.FactoryProvider;
 import org.spongepowered.api.service.ServiceProvider;
-import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.common.registry.RegistryHolderLogic;
@@ -64,7 +63,6 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
     private final PluginConfigManager configManager;
     private final ChannelManager channelManager;
     private final MetricsConfigManager metricsConfigManager;
-    private final SqlManager sqlManager;
     private final ServiceProvider.GameScoped serviceProvider;
 
     private final AsyncScheduler asyncScheduler;
@@ -79,7 +77,7 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
     public SpongeGame(final Platform platform, final BuilderProvider builderProvider,
             final FactoryProvider factoryProvider, final DataManager dataManager, final PluginManager pluginManager,
             final EventManager eventManager, final PluginConfigManager configManager, final ChannelManager channelManager,
-            final MetricsConfigManager metricsConfigManager, final SqlManager sqlManager, final ServiceProvider.GameScoped serviceProvider) {
+            final MetricsConfigManager metricsConfigManager, final ServiceProvider.GameScoped serviceProvider) {
 
         this.platform = platform;
         this.builderProvider = builderProvider;
@@ -90,7 +88,6 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
         this.configManager = configManager;
         this.channelManager = channelManager;
         this.metricsConfigManager = metricsConfigManager;
-        this.sqlManager = sqlManager;
         this.serviceProvider = serviceProvider;
 
         this.asyncScheduler = new AsyncScheduler();
@@ -152,11 +149,6 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
     @Override
     public MetricsConfigManager metricsConfigManager() {
         return this.metricsConfigManager;
-    }
-
-    @Override
-    public SqlManager sqlManager() {
-        return this.sqlManager;
     }
 
     @Override

@@ -56,10 +56,6 @@ public final class CommonConfig implements Config {
     public final GeneralCategory general = new GeneralCategory();
 
     @Setting
-    @Comment("Configuration options related to the SQL manager, including connection aliases etc")
-    public final SqlCategory sql = new SqlCategory();
-
-    @Setting
     public final CommandsCategory commands = new CommandsCategory();
 
     @Setting

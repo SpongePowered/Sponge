@@ -241,7 +241,6 @@ dependencies {
     val gameLibraries = gameLibrariesConfig.name
     gameLibraries("org.spongepowered:spongeapi:$apiVersion")
     gameLibraries(libs.javaxInject)
-    gameLibraries(libs.db.hikariCp)
     gameLibraries(platform(apiLibs.adventure.bom))
     gameLibraries(libs.adventure.serializerConfigurate4)
 

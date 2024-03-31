@@ -29,6 +29,7 @@ dependencies {
     //  the platform making use of this project
     compileOnly(libs.log4j.api)
     compileOnly(libs.modlauncher) {
+        exclude(group = "org.ow2.asm")
         exclude(group = "org.apache.logging.log4j")
         exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
     }
