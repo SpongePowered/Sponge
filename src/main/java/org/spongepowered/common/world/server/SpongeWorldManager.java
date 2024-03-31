@@ -1009,21 +1009,6 @@ public abstract class SpongeWorldManager implements WorldManager {
         return net.minecraft.resources.ResourceKey.create(Registries.DIMENSION, (ResourceLocation) (Object) key);
     }
 
-
-
-    private LevelStorageSource.LevelStorageAccess createStorageSource(final ResourceKey key) throws IOException {
-        if (DefaultWorldKeys.DEFAULT.equals(key)) {
-            LevelStorageSource.createDefault(this.defaultWorldDirectory.getParent()).createAccess(this.defaultWorldDirectory.getFileName().toString());
-        }
-        if (DefaultWorldKeys.THE_NETHER.equals(key)) {
-            return LevelStorageSource.createDefault(this.defaultWorldDirectory).createAccess("DIM-1");
-        }
-        if (DefaultWorldKeys.THE_END.equals(key)) {
-            return LevelStorageSource.createDefault(this.defaultWorldDirectory).createAccess("DIM1");
-        }
-        return LevelStorageSource.createDefault(this.customWorldsDirectory).createAccess(key.namespace() + File.separator + key.value());
-    }
-
     private String getDirectoryName(final ResourceKey key) {
         if (DefaultWorldKeys.DEFAULT.equals(key)) {
             return "";
