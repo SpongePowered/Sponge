@@ -28,15 +28,19 @@ import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
+import org.spongepowered.common.bridge.core.MappedRegistryBridge;
 import org.spongepowered.common.bridge.core.RegistryBridge;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 import org.spongepowered.common.registry.SpongeRegistryEntry;
@@ -48,8 +52,10 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Mixin(MappedRegistry.class)
-public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, WritableRegistryBridge<T> {
+public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, WritableRegistryBridge<T>, MappedRegistryBridge<T> {
 
+    @Shadow @Final private Map<ResourceLocation, Holder.Reference<T>> byLocation;
+    @Shadow @Final private Map<T, Holder.Reference<T>> byValue;
     private RegistryType<T> impl$type;
     private final Map<ResourceKey, RegistryEntry<T>> impl$entries = new LinkedHashMap<>();
 
@@ -105,4 +111,9 @@ public abstract class MappedRegistryMixin<T> implements RegistryBridge<T>, Writa
         return this.impl$entries.values().stream();
     }
 
+    @Override
+    public void bridge$forceRemoveValue(net.minecraft.resources.ResourceKey<Registry<T>> key) {
+        this.byLocation.remove(key);
+        this.byValue.remove(key);
+    }
 }
