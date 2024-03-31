@@ -44,10 +44,10 @@ accessWidener = { module = "net.fabricmc:access-widener", version = "2.1.0" }
 adventure-serializerAnsi = { module = "net.kyori:adventure-text-serializer-ansi" } # version inherited from bom in API catalog
 adventure-serializerConfigurate4 = { module = "net.kyori:adventure-serializer-configurate4" } # version inherited from bom in API catalog
 configurate-jackson = { module = "org.spongepowered:configurate-jackson" } # version inherited from bom in API catalog
-db-h2 = { module = "com.h2database:h2", version = "1.4.196" }
-db-hikariCp = { module = "com.zaxxer:HikariCP", version = "2.6.3" }
-db-maria = { module = "org.mariadb.jdbc:mariadb-java-client",  version = "2.0.3" }
-db-sqlite = { module = "org.xerial:sqlite-jdbc", version = "3.20.0" }
+db-h2 = { module = "com.h2database:h2", version = "2.2.224" }
+db-hikariCp = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
+db-maria = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.3.3" }
+db-sqlite = { module = "org.xerial:sqlite-jdbc", version = "3.45.2.0" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 javaxInject = { module = "javax.inject:javax.inject", version = "1" }
 mixin = { module = "org.spongepowered:mixin", version.ref = "mixin" }
