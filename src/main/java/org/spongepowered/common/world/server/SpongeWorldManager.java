@@ -332,13 +332,14 @@ public abstract class SpongeWorldManager implements WorldManager {
         final GameType gameType = levelStemBridge.bridge$gameMode();
         final Boolean hardcore = levelStemBridge.bridge$hardcore();
         final Difficulty difficulty = levelStemBridge.bridge$difficulty();
-        final Boolean commands = levelStemBridge.bridge$commands();
-        return new LevelSettings(directoryName,
+        final Boolean allowCommands = levelStemBridge.bridge$allowCommands();
+        return new LevelSettings(
+                directoryName,
                 gameType == null ? defaultLevelData.getGameType() : gameType,
                 hardcore == null ? defaultLevelData.isHardcore() : hardcore,
                 difficulty == null ? defaultLevelData.getDifficulty() : difficulty,
-                commands == null ? defaultLevelData.getAllowCommands() : commands,
-                new GameRules(),
+                allowCommands == null ? defaultLevelData.getAllowCommands() : allowCommands,
+                defaultLevelData.getGameRules().copy(),
                 defaultLevelData.getDataConfiguration());
     }
 
