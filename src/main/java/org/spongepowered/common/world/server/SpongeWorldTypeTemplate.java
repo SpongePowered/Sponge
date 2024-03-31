@@ -61,6 +61,7 @@ import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.holder.SpongeDataHolder;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.util.AbstractDataPackEntryBuilder;
 
@@ -151,6 +152,17 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
         }
 
         @Override
+        public Builder from(WorldType type) {
+            this.data.set(type.getValues());
+            return this;
+        }
+
+        @Override
+        public Function<WorldTypeTemplate, WorldType> valueExtractor() {
+            return value -> (WorldType) (Object) ((SpongeWorldTypeTemplate) value).dimensionType;
+        }
+
+        @Override
         public @NonNull WorldTypeTemplate build0() {
             @Nullable final WorldTypeEffect effect = this.data.getOrNull(Keys.WORLD_TYPE_EFFECT);
             final boolean scorching = this.data.require(Keys.SCORCHING);
@@ -167,11 +179,11 @@ public record SpongeWorldTypeTemplate(ResourceKey key, DimensionType dimensionTy
             final int logicalHeight = this.data.require(Keys.WORLD_LOGICAL_HEIGHT);
             @Nullable final Tag<BlockType> infiniburn = this.data.getOrNull(Keys.INFINIBURN);
 
-            final boolean piglinSafe = this.manipulator.require(Keys.PIGLIN_SAFE);
-            final boolean hasRaids = this.manipulator.require(Keys.HAS_RAIDS);
-            final int monsterSpawnBlockLightLimit = this.manipulator.getOrElse(Keys.SPAWN_LIGHT_LIMIT, 0);
-            final Range<Integer> lightRange = this.manipulator.getOrElse(Keys.SPAWN_LIGHT_RANGE, Range.intRange(0, 7));
-            final boolean createDragonFight = this.manipulator.getOrElse(Keys.CREATE_DRAGON_FIGHT, false);
+            final boolean piglinSafe = this.data.require(Keys.PIGLIN_SAFE);
+            final boolean hasRaids = this.data.require(Keys.HAS_RAIDS);
+            final int monsterSpawnBlockLightLimit = this.data.getOrElse(Keys.SPAWN_LIGHT_LIMIT, 0);
+            final Range<Integer> lightRange = this.data.getOrElse(Keys.SPAWN_LIGHT_RANGE, Range.intRange(0, 7));
+            final boolean createDragonFight = this.data.getOrElse(Keys.CREATE_DRAGON_FIGHT, false);
             final UniformInt monsterSpawnLightTest = UniformInt.of(lightRange.min(), lightRange.max());
 
             final SpongeDimensionTypes.SpongeDataSection spongeData = new SpongeDimensionTypes.SpongeDataSection(createDragonFight);
