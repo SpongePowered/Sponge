@@ -29,11 +29,11 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.entity.carrier.furnace.FurnaceBlockEntity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -62,7 +62,7 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
     // @formatter:off
     @Shadow protected NonNullList<ItemStack> items;
     @Shadow int cookingProgress;
-    @Shadow private boolean shadow$canBurn(RegistryAccess p_266924_, @Nullable Recipe<?> p_155006_, NonNullList<ItemStack> p_155007_, int p_155008_) {
+    @Shadow private boolean shadow$canBurn(RegistryAccess registryAccess, @Nullable RecipeHolder<?> recipe, NonNullList<ItemStack> slots, int maxStackSize) {
         throw new IllegalStateException("Mixin failed to shadow canBurn");
     }
     // @formatter:on
@@ -71,11 +71,11 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
     // Tick up and Start
     @Redirect(method = "serverTick",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/core/NonNullList;I)Z",
+            target = "Lnet/minecraft/world/level/block/entity/AbstractFurnaceBlockEntity;canBurn(Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/core/NonNullList;I)Z",
             ordinal = 1))
     private static boolean forgeImpl$checkIfCanSmelt(final AbstractFurnaceBlockEntity entity,
                                                      final RegistryAccess registryAccess,
-                                                     final Recipe<?> recipe,
+                                                     final RecipeHolder<?> recipe,
                                                      final NonNullList<ItemStack> slots,
                                                      final int maxStackSize) {
         final var $this = (AbstractFurnaceBlockEntityMixin_Forge) (Object) (entity);
@@ -88,13 +88,13 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         if ($this.cookingProgress == 0) { // Start
             final CookingEvent.Start event = SpongeEventFactory.createCookingEventStart(cause, (FurnaceBlockEntity) entity, Optional.of(fuel),
-                Optional.of((CookingRecipe) recipe));
+                Optional.of((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()));
             SpongeCommon.post(event);
             return !event.isCancelled();
         } else { // Tick up
             final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf($this.items.get(0));
             final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entity, cooking, Optional.of(fuel),
-                Optional.of((CookingRecipe) recipe));
+                Optional.of((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()));
             SpongeCommon.post(event);
             return !event.isCancelled();
         }
@@ -108,10 +108,10 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
         final var thisEntity = (AbstractFurnaceBlockEntityMixin_Forge) (Object) entity;
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(thisEntity.items.get(1));
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-        final AbstractCookingRecipe recipe = thisEntity.impl$getCurrentRecipe();
+        final var recipe = thisEntity.bridge$getCurrentRecipe();
         final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf(thisEntity.items.get(0));
         final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entity, cooking, Optional.of(fuel),
-            Optional.of((CookingRecipe) recipe));
+                recipe.map(r -> (CookingRecipe) r.value()), recipe.map(r -> (ResourceKey) (Object) r.id()));
         SpongeCommon.post(event);
         if (event.isCancelled()) {
             return thisEntity.cookingProgress; // dont tick down
@@ -125,7 +125,7 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
         method = "burn",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
     private void forgeImpl$afterSmeltItem(
-        final RegistryAccess registryAccess, final Recipe<?> recipe,
+        final RegistryAccess registryAccess, final RecipeHolder<?> recipe,
         final NonNullList<ItemStack> slots, final int var2,
         final CallbackInfoReturnable<Boolean> cir
     ) {
@@ -133,9 +133,10 @@ public abstract class AbstractFurnaceBlockEntityMixin_Forge implements AbstractF
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final FurnaceBlockEntity entity = cause.first(FurnaceBlockEntity.class)
             .orElseThrow(() -> new IllegalStateException("Expected to have a FurnaceBlockEntity in the Cause"));
-        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(recipe.getResultItem(registryAccess));
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(recipe.value().getResultItem(registryAccess));
         final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, entity,
-            Collections.singletonList(snapshot), Optional.of(fuel), Optional.ofNullable((CookingRecipe) recipe));
+            Collections.singletonList(snapshot), Optional.of(fuel),
+                Optional.of((CookingRecipe) recipe.value()), Optional.of((ResourceKey) (Object) recipe.id()));
         SpongeCommon.post(event);
     }
 

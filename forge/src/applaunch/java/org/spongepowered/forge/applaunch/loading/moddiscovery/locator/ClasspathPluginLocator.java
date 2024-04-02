@@ -25,7 +25,8 @@
 package org.spongepowered.forge.applaunch.loading.moddiscovery.locator;
 
 import net.minecraftforge.fml.loading.ClasspathLocatorUtils;
-import net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileModLocator;
+import net.minecraftforge.fml.loading.moddiscovery.AbstractModProvider;
+import net.minecraftforge.forgespi.locating.IModLocator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
@@ -39,15 +40,15 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
-public final class ClasspathPluginLocator extends AbstractJarFileModLocator {
+public final class ClasspathPluginLocator extends AbstractModProvider implements IModLocator {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
-    public Stream<Path> scanCandidates() {
+    public List<ModFileOrException> scanMods() {
         try {
-            return locatePlugins(PluginPlatformConstants.METADATA_FILE_LOCATION, "classpath_plugin").stream();
+            return locatePlugins(PluginPlatformConstants.METADATA_FILE_LOCATION, "classpath_plugin")
+                    .stream().map(this::createMod).toList();
         } catch (IOException e) {
             ClasspathPluginLocator.LOGGER.fatal("Error trying to find resources", e);
             throw new RuntimeException(e);
@@ -55,7 +56,7 @@ public final class ClasspathPluginLocator extends AbstractJarFileModLocator {
     }
 
     @Override
-    protected ModFileOrException createMod(Path... path) {
+    protected ModFileOrException createMod(Path path) {
         return new ModFileOrException(ModFileParsers.newPluginInstance(this, path), null);
     }
 

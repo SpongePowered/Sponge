@@ -27,7 +27,7 @@ package org.spongepowered.forge.applaunch.loading.moddiscovery.locator;
 import cpw.mods.modlauncher.api.LamdbaExceptionUtils;
 import net.minecraftforge.fml.loading.ModDirTransformerDiscoverer;
 import net.minecraftforge.fml.loading.StringUtils;
-import net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileModProvider;
+import net.minecraftforge.fml.loading.moddiscovery.AbstractModProvider;
 import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
 import org.apache.logging.log4j.LogManager;
@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public final class PluginsFolderLocator extends AbstractJarFileModProvider implements IModLocator {
+public final class PluginsFolderLocator extends AbstractModProvider implements IModLocator {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Override

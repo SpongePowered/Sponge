@@ -42,7 +42,7 @@ public class ForgeWorldHooks implements WorldHooks {
             final ItemStack stack = ((ItemEntity) entity).getItem();
             final Item item = stack.getItem();
             if (item.hasCustomEntity(stack)) {
-                final Entity newEntity = item.createEntity(entity.level, entity, stack);
+                final Entity newEntity = item.createEntity(entity.level(), entity, stack);
                 if (newEntity != null) {
                     entity.remove(Entity.RemovalReason.DISCARDED);
                     return newEntity;

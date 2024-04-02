@@ -5,7 +5,6 @@ import org.gradle.configurationcache.extensions.capitalized
 
 buildscript {
     repositories {
-        maven("https://oss.sonatype.org/content/repositories/snapshots/")
         maven("https://repo.spongepowered.org/repository/maven-public") {
             name = "sponge"
         }
@@ -17,7 +16,7 @@ plugins {
     alias(libs.plugins.shadow)
     id("implementation-structure")
     alias(libs.plugins.blossom)
-    id("net.smoofyuniverse.loom") version "1.1-SNAPSHOT"
+    id("dev.architectury.loom") version "1.5-SNAPSHOT"
 }
 
 val commonProject = parent!!
@@ -69,7 +68,7 @@ val gameLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.r
     extendsFrom(gameLibrariesConfig.get())
 
     afterEvaluate {
-        extendsFrom(configurations.getByName("minecraftNamed"))
+        extendsFrom(configurations.getByName("minecraftNamedCompile"))
     }
 }
 
@@ -199,6 +198,11 @@ extensions.configure(LoomGradleExtensionAPI::class) {
             configuration(gameShadedLibrariesConfig.get())
         }
     }
+
+    // Arch-loom bug, skip broken union-relauncher
+    runs.forEach {
+        it.mainClass.set("net.minecraftforge.bootstrap.ForgeBootstrap")
+    }
 }
 
 dependencies {
@@ -256,11 +260,16 @@ dependencies {
     }
 
     val runTaskOnly = runTaskOnlyConfig.name
+    /* TODO fix
     testPluginsProject?.also {
         runTaskOnly(project(it.path)) {
             exclude(group = "org.spongepowered")
         }
     }
+    */
+
+    // Arch-loom bug, fix support of MOD_CLASSES
+    runTaskOnly("net.minecraftforge:bootstrap-dev:2.1.0")
 }
 
 val forgeManifest = java.manifest {
@@ -327,13 +336,19 @@ tasks {
 
     afterEvaluate {
         withType(net.fabricmc.loom.task.AbstractRunTask::class) {
-            classpath += files(forgeServicesDevJar, forgeLangJar, runTaskOnlyConfig)
+            // Default classpath is a mess, we better start a new one from scratch
+            classpath = files(
+                    configurations.getByName("forgeRuntimeLibrary"),
+                    forgeServicesDevJar, forgeLangJar, runTaskOnlyConfig
+            )
 
             argumentProviders += CommandLineArgumentProvider {
                 mixinConfigs.asSequence()
                         .flatMap { sequenceOf("--mixin.config", it) }
                         .toList()
             }
+
+            jvmArguments.add("-Dbsl.debug=true")
 
             sourceSets.forEach {
                 dependsOn(it.classesTaskName)

@@ -24,11 +24,9 @@
  */
 package org.spongepowered.forge.hook;
 
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.util.FakePlayerFactory;
 import net.minecraftforge.event.level.BlockEvent;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -47,7 +45,9 @@ public final class EventMappingUtils {
         return x -> new BlockEvent.BreakEvent((Level) thisEvent.world(),
             VecHelper.toBlockPos(x.original().position()),
             (BlockState) x.original().state(),
-            player.orElseGet(() -> FakePlayerFactory.getMinecraft((ServerLevel) thisEvent.world())));
+            player.get());
+        // TODO SF 1.20.4 FakePlayerFactory no longer exists
+        // player.orElseGet(() -> FakePlayerFactory.getMinecraft((ServerLevel) thisEvent.world())));
     }
 
 }
