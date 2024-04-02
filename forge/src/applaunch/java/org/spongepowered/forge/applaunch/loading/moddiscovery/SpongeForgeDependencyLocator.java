@@ -27,7 +27,7 @@ package org.spongepowered.forge.applaunch.loading.moddiscovery;
 import cpw.mods.modlauncher.Environment;
 import cpw.mods.modlauncher.Launcher;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileModProvider;
+import net.minecraftforge.fml.loading.moddiscovery.AbstractModProvider;
 import net.minecraftforge.forgespi.locating.IDependencyLocator;
 import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 // works with ForgeProductionBootstrap to make this whole thing go
-public class SpongeForgeDependencyLocator extends AbstractJarFileModProvider implements IDependencyLocator {
+public class SpongeForgeDependencyLocator extends AbstractModProvider implements IDependencyLocator {
     private static final Logger LOGGER = LogManager.getLogger();
 
     private LibraryManager libraryManager;

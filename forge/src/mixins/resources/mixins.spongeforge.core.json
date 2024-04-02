@@ -7,7 +7,6 @@
   "compatibilityLevel": "JAVA_8",
   "priority": 1301,
   "mixins": [
-    "advancements.Advancement_BuilderMixin",
     "api.event.EventMixin_Forge",
     "api.event.block.ChangeBlockEvent_AllMixin_Forge",
     "api.event.entity.ChangeEntityWorldEvent_PreMixin_Forge",
@@ -19,7 +18,6 @@
     "minecraftforge.event.world.BlockEvent_BreakEventMixin_Forge",
     "minecraftforge.event.world.BlockEventMixin_Forge",
     "minecraftforge.internal.BrandingControlMixin_Forge",
-    "minecraftforge.network.NetworkHooksMixin_Forge",
     "minecraftforge.registries.ForgeRegistryMixin_Forge",
     "minecraftforge.registries.RegistryManagerMixin_Forge",
     "minecraftforge.util.ITeleporterMixin_Forge",

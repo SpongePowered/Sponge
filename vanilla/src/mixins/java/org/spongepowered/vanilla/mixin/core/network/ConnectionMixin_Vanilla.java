@@ -22,24 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.network;
+package org.spongepowered.vanilla.mixin.core.network;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import io.netty.util.concurrent.Future;
+import net.minecraft.network.Connection;
+import net.minecraft.network.PacketSendListener;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.network.channel.PacketSender;
 
-@Mixin(FriendlyByteBuf.class)
-public abstract class FriendlyByteBufMixin_Forge implements FriendlyByteBufBridge {
+@Mixin(Connection.class)
+public class ConnectionMixin_Vanilla {
 
-    @Redirect(method = "writeItemStack", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;writeNbt(Lnet/minecraft/nbt/Tag;)Lnet/minecraft/network/FriendlyByteBuf;"))
-    public FriendlyByteBuf renderItemComponents(final FriendlyByteBuf buf, final Tag tag) {
-        if (tag instanceof final CompoundTag compoundTag) {
-            return buf.writeNbt(bridge$renderItemComponents(compoundTag));
+    @Inject(method = "lambda$doSendPacket$10", at = @At(value = "INVOKE", target = "Lio/netty/util/concurrent/Future;isSuccess()Z"))
+    public void impl$onPacketSent(final PacketSendListener listener, final Future future, final CallbackInfo ci) {
+        if (listener instanceof final PacketSender.SpongePacketSendListener spongeListener) {
+            spongeListener.accept(future.cause());
         }
-        return buf.writeNbt(tag);
     }
 }

@@ -36,10 +36,10 @@ import org.spongepowered.common.network.channel.PacketSender;
 @Mixin(Connection.class)
 public abstract class ConnectionMixin_Forge {
 
-    @Inject(method = "lambda$doSendPacket$9", at = @At(value = "INVOKE", target = "Lio/netty/util/concurrent/Future;isSuccess()Z"))
-    public void impl$onPacketSent(final PacketSendListener $$0x, final Future $$1x, final CallbackInfo ci) {
-        if ($$0x instanceof final PacketSender.SpongePacketSendListener spongeListener) {
-            spongeListener.accept($$1x.cause());
+    @Inject(method = "lambda$doSendPacket$11", at = @At(value = "INVOKE", target = "Lio/netty/util/concurrent/Future;isSuccess()Z"))
+    public void impl$onPacketSent(final PacketSendListener listener, final Future future, final CallbackInfo ci) {
+        if (listener instanceof final PacketSender.SpongePacketSendListener spongeListener) {
+            spongeListener.accept(future.cause());
         }
     }
 
