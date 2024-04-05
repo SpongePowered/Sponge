@@ -8,6 +8,8 @@
          <trust group="org.spongepowered" name="vanillagradle" reason="FIX THIS"/>
          <trust group="org.spongepowered" name="vanillagradle-downloader-apache-http" reason="FIX THIS"/>
          <trust group="org.spongepowered" name="vanillagradle-resolver-core" reason="FIX THIS"/>
+         <trust file=".*-javadoc[.]jar" regex="true"/>
+         <trust file=".*-sources[.]jar" regex="true"/>
       </trusted-artifacts>
    </configuration>
    <components>
