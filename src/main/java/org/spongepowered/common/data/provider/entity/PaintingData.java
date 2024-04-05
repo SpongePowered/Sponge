@@ -25,26 +25,18 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.core.Holder;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ArtType;
-import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.accessor.server.level.ChunkMap_TrackedEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.decoration.HangingEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.decoration.PaintingAccessor;
-import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.util.SpongeTicks;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public final class PaintingData {
 
@@ -74,20 +66,10 @@ public final class PaintingData {
                                     return true;
                                 }
 
-                                final List<ServerPlayer> players = new ArrayList<>();
-                                for (final ServerPlayer player : paintingTracker.accessor$seenBy()) {
-                                    final ClientboundRemoveEntitiesPacket packet = new ClientboundRemoveEntitiesPacket(h.getId());
-                                    player.connection.send(packet);
-                                    players.add(player);
-                                }
-                                for (final ServerPlayer player : players) {
-                                    SpongeCommon.serverScheduler().submit(Task.builder()
-                                            .plugin(Launch.instance().commonPlugin())
-                                            .delay(new SpongeTicks(SpongeGameConfigs.getForWorld(h.level()).get().entity.painting.respawnDelay))
-                                            .execute(() -> {
-                                                player.connection.send(h.getAddEntityPacket()); // TODO does it also set the variant?
-                                            })
-                                            .build());
+                                for (final ServerPlayerConnection playerConnection : paintingTracker.accessor$seenBy().toArray(new ServerPlayerConnection[0])) {
+                                    final ServerPlayer player = playerConnection.getPlayer();
+                                    paintingTracker.accessor$removePlayer(player);
+                                    paintingTracker.accessor$updatePlayer(player);
                                 }
                                 return true;
                             }
