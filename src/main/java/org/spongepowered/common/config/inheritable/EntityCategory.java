@@ -37,23 +37,12 @@ public final class EntityCategory {
     @Setting
     public final ItemSubCategory item = new ItemSubCategory();
 
-    @Setting
-    public final PaintingSubCategory painting = new PaintingSubCategory();
-
     @ConfigSerializable
     public static final class HumanSubCategory {
 
         @Setting("tab-list-remove-delay")
         @Comment("Number of ticks before the fake player entry of a human is removed from the tab list (range of 0 to 100 ticks).")
         public int tabListRemoveDelay = 10;
-    }
-
-    @ConfigSerializable
-    public static final class PaintingSubCategory {
-
-        @Setting("respawn-delay")
-        @Comment("Number of ticks before a painting is respawned on clients when their art is changed")
-        public int respawnDelay = 2;
     }
 
     @ConfigSerializable
