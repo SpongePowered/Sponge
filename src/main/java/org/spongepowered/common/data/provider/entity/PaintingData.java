@@ -27,7 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.decoration.PaintingVariant;
 import org.spongepowered.api.data.Keys;
@@ -74,18 +74,18 @@ public final class PaintingData {
                                     return true;
                                 }
 
-                                final List<ServerPlayer> players = new ArrayList<>();
-                                for (final ServerPlayer player : paintingTracker.accessor$seenBy()) {
+                                final List<ServerPlayerConnection> players = new ArrayList<>();
+                                for (final ServerPlayerConnection player : paintingTracker.accessor$seenBy()) {
                                     final ClientboundRemoveEntitiesPacket packet = new ClientboundRemoveEntitiesPacket(h.getId());
-                                    player.connection.send(packet);
+                                    player.send(packet);
                                     players.add(player);
                                 }
-                                for (final ServerPlayer player : players) {
+                                for (final ServerPlayerConnection player : players) {
                                     SpongeCommon.serverScheduler().submit(Task.builder()
                                             .plugin(Launch.instance().commonPlugin())
                                             .delay(new SpongeTicks(SpongeGameConfigs.getForWorld(h.level).get().entity.painting.respawnDelay))
                                             .execute(() -> {
-                                                player.connection.send(h.getAddEntityPacket()); // TODO does it also set the variant?
+                                                player.send(h.getAddEntityPacket()); // TODO does it also set the variant?
                                             })
                                             .build());
                                 }
