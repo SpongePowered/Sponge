@@ -664,6 +664,7 @@ public final class PhaseTracker implements CauseStackManager {
         // Remove new values
         for (final Map.Entry<EventContextKey<?>, Object> entry : frame.getOriginalContextDelta().entrySet()) {
             this.cached_ctx = null;
+            this.cached_cause = null;
             if (entry.getValue() == null) { // wasn't present before, remove
                 this.ctx.remove(entry.getKey());
             } else { // was there, replace
@@ -710,6 +711,7 @@ public final class PhaseTracker implements CauseStackManager {
         Objects.requireNonNull(value, "value");
         this.enforceMainThread();
         this.cached_ctx = null;
+        this.cached_cause = null;
         final @Nullable Object existing = this.ctx.put(key, value);
         if (!this.frames.isEmpty()) {
             this.frames.peek().storeOriginalContext(key, existing);
@@ -729,6 +731,7 @@ public final class PhaseTracker implements CauseStackManager {
         Objects.requireNonNull(key, "key");
         this.enforceMainThread();
         this.cached_ctx = null;
+        this.cached_cause = null;
         final Object existing = this.ctx.remove(key);
         if (!this.frames.isEmpty()) {
             this.frames.peek().storeOriginalContext(key, existing);
