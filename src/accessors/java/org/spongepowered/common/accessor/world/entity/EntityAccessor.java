@@ -33,6 +33,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.entity.EntityInLevelCallback;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -93,6 +94,8 @@ public interface EntityAccessor {
     @Accessor("portalEntrancePos") void accessor$portalEntrancePos(final BlockPos portalEntrancePos);
 
     @Accessor("passengers") ImmutableList<Entity> accessor$passengers();
+
+    @Accessor("levelCallback") EntityInLevelCallback accessor$levelCallback();
 
     @Invoker("setRot") void invoker$setRot(final float yRot, final float xRot);
 
