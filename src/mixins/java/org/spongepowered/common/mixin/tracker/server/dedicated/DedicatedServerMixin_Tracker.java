@@ -24,15 +24,22 @@
  */
 package org.spongepowered.common.mixin.tracker.server.dedicated;
 
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -69,5 +76,14 @@ public abstract class DedicatedServerMixin_Tracker {
         return protectionRadius > 0
                 && Math.max(Math.abs(pos.getX() - spawnPoint.getX()), Math.abs(pos.getZ() - spawnPoint.getZ())) <= protectionRadius
                 && !((ServerPlayer) playerIn).hasPermission("minecraft.spawn-protection.override");
+    }
+
+    @Redirect(method = "handleConsoleInputs", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;performPrefixedCommand(Lnet/minecraft/commands/CommandSourceStack;Ljava/lang/String;)I"))
+    private int tracker$onPerformConsoleCommand(final Commands instance, final CommandSourceStack source, final String command) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(Sponge.systemSubject());
+            frame.addContext(EventContextKeys.COMMAND, command);
+            return instance.performPrefixedCommand(source, command);
+        }
     }
 }
