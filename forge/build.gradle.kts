@@ -364,6 +364,7 @@ tasks {
         exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "module-info.class")
 
         manifest {
+            attributes("Automatic-Module-Name" to "spongeforge.services")
             attributes("Multi-Release" to true)
             from(forgeManifest)
         }
@@ -412,7 +413,7 @@ tasks {
         group = "build"
         archiveClassifier.set("universal")
 
-        manifest.from(forgeManifest)
+        manifest.from(forgeServicesShadowJar.manifest)
 
         from(forgeServicesShadowJar.archiveFile.map { zipTree(it) })
 

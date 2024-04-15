@@ -28,9 +28,16 @@ import com.mojang.brigadier.ResultConsumer;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ContextChain;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.execution.tasks.ExecuteCommand;
+import net.minecraft.server.level.ServerPlayer;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Final;
@@ -40,7 +47,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
-import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
 @Mixin(ExecuteCommand.class)
 public abstract class ExecuteCommandMixin {
@@ -52,7 +61,7 @@ public abstract class ExecuteCommandMixin {
     @Redirect(method = "execute(Lnet/minecraft/commands/ExecutionCommandSource;Lnet/minecraft/commands/execution/ExecutionContext;Lnet/minecraft/commands/execution/Frame;)V",
             at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/context/ContextChain;runExecutable(Lcom/mojang/brigadier/context/CommandContext;Ljava/lang/Object;Lcom/mojang/brigadier/ResultConsumer;Z)I"))
     private <S> int impl$onRunExecutable(final CommandContext<S> executable, final S source, final ResultConsumer<S> resultConsumer, final boolean forkedMode) throws CommandSyntaxException {
-        final int result = ContextChain.runExecutable(executable, source, resultConsumer, forkedMode);
+        final @Nullable ServerPlayer player = ((CommandSourceStack) source).getPlayer();
 
         final Cause cause = ((CommandSourceStackBridge) source).bridge$getCause();
         final String originalRawCommand = cause.context().get(EventContextKeys.COMMAND).orElse(this.commandInput);
@@ -60,18 +69,41 @@ public abstract class ExecuteCommandMixin {
         final String originalCommand = origSplitArg[0];
         final String originalArgs = origSplitArg.length == 2 ? origSplitArg[1] : "";
 
-        final String[] splitArg = this.commandInput.split(" ", 2);
-        final String baseCommand = splitArg[0];
-        final String args = splitArg.length == 2 ? splitArg[1] : "";
-        SpongeCommon.post(SpongeEventFactory.createExecuteCommandEventPost(
-                cause,
-                originalArgs,
-                args,
-                originalCommand,
-                baseCommand,
-                ((SpongeCommandContext) executable).cause(),
-                CommandResult.builder().result(result).build()
-        ));
-        return result;
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            final CommandSourceStackBridge sourceBridge = (CommandSourceStackBridge) source;
+            frame.addContext(EventContextKeys.COMMAND, this.commandInput);
+            sourceBridge.bridge$updateFrameFromCommandSource(frame);
+
+            final CommandCause commandCause = sourceBridge.bridge$withCurrentCause();
+
+            final String[] splitArg = this.commandInput.split(" ", 2);
+            final String baseCommand = splitArg[0];
+            final String args = splitArg.length == 2 ? splitArg[1] : "";
+            final CommandMapping mapping = Sponge.server().commandManager().commandMapping(baseCommand).orElse(null);
+
+            try (final CommandPhaseContext context = GeneralPhase.State.COMMAND
+                    .createPhaseContext(PhaseTracker.getInstance())
+                    .source(source)
+                    .command(this.commandInput)
+                    .commandMapping(mapping)) {
+                if (player != null) {
+                    context.creator(player.getUUID());
+                    context.notifier(player.getUUID());
+                }
+                context.buildAndSwitch();
+
+                final int result =  ContextChain.runExecutable(executable.copyFor((S) commandCause), source, resultConsumer, forkedMode);
+                SpongeCommon.post(SpongeEventFactory.createExecuteCommandEventPost(
+                        commandCause.cause(),
+                        originalArgs,
+                        args,
+                        originalCommand,
+                        baseCommand,
+                        commandCause,
+                        CommandResult.builder().result(result).build()
+                ));
+                return result;
+            }
+        }
     }
 }
