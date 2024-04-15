@@ -323,22 +323,14 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
         }
         final PhaseTracker instance = PhaseTracker.getInstance();
         instance.completePhase(this);
-        if (!this.shouldProvideModifiers()) {
-            if (this.usedFrame != null) {
-                this.usedFrame.iterator().forEachRemaining(instance::popCauseFrame);
-            }
-            return;
-        }
-        if (this.usedFrame == null) {
-            // So, this part is interesting... Since the used frame is null, that means
-            // the cause stack manager still has the refernce of this context/phase, we have
-            // to "pop off" the list.
-            instance.popFrameMutator(this);
-        }
         if (this.usedFrame != null) {
             this.usedFrame.iterator().forEachRemaining(instance::popCauseFrame);
-            this.usedFrame.clear();
             this.usedFrame = null;
+        } else if (this.shouldProvideModifiers()) {
+            // So, this part is interesting... Since the used frame is null, that means
+            // the cause stack manager still has the reference of this context/phase, we have
+            // to "pop off" the list.
+            instance.popFrameMutator(this);
         }
         this.reset();
         this.isCompleted = false;
