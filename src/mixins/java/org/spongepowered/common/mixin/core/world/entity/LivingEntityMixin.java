@@ -107,6 +107,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected boolean dead;
     @Shadow protected int deathScore;
     @Shadow protected ItemStack useItem;
+    @Shadow @Nullable private DamageSource lastDamageSource;
+    @Shadow private long lastDamageStamp;
 
     @Shadow public abstract AttributeInstance shadow$getAttribute(Attribute attribute);
     @Shadow public abstract void shadow$setHealth(float health);
@@ -724,6 +726,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
         this.shadow$setPos(event.toLocation().x(), event.toLocation().y(), event.toLocation().z());
         ((Living) this).setRotation(event.toRotation());
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatTracker;recheckStatus()V", shift = At.Shift.AFTER))
+    private void impl$clearLastDamageSource(final CallbackInfo ci) {
+        //Fix for MC-270896 - Players leak the last entity they took damage from
+        if (this.lastDamageSource != null && this.shadow$level().getGameTime() - this.lastDamageStamp > 40L) {
+            this.lastDamageSource = null;
+        }
     }
 
 }
