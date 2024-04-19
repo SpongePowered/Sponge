@@ -410,4 +410,10 @@ interface TransactionSink {
         this.logTransaction(transaction);
         return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
+
+    default EffectTransactor logImplicitParent() {
+        final ImplicitParentTransaction transaction = new ImplicitParentTransaction();
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+    }
 }

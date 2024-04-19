@@ -27,40 +27,53 @@ package org.spongepowered.common.event.tracking.context.transaction;
 import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
-import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.util.PrettyPrinter;
 
-@DefaultQualifier(NonNull.class)
-final class EventByTransaction<T extends Event & Cancellable> {
+import java.util.Optional;
+import java.util.function.BiConsumer;
 
-    final T event;
-    final ImmutableList<GameTransaction<T>> transactions;
-    final GameTransaction<T> decider;
-    final @Nullable GameTransaction<@NonNull ?> parent;
+public final class ImplicitParentTransaction extends GameTransaction {
 
-    EventByTransaction(final T event,
-        final ImmutableList<GameTransaction<T>> transactions,
-        final @Nullable GameTransaction<@NonNull ?> parent,
-        final GameTransaction<T> decider
-    ) {
-        this.parent = parent;
-        this.event = event;
-        this.transactions = transactions;
-        this.decider = decider;
+    public ImplicitParentTransaction() {
+        super(null);
     }
 
-    public void markCancelled() {
-        this.decider.markCancelled();
-        for (GameTransaction<T> transaction : this.transactions) {
-            transaction.markCancelled();
-        }
-        if (this.parent != null) {
-            this.parent.onChildCancelled(this.decider);
-        }
+    @Override
+    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(@Nullable GameTransaction parent) {
+        return Optional.empty();
     }
 
-    public boolean isParentOrDeciderCancelled() {
-        return this.decider.cancelled || (this.parent != null && this.parent.cancelled);
+    @Override
+    public void addToPrinter(PrettyPrinter printer) {
+
+    }
+
+    @Override
+    public void onChildCancelled(GameTransaction transaction) {
+        this.markCancelled();
+    }
+
+    @Override
+    public boolean markCancelledTransactions(Event event, ImmutableList immutableList) {
+        return false;
+    }
+
+    @Override
+    public void restore(PhaseContext context, Event event) {
+
+    }
+
+    @Override
+    public Optional generateEvent(PhaseContext context, @Nullable GameTransaction parent, ImmutableList immutableList, Cause currentCause) {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean isUnbatchable() {
+        return true;
     }
 }

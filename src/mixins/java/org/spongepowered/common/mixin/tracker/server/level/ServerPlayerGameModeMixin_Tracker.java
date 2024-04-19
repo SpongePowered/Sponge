@@ -137,7 +137,16 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
             final ItemStack copiedStack = stackIn.copy();
             if (useBlock != Tristate.FALSE && !flag1) { // Sponge check useBlock
                 final AbstractContainerMenu lastOpenContainer = playerIn.containerMenu;
-                final InteractionResult result = blockstate.use(worldIn, playerIn, handIn, blockRaytraceResultIn);
+                final InteractionResult result;
+                final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+                final TransactionalCaptureSupplier transactor = context.getTransactor();
+                try (final EffectTransactor ignored = transactor.logImplicitParent()) {
+                    result = blockstate.use(worldIn, playerIn, handIn, blockRaytraceResultIn);
+
+                    try (final EffectTransactor ignored2 = transactor.logPlayerInventoryChangeWithEffect(this.player, PlayerInventoryTransaction.EventCreator.STANDARD)) {
+                        this.player.inventoryMenu.broadcastChanges();
+                    }
+                }
                 if (result.consumesAction() && lastOpenContainer != playerIn.containerMenu) {
                     final Vector3i pos = VecHelper.toVector3i(blockRaytraceResultIn.getBlockPos());
                     final ServerLocation location = ServerLocation.of((ServerWorld) worldIn, pos);
@@ -170,13 +179,13 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                     result = stackIn.useOn(itemusecontext);
                     stackIn.setCount(i);
                 } else {
-                    result = stackIn.useOn(itemusecontext);
                     // Sponge start - log change in hand
                     final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
                     final TransactionalCaptureSupplier transactor = context.getTransactor();
-                    if (!transactor.isEmpty()) { //TODO: Add effect to attach the transaction to be the child of the parents
-                        try (final EffectTransactor ignored = context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {
-                            transactor.logPlayerInventoryChange(this.player, PlayerInventoryTransaction.EventCreator.STANDARD);
+                    try (final EffectTransactor ignored = transactor.logImplicitParent()) {
+                        result = stackIn.useOn(itemusecontext);
+
+                        try (final EffectTransactor ignored2 = transactor.logPlayerInventoryChangeWithEffect(this.player, PlayerInventoryTransaction.EventCreator.STANDARD)) {
                             this.player.inventoryMenu.broadcastChanges();
                         }
                     }

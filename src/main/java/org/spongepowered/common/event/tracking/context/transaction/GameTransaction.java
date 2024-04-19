@@ -133,6 +133,10 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
         this.childIterator().forEachRemaining(GameTransaction::markCancelled);
     }
 
+    public void onChildCancelled(GameTransaction<@NonNull ?> transaction) {
+
+    }
+
     public abstract boolean markCancelledTransactions(E event, ImmutableList<? extends GameTransaction<E>> transactions);
 
     public void postProcessEvent(final PhaseContext<@NonNull ?> context, final E event) {
