@@ -70,7 +70,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -101,8 +100,6 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     private InheritableConfigHandle<WorldConfig> impl$configAdapter;
 
     private final BiMap<Integer, UUID> impl$playerUniqueIdMap = HashBiMap.create();
-    private final List<UUID> impl$pendingUniqueIds = new ArrayList<>();
-    private int impl$trackedUniqueIdCount = 0;
 
     private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$loadOnStartup, impl$performsSpawnLogic;
 
@@ -319,9 +316,9 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
             return index;
         }
 
-        this.impl$playerUniqueIdMap.put(this.impl$trackedUniqueIdCount, uuid);
-        this.impl$pendingUniqueIds.add(uuid);
-        return this.impl$trackedUniqueIdCount++;
+        final int newIndex = this.impl$playerUniqueIdMap.size();
+        this.impl$playerUniqueIdMap.put(newIndex, uuid);
+        return newIndex;
     }
 
     @Override
@@ -378,12 +375,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         // TODO Move this to Schema
         dynamic.get(Constants.Sponge.LEGACY_SPONGE_PLAYER_UUID_TABLE).readList(LegacyUUIDCodec.CODEC).result().orElseGet(() ->
             dynamic.get(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE).readList(UUIDUtil.CODEC).result().orElse(Collections.emptyList())
-        ).forEach(uuid -> {
-            final Integer playerIndex = this.impl$playerUniqueIdMap.inverse().get(uuid);
-            if (playerIndex == null) {
-                this.impl$playerUniqueIdMap.put(this.impl$trackedUniqueIdCount++, uuid);
-            }
-        });
+        ).forEach(uuid -> this.impl$playerUniqueIdMap.inverse().putIfAbsent(uuid, this.impl$playerUniqueIdMap.size()));
     }
 
     @Override
@@ -399,8 +391,6 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         final ListTag playerIdList = new ListTag();
         data.put(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, playerIdList);
         this.impl$playerUniqueIdMap.values().forEach(uuid -> playerIdList.add(new IntArrayTag(UUIDUtil.uuidToIntArray(uuid))));
-        this.impl$pendingUniqueIds.forEach(uuid -> playerIdList.add(new IntArrayTag(UUIDUtil.uuidToIntArray(uuid))));
-        this.impl$pendingUniqueIds.clear();
 
         return data;
     }
