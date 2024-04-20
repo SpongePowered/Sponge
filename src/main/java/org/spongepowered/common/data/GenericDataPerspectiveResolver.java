@@ -22,21 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.data;
+package org.spongepowered.common.data;
 
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPerspective;
-import org.spongepowered.api.effect.VanishState;
+import org.spongepowered.api.data.DataPerspectiveResolver;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 
-public interface VanishableBridge {
+public abstract class GenericDataPerspectiveResolver<H, E> implements DataPerspectiveResolver<Value<E>, E> {
 
-    VanishState bridge$vanishState();
+    private final Key<Value<E>> key;
 
-    void bridge$vanishState(VanishState state);
+    public GenericDataPerspectiveResolver(final Key<? extends Value<E>> key) {
+        this.key = (Key<Value<E>>)key;
+    }
 
-    void bridge$vanishState(VanishState state, DataPerspective perspective);
+    @Override
+    public Key<Value<E>> key() {
+        return this.key;
+    }
 
-    boolean bridge$isInvisible();
+    @Override
+    public void apply(DataHolder dataHolder, DataPerspective perspective, E value) {
+        this.apply((H) dataHolder, perspective, value);
+    }
 
-    void bridge$setInvisible(boolean invisible);
-
+    public abstract void apply(H dataHolder, DataPerspective perspective, E value);
 }

@@ -39,6 +39,7 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataHolderBuilder;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataManipulator.Mutable;
+import org.spongepowered.api.data.DataPerspectiveResolver;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
@@ -144,6 +145,7 @@ public final class SpongeDataManager implements DataManager {
 
     private final DataStoreRegistry dataStoreRegistry;
     private final DataProviderRegistry dataProviderRegistry;
+    private final DataPerspectiveResolverRegistry dataPerspectiveResolverRegistry;
     private final Map<Class<?>, DataBuilder<?>> builders;
     private final Map<Class<? extends DataHolder.Immutable<?>>, DataHolderBuilder.Immutable<?, ?>> immutableDataBuilderMap;
     private final Map<Class<? extends DataSerializable>, List<DataContentUpdater>> updatersMap;
@@ -158,6 +160,7 @@ public final class SpongeDataManager implements DataManager {
 
         this.dataStoreRegistry = new DataStoreRegistry();
         this.dataProviderRegistry = new DataProviderRegistry();
+        this.dataPerspectiveResolverRegistry = new DataPerspectiveResolverRegistry();
         this.builders = new HashMap<>();
         this.immutableDataBuilderMap = new MapMaker()
                 .concurrencyLevel(4)
@@ -333,6 +336,9 @@ public final class SpongeDataManager implements DataManager {
 
         for (final Key key : registration.keys()) {
             this.registerCustomDataProviderForKey(registration, key);
+
+            final Optional<DataPerspectiveResolver<?, ?>> resolver = registration.dataPerspectiveResolverFor(key);
+            resolver.ifPresent(this.dataPerspectiveResolverRegistry::register);
         }
     }
 
@@ -363,6 +369,8 @@ public final class SpongeDataManager implements DataManager {
             for (DataProvider<?, ?> provider : providers) {
                 this.dataProviderRegistry.register(provider);
             }
+            final Optional<DataPerspectiveResolver<?, ?>> resolver = registration.dataPerspectiveResolverFor(key);
+            resolver.ifPresent(this.dataPerspectiveResolverRegistry::register);
         }
     }
 
@@ -387,6 +395,10 @@ public final class SpongeDataManager implements DataManager {
 
     public static DataProviderRegistry getProviderRegistry() {
         return SpongeDataManager.INSTANCE.dataProviderRegistry;
+    }
+
+    public static DataPerspectiveResolverRegistry getDataPerspectiveResolverRegistry() {
+        return SpongeDataManager.INSTANCE.dataPerspectiveResolverRegistry;
     }
 
     public void registerDefaultBuilders() {

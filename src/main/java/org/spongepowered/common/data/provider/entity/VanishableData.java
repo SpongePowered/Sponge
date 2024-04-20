@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.effect.VanishState;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -46,7 +47,7 @@ public final class VanishableData {
                     .create(Keys.IS_INVISIBLE)
                         .get(VanishableBridge::bridge$isInvisible)
                         .set(VanishableBridge::bridge$setInvisible)
-                    .create(Keys.VANISH_STATE)
+                    .createContextual(Keys.VANISH_STATE)
                         .get(VanishableBridge::bridge$vanishState)
                         .setAnd((h, v) -> {
                             if (h instanceof Entity && ((Entity) h).level().isClientSide) {
@@ -54,6 +55,46 @@ public final class VanishableData {
                             }
                             h.bridge$vanishState(v);
                             return true;
+                        })
+                        .dataPerspectiveMerge(values -> {
+                            VanishState current = VanishState.unvanished();
+                            for (final VanishState value : values) {
+                                if (!value.invisible()) {
+                                    continue;
+                                }
+                                else if (!current.invisible()) {
+                                    current = value;
+                                    continue;
+                                }
+
+                                if (!value.affectsMonsterSpawning()) {
+                                    current = current.affectMonsterSpawning(false);
+                                }
+
+                                if (value.untargetable()) {
+                                    current = current.untargetable(true);
+                                }
+
+                                if (!value.createsSounds()) {
+                                    current = current.createSounds(false);
+                                }
+
+                                if (!value.createsParticles()) {
+                                    current = current.createParticles(false);
+                                }
+
+                                if (!value.triggerVibrations()) {
+                                    current = current.triggerVibrations(false);
+                                }
+                            }
+
+                            return current;
+                        })
+                        .dataPerspectiveApply((h, p, v) -> {
+                            if (h instanceof Entity && ((Entity) h).level().isClientSide) {
+                                return;
+                            }
+                            h.bridge$vanishState(v, p);
                         });
         final ResourceKey dataStoreKey = ResourceKey.sponge("invisibility");
         registrator.spongeDataStore(dataStoreKey, VanishableBridge.class, Keys.IS_INVISIBLE, Keys.VANISH_STATE);

@@ -38,10 +38,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -60,13 +63,16 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
+import org.spongepowered.common.data.ContextualDataHolder;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.plugin.PluginContainer;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Objects;
@@ -102,6 +108,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract void shadow$lookAt(EntityAnchorArgument.Anchor param0, Vec3 param1);
     @Shadow public abstract CompoundTag shadow$saveWithoutId(CompoundTag $$0);
     // @formatter:on
+
+    private ContextualDataHolder impl$contextualData = new ContextualDataHolder(this);
 
     @Override
     public Source random() {
@@ -390,5 +398,24 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Override
     public net.kyori.adventure.text.Component teamRepresentation() {
         return net.kyori.adventure.text.Component.text(this.shadow$getUUID().toString());
+    }
+
+    @Override
+    public Iterable<DataPerspective> perceives() {
+        return Collections.singleton(this);
+    }
+
+    @Override
+    public ValueContainer getDataPerception(final DataPerspective perspective) {
+        final @Nullable ValueContainer container = this.impl$contextualData.get(perspective);
+        if (container != null) {
+            return container;
+        }
+        return this;
+    }
+
+    @Override
+    public DataHolder.Mutable createDataPerception(final PluginContainer plugin, final DataPerspective perspective) {
+        return this.impl$contextualData.createDataPerception(plugin, perspective);
     }
 }

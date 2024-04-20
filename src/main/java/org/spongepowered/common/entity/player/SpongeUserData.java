@@ -42,6 +42,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataSerializable;
@@ -541,6 +542,16 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         this.markDirty();
         ((SpongeDataHolderBridge) (Object) this).bridge$offer(Keys.VANISH_STATE, state);
 
+    }
+
+    @Override
+    public void bridge$vanishState(final VanishState state, final DataPerspective perspective) {
+        final Optional<ServerPlayer> playerOpt = this.player();
+        if (playerOpt.isPresent()) {
+            ((VanishableBridge) playerOpt.get()).bridge$vanishState(state, perspective);
+            return;
+        }
+        //TODO: Make this work
     }
 
     @Override

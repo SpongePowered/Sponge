@@ -22,21 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.data;
+package org.spongepowered.common.function;
 
-import org.spongepowered.api.data.DataPerspective;
-import org.spongepowered.api.effect.VanishState;
+import java.util.Objects;
 
-public interface VanishableBridge {
+@FunctionalInterface
+public interface TriConsumer<T, U, V> {
+    void accept(T t, U u, V v);
 
-    VanishState bridge$vanishState();
+    default TriConsumer<T, U, V> andThen(TriConsumer<? super T, ? super U, ? super V> after) {
+        Objects.requireNonNull(after);
 
-    void bridge$vanishState(VanishState state);
-
-    void bridge$vanishState(VanishState state, DataPerspective perspective);
-
-    boolean bridge$isInvisible();
-
-    void bridge$setInvisible(boolean invisible);
-
+        return (t, u, v) -> {
+            accept(t, u, v);
+            after.accept(t, u, v);
+        };
+    }
 }

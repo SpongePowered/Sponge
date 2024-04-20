@@ -22,21 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.data;
+package org.spongepowered.common.data;
 
-import org.spongepowered.api.data.DataPerspective;
-import org.spongepowered.api.effect.VanishState;
+import com.google.common.collect.Maps;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.DataPerspectiveResolver;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 
-public interface VanishableBridge {
+import java.util.Map;
 
-    VanishState bridge$vanishState();
+public class DataPerspectiveResolverRegistry {
 
-    void bridge$vanishState(VanishState state);
+    private final Map<Key<?>, DataPerspectiveResolver<?,?>> resolvers;
 
-    void bridge$vanishState(VanishState state, DataPerspective perspective);
+    public DataPerspectiveResolverRegistry() {
+        this.resolvers = Maps.newHashMap();
+    }
 
-    boolean bridge$isInvisible();
+    public <E> @Nullable DataPerspectiveResolver<Value<E>, E> get(final Key<? extends Value<E>> key) {
+        return (DataPerspectiveResolver<Value<E>, E>)this.resolvers.get(key);
+    }
 
-    void bridge$setInvisible(boolean invisible);
-
+    public void register(final DataPerspectiveResolver<?,?> resolver) {
+        this.resolvers.put(resolver.key(), resolver);
+    }
 }

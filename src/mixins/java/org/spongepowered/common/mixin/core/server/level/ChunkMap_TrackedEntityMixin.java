@@ -29,14 +29,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.world.entity.Entity;
+import org.spongepowered.api.data.DataPerspective;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
 import java.util.stream.Stream;
@@ -44,9 +44,14 @@ import java.util.stream.Stream;
 @Mixin(targets = "net/minecraft/server/level/ChunkMap$TrackedEntity")
 public abstract class ChunkMap_TrackedEntityMixin {
 
-    @Shadow @Final private Entity entity;
+    @Shadow @Final Entity entity;
 
     /**
+     * @author gabizou
+     * @reason Because of the public availability of some methods, a packet
+     * being sent for a "vanished" entity is not permissible since the vanished
+     * entity is being "removed" from clients by way of literally being mimiced being
+     * "untracked". This safeguards the players being updated erroneously.
      * @author gabizou
      * @reason Instead of attempting to fetch the player set within
      * {@link org.spongepowered.common.mixin.core.server.level.ServerEntityMixin#impl$sendHumanMetadata(CallbackInfo)},
@@ -58,6 +63,10 @@ public abstract class ChunkMap_TrackedEntityMixin {
     @Redirect(method = "broadcast(Lnet/minecraft/network/protocol/Packet;)V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/network/ServerPlayerConnection;send(Lnet/minecraft/network/protocol/Packet;)V"))
     private void impl$sendQueuedHumanPackets(final ServerPlayerConnection serverPlayNetHandler, final Packet<?> packetIn) {
+        if (((DataPerspective) this.entity).getDataPerception((DataPerspective) serverPlayNetHandler.getPlayer()).require(Keys.VANISH_STATE).invisible()) {
+            return;
+        }
+
         serverPlayNetHandler.send(packetIn);
 
         if (this.entity instanceof HumanEntity && serverPlayNetHandler instanceof ServerGamePacketListenerImpl) {
@@ -67,32 +76,15 @@ public abstract class ChunkMap_TrackedEntityMixin {
         }
     }
 
-    /**
-     * @author gabizou
-     * @reason Because of the public availability of some methods, a packet
-     * being sent for a "vanished" entity is not permissible since the vanished
-     * entity is being "removed" from clients by way of literally being mimiced being
-     * "untracked". This safeguards the players being updated erroneously.
-     */
-    @Inject(method = "broadcast(Lnet/minecraft/network/protocol/Packet;)V", at = @At("HEAD"), cancellable = true)
-    private void impl$ignoreVanished(final Packet<?> p_219391_1_, final CallbackInfo ci) {
-        if (this.entity instanceof VanishableBridge) {
-            if (((VanishableBridge) this.entity).bridge$vanishState().invisible()) {
-                ci.cancel();
-            }
-        }
-    }
-
     @Redirect(method = "updatePlayer(Lnet/minecraft/server/level/ServerPlayer;)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/entity/Entity;broadcastToPlayer(Lnet/minecraft/server/level/ServerPlayer;)Z"))
     private boolean impl$isSpectatedOrVanished(final Entity entity, final ServerPlayer player) {
-        if (entity instanceof VanishableBridge) {
-            if (((VanishableBridge) entity).bridge$vanishState().invisible()) {
-                return false;
-            }
+        if (((DataPerspective) entity).getDataPerception((DataPerspective) player).require(Keys.VANISH_STATE).invisible()) {
+            return false;
         }
+
         return entity.broadcastToPlayer(player);
     }
 

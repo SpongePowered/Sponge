@@ -30,6 +30,10 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataPerspective;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.asm.mixin.Final;
@@ -41,6 +45,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.scores.PlayerTeamBridge;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -219,6 +224,22 @@ public abstract class PlayerTeamMixin_API implements Team {
         this.scoreboard.removePlayerTeam((PlayerTeam) (Object) this);
         this.scoreboard = null;
         return true;
+    }
+
+    @Override
+    public Iterable<DataPerspective> perceives() {
+        return Sponge.server().onlinePlayers().stream().filter(p -> this.members().contains(p.teamRepresentation())).collect(Collectors.toList());
+    }
+
+    @Override
+    public ValueContainer getDataPerception(DataPerspective perspective) {
+        return null;
+    }
+
+    @Override
+    public DataHolder.Mutable createDataPerception(PluginContainer plugin, DataPerspective perspective) {
+
+        return null;
     }
 
 }

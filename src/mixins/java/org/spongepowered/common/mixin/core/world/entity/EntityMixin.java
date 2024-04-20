@@ -70,6 +70,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
@@ -421,12 +422,16 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
         if (this.bridge$vanishState().invisible()) {
             for (final ServerPlayerConnection playerConnection : trackerAccessor.accessor$seenBy()) {
-                trackerAccessor.accessor$removePlayer(playerConnection.getPlayer());
+                final ServerPlayer player = playerConnection.getPlayer();
+                if (((DataPerspective) this).getDataPerception((DataPerspective) player).require(Keys.VANISH_STATE).invisible()) {
+                    trackerAccessor.accessor$removePlayer(player);
+                }
             }
 
             if ((Entity) (Object) this instanceof ServerPlayer) {
                 for (final ServerPlayer entityPlayerMP : SpongeCommon.server().getPlayerList().getPlayers()) {
-                    if ((Object) this == entityPlayerMP) {
+                    if ((Object) this == entityPlayerMP
+                            || !((DataPerspective) this).getDataPerception((DataPerspective) entityPlayerMP).require(Keys.VANISH_STATE).invisible()) {
                         continue;
                     }
                     entityPlayerMP.connection.send(new ClientboundPlayerInfoRemovePacket(List.of(this.uuid)));
@@ -434,10 +439,37 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             }
         } else {
             for (final ServerPlayer entityPlayerMP : SpongeCommon.server().getPlayerList().getPlayers()) {
-                if ((Object) this == entityPlayerMP) {
+                if ((Object) this == entityPlayerMP
+                        || ((DataPerspective) this).getDataPerception((DataPerspective) entityPlayerMP).require(Keys.VANISH_STATE).invisible()) {
                     continue;
                 }
                 if ((Entity) (Object) this instanceof ServerPlayer player) {
+                    entityPlayerMP.connection.send(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(player)));
+                }
+                trackerAccessor.accessor$updatePlayer(entityPlayerMP);
+            }
+        }
+    }
+
+    @Override
+    public void bridge$vanishState(final VanishState state, final DataPerspective perspective) {
+        final ChunkMap_TrackedEntityAccessor trackerAccessor = ((ChunkMapAccessor) ((ServerWorld) this.shadow$level()).chunkManager()).accessor$entityMap().get(this.shadow$getId());
+        if (trackerAccessor == null) {
+            return;
+        }
+
+        for (final DataPerspective perceive : perspective.perceives()) {
+            if (!(perceive instanceof final ServerPlayer entityPlayerMP) || this == perceive) {
+                continue;
+            }
+
+            if (state.invisible()) {
+                trackerAccessor.accessor$removePlayer(entityPlayerMP);
+                if ((Entity) (Object) this instanceof ServerPlayer) {
+                    entityPlayerMP.connection.send(new ClientboundPlayerInfoRemovePacket(List.of(this.uuid)));
+                }
+            } else {
+                if ((Entity) (Object) this instanceof final ServerPlayer player) {
                     entityPlayerMP.connection.send(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(player)));
                 }
                 trackerAccessor.accessor$updatePlayer(entityPlayerMP);
