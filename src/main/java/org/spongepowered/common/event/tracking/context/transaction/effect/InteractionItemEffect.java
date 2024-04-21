@@ -24,30 +24,35 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
-import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
+import net.minecraft.world.InteractionResult;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.UseBlockPipeline;
 
-public final class PerformBlockDropsFromDestruction implements ProcessingSideEffect<BlockPipeline, PipelineCursor, BlockChangeArgs, BlockState> {
+public final class InteractionItemEffect implements ProcessingSideEffect<UseBlockPipeline, InteractionResult, InteractionArgs, InteractionResult> {
 
     private static final class Holder {
-        static final PerformBlockDropsFromDestruction INSTANCE = new PerformBlockDropsFromDestruction();
+        static final InteractionItemEffect INSTANCE = new InteractionItemEffect();
     }
-    public static PerformBlockDropsFromDestruction getInstance() {
+
+    public static InteractionItemEffect getInstance() {
         return Holder.INSTANCE;
     }
 
-    PerformBlockDropsFromDestruction() {}
-
     @Override
-    public EffectResult<@Nullable BlockState> processSideEffect(
-        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockChangeArgs args
+    public EffectResult<InteractionResult> processSideEffect(
+        UseBlockPipeline pipeline, InteractionResult oldState, InteractionArgs args
     ) {
-        Block.dropResources(oldState.state, pipeline.getServerWorld(), oldState.pos, oldState.tileEntity, oldState.destroyer, ItemStack.EMPTY);
-        return EffectResult.nullPass();
+        final var player = args.player();
+        final var world = args.world();
+        final var blockstate = args.blockstate();
+        final var blockHitResult = args.blockRaytraceResult();
+        final InteractionResult result = blockstate.useWithoutItem(world, player, blockHitResult);
+        pipeline.transactor().logPlayerInventoryChange(args.player(), PlayerInventoryTransaction.EventCreator.STANDARD);
+        try (EffectTransactor ignored = BroadcastInventoryChangesEffect.transact(pipeline.transactor())) {
+            args.player().containerMenu.broadcastChanges();
+        }
+        return new EffectResult<>(result, true);
     }
 
 }

@@ -24,30 +24,19 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
-import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
+import net.minecraft.world.phys.BlockHitResult;
 
-public final class PerformBlockDropsFromDestruction implements ProcessingSideEffect<BlockPipeline, PipelineCursor, BlockChangeArgs, BlockState> {
-
-    private static final class Holder {
-        static final PerformBlockDropsFromDestruction INSTANCE = new PerformBlockDropsFromDestruction();
-    }
-    public static PerformBlockDropsFromDestruction getInstance() {
-        return Holder.INSTANCE;
-    }
-
-    PerformBlockDropsFromDestruction() {}
-
-    @Override
-    public EffectResult<@Nullable BlockState> processSideEffect(
-        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockChangeArgs args
-    ) {
-        Block.dropResources(oldState.state, pipeline.getServerWorld(), oldState.pos, oldState.tileEntity, oldState.destroyer, ItemStack.EMPTY);
-        return EffectResult.nullPass();
-    }
-
+public record InteractionArgs(
+    Level world,
+    ServerPlayer player,
+    InteractionHand hand,
+    BlockHitResult blockRaytraceResult,
+    BlockState blockstate,
+    ItemStack copiedStack
+) implements ProcessingSideEffect.Args {
 }
