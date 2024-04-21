@@ -25,20 +25,27 @@
 package org.spongepowered.common.mixin.core.server.level;
 
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 @Mixin(targets = "net/minecraft/server/level/ChunkMap$TrackedEntity")
@@ -63,11 +70,25 @@ public abstract class ChunkMap_TrackedEntityMixin {
     @Redirect(method = "broadcast(Lnet/minecraft/network/protocol/Packet;)V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/network/ServerPlayerConnection;send(Lnet/minecraft/network/protocol/Packet;)V"))
     private void impl$sendQueuedHumanPackets(final ServerPlayerConnection serverPlayNetHandler, final Packet<?> packetIn) {
-        if (((DataPerspective) this.entity).getDataPerception((DataPerspective) serverPlayNetHandler.getPlayer()).require(Keys.VANISH_STATE).invisible()) {
+        final ValueContainer contextualData = ((DataPerspective) this.entity).getDataPerception((DataPerspective) serverPlayNetHandler.getPlayer());
+        if (contextualData.require(Keys.VANISH_STATE).invisible()) {
             return;
         }
 
-        serverPlayNetHandler.send(packetIn);
+        if (packetIn instanceof final ClientboundSetEntityDataPacket entityDataPacket) {
+            List<SynchedEntityData.DataValue<?>> values = new ArrayList<>();
+            for (final SynchedEntityData.DataValue<?> dataValue : entityDataPacket.packedItems()) {
+                if (dataValue.id() == EntityAccessor.accessor$DATA_CUSTOM_NAME().getId()) {
+                    values.add(SynchedEntityData.DataValue.create(
+                            EntityAccessor.accessor$DATA_CUSTOM_NAME(), SpongeAdventure.asVanillaOpt(contextualData.require(Keys.CUSTOM_NAME))));
+                } else {
+                    values.add(dataValue);
+                }
+            }
+            serverPlayNetHandler.send(new ClientboundSetEntityDataPacket(this.entity.getId(), values));
+        } else {
+            serverPlayNetHandler.send(packetIn);
+        }
 
         if (this.entity instanceof HumanEntity && serverPlayNetHandler instanceof ServerGamePacketListenerImpl) {
             final ServerPlayer player = ((ServerGamePacketListenerImpl) serverPlayNetHandler).player;

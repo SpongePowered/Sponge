@@ -25,14 +25,19 @@
 package org.spongepowered.common.mixin.core.server.level;
 
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import org.spongepowered.api.data.DataPerspective;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -42,11 +47,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -164,6 +172,24 @@ public abstract class ServerEntityMixin {
         final List<SynchedEntityData.DataValue<?>> packed = entityData.packDirty();
         entityData.set(LivingEntityAccessor.accessor$DATA_HEALTH_ID(), actualHealth);
         return packed;
+    }
+
+
+    @Redirect(method = "sendPairingData", at = @At(value = "INVOKE", remap = false, target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V", ordinal = 1))
+    private void impl$modifyContextualData(final Consumer<Packet<ClientGamePacketListener>> instance, final Object packet, final ServerPlayer player) {
+        final ValueContainer contextualData = ((DataPerspective) this.entity).getDataPerception((DataPerspective) player);
+
+        List<SynchedEntityData.DataValue<?>> values = new ArrayList<>();
+        for (final SynchedEntityData.DataValue<?> dataValue : ((ClientboundSetEntityDataPacket) packet).packedItems()) {
+            if (dataValue.id() == EntityAccessor.accessor$DATA_CUSTOM_NAME().getId()) {
+                values.add(SynchedEntityData.DataValue.create(
+                        EntityAccessor.accessor$DATA_CUSTOM_NAME(), SpongeAdventure.asVanillaOpt(contextualData.require(Keys.CUSTOM_NAME))));
+            } else {
+                values.add(dataValue);
+            }
+        }
+
+        instance.accept(new ClientboundSetEntityDataPacket(this.entity.getId(), values));
     }
 
 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.contextual;
 
 import com.google.common.collect.Maps;
+import net.minecraft.network.protocol.Packet;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.api.data.DataPerspectiveResolver;
@@ -49,6 +50,7 @@ public final class ContextualDataDelegate implements ContextualData {
         this.perspectives = Maps.newHashMap();
     }
 
+    @Override
     public PerspectiveContainer<?, ?> createDataPerception(final DataPerspective perspective) {
         return this.perspectives.computeIfAbsent(perspective, p -> {
             if (p instanceof final Entity entity) {
@@ -60,6 +62,11 @@ public final class ContextualDataDelegate implements ContextualData {
             }
             throw new UnsupportedOperationException();
         });
+    }
+
+    @Override
+    public void broadcastToPerceives(Packet<?> packet) {
+        ((ContextualData) this.perspective).broadcastToPerceives(packet);
     }
 
     public DataHolder.Mutable createDataPerception(final PluginContainer plugin, final DataPerspective perspective) {

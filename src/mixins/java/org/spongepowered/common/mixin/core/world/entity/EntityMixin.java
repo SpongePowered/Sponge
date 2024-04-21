@@ -32,6 +32,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -1344,5 +1345,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Override
     public PerspectiveContainer<?, ?> createDataPerception(final DataPerspective perspective) {
         return this.impl$contextualData.createDataPerception(perspective);
+    }
+
+    @Override
+    public void broadcastToPerceives(final Packet<?> packet) {
+        if ((Object) this instanceof ServerPlayer player) {
+            player.connection.send(packet);
+        }
     }
 }

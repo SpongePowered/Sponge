@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.data.contextual;
 
+import net.minecraft.network.protocol.Packet;
 import org.spongepowered.api.data.DataPerspective;
 
 public interface ContextualData {
 
     PerspectiveContainer<?, ?> createDataPerception(DataPerspective perspective);
+
+    void broadcastToPerceives(Packet<?> packet);
 }

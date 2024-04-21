@@ -25,6 +25,8 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -37,6 +39,7 @@ import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.EntityMaxAirBridge;
+import org.spongepowered.common.data.contextual.ContextualData;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.entity.SpongeEntitySnapshot;
@@ -44,6 +47,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 public final class EntityData {
@@ -74,13 +78,17 @@ public final class EntityData {
                             }
                             return (org.spongepowered.api.entity.Entity) rootVehicle;
                         })
-                    .create(Keys.CUSTOM_NAME)
+                    .createContextual(Keys.CUSTOM_NAME)
                         .get(h -> h.hasCustomName() ? SpongeAdventure.asAdventure(h.getCustomName()) : null)
                         .set((h, v) -> h.setCustomName(SpongeAdventure.asVanilla(v)))
                         .delete(h -> {
                             h.setCustomName(null);
                             h.setCustomNameVisible(false);
                         })
+                        .dataPerspectiveMerge(values -> values.iterator().next())
+                        .dataPerspectiveApply((h, p, v) -> ((ContextualData) p).broadcastToPerceives(new ClientboundSetEntityDataPacket(h.getId(),
+                                Collections.singletonList(SynchedEntityData.DataValue.create(EntityAccessor.accessor$DATA_CUSTOM_NAME(), SpongeAdventure.asVanillaOpt(v)))))
+                        )
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
                     .create(Keys.EYE_HEIGHT)

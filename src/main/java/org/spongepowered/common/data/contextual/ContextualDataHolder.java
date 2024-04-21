@@ -25,6 +25,8 @@
 package org.spongepowered.common.data.contextual;
 
 import com.google.common.collect.Maps;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPerspective;
@@ -35,11 +37,13 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.util.CopyHelper;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @SuppressWarnings("unchecked")
 public final class ContextualDataHolder implements ContextualData {
@@ -54,6 +58,7 @@ public final class ContextualDataHolder implements ContextualData {
         this.perspectives = Maps.newHashMap();
     }
 
+    @Override
     public PerspectiveContainer<?, ?> createDataPerception(final DataPerspective perspective) {
         return this.perspectives.computeIfAbsent(perspective, p -> {
             if (p instanceof final Entity entity) {
@@ -67,6 +72,13 @@ public final class ContextualDataHolder implements ContextualData {
         });
     }
 
+    @Override
+    public void broadcastToPerceives(final Packet<?> packet) {
+        if (this.dataHolder instanceof final ServerPlayer player) {
+            player.connection.send(packet);
+        }
+    }
+
     public DataHolder.Mutable createDataPerception(final PluginContainer plugin, final DataPerspective perspective) {
         return new ContextualDataProvider(this.createDataPerception(perspective), plugin);
     }
@@ -75,7 +87,34 @@ public final class ContextualDataHolder implements ContextualData {
         return this.perspectives.get(perspective);
     }
 
-    private static final class EntityPerspectiveContainer extends PerspectiveContainer<ContextualDataHolder, Entity> {
+    private static abstract class AbstractPerspectiveContainer<P extends DataPerspective> extends PerspectiveContainer<ContextualDataHolder, P> {
+
+        protected AbstractPerspectiveContainer(PerspectiveType perspectiveType, ContextualDataHolder holder, P perspective) {
+            super(perspectiveType, holder, perspective);
+        }
+
+        @Override
+        public <E> Optional<E> get(final Key<? extends Value<E>> key) {
+            Objects.requireNonNull(key, "key");
+            final @Nullable E value = (E) this.activeValues.get(key);
+            if (value == null) {
+                return this.holder.dataHolder.get(key);
+            }
+            return Optional.ofNullable(CopyHelper.copy(value));
+        }
+
+        @Override
+        public <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
+            Objects.requireNonNull(key, "key");
+            final @Nullable E value = (E) this.activeValues.get(key);
+            if (value == null) {
+                return this.holder.dataHolder.getValue(key);
+            }
+            return Optional.of(Value.genericMutableOf(key, CopyHelper.copy(value)));
+        }
+    }
+
+    private static final class EntityPerspectiveContainer extends AbstractPerspectiveContainer<Entity> {
 
         private final Map<Key<?>, EnumMap<PerspectiveType, Object>> perspectiveValues;
 
@@ -112,7 +151,7 @@ public final class ContextualDataHolder implements ContextualData {
         }
     }
 
-    private static abstract class NonEntityContainer<P extends DataPerspective> extends PerspectiveContainer<ContextualDataHolder, P> {
+    private static abstract class NonEntityContainer<P extends DataPerspective> extends AbstractPerspectiveContainer<P> {
 
         protected NonEntityContainer(final PerspectiveType perspectiveType, final ContextualDataHolder holder, final P perspective) {
             super(perspectiveType, holder, perspective);
