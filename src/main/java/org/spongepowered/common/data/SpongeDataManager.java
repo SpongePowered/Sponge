@@ -92,6 +92,7 @@ import org.spongepowered.common.data.builder.util.weighted.BaseAndAdditionBuilde
 import org.spongepowered.common.data.builder.util.weighted.BaseAndVarianceBuilder;
 import org.spongepowered.common.data.builder.util.weighted.FixedBuilder;
 import org.spongepowered.common.data.builder.util.weighted.OptionalVarianceBuilder;
+import org.spongepowered.common.data.contextual.DataPerspectiveResolverRegistry;
 import org.spongepowered.common.data.datasync.entity.EntityAirSupplyConverter;
 import org.spongepowered.common.data.datasync.entity.EntityBabyConverter;
 import org.spongepowered.common.data.datasync.entity.EntityCustomNameConverter;

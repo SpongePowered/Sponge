@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
+package org.spongepowered.common.data.contextual;
 
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -41,14 +41,14 @@ import java.util.Optional;
 import java.util.Set;
 
 @SuppressWarnings("unchecked")
-final class ContextualDataHolderProvider implements DataHolder.Mutable {
+final class ContextualDataProvider implements DataHolder.Mutable {
 
+    private final PerspectiveContainer<?, ?> container;
     private final PluginContainer plugin;
-    private final ContextualDataHolder.PerspectiveContainer<?> container;
 
-    ContextualDataHolderProvider(final PluginContainer plugin, final ContextualDataHolder.PerspectiveContainer<?> container) {
-        this.plugin = plugin;
+    ContextualDataProvider(final PerspectiveContainer<?, ?> container, final PluginContainer plugin) {
         this.container = container;
+        this.plugin = plugin;
     }
 
     @Override

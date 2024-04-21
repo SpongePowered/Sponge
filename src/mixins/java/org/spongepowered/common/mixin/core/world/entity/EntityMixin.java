@@ -111,10 +111,14 @@ import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.TransientBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge_Contextual;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.data.DataUtil;
+import org.spongepowered.common.data.contextual.ContextualData;
+import org.spongepowered.common.data.contextual.ContextualDataHolder;
+import org.spongepowered.common.data.contextual.PerspectiveContainer;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.data.value.ImmutableSpongeValue;
@@ -142,7 +146,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, CommandSourceProviderBridge, DataCompoundHolder, TransientBridge {
+public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, CommandSourceProviderBridge, DataCompoundHolder, TransientBridge, EntityBridge_Contextual, ContextualData {
 
     // @formatter:off
 
@@ -256,6 +260,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     // In a Forge environment the ForgeData tag is managed by forge
     // Structure: tileNbt - ForgeData - SpongeData - customdata
     private CompoundTag impl$customDataCompound;
+
+    private final ContextualDataHolder impl$contextualData = new ContextualDataHolder((DataHolder) this);
 
     @Override
     public boolean bridge$isConstructing() {
@@ -1330,4 +1336,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     }*/
 
+    @Override
+    public ContextualDataHolder bridge$contextualData() {
+        return this.impl$contextualData;
+    }
+
+    @Override
+    public PerspectiveContainer<?, ?> createDataPerception(final DataPerspective perspective) {
+        return this.impl$contextualData.createDataPerception(perspective);
+    }
 }

@@ -63,7 +63,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
-import org.spongepowered.common.data.ContextualDataHolder;
+import org.spongepowered.common.bridge.world.entity.EntityBridge_Contextual;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -108,8 +108,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract void shadow$lookAt(EntityAnchorArgument.Anchor param0, Vec3 param1);
     @Shadow public abstract CompoundTag shadow$saveWithoutId(CompoundTag $$0);
     // @formatter:on
-
-    private ContextualDataHolder impl$contextualData = new ContextualDataHolder(this);
 
     @Override
     public Source random() {
@@ -407,7 +405,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public ValueContainer getDataPerception(final DataPerspective perspective) {
-        final @Nullable ValueContainer container = this.impl$contextualData.get(perspective);
+        final @Nullable ValueContainer container = ((EntityBridge_Contextual) this).bridge$contextualData().get(perspective);
         if (container != null) {
             return container;
         }
@@ -416,6 +414,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public DataHolder.Mutable createDataPerception(final PluginContainer plugin, final DataPerspective perspective) {
-        return this.impl$contextualData.createDataPerception(plugin, perspective);
+        return ((EntityBridge_Contextual) this).bridge$contextualData().createDataPerception(plugin, perspective);
     }
 }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
+package org.spongepowered.common.data.contextual;
 
 import com.google.common.collect.Maps;
 import org.checkerframework.checker.nullness.qual.Nullable;

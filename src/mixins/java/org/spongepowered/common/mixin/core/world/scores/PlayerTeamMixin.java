@@ -36,6 +36,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -46,13 +47,17 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.scores.PlayerTeamBridge;
+import org.spongepowered.common.bridge.world.scores.PlayerTeamBridge_Contextual;
+import org.spongepowered.common.data.contextual.ContextualData;
+import org.spongepowered.common.data.contextual.ContextualDataDelegate;
+import org.spongepowered.common.data.contextual.PerspectiveContainer;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Mixin(PlayerTeam.class)
-public abstract class PlayerTeamMixin implements PlayerTeamBridge {
+public abstract class PlayerTeamMixin implements PlayerTeamBridge, PlayerTeamBridge_Contextual, ContextualData {
 
     // @formatter:off
     @Shadow @Final @Mutable @Nullable private Scoreboard scoreboard;
@@ -67,6 +72,8 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
     private @MonotonicNonNull Component bridge$prefix;
     private @MonotonicNonNull Component bridge$suffix;
     private @MonotonicNonNull NamedTextColor bridge$color;
+
+    private final ContextualDataDelegate impl$contextualData = new ContextualDataDelegate((DataPerspective) this);
 
     private void impl$teamChanged() {
         if (this.scoreboard != null) {
@@ -203,5 +210,15 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
         return Audience.audience(Sponge.game().server().streamOnlinePlayers()
                 .filter(player -> ((ServerPlayer) player).getTeam() != (Object) this)
                 .collect(Collectors.toSet()));
+    }
+
+    @Override
+    public ContextualDataDelegate bridge$contextualData() {
+        return this.impl$contextualData;
+    }
+
+    @Override
+    public PerspectiveContainer<?, ?> createDataPerception(final DataPerspective perspective) {
+        return this.impl$contextualData.createDataPerception(perspective);
     }
 }
