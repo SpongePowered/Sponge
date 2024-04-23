@@ -1343,6 +1343,11 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Override
+    public @Nullable PerspectiveContainer<?, ?> getDataPerception(final DataPerspective perspective) {
+        return this.impl$contextualData.getDataPerception(perspective);
+    }
+
+    @Override
     public PerspectiveContainer<?, ?> createDataPerception(final DataPerspective perspective) {
         return this.impl$contextualData.createDataPerception(perspective);
     }

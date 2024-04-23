@@ -25,9 +25,12 @@
 package org.spongepowered.common.data.contextual;
 
 import net.minecraft.network.protocol.Packet;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataPerspective;
 
 public interface ContextualData {
+
+    @Nullable PerspectiveContainer<?, ?> getDataPerception(DataPerspective perspective);
 
     PerspectiveContainer<?, ?> createDataPerception(DataPerspective perspective);
 

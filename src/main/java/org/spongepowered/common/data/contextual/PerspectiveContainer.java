@@ -30,8 +30,10 @@ import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.api.data.DataPerspectiveResolver;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.util.CopyHelper;
 import org.spongepowered.plugin.PluginContainer;
@@ -52,6 +54,8 @@ public abstract class PerspectiveContainer<H extends ContextualData, P extends D
     private final Map<Key<?>, Map<Object, Object>> valuesByOwner;
     protected final Map<Key<?>, Object> activeValues;
 
+    private long entityDataFlags;
+
     protected PerspectiveContainer(final PerspectiveType perspectiveType, final H holder, final P perspective) {
         this.perspectiveType = perspectiveType;
         this.holder = holder;
@@ -59,6 +63,10 @@ public abstract class PerspectiveContainer<H extends ContextualData, P extends D
 
         this.valuesByOwner = Maps.newHashMap();
         this.activeValues = Maps.newHashMap();
+    }
+
+    public long entityDataFlags() {
+        return this.entityDataFlags;
     }
 
     final <E> DataTransactionResult offer(final PluginContainer pluginContainer, final Key<? extends Value<E>> key, final E value) {
@@ -74,6 +82,10 @@ public abstract class PerspectiveContainer<H extends ContextualData, P extends D
         final Map<Object, E> valueMap = (Map<Object, E>) this.valuesByOwner.computeIfAbsent(resolver.key(), k -> Maps.newLinkedHashMap());
         if (Objects.equals(value, valueMap.put(owner, value))) {
             return DataTransactionResult.successResult(Value.immutableOf(resolver.key(), value));
+        }
+
+        if (resolver.key() == (Key<?>)Keys.CUSTOM_NAME) {
+            entityDataFlags |= 1L << EntityAccessor.accessor$DATA_CUSTOM_NAME().getId();
         }
 
         final E mergedValue = resolver.merge(valueMap.values());

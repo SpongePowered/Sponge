@@ -37,11 +37,16 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.network.syncher.EntityDataAccessorBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.network.syncher.SpongeSynchedEntityDataList;
 
+import java.util.List;
 import java.util.Optional;
 
 @Mixin(SynchedEntityData.class)
@@ -107,5 +112,21 @@ public abstract class SynchedEntityDataMixin {
             dataentry.setDirty(true);
             this.isDirty = true;
         }
+    }
+
+    @ModifyVariable(method = "packDirty", at = @At("STORE"), slice = @Slice(
+            from = @At(value = "INVOKE", target = "java/util/ArrayList.<init>()V", remap = false),
+            to = @At(value = "INVOKE", target = "java/util/List.add (Ljava/lang/Object;)Z", remap = false)
+    ))
+    private List<SynchedEntityData.DataValue<?>> impl$useTrackingList(final List<SynchedEntityData.DataValue<?>> original) {
+        return new SpongeSynchedEntityDataList();
+    }
+
+    @ModifyVariable(method = "getNonDefaultValues", at = @At("STORE"), slice = @Slice(
+            from = @At(value = "INVOKE", target = "java/util/ArrayList.<init>()V", remap = false),
+            to = @At(value = "INVOKE", target = "java/util/List.add (Ljava/lang/Object;)Z", remap = false)
+    ))
+    private List<SynchedEntityData.DataValue<?>> impl$useTrackingList2(final List<SynchedEntityData.DataValue<?>> original) {
+        return new SpongeSynchedEntityDataList();
     }
 }

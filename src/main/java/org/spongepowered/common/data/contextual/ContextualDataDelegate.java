@@ -26,11 +26,11 @@ package org.spongepowered.common.data.contextual;
 
 import com.google.common.collect.Maps;
 import net.minecraft.network.protocol.Packet;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.api.data.DataPerspectiveResolver;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.world.World;
@@ -48,6 +48,11 @@ public final class ContextualDataDelegate implements ContextualData {
         this.perspective = perspective;
 
         this.perspectives = Maps.newHashMap();
+    }
+
+    @Override
+    public @Nullable PerspectiveContainer<?, ?> getDataPerception(final DataPerspective perspective) {
+        return this.perspectives.get(perspective);
     }
 
     @Override
@@ -71,10 +76,6 @@ public final class ContextualDataDelegate implements ContextualData {
 
     public DataHolder.Mutable createDataPerception(final PluginContainer plugin, final DataPerspective perspective) {
         return new ContextualDataProvider(this.createDataPerception(perspective), plugin);
-    }
-
-    public ValueContainer getDataPerception(final DataPerspective perspective) {
-        return this.perspectives.get(perspective);
     }
 
     private static abstract class AbstractPerspectiveContainer<P extends DataPerspective> extends PerspectiveContainer<ContextualDataDelegate, P> {

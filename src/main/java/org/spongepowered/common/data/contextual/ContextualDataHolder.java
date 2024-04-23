@@ -33,7 +33,6 @@ import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.api.data.DataPerspectiveResolver;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.world.World;
@@ -59,6 +58,11 @@ public final class ContextualDataHolder implements ContextualData {
     }
 
     @Override
+    public @Nullable PerspectiveContainer<?, ?> getDataPerception(final DataPerspective perspective) {
+        return this.perspectives.get(perspective);
+    }
+
+    @Override
     public PerspectiveContainer<?, ?> createDataPerception(final DataPerspective perspective) {
         return this.perspectives.computeIfAbsent(perspective, p -> {
             if (p instanceof final Entity entity) {
@@ -81,10 +85,6 @@ public final class ContextualDataHolder implements ContextualData {
 
     public DataHolder.Mutable createDataPerception(final PluginContainer plugin, final DataPerspective perspective) {
         return new ContextualDataProvider(this.createDataPerception(perspective), plugin);
-    }
-
-    public @Nullable ValueContainer get(final DataPerspective perspective) {
-        return this.perspectives.get(perspective);
     }
 
     private static abstract class AbstractPerspectiveContainer<P extends DataPerspective> extends PerspectiveContainer<ContextualDataHolder, P> {
