@@ -29,6 +29,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -248,7 +249,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
             (blockPos, world) -> {
                 final net.minecraft.world.level.block.state.BlockState tileEntity = shouldCarbonCopy
                     ? backingVolume.getBlock(blockPos)
-                    : ((LevelReader) world).getBlockState(blockPos);
+                    : ((BlockGetter) world).getBlockState(blockPos);
                 return new Tuple<>(blockPos, tileEntity);
             }
         );
