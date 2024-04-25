@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.data;
 
+import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.api.effect.VanishState;
 
 public interface VanishableBridge {
@@ -31,6 +32,8 @@ public interface VanishableBridge {
     VanishState bridge$vanishState();
 
     void bridge$vanishState(VanishState state);
+
+    void bridge$vanishState(VanishState state, DataPerspective perspective);
 
     boolean bridge$isInvisible();
 

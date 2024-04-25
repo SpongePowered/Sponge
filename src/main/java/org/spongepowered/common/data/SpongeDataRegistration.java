@@ -28,6 +28,7 @@ import com.google.common.collect.Multimap;
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataPerspectiveResolver;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.Key;
@@ -46,11 +47,13 @@ public final class SpongeDataRegistration implements DataRegistration {
     final List<Key<?>> keys;
     final Map<Type, DataStore> dataStoreMap;
     final Multimap<Key, DataProvider> dataProviderMap;
+    final Map<Key, DataPerspectiveResolver> dataPerspectiveResolverMap;
 
     SpongeDataRegistration(final SpongeDataRegistrationBuilder builder) {
         this.keys = builder.keys;
         this.dataStoreMap = builder.dataStoreMap;
         this.dataProviderMap = builder.dataProviderMap;
+        this.dataPerspectiveResolverMap = builder.dataPerspectiveResolverMap;
     }
 
     @Override
@@ -67,6 +70,11 @@ public final class SpongeDataRegistration implements DataRegistration {
     @Override
     public Optional<DataStore> dataStore(final Class<? extends DataHolder> token) {
         return this.getDataStore0(token);
+    }
+
+    @Override
+    public <V extends Value<E>, E> Optional<DataPerspectiveResolver<V, E>> dataPerspectiveResolverFor(Key<V> key) {
+        return Optional.ofNullable(this.dataPerspectiveResolverMap.get(key));
     }
 
     private Optional<DataStore> getDataStore0(final Type type) {

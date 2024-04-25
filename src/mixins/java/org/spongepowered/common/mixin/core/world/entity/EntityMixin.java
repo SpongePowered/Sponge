@@ -32,6 +32,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -70,6 +71,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
@@ -110,10 +112,15 @@ import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.TransientBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge_Contextual;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.data.DataUtil;
+import org.spongepowered.common.data.contextual.ContextualData;
+import org.spongepowered.common.data.contextual.ContextualDataHolder;
+import org.spongepowered.common.data.contextual.ContextualDataOwner;
+import org.spongepowered.common.data.contextual.PerspectiveContainer;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.data.value.ImmutableSpongeValue;
@@ -141,7 +148,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, CommandSourceProviderBridge, DataCompoundHolder, TransientBridge {
+public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, CommandSourceProviderBridge, DataCompoundHolder, TransientBridge, EntityBridge_Contextual, ContextualData {
 
     // @formatter:off
 
@@ -255,6 +262,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     // In a Forge environment the ForgeData tag is managed by forge
     // Structure: tileNbt - ForgeData - SpongeData - customdata
     private CompoundTag impl$customDataCompound;
+
+    private final ContextualDataHolder impl$contextualData = new ContextualDataHolder((org.spongepowered.api.entity.Entity) this);
 
     @Override
     public boolean bridge$isConstructing() {
@@ -421,12 +430,16 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
         if (this.bridge$vanishState().invisible()) {
             for (final ServerPlayerConnection playerConnection : trackerAccessor.accessor$seenBy()) {
-                trackerAccessor.accessor$removePlayer(playerConnection.getPlayer());
+                final ServerPlayer player = playerConnection.getPlayer();
+                if (((DataPerspective) this).getDataPerception((DataPerspective) player).require(Keys.VANISH_STATE).invisible()) {
+                    trackerAccessor.accessor$removePlayer(player);
+                }
             }
 
             if ((Entity) (Object) this instanceof ServerPlayer) {
                 for (final ServerPlayer entityPlayerMP : SpongeCommon.server().getPlayerList().getPlayers()) {
-                    if ((Object) this == entityPlayerMP) {
+                    if ((Object) this == entityPlayerMP
+                            || !((DataPerspective) this).getDataPerception((DataPerspective) entityPlayerMP).require(Keys.VANISH_STATE).invisible()) {
                         continue;
                     }
                     entityPlayerMP.connection.send(new ClientboundPlayerInfoRemovePacket(List.of(this.uuid)));
@@ -434,10 +447,37 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             }
         } else {
             for (final ServerPlayer entityPlayerMP : SpongeCommon.server().getPlayerList().getPlayers()) {
-                if ((Object) this == entityPlayerMP) {
+                if ((Object) this == entityPlayerMP
+                        || ((DataPerspective) this).getDataPerception((DataPerspective) entityPlayerMP).require(Keys.VANISH_STATE).invisible()) {
                     continue;
                 }
                 if ((Entity) (Object) this instanceof ServerPlayer player) {
+                    entityPlayerMP.connection.send(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(player)));
+                }
+                trackerAccessor.accessor$updatePlayer(entityPlayerMP);
+            }
+        }
+    }
+
+    @Override
+    public void bridge$vanishState(final VanishState state, final DataPerspective perspective) {
+        final ChunkMap_TrackedEntityAccessor trackerAccessor = ((ChunkMapAccessor) ((ServerWorld) this.shadow$level()).chunkManager()).accessor$entityMap().get(this.shadow$getId());
+        if (trackerAccessor == null) {
+            return;
+        }
+
+        for (final DataPerspective perceive : perspective.perceives()) {
+            if (!(perceive instanceof final ServerPlayer entityPlayerMP) || this == perceive) {
+                continue;
+            }
+
+            if (state.invisible()) {
+                trackerAccessor.accessor$removePlayer(entityPlayerMP);
+                if ((Entity) (Object) this instanceof ServerPlayer) {
+                    entityPlayerMP.connection.send(new ClientboundPlayerInfoRemovePacket(List.of(this.uuid)));
+                }
+            } else {
+                if ((Entity) (Object) this instanceof final ServerPlayer player) {
                     entityPlayerMP.connection.send(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of(player)));
                 }
                 trackerAccessor.accessor$updatePlayer(entityPlayerMP);
@@ -1298,4 +1338,41 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     }*/
 
+    @Override
+    public ContextualDataHolder bridge$contextualData() {
+        return this.impl$contextualData;
+    }
+
+    @Override
+    public @Nullable PerspectiveContainer<?, ?> dataPerception(final DataPerspective perspective) {
+        return this.impl$contextualData.dataPerception(perspective);
+    }
+
+    @Override
+    public PerspectiveContainer<?, ?> createDataPerception(final DataPerspective perspective) {
+        return this.impl$contextualData.createDataPerception(perspective);
+    }
+
+    @Override
+    public void linkContextualOwner(final ContextualDataOwner<?> owner) {
+        this.impl$contextualData.linkContextualOwner(owner);
+    }
+
+    @Override
+    public void unlinkContextualOwner(final ContextualDataOwner<?> owner) {
+        this.impl$contextualData.unlinkContextualOwner(owner);
+    }
+
+    @Override
+    public void broadcastToPerceives(final Packet<?> packet) {
+        if ((Object) this instanceof ServerPlayer player) {
+            player.connection.send(packet);
+        }
+    }
+
+    //TODO: We lose the contextual data when the entity changes dimensions
+    @Inject(method = "setRemoved", at = @At("TAIL"))
+    private void impl$clearContextualData(final Entity.RemovalReason $$0, final CallbackInfo ci) {
+        this.impl$contextualData.close();
+    }
 }

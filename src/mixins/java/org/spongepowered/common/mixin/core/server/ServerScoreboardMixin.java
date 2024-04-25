@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.google.common.collect.Maps;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
@@ -36,6 +37,7 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
@@ -46,19 +48,22 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.world.scores.PlayerTeamAccessor;
 import org.spongepowered.common.accessor.world.scores.ScoreboardAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
+import org.spongepowered.common.bridge.world.scores.PlayerTeamBridge;
+import org.spongepowered.common.bridge.world.scores.PlayerTeamBridge_Contextual;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.SpongeScore;
 import org.spongepowered.common.util.Constants;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -68,7 +73,7 @@ import java.util.stream.Collectors;
 public abstract class ServerScoreboardMixin extends Scoreboard implements ServerScoreboardBridge {
 
 
-    private final List<ServerPlayer> impl$players = new ArrayList<>();
+    private final Map<String, ServerPlayer> impl$players = Maps.newHashMap();
 
     private boolean impl$apiCall;
 
@@ -178,14 +183,18 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public void bridge$sendToPlayers(final Packet<?> packet) {
-        for (final ServerPlayer player: this.impl$players) {
+        for (final ServerPlayer player: this.impl$players.values()) {
             player.connection.send(packet);
         }
     }
 
     @Override
     public void bridge$addPlayer(final ServerPlayer player, final boolean sendPackets) {
-        this.impl$players.add(player);
+        this.impl$players.put(player.getScoreboardName(), player);
+        final @Nullable PlayerTeam playerTeam = this.getPlayersTeam(player.getScoreboardName());
+        if (playerTeam != null) {
+            ((PlayerTeamBridge) playerTeam).bridge$addPlayer(player);
+        }
         if (sendPackets) {
             for (final PlayerTeam team : this.getPlayerTeams()) {
                 player.connection.send(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true));
@@ -213,7 +222,11 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public void bridge$removePlayer(final ServerPlayer player, final boolean sendPackets) {
-        this.impl$players.remove(player);
+        this.impl$players.remove(player.getScoreboardName());
+        final @Nullable PlayerTeam playerTeam = this.getPlayersTeam(player.getScoreboardName());
+        if (playerTeam != null) {
+            ((PlayerTeamBridge) playerTeam).bridge$removePlayer(player, sendPackets);
+        }
         if (sendPackets) {
             this.impl$removeScoreboard(player);
         }
@@ -309,13 +322,13 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Redirect(method = "startTrackingObjective",
         at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap = false))
     private Iterator impl$useOurScoreboardForPlayers(final List list) {
-        return this.impl$players.iterator();
+        return this.impl$players.values().iterator();
     }
 
     @Redirect(method = "stopTrackingObjective",
         at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap = false))
     private Iterator impl$useOurScoreboardForPlayersOnRemoval(final List list) {
-        return this.impl$players.iterator();
+        return this.impl$players.values().iterator();
     }
 
     private void impl$removeScoreboard(final ServerPlayer player) {
@@ -343,5 +356,30 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         this.resetSinglePlayerScore(holder, mcObjective);
         ((SpongeScore) spongeScore).unregister(mcObjective);
         this.impl$apiCall = false;
+    }
+
+    @Inject(method = "addPlayerToTeam", at = @At("RETURN"))
+    private void impl$onAddPlayerToTeam(final String scoreboardName, final PlayerTeam team, final CallbackInfoReturnable<Boolean> cir) {
+        if (!cir.getReturnValue()) {
+            return;
+        }
+
+        final @Nullable ServerPlayer player = this.impl$players.get(scoreboardName);
+        if (player != null) {
+            ((PlayerTeamBridge) team).bridge$addPlayer(player);
+        }
+    }
+
+    @Inject(method = "removePlayerFromTeam", at = @At("TAIL"))
+    private void impl$onPlayerRemovedFromTeam(final String scoreboardName, final PlayerTeam team, final CallbackInfo ci) {
+        final @Nullable ServerPlayer player = this.impl$players.get(scoreboardName);
+        if (player != null) {
+            ((PlayerTeamBridge) team).bridge$removePlayer(player, true);
+        }
+    }
+
+    @Inject(method = "onTeamRemoved", at = @At("TAIL"))
+    private void impl$onTeamRemoved(final PlayerTeam team, final CallbackInfo ci) {
+        ((PlayerTeamBridge_Contextual) team).bridge$contextualData().close();
     }
 }

@@ -22,40 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.scores;
+package org.spongepowered.common.function;
 
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.server.level.ServerPlayer;
+import java.util.Objects;
 
-import java.util.List;
+@FunctionalInterface
+public interface TriConsumer<T, U, V> {
+    void accept(T t, U u, V v);
 
-public interface PlayerTeamBridge {
+    default TriConsumer<T, U, V> andThen(TriConsumer<? super T, ? super U, ? super V> after) {
+        Objects.requireNonNull(after);
 
-    Component bridge$getDisplayName();
-
-    void bridge$setDisplayName(Component text);
-
-    Component bridge$getPrefix();
-
-    void bridge$setPrefix(Component text);
-
-    Component bridge$getSuffix();
-
-    void bridge$setSuffix(Component suffix);
-
-    NamedTextColor bridge$getColor();
-
-    void bridge$setColor(NamedTextColor color);
-
-    Audience bridge$getTeamChannel(ServerPlayer player);
-
-    Audience bridge$getNonTeamChannel();
-
-    void bridge$addPlayer(ServerPlayer player);
-
-    void bridge$removePlayer(ServerPlayer player, boolean sendPackets);
-
-    List<ServerPlayer> bridge$getPlayers();
+        return (t, u, v) -> {
+            accept(t, u, v);
+            after.accept(t, u, v);
+        };
+    }
 }

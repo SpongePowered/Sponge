@@ -22,40 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.scores;
+package org.spongepowered.common.data.contextual;
 
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.network.protocol.Packet;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.DataPerspective;
 
-import java.util.List;
+public interface ContextualData {
 
-public interface PlayerTeamBridge {
+    @Nullable PerspectiveContainer<?, ?> dataPerception(DataPerspective perspective);
 
-    Component bridge$getDisplayName();
+    PerspectiveContainer<?, ?> createDataPerception(DataPerspective perspective);
 
-    void bridge$setDisplayName(Component text);
+    void linkContextualOwner(ContextualDataOwner<?> owner);
+    void unlinkContextualOwner(ContextualDataOwner<?> owner);
 
-    Component bridge$getPrefix();
-
-    void bridge$setPrefix(Component text);
-
-    Component bridge$getSuffix();
-
-    void bridge$setSuffix(Component suffix);
-
-    NamedTextColor bridge$getColor();
-
-    void bridge$setColor(NamedTextColor color);
-
-    Audience bridge$getTeamChannel(ServerPlayer player);
-
-    Audience bridge$getNonTeamChannel();
-
-    void bridge$addPlayer(ServerPlayer player);
-
-    void bridge$removePlayer(ServerPlayer player, boolean sendPackets);
-
-    List<ServerPlayer> bridge$getPlayers();
+    void broadcastToPerceives(Packet<?> packet);
 }

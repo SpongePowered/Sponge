@@ -31,6 +31,8 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.DataPerspective;
+import org.spongepowered.api.data.DataPerspectiveResolver;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -48,7 +50,9 @@ import org.spongepowered.common.bridge.data.DataContainerHolder;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.SpongeDataRegistration;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
+import org.spongepowered.common.data.contextual.GenericDataPerspectiveResolver;
 import org.spongepowered.common.data.persistence.datastore.SpongeDataStoreBuilder;
+import org.spongepowered.common.function.TriConsumer;
 import org.spongepowered.common.util.CopyHelper;
 import org.spongepowered.common.util.TypeTokenUtil;
 
@@ -183,7 +187,7 @@ public class DataProviderRegistrator {
          * @param <K> The key type
          * @return The registration
          */
-        public <K> MutableRegistration<T, K> create(final Supplier<? extends Key<? extends Value<K>>> suppliedKey) {
+        public <K, R extends MutableRegistration<T, K, R>> MutableRegistration<T, K, R> create(final Supplier<? extends Key<? extends Value<K>>> suppliedKey) {
             return this.create(suppliedKey.get());
         }
 
@@ -193,16 +197,23 @@ public class DataProviderRegistrator {
          * @param <K> The key type
          * @return The registration
          */
-        public <K> MutableRegistration<T, K> create(final Key<? extends Value<K>> key) {
-            final MutableRegistration<T, K> registration = new MutableRegistration<>(this, key);
+        public <K, R extends MutableRegistration<T, K, R>> MutableRegistration<T, K, R> create(final Key<? extends Value<K>> key) {
+            final MutableRegistration<T, K, R> registration = new MutableRegistration<>(this, key);
             this.register(registration);
             return registration;
         }
 
         @SuppressWarnings({"unchecked", "UnstableApiUsage"})
-        protected <K, V extends Value<K>> MutableRegistrator<T> register(final MutableRegistration<T, K> registration) {
-            final DataProvider<?, ?> provider = registration.build(this.target);
+        protected <K, V extends Value<K>, R extends MutableRegistration<T, K, R>> MutableRegistrator<T> register(final MutableRegistration<T, K, R> registration) {
+            final DataProvider<?, ?> provider = registration.buildProvider(this.target);
             this.registrationBuilder.dataKey(provider.key()).provider(provider);
+            return this;
+        }
+
+        @SuppressWarnings({"unchecked", "UnstableApiUsage"})
+        protected <K, V extends Value<K>, R extends MutableRegistration<T, K, R>> MutableRegistrator<T> register(final MutableContextualRegistration<T, K> registration) {
+            this.register((MutableRegistration<T, K, R>) registration);
+            this.registrationBuilder.perspectiveResolver(registration.buildPerspectiveResolver());
             return this;
         }
     }
@@ -323,7 +334,7 @@ public class DataProviderRegistrator {
             return (R) this;
         }
 
-        public DataProvider<?, ?> build(Class<H> target) {
+        public DataProvider<?, ?> buildProvider(Class<H> target) {
             final MutableRegistrationBase<H, E, R> registration = this;
             return new GenericMutableDataProvider<H, E>(registration.key, target) {
                 final boolean isBooleanKey = registration.key.elementType() == Boolean.class;
@@ -407,7 +418,7 @@ public class DataProviderRegistrator {
 
     }
 
-    public static final class MutableRegistration<H, E> extends MutableRegistrationBase<H, E, MutableRegistration<H, E>> {
+    public static class MutableRegistration<H, E, R extends MutableRegistration<H, E, R>> extends MutableRegistrationBase<H, E, R> {
 
         private final MutableRegistrator<H> registrator;
 
@@ -416,12 +427,18 @@ public class DataProviderRegistrator {
             this.registrator = registrator;
         }
 
-        public <NE> MutableRegistration<H, NE> create(final DefaultedRegistryReference<? extends Key<? extends Value<NE>>> suppliedKey) {
+        public <NE, NR extends MutableRegistration<H, NE, NR>> MutableRegistration<H, NE, NR> create(final DefaultedRegistryReference<? extends Key<? extends Value<NE>>> suppliedKey) {
             return this.create(suppliedKey.get());
         }
 
-        public <NE> MutableRegistration<H, NE> create(final Key<? extends Value<NE>> key) {
-            final MutableRegistration<H, NE> registration = new MutableRegistration<>(this.registrator, key);
+        public <NE, NR extends MutableRegistration<H, NE, NR>> MutableRegistration<H, NE, NR> create(final Key<? extends Value<NE>> key) {
+            final MutableRegistration<H, NE, NR> registration = new MutableRegistration<>(this.registrator, key);
+            this.registrator.register(registration);
+            return registration;
+        }
+
+        public <NE> MutableContextualRegistration<H, NE> createContextual(final Key<? extends Value<NE>> key) {
+            final MutableContextualRegistration<H, NE> registration = new MutableContextualRegistration<>(this.registrator, key);
             this.registrator.register(registration);
             return registration;
         }
@@ -443,7 +460,46 @@ public class DataProviderRegistrator {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    public static final class MutableContextualRegistration<H, E> extends MutableRegistration<H, E, MutableContextualRegistration<H, E>> {
+
+        private @Nullable Function<Iterable<E>, E> dataPerspectiveMerge;
+        private @Nullable TriConsumer<H, DataPerspective, E> dataPerspectiveApply;
+
+        private MutableContextualRegistration(MutableRegistrator<H> registrator, Key<? extends Value<E>> key) {
+            super(registrator, key);
+        }
+
+        public MutableContextualRegistration<H, E> dataPerspectiveMerge(final Function<Iterable<E>, E> merge) {
+            this.dataPerspectiveMerge = merge;
+            return this;
+        }
+
+        public MutableContextualRegistration<H, E> dataPerspectiveApply(final TriConsumer<H, DataPerspective, E> apply) {
+            this.dataPerspectiveApply = apply;
+            return this;
+        }
+
+        public DataPerspectiveResolver<?, ?> buildPerspectiveResolver() {
+            final MutableContextualRegistration<H, E> registration = this;
+            return new GenericDataPerspectiveResolver<H, E>(registration.key) {
+
+                @Override
+                public E merge(Iterable<E> values) {
+                    return registration.dataPerspectiveMerge.apply(values);
+                }
+
+                @Override
+                public void apply(H dataHolder, DataPerspective perspective, E value) {
+                    if (registration.dataPerspectiveApply != null) {
+                        registration.dataPerspectiveApply.accept(dataHolder, perspective, value);
+                    }
+                }
+            };
+        }
+    }
+
+
+        @SuppressWarnings("unchecked")
     private static class ImmutableRegistrationBase<H, E, R extends ImmutableRegistrationBase<H, E, R>> {
         private final Key<? extends Value<E>> key;
         private @Nullable BiFunction<H, E, Value<E>> constructValue;
@@ -700,7 +756,7 @@ public class DataProviderRegistrator {
 
         @Override
         public DataProvider<V, E> build() {
-            return this.registration.build((Class) GenericTypeReflector.erase(this.holder));
+            return this.registration.buildProvider((Class) GenericTypeReflector.erase(this.holder));
         }
     }
 

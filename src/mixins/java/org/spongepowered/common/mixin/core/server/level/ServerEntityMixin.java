@@ -25,14 +25,17 @@
 package org.spongepowered.common.mixin.core.server.level;
 
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -45,6 +48,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.data.contextual.ContextualData;
+import org.spongepowered.common.data.contextual.util.ContextualPacketUtil;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
 import java.util.Collection;
@@ -164,6 +169,12 @@ public abstract class ServerEntityMixin {
         final List<SynchedEntityData.DataValue<?>> packed = entityData.packDirty();
         entityData.set(LivingEntityAccessor.accessor$DATA_HEALTH_ID(), actualHealth);
         return packed;
+    }
+
+
+    @Redirect(method = "sendPairingData", at = @At(value = "INVOKE", remap = false, target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V", ordinal = 1))
+    private void impl$modifyContextualEntityData(final Consumer<Packet<ClientGamePacketListener>> instance, final Object packet, final ServerPlayer player) {
+        instance.accept(ContextualPacketUtil.createContextualPacket((ClientboundSetEntityDataPacket) packet, (ContextualData) this.entity, (DataPerspective) player));
     }
 
 }

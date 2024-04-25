@@ -22,40 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.scores;
+package org.spongepowered.common.data.contextual;
 
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.server.level.ServerPlayer;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataPerspective;
+import org.spongepowered.api.data.DataPerspectiveResolver;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.Value;
 
-import java.util.List;
+public abstract class GenericDataPerspectiveResolver<H, E> implements DataPerspectiveResolver<Value<E>, E> {
 
-public interface PlayerTeamBridge {
+    private final Key<Value<E>> key;
 
-    Component bridge$getDisplayName();
+    public GenericDataPerspectiveResolver(final Key<? extends Value<E>> key) {
+        this.key = (Key<Value<E>>)key;
+    }
 
-    void bridge$setDisplayName(Component text);
+    @Override
+    public Key<Value<E>> key() {
+        return this.key;
+    }
 
-    Component bridge$getPrefix();
+    @Override
+    public void apply(DataHolder dataHolder, DataPerspective perspective, E value) {
+        this.apply((H) dataHolder, perspective, value);
+    }
 
-    void bridge$setPrefix(Component text);
-
-    Component bridge$getSuffix();
-
-    void bridge$setSuffix(Component suffix);
-
-    NamedTextColor bridge$getColor();
-
-    void bridge$setColor(NamedTextColor color);
-
-    Audience bridge$getTeamChannel(ServerPlayer player);
-
-    Audience bridge$getNonTeamChannel();
-
-    void bridge$addPlayer(ServerPlayer player);
-
-    void bridge$removePlayer(ServerPlayer player, boolean sendPackets);
-
-    List<ServerPlayer> bridge$getPlayers();
+    public abstract void apply(H dataHolder, DataPerspective perspective, E value);
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.data;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.spongepowered.api.data.DataPerspectiveResolver;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DuplicateDataStoreException;
@@ -45,6 +46,7 @@ public final class SpongeDataRegistrationBuilder implements DataRegistration.Bui
 
     Multimap<Key, DataProvider> dataProviderMap = HashMultimap.create();
     Map<Type, DataStore> dataStoreMap = new HashMap<>();
+    Map<Key, DataPerspectiveResolver> dataPerspectiveResolverMap = new HashMap<>();
     List<Key<?>> keys = new ArrayList<>();
 
     @Override
@@ -58,6 +60,12 @@ public final class SpongeDataRegistrationBuilder implements DataRegistration.Bui
     @Override
     public DataRegistration.Builder provider(final DataProvider<?, ?> provider) throws DuplicateProviderException {
         this.dataProviderMap.put(provider.key(), provider);
+        return this;
+    }
+
+    @Override
+    public DataRegistration.Builder perspectiveResolver(DataPerspectiveResolver<?, ?> resolver) {
+        this.dataPerspectiveResolverMap.put(resolver.key(), resolver);
         return this;
     }
 
@@ -89,6 +97,7 @@ public final class SpongeDataRegistrationBuilder implements DataRegistration.Bui
     public SpongeDataRegistrationBuilder reset() {
         this.dataProviderMap = HashMultimap.create();
         this.dataStoreMap = new IdentityHashMap<>();
+        this.dataPerspectiveResolverMap = new HashMap<>();
         this.keys = new ArrayList<>();
         return this;
     }

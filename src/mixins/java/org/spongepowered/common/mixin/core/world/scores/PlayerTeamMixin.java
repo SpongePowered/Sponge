@@ -29,6 +29,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
@@ -36,6 +37,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -46,13 +48,20 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.scores.PlayerTeamBridge;
+import org.spongepowered.common.bridge.world.scores.PlayerTeamBridge_Contextual;
+import org.spongepowered.common.data.contextual.ContextualData;
+import org.spongepowered.common.data.contextual.ContextualDataDelegate;
+import org.spongepowered.common.data.contextual.ContextualDataOwner;
+import org.spongepowered.common.data.contextual.PerspectiveContainer;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mixin(PlayerTeam.class)
-public abstract class PlayerTeamMixin implements PlayerTeamBridge {
+public abstract class PlayerTeamMixin implements PlayerTeamBridge, PlayerTeamBridge_Contextual, ContextualData {
 
     // @formatter:off
     @Shadow @Final @Mutable @Nullable private Scoreboard scoreboard;
@@ -67,6 +76,9 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
     private @MonotonicNonNull Component bridge$prefix;
     private @MonotonicNonNull Component bridge$suffix;
     private @MonotonicNonNull NamedTextColor bridge$color;
+    private final List<ServerPlayer> impl$players = new ArrayList<>();
+
+    private final ContextualDataDelegate impl$contextualData = new ContextualDataDelegate((DataPerspective) this);
 
     private void impl$teamChanged() {
         if (this.scoreboard != null) {
@@ -190,12 +202,7 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
     @SuppressWarnings("EqualsBetweenInconvertibleTypes")
     @Override
     public Audience bridge$getTeamChannel(final ServerPlayer player) {
-        return Audience.audience(this.getPlayers().stream()
-                .map(name -> Sponge.game().server().player(name))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .filter(member -> member != player)
-                .collect(Collectors.toSet()));
+        return Audience.audience((Iterable<? extends Audience>) (Object) this.impl$players);
     }
 
     @Override
@@ -203,5 +210,56 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
         return Audience.audience(Sponge.game().server().streamOnlinePlayers()
                 .filter(player -> ((ServerPlayer) player).getTeam() != (Object) this)
                 .collect(Collectors.toSet()));
+    }
+
+    @Override
+    public ContextualDataDelegate bridge$contextualData() {
+        return this.impl$contextualData;
+    }
+
+    @Override
+    public @Nullable PerspectiveContainer<?, ?> dataPerception(final DataPerspective perspective) {
+        return this.impl$contextualData.dataPerception(perspective);
+    }
+
+    @Override
+    public PerspectiveContainer<?, ?> createDataPerception(final DataPerspective perspective) {
+        return this.impl$contextualData.createDataPerception(perspective);
+    }
+
+    @Override
+    public void linkContextualOwner(final ContextualDataOwner<?> owner) {
+        this.impl$contextualData.linkContextualOwner(owner);
+    }
+
+    @Override
+    public void unlinkContextualOwner(final ContextualDataOwner<?> owner) {
+        this.impl$contextualData.unlinkContextualOwner(owner);
+    }
+
+    @Override
+    public void broadcastToPerceives(final Packet<?> packet) {
+        for (final ServerPlayer player : this.impl$players) {
+            player.connection.send(packet);
+        }
+    }
+
+    @Override
+    public void bridge$addPlayer(final ServerPlayer player) {
+        this.impl$players.add(player);
+        this.impl$contextualData.perceiveAdded((DataPerspective) player);
+    }
+
+    @Override
+    public void bridge$removePlayer(final ServerPlayer player, final boolean sendPackets) {
+        this.impl$players.remove(player);
+        if (sendPackets) {
+            this.impl$contextualData.perceiveRemoved((DataPerspective) player);
+        }
+    }
+
+    @Override
+    public List<ServerPlayer> bridge$getPlayers() {
+        return this.impl$players;
     }
 }
