@@ -30,9 +30,12 @@ import org.spongepowered.api.data.DataPerspective;
 
 public interface ContextualData {
 
-    @Nullable PerspectiveContainer<?, ?> getDataPerception(DataPerspective perspective);
+    @Nullable PerspectiveContainer<?, ?> dataPerception(DataPerspective perspective);
 
     PerspectiveContainer<?, ?> createDataPerception(DataPerspective perspective);
+
+    void linkContextualOwner(ContextualDataOwner<?> owner);
+    void unlinkContextualOwner(ContextualDataOwner<?> owner);
 
     void broadcastToPerceives(Packet<?> packet);
 }

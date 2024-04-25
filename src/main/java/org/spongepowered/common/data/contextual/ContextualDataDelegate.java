@@ -24,35 +24,22 @@
  */
 package org.spongepowered.common.data.contextual;
 
-import com.google.common.collect.Maps;
-import net.minecraft.network.protocol.Packet;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.api.data.DataPerspectiveResolver;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.world.World;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.common.data.SpongeDataManager;
 
-import java.util.Map;
 import java.util.Objects;
 
-public final class ContextualDataDelegate implements ContextualData {
-
-    private final DataPerspective perspective;
-    private final Map<DataPerspective, PerspectiveContainer<?, ?>> perspectives;
+public final class ContextualDataDelegate extends ContextualDataOwner<DataPerspective> {
 
     public ContextualDataDelegate(final DataPerspective perspective) {
-        this.perspective = perspective;
-
-        this.perspectives = Maps.newHashMap();
-    }
-
-    @Override
-    public @Nullable PerspectiveContainer<?, ?> getDataPerception(final DataPerspective perspective) {
-        return this.perspectives.get(perspective);
+        super(perspective);
     }
 
     @Override
@@ -69,15 +56,6 @@ public final class ContextualDataDelegate implements ContextualData {
         });
     }
 
-    @Override
-    public void broadcastToPerceives(Packet<?> packet) {
-        ((ContextualData) this.perspective).broadcastToPerceives(packet);
-    }
-
-    public DataHolder.Mutable createDataPerception(final PluginContainer plugin, final DataPerspective perspective) {
-        return new ContextualDataProvider(this.createDataPerception(perspective), plugin);
-    }
-
     private static abstract class AbstractPerspectiveContainer<P extends DataPerspective> extends PerspectiveContainer<ContextualDataDelegate, P> {
 
         protected AbstractPerspectiveContainer(final PerspectiveType perspectiveType, final ContextualDataDelegate holder, final P perspective) {
@@ -85,13 +63,49 @@ public final class ContextualDataDelegate implements ContextualData {
         }
 
         @Override
-        protected <E> void offer(final PerspectiveType perspectiveType, final DataPerspectiveResolver<Value<E>, E> resolver, final E value) {
+        protected final <E> void offer(final PerspectiveType perspectiveType, final DataPerspectiveResolver<Value<E>, E> resolver, final E value) {
             if (Objects.equals(this.activeValues.put(resolver.key(), value), value)) {
                 return;
             }
 
-            for (final DataPerspective perspective : this.holder.perspective.perceives()) {
-                ((ContextualData) perspective).createDataPerception(this.perspective).offer(PerspectiveType.TEAM, this.holder.perspective, resolver, value);
+            for (final DataPerspective perspective : this.holder.owner.perceives()) {
+                ((ContextualData) perspective).createDataPerception(this.perspective).offer(PerspectiveType.TEAM, this.holder.owner, resolver, value);
+            }
+        }
+
+        @Override
+        protected void remove(PerspectiveType perspectiveType, DataPerspectiveResolver<Value<?>, ?> resolver) {
+            this.activeValues.remove(resolver.key());
+
+            for (final DataPerspective perspective : this.holder.owner.perceives()) {
+                final @Nullable PerspectiveContainer<?, ?> container = ((ContextualData) perspective).dataPerception(this.perspective);
+                if (container != null) {
+                    container.remove(PerspectiveType.TEAM, this.holder.owner, resolver);
+                }
+            }
+        }
+
+        @Override
+        protected void addPerspective(final DataPerspective perspective) {
+            final PerspectiveContainer<?, ?> container = ((ContextualData) perspective).createDataPerception(this.perspective);
+            this.activeValues.forEach((k, v) -> {
+                final DataPerspectiveResolver<Value<Object>, Object> resolver =
+                        Objects.requireNonNull(SpongeDataManager.getDataPerspectiveResolverRegistry().get((Key) k));
+
+                container.offer(PerspectiveType.TEAM, this.holder.owner, resolver, v);
+            });
+        }
+
+        @Override
+        protected void removePerspective(final DataPerspective perspective) {
+            final @Nullable PerspectiveContainer<?, ?> container = ((ContextualData) perspective).dataPerception(this.perspective);
+            if (container != null) {
+                this.activeValues.forEach((k, v) -> {
+                    final DataPerspectiveResolver<Value<?>, ?> resolver =
+                            Objects.requireNonNull(SpongeDataManager.getDataPerspectiveResolverRegistry().get((Key) k));
+
+                    container.remove(PerspectiveType.TEAM, this.holder.owner, resolver);
+                });
             }
         }
     }

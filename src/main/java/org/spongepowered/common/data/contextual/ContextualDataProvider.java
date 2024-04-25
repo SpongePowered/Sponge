@@ -129,7 +129,7 @@ final class ContextualDataProvider implements DataHolder.Mutable {
 
     @Override
     public DataTransactionResult remove(Key<?> key) {
-        return null;
+        return this.container.remove(this.plugin, key);
     }
 
     @Override

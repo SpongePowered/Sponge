@@ -119,6 +119,7 @@ import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.contextual.ContextualData;
 import org.spongepowered.common.data.contextual.ContextualDataHolder;
+import org.spongepowered.common.data.contextual.ContextualDataOwner;
 import org.spongepowered.common.data.contextual.PerspectiveContainer;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
@@ -262,7 +263,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     // Structure: tileNbt - ForgeData - SpongeData - customdata
     private CompoundTag impl$customDataCompound;
 
-    private final ContextualDataHolder impl$contextualData = new ContextualDataHolder((DataHolder) this);
+    private final ContextualDataHolder impl$contextualData = new ContextualDataHolder((org.spongepowered.api.entity.Entity) this);
 
     @Override
     public boolean bridge$isConstructing() {
@@ -1343,8 +1344,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Override
-    public @Nullable PerspectiveContainer<?, ?> getDataPerception(final DataPerspective perspective) {
-        return this.impl$contextualData.getDataPerception(perspective);
+    public @Nullable PerspectiveContainer<?, ?> dataPerception(final DataPerspective perspective) {
+        return this.impl$contextualData.dataPerception(perspective);
     }
 
     @Override
@@ -1353,9 +1354,25 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Override
+    public void linkContextualOwner(final ContextualDataOwner<?> owner) {
+        this.impl$contextualData.linkContextualOwner(owner);
+    }
+
+    @Override
+    public void unlinkContextualOwner(final ContextualDataOwner<?> owner) {
+        this.impl$contextualData.unlinkContextualOwner(owner);
+    }
+
+    @Override
     public void broadcastToPerceives(final Packet<?> packet) {
         if ((Object) this instanceof ServerPlayer player) {
             player.connection.send(packet);
         }
+    }
+
+    //TODO: We lose the contextual data when the entity changes dimensions
+    @Inject(method = "setRemoved", at = @At("TAIL"))
+    private void impl$clearContextualData(final Entity.RemovalReason $$0, final CallbackInfo ci) {
+        this.impl$contextualData.close();
     }
 }

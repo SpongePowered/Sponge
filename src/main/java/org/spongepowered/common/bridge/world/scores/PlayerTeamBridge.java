@@ -29,6 +29,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.List;
+
 public interface PlayerTeamBridge {
 
     Component bridge$getDisplayName();
@@ -50,4 +52,10 @@ public interface PlayerTeamBridge {
     Audience bridge$getTeamChannel(ServerPlayer player);
 
     Audience bridge$getNonTeamChannel();
+
+    void bridge$addPlayer(ServerPlayer player);
+
+    void bridge$removePlayer(ServerPlayer player, boolean sendPackets);
+
+    List<ServerPlayer> bridge$getPlayers();
 }

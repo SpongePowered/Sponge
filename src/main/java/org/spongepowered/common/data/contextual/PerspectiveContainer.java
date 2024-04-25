@@ -38,6 +38,7 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.util.CopyHelper;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.io.Closeable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -45,13 +46,13 @@ import java.util.Optional;
 import java.util.Set;
 
 @SuppressWarnings("unchecked")
-public abstract class PerspectiveContainer<H extends ContextualData, P extends DataPerspective> implements ValueContainer {
+public abstract class PerspectiveContainer<H extends ContextualDataOwner<?>, P extends DataPerspective> implements ValueContainer, Closeable {
 
     private final PerspectiveType perspectiveType;
     protected final H holder;
     protected final P perspective;
 
-    private final Map<Key<?>, Map<Object, Object>> valuesByOwner;
+    private final Map<Key<?>, Map<Object, ?>> valuesByOwner;
     protected final Map<Key<?>, Object> activeValues;
 
     private long entityDataFlags;
@@ -63,9 +64,11 @@ public abstract class PerspectiveContainer<H extends ContextualData, P extends D
 
         this.valuesByOwner = Maps.newHashMap();
         this.activeValues = Maps.newHashMap();
+
+        ((ContextualData) perspective).linkContextualOwner(this.holder);
     }
 
-    public long entityDataFlags() {
+    public final long entityDataFlags() {
         return this.entityDataFlags;
     }
 
@@ -85,15 +88,56 @@ public abstract class PerspectiveContainer<H extends ContextualData, P extends D
         }
 
         if (resolver.key() == (Key<?>)Keys.CUSTOM_NAME) {
-            entityDataFlags |= 1L << EntityAccessor.accessor$DATA_CUSTOM_NAME().getId();
+            this.entityDataFlags |= 1L << EntityAccessor.accessor$DATA_CUSTOM_NAME().getId();
         }
 
-        final E mergedValue = resolver.merge(valueMap.values());
+        final E mergedValue = valueMap.size() == 1 ? value : resolver.merge(valueMap.values());
         this.offer(perspectiveType, resolver, mergedValue);
         return DataTransactionResult.successResult(Value.immutableOf(resolver.key(), mergedValue));
     }
 
     protected abstract <E> void offer(final PerspectiveType perspectiveType, final DataPerspectiveResolver<Value<E>, E> resolver, final E value);
+
+    final DataTransactionResult remove(final PluginContainer pluginContainer, final Key<?> key) {
+        final @Nullable DataPerspectiveResolver<Value<?>, ?> resolver = SpongeDataManager.getDataPerspectiveResolverRegistry().get((Key) key);
+        if (resolver == null) {
+            return DataTransactionResult.failNoData();
+        }
+
+        return this.remove(this.perspectiveType, pluginContainer, resolver);
+    }
+
+    final DataTransactionResult remove(final PerspectiveType perspectiveType, final Object owner, final DataPerspectiveResolver<Value<?>, ?> resolver) {
+        final @Nullable Map<Object, Object> valueMap = (Map<Object, Object>) this.valuesByOwner.get(resolver.key());
+        if (valueMap == null) {
+            return DataTransactionResult.failNoData();
+        }
+
+        final @Nullable Object value = valueMap.remove(owner);
+        if (value == null) {
+            return DataTransactionResult.failNoData();
+        }
+
+        if (resolver.key() == (Key<?>)Keys.CUSTOM_NAME) {
+            this.entityDataFlags &= ~(1L << EntityAccessor.accessor$DATA_CUSTOM_NAME().getId());
+        }
+
+        if (valueMap.isEmpty()) {
+            this.valuesByOwner.remove(resolver.key());
+            this.activeValues.remove(resolver.key());
+            this.remove(perspectiveType, resolver);
+            return DataTransactionResult.successNoData();
+        }
+
+        final Object mergedValue = valueMap.size() == 1 ? valueMap.values().iterator().next() : ((DataPerspectiveResolver) resolver).merge(valueMap.values());
+        this.offer(perspectiveType, owner, (DataPerspectiveResolver) resolver, mergedValue);
+        return DataTransactionResult.successNoData();
+    }
+
+    protected abstract void remove(final PerspectiveType perspectiveType, final DataPerspectiveResolver<Value<?>, ?> resolver);
+
+    protected abstract void addPerspective(final DataPerspective perspective);
+    protected abstract void removePerspective(final DataPerspective perspective);
 
     @Override
     public <E> Optional<E> get(final Key<? extends Value<E>> key) {
@@ -122,5 +166,10 @@ public abstract class PerspectiveContainer<H extends ContextualData, P extends D
     @Override
     public Set<Value.Immutable<?>> getValues() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public final void close() {
+        ((ContextualData) this.perspective).unlinkContextualOwner(this.holder);
     }
 }

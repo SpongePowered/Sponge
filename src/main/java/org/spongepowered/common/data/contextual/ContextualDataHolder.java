@@ -25,10 +25,7 @@
 package org.spongepowered.common.data.contextual;
 
 import com.google.common.collect.Maps;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.api.data.DataPerspectiveResolver;
 import org.spongepowered.api.data.Key;
@@ -37,7 +34,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.util.CopyHelper;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -45,21 +41,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 @SuppressWarnings("unchecked")
-public final class ContextualDataHolder implements ContextualData {
+public final class ContextualDataHolder extends ContextualDataOwner<Entity> {
 
-    private final DataHolder dataHolder;
-
-    private final Map<DataPerspective, PerspectiveContainer<?, ?>> perspectives;
-
-    public ContextualDataHolder(final DataHolder dataHolder) {
-        this.dataHolder = dataHolder;
-
-        this.perspectives = Maps.newHashMap();
-    }
-
-    @Override
-    public @Nullable PerspectiveContainer<?, ?> getDataPerception(final DataPerspective perspective) {
-        return this.perspectives.get(perspective);
+    public ContextualDataHolder(final Entity entity) {
+        super(entity);
     }
 
     @Override
@@ -76,17 +61,6 @@ public final class ContextualDataHolder implements ContextualData {
         });
     }
 
-    @Override
-    public void broadcastToPerceives(final Packet<?> packet) {
-        if (this.dataHolder instanceof final ServerPlayer player) {
-            player.connection.send(packet);
-        }
-    }
-
-    public DataHolder.Mutable createDataPerception(final PluginContainer plugin, final DataPerspective perspective) {
-        return new ContextualDataProvider(this.createDataPerception(perspective), plugin);
-    }
-
     private static abstract class AbstractPerspectiveContainer<P extends DataPerspective> extends PerspectiveContainer<ContextualDataHolder, P> {
 
         protected AbstractPerspectiveContainer(PerspectiveType perspectiveType, ContextualDataHolder holder, P perspective) {
@@ -94,29 +68,39 @@ public final class ContextualDataHolder implements ContextualData {
         }
 
         @Override
-        public <E> Optional<E> get(final Key<? extends Value<E>> key) {
+        public final <E> Optional<E> get(final Key<? extends Value<E>> key) {
             Objects.requireNonNull(key, "key");
             final @Nullable E value = (E) this.activeValues.get(key);
             if (value == null) {
-                return this.holder.dataHolder.get(key);
+                return this.holder.owner.get(key);
             }
             return Optional.ofNullable(CopyHelper.copy(value));
         }
 
         @Override
-        public <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
+        public final <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
             Objects.requireNonNull(key, "key");
             final @Nullable E value = (E) this.activeValues.get(key);
             if (value == null) {
-                return this.holder.dataHolder.getValue(key);
+                return this.holder.owner.getValue(key);
             }
             return Optional.of(Value.genericMutableOf(key, CopyHelper.copy(value)));
+        }
+
+        @Override
+        protected void addPerspective(final DataPerspective perspective) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        protected void removePerspective(final DataPerspective perspective) {
+            throw new UnsupportedOperationException();
         }
     }
 
     private static final class EntityPerspectiveContainer extends AbstractPerspectiveContainer<Entity> {
 
-        private final Map<Key<?>, EnumMap<PerspectiveType, Object>> perspectiveValues;
+        private final Map<Key<?>, EnumMap<PerspectiveType, ?>> perspectiveValues;
 
         private EntityPerspectiveContainer(final ContextualDataHolder holder, final Entity entity) {
             super(PerspectiveType.ENTITY, holder, entity);
@@ -135,6 +119,23 @@ public final class ContextualDataHolder implements ContextualData {
             this.updatePerspective(values, resolver);
         }
 
+        @Override
+        protected void remove(final PerspectiveType perspectiveType, final DataPerspectiveResolver<Value<?>, ?> resolver) {
+            final @Nullable EnumMap<PerspectiveType, ?> values = this.perspectiveValues.get(resolver.key());
+            if (values == null) {
+                return;
+            }
+
+            values.remove(perspectiveType);
+            if (values.isEmpty()) {
+                this.perspectiveValues.remove(resolver.key());
+                ((DataPerspectiveResolver) resolver).apply(this.holder.owner, this.perspective, this.holder.owner.require((Key) resolver.key()));
+                return;
+            }
+
+            this.updatePerspective(values, (DataPerspectiveResolver) resolver);
+        }
+
         private <E> void updatePerspective(final EnumMap<PerspectiveType, E> values, final DataPerspectiveResolver<Value<E>, E> resolver) {
             for (final PerspectiveType type : PerspectiveType.values()) {
                 final @Nullable E value = values.get(type);
@@ -143,7 +144,7 @@ public final class ContextualDataHolder implements ContextualData {
                 }
 
                 if (!Objects.equals(this.activeValues.put(resolver.key(), value), value)) {
-                    resolver.apply(this.holder.dataHolder, this.perspective, value);
+                    resolver.apply(this.holder.owner, this.perspective, value);
                 }
 
                 return;
@@ -165,6 +166,18 @@ public final class ContextualDataHolder implements ContextualData {
 
             for (final DataPerspective perspective : this.perspective.perceives()) {
                 this.holder.createDataPerception(perspective).offer(perspectiveType, this.perspective, resolver, value);
+            }
+        }
+
+        @Override
+        protected void remove(final PerspectiveType perspectiveType, final DataPerspectiveResolver<Value<?>, ?> resolver) {
+            this.activeValues.remove(resolver.key());
+
+            for (final DataPerspective perspective : this.perspective.perceives()) {
+                final @Nullable PerspectiveContainer<?, ?> container = this.holder.dataPerception(perspective);
+                if (container != null) {
+                    container.remove(perspectiveType, this.perspective, resolver);
+                }
             }
         }
     }

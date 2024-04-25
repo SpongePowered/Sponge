@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data;
+package org.spongepowered.common.data.contextual;
 
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPerspective;

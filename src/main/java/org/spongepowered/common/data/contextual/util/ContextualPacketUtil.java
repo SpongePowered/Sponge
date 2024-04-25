@@ -42,7 +42,7 @@ public final class ContextualPacketUtil {
 
     public static ClientboundSetEntityDataPacket createContextualPacket(
             final ClientboundSetEntityDataPacket original, final ContextualData context, final DataPerspective perspective) {
-        final @Nullable PerspectiveContainer<?, ?> contextualData = context.getDataPerception(perspective);
+        final @Nullable PerspectiveContainer<?, ?> contextualData = context.dataPerception(perspective);
         if (contextualData == null) {
             return original;
         }

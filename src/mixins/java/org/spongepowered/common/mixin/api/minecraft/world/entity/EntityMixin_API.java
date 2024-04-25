@@ -405,7 +405,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public ValueContainer getDataPerception(final DataPerspective perspective) {
-        final @Nullable ValueContainer container = ((EntityBridge_Contextual) this).bridge$contextualData().getDataPerception(perspective);
+        final @Nullable ValueContainer container = ((EntityBridge_Contextual) this).bridge$contextualData().dataPerception(perspective);
         if (container != null) {
             return container;
         }

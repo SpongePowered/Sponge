@@ -30,7 +30,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataPerspective;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -229,7 +228,7 @@ public abstract class PlayerTeamMixin_API implements Team {
 
     @Override
     public Iterable<DataPerspective> perceives() {
-        return Sponge.server().onlinePlayers().stream().filter(p -> this.members().contains(p.teamRepresentation())).collect(Collectors.toList());
+        return (Iterable<DataPerspective>) (Object) ((PlayerTeamBridge) this).bridge$getPlayers();
     }
 
     @Override

@@ -69,7 +69,7 @@ public abstract class ChunkMap_TrackedEntityMixin {
     @Redirect(method = "broadcast(Lnet/minecraft/network/protocol/Packet;)V", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/network/ServerPlayerConnection;send(Lnet/minecraft/network/protocol/Packet;)V"))
     private void impl$sendQueuedHumanPackets(final ServerPlayerConnection serverPlayNetHandler, final Packet<?> packetIn) {
-        final @Nullable PerspectiveContainer<?, ?> contextualData = ((ContextualData) this.entity).getDataPerception((DataPerspective) serverPlayNetHandler.getPlayer());
+        final @Nullable PerspectiveContainer<?, ?> contextualData = ((ContextualData) this.entity).dataPerception((DataPerspective) serverPlayNetHandler.getPlayer());
         final ValueContainer dataPerception = contextualData != null ? contextualData : (ValueContainer) this.entity;
         if (dataPerception.require(Keys.VANISH_STATE).invisible()) {
             return;
