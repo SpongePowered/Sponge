@@ -72,7 +72,6 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge, PlayerTeamBri
     @Shadow public abstract Collection<String> getPlayers();
     // @formatter:on
 
-    @Shadow @Final private Set<String> players;
     private @MonotonicNonNull Component bridge$displayName;
     private @MonotonicNonNull Component bridge$prefix;
     private @MonotonicNonNull Component bridge$suffix;
