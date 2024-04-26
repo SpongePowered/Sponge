@@ -150,6 +150,7 @@ public final class SpongeTabList implements TabList {
                     displayName == null ? null : SpongeAdventure.asAdventure(displayName),
                     entry.latency(),
                     (GameMode) (Object) entry.gameMode(),
+                    entry.listed(),
                     entry.chatSession() == null ? null : entry.chatSession().profilePublicKey()
             ), false);
         }
@@ -193,7 +194,7 @@ public final class SpongeTabList implements TabList {
         final RemoteChatSession.Data chatSessionData = ((SpongeTabListEntry) entry).profilePublicKey() == null ? null : new RemoteChatSession.Data(entry.profile().uuid(), ((SpongeTabListEntry) entry).profilePublicKey());
         final net.minecraft.network.chat.Component displayName = entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null;
         final ClientboundPlayerInfoUpdatePacket.Entry data = new ClientboundPlayerInfoUpdatePacket.Entry(entry.profile().uniqueId(), SpongeGameProfile.toMcProfile(entry.profile()),
-            true, entry.latency(), (GameType) (Object) entry.gameMode(), displayName, chatSessionData);
+            entry.listed(), entry.latency(), (GameType) (Object) entry.gameMode(), displayName, chatSessionData);
         ((ClientboundPlayerInfoUpdatePacketAccessor) packet).accessor$entries(List.of(data));
         this.player.connection.send(packet);
     }
@@ -223,9 +224,14 @@ public final class SpongeTabList implements TabList {
                 if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LATENCY)) {
                     ((SpongeTabListEntry) entry).updateWithoutSend();
                     entry.setLatency(update.latency());
-                } else if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE)) {
+                }
+                if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE)) {
                     ((SpongeTabListEntry) entry).updateWithoutSend();
                     entry.setGameMode((GameMode) (Object) update.gameMode());
+                }
+                if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED)) {
+                    ((SpongeTabListEntry) entry).updateWithoutSend();
+                    entry.setListed(update.listed());
                 }
             });
         }

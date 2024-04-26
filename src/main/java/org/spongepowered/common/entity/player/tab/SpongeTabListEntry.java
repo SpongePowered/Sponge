@@ -51,18 +51,20 @@ public final class SpongeTabListEntry implements TabListEntry {
     private @Nullable Component displayName;
     private int latency;
     private GameMode gameMode;
+    private boolean listed;
     private boolean updateWithoutSend;
     private final ProfilePublicKey.Data profilePublicKey;
 
     public SpongeTabListEntry(
         final TabList list, final GameProfile profile, @Nullable final Component displayName, final int latency, final GameMode gameMode,
-            final ProfilePublicKey.Data profilePublicKey) {
+            final boolean listed, final ProfilePublicKey.Data profilePublicKey) {
         Preconditions.checkState(list instanceof SpongeTabList, "list is not a SpongeTabList");
         this.list = (SpongeTabList) list;
         this.profile = Objects.requireNonNull(profile, "profile");
         this.displayName = displayName;
         this.latency = latency;
         this.gameMode = Objects.requireNonNull(gameMode, "game mode");
+        this.listed = listed;
         this.profilePublicKey = profilePublicKey;
     }
 
@@ -109,6 +111,18 @@ public final class SpongeTabListEntry implements TabListEntry {
     public TabListEntry setGameMode(final GameMode gameMode) {
         this.gameMode = java.util.Objects.requireNonNull(gameMode, "game mode");
         this.sendUpdate(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE);
+        return this;
+    }
+
+    @Override
+    public boolean listed() {
+        return this.listed;
+    }
+
+    @Override
+    public SpongeTabListEntry setListed(boolean listed) {
+        this.listed = listed;
+        this.sendUpdate(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED);
         return this;
     }
 
@@ -160,6 +174,7 @@ public final class SpongeTabListEntry implements TabListEntry {
                 .add("latency=" + this.latency)
                 .add("displayName=" + this.displayName)
                 .add("gameMode=" + this.gameMode)
+                .add("listed=" + this.listed)
                 .toString();
     }
 
