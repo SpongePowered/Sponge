@@ -259,7 +259,8 @@
         "server.network.MemoryServerHandshakePacketListenerImplMixin"
     ],
     "server": [
-        "server.dedicated.DedicatedServerMixin"
+        "server.dedicated.DedicatedServerMixin",
+        "server.dedicated.ServerWatchdogMixin"
     ],
     "injectors": {
         "maxShiftBy": 3

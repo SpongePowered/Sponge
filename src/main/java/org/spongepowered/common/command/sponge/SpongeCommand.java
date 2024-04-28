@@ -67,16 +67,14 @@ import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.util.JvmUtil;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.model.PluginContributor;
 
 import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.text.DecimalFormat;
-import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -86,8 +84,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
-import javax.management.MBeanServer;
 
 public class SpongeCommand {
 
@@ -429,26 +425,13 @@ public class SpongeCommand {
     }
 
     private @NonNull CommandResult heapSubcommandExecutor(final CommandContext context) {
-        final File file = new File(new File(new File("."), "dumps"),
-                "heap-dump-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.hprof");
-        // src.sendMessage(Text.of("Writing JVM heap data to: ", file));
-        SpongeCommon.logger().info("Writing JVM heap data to: {}", file.getAbsolutePath());
-        try {
-            if (file.getParentFile() != null) {
-                file.getParentFile().mkdirs();
-            }
-
-            final Class<?> clazz = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
-            final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-            final Object hotspotMBean = ManagementFactory.newPlatformMXBeanProxy(server, "com.sun.management:type=HotSpotDiagnostic", clazz);
-            final Method m = clazz.getMethod("dumpHeap", String.class, boolean.class);
-            m.invoke(hotspotMBean, file.getPath(), true);
-        } catch (final Throwable t) {
-            SpongeCommon.logger().fatal(MessageFormat.format("Could not write heap to {0}", file));
+        context.sendMessage(Component.text("Writing JVM heap data"));
+        if (JvmUtil.dumpHeap()) {
+            context.sendMessage(Component.text("Heap dump complete"));
+            return CommandResult.success();
+        } else {
+            return CommandResult.error(Component.text("Failed to write heap dump. Check the console for more information."));
         }
-        // src.sendMessage(Text.of("Heap dump complete"));
-        SpongeCommon.logger().info("Heap dump complete");
-        return CommandResult.success();
     }
 
     private @NonNull CommandResult pluginsListSubcommand(final CommandContext context) {
