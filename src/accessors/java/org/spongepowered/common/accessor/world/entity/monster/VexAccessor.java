@@ -33,4 +33,9 @@ public interface VexAccessor {
 
     @Accessor("limitedLifeTicks") int accessor$limitedLifeTicks();
 
+    @Accessor("limitedLifeTicks") void accessor$limitedLifeTicks(int limitedLifeTicks);
+
+    @Accessor("hasLimitedLife") boolean accessor$hasLimitedLife();
+
+    @Accessor("hasLimitedLife") void accessor$hasLimitedLife(boolean limitedLife);
 }

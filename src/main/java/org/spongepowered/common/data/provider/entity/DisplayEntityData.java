@@ -44,6 +44,7 @@ import org.spongepowered.common.accessor.world.entity.Display_TextDisplayAccesso
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.math.matrix.Matrix4d;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -75,10 +76,22 @@ public class DisplayEntityData {
                         .delete(h -> h.invoker$setBrightnessOverride(null))
                     .create(Keys.INTERPOLATION_DURATION)
                         .get(h -> Ticks.of(h.invoker$getInterpolationDuration()))
-                        .set((h ,v) -> h.invoker$setInterpolationDuration((int) v.ticks()))
+                        .setAnd((h ,v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.invoker$setInterpolationDuration(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.INTERPOLATION_DELAY)
                         .get(h -> Ticks.of(h.invoker$getInterpolationDelay()))
-                        .set((h ,v) -> h.invoker$setInterpolationDelay((int) v.ticks()))
+                        .setAnd((h ,v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.invoker$setInterpolationDelay(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.SHADOW_RADIUS)
                         .get(h -> (double) h.invoker$getShadowRadius())
                         .set((h ,v) -> h.invoker$setShadowRadius(v.floatValue()))

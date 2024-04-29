@@ -42,8 +42,8 @@ public final class AgeableData {
                     .create(Keys.BABY_TICKS)
                         .get(h -> h.getAge() < 0 ? new SpongeTicks(-h.getAge()) : null)
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.ticks();
-                            if (ticks < 0) {
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                            if (v.isInfinite() || ticks < 0) {
                                 return false;
                             }
                             h.setAge(-ticks);
@@ -52,8 +52,8 @@ public final class AgeableData {
                     .create(Keys.BREEDING_COOLDOWN)
                         .get(h -> h.getAge() >= 0 ? new SpongeTicks(h.getAge()) : null)
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.ticks();
-                            if (ticks < 0) {
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                            if (v.isInfinite() || ticks < 0) {
                                 return false;
                             }
                             h.setAge(ticks);

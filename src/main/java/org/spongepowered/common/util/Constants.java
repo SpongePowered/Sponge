@@ -253,6 +253,7 @@ public final class Constants {
             public static final class Player {
 
                 public static final String HEALTH_SCALE = "HealthScale";
+                public static final int ITEM_COOLDOWN_CANCELLED = -2;
             }
 
             public static final class Human {
@@ -271,6 +272,9 @@ public final class Constants {
                 public static final String NBT = "nbt";
             }
 
+            public static final class RangedAttackGoal {
+                public static final int INFINITE_ATTACK_TIME = -2;
+            }
         }
 
         public static final class User {
@@ -1555,7 +1559,7 @@ public final class Constants {
         public static final double MINECRAFT_MINUTE_TICKS = TickConversions.MINECRAFT_HOUR_TICKS / 60.0;
         public static final double MINECRAFT_SECOND_TICKS = TickConversions.MINECRAFT_MINUTE_TICKS / 60.0;
         public static final int MINECRAFT_EPOCH_OFFSET = 6000;
-
+        public static final int INFINITE_TICKS = -1;
     }
 
     public static final class Universe {

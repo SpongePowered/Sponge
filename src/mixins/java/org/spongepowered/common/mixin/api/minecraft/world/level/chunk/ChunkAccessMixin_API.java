@@ -91,6 +91,10 @@ public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<
 
     @Override
     public void setInhabitedTime(final Ticks newInhabitedTime) {
+        Objects.requireNonNull(newInhabitedTime);
+        if (newInhabitedTime.isInfinite()) {
+            throw new IllegalArgumentException("Inhabited time cannot be infinite!");
+        }
         this.shadow$setInhabitedTime(newInhabitedTime.ticks());
     }
 

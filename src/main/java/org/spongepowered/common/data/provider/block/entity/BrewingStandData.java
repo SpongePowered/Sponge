@@ -49,10 +49,15 @@ public final class BrewingStandData {
                         })
                     .create(Keys.REMAINING_BREW_TIME)
                         .get(h -> BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$items()) ? new SpongeTicks(h.accessor$brewTime()) : null)
-                        .set((h, v) -> {
-                            if (BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$items())) {
-                                h.accessor$brewTime((int) v.ticks());
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
                             }
+                            if (BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$items())) {
+                                h.accessor$brewTime(SpongeTicks.toSaturatedIntOrInfinite(v));
+                                return true;
+                            }
+                            return false;
                         });
     }
     // @formatter:on

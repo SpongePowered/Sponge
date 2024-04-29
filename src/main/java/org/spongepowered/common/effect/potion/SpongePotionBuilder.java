@@ -41,6 +41,7 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.Preconditions;
+import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -84,7 +85,7 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
         if (!optional.isPresent()) {
             throw new InvalidDataException("The container has an invalid potion type name: " + effectName);
         }
-        final Ticks duration = Ticks.of(container.getInt(Constants.Item.Potions.POTION_DURATION).get());
+        final Ticks duration = SpongeTicks.ticksOrInfinite(container.getInt(Constants.Item.Potions.POTION_DURATION).get());
         final int amplifier = container.getInt(Constants.Item.Potions.POTION_AMPLIFIER).get();
         final boolean ambience = container.getBoolean(Constants.Item.Potions.POTION_AMBIANCE).get();
         final boolean particles = container.getBoolean(Constants.Item.Potions.POTION_SHOWS_PARTICLES).get();
@@ -109,7 +110,7 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
 
     @Override
     public PotionEffect.Builder duration(final @NonNull Ticks duration) {
-        if (duration.ticks() <= 0) {
+        if (!duration.isInfinite() && duration.ticks() <= 0) {
             throw new IllegalArgumentException("Duration must be positive");
         }
         this.duration = duration;
@@ -143,11 +144,11 @@ public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect>
     @Override
     public PotionEffect build() throws IllegalStateException {
         Preconditions.checkState(this.potionType != null, "Potion type has not been set");
-        if (this.duration.ticks() <= 0) {
+        if (!this.duration.isInfinite() && this.duration.ticks() <= 0) {
             throw new IllegalStateException("Duration has not been set");
         }
         return (PotionEffect) new MobEffectInstance((MobEffect) this.potionType,
-                (int) this.duration.ticks(),
+                SpongeTicks.toSaturatedIntOrInfinite(this.duration),
                 this.amplifier,
                 this.isAmbient,
                 this.showParticles,

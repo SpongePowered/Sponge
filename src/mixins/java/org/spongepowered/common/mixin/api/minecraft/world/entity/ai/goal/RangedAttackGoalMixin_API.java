@@ -31,6 +31,8 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 
 @Mixin(RangedAttackGoal.class)
 public abstract class RangedAttackGoalMixin_API implements RangedAttackAgainstAgentGoal {
@@ -60,7 +62,7 @@ public abstract class RangedAttackGoalMixin_API implements RangedAttackAgainstAg
 
     @Override
     public RangedAttackAgainstAgentGoal setDelayBetweenAttacks(final Ticks delay) {
-        this.attackIntervalMax = (int) delay.ticks();
+        this.attackIntervalMax = SpongeTicks.toSaturatedIntOrInfinite(delay, Constants.Sponge.Entity.RangedAttackGoal.INFINITE_ATTACK_TIME);
         return this;
     }
 

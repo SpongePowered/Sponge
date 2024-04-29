@@ -30,6 +30,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.bridge.world.entity.item.ItemEntityBridge;
 import org.spongepowered.common.data.ByteToBooleanContentUpdater;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -57,9 +58,15 @@ public final class ItemData {
                         .set((h, v) -> h.setItem(ItemStackUtil.fromSnapshotToNative(v)))
                 .asMutable(ItemEntityBridge.class)
                     .create(Keys.DESPAWN_DELAY)
-                        .get(h -> new SpongeTicks(h.bridge$getDespawnDelay()))
+                        .get(h -> h.bridge$infiniteDespawnDelay()
+                                ? Ticks.infinite()
+                                : new SpongeTicks(h.bridge$getDespawnDelay()))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.ticks();
+                            if (v.isInfinite()) {
+                                h.bridge$setDespawnDelay(h.bridge$getDespawnDelay(), true);
+                                return true;
+                            }
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
                             if (ticks < 0) {
                                 return false;
                             }
@@ -73,8 +80,16 @@ public final class ItemData {
                         .get(ItemEntityBridge::bridge$infinitePickupDelay)
                         .set((h, v) -> h.bridge$setPickupDelay(h.bridge$getPickupDelay(), v))
                     .create(Keys.PICKUP_DELAY)
-                        .get(h -> new SpongeTicks(h.bridge$getPickupDelay()))
-                        .set((h, v) -> h.bridge$setPickupDelay((int) v.ticks(), false))
+                        .get(h -> h.bridge$infinitePickupDelay()
+                                ? Ticks.infinite()
+                                : new SpongeTicks(h.bridge$getPickupDelay()))
+                        .set((h, v) -> {
+                            if (v.isInfinite()) {
+                                h.bridge$setPickupDelay(h.bridge$getPickupDelay(), true);
+                            } else {
+                                h.bridge$setPickupDelay(SpongeTicks.toSaturatedIntOrInfinite(v), false);
+                            }
+                        })
                     // Only for internal use
                     .create(ItemData.PREVIOUS_PICKUP_DELAY)
                         .get(v -> -1)

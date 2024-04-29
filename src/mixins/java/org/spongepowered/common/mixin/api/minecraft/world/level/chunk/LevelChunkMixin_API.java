@@ -144,6 +144,10 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
 
     @Override
     public void setInhabitedTime(final Ticks newInhabitedTime) {
+        Objects.requireNonNull(newInhabitedTime);
+        if (newInhabitedTime.isInfinite()) {
+            throw new IllegalArgumentException("Inhabited time cannot be infinite!");
+        }
         this.setInhabitedTime(newInhabitedTime.ticks());
     }
 

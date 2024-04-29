@@ -27,19 +27,29 @@ package org.spongepowered.common.mixin.core.world.item;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemCooldowns;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.accessor.world.item.ItemCooldowns_CooldownInstanceAccessor;
 import org.spongepowered.common.bridge.world.item.ItemCooldownsBridge;
+import org.spongepowered.common.util.Constants;
 
 import java.util.Map;
 
 @Mixin(ItemCooldowns.class)
 public abstract class ItemCooldownsMixin implements ItemCooldownsBridge {
+
+    // @formatter:off
+    @Shadow @Final private Map<Item, ?> cooldowns;
+    // @formatter:on
 
     private int impl$lastSetCooldownResult;
 
@@ -54,7 +64,7 @@ public abstract class ItemCooldownsMixin implements ItemCooldownsBridge {
     )
     private void impl$throwEventOnSetAndTrackResult(final Item item, final int ticks, final CallbackInfo ci) {
         this.impl$lastSetCooldownResult = this.impl$throwSetCooldownEvent((ItemType) item, ticks);
-        if (this.impl$lastSetCooldownResult == -1) {
+        if (this.impl$lastSetCooldownResult == Constants.Sponge.Entity.Player.ITEM_COOLDOWN_CANCELLED) {
             ci.cancel();
         }
     }
@@ -87,6 +97,22 @@ public abstract class ItemCooldownsMixin implements ItemCooldownsBridge {
 
     @Override
     public boolean bridge$getSetCooldownResult() {
-        return this.impl$lastSetCooldownResult != -1;
+        return this.impl$lastSetCooldownResult != Constants.Sponge.Entity.Player.ITEM_COOLDOWN_CANCELLED;
+    }
+
+    @Inject(method = "getCooldownPercent", at = @At("HEAD"), cancellable = true)
+    private void impl$getCooldownPercentInfiniteCooldown(final Item $$0, final float $$1, final CallbackInfoReturnable<Float> cir) {
+        final ItemCooldowns_CooldownInstanceAccessor cooldown = (ItemCooldowns_CooldownInstanceAccessor) this.cooldowns.get($$0);
+        if (cooldown != null && cooldown.accessor$endTime() == cooldown.accessor$startTime() - 1) {
+            cir.setReturnValue(1.0F);
+        }
+    }
+
+    @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/item/ItemCooldowns$CooldownInstance;endTime:I"))
+    private int impl$dontRemoveInfiniteCooldown(final @Coerce ItemCooldowns_CooldownInstanceAccessor instance) {
+        if (instance.accessor$endTime() != instance.accessor$startTime() - 1) {
+            return instance.accessor$endTime();
+        }
+        return Integer.MAX_VALUE;
     }
 }
