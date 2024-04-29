@@ -48,7 +48,7 @@ import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.level.chunk.storage.SpongeChunkEntities;
+import org.spongepowered.common.world.level.chunk.storage.SpongeEntityChunk;
 import org.spongepowered.common.world.level.chunk.storage.SpongeIOWorkerType;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -75,9 +75,9 @@ public abstract class EntityStorageMixin {
         }
 
         final Vector3i chunkPos = VecHelper.toVector3i($$0x);
-        final SpongeChunkEntities entities = new SpongeChunkEntities(this.level, chunkPos, cir.getReturnValue().getEntities());
+        final SpongeEntityChunk entities = new SpongeEntityChunk(this.level, chunkPos, cir.getReturnValue().getEntities());
         final ChunkEvent.Entities.Load loadEvent = SpongeEventFactory.createChunkEventEntitiesLoad(PhaseTracker.getInstance().currentCause(),
-                chunkPos, entities, (ResourceKey) (Object) this.level.dimension().location());
+                entities, chunkPos, (ResourceKey) (Object) this.level.dimension().location());
 
         SpongeCommon.post(loadEvent);
 
@@ -95,9 +95,9 @@ public abstract class EntityStorageMixin {
 
         final Vector3i chunkPos = VecHelper.toVector3i($$0.getPos());
 
-        final SpongeChunkEntities entities = new SpongeChunkEntities(this.level, chunkPos, $$0.getEntities());
+        final SpongeEntityChunk entities = new SpongeEntityChunk(this.level, chunkPos, $$0.getEntities());
         final ChunkEvent.Entities.Save.Pre saveEvent = SpongeEventFactory.createChunkEventEntitiesSavePre(PhaseTracker.getInstance().currentCause(),
-                chunkPos, entities, (ResourceKey) (Object) this.level.dimension().location());
+                entities, chunkPos, (ResourceKey) (Object) this.level.dimension().location());
 
         if (SpongeCommon.post(saveEvent)) {
             return null;

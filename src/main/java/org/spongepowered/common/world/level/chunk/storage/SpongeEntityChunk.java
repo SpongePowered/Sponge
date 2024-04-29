@@ -25,8 +25,8 @@
 package org.spongepowered.common.world.level.chunk.storage;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
-import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -55,9 +55,9 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public final class SpongeChunkEntities implements EntityChunk {
+public final class SpongeEntityChunk implements EntityChunk {
 
-    private final Level level;
+    private final ServerLevel level;
     private final Vector3i chunkPosition;
     private final Stream<net.minecraft.world.entity.Entity> entities;
 
@@ -66,8 +66,8 @@ public final class SpongeChunkEntities implements EntityChunk {
     private @MonotonicNonNull Vector3i blockMax;
     private @MonotonicNonNull List<net.minecraft.world.entity.Entity> newEntities;
 
-    public SpongeChunkEntities(final Level chunkLayout, final Vector3i chunkPosition, final Stream<net.minecraft.world.entity.Entity> entities) {
-        this.level = chunkLayout;
+    public SpongeEntityChunk(final ServerLevel level, final Vector3i chunkPosition, final Stream<net.minecraft.world.entity.Entity> entities) {
+        this.level = level;
         this.chunkPosition = chunkPosition;
         this.entities = entities;
     }

@@ -241,11 +241,11 @@ public final class ChunkEventTest implements LoadableModule {
         @Listener
         public void onChunkEntitiesLoad(final ChunkEvent.Entities.Load event) {
             ChunkEventTest.this.addEntityLoad.forEach(e -> {
-                final Entity entity = event.entityVolume().createEntity(e, event.entityVolume().min().add(8, event.entityVolume().size().y() / 2, 8));
+                final Entity entity = event.chunk().createEntity(e, event.chunk().min().add(8, event.chunk().size().y() / 2, 8));
                 entity.offer(Keys.TRANSIENT, true);
                 entity.offer(Keys.IS_GRAVITY_AFFECTED, false);
                 entity.offer(Keys.IS_AI_ENABLED, false);
-                event.entityVolume().spawnEntity(entity);
+                event.chunk().spawnEntity(entity);
             });
             if (ChunkEventTest.this.logEvents) {
                 Sponge.game().systemSubject().sendMessage(Component.text("Load Chunk Entities " + event.chunkPosition() + " in " + event.worldKey().asString()));
@@ -259,7 +259,7 @@ public final class ChunkEventTest implements LoadableModule {
                 return;
             }
             if (!ChunkEventTest.this.filterEntitySave.isEmpty()) {
-                event.entityVolume().entities().forEach(e -> {
+                event.chunk().entities().forEach(e -> {
                     if (ChunkEventTest.this.filterEntitySave.contains(e.type())) {
                         e.remove();
                     }
