@@ -22,13 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level.chunk.storage;
+package org.spongepowered.common.world.level.chunk.storage;
 
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
-import org.spongepowered.common.world.level.chunk.storage.SpongeIOWorkerType;
-
-public interface IOWorkerBridge {
-
-    void bridge$setDimension(SpongeIOWorkerType type, ResourceKey<Level> dimension);
+public enum SpongeIOWorkerType {
+    CHUNK,
+    ENTITY
 }

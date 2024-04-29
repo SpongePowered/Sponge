@@ -47,6 +47,7 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.world.chunk.BlockChunk;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -82,7 +83,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
-public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkBridge, CacheKeyBridge, SpongeMutableDataHolder, SpongeDataHolderBridge, DataCompoundHolder {
+public abstract class LevelChunkMixin extends ChunkAccess implements LevelChunkBridge, CacheKeyBridge, SpongeMutableDataHolder, SpongeDataHolderBridge, DataCompoundHolder, BlockChunk {
 
     // @formatter:off
     @Shadow @Final private Level level;
