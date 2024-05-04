@@ -42,11 +42,12 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(ThrowableProjectile.class)
 public abstract class ThrowableProjectileMixin extends ProjectileMixin {
 
-    @Redirect(method = "tick()V",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/projectile/ThrowableProjectile;onHit(Lnet/minecraft/world/phys/HitResult;)V"
-        )
-    )
+    // TODO fixme
+//    @Redirect(method = "tick()V",
+//        at = @At(value = "INVOKE",
+//            target = "Lnet/minecraft/world/entity/projectile/ThrowableProjectile;onHit(Lnet/minecraft/world/phys/HitResult;)V"
+//        )
+//    )
     private void impl$handleProjectileImpact(final ThrowableProjectile projectile, final HitResult movingObjectPosition) {
         if (((LevelBridge) this.shadow$level()).bridge$isFake() || movingObjectPosition.getType() == HitResult.Type.MISS) {
             this.shadow$onHit(movingObjectPosition);

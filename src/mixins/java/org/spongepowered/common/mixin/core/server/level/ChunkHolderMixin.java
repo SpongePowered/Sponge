@@ -56,7 +56,7 @@ import java.util.concurrent.CompletableFuture;
 abstract class ChunkHolderMixin {
 
     // @formatter:off
-    @Shadow public abstract CompletableFuture<Either<LevelChunk, ChunkHolder.ChunkLoadingFailure>> shadow$getEntityTickingChunkFuture();
+    @Shadow public abstract CompletableFuture<ChunkResult<LevelChunk>> shadow$getEntityTickingChunkFuture();
     // @formatter:on
 
     @Inject(
@@ -83,10 +83,10 @@ abstract class ChunkHolderMixin {
         }
     }
 
-    @Inject(method = "lambda$scheduleFullChunkPromotion$7", at = @At("TAIL"))
+    @Inject(method = "lambda$scheduleFullChunkPromotion$5", at = @At("TAIL"))
     private void impl$onScheduleFullChunkPromotion(final ChunkMap $$0x, final FullChunkStatus $$1x, final CallbackInfo ci) {
         if ($$1x == FullChunkStatus.ENTITY_TICKING && ShouldFire.CHUNK_EVENT_LOAD) {
-            this.shadow$getEntityTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK).ifLeft(chunk -> {
+            this.shadow$getEntityTickingChunkFuture().getNow(ChunkHolder.UNLOADED_LEVEL_CHUNK).ifSuccess(chunk -> {
                 final Vector3i chunkPos = VecHelper.toVector3i(chunk.getPos());
                 final ChunkEvent.Load event = SpongeEventFactory.createChunkEventLoad(PhaseTracker.getInstance().currentCause(),
                         (WorldChunk) chunk, chunkPos, (ResourceKey) (Object) chunk.getLevel().dimension().location());

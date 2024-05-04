@@ -41,7 +41,8 @@ public abstract class RandomizableContainerBlockEntityMixin_BugFix {
     protected ResourceLocation lootTable;
 
     // Minecraft 1.19.4 - Fixes https://bugs.mojang.com/browse/MC-136917
-    @Inject(method = "clearContent", at = @At("TAIL"))
+    // TODO fix me
+    //@Inject(method = "clearContent", at = @At("TAIL"))
     private void impl$clearContent(final CallbackInfo ci) {
         this.lootTable = null;
     }

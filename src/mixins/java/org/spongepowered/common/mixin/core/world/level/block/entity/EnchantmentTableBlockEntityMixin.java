@@ -25,12 +25,12 @@
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
+import net.minecraft.world.level.block.entity.EnchantingTableBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.accessor.world.level.block.entity.EnchantingTableBlockEntityAccessor;
 import org.spongepowered.common.bridge.CustomNameableBridge;
 
-@Mixin(EnchantmentTableBlockEntity.class)
+@Mixin(EnchantingTableBlockEntity.class)
 public abstract class EnchantmentTableBlockEntityMixin implements CustomNameableBridge {
 
     @Override

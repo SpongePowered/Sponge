@@ -59,13 +59,13 @@ import java.util.Optional;
 public abstract class EntityStorageMixin {
 
     // @formatter:off
-    @Shadow @Final private IOWorker worker;
     @Shadow @Final private ServerLevel level;
     // @formatter:on
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setIOWorkerDimension(final CallbackInfo ci) {
-        ((IOWorkerBridge) this.worker).bridge$setDimension(SpongeIOWorkerType.ENTITY, this.level.dimension());
+        // TODO fix me
+        //((IOWorkerBridge) this.worker).bridge$setDimension(SpongeIOWorkerType.ENTITY, this.level.dimension());
     }
 
     @Inject(method = "lambda$loadEntities$0", at = @At("RETURN"), cancellable = true)

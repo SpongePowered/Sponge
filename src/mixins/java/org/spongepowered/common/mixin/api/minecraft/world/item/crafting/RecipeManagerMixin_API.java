@@ -63,11 +63,10 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
 
     // @formatter:off
     @Shadow public abstract Optional<? extends net.minecraft.world.item.crafting.Recipe<?>> shadow$byKey(ResourceLocation recipeId);
-    @Shadow protected abstract <C extends Container, T extends net.minecraft.world.item.crafting.Recipe<C>> Map<ResourceLocation, net.minecraft.world.item.crafting.Recipe<C>> shadow$byType(net.minecraft.world.item.crafting.RecipeType<T> recipeTypeIn);
+    @Shadow protected abstract <C extends Container, T extends net.minecraft.world.item.crafting.Recipe<C>> Collection<RecipeHolder<T>> shadow$byType(net.minecraft.world.item.crafting.RecipeType<T> recipeTypeIn);
     @Shadow public abstract Collection<net.minecraft.world.item.crafting.Recipe<?>> shadow$getRecipes();
     @Shadow public abstract <C extends Container, T extends net.minecraft.world.item.crafting.Recipe<C>> Optional<T> shadow$getRecipeFor(net.minecraft.world.item.crafting.RecipeType<T> recipeTypeIn, C inventoryIn, net.minecraft.world.level.Level worldIn);
 
-    @Shadow private Map<net.minecraft.world.item.crafting.RecipeType<?>, Map<ResourceLocation, net.minecraft.world.item.crafting.Recipe<?>>> recipes;
     // @formatter:on
 
     @Override
@@ -86,7 +85,7 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public <T extends Recipe> Collection<T> allOfType(final RecipeType<T> type) {
         Objects.requireNonNull(type);
-        return this.shadow$byType((net.minecraft.world.item.crafting.RecipeType)type).values();
+        return this.shadow$byType((net.minecraft.world.item.crafting.RecipeType)type);
     }
 
     @Override
@@ -149,8 +148,9 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
         return this.shadow$getRecipeFor((net.minecraft.world.item.crafting.RecipeType) type, fakeFurnace, null);
     }
 
-    @Redirect(method = "apply", at = @At(value = "INVOKE", remap = false, target = "Ljava/util/Map;size()I"))
-    public int impl$getActualRecipeCount(final Map<net.minecraft.world.item.crafting.RecipeType<?>, ImmutableMap.Builder<ResourceLocation, net.minecraft.world.item.crafting.Recipe<?>>>  map) {
-        return this.recipes.values().stream().mapToInt(Map::size).sum();
-    }
+    // TODO fix me
+//    @Redirect(method = "apply", at = @At(value = "INVOKE", remap = false, target = "Ljava/util/Map;size()I"))
+//    public int impl$getActualRecipeCount(final Map<net.minecraft.world.item.crafting.RecipeType<?>, ImmutableMap.Builder<ResourceLocation, net.minecraft.world.item.crafting.Recipe<?>>>  map) {
+//        return this.recipes.values().stream().mapToInt(Map::size).sum();
+//    }
 }

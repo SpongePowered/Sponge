@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 import org.spongepowered.api.block.entity.carrier.BrewingStand;
@@ -43,14 +44,14 @@ public abstract class BrewingStandBlockEntityMixin_API extends BaseContainerBloc
     @Shadow private NonNullList<ItemStack> items;
 
     @Shadow private static void shadow$doBrew(final Level param0, final BlockPos param1, final NonNullList<ItemStack> param2) {};
-    @Shadow private static boolean shadow$isBrewable(final NonNullList<ItemStack> param0) {
+    @Shadow private static boolean shadow$isBrewable(PotionBrewing $$0, NonNullList<ItemStack> $$1) {
         return false;
     }
     // @formatter:on
 
     @Override
     public boolean brew() {
-        if (BrewingStandBlockEntityMixin_API.shadow$isBrewable(this.items)) {
+        if (BrewingStandBlockEntityMixin_API.shadow$isBrewable(this.level.potionBrewing(), this.items)) {
             BrewingStandBlockEntityMixin_API.shadow$doBrew(this.level, this.shadow$getBlockPos(), this.items);
             return true;
         }

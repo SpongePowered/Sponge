@@ -37,7 +37,6 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
-import org.spongepowered.common.map.decoration.SpongeMapDecorationType;
 import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MapUtil;
@@ -60,8 +59,9 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
 
     @Override
     public MapDecorationType type() {
-        return SpongeMapDecorationType.toSpongeType(this.type)
-                .orElseThrow(() -> new IllegalStateException("Tried to get MapDecoration type but it didn't exist in Sponge's registries! Have MC Decoration types been missed?"));
+        //TODO fixme
+        return null;
+        //return SpongeMapDecorationType.toSpongeType(this.type).orElseThrow(() -> new IllegalStateException("Tried to get MapDecoration type but it didn't exist in Sponge's registries! Have MC Decoration types been missed?"));
     }
 
     @Override

@@ -176,7 +176,7 @@ public final class ItemStackData {
                             final var food = h.get(DataComponents.FOOD);
                             if (food != null) {
                                 // Translate's Minecraft's weird internal value to the actual saturation value
-                                return food.saturationModifier() * food.nutrition() * 2.0;
+                                return (double)food.saturation();
                             }
                             return null;
                         })

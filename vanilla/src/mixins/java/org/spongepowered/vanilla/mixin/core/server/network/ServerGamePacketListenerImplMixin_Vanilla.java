@@ -47,6 +47,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.hooks.PlatformHooks;
 
 @Mixin(value = ServerGamePacketListenerImpl.class, priority = 999)
 public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCommonPacketListenerImplMixin_Vanilla implements ServerGamePacketListener {
@@ -55,6 +56,8 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCo
     @Shadow public ServerPlayer player;
     @Shadow protected abstract void shadow$performChatCommand(final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1);
     //@formatter:on
+
+    @Shadow protected abstract void performUnsignedChatCommand(String $$0);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "lambda$handlePlaceRecipe$10",
@@ -80,19 +83,20 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCo
      * Specifically hooks the reach distance to use the forge hook. SpongeForge does not need this hook as forge already
      * replaces this logic with an equivalent.
      */
-    @Redirect(
-        method = "handleInteract",
-        at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;MAX_INTERACTION_DISTANCE:D"))
-    private double vanilla$getPlatformReach(final ServerboundInteractPacket packet) {
-        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, packet.getTarget(this.player.serverLevel()));
-    }
+    // TODO fix me
+//    @Redirect(
+//        method = "handleInteract",
+//        at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;MAX_INTERACTION_DISTANCE:D"))
+//    private double vanilla$getPlatformReach(final ServerboundInteractPacket packet) {
+//        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, packet.getTarget(this.player.serverLevel()));
+//    }
 
-    @Redirect(method = "lambda$handleChatCommand$8", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
-    private void vanilla$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1) {
+    @Redirect(method = "lambda$handleChatCommand$7", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performUnsignedChatCommand(Ljava/lang/String;)V"))
+    private void vanilla$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final String $$0) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this.player);
-            frame.addContext(EventContextKeys.COMMAND, $$0.command());
-            this.shadow$performChatCommand($$0, $$1);
+            frame.addContext(EventContextKeys.COMMAND, $$0);
+            this.performUnsignedChatCommand($$0);
         }
     }
 }

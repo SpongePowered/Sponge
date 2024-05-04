@@ -36,7 +36,8 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 @Mixin(AbstractHurtingProjectile.class)
 public abstract class AbstractHurtingProjectileMixin extends ProjectileMixin {
 
-    @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/AbstractHurtingProjectile;onHit(Lnet/minecraft/world/phys/HitResult;)V"))
+    //TODO fix me
+    //@Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/AbstractHurtingProjectile;onHit(Lnet/minecraft/world/phys/HitResult;)V"))
     private void impl$callCollideImpactEvent(AbstractHurtingProjectile projectile, HitResult result) {
         if (result.getType() == HitResult.Type.MISS || ((LevelBridge) this.shadow$level()).bridge$isFake()) {
             this.shadow$onHit(result);

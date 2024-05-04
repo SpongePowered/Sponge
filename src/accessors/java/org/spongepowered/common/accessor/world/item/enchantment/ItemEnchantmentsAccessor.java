@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.world.item.enchantment;
 
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.core.Holder;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -38,9 +39,9 @@ public interface ItemEnchantmentsAccessor {
 
     @Accessor("showInTooltip") boolean accessor$showInTooltip();
 
-    @Accessor("enchantments") Object2IntLinkedOpenHashMap<Holder<Enchantment>> accessor$enchantments();
+    @Accessor("enchantments") Object2IntOpenHashMap<Holder<Enchantment>> accessor$enchantments();
 
-    @Invoker("<init>") static ItemEnchantments invoker$new(Object2IntLinkedOpenHashMap<Holder<Enchantment>> $$0, boolean $$1) {
+    @Invoker("<init>") static ItemEnchantments invoker$new(Object2IntOpenHashMap<Holder<Enchantment>> $$0, boolean $$1) {
         throw new UntransformedInvokerError();
     }
 

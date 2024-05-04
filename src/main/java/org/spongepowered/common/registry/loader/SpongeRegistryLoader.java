@@ -159,8 +159,6 @@ import org.spongepowered.common.inventory.query.type.TypeQuery;
 import org.spongepowered.common.inventory.query.type.UnionQuery;
 import org.spongepowered.common.map.color.SpongeMapColorType;
 import org.spongepowered.common.map.color.SpongeMapShade;
-import org.spongepowered.common.map.decoration.SpongeMapDecorationBannerType;
-import org.spongepowered.common.map.decoration.SpongeMapDecorationType;
 import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
 import org.spongepowered.common.registry.RegistryLoader;
 import org.spongepowered.common.util.SpongeOrientation;

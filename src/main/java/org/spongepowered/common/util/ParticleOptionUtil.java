@@ -50,14 +50,15 @@ public final class ParticleOptionUtil {
         options.put(ParticleOptions.OFFSET.get(), Vector3d.ZERO);
         options.put(ParticleOptions.QUANTITY.get(), 1);
 
-        if (type.getDeserializer() == BlockParticleOption.DESERIALIZER) {
-            options.put(ParticleOptions.BLOCK_STATE.get(), BlockTypes.AIR.get().defaultState());
-        } else if (type.getDeserializer() == ItemParticleOption.DESERIALIZER) {
-            options.put(ParticleOptions.ITEM_STACK_SNAPSHOT.get(), ItemStackSnapshot.empty());
-        } else if (type.getDeserializer() == DustParticleOptions.DESERIALIZER) {
-            options.put(ParticleOptions.COLOR.get(), Color.RED);
-            options.put(ParticleOptions.SCALE.get(), 1.0d);
-        }
+        // TODO fix me
+//        if (type.getDeserializer() == BlockParticleOption.DESERIALIZER) {
+//            options.put(ParticleOptions.BLOCK_STATE.get(), BlockTypes.AIR.get().defaultState());
+//        } else if (type.getDeserializer() == ItemParticleOption.DESERIALIZER) {
+//            options.put(ParticleOptions.ITEM_STACK_SNAPSHOT.get(), ItemStackSnapshot.empty());
+//        } else if (type.getDeserializer() == DustParticleOptions.DESERIALIZER) {
+//            options.put(ParticleOptions.COLOR.get(), Color.RED);
+//            options.put(ParticleOptions.SCALE.get(), 1.0d);
+//        }
 
         return ImmutableMap.copyOf(options);
     }
