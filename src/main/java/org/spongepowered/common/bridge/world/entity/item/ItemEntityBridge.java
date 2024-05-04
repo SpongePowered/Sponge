@@ -26,17 +26,11 @@ package org.spongepowered.common.bridge.world.entity.item;
 
 public interface ItemEntityBridge {
 
-    boolean bridge$infinitePickupDelay();
-
     int bridge$getPickupDelay();
 
-    void bridge$setPickupDelay(int delay, boolean infinite);
-    void bridge$setPrevPickupDelay(int delay);
-
-    boolean bridge$infiniteDespawnDelay();
+    void bridge$setPickupDelay(int delay);
 
     int bridge$getDespawnDelay();
 
-    void bridge$setDespawnDelay(int delay, boolean infinite);
-    void bridge$setPrevDespawnDelay(int delay);
+    void bridge$setDespawnDelay(int delay);
 }
