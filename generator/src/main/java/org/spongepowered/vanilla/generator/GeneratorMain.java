@@ -32,7 +32,6 @@ import com.squareup.javapoet.WildcardTypeName;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.advancements.AdvancementType;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.commands.Commands.CommandSelection;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.RegistryAccess;
@@ -206,12 +205,6 @@ public final class GeneratorMain {
         // Enum-backed (automatically-named) catalogs can be added later as necessary
         return List.of(
             new MapEntriesValidator<>(
-                "advancement.criteria.trigger",
-                "Triggers",
-                CriteriaTriggers.class,
-                "CRITERIA"
-            ),
-            new MapEntriesValidator<>(
                 "world.gamerule",
                 "GameRules",
                 GameRules.class,
@@ -306,7 +299,7 @@ public final class GeneratorMain {
                  "advancement",
                  "AdvancementTypes",
                  AdvancementType.class,
-                 "getName",
+                 "getSerializedName",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
@@ -555,6 +548,15 @@ public final class GeneratorMain {
                 context.relativeClass("world.generation.structure.jigsaw", "ProcessorType"),
                 Registries.STRUCTURE_PROCESSOR,
                 $ -> true, RegistryScope.GAME
+            ),
+            new RegistryEntriesGenerator<>(
+                "advancement.criteria.trigger",
+                "Triggers",
+                "TRIGGER",
+                ParameterizedTypeName.get(context.relativeClass("advancement.criteria.trigger", "Trigger"), WildcardTypeName.subtypeOf(Object.class)),
+                Registries.TRIGGER_TYPE,
+                $ -> true,
+                RegistryScope.GAME
             ),
             new RegistryEntriesGenerator<>(
                 "data.type",
