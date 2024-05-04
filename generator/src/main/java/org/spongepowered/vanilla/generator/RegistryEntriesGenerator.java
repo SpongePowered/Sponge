@@ -24,7 +24,6 @@
  */
 package org.spongepowered.vanilla.generator;
 
-import com.github.javaparser.ast.body.TypeDeclaration;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
