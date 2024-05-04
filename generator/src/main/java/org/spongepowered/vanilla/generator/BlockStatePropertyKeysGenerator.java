@@ -161,7 +161,7 @@ public class BlockStatePropertyKeysGenerator implements Generator {
 
     @Override
     public void generate(final Context ctx) throws IOException {
-        final var clazz = Types.utilityClass("BlockStateKeys", GENERATED_FILE_JAVADOCS);
+        final var clazz = Types.utilityClass("BlockStateKeys", Generator.GENERATED_FILE_JAVADOCS);
         clazz.addAnnotation(Types.suppressWarnings("unused"));
 
         final MethodSpec factoryMethod = this.factoryMethod();
