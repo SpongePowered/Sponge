@@ -35,6 +35,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.display.BillboardType;
 import org.spongepowered.api.entity.display.ItemDisplayType;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.common.accessor.world.entity.DisplayAccessor;
@@ -47,8 +48,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.math.matrix.Matrix4d;
 import org.spongepowered.math.vector.Vector3d;
-
-import java.awt.Color;
 
 public class DisplayEntityData {
 
@@ -188,11 +187,11 @@ public class DisplayEntityData {
     }
 
     private static Color colorFromInt(final int color) {
-        return new Color(color, true);
+        return Color.ofRgb(color);
     }
 
     private static int colorToInt(final Color color) {
-        return color.getRGB();
+        return color.rgb();
     }
 
     private static Transform getTransform(final Display display) {
