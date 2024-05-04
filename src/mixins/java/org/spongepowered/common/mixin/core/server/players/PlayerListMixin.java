@@ -419,7 +419,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final Connection playerConnection, final net.minecraft.server.level.ServerPlayer serverPlayer
     ) {
         if (((VanishableBridge) serverPlayer).bridge$vanishState().invisible()) {
-            playerConnection.send(addPlayer);
+            serverPlayer.connection.send(addPlayer);
             return;
         }
         playerList.broadcastAll(addPlayer);
