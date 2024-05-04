@@ -163,9 +163,7 @@ import org.spongepowered.common.world.portal.UnknownPortalType;
 import org.spongepowered.common.world.schematic.SpongePaletteType;
 import org.spongepowered.common.world.weather.SpongeWeatherType;
 import org.spongepowered.math.vector.Vector3d;
-import org.spongepowered.math.vector.Vector3i;
 
-import java.util.Comparator;
 import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
