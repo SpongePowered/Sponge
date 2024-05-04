@@ -149,20 +149,7 @@ class RegistryEntriesGenerator<V> implements Generator {
         clazz.addMethod(factoryMethod);
 
         ctx.write(this.relativePackageName, clazz.build());
-
-        // Then fix up before/after comments
-        final var cu = ctx.compilationUnit(this.relativePackageName, this.targetClassSimpleName);
-        final TypeDeclaration<?> type = cu.getPrimaryType().get();
-
-        final var fields = type.getFields();
-        if (!fields.isEmpty()) {
-            fields.get(0).setLineComment("@formatter:off");
-        }
-
-        final var constructors = type.getConstructors();
-        if (!constructors.isEmpty()) {
-            constructors.get(0).setLineComment("@formatter:on");
-        }
+        ctx.compilationUnit(this.relativePackageName, this.targetClassSimpleName);
     }
 
     private FieldSpec makeField(final String ownType, final TypeName fieldType, final MethodSpec factoryMethod, final ResourceLocation element, @Nullable final FeatureFlagSet featureFlagSet) {
