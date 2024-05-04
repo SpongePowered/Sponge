@@ -50,6 +50,7 @@ public final class VexData {
                                 ((VexAccessor) h).accessor$limitedLifeTicks(0);
                                 return;
                             }
+                            ((VexAccessor) h).accessor$hasLimitedLife(true);
                             h.setLimitedLife(SpongeTicks.toSaturatedIntOrInfinite(v));
                         });
     }

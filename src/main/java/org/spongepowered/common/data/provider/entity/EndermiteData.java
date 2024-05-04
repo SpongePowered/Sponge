@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.world.entity.monster.Endermite;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Ticks;
+import org.spongepowered.common.accessor.world.entity.MobAccessor;
 import org.spongepowered.common.accessor.world.entity.monster.EndermiteAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
@@ -55,6 +56,7 @@ public final class EndermiteData {
                             if (ticks < 0) {
                                 return false;
                             }
+                            ((MobAccessor) h).accessor$persistenceRequired(false);
                             ((EndermiteAccessor) h).accessor$life(EndermiteData.DESPAWN_DELAY_MAX - ticks);
                             return true;
                         });
