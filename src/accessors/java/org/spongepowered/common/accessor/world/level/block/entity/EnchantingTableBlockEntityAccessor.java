@@ -25,13 +25,13 @@
 package org.spongepowered.common.accessor.world.level.block.entity;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
+import net.minecraft.world.level.block.entity.EnchantingTableBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(EnchantmentTableBlockEntity.class)
-public interface EnchantmentTableBlockEntityAccessor {
+@Mixin(EnchantingTableBlockEntity.class)
+public interface EnchantingTableBlockEntityAccessor {
 
     @Invoker("setCustomName") void invoker$setCustomName(final @Nullable Component customName);
 

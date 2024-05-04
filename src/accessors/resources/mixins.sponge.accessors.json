@@ -168,7 +168,7 @@
         "world.level.block.entity.BlockEntityAccessor",
         "world.level.block.entity.BrewingStandBlockEntityAccessor",
         "world.level.block.entity.ConduitBlockEntityAccessor",
-        "world.level.block.entity.EnchantmentTableBlockEntityAccessor",
+        "world.level.block.entity.EnchantingTableBlockEntityAccessor",
         "world.level.block.entity.HopperBlockEntityAccessor",
         "world.level.block.entity.LecternBlockEntity_Accessor",
         "world.level.block.entity.SpawnerBlockEntityAccessor",
