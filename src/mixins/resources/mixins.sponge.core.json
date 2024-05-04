@@ -266,8 +266,6 @@
     ],
     "client": [
         "client.MinecraftMixin",
-        "client.gui.screens.worldselection.CreateWorldScreenMixin",
-        "client.gui.screens.worldselection.WorldOpenFlowsMixin",
         "client.multiplayer.ClientHandshakePacketListenerImplMixin",
         "client.multiplayer.ClientLevelMixin",
         "client.multiplayer.ClientPacketListenerMixin",
