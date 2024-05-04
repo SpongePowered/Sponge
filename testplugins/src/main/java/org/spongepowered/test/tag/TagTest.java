@@ -91,7 +91,7 @@ public final class TagTest {
 
         final TagTemplate<BlockType> tagRegistration = TagTemplate.builder(DataPacks.BLOCK_TAG)
                 .key(ResourceKey.of(this.pluginContainer, "wool"))
-                .addValue(BlockTypes.GRASS)
+                .addValue(BlockTypes.SHORT_GRASS)
                 .build();
 
         event.register(tagRegistration);
