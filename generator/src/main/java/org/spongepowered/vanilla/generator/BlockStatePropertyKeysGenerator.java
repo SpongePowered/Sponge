@@ -221,6 +221,10 @@ public class BlockStatePropertyKeysGenerator implements Generator {
     private Map<String, Property<?>> vanillaProperties() {
         final Map<String, Property<?>> vanillaMap = new TreeMap<>();
         for (Field field : BlockStateProperties.class.getDeclaredFields()) {
+            if (field.getName().equals("TRIAL_SPAWNER_STATE")) {
+                // TODO add spawner states to API
+                continue;
+            }
             try {
                 final Object property = field.get(null);
                 if (property instanceof Property<?>) {
