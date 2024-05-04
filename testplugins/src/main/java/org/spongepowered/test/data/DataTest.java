@@ -704,9 +704,6 @@ public final class DataTest  {
         snowball.offer(Keys.CUSTOM_NAME, Component.text("I am very inaccurate :)", NamedTextColor.RED));
         player.inventory().offer(snowball);
 
-        this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, true);
-        this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, false);
-        this.checkOfferData(itemEntity, Keys.INFINITE_PICKUP_DELAY, true);
         world.spawnEntity(itemEntity);
 
         final BlockState noteBlockState = BlockTypes.NOTE_BLOCK.get().defaultState();

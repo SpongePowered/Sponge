@@ -49,44 +49,50 @@ public final class SpongeWeather implements Weather {
     public static Weather of(final ServerLevelData levelData) {
         final boolean thundering = levelData.isThundering();
         if (thundering) {
-            final int thunderTime = levelData.getThunderTime();
+            final Ticks thunderTime = SpongeTicks.ticksOrInfinite(levelData.getThunderTime());
             return new SpongeWeather((SpongeWeatherType) WeatherTypes.THUNDER.get(),
-                    new SpongeTicks(thunderTime),
-                    new SpongeTicks(6000 - thunderTime));
+                    thunderTime,
+                    thunderTime.isInfinite()
+                            ? thunderTime
+                            : new SpongeTicks(6000 - thunderTime.ticks()));
         }
         final boolean raining = levelData.isRaining();
         if (raining) {
-            final int rainTime = levelData.getRainTime();
+            final Ticks rainTime = SpongeTicks.ticksOrInfinite(levelData.getRainTime());
             return new SpongeWeather((SpongeWeatherType) WeatherTypes.RAIN.get(),
-                    new SpongeTicks(rainTime),
-                    new SpongeTicks(6000 - rainTime));
+                    rainTime,
+                    rainTime.isInfinite()
+                            ? rainTime
+                            : new SpongeTicks(6000 - rainTime.ticks()));
         }
-        final int clearWeatherTime = levelData.getClearWeatherTime();
+        final Ticks clearWeatherTime = SpongeTicks.ticksOrInfinite(levelData.getClearWeatherTime());
         return new SpongeWeather((SpongeWeatherType) WeatherTypes.CLEAR.get(),
-                new SpongeTicks(clearWeatherTime),
-                new SpongeTicks(6000 - clearWeatherTime));
+                clearWeatherTime,
+                clearWeatherTime.isInfinite()
+                        ? clearWeatherTime
+                        : new SpongeTicks(6000 - clearWeatherTime.ticks()));
     }
 
     public static void apply(final ServerLevelData levelData, final Weather weather) {
-        final long time = weather.remainingDuration().ticks();
+        final int time = SpongeTicks.toSaturatedIntOrInfinite(weather.remainingDuration());
         final WeatherType type = weather.type();
         if (type == WeatherTypes.CLEAR.get()) {
-            levelData.setClearWeatherTime((int) time);
+            levelData.setClearWeatherTime(time);
             levelData.setRaining(false);
             levelData.setRainTime(0);
             levelData.setThundering(false);
             levelData.setThunderTime(0);
         } else if (type == WeatherTypes.RAIN.get()) {
             levelData.setRaining(true);
-            levelData.setRainTime((int) time);
+            levelData.setRainTime(time);
             levelData.setThundering(false);
             levelData.setThunderTime(0);
             levelData.setClearWeatherTime(0);
         } else if (type == WeatherTypes.THUNDER.get()) {
             levelData.setRaining(true);
-            levelData.setRainTime((int) time);
+            levelData.setRainTime(time);
             levelData.setThundering(true);
-            levelData.setThunderTime((int) time);
+            levelData.setThunderTime(time);
             levelData.setClearWeatherTime(0);
         }
     }

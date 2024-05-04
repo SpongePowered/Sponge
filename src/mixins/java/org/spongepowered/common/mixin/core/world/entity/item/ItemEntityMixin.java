@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world.entity.item;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -52,8 +51,6 @@ import org.spongepowered.common.util.Constants;
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityBridge {
 
-    private static final int MAGIC_PREVIOUS = -1;
-
     // @formatter:off
     @Shadow private int pickupDelay;
     @Shadow private int age;
@@ -66,16 +63,6 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
      * other items, this value is cached.
      */
     private double impl$cachedRadius = -1;
-
-    private int impl$previousPickupDelay = ItemEntityMixin.MAGIC_PREVIOUS;
-    private boolean impl$infinitePickupDelay;
-    private int impl$previousDespawnDelay = ItemEntityMixin.MAGIC_PREVIOUS;
-    private boolean impl$infiniteDespawnDelay;
-
-    @Override
-    public boolean bridge$infinitePickupDelay() {
-        return this.impl$infinitePickupDelay;
-    }
 
     @ModifyConstant(method = "mergeWithNeighbours", constant = @Constant(doubleValue = Constants.Entity.Item.DEFAULT_ITEM_MERGE_RADIUS))
     private double impl$changeSearchRadiusFromConfig(final double originalRadius) {
@@ -91,66 +78,34 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
 
     @Override
     public int bridge$getPickupDelay() {
-        return this.impl$infinitePickupDelay ? this.impl$previousPickupDelay : this.pickupDelay;
+        return this.pickupDelay;
     }
 
     @Override
-    public void bridge$setPickupDelay(final int delay, final boolean infinite) {
+    public void bridge$setPickupDelay(final int delay) {
         this.pickupDelay = delay;
-        final boolean previous = this.impl$infinitePickupDelay;
-        this.impl$infinitePickupDelay = infinite;
-        if (infinite && !previous) {
-            this.impl$previousPickupDelay = this.pickupDelay;
-            this.pickupDelay = Constants.Entity.Item.MAGIC_NO_PICKUP;
-        } else if (!infinite) {
-            this.impl$previousPickupDelay = ItemEntityMixin.MAGIC_PREVIOUS;
-        }
-        if (infinite) {
-            ((SpongeDataHolderBridge) this).bridge$offer(Keys.INFINITE_PICKUP_DELAY, true);
-            ((SpongeDataHolderBridge) this).bridge$offer(ItemData.PREVIOUS_PICKUP_DELAY, this.impl$previousPickupDelay);
+        if (delay == Constants.Entity.Item.INFINITE_PICKUP_DELAY) {
+            ((SpongeDataHolderBridge) this).bridge$offer(ItemData.INFINITE_PICKUP_DELAY, true);
         } else {
-            ((SpongeDataHolderBridge) this).bridge$remove(Keys.INFINITE_PICKUP_DELAY);
-            ((SpongeDataHolderBridge) this).bridge$remove(ItemData.PREVIOUS_PICKUP_DELAY);
+            ((SpongeDataHolderBridge) this).bridge$remove(ItemData.INFINITE_PICKUP_DELAY);
         }
-    }
-
-    @Override
-    public void bridge$setPrevPickupDelay(final int delay) {
-        this.impl$previousPickupDelay = delay;
-    }
-
-    @Override
-    public void bridge$setPrevDespawnDelay(final int delay) {
-        this.impl$previousDespawnDelay = delay;
-    }
-
-    @Override
-    public boolean bridge$infiniteDespawnDelay() {
-        return this.impl$infiniteDespawnDelay;
     }
 
     @Override
     public int bridge$getDespawnDelay() {
-        return SpongeGameConfigs.getForWorld(this.shadow$level()).get().entity.item.despawnRate - (this.impl$infiniteDespawnDelay ? this.impl$previousDespawnDelay : this.age);
+        return this.age != Constants.Entity.Item.MAGIC_NO_DESPAWN
+                ? SpongeGameConfigs.getForWorld(this.shadow$level()).get().entity.item.despawnRate - this.age
+                : this.age;
     }
 
     @Override
-    public void bridge$setDespawnDelay(final int delay, final boolean infinite) {
-        this.age = SpongeGameConfigs.getForWorld(this.shadow$level()).get().entity.item.despawnRate - delay;
-        final boolean previous = this.impl$infiniteDespawnDelay;
-        this.impl$infiniteDespawnDelay = infinite;
-        if (infinite && !previous) {
-            this.impl$previousDespawnDelay = this.age;
+    public void bridge$setDespawnDelay(final int delay) {
+        if (delay == Constants.Entity.Item.MAGIC_NO_DESPAWN) {
             this.age = Constants.Entity.Item.MAGIC_NO_DESPAWN;
-        } else if (!infinite) {
-            this.impl$previousDespawnDelay = ItemEntityMixin.MAGIC_PREVIOUS;
-        }
-        if (infinite) {
-            ((SpongeDataHolderBridge) this).bridge$offer(Keys.INFINITE_DESPAWN_DELAY, true);
-            ((SpongeDataHolderBridge) this).bridge$offer(ItemData.PREVIOUS_DESPAWN_DELAY, this.impl$previousPickupDelay);
+            ((SpongeDataHolderBridge) this).bridge$offer(ItemData.INFINITE_DESPAWN_DELAY, true);
         } else {
-            ((SpongeDataHolderBridge) this).bridge$remove(Keys.INFINITE_DESPAWN_DELAY);
-            ((SpongeDataHolderBridge) this).bridge$remove(ItemData.PREVIOUS_DESPAWN_DELAY);
+            this.age = SpongeGameConfigs.getForWorld(this.shadow$level()).get().entity.item.despawnRate - delay;
+            ((SpongeDataHolderBridge) this).bridge$remove(ItemData.INFINITE_DESPAWN_DELAY);
         }
     }
 

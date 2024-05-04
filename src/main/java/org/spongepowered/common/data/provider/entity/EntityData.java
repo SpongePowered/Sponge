@@ -97,10 +97,12 @@ public final class EntityData {
                             return true;
                         })
                     .create(Keys.FIRE_DAMAGE_DELAY)
-                        .get(h -> new SpongeTicks(((EntityAccessor) h).invoker$getFireImmuneTicks()))
+                        .get(h -> h.fireImmune()
+                                ? Ticks.infinite()
+                                : Ticks.of(((EntityAccessor) h).invoker$getFireImmuneTicks()))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.ticks();
-                            if (ticks < 1 || ticks > Short.MAX_VALUE) {
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                            if (v.isInfinite() || ticks < 1 || ticks > Short.MAX_VALUE) {
                                 return false;
                             }
                             ((EntityBridge) h).bridge$setFireImmuneTicks(ticks);
@@ -108,9 +110,13 @@ public final class EntityData {
                         })
                     .create(Keys.FIRE_TICKS)
                         .get(h -> ((EntityAccessor) h).accessor$remainingFireTicks() > 0 ? Ticks.of(((EntityAccessor) h).accessor$remainingFireTicks()) : null)
-                        .set((h, v) -> {
-                            final int ticks = (int) v.ticks();
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
                             ((EntityAccessor) h).accessor$remainingFireTicks(Math.max(ticks, Constants.Entity.MINIMUM_FIRE_TICKS));
+                            return true;
                         })
                         .deleteAndGet(h -> {
                             final EntityAccessor accessor = (EntityAccessor) h;
@@ -127,7 +133,13 @@ public final class EntityData {
                         })
                     .create(Keys.FROZEN_TIME)
                         .get(h -> Ticks.of(h.getTicksFrozen()))
-                        .set((h, v) -> h.setTicksFrozen((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.setTicksFrozen(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.MAX_FROZEN_TIME)
                         .get(h -> Ticks.of(h.getTicksRequiredToFreeze()))
                     .create(Keys.HEIGHT)
@@ -135,8 +147,8 @@ public final class EntityData {
                     .create(Keys.INVULNERABILITY_TICKS)
                         .get(h -> new SpongeTicks(h.invulnerableTime))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.ticks();
-                            if (ticks < 0) {
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                            if (v.isInfinite() || ticks < 0) {
                                 return false;
                             }
                             h.invulnerableTime = ticks;

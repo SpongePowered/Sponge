@@ -36,6 +36,7 @@ import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -62,12 +63,12 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 
     @Override
     default Ticks wanderingTraderSpawnDelay() {
-        return Ticks.of(this.shadow$getWanderingTraderSpawnDelay());
+        return SpongeTicks.ticksOrInfinite(this.shadow$getWanderingTraderSpawnDelay());
     }
 
     @Override
     default void setWanderingTraderSpawnDelay(final Ticks delay) {
-        this.shadow$setWanderingTraderSpawnDelay((int) delay.ticks());
+        this.shadow$setWanderingTraderSpawnDelay(SpongeTicks.toSaturatedIntOrInfinite(delay));
     }
 
     @Override

@@ -29,6 +29,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.accessor.world.entity.monster.VexAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
 public final class VexData {
 
@@ -40,8 +41,18 @@ public final class VexData {
         registrator
                 .asMutable(Vex.class)
                     .create(Keys.LIFE_TICKS)
-                        .get(h -> Ticks.of(((VexAccessor) h).accessor$limitedLifeTicks()))
-                        .set((h, v) -> h.setLimitedLife((int) v.ticks()));
+                        .get(h -> ((VexAccessor) h).accessor$hasLimitedLife()
+                                ? Ticks.of(((VexAccessor) h).accessor$limitedLifeTicks())
+                                : Ticks.infinite())
+                        .set((h, v) -> {
+                            if (v.isInfinite()) {
+                                ((VexAccessor) h).accessor$hasLimitedLife(false);
+                                ((VexAccessor) h).accessor$limitedLifeTicks(0);
+                                return;
+                            }
+                            ((VexAccessor) h).accessor$hasLimitedLife(true);
+                            h.setLimitedLife(SpongeTicks.toSaturatedIntOrInfinite(v));
+                        });
     }
     // @formatter:on
 }

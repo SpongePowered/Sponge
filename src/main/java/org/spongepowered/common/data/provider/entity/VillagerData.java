@@ -77,7 +77,13 @@ public final class VillagerData {
                         .get(h -> h.getUnhappyCounter() > 0)
                     .create(Keys.UNHAPPY_TIME)
                         .get(x -> new SpongeTicks(x.getUnhappyCounter()))
-                        .set((h, v) -> h.setUnhappyCounter((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.setUnhappyCounter(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                 .asMutable(WanderingTrader.class)
                     .create(Keys.TRADE_OFFERS)
                     .get(h -> h.getOffers().stream().map(TradeOffer.class::cast).collect(Collectors.toList()))

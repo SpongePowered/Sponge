@@ -41,8 +41,6 @@ public abstract class ItemEntityMixin_API extends EntityMixin_API implements Ite
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         values.add(this.requireValue(Keys.DESPAWN_DELAY).asImmutable());
-        values.add(this.requireValue(Keys.INFINITE_DESPAWN_DELAY).asImmutable());
-        values.add(this.requireValue(Keys.INFINITE_PICKUP_DELAY).asImmutable());
         values.add(this.requireValue(Keys.ITEM_STACK_SNAPSHOT).asImmutable());
         values.add(this.requireValue(Keys.PICKUP_DELAY).asImmutable());
 

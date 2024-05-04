@@ -44,6 +44,7 @@ import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
+import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.Collections;
 import java.util.List;
@@ -114,7 +115,7 @@ public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration<Ab
     @Override
     public Recipe recipe() {
         this.ensureCached();
-        final int ticksCookingTime = (int) this.cookingTime.ticks();
+        final int ticksCookingTime = SpongeTicks.toSaturatedIntOrInfinite(this.cookingTime);
         final String resultFunctionId = this.resultFunction == null ? null : this.key.toString();
 
         final List<Ingredient> ingredientList = Collections.singletonList(ingredient);

@@ -49,17 +49,34 @@ public final class AbstractFurnaceData {
                         })
                     .create(Keys.MAX_BURN_TIME)
                         .get(x -> new SpongeTicks(x.accessor$litDuration()))
-                        .set((h, v) -> h.accessor$litDuration((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.accessor$litDuration(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.MAX_COOK_TIME)
                         .get(x -> new SpongeTicks(x.accessor$cookingTotalTime()))
-                        .set((h, v) -> h.accessor$cookingTotalTime((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.accessor$cookingTotalTime(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.PASSED_COOK_TIME)
                         .get(x -> new SpongeTicks(x.accessor$cookingProgress()))
-                        .set((h, v) -> {
-                            final int ticks = (int) v.ticks();
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
                             if (ticks < h.accessor$cookingTotalTime()) {
                                 h.accessor$cookingProgress(ticks);
+                                return true;
                             }
+                            return false;
                         });
     }
     // @formatter:on
