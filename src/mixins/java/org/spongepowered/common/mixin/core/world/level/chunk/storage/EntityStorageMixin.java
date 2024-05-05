@@ -45,6 +45,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.level.chunk.storage.SimpleRegionStorageAccessor;
 import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -66,7 +67,7 @@ public abstract class EntityStorageMixin {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setIOWorkerDimension(final SimpleRegionStorage $$0, final ServerLevel $$1, final Executor $$2, final CallbackInfo ci) {
-        ((IOWorkerBridge) $$0).bridge$setDimension(SpongeIOWorkerType.ENTITY, this.level.dimension());
+        ((IOWorkerBridge) ((SimpleRegionStorageAccessor) $$0).accessor$worker()).bridge$setDimension(SpongeIOWorkerType.ENTITY, this.level.dimension());
     }
 
     @Inject(method = "lambda$loadEntities$0", at = @At("RETURN"), cancellable = true)
