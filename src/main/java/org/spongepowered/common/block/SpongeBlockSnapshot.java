@@ -261,7 +261,11 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
     @Override
     public Optional<BlockEntityArchetype> createArchetype() {
-        final String blockEntityId = compound.getString(Constants.Item.BLOCK_ENTITY_ID);
+        if (this.compound == null) {
+            return Optional.empty();
+        }
+
+        final String blockEntityId = this.compound.getString(Constants.Item.BLOCK_ENTITY_ID);
 
         final CompoundTag compound = this.compound.copy();
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X);

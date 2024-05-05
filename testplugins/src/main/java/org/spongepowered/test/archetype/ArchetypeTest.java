@@ -25,10 +25,14 @@
 package org.spongepowered.test.archetype;
 
 import com.google.inject.Inject;
+import net.kyori.adventure.text.Component;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -40,11 +44,13 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 // TODO other Archetypes
+@SuppressWarnings({"unchecked", "rawtypes"})
 @Plugin("archetypetest")
 public final class ArchetypeTest implements LoadableModule {
 
@@ -60,6 +66,10 @@ public final class ArchetypeTest implements LoadableModule {
         event.register(this.plugin, Command.builder()
                 .addChild(Command.builder().executor(this::testEntityArchetype).build(), "entity")
                 .build(), "testarchetypes");
+
+        event.register(this.plugin, Command.builder()
+                .addChild(this.queryBlockArchetype(), "block")
+                .build(), "queryArchetype");
     }
 
     private CommandResult testEntityArchetype(CommandContext context) {
@@ -68,6 +78,29 @@ public final class ArchetypeTest implements LoadableModule {
             this.testEntityArchetype(entity);
         });
         return CommandResult.success();
+    }
+
+    private Command.Parameterized queryBlockArchetype() {
+        final Parameter.Value<ServerLocation> serverLocationParameter = Parameter.location().key("location").build();
+        final Parameter.Value<ResourceKey> resourceKeyValue = Parameter.resourceKey().key("resourceKey").build();
+
+        return Command.builder()
+                .addParameter(serverLocationParameter)
+                .addParameter(resourceKeyValue)
+                .executor(context -> {
+                    final ServerLocation location = context.requireOne(serverLocationParameter);
+                    final ResourceKey resourceKey = context.requireOne(resourceKeyValue);
+                    location.createSnapshot().createArchetype().ifPresentOrElse(a ->
+                            a.getKeys()
+                                    .stream()
+                                    .filter(k -> k.key().equals(resourceKey))
+                                    .findFirst()
+                                    .ifPresentOrElse(k -> context.sendMessage(Component.text("Value: " +  a.get((Key) k).orElse(null))),
+                                            () -> context.sendMessage(Component.text("Not valid key"))),
+                            () -> context.sendMessage(Component.text("No valid archetype could be created")));
+                    return CommandResult.success();
+                })
+                .build();
     }
 
     @Override
