@@ -132,9 +132,8 @@ public final class SpongeMapDecorationBuilder implements MapDecoration.Builder {
         if (mcType == null) {
             throw new IllegalStateException("Missing a MapDecorationType, could not find one for Minecraft's MapDecoration.Type: " + type);
         }
-        // TODO fix me
-        //final MapDecorationType mapDecorationType = SpongeMapDecorationType.toSpongeType(BuiltInRegistries.MAP_DECORATION_TYPE.wrapAsHolder(mcType)).get();
-        //this.type(mapDecorationType);
+
+        this.type((MapDecorationType) (Object) mcType);
 
         final int intRot = MapUtil.normalizeDecorationOrientation(rot);
         this.rotation(MapUtil.getMapRotById(intRot));
@@ -167,13 +166,11 @@ public final class SpongeMapDecorationBuilder implements MapDecoration.Builder {
     @Override
     public MapDecoration build() throws IllegalStateException {
         Objects.requireNonNull(this.type, "Type has not been set");
-        // TODO fix me
-        return null;
-//        final MapDecoration decoration = (MapDecoration) (Object) new net.minecraft.world.level.saveddata.maps.MapDecoration(
-//                Holder.direct(((SpongeMapDecorationType) this.type).getType()),
-//                (byte) this.x, (byte) this.y, (byte) ((SpongeMapDecorationOrientation) this.rot).getOrientationNumber(),
-//                Optional.ofNullable(this.customName).map(SpongeAdventure::asVanilla));
-//        ((MapDecorationBridge) decoration).bridge$setPersistent(true); // Anything that comes out of this builder should be persistent
-//        return decoration;
+        final MapDecoration decoration = (MapDecoration) (Object) new net.minecraft.world.level.saveddata.maps.MapDecoration(
+                Holder.direct((net.minecraft.world.level.saveddata.maps.MapDecorationType) (Object) this.type),
+                (byte) this.x, (byte) this.y, (byte) ((SpongeMapDecorationOrientation) this.rot).getOrientationNumber(),
+                Optional.ofNullable(this.customName).map(SpongeAdventure::asVanilla));
+        ((MapDecorationBridge) decoration).bridge$setPersistent(true); // Anything that comes out of this builder should be persistent
+        return decoration;
     }
 }

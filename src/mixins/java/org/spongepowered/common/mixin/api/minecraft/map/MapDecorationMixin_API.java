@@ -59,9 +59,7 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
 
     @Override
     public MapDecorationType type() {
-        //TODO fixme
-        return null;
-        //return SpongeMapDecorationType.toSpongeType(this.type).orElseThrow(() -> new IllegalStateException("Tried to get MapDecoration type but it didn't exist in Sponge's registries! Have MC Decoration types been missed?"));
+        return (MapDecorationType) (Object) this.type.value();
     }
 
     @Override
