@@ -46,19 +46,18 @@ public final class BrewingStandData {
                             }
                             h.accessor$fuel(v);
                             return true;
-                            // TODO fix me
-//                        })
-//                    .create(Keys.REMAINING_BREW_TIME)
-//                        .get(h -> BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$items()) ? new SpongeTicks(h.accessor$brewTime()) : null)
-//                        .setAnd((h, v) -> {
-//                            if (v.isInfinite()) {
-//                                return false;
-//                            }
-//                            if (BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$items())) {
-//                                h.accessor$brewTime(SpongeTicks.toSaturatedIntOrInfinite(v));
-//                                return true;
-//                            }
-//                            return false;
+                        })
+                    .create(Keys.REMAINING_BREW_TIME)
+                        .get(h -> BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$level().potionBrewing(), h.accessor$items()) ? new SpongeTicks(h.accessor$brewTime()) : null)
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            if (BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$level().potionBrewing(), h.accessor$items())) {
+                                h.accessor$brewTime(SpongeTicks.toSaturatedIntOrInfinite(v));
+                                return true;
+                            }
+                            return false;
                         });
     }
     // @formatter:on

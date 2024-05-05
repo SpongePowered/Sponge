@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
 @Mixin(BrewingStandBlockEntity.class)
-public interface BrewingStandBlockEntityAccessor {
+public interface BrewingStandBlockEntityAccessor extends BlockEntityAccessor {
 
     @Accessor("brewTime") int accessor$brewTime();
 
