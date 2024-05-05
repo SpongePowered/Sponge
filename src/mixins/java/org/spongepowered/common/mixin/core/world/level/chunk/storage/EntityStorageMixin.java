@@ -30,6 +30,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.EntityStorage;
 import net.minecraft.world.level.chunk.storage.IOWorker;
+import net.minecraft.world.level.chunk.storage.SimpleRegionStorage;
 import net.minecraft.world.level.entity.ChunkEntities;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -54,6 +55,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 @Mixin(EntityStorage.class)
 public abstract class EntityStorageMixin {
@@ -63,9 +65,8 @@ public abstract class EntityStorageMixin {
     // @formatter:on
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setIOWorkerDimension(final CallbackInfo ci) {
-        // TODO fix me
-        //((IOWorkerBridge) this.worker).bridge$setDimension(SpongeIOWorkerType.ENTITY, this.level.dimension());
+    private void impl$setIOWorkerDimension(final SimpleRegionStorage $$0, final ServerLevel $$1, final Executor $$2, final CallbackInfo ci) {
+        ((IOWorkerBridge) $$0).bridge$setDimension(SpongeIOWorkerType.ENTITY, this.level.dimension());
     }
 
     @Inject(method = "lambda$loadEntities$0", at = @At("RETURN"), cancellable = true)
