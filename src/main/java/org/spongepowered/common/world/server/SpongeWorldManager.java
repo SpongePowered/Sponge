@@ -97,6 +97,7 @@ import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.user.SpongeUserManager;
