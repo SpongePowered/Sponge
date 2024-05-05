@@ -147,10 +147,4 @@ public abstract class RecipeManagerMixin_API implements RecipeManager {
         fakeFurnace.setItem(0, ItemStackUtil.fromSnapshotToNative(ingredient));
         return this.shadow$getRecipeFor((net.minecraft.world.item.crafting.RecipeType) type, fakeFurnace, null);
     }
-
-    // TODO fix me
-//    @Redirect(method = "apply", at = @At(value = "INVOKE", remap = false, target = "Ljava/util/Map;size()I"))
-//    public int impl$getActualRecipeCount(final Map<net.minecraft.world.item.crafting.RecipeType<?>, ImmutableMap.Builder<ResourceLocation, net.minecraft.world.item.crafting.Recipe<?>>>  map) {
-//        return this.recipes.values().stream().mapToInt(Map::size).sum();
-//    }
 }
