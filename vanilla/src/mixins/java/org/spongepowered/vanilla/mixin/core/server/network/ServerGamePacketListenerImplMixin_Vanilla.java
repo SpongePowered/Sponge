@@ -52,11 +52,6 @@ import org.spongepowered.common.hooks.PlatformHooks;
 @Mixin(value = ServerGamePacketListenerImpl.class, priority = 999)
 public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCommonPacketListenerImplMixin_Vanilla implements ServerGamePacketListener {
 
-    // @formatter:off
-    @Shadow public ServerPlayer player;
-    @Shadow protected abstract void shadow$performUnsignedChatCommand(String $$0);
-    //@formatter:on
-
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "lambda$handlePlaceRecipe$10",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/server/level/ServerPlayer;)V"))
@@ -88,13 +83,4 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCo
 //    private double vanilla$getPlatformReach(final ServerboundInteractPacket packet) {
 //        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, packet.getTarget(this.player.serverLevel()));
 //    }
-
-    @Redirect(method = "lambda$handleChatCommand$7", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performUnsignedChatCommand(Ljava/lang/String;)V"))
-    private void vanilla$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final String $$0) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(this.player);
-            frame.addContext(EventContextKeys.COMMAND, $$0);
-            this.shadow$performUnsignedChatCommand($$0);
-        }
-    }
 }
