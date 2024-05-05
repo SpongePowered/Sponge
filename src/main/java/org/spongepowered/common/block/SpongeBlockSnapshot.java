@@ -25,7 +25,9 @@
 package org.spongepowered.common.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -39,6 +41,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
@@ -54,6 +57,7 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.DataContainerHolder;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
@@ -257,7 +261,23 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
     @Override
     public Optional<BlockEntityArchetype> createArchetype() {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+        if (this.compound == null) {
+            return Optional.empty();
+        }
+
+        final String blockEntityId = this.compound.getString(Constants.Item.BLOCK_ENTITY_ID);
+
+        final CompoundTag compound = this.compound.copy();
+        compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X);
+        compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Y);
+        compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Z);
+        compound.remove(Constants.Item.BLOCK_ENTITY_ID);
+
+        return Optional.of(SpongeBlockEntityArchetypeBuilder.pooled()
+                .state(this.state())
+                .blockEntity((BlockEntityType) SpongeCommon.vanillaRegistry(Registries.BLOCK_ENTITY_TYPE).get(ResourceLocation.tryParse(blockEntityId)))
+                .blockEntityData(NBTTranslator.INSTANCE.translate(compound))
+                .build());
     }
 
     @Override
