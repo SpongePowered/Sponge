@@ -54,10 +54,8 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCo
 
     // @formatter:off
     @Shadow public ServerPlayer player;
-    @Shadow protected abstract void shadow$performChatCommand(final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1);
+    @Shadow protected abstract void shadow$performUnsignedChatCommand(String $$0);
     //@formatter:on
-
-    @Shadow protected abstract void performUnsignedChatCommand(String $$0);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "lambda$handlePlaceRecipe$10",
@@ -96,7 +94,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCo
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this.player);
             frame.addContext(EventContextKeys.COMMAND, $$0);
-            this.performUnsignedChatCommand($$0);
+            this.shadow$performUnsignedChatCommand($$0);
         }
     }
 }
