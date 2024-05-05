@@ -344,10 +344,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             return;
         }
 
-        if (forceDifficulty) {
+        if (forceDifficulty && world.getLevelData() instanceof PrimaryLevelDataBridge bridge && bridge.bridge$isVanilla()) {
             // Don't allow vanilla forcing the difficulty at launch set ours if we have a custom one
-            if (!((PrimaryLevelDataBridge) world.getLevelData()).bridge$customDifficulty()) {
-                ((PrimaryLevelDataBridge) world.getLevelData()).bridge$forceSetDifficulty(newDifficulty);
+            if (!bridge.bridge$customDifficulty()) {
+                bridge.bridge$forceSetDifficulty(newDifficulty);
             }
         } else {
             ((PrimaryLevelData) world.getLevelData()).setDifficulty(newDifficulty);

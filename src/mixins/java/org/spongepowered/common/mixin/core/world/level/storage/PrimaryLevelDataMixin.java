@@ -106,6 +106,12 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     private BiMap<Integer, UUID> impl$mapUUIDIndex = HashBiMap.create();
 
     @Override
+    public boolean bridge$isVanilla() {
+        // Mods can extend/implement WorldData but may not implement Bridge appropriately
+        return ((PrimaryLevelData) (Object) this).getClass() == PrimaryLevelData.class;
+    }
+
+    @Override
     public ResourceKey bridge$getKey() {
         return this.impl$key;
     }
