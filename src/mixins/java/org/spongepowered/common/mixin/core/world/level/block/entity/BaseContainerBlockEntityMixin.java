@@ -27,11 +27,14 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.level.block.entity.BaseContainerBlockEntityAccessor;
 import org.spongepowered.common.bridge.CustomNameableBridge;
 
 @Mixin(BaseContainerBlockEntity.class)
 public abstract class BaseContainerBlockEntityMixin extends BlockEntityMixin implements CustomNameableBridge {
+
+    @Shadow public void shadow$clearContent() {}
 
     @Override
     public void bridge$setCustomDisplayName(final Component customName) {

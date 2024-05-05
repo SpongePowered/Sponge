@@ -29,21 +29,19 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.mixin.core.world.level.block.entity.BaseContainerBlockEntityMixin;
 
 @Mixin(RandomizableContainerBlockEntity.class)
-public abstract class RandomizableContainerBlockEntityMixin_BugFix {
+public abstract class RandomizableContainerBlockEntityMixin_BugFix extends BaseContainerBlockEntityMixin {
 
     @Shadow
     @Nullable
     protected ResourceLocation lootTable;
 
     // Minecraft 1.19.4 - Fixes https://bugs.mojang.com/browse/MC-136917
-    // TODO fix me
-    //@Inject(method = "clearContent", at = @At("TAIL"))
-    private void impl$clearContent(final CallbackInfo ci) {
+    // @Override
+    public void clearContent() {
+        super.shadow$clearContent();
         this.lootTable = null;
     }
 }
