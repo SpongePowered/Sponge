@@ -1,7 +1,0 @@
-{
-    "parent": "mixins.sponge.parent.json",
-    "package": "org.spongepowered.common.mixin.bugfix",
-    "mixins": [
-        "world.level.block.entity.RandomizableContainerBlockEntityMixin_BugFix"
-    ]
-}
