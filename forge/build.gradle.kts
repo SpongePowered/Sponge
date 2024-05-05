@@ -270,6 +270,9 @@ dependencies {
 
     // Arch-loom bug, fix support of MOD_CLASSES
     runTaskOnly("net.minecraftforge:bootstrap-dev:2.1.0")
+
+    // Upgrade to fix SecureModules issue #3
+    "forgeDependencies"("net.minecraftforge:securemodules:2.2.19")
 }
 
 val forgeManifest = java.manifest {
