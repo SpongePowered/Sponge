@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity.projectile;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
@@ -42,22 +43,21 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 @Mixin(ThrowableProjectile.class)
 public abstract class ThrowableProjectileMixin extends ProjectileMixin {
 
-    // TODO fixme
-//    @Redirect(method = "tick()V",
-//        at = @At(value = "INVOKE",
-//            target = "Lnet/minecraft/world/entity/projectile/ThrowableProjectile;onHit(Lnet/minecraft/world/phys/HitResult;)V"
-//        )
-//    )
-    private void impl$handleProjectileImpact(final ThrowableProjectile projectile, final HitResult movingObjectPosition) {
+    @Redirect(method = "tick()V",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/projectile/ThrowableProjectile;hitTargetOrDeflectSelf(Lnet/minecraft/world/phys/HitResult;)Lnet/minecraft/world/entity/projectile/ProjectileDeflection;"
+        )
+    )
+    private ProjectileDeflection impl$handleProjectileImpact(final ThrowableProjectile projectile, final HitResult movingObjectPosition) {
         if (((LevelBridge) this.shadow$level()).bridge$isFake() || movingObjectPosition.getType() == HitResult.Type.MISS) {
-            this.shadow$onHit(movingObjectPosition);
-            return;
+            return this.shadow$hitTargetOrDeflectSelf(movingObjectPosition);
         }
 
         if (SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.impl$getProjectileSource(), movingObjectPosition)) {
             this.shadow$discard();
+            return ProjectileDeflection.NONE;
         } else {
-            this.shadow$onHit(movingObjectPosition);
+            return this.shadow$hitTargetOrDeflectSelf(movingObjectPosition);
         }
     }
 

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.entity.projectile;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.phys.HitResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -50,6 +51,8 @@ public abstract class ProjectileMixin extends EntityMixin {
     @Shadow protected abstract void shadow$onHit(HitResult result);
     @Shadow public abstract void shadow$setOwner(@Nullable Entity p_212361_1_);
     @Shadow public abstract @Nullable Entity shadow$getOwner();
+    @Shadow protected abstract ProjectileDeflection shadow$hitTargetOrDeflectSelf(HitResult $$0);
+
     // @formatter:on
     private ProjectileSource impl$projectileSource = UnknownProjectileSource.UNKNOWN;
 
