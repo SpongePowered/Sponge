@@ -854,7 +854,10 @@ public abstract class SpongeWorldManager implements WorldManager {
                 final boolean hasSpawnAlready = levelDataBridge.bridge$customSpawnPosition();
                 if (!hasSpawnAlready) {
                     if (isDefaultWorld || levelDataBridge.bridge$performsSpawnLogic()) {
-                        MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenOptions().generateBonusChest(), isDebugGeneration);
+                        try (final var state = GenerationPhase.State.TERRAIN_GENERATION.createPhaseContext(PhaseTracker.getInstance())) {
+                            state.buildAndSwitch();
+                            MinecraftServerAccessor.invoker$setInitialSpawn(world, levelData, levelData.worldGenOptions().generateBonusChest(), isDebugGeneration);
+                        }
                     } else if (Level.END.equals(world.dimension())) {
                         levelData.setSpawn(ServerLevel.END_SPAWN_POINT, 0);
                     }
