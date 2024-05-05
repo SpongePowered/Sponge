@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.inventory.query;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.query.QueryType;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 public final class SpongeOneParamQueryType<T> implements QueryType.OneParam<T> {
@@ -41,7 +41,7 @@ public final class SpongeOneParamQueryType<T> implements QueryType.OneParam<T> {
 
     @Override
     public Query of(final T arg) {
-        checkNotNull(arg);
+        Objects.requireNonNull(arg);
         return this.newInstance.apply(arg);
     }
 

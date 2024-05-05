@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.raid;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.kyori.adventure.bossbar.BossBar;
 import net.minecraft.server.level.ServerBossEvent;
@@ -44,6 +43,7 @@ import org.spongepowered.common.bridge.world.entity.raid.RaidBridge;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -72,7 +72,7 @@ public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
 
     @Override
     public void setBossBar(final BossBar bossBar) {
-        checkNotNull(bossBar, "BossBar cannot be null.");
+        Objects.requireNonNull(bossBar, "BossBar cannot be null.");
         this.raidEvent = SpongeAdventure.asVanillaServer(bossBar);
     }
 

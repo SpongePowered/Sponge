@@ -29,6 +29,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -144,6 +145,10 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
 
     @Override
     public void setInhabitedTime(final Ticks newInhabitedTime) {
+        Objects.requireNonNull(newInhabitedTime);
+        if (newInhabitedTime.isInfinite()) {
+            throw new IllegalArgumentException("Inhabited time cannot be infinite!");
+        }
         this.setInhabitedTime(newInhabitedTime.ticks());
     }
 
@@ -248,7 +253,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
             (blockPos, world) -> {
                 final net.minecraft.world.level.block.state.BlockState tileEntity = shouldCarbonCopy
                     ? backingVolume.getBlock(blockPos)
-                    : ((LevelReader) world).getBlockState(blockPos);
+                    : ((BlockGetter) world).getBlockState(blockPos);
                 return new Tuple<>(blockPos, tileEntity);
             }
         );

@@ -29,7 +29,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -173,7 +173,7 @@ public final class RegistryHolderLogic implements RegistryHolder {
             throw new DuplicateRegistrationException(String.format("Registry '%s' in root '%s' has already been defined", type.location(), type.root()));
         }
         final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>> key;
-        if (BuiltInRegistries.ROOT_REGISTRY_NAME.equals(type.root())) {
+        if (Registries.ROOT_REGISTRY_NAME.equals(type.root())) {
             key = net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) type.location());
         } else {
             key = ResourceKeyAccessor.invoker$create(

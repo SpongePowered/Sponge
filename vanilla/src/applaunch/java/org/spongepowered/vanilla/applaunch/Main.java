@@ -31,7 +31,6 @@ import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 import org.spongepowered.plugin.builtin.StandardEnvironment;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.applaunch.util.ArgumentList;
-import org.spongepowered.vanilla.applaunch.util.Java8SpaceDetection;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,7 +59,6 @@ public final class Main {
     }
 
     public static void main(final String[] args, final Path[] extraPaths) throws Exception {
-        Java8SpaceDetection.check();
         AppCommandLine.configure(args);
         new Main(extraPaths).run();
     }

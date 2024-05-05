@@ -10,6 +10,14 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
     repositories { pluginManagement.repositories.each { add(it) } }
+    versionCatalogs {
+        libs {
+            from files("../gradle/libs.versions.toml")
+        }
+        apiLibs {
+            from files("../SpongeAPI/gradle/libs.versions.toml")
+        }
+    }
 }
 
 rootProject.name = "build-logic"

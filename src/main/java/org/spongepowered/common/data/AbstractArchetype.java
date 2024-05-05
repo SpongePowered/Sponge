@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.api.data.persistence.DataView;
@@ -41,6 +39,7 @@ import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> implements Archetype<S, E>,
         SpongeMutableDataHolder {
@@ -72,7 +71,7 @@ public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> im
 
     @Override
     public void setRawData(final DataView container) throws InvalidDataException {
-        checkNotNull(container, "Raw data cannot be null!");
+        Objects.requireNonNull(container, "Raw data cannot be null!");
         final CompoundTag copy = NBTTranslator.INSTANCE.translate(container);
         final boolean valid = this.getValidator().validate(copy);
         if (valid) {
@@ -100,7 +99,9 @@ public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> im
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("type", this.type).add("data", this.compound).toString();
+        return new StringJoiner(", ", AbstractArchetype.class.getSimpleName() + "[", "]")
+                .add("type=" + this.type)
+                .add("data=" + this.compound).toString();
     }
 
     public CompoundTag getCompound() {

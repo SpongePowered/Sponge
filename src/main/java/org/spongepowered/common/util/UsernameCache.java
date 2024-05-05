@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -38,16 +36,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class UsernameCache {
 
-    private static final Charset CHARSET = Charsets.UTF_8;
+    private static final Charset CHARSET = StandardCharsets.UTF_8;
 
     private final Map<UUID, String> usernameByUniqueId;
     private final Gson gson;
@@ -61,8 +61,8 @@ public final class UsernameCache {
     }
 
     public void setUsername(final UUID uniqueId, final String username) {
-        Preconditions.checkNotNull(uniqueId);
-        Preconditions.checkNotNull(username);
+        Objects.requireNonNull(uniqueId);
+        Objects.requireNonNull(username);
 
         if (username.equals(this.usernameByUniqueId.get(uniqueId))) {
             return;
@@ -73,7 +73,7 @@ public final class UsernameCache {
     }
 
     public boolean removeUsername(final UUID uniqueId) {
-        Preconditions.checkNotNull(uniqueId);
+        Objects.requireNonNull(uniqueId);
 
         if (this.usernameByUniqueId.remove(uniqueId) != null) {
             this.dirty = true;
@@ -84,13 +84,13 @@ public final class UsernameCache {
     }
 
     public @Nullable String getLastKnownUsername(final UUID uniqueId) {
-        Preconditions.checkNotNull(uniqueId);
+        Objects.requireNonNull(uniqueId);
 
         return this.usernameByUniqueId.get(uniqueId);
     }
 
     public @Nullable UUID getLastKnownUUID(final String username) {
-        Preconditions.checkNotNull(username);
+        Objects.requireNonNull(username);
 
         for (Map.Entry<UUID, String> mapEntry : this.usernameByUniqueId.entrySet()) {
             if (mapEntry.getValue().equalsIgnoreCase(username)) {
@@ -102,7 +102,7 @@ public final class UsernameCache {
     }
 
     public boolean containsUUID(final UUID uniqueId) {
-        Preconditions.checkNotNull(uniqueId);
+        Objects.requireNonNull(uniqueId);
 
         return this.usernameByUniqueId.containsKey(uniqueId);
     }

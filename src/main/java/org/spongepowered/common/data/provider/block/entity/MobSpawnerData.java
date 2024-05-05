@@ -68,16 +68,34 @@ public final class MobSpawnerData {
                         .set((h, v) -> ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$maxNearbyEntities(v))
                     .create(Keys.MAX_SPAWN_DELAY)
                         .get(h -> new SpongeTicks(((BaseSpawnerAccessor) h.accessor$spawner()).accessor$maxSpawnDelay()))
-                        .set((h, v) -> ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$maxSpawnDelay((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$maxSpawnDelay(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.MIN_SPAWN_DELAY)
                         .get(h -> new SpongeTicks(((BaseSpawnerAccessor) h.accessor$spawner()).accessor$minSpawnDelay()))
-                        .set((h, v) -> ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$minSpawnDelay((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$minSpawnDelay(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.NEXT_ENTITY_TO_SPAWN)
                         .get(h -> MobSpawnerData.getNextEntity((BaseSpawnerAccessor) h.accessor$spawner()))
                         .set((h, v) -> MobSpawnerData.setNextEntity((SpawnerBlockEntity) h, v))
                     .create(Keys.REMAINING_SPAWN_DELAY)
                         .get(h -> new SpongeTicks(((BaseSpawnerAccessor) h.accessor$spawner()).accessor$spawnDelay()))
-                        .set((h, v) -> ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$spawnDelay((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$spawnDelay(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.REQUIRED_PLAYER_RANGE)
                         .get(h -> (double) ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$requiredPlayerRange())
                         .set((h, v) -> ((BaseSpawnerAccessor) h.accessor$spawner()).accessor$requiredPlayerRange(v.intValue()))

@@ -32,6 +32,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,7 +49,7 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Pla
 public abstract class ServerPlayerGameModeMixin_Forge_Tracker {
 
     // @formatter:off
-    @Shadow public ServerPlayer player;
+    @Shadow @Final protected ServerPlayer player;
     // @formatter:on
 
     @Redirect(

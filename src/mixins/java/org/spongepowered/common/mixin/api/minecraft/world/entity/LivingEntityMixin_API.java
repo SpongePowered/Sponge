@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
-import static java.util.Objects.requireNonNull;
-
-import com.google.common.base.Preconditions;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -43,6 +40,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileUtil;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -57,7 +55,7 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
 
     @Override
     public Optional<Attribute> attribute(final AttributeType type) {
-        Preconditions.checkNotNull(type, "AttributeType cannot be null");
+        Objects.requireNonNull(type, "AttributeType cannot be null");
         return Optional.ofNullable((Attribute) this.shadow$getAttribute((net.minecraft.world.entity.ai.attributes.Attribute) type));
     }
 
@@ -87,12 +85,12 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
 
     @Override
     public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType) {
-        return ProjectileUtil.launch(requireNonNull(projectileType, "projectileType"), this, null);
+        return ProjectileUtil.launch(Objects.requireNonNull(projectileType, "projectileType"), this, null);
     }
 
     @Override
     public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType, final Vector3d velocity) {
-        return ProjectileUtil.launch(requireNonNull(projectileType, "projectileType"), this, requireNonNull(velocity, "velocity"));
+        return ProjectileUtil.launch(Objects.requireNonNull(projectileType, "projectileType"), this, Objects.requireNonNull(velocity, "velocity"));
     }
 
     @Override

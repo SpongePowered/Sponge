@@ -6,31 +6,19 @@ plugins {
     `java-library`
     eclipse
     id("org.spongepowered.gradle.vanilla")
-    id("com.github.johnrengelman.shadow")
-    id("org.spongepowered.gradle.sponge.dev") apply false // for version json generation
-    id("net.kyori.indra.licenser.spotless")
+    alias(libs.plugins.shadow)
+    alias(apiLibs.plugins.spongeGradle.convention) apply false // for version json generation
+    alias(libs.plugins.indra.licenserSpotless) version apiLibs.versions.indra.get()
     id("implementation-structure")
-    id("org.jetbrains.gradle.plugin.idea-ext")
-    id("com.github.ben-manes.versions")
+    id(apiLibs.plugins.ideaExt.get().pluginId)
+    alias(libs.plugins.versions)
 }
 
 val commonProject = project
 val apiVersion: String by project
+val apiJavaTarget: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
-
-val apiAdventureVersion: String by project
-val apiConfigurateVersion: String by project
-val apiGsonVersion: String by project
-val apiCheckerVersion: String by project
-val guavaVersion: String by project
-val apiPluginSpiVersion: String by project
-val asmVersion: String by project
-val log4jVersion: String by project
-val modlauncherVersion: String by project
-val mixinVersion: String by project
-val junitVersion: String by project
-val mockitoVersion: String by project
 
 val commonManifest = java.manifest {
     attributes(
@@ -145,85 +133,99 @@ val mixins by sourceSets.registering {
     }
 }
 
+sourceSets.configureEach {
+    val sourceSet = this
+    val isMain = "main".equals(sourceSet.name)
+
+    val sourcesJarName: String = if (isMain) "sourcesJar" else (sourceSet.name + "SourcesJar")
+    tasks.register(sourcesJarName, Jar::class.java) {
+        group = "build"
+        val classifier = if (isMain) "sources" else (sourceSet.name + "-sources")
+        archiveClassifier.set(classifier)
+        from(sourceSet.allJava)
+    }
+}
+
 dependencies {
     // api
     api("org.spongepowered:spongeapi:$apiVersion")
 
-    // Database stuffs... likely needs to be looked at
-    implementation("com.zaxxer:HikariCP:2.6.3") {
-        exclude(group = "org.slf4j", module = "slf4j-api")
-    }
-    implementation("org.mariadb.jdbc:mariadb-java-client:2.0.3")
-    implementation("com.h2database:h2:1.4.196")
-    implementation("org.xerial:sqlite-jdbc:3.20.0")
-    implementation("javax.inject:javax.inject:1")
+    implementation(libs.javaxInject)
 
     // ASM - required for generating event listeners
-    implementation("org.ow2.asm:asm-util:$asmVersion")
-    implementation("org.ow2.asm:asm-tree:$asmVersion")
+    implementation(libs.asm.util)
+    implementation(libs.asm.tree)
 
     // Implementation-only Adventure
-    implementation(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
-    implementation("net.kyori:adventure-serializer-configurate4") {
+    implementation(platform(apiLibs.adventure.bom)) {
+        exclude(group = "org.jetbrains", module = "annotations")
+    }
+    implementation(libs.adventure.serializerConfigurate4) {
+        exclude(group = "org.jetbrains", module = "annotations")
+        exclude(group = "org.checkerframework", module = "checker-qual")
+    }
+    implementation(libs.adventure.serializerAnsi) {
         exclude(group = "org.jetbrains", module = "annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig("org.spongepowered:spongeapi:$apiVersion")
-    launchConfig("org.spongepowered:plugin-spi:$apiPluginSpiVersion") {
+    launchConfig(apiLibs.pluginSpi) {
         exclude(group = "org.checkerframework", module = "checker-qual")
         exclude(group = "com.google.code.gson", module = "gson")
         exclude(group = "org.apache.logging.log4j", module = "log4j-api")
+        exclude(group = "org.apache.commons", module = "commons-lang3")
     }
-    launchConfig("org.spongepowered:mixin:$mixinVersion")
-    launchConfig("org.checkerframework:checker-qual:$apiCheckerVersion")
-    launchConfig("com.google.guava:guava:$guavaVersion") {
+    launchConfig(libs.mixin)
+    launchConfig(apiLibs.checkerQual)
+    launchConfig(libs.guava) {
         exclude(group = "com.google.code.findbugs", module = "jsr305") // We don't want to use jsr305, use checkerframework
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
         exclude(group = "com.google.j2objc", module = "j2objc-annotations")
         exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
-    launchConfig("com.google.code.gson:gson:$apiGsonVersion")
-    launchConfig("org.ow2.asm:asm-tree:$asmVersion")
-    launchConfig("org.ow2.asm:asm-util:$asmVersion")
+    launchConfig(apiLibs.gson)
+    launchConfig(libs.asm.tree)
+    launchConfig(libs.asm.util)
 
     // Applaunch -- initialization that needs to occur without game access
-    applaunchConfig("org.checkerframework:checker-qual:$apiCheckerVersion")
-    applaunchConfig("org.apache.logging.log4j:log4j-api:$log4jVersion")
-    applaunchConfig("com.google.guava:guava:$guavaVersion"){
+    applaunchConfig(apiLibs.checkerQual)
+    applaunchConfig(libs.log4j.api)
+    applaunchConfig(libs.guava) {
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    applaunchConfig(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
-    applaunchConfig("org.spongepowered:configurate-core") {
+    applaunchConfig(platform(apiLibs.configurate.bom))
+    applaunchConfig(apiLibs.configurate.core) {
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
-    applaunchConfig("org.spongepowered:configurate-hocon") {
+    applaunchConfig(apiLibs.configurate.hocon) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
-    applaunchConfig("org.spongepowered:configurate-jackson") {
+    applaunchConfig(libs.configurate.jackson) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
-    applaunchConfig("org.apache.logging.log4j:log4j-core:$log4jVersion")
-    applaunchConfig("org.apache.logging.log4j:log4j-jpl:$log4jVersion")
+    applaunchConfig(libs.log4j.core)
+    applaunchConfig(libs.log4j.jpl)
 
-    mixinsConfig(sourceSets.named("main").map { it.output })
+    mixinsConfig(sourceSets.main.map { it.output })
     add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 
     // Tests
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+    testImplementation(platform(apiLibs.junit.bom))
+    testImplementation(apiLibs.junit.api)
+    testImplementation(apiLibs.junit.params)
+    testRuntimeOnly(apiLibs.junit.engine)
+    testRuntimeOnly(apiLibs.junit.launcher)
 
-    testImplementation("org.mockito:mockito-core:$mockitoVersion")
-    testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion") {
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.junitJupiter) {
         exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
     }
-    testImplementation("org.mockito:mockito-inline:$mockitoVersion")
 }
 
 val organization: String by project
@@ -267,7 +269,6 @@ allprojects {
     }
 
     plugins.withId("org.spongepowered.gradle.vanilla") {
-        val vineflowerVersion: String by project
         minecraft {
             version(minecraftVersion)
             injectRepositories(false)
@@ -281,7 +282,7 @@ allprojects {
         }
 
         dependencies {
-            decompiler("org.vineflower:vineflower:$vineflowerVersion")
+            decompiler(libs.vineflower)
         }
 
         tasks.named("decompile", DecompileJarTask::class) {
@@ -296,7 +297,7 @@ allprojects {
                     delegateBuildRunToGradle = false
                     testRunner = org.jetbrains.gradle.ext.ActionDelegationConfig.TestRunner.PLATFORM
                 }
-                (this as ExtensionAware).extensions.getByType(org.jetbrains.gradle.ext.IdeaCompilerConfiguration::class).run {
+                extensions.getByType(org.jetbrains.gradle.ext.IdeaCompilerConfiguration::class).run {
                     addNotNullAssertions = false
                     useReleaseOption = JavaVersion.current().isJava10Compatible
                     parallelCompilation = true
@@ -306,11 +307,12 @@ allprojects {
     }
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-        if (JavaVersion.current() < JavaVersion.VERSION_17) {
+        val targetJavaVersion = JavaVersion.toVersion(apiJavaTarget.toInt())
+        sourceCompatibility = targetJavaVersion
+        targetCompatibility = targetJavaVersion
+        if (JavaVersion.current() < targetJavaVersion) {
             toolchain {
-                languageVersion.set(JavaLanguageVersion.of(17))
+                languageVersion.set(JavaLanguageVersion.of(apiJavaTarget.toInt()))
             }
         }
     }
@@ -344,7 +346,7 @@ allprojects {
         withType(JavaCompile::class).configureEach {
             options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
             options.encoding = "UTF-8"
-            options.release.set(17)
+            options.release.set(apiJavaTarget.toInt())
             if (project.name != "testplugins" && System.getProperty("idea.sync.active") != null) {
                 options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
             }
@@ -404,11 +406,12 @@ allprojects {
 
 tasks {
     val jar by existing
-    val sourceJar by existing
+    val sourcesJar by existing
     val mixinsJar by existing
     val accessorsJar by existing
     val launchJar by existing
     val applaunchJar by existing
+
     shadowJar {
         mergeServiceFiles()
         archiveClassifier.set("dev")
@@ -420,7 +423,7 @@ tasks {
             from(commonManifest)
         }
         from(jar)
-        from(sourceJar)
+        from(sourcesJar)
         from(mixinsJar)
         from(accessorsJar)
         from(launchJar)
@@ -430,20 +433,25 @@ tasks {
         }
     }
 }
+
 publishing {
     publications {
         register("sponge", MavenPublication::class) {
             from(components["java"])
+            artifact(tasks["sourcesJar"])
 
-            artifact(tasks["sourceJar"])
             artifact(tasks["mixinsJar"])
+            artifact(tasks["mixinsSourcesJar"])
+
             artifact(tasks["accessorsJar"])
+            artifact(tasks["accessorsSourcesJar"])
+
             artifact(tasks["launchJar"])
+            artifact(tasks["launchSourcesJar"])
+
             artifact(tasks["applaunchJar"])
-            artifact(tasks["applaunchSourceJar"])
-            artifact(tasks["launchSourceJar"])
-            artifact(tasks["mixinsSourceJar"])
-            artifact(tasks["accessorsSourceJar"])
+            artifact(tasks["applaunchSourcesJar"])
+
             pom {
                 artifactId = project.name.lowercase()
                 this.name.set(project.name)

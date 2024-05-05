@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 
 
@@ -77,9 +77,9 @@ final class PhaseStack {
     }
 
     PhaseStack push(IPhaseState<?> state, PhaseContext<?> context) {
-        checkNotNull(context, "Tuple cannot be null!");
-        checkArgument(context.state == state, "Illegal IPhaseState not matching PhaseContext: %s", context);
-        checkArgument(context.isComplete(), "Phase context must be complete: %s", context);
+        Objects.requireNonNull(context, "Tuple cannot be null!");
+        Preconditions.checkArgument(context.state == state, String.format("Illegal IPhaseState not matching PhaseContext: %s", context));
+        Preconditions.checkArgument(context.isComplete(), String.format("Phase context must be complete: %s", context));
         this.phases.push(context);
         return this;
     }
@@ -115,8 +115,8 @@ final class PhaseStack {
 
     @Override
     public String toString() {
-        return com.google.common.base.MoreObjects.toStringHelper(this)
-                .add("phases", this.phases)
+        return new StringJoiner(", ", PhaseStack.class.getSimpleName() + "[", "]")
+                .add("phases=" + this.phases)
                 .toString();
     }
 

@@ -25,7 +25,6 @@
 package org.spongepowered.common.service.game.pagination;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 import net.kyori.adventure.text.BuildableComponent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -314,7 +313,7 @@ final class PaginationCalculator {
         if (count > 0) {
             // In simple cases, we can create a more compact component
             if (padding instanceof TextComponent && padding.children().isEmpty()) {
-                build.append(Component.text(Strings.repeat(((TextComponent) padding).content(), count), padding.style()));
+                build.append(Component.text(((TextComponent) padding).content().repeat(count), padding.style()));
             } else {
                 build.append(Collections.nCopies(count, padding));
             }

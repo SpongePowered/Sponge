@@ -24,28 +24,35 @@
  */
 package org.spongepowered.common.mixin.core.advancements;
 
-import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.util.ExtraCodecs;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.advancement.criterion.SpongeScoreCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeScoreTrigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 @Mixin(Criterion.class)
-public abstract class CriterionMixin implements CriterionBridge {
+public abstract class CriterionMixin<T extends CriterionTriggerInstance> implements CriterionBridge {
 
     // @formatter:off
-    @Shadow @Final private CriterionTriggerInstance triggerInstance;
+    @Shadow @Final private T triggerInstance;
     // @formatter:on
 
     @Nullable private String impl$name;
@@ -53,26 +60,38 @@ public abstract class CriterionMixin implements CriterionBridge {
     @Nullable private Integer impl$scoreGoal;
     @Nullable private String impl$scoreCriterionName;
 
-    @Inject(method = "criterionFromJson(Lcom/google/gson/JsonObject;Lnet/minecraft/advancements/critereon/DeserializationContext;)Lnet/minecraft/advancements/Criterion;", at = @At("RETURN"))
-    private static void impl$fixTriggerTimeDeserializer(final JsonObject json, final DeserializationContext p_232633_1_,
-            final CallbackInfoReturnable<Criterion<?>> ci) {
-        final Criterion<?> criterion = ci.getReturnValue();
-        if (json.has("trigger_times")) {
-            ((CriterionBridge) (Object) criterion).bridge$setScoreGoal(json.get("trigger_times").getAsInt());
-        }
-        if (json.has("criterion")) {
-            ((CriterionBridge) (Object) criterion).bridge$setScoreCriterionName(json.get("criterion").getAsString());
-        }
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ExtraCodecs;dispatchOptionalValue(Ljava/lang/String;Ljava/lang/String;Lcom/mojang/serialization/Codec;Ljava/util/function/Function;Ljava/util/function/Function;)Lcom/mojang/serialization/MapCodec;"))
+    private static MapCodec<Criterion<?>> impl$onCodecCreation(final String $$0,
+            final String $$1,
+            final Codec<CriterionTrigger<?>> $$2,
+            final Function<? super Criterion<?>, ? extends CriterionTrigger<?>> $$3,
+            final Function<? super CriterionTrigger<?>, ? extends Codec<? extends Criterion<?>>> $$4)
+    {
+        @SuppressWarnings("deprecation")
+        var mcCodec = ExtraCodecs.dispatchOptionalValue($$0, $$1, $$2, $$3, $$4);
+
+        final var triggerTimesCodec = Codec.optionalField("trigger_times", Codec.INT);
+        var tmpCodec = CriterionMixin.impl$dependent(mcCodec, triggerTimesCodec, CriterionBridge::bridge$getScoreGoal, CriterionBridge::bridge$setScoreGoal);
+
+        final var criterionCodec = Codec.optionalField("criterion", Codec.STRING);
+        tmpCodec = CriterionMixin.impl$dependent(tmpCodec, criterionCodec,
+                bridge -> bridge.bridge$getScoreCriterion() == null ? null : bridge.bridge$getScoreCriterion().name(),
+                CriterionBridge::bridge$setScoreCriterionName);
+
+        return tmpCodec;
     }
 
-    @Inject(method = "serializeToJson", at = @At("RETURN"))
-    private void impl$serializeTriggerTimes(CallbackInfoReturnable<JsonObject> cir) {
-        if (this.triggerInstance instanceof SpongeScoreTrigger.Instance) {
-            cir.getReturnValue().addProperty("trigger_times", ((SpongeScoreTrigger.Instance) this.triggerInstance).getTriggerTimes());
-        }
-        if (this.impl$scoreCriterion != null) {
-            cir.getReturnValue().addProperty("criterion", this.impl$scoreCriterion.name());
-        }
+    private static <T> MapCodec<Criterion<?>> impl$dependent(
+            final MapCodec<Criterion<?>> original,
+            final MapCodec<Optional<T>> codec,
+            final Function<CriterionBridge, T> getter,
+            final BiConsumer<CriterionBridge, T> setter) {
+        return original.dependent(codec,
+                criterion -> Pair.of(Optional.ofNullable(getter.apply((CriterionBridge) (Object) criterion)), codec),
+                (criterion, optValue) -> {
+                    optValue.ifPresent(value -> setter.accept((CriterionBridge) (Object) criterion, value));
+                    return criterion;
+                });
     }
 
     @Override
@@ -102,7 +121,7 @@ public abstract class CriterionMixin implements CriterionBridge {
     @Nullable
     @Override
     public Integer bridge$getScoreGoal() {
-        return this.impl$scoreGoal;
+        return this.triggerInstance instanceof SpongeScoreTrigger.TriggerInstance instance ? instance.triggerTimes() : null;
     }
 
     @Override
@@ -120,4 +139,20 @@ public abstract class CriterionMixin implements CriterionBridge {
     public String bridge$getScoreCriterionName() {
         return this.impl$scoreCriterionName;
     }
+
+
+    @Inject(method = "hashCode", at = @At("RETURN"), cancellable = true)
+    public void impl$onHashCode(CallbackInfoReturnable<Integer> cir) {
+        int result = cir.getReturnValue();
+        result += 31 * result + this.bridge$getName().hashCode();
+        cir.setReturnValue(result);
+    }
+
+    @Inject(method = "equals", at = @At("RETURN"), cancellable = true)
+    public void impl$Equals(Object obj, CallbackInfoReturnable<Boolean> cir) {
+        boolean result = cir.getReturnValue();
+        result = result && ((CriterionBridge) obj).bridge$getName().equals(this.bridge$getName());
+        cir.setReturnValue(result);
+    }
+
 }

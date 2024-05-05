@@ -25,6 +25,7 @@
 package org.spongepowered.common.datapack;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.datapack.DataPackEntry;
@@ -69,7 +70,7 @@ public class NbtDataPackSerializer<T extends DataPackEntry<T>> extends DataPackS
     @Override
     public T deserialize(final SpongeDataPack<CompoundTag, T> pack, final InputStream is, final ResourceKey key) throws IOException {
         try (final DataInputStream dis = new DataInputStream(is)) {
-            final CompoundTag element = NbtIo.readCompressed(dis);
+            final CompoundTag element = NbtIo.readCompressed(dis, NbtAccounter.unlimitedHeap());
             if (this.decoder != null) {
                 // TODO this is actually blocking
                 return this.decoder.decode(pack, key, element, SpongeCommon.server().registryAccess());
@@ -80,7 +81,7 @@ public class NbtDataPackSerializer<T extends DataPackEntry<T>> extends DataPackS
 
     public static void writeFile(final Path file, final CompoundTag object) throws IOException {
         Files.deleteIfExists(file);
-        NbtIo.writeCompressed(object, file.toFile());
+        NbtIo.writeCompressed(object, file);
     }
 
 }

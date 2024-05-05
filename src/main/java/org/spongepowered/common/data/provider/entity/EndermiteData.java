@@ -26,6 +26,8 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.entity.monster.Endermite;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.util.Ticks;
+import org.spongepowered.common.accessor.world.entity.MobAccessor;
 import org.spongepowered.common.accessor.world.entity.monster.EndermiteAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
@@ -42,21 +44,20 @@ public final class EndermiteData {
         registrator
                 .asMutable(Endermite.class)
                     .create(Keys.DESPAWN_DELAY)
-                        .get(h -> {
-                            if (h.isPersistenceRequired()) {
-                                return null;
-                            }
-                            return new SpongeTicks(((EndermiteAccessor) h).accessor$life());
-                        })
+                        .get(h -> h.isPersistenceRequired()
+                                ? Ticks.infinite()
+                                : new SpongeTicks(EndermiteData.DESPAWN_DELAY_MAX - ((EndermiteAccessor) h).accessor$life()))
                         .setAnd((h, v) -> {
-                            if (h.isPersistenceRequired()) {
+                            if (v.isInfinite()) {
+                                h.setPersistenceRequired();
+                                return true;
+                            }
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                            if (ticks < 0) {
                                 return false;
                             }
-                            final int ticks = (int) v.ticks();
-                            if (ticks < 0 || ticks > EndermiteData.DESPAWN_DELAY_MAX) {
-                                return false;
-                            }
-                            ((EndermiteAccessor) h).accessor$life(ticks);
+                            ((MobAccessor) h).accessor$persistenceRequired(false);
+                            ((EndermiteAccessor) h).accessor$life(EndermiteData.DESPAWN_DELAY_MAX - ticks);
                             return true;
                         });
     }

@@ -29,7 +29,6 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -50,9 +49,9 @@ public class TestPluginPlatform implements PluginPlatform {
     public TestPluginPlatform() {
         final ClassLoader classLoader = this.getClass().getClassLoader();
         final String directory = classLoader.getResource(".").getFile();
-        final File file = new File(directory);
-        this.outputDirectory = file.toPath();
-        this.pluginDirectory = new File(file, "plugins").toPath();
+        final Path p = Path.of(directory);
+        this.outputDirectory = p;
+        this.pluginDirectory = p.resolve("plugins");
     }
 
     @Override

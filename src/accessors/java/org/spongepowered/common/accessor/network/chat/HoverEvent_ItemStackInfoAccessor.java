@@ -33,6 +33,8 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
+import java.util.Optional;
+
 @Mixin(HoverEvent.ItemStackInfo.class)
 public interface HoverEvent_ItemStackInfoAccessor {
 
@@ -45,6 +47,6 @@ public interface HoverEvent_ItemStackInfoAccessor {
 
     @Accessor("count") int accessor$count();
 
-    @Accessor("tag") CompoundTag accessor$tag();
+    @Accessor("tag") Optional<CompoundTag> accessor$tag();
 
 }

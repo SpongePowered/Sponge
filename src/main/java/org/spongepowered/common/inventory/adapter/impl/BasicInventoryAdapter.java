@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.adapter.impl;
 
-import com.google.common.base.MoreObjects;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -39,6 +38,7 @@ import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 /**
  * Base Adapter implementation for {@link ItemStack} based Inventories.
@@ -126,12 +126,12 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("capacity", this.capacity())
-                .add("children", this.children().size())
-                .add("parent", ((this.parent == this) ? "self" : this.parent.getClass().getSimpleName()))
-                .add("fabric", this.fabric.getClass().getSimpleName())
-                .add("lens",  this.lens.getClass().getSimpleName())
+        return new StringJoiner(", ", BasicInventoryAdapter.class.getSimpleName() + "[", "]")
+                .add("capacity=" + this.capacity())
+                .add("children=" + this.children().size())
+                .add("parent=" + ((this.parent == this) ? "self" : this.parent.getClass().getSimpleName()))
+                .add("fabric=" + this.fabric.getClass().getSimpleName())
+                .add("lens=" + this.lens.getClass().getSimpleName())
                 .toString();
     }
 }

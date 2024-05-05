@@ -29,7 +29,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.accessor.world.entity.AreaEffectCloudAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.MissingImplementationException;
+import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.util.PotionEffectUtil;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -48,20 +48,16 @@ public final class AreaEffectCloudData {
                     .create(Keys.DURATION)
                         .get(x -> new SpongeTicks(x.getDuration()))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.ticks();
-                            if (ticks < 0) {
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                            if (v.isInfinite() || ticks < 0) {
                                 return false;
                             }
                             h.setDuration(ticks);
                             return true;
                         })
                     .create(Keys.PARTICLE_EFFECT)
-                        .get(h -> {
-                            throw new MissingImplementationException("AreaEffectCloudData", "PARTICLE_EFFECT::getter");
-                        })
-                        .set((h, v) -> {
-                            throw new MissingImplementationException("AreaEffectCloudData", "PARTICLE_EFFECT::setter");
-                        })
+                        .get(h -> SpongeParticleHelper.spongeParticleOptions(h.getParticle()))
+                        .set((h, v) -> h.setParticle(SpongeParticleHelper.vanillaParticleOptions(v)))
                     .create(Keys.RADIUS)
                         .get(h -> (double) h.getRadius())
                         .set((h, v) -> h.setRadius(v.floatValue()))
@@ -73,17 +69,35 @@ public final class AreaEffectCloudData {
                         .set((h, v) -> h.setRadiusPerTick(v.floatValue()))
                     .create(Keys.WAIT_TIME)
                         .get(h -> new SpongeTicks(((AreaEffectCloudAccessor) h).accessor$waitTime()))
-                        .set((h, v) -> h.setWaitTime((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.setWaitTime(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                 .asMutable(AreaEffectCloudAccessor.class)
                     .create(Keys.DURATION_ON_USE)
                         .get(h -> new SpongeTicks(h.accessor$durationOnUse()))
-                        .set((h, v) -> h.accessor$durationOnUse((int) v.ticks()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.accessor$durationOnUse(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> PotionEffectUtil.copyAsPotionEffects(h.accessor$effects()))
                         .set((h, v) -> h.accessor$effects(PotionEffectUtil.copyAsEffectInstances(v)))
                     .create(Keys.REAPPLICATION_DELAY)
                         .get(h -> new SpongeTicks(h.accessor$reapplicationDelay()))
-                        .set((h, v) -> h.accessor$reapplicationDelay((int) v.ticks()));
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.accessor$reapplicationDelay(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        });
     }
     // @formatter:on
 }

@@ -106,8 +106,8 @@ public abstract class NativeComponentRenderer<C> {
             return new HoverEvent(HoverEvent.Action.SHOW_TEXT, this.render(original.copy(), context));
         } else if (action == HoverEvent.Action.SHOW_ENTITY) {
            final HoverEvent.EntityTooltipInfo data = input.getValue(HoverEvent.Action.SHOW_ENTITY);
-           if (data.name != null) {
-               final Component rendered = this.render(data.name.copy(), context);
+           if (data.name.isPresent()) {
+               final Component rendered = this.render(data.name.get().copy(), context);
                return new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new HoverEvent.EntityTooltipInfo(data.type, data.id, rendered));
            }
         }

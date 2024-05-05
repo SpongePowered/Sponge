@@ -26,6 +26,7 @@ package org.spongepowered.common.world.storage;
 
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
@@ -82,7 +83,7 @@ public final class SpongePlayerDataManager {
                     final CompoundTag compound;
 
                     try (final InputStream stream = Files.newInputStream(playerFile)) {
-                        compound = NbtIo.readCompressed(stream);
+                        compound = NbtIo.readCompressed(stream, NbtAccounter.unlimitedHeap());
                     } catch (final Exception e) {
                         throw new RuntimeException("Failed to decompress playerdata for playerfile " + playerFile, e);
                     }

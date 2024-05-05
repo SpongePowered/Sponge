@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.launch;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import org.apache.logging.log4j.LogManager;
@@ -39,6 +38,7 @@ import org.spongepowered.plugin.PluginContainer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class Launch {
 
@@ -67,7 +67,7 @@ public abstract class Launch {
             throw new RuntimeException("Attempt made to re-set launcher instance!");
         }
 
-        Launch.INSTANCE = Preconditions.checkNotNull(instance);
+        Launch.INSTANCE = Objects.requireNonNull(instance);
     }
 
     public final String id() {

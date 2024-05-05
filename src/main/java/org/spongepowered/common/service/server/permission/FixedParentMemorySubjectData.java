@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -55,7 +55,7 @@ public class FixedParentMemorySubjectData extends GlobalMemorySubjectData {
 
     @Override
     public CompletableFuture<Boolean> addParent(final Set<Context> contexts, final SubjectReference parent) {
-        if (Objects.equal(this.forcedParent, parent) && contexts.isEmpty()) {
+        if (Objects.equals(this.forcedParent, parent) && contexts.isEmpty()) {
             return CompletableFuture.completedFuture(true);
         }
         return super.addParent(contexts, parent);
@@ -63,7 +63,7 @@ public class FixedParentMemorySubjectData extends GlobalMemorySubjectData {
 
     @Override
     public CompletableFuture<Boolean> removeParent(final Set<Context> contexts, final SubjectReference parent) {
-        if (Objects.equal(this.forcedParent, parent)) {
+        if (Objects.equals(this.forcedParent, parent)) {
             return CompletableFuture.completedFuture(false);
         }
         return super.removeParent(contexts, parent);

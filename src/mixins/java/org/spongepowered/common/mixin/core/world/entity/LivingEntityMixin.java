@@ -45,6 +45,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -90,6 +91,7 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Pla
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DamageEventUtil;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -107,6 +109,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow protected boolean dead;
     @Shadow protected int deathScore;
     @Shadow protected ItemStack useItem;
+    @Shadow @Nullable private DamageSource lastDamageSource;
+    @Shadow private long lastDamageStamp;
 
     @Shadow public abstract AttributeInstance shadow$getAttribute(Attribute attribute);
     @Shadow public abstract void shadow$setHealth(float health);
@@ -488,7 +492,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) hand;
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            final Ticks useDuration = Ticks.of(stack.getUseDuration());
+            final Ticks useDuration = SpongeTicks.ticksOrInfinite(stack.getUseDuration());
             event = SpongeEventFactory.createUseItemStackEventStart(PhaseTracker.getCauseStackManager().currentCause(),
                 useDuration, useDuration, snapshot);
         }
@@ -496,7 +500,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         if (SpongeCommon.post(event)) {
             ci.cancel();
         } else {
-            this.useItemRemaining = (int) event.remainingDuration().ticks();
+            this.useItemRemaining = SpongeTicks.toSaturatedIntOrInfinite(event.remainingDuration());
         }
     }
 
@@ -542,13 +546,15 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.useItem);
             final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            final Ticks useItemRemainingTicks = Ticks.of(this.useItemRemaining);
+            final Ticks useItemRemainingTicks = SpongeTicks.ticksOrInfinite(this.useItemRemaining);
             event = SpongeEventFactory.createUseItemStackEventTick(PhaseTracker.getCauseStackManager().currentCause(),
                 useItemRemainingTicks, useItemRemainingTicks, snapshot);
             SpongeCommon.post(event);
         }
         // Because the item usage will only finish if useItemRemaining == 0 and decrements it first, it should be >= 1
-        this.useItemRemaining = Math.max((int) event.remainingDuration().ticks(), 1);
+        this.useItemRemaining = event.remainingDuration().isInfinite()
+                ? Constants.TickConversions.INFINITE_TICKS
+                : Math.max(SpongeTicks.toSaturatedIntOrInfinite(event.remainingDuration()), 1);
 
         if (event.isCancelled()) {
             // Get prepared for some cool hacks: We're within the condition for updateItemUse
@@ -558,6 +564,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
 
         return this.shadow$getUseItemRemainingTicks();
+    }
+
+    @Inject(method = "updateUsingItem",
+            at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/LivingEntity;useItemRemaining:I", opcode = Opcodes.PUTFIELD), cancellable = true)
+    private void impl$dontReduceInfiniteRemainingItemDuration(final CallbackInfo ci) {
+        if (this.useItemRemaining == Constants.TickConversions.INFINITE_TICKS) {
+            ci.cancel();
+        }
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -576,13 +590,13 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.useItem);
             final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            final Ticks useItemRemainingTicks = Ticks.of(this.useItemRemaining);
+            final Ticks useItemRemainingTicks = SpongeTicks.ticksOrInfinite(this.useItemRemaining);
             event = SpongeEventFactory.createUseItemStackEventFinish(PhaseTracker.getCauseStackManager().currentCause(),
                     useItemRemainingTicks, useItemRemainingTicks, snapshot);
         }
         SpongeCommon.post(event);
-        if (event.remainingDuration().ticks() > 0) {
-            this.useItemRemaining = (int) event.remainingDuration().ticks();
+        if (event.remainingDuration().isInfinite() || event.remainingDuration().ticks() > 0) {
+            this.useItemRemaining = SpongeTicks.toSaturatedIntOrInfinite(event.remainingDuration());
             ci.cancel();
         } else if (event.isCancelled()) {
             this.shadow$stopUsingItem();
@@ -616,7 +630,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack == null ? ItemStack.EMPTY : stack);
             final HandType handType = (HandType) (Object) hand;
             this.impl$addSelfToFrame(frame, activeItemStackSnapshot, handType);
-            final Ticks useItemRemainingTicks = Ticks.of(this.useItemRemaining);
+            final Ticks useItemRemainingTicks = SpongeTicks.ticksOrInfinite(this.useItemRemaining);
             event = SpongeEventFactory.createUseItemStackEventReplace(PhaseTracker.getCauseStackManager().currentCause(),
                     useItemRemainingTicks, useItemRemainingTicks, activeItemStackSnapshot,
                 new Transaction<>(ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy), snapshot));
@@ -649,7 +663,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            final Ticks ticksDuration = Ticks.of(duration);
+            final Ticks ticksDuration = SpongeTicks.ticksOrInfinite(duration);
             if (!SpongeCommon.post(SpongeEventFactory.createUseItemStackEventStop(PhaseTracker.getCauseStackManager().currentCause(),
                 ticksDuration, ticksDuration, snapshot))) {
                 stack.releaseUsing(world, self, duration);
@@ -675,7 +689,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             this.impl$addSelfToFrame(frame, snapshot);
-            final Ticks useItemRemainingTicks = Ticks.of(this.useItemRemaining);
+            final Ticks useItemRemainingTicks = SpongeTicks.ticksOrInfinite(this.useItemRemaining);
             SpongeCommon.post(SpongeEventFactory.createUseItemStackEventReset(PhaseTracker.getCauseStackManager().currentCause(),
                     useItemRemainingTicks, useItemRemainingTicks, snapshot));
         }
@@ -724,6 +738,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
         this.shadow$setPos(event.toLocation().x(), event.toLocation().y(), event.toLocation().z());
         ((Living) this).setRotation(event.toRotation());
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/CombatTracker;recheckStatus()V", shift = At.Shift.AFTER))
+    private void impl$clearLastDamageSource(final CallbackInfo ci) {
+        //Fix for MC-270896 - Players leak the last entity they took damage from
+        if (this.lastDamageSource != null && this.shadow$level().getGameTime() - this.lastDamageStamp > 40L) {
+            this.lastDamageSource = null;
+        }
     }
 
 }

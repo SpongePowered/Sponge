@@ -25,29 +25,85 @@
 package org.spongepowered.common.item.recipe.crafting.shaped;
 
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.ShapedRecipePattern;
+import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
+import org.spongepowered.common.bridge.world.item.crafting.ShapedRecipeBridge;
+import org.spongepowered.common.item.recipe.ResultFunctionRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
+import org.spongepowered.common.util.Constants;
 
-public class SpongeShapedRecipe extends ShapedRecipe {
+import java.util.Optional;
 
+public class SpongeShapedRecipe extends ShapedRecipe implements ResultFunctionRecipe {
+
+    public static final MapCodec<SpongeShapedRecipe> SPONGE_CODEC = RecordCodecBuilder.mapCodec(
+            $$0 -> $$0.group(
+                            Codec.STRING.fieldOf(Constants.Recipe.SPONGE_TYPE).forGetter(t -> "custom"), // important to fail early when decoding vanilla recipes
+                            ExtraCodecs.strictOptionalField(Codec.STRING, Constants.Recipe.GROUP, "").forGetter(ShapedRecipe::getGroup),
+                            CraftingBookCategory.CODEC.fieldOf(Constants.Recipe.CATEGORY).orElse(CraftingBookCategory.MISC).forGetter(ShapedRecipe::category),
+                            ShapedRecipePattern.MAP_CODEC.forGetter($$0x -> ((ShapedRecipeBridge) $$0x).bridge$pattern()),
+                            ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
+                            ExtraCodecs.strictOptionalField(Codec.BOOL, "show_notification", true).forGetter(ShapedRecipe::showNotification),
+                            ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$spongeResult()),
+                            IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(ResultFunctionRecipe::resultFunctionId),
+                            IngredientResultUtil.CACHED_REMAINING_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_REMAINING_ITEMS).forGetter(SpongeShapedRecipe::remainingItemsFunctionId)
+                    )
+                    .apply($$0, SpongeShapedRecipe::of)
+    );
 
     private final String resultFunctionId;
     private final String remainingItemsFunctionId;
 
-    public SpongeShapedRecipe(String groupIn, final CraftingBookCategory category, int recipeWidthIn, int recipeHeightIn, NonNullList<Ingredient> recipeItemsIn,
-            ItemStack recipeOutputIn, boolean showNotification,
-            String resultFunctionId, String remainingItemsFunctionId) {
-        super(groupIn, category, recipeWidthIn, recipeHeightIn, recipeItemsIn, recipeOutputIn, showNotification);
+    public static SpongeShapedRecipe of(
+            final String spongeType,
+            final String groupIn, final CraftingBookCategory category,
+            final ShapedRecipePattern pattern,
+            final ItemStack recipeOutputIn,
+            final boolean showNotification,
+            final ItemStack spongeResultStack,
+            final Optional<String> resultFunctionId,
+            final Optional<String> remainingItemsFunctionId) {
+        return new SpongeShapedRecipe(
+                groupIn,
+                category,
+                pattern,
+                showNotification,
+                spongeResultStack.isEmpty() ? recipeOutputIn : spongeResultStack,
+                resultFunctionId.orElse(null),
+                remainingItemsFunctionId.orElse(null));
+    }
+
+    public SpongeShapedRecipe(
+            final String groupIn,
+            final CraftingBookCategory category,
+            final ShapedRecipePattern pattern,
+            final boolean showNotification,
+            final ItemStack spongeResultStack,
+            final String resultFunctionId,
+            final String remainingItemsFunctionId) {
+        super(groupIn, category, pattern, spongeResultStack, showNotification);
         this.resultFunctionId = resultFunctionId;
         this.remainingItemsFunctionId = remainingItemsFunctionId;
     }
 
+    @Override
+    public Optional<String> resultFunctionId() {
+        return Optional.ofNullable(resultFunctionId);
+    }
+
+    public Optional<String> remainingItemsFunctionId() {
+        return Optional.ofNullable(remainingItemsFunctionId);
+    }
 
     @Override
     public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
@@ -72,4 +128,5 @@ public class SpongeShapedRecipe extends ShapedRecipe {
         }
         return super.getResultItem($$0);
     }
+
 }

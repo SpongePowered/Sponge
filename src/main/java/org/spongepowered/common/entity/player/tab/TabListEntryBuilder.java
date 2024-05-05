@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.entity.player.tab;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -33,6 +31,9 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.common.util.Preconditions;
+
+import java.util.Objects;
 
 
 public final class TabListEntryBuilder implements TabListEntry.Builder {
@@ -41,17 +42,18 @@ public final class TabListEntryBuilder implements TabListEntry.Builder {
     private @Nullable GameProfile profile;
     private @Nullable Component displayName;
     private int latency;
+    private boolean listed = true;
     private @Nullable GameMode gameMode;
 
     @Override
     public TabListEntry.Builder list(TabList list) {
-        this.list = checkNotNull(list, "list");
+        this.list = Objects.requireNonNull(list, "list");
         return this;
     }
 
     @Override
     public TabListEntry.Builder profile(GameProfile profile) {
-        this.profile = checkNotNull(profile, "profile");
+        this.profile = Objects.requireNonNull(profile, "profile");
         return this;
     }
 
@@ -69,26 +71,32 @@ public final class TabListEntryBuilder implements TabListEntry.Builder {
 
     @Override
     public TabListEntry.Builder gameMode(GameMode gameMode) {
-        this.gameMode = checkNotNull(gameMode, "game mode");
+        this.gameMode = Objects.requireNonNull(gameMode, "game mode");
+        return this;
+    }
+
+    @Override
+    public TabListEntry.Builder listed(boolean listed) {
+        this.listed = listed;
         return this;
     }
 
     @Override
     public TabListEntry build() {
-        checkState(this.list != null, "list must be set");
-        checkState(this.profile != null, "profile must be set");
-        checkState(this.gameMode != null, "game mode must be set");
+        Preconditions.checkState(this.list != null, "list must be set");
+        Preconditions.checkState(this.profile != null, "profile must be set");
+        Preconditions.checkState(this.gameMode != null, "game mode must be set");
 
-        return new SpongeTabListEntry(this.list, this.profile, this.displayName, this.latency, this.gameMode, null);
+        return new SpongeTabListEntry(this.list, this.profile, this.displayName, this.latency, this.gameMode, this.listed, null);
     }
 
     @Override
     public TabListEntry.Builder from(TabListEntry value) {
-        this.list = checkNotNull(value.list(), "list");
-        this.profile = checkNotNull(value.profile(), "profile");
+        this.list = Objects.requireNonNull(value.list(), "list");
+        this.profile = Objects.requireNonNull(value.profile(), "profile");
         this.displayName = value.displayName().orElse(null);
         this.latency = value.latency();
-        this.gameMode = checkNotNull(value.gameMode(), "game mode");
+        this.gameMode = Objects.requireNonNull(value.gameMode(), "game mode");
         return this;
     }
 

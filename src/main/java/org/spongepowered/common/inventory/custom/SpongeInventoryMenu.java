@@ -232,8 +232,9 @@ public class SpongeInventoryMenu implements InventoryMenu {
             if (slot.isPresent()) {
                 switch (clickTypeIn) {
                     case SWAP:
-                        if (dragType >= 0 && dragType < 9) {
-                            final Optional<org.spongepowered.api.item.inventory.Slot> slot2 = container.slot(dragType);
+                        if (dragType >= 0 && dragType < 9 || dragType == 40) {
+                            final Optional<org.spongepowered.api.item.inventory.Slot> slot2 =
+                                    ((org.spongepowered.api.entity.living.player.Player) player).inventory().slot(dragType);
                             if (slot2.isPresent() && this.keySwapHandler != null) {
                                 return this.keySwapHandler.handle(cause, container, slot.get(), slotId, ClickTypes.KEY_SWAP.get(), slot2.get());
                             }

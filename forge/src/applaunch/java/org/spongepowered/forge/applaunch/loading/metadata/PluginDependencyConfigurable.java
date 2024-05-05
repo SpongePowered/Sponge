@@ -51,23 +51,14 @@ public final class PluginDependencyConfigurable implements IConfigurable {
             return Optional.empty();
         }
 
-        final String query = key[0];
-        if ("modId".equals(query)) {
-            return (Optional<T>) Optional.of(this.dependency.id());
-        }
-        if ("mandatory".equals(query)) {
-            return (Optional<T>) Optional.of(!this.dependency.optional());
-        }
-        if ("versionRange".equals(query)) {
-            return (Optional<T>) Optional.of(this.dependency.version().toString());
-        }
-        if ("ordering".equals(query)) {
-            return (Optional<T>) Optional.of(this.loadToOrdering(this.dependency.loadOrder()).toString());
-        }
-        if ("side".equals(query)) {
-            return (Optional<T>) Optional.of(IModInfo.DependencySide.BOTH.toString());
-        }
-        return Optional.empty();
+        return switch (key[0]) {
+            case "modId" -> (Optional<T>) Optional.of(this.dependency.id());
+            case "mandatory" -> (Optional<T>) Optional.of(!this.dependency.optional());
+            case "versionRange" -> (Optional<T>) Optional.of(this.dependency.version().toString());
+            case "ordering" -> (Optional<T>) Optional.of(this.loadToOrdering(this.dependency.loadOrder()).toString());
+            case "side" -> (Optional<T>) Optional.of(IModInfo.DependencySide.BOTH.toString());
+            default -> Optional.empty();
+        };
     }
 
     @Override

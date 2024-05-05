@@ -103,4 +103,8 @@ public abstract class AbstractContainerMenuMixin_Fabric_Inventory implements Fab
         this.shadow$broadcastChanges();
     }
 
+    @Override
+    public Set<AbstractContainerMenu> fabric$containerMenus() {
+        return Set.of((AbstractContainerMenu) (Object) this);
+    }
 }

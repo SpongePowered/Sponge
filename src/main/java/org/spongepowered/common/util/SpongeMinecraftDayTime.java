@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Ticks;
@@ -69,6 +68,9 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
     @Override
     public MinecraftDayTime add(final Ticks ticks) {
         Objects.requireNonNull(ticks);
+        if (ticks.isInfinite()) {
+            throw new IllegalArgumentException("Ticks cannot be infinite!");
+        }
 
         return new SpongeMinecraftDayTime(this.internalTime + ticks.ticks());
     }
@@ -89,6 +91,10 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
 
     @Override
     public MinecraftDayTime subtract(final Ticks ticks) {
+        Objects.requireNonNull(ticks);
+        if (ticks.isInfinite()) {
+            throw new IllegalArgumentException("Ticks cannot be infinite!");
+        }
         final long time = this.internalTime - ticks.ticks();
         if (time <= 0) {
             throw new IllegalArgumentException("ticks is larger than this day time object");
@@ -177,6 +183,9 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
         public MinecraftDayTime of(final Engine engine, final Ticks ticks) {
             Objects.requireNonNull(engine);
             Objects.requireNonNull(ticks);
+            if (ticks.isInfinite()) {
+                throw new IllegalArgumentException("Ticks cannot be infinite!");
+            }
 
             return new SpongeMinecraftDayTime(ticks.ticks());
         }

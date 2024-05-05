@@ -48,7 +48,7 @@ public final class ResourcePackState extends BasicPacketState {
         final ServerboundResourcePackPacket resource = phaseContext.getPacket();
         final ResourcePackStatusEvent.ResourcePackStatus status;
         final @Nullable ResourcePack pack;
-        switch (resource.getAction()) {
+        switch (resource.action()) {
             case ACCEPTED:
                 pack = mixinHandler.bridge$popReceivedResourcePack(true);
                 status = ResourcePackStatusEvent.ResourcePackStatus.ACCEPTED;
@@ -65,6 +65,11 @@ public final class ResourcePackState extends BasicPacketState {
                 pack = mixinHandler.bridge$popAcceptedResourcePack();
                 status = ResourcePackStatusEvent.ResourcePackStatus.FAILED;
                 break;
+            case DOWNLOADED:
+            case INVALID_URL:
+            case FAILED_RELOAD:
+            case DISCARDED:
+                return; //TODO: Update API
             default:
                 throw new AssertionError();
         }

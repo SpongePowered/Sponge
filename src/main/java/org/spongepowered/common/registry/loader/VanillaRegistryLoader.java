@@ -25,9 +25,7 @@
 package org.spongepowered.common.registry.loader;
 
 import com.google.common.base.CaseFormat;
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.CriterionTrigger;
-import net.minecraft.advancements.FrameType;
+import net.minecraft.advancements.AdvancementType;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.resources.ResourceLocation;
@@ -89,11 +87,11 @@ import net.minecraft.world.level.block.state.properties.Tilt;
 import net.minecraft.world.level.block.state.properties.WallSide;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.minecraft.world.ticks.TickPriority;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
 import org.spongepowered.api.registry.Registry;
@@ -101,13 +99,10 @@ import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.criteria.Criteria;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
-import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.MushroomCow_MushroomTypeAccessor;
 import org.spongepowered.common.accessor.world.entity.boss.enderdragon.phases.EnderDragonPhaseAccessor;
 import org.spongepowered.common.accessor.world.item.ArmorMaterialsAccessor;
 import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
-import org.spongepowered.common.advancement.criterion.SpongeDummyTrigger;
-import org.spongepowered.common.advancement.criterion.SpongeScoreTrigger;
 import org.spongepowered.common.registry.RegistryLoader;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 
@@ -147,8 +142,6 @@ public final class VanillaRegistryLoader {
             map.put(EnderDragonPhase.HOVERING, "hover");
         }, phase -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, ((EnderDragonPhaseAccessor) phase).accessor$name()));
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape());
-        this.holder.createRegistry(RegistryTypes.TRIGGER, VanillaRegistryLoader.trigger(), true,
-                (k, trigger) -> CriteriaTriggersAccessor.invoker$register(k.location().toString(), (CriterionTrigger<?>) trigger));
         this.knownName(RegistryTypes.GAME_RULE, GameRulesAccessor.accessor$GAME_RULE_TYPES().keySet(), rule -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, rule.getId()));
     }
 
@@ -222,7 +215,7 @@ public final class VanillaRegistryLoader {
             map.put(Team.Visibility.HIDE_FOR_OWN_TEAM, "hide_for_own_team");
         });
         this.automaticSerializedName(RegistryTypes.WIRE_ATTACHMENT_TYPE, RedstoneSide.values());
-        this.knownName(RegistryTypes.ADVANCEMENT_TYPE, FrameType.values(), FrameType::getName);
+        this.automaticSerializedName(RegistryTypes.ADVANCEMENT_TYPE, AdvancementType.values());
         // TODO banner patterns are in registry now this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), b -> ((BannerPatternAccessor) (Object) b).accessor$filename());
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());
         this.automaticName(RegistryTypes.HEIGHT_TYPE, Heightmap.Types.values());
@@ -244,6 +237,7 @@ public final class VanillaRegistryLoader {
         this.automaticSerializedName(RegistryTypes.BILLBOARD_TYPE, Display.BillboardConstraints.values());
         this.automaticSerializedName(RegistryTypes.TEXT_ALIGNMENT, Display.TextDisplay.Align.values());
         this.automaticName(RegistryTypes.LIGHT_TYPE, LightLayer.values());
+        this.naming(RegistryTypes.DISPLAY_SLOT, DisplaySlot.values(), d -> d.getSerializedName().replace(".", "_"));
     }
 
     private static RegistryLoader<Criterion> criterion() {
@@ -272,11 +266,6 @@ public final class VanillaRegistryLoader {
         });
     }
 
-    private static RegistryLoader<Trigger<?>> trigger() {
-        final var loadMe1 = SpongeDummyTrigger.DUMMY_TRIGGER; // register sponge trigger
-        final var loadMe2 =   SpongeScoreTrigger.SCORE_TRIGGER; // register sponge trigger
-        return RegistryLoader.of(l -> CriteriaTriggers.all().forEach(trigger -> l.add(((ResourceKey) (Object) CriteriaTriggers.getId(trigger)), (Trigger<?>) trigger)));
-    }
 
     // The following methods are named for clarity above.
 

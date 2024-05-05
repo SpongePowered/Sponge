@@ -37,11 +37,13 @@ import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.ProgressListener;
+import net.minecraft.util.thread.BlockableEventLoop;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
@@ -99,6 +101,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow @Final private static Logger LOGGER;
     @Shadow private int tickCount;
     @Shadow @Final protected LevelStorageSource.LevelStorageAccess storageSource;
+    @Shadow @Final private Thread serverThread;
 
     @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
     @Shadow public abstract Iterable<ServerLevel> shadow$getAllLevels();
@@ -111,11 +114,34 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract CompletableFuture<Void> shadow$reloadResources(final Collection<String> $$0);
     @Shadow public abstract WorldData shadow$getWorldData();
     @Shadow protected abstract void loadLevel(); // has overrides!
+    @Shadow public abstract boolean shadow$haveTime();
+    @Shadow private volatile boolean isSaving;
     // @formatter:on
 
     private final ChatDecorator impl$spongeDecorator = new SpongeChatDecorator();
     private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
     protected @Nullable ResourcePack impl$resourcePack;
+    private final BlockableEventLoop<Runnable> impl$spongeMainThreadExecutor = new BlockableEventLoop<>("Sponge") {
+
+        //Used to schedule internal Sponge tasks to the main thread
+        //that could be joined on the main thread. Avoiding using the
+        //MinecraftServer Executor to prevent changes in timings.
+
+        @Override
+        protected @NonNull Runnable wrapRunnable(@NonNull Runnable runnable) {
+            return runnable;
+        }
+
+        @Override
+        protected boolean shouldRun(@NonNull Runnable runnable) {
+            return MinecraftServerMixin.this.shadow$haveTime();
+        }
+
+        @Override
+        protected @NonNull Thread getRunningThread() {
+            return MinecraftServerMixin.this.serverThread;
+        }
+    };
 
     @Override
     public Subject subject() {
@@ -203,24 +229,28 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         ci.cancel();
     }
 
-    @ModifyConstant(method = "tickServer", constant = @Constant(intValue = 6000, ordinal = 0))
-    private int getSaveTickInterval(final int tickInterval) {
+    @ModifyConstant(method = "tickServer", constant = @Constant(intValue = 0, ordinal = 0))
+    private int getSaveTickInterval(final int zero) {
         if (!this.shadow$isDedicatedServer()) {
-            return tickInterval;
+            return zero;
         } else if (!this.shadow$isRunning()) {
             // Don't autosave while server is stopping
-            return this.tickCount + 1;
+            return Integer.MAX_VALUE;
         }
 
         final int autoPlayerSaveInterval = SpongeConfigs.getCommon().get().world.playerAutoSaveInterval;
         if (autoPlayerSaveInterval > 0 && (this.tickCount % autoPlayerSaveInterval == 0)) {
+            this.isSaving = true;
             this.shadow$getPlayerList().saveAll();
+            this.isSaving = false;
         }
 
+        this.isSaving = true;
         this.saveAllChunks(true, false, false);
+        this.isSaving = false;
 
         // force check to fail as we handle everything above
-        return this.tickCount + 1;
+        return Integer.MAX_VALUE;
     }
 
     /**
@@ -314,10 +344,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             return;
         }
 
-        if (forceDifficulty) {
+        if (forceDifficulty && world.getLevelData() instanceof PrimaryLevelDataBridge bridge && bridge.bridge$isVanilla()) {
             // Don't allow vanilla forcing the difficulty at launch set ours if we have a custom one
-            if (!((PrimaryLevelDataBridge) world.getLevelData()).bridge$customDifficulty()) {
-                ((PrimaryLevelDataBridge) world.getLevelData()).bridge$forceSetDifficulty(newDifficulty);
+            if (!bridge.bridge$customDifficulty()) {
+                bridge.bridge$forceSetDifficulty(newDifficulty);
             }
         } else {
             ((PrimaryLevelData) world.getLevelData()).setDifficulty(newDifficulty);
@@ -353,6 +383,19 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     private void impl$redirectChatDecorator(final CallbackInfoReturnable<ChatDecorator> cir) {
         if (cir.getReturnValue() == ChatDecorator.PLAIN) {
             cir.setReturnValue(this.impl$spongeDecorator);
+        }
+    }
+
+    @Override
+    public BlockableEventLoop<Runnable> bridge$spongeMainThreadExecutor() {
+        return this.impl$spongeMainThreadExecutor;
+    }
+
+    @Inject(method = "pollTaskInternal", at = @At("HEAD"), cancellable = true)
+    private void impl$pollSpongeTasks(final CallbackInfoReturnable<Boolean> cir) {
+        //Pool our tasks first to try to have small impact on timings
+        if (this.impl$spongeMainThreadExecutor.pollTask()) {
+            cir.setReturnValue(true);
         }
     }
 }

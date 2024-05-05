@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -45,6 +44,7 @@ import org.spongepowered.plugin.PluginContainer;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -144,8 +144,8 @@ public final class SpongePermissionService implements PermissionService {
 
     @Override
     public SubjectReference newSubjectReference(final String collectionIdentifier, final String subjectIdentifier) {
-        checkNotNull(collectionIdentifier, "collectionIdentifier");
-        checkNotNull(subjectIdentifier, "subjectIdentifier");
+        Objects.requireNonNull(collectionIdentifier, "collectionIdentifier");
+        Objects.requireNonNull(subjectIdentifier, "subjectIdentifier");
         return new SpongeSubjectReference(this, collectionIdentifier, subjectIdentifier);
     }
 
@@ -180,15 +180,15 @@ public final class SpongePermissionService implements PermissionService {
     }
 
     public void addDescription(final PermissionDescription permissionDescription) {
-        checkNotNull(permissionDescription, "permissionDescription");
-        checkNotNull(permissionDescription.id(), "permissionId");
+        Objects.requireNonNull(permissionDescription, "permissionDescription");
+        Objects.requireNonNull(permissionDescription.id(), "permissionId");
         this.descriptionMap.put(permissionDescription.id().toLowerCase(), permissionDescription);
         this.descriptions = null;
     }
 
     @Override
     public Optional<PermissionDescription> description(final String permissionId) {
-        return Optional.ofNullable(this.descriptionMap.get(checkNotNull(permissionId, "permissionId").toLowerCase()));
+        return Optional.ofNullable(this.descriptionMap.get(Objects.requireNonNull(permissionId, "permissionId").toLowerCase()));
     }
 
     @Override

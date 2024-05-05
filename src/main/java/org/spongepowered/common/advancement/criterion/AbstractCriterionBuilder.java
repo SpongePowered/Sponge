@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.advancement.criterion;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -33,6 +31,9 @@ import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
+import org.spongepowered.common.util.Preconditions;
+
+import java.util.Objects;
 
 
 @SuppressWarnings("unchecked")
@@ -46,8 +47,8 @@ public abstract class AbstractCriterionBuilder<T extends AdvancementCriterion, B
 
     @Override
     public <C extends FilteredTriggerConfiguration> B trigger(Trigger<C> type, FilteredTrigger<C> trigger) {
-        checkNotNull(type, "type");
-        checkNotNull(trigger, "trigger");
+        Objects.requireNonNull(type, "type");
+        Objects.requireNonNull(trigger, "trigger");
         this.trigger = trigger;
         this.type = type;
         return (B) this;
@@ -55,14 +56,14 @@ public abstract class AbstractCriterionBuilder<T extends AdvancementCriterion, B
 
     @Override
     public B name(String name) {
-        checkNotNull(name, "name");
+        Objects.requireNonNull(name, "name");
         this.name = name;
         return (B) this;
     }
 
     @Override
     public T build() {
-        checkState(this.name != null, "The name must be set");
+        Preconditions.checkState(this.name != null, "The name must be set");
         return this.build0();
     }
 

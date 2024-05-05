@@ -26,7 +26,7 @@ package org.spongepowered.common.bridge.world.item.crafting;
 
 import net.minecraft.world.item.crafting.Ingredient;
 
-public interface SmithingRecipeBridge {
+public interface SmithingRecipeBridge extends RecipeResultBridge {
 
     Ingredient bridge$template();
     Ingredient bridge$base();

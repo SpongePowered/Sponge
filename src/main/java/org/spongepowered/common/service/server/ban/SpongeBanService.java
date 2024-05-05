@@ -39,6 +39,7 @@ import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.players.IpBanListAccessor;
 import org.spongepowered.common.accessor.server.players.StoredUserListAccessor;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.UserListUtil;
@@ -133,7 +134,7 @@ public final class SpongeBanService implements BanService {
         final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
             (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
         accessor.invoker$removeExpired();
-        return CompletableFuture.completedFuture(ban.join().isPresent() && this.remove(ban.join().get()).join());
+        return ban.thenCompose(result -> result.map(this::remove).orElse(CompletableFuture.completedFuture(false)));
     }
 
     @SuppressWarnings("unchecked")
@@ -142,7 +143,7 @@ public final class SpongeBanService implements BanService {
         final CompletableFuture<Optional<Ban.IP>> ban = this.find(address);
         final StoredUserListAccessor<String, IpBanListEntry> accessor = ((StoredUserListAccessor<String, IpBanListEntry>) this.getIPBanList());
         accessor.invoker$removeExpired();
-        return CompletableFuture.completedFuture(ban.join().isPresent() && this.remove(ban.join().get()).join());
+        return ban.thenCompose(result -> result.map(this::remove).orElse(CompletableFuture.completedFuture(false)));
     }
 
     @Override
@@ -157,7 +158,7 @@ public final class SpongeBanService implements BanService {
 
                         UserListUtil.removeEntry(this.getUserBanList(), SpongeGameProfile.toMcProfile(((Ban.Profile) ban).profile()));
                         return true;
-                    }, SpongeCommon.server());
+                    }, ((MinecraftServerBridge) SpongeCommon.server()).bridge$spongeMainThreadExecutor());
         } else if (ban.type().equals(BanTypes.IP.get())) {
             Sponge.eventManager().post(SpongeEventFactory.createPardonIpEvent(PhaseTracker.getCauseStackManager().currentCause(), (Ban.IP) ban));
 
@@ -178,7 +179,7 @@ public final class SpongeBanService implements BanService {
                     .thenApplyAsync(user -> {
                         Sponge.eventManager().post(SpongeEventFactory.createBanUserEvent(PhaseTracker.getCauseStackManager().currentCause(), (Ban.Profile) ban, user));
                         return Optional.ofNullable((Ban) UserListUtil.addEntry(this.getUserBanList(), (StoredUserEntry<?>) ban));
-                    }, SpongeCommon.server());
+                    }, ((MinecraftServerBridge) SpongeCommon.server()).bridge$spongeMainThreadExecutor());
         } else if (ban.type().equals(BanTypes.IP.get())) {
 
             Sponge.eventManager().post(SpongeEventFactory.createBanIpEvent(PhaseTracker.getCauseStackManager().currentCause(), (Ban.IP) ban));

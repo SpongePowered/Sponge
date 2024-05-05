@@ -59,8 +59,8 @@ public final class FireworkRocketData {
                             return null;
                         })
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.ticks();
-                            if (ticks < 0 || ticks > Byte.MAX_VALUE) {
+                            final int ticks = SpongeTicks.toSaturatedIntOrInfinite(v);
+                            if (v.isInfinite() || ticks < 0 || ticks > Byte.MAX_VALUE) {
                                 return false;
                             }
                             final ItemStack item = FireworkUtil.getItem(h);

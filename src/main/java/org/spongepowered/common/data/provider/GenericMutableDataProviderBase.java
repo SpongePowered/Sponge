@@ -25,11 +25,18 @@
 package org.spongepowered.common.data.provider;
 
 import io.leangen.geantyref.GenericTypeReflector;
+import net.minecraft.world.level.entity.EntityInLevelCallback;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.TypeTokenUtil;
 
 import java.lang.reflect.Type;
@@ -119,18 +126,21 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     protected DataTransactionResult setAndGetResult(final H dataHolder, final E value) {
         final Optional<Value.Immutable<E>> originalValue = this.getFrom(dataHolder)
                 .map(e -> this.constructValue(dataHolder, e).asImmutable());
-        final Value.Immutable<E> replacementValue = Value.immutableOf(this.key(), value);
-        try {
-            if (this.set(dataHolder, value)) {
-                final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-                originalValue.ifPresent(builder::replace);
-                return builder.result(DataTransactionResult.Type.SUCCESS).success(replacementValue).build();
+        final Value.Immutable<E> originalReplacementValue = Value.immutableOf(this.key(), value);
+
+        return this.callReplacementEvent((DataHolder.Mutable) dataHolder, originalValue, originalReplacementValue).map(replacementValue -> {
+            try {
+                if (this.set(dataHolder, value)) {
+                    final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+                    originalValue.ifPresent(builder::replace);
+                    return builder.result(DataTransactionResult.Type.SUCCESS).success(replacementValue).build();
+                }
+                return DataTransactionResult.failResult(replacementValue);
+            } catch (Exception e) {
+                SpongeCommon.logger().debug("An exception occurred when setting data: ", e);
+                return DataTransactionResult.errorResult(replacementValue);
             }
-            return DataTransactionResult.failResult(replacementValue);
-        } catch (Exception e) {
-            SpongeCommon.logger().debug("An exception occurred when setting data: ", e);
-            return DataTransactionResult.errorResult(replacementValue);
-        }
+        }).orElse(DataTransactionResult.failResult(originalReplacementValue));
     }
 
     /**
@@ -206,18 +216,21 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
 
         final Optional<Value.Immutable<E>> originalValue = this.getFrom((H) dataHolder)
                 .map(e -> this.constructValue((H) dataHolder, e).asImmutable());
-        final Value.Immutable<E> replacementValue = value.asImmutable();
-        try {
-            if (this.set((H) dataHolder, value.get())) {
-                final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-                originalValue.ifPresent(builder::replace);
-                return builder.result(DataTransactionResult.Type.SUCCESS).success(replacementValue).build();
+        final Value.Immutable<E> originalReplacementValue = value.asImmutable();
+
+        return this.callReplacementEvent(dataHolder, originalValue, originalReplacementValue).map(replacementValue -> {
+            try {
+                if (this.set((H) dataHolder, value.get())) {
+                    final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+                    originalValue.ifPresent(builder::replace);
+                    return builder.result(DataTransactionResult.Type.SUCCESS).success(replacementValue).build();
+                }
+                return DataTransactionResult.failResult(replacementValue);
+            } catch (Exception e) {
+                SpongeCommon.logger().debug("An exception occurred when setting data: ", e);
+                return DataTransactionResult.errorResult(replacementValue);
             }
-            return DataTransactionResult.failResult(replacementValue);
-        } catch (Exception e) {
-            SpongeCommon.logger().debug("An exception occurred when setting data: ", e);
-            return DataTransactionResult.errorResult(replacementValue);
-        }
+        }).orElse(DataTransactionResult.failResult(originalReplacementValue));
     }
 
     @Override
@@ -234,5 +247,25 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
             return DataTransactionResult.failNoData();
         }
         return this.deleteAndGetResult((H) dataHolder);
+    }
+
+    private Optional<Value.Immutable<E>> callReplacementEvent(
+            final DataHolder.Mutable dataHolder, final Optional<Value.Immutable<E>> originalValue, final Value.Immutable<E> replacementValue) {
+        if (!(dataHolder instanceof Entity entity) || ((EntityAccessor) entity).accessor$levelCallback() == EntityInLevelCallback.NULL
+                || ((SpongeDataHolderBridge) dataHolder).brigde$isDeserializing()) {
+            return Optional.of(replacementValue);
+        }
+        final DataTransactionResult.Builder transaction = DataTransactionResult.builder()
+                .success(replacementValue)
+                .result(DataTransactionResult.Type.SUCCESS);
+        originalValue.ifPresent(transaction::replace);
+        final ChangeDataHolderEvent.ValueChange valueChange = SpongeEventFactory.createChangeDataHolderEventValueChange(
+                PhaseTracker.SERVER.currentCause(),
+                transaction.build(),
+                dataHolder);
+        if (SpongeCommon.post(valueChange)) {
+            return Optional.empty();
+        }
+        return valueChange.endResult().successfulValue(replacementValue.key());
     }
 }

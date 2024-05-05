@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.builder.meta;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
@@ -38,7 +36,9 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.Preconditions;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -56,7 +56,7 @@ public final class SpongePatternLayerBuilder extends AbstractDataBuilder<BannerP
 
     @Override
     protected Optional<BannerPatternLayer> buildContent(final DataView container) throws InvalidDataException {
-        checkNotNull(container);
+        Objects.requireNonNull(container);
         if (!container.contains(Constants.TileEntity.Banner.SHAPE) || !container.contains(Constants.TileEntity.Banner.COLOR)) {
             return Optional.empty();
         }
@@ -81,13 +81,13 @@ public final class SpongePatternLayerBuilder extends AbstractDataBuilder<BannerP
 
     @Override
     public BannerPatternLayer.Builder pattern(final BannerPatternShape shape) {
-        this.shape = checkNotNull(shape);
+        this.shape = Objects.requireNonNull(shape);
         return this;
     }
 
     @Override
     public BannerPatternLayer.Builder color(final DyeColor color) {
-        this.color = checkNotNull(color);
+        this.color = Objects.requireNonNull(color);
         return this;
     }
 
@@ -100,8 +100,8 @@ public final class SpongePatternLayerBuilder extends AbstractDataBuilder<BannerP
 
     @Override
     public BannerPatternLayer build() {
-        checkState(this.shape != null);
-        checkState(this.color != null);
+        Preconditions.checkState(this.shape != null);
+        Preconditions.checkState(this.color != null);
         return new SpongePatternLayer(this.shape, this.color);
     }
 }

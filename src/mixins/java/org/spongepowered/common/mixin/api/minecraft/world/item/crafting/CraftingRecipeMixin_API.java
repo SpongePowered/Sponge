@@ -30,8 +30,6 @@ import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.world.item.crafting.ShapedRecipeAccessor;
-import org.spongepowered.common.accessor.world.item.crafting.ShapelessRecipeAccessor;
 
 import java.util.Optional;
 
@@ -48,11 +46,11 @@ public interface CraftingRecipeMixin_API extends CraftingRecipe {
 
     default Optional<String> group() {
         String group = "";
-        if (this instanceof ShapedRecipe) {
-            group = ((ShapedRecipeAccessor) this).accessor$group();
+        if (this instanceof ShapedRecipe sr) {
+            group = sr.getGroup();
         }
-        if (this instanceof ShapelessRecipe) {
-            group = ((ShapelessRecipeAccessor) this).accessor$group();
+        if (this instanceof ShapelessRecipe sr) {
+            group = sr.getGroup();
         }
         if (group.isEmpty()) {
             return Optional.empty();

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.scheduler;
 
-import com.google.common.base.MoreObjects;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
@@ -34,6 +33,7 @@ import org.spongepowered.plugin.PluginContainer;
 import java.time.Duration;
 import java.time.temporal.TemporalUnit;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -78,10 +78,10 @@ public final class SpongeTask implements Task {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("plugin", this.plugin.metadata().id())
-                .add("delay", this.delay)
-                .add("interval", this.interval)
+        return new StringJoiner(", ", SpongeTask.class.getSimpleName() + "[", "]")
+                .add("plugin=" + this.plugin.metadata().id())
+                .add("delay=" + this.delay)
+                .add("interval=" + this.interval)
                 .toString();
     }
 
@@ -128,6 +128,8 @@ public final class SpongeTask implements Task {
             Objects.requireNonNull(delay);
             if (delay.ticks() < 0) {
                 throw new IllegalArgumentException("Delay must be equal to or greater than zero!");
+            } else if (delay.isInfinite()) {
+                throw new IllegalArgumentException("Delay must not be infinite!");
             }
             this.delay = delay.ticks() * SpongeScheduler.TICK_DURATION_NS;
             this.tickBasedDelay = true;
@@ -173,6 +175,8 @@ public final class SpongeTask implements Task {
             Objects.requireNonNull(interval, "interval");
             if (interval.ticks() < 0) {
                 throw new IllegalArgumentException("Interval must be equal to or greater than zero!");
+            } else if (interval.isInfinite()) {
+                throw new IllegalArgumentException("Interval must not be infinite!");
             }
             this.interval = interval.ticks() * SpongeScheduler.TICK_DURATION_NS;
             this.tickBasedInterval = true;

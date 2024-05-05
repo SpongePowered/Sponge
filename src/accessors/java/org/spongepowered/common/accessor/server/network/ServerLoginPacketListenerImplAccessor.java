@@ -29,6 +29,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
 public interface ServerLoginPacketListenerImplAccessor {
@@ -39,4 +40,6 @@ public interface ServerLoginPacketListenerImplAccessor {
 
     @Accessor("authenticatedProfile") void accessor$gameProfile(final GameProfile profile);
     @Accessor("connection") Connection accessor$connection();
+
+    @Invoker("startClientVerification") void invoker$startClientVerification(final GameProfile profile);
 }

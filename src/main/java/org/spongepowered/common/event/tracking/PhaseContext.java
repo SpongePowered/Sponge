@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -39,11 +37,13 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.util.MemoizedSupplier;
+import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Deque;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -86,7 +86,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
     private @Nullable Object source;
 
     public P source(final Object owner) {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        Preconditions.checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.source = owner;
         return (P) this;
     }
@@ -274,7 +274,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
 
     protected PhaseContext(final IPhaseState<P> state, final PhaseTracker tracker) {
         this.state = state;
-        this.createdTracker = checkNotNull(tracker, "Null PhaseTracker!");
+        this.createdTracker = Objects.requireNonNull(tracker, "Null PhaseTracker!");
     }
 
     @Override
@@ -296,9 +296,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
 
     @Override
     public String toString() {
-        return com.google.common.base.MoreObjects.toStringHelper(this)
-            .add("isCompleted", this.isCompleted)
-            .toString();
+        return new StringJoiner(", ", PhaseContext.class.getSimpleName() + "[", "]")
+                .add("isCompleted=" + this.isCompleted)
+                .toString();
     }
 
     protected P markEmpty() {
@@ -323,22 +323,14 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
         }
         final PhaseTracker instance = PhaseTracker.getInstance();
         instance.completePhase(this);
-        if (!this.shouldProvideModifiers()) {
-            if (this.usedFrame != null) {
-                this.usedFrame.iterator().forEachRemaining(instance::popCauseFrame);
-            }
-            return;
-        }
-        if (this.usedFrame == null) {
-            // So, this part is interesting... Since the used frame is null, that means
-            // the cause stack manager still has the refernce of this context/phase, we have
-            // to "pop off" the list.
-            instance.popFrameMutator(this);
-        }
         if (this.usedFrame != null) {
             this.usedFrame.iterator().forEachRemaining(instance::popCauseFrame);
-            this.usedFrame.clear();
             this.usedFrame = null;
+        } else if (this.shouldProvideModifiers()) {
+            // So, this part is interesting... Since the used frame is null, that means
+            // the cause stack manager still has the reference of this context/phase, we have
+            // to "pop off" the list.
+            instance.popFrameMutator(this);
         }
         this.reset();
         this.isCompleted = false;

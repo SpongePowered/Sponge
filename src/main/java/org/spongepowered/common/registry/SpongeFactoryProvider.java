@@ -63,6 +63,7 @@ import org.spongepowered.api.resource.ResourcePath;
 import org.spongepowered.api.resource.pack.PackStatus;
 import org.spongepowered.api.resource.pack.PackType;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.scoreboard.ScoreFormat;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.service.permission.NodeTree;
 import org.spongepowered.api.state.BooleanStateProperty;
@@ -132,6 +133,7 @@ import org.spongepowered.common.resource.pack.SpongePackStatusFactory;
 import org.spongepowered.common.resource.pack.SpongePackTypeFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
+import org.spongepowered.common.scoreboard.SpongeScoreFormatFactory;
 import org.spongepowered.common.service.server.permission.SpongeNodeTree;
 import org.spongepowered.common.state.SpongeStateMatcherFactory;
 import org.spongepowered.common.tag.SpongeTagFactory;
@@ -275,6 +277,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(SoundConfig.Factory.class, new SpongeSoundConfigFactory())
                 .registerFactory(NaturalSpawnCost.Factory.class, new SpongeNaturalSpawnerCostFactory())
                 .registerFactory(NaturalSpawner.Factory.class, new SpongeNaturalSpawnerFactory())
+                .registerFactory(ScoreFormat.Factory.class, new SpongeScoreFormatFactory())
         ;
     }
 }

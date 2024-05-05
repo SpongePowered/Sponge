@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Client;
@@ -39,7 +37,6 @@ import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.BuilderProvider;
 import org.spongepowered.api.registry.FactoryProvider;
 import org.spongepowered.api.service.ServiceProvider;
-import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.common.registry.RegistryHolderLogic;
@@ -47,9 +44,12 @@ import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.server.ServerConsoleSystemSubject;
 import org.spongepowered.common.util.LocaleCache;
+import org.spongepowered.common.util.Preconditions;
 
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 @Singleton
 public final class SpongeGame implements Game, SpongeRegistryHolder {
@@ -63,7 +63,6 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
     private final PluginConfigManager configManager;
     private final ChannelManager channelManager;
     private final MetricsConfigManager metricsConfigManager;
-    private final SqlManager sqlManager;
     private final ServiceProvider.GameScoped serviceProvider;
 
     private final AsyncScheduler asyncScheduler;
@@ -78,7 +77,7 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
     public SpongeGame(final Platform platform, final BuilderProvider builderProvider,
             final FactoryProvider factoryProvider, final DataManager dataManager, final PluginManager pluginManager,
             final EventManager eventManager, final PluginConfigManager configManager, final ChannelManager channelManager,
-            final MetricsConfigManager metricsConfigManager, final SqlManager sqlManager, final ServiceProvider.GameScoped serviceProvider) {
+            final MetricsConfigManager metricsConfigManager, final ServiceProvider.GameScoped serviceProvider) {
 
         this.platform = platform;
         this.builderProvider = builderProvider;
@@ -89,7 +88,6 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
         this.configManager = configManager;
         this.channelManager = channelManager;
         this.metricsConfigManager = metricsConfigManager;
-        this.sqlManager = sqlManager;
         this.serviceProvider = serviceProvider;
 
         this.asyncScheduler = new AsyncScheduler();
@@ -154,11 +152,6 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
     }
 
     @Override
-    public SqlManager sqlManager() {
-        return this.sqlManager;
-    }
-
-    @Override
     public ServiceProvider.GameScoped serviceProvider() {
         return this.serviceProvider;
     }
@@ -170,7 +163,7 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
 
     @Override
     public Locale locale(final String locale) {
-        return LocaleCache.getLocale(Preconditions.checkNotNull(locale));
+        return LocaleCache.getLocale(Objects.requireNonNull(locale));
     }
 
     @Override
@@ -222,8 +215,8 @@ public final class SpongeGame implements Game, SpongeRegistryHolder {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("platform", this.platform)
+        return new StringJoiner(", ", SpongeGame.class.getSimpleName() + "[", "]")
+                .add("platform=" + this.platform)
                 .toString();
     }
 }

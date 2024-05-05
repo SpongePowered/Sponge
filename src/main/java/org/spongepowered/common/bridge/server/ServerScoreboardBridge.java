@@ -27,7 +27,8 @@ package org.spongepowered.common.bridge.server;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.scores.ScoreHolder;
+import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -45,15 +46,22 @@ public interface ServerScoreboardBridge {
 
     Optional<Objective> bridge$getObjective(String name);
 
-    void bridge$addObjective(Objective objective);
+    void bridge$addAPIObjective(Objective objective);
 
-    void bridge$updateDisplaySlot(@Nullable Objective objective, DisplaySlot displaySlot) throws IllegalStateException;
+    void bridge$addMCObjective(net.minecraft.world.scores.Objective mcObjective);
+
 
     Optional<Objective> bridge$getObjective(DisplaySlot slot);
 
     Set<Objective> bridge$getObjectivesByCriterion(Criterion criterion);
 
-    void bridge$removeObjective(Objective objective);
+    void bridge$removeAPIObjective(Objective objective);
+
+    void bridge$removeMCObjective(net.minecraft.world.scores.Objective mcObjective);
+
+    void bridge$removeMCScore(ScoreHolder holder, net.minecraft.world.scores.Objective mcObjective);
+
+    void bridge$removeAPIScore(Objective spongeObjective, Score spongeScore);
 
     void bridge$registerTeam(Team spongeTeam);
 

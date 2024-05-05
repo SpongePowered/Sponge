@@ -35,16 +35,12 @@ import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.Connection;
-import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
-import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
@@ -95,7 +91,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundMoveVehiclePacketAccessor;
 import org.spongepowered.common.accessor.server.level.ServerPlayerGameModeAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
@@ -106,7 +101,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.CommandUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -122,7 +116,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPacketListenerImplMixin implements ConnectionHolderBridge, ServerGamePacketListenerImplBridge {
+public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPacketListenerImplMixin implements ServerGamePacketListenerImplBridge {
 
     // @formatter:off
     @Shadow public net.minecraft.server.level.ServerPlayer player;
@@ -133,7 +127,6 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch, Set<RelativeMovement> relativeArguments);
     @Shadow protected abstract CompletableFuture<List<FilteredText>> shadow$filterTextPacket(final List<String> $$0);
-    @Shadow protected abstract void shadow$performChatCommand(final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1);
     @Shadow protected abstract ParseResults<CommandSourceStack> shadow$parseCommand(final String $$0);
     // @formatter:on
 
@@ -147,11 +140,6 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         if (packet instanceof ClientboundPlayerInfoUpdatePacket infoPacket) {
             ((SpongeTabList) ((ServerPlayer) this.player).tabList()).updateEntriesOnSend(infoPacket);
         }
-    }
-
-    @Override
-    public Connection bridge$getConnection() {
-        return this.connection;
     }
 
     @Override
@@ -204,16 +192,6 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         return SpongeCommandManager.get(this.server).getDispatcher().parse(command, (CommandSourceStack) source, true);
     }
 
-    /**
-     * Specifically hooks the reach distance to use the forge hook.
-     */
-    @Redirect(
-            method = "handleInteract",
-            at = @At( value = "FIELD",target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;MAX_INTERACTION_DISTANCE:D"))
-    private double impl$getPlatformReach(final ServerboundInteractPacket packet) {
-        return PlatformHooks.INSTANCE.getGeneralHooks().getEntityReachDistanceSq(this.player, packet.getTarget(this.player.serverLevel()));
-    }
-
     @Inject(method = "handleMovePlayer",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;isPassenger()Z"),
             cancellable = true
@@ -234,8 +212,8 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
         final Vector3d originalToPosition = new Vector3d(packetIn.getX(this.player.getX()),
                 packetIn.getY(this.player.getY()), packetIn.getZ(this.player.getZ()));
-        final Vector3d originalToRotation = new Vector3d(packetIn.getYRot(this.player.getYRot()),
-                packetIn.getXRot(this.player.getXRot()), 0);
+        final Vector3d originalToRotation = new Vector3d(packetIn.getXRot(this.player.getXRot()),
+                packetIn.getYRot(this.player.getYRot()), 0);
 
         // common checks and throws are done here.
         final @Nullable Vector3d toPosition;
@@ -272,10 +250,12 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             // The position is absolute so the momentum will be reset by the client.
             // The rotation is relative so the head movement is still smooth.
             // The client thinks its current rotation is originalToRotation so the new rotation is relative to that.
-            this.player.absMoveTo(fromPosition.x(), fromPosition.y(), fromPosition.z(),
-                    (float) originalToRotation.x(), (float) originalToRotation.y());
+            // The rotation values can be out of "valid" range so set them directly to the same value the client has.
+            this.player.absMoveTo(fromPosition.x(), fromPosition.y(), fromPosition.z());
+            this.player.setXRot((float) originalToRotation.x());
+            this.player.setYRot((float) originalToRotation.y());
             this.shadow$teleport(fromPosition.x(), fromPosition.y(), fromPosition.z(),
-                    (float) toRotation.x(), (float) toRotation.y(),
+                    (float) toRotation.y(), (float) toRotation.x(),
                     EnumSet.of(RelativeMovement.X_ROT, RelativeMovement.Y_ROT));
             ci.cancel();
             return;
@@ -286,10 +266,12 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             // Notify the client about the new position and new rotation.
             // Both are relatives so the client will keep its momentum.
             // The client thinks its current position is originalToPosition so the new position is relative to that.
-            this.player.absMoveTo(originalToPosition.x(), originalToPosition.y(), originalToPosition.z(),
-                    (float) originalToRotation.x(), (float) originalToRotation.y());
+            // The rotation values can be out of "valid" range so set them directly to the same value the client has.
+            this.player.absMoveTo(originalToPosition.x(), originalToPosition.y(), originalToPosition.z());
+            this.player.setXRot((float) originalToRotation.x());
+            this.player.setYRot((float) originalToRotation.y());
             this.shadow$teleport(toPosition.x(), toPosition.y(), toPosition.z(),
-                    (float) toRotation.x(), (float) toRotation.y(),
+                    (float) toRotation.y(), (float) toRotation.x(),
                     EnumSet.allOf(RelativeMovement.class));
             ci.cancel();
         }
@@ -513,15 +495,6 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         } else {
             // TODO maybe not ignore this?
             // LOGGER.warn("Player {} just tried to change non-editable sign", $$0.getName().getString());
-        }
-    }
-
-    @Redirect(method = "lambda$handleChatCommand$9", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
-    public void impl$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(this.player);
-            frame.addContext(EventContextKeys.COMMAND, $$0.command());
-            this.shadow$performChatCommand($$0, $$1);
         }
     }
 

@@ -44,21 +44,20 @@ import java.util.Set;
 public abstract class JukeboxBlockEntityMixin_API extends BlockEntityMixin_API implements Jukebox {
 
     // @formatter:off
-    @Shadow public abstract net.minecraft.world.item.ItemStack shadow$getItem(final int $$0);
+    @Shadow public abstract net.minecraft.world.item.ItemStack shadow$getTheItem();
 
-    @Shadow public abstract void shadow$setItem(final int $$0, final net.minecraft.world.item.ItemStack $$1);
+    @Shadow public abstract void shadow$setTheItem(final net.minecraft.world.item.ItemStack $$1);
 
     @Shadow public abstract void shadow$popOutRecord();
 
     // @formatter:on
 
 
-    @Shadow public abstract net.minecraft.world.item.ItemStack getItem(final int $$0);
-
     @Override
     public void play() {
-        if (!this.getItem(0).isEmpty()) {
-            this.level.levelEvent(null, Constants.WorldEvents.PLAY_RECORD_EVENT, this.shadow$getBlockPos(), Item.getId(this.shadow$getItem(0).getItem()));
+        final net.minecraft.world.item.ItemStack stack = this.shadow$getTheItem();
+        if (!stack.isEmpty()) {
+            this.level.levelEvent(null, Constants.WorldEvents.PLAY_RECORD_EVENT, this.shadow$getBlockPos(), Item.getId(stack.getItem()));
         }
     }
 
@@ -84,7 +83,7 @@ public abstract class JukeboxBlockEntityMixin_API extends BlockEntityMixin_API i
         final BlockState block = this.level.getBlockState(this.shadow$getBlockPos());
         if (block.getBlock() == Blocks.JUKEBOX) {
             // Don't use BlockJukebox#insertRecord - it looses item data
-            this.shadow$setItem(0, itemStack);
+            this.shadow$setTheItem(itemStack);
             this.level.setBlock(this.shadow$getBlockPos(), block.setValue(JukeboxBlock.HAS_RECORD, true), Constants.BlockChangeFlags.NOTIFY_CLIENTS);
         }
     }

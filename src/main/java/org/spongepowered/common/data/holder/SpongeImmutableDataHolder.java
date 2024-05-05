@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.holder;
 
-import static java.util.Objects.requireNonNull;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
@@ -33,6 +31,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -43,7 +42,7 @@ public interface SpongeImmutableDataHolder<I extends DataHolder.Immutable<I>> ex
     default <E> Optional<I> transform(Key<? extends Value<E>> key, Function<E, E> function) {
         final DataProvider<? extends Value<E>, E> provider = this.impl$getProviderFor(key, this);
         return provider.get(this).flatMap(e -> {
-            final E transformed = requireNonNull(function.apply(e));
+            final E transformed = Objects.requireNonNull(function.apply(e));
             return provider.with((I) this, transformed);
         });
     }

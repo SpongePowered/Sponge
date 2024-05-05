@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.resourcepack;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import net.kyori.adventure.text.Component;
@@ -40,6 +39,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 public abstract class SpongeResourcePack implements ResourcePack {
@@ -74,7 +74,9 @@ public abstract class SpongeResourcePack implements ResourcePack {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("id", this.id()).add("uri", this.uri()).toString();
+        return new StringJoiner(", ", SpongeResourcePack.class.getSimpleName() + "[", "]")
+                .add("id=" + this.id())
+                .add("uri=" + this.uri()).toString();
     }
 
     public static SpongeResourcePack create(String uri, String hash, Component component) throws URISyntaxException {

@@ -24,36 +24,16 @@
  */
 package org.spongepowered.forge.hook;
 
-import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.entity.EntityBridge;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
-import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.common.hooks.EventHooks;
 
 public final class ForgeEventHooks implements EventHooks {
-
-    @Override
-    public ChangeEntityWorldEvent.Pre callChangeEntityWorldEventPre(final Entity entity, final ServerLevel toWorld) {
-        final ChangeEntityWorldEvent.Pre pre = EventHooks.super.callChangeEntityWorldEventPre(entity, toWorld);
-        if (pre.isCancelled()) {
-            // Taken from ForgeHooks#onTravelToDimension
-            // Revert variable back to true as it would have been set to false
-            if (entity instanceof AbstractMinecartContainer)
-            {
-                ((AbstractMinecartContainer) entity).dropContentsWhenDead(true);
-            }
-        }
-        return pre;
-    }
 
     @Override
     public void callItemDestroyedEvent(

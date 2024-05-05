@@ -35,6 +35,8 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.javadoc.Javadoc;
+import com.github.javaparser.javadoc.description.JavadocDescription;
 import net.minecraft.resources.ResourceLocation;
 import org.tinylog.Logger;
 
@@ -82,6 +84,8 @@ class EnumEntriesValidator<V> implements Generator {
                 .orElseThrow(() -> new IllegalStateException("Could not find primary type for registry type " + this.targetClassSimpleName));
 
         final Object[] map = this.clazz.getEnumConstants();
+
+        primaryTypeDeclaration.setJavadocComment(new Javadoc(JavadocDescription.parseText(Generator.GENERATED_FILE_JAVADOCS)));
 
         // Find index of first field member
         // Take out all field members from the members list

@@ -24,64 +24,58 @@
  */
 package org.spongepowered.common.item.recipe.smithing;
 
-import com.google.gson.JsonObject;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.item.recipe.smithing.SmithingRecipe;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
-import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
-import org.spongepowered.common.util.Constants;
 
+import java.util.List;
 import java.util.function.Function;
 
-public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration {
+public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration<SmithingTransformRecipe> implements
+        SpongeRecipeRegistration.ResultFunctionRegistration<Container> {
 
     // Vanilla Recipe
+    private final Ingredient template;
+
     private final Ingredient base;
     private final Ingredient addition;
-    private final Item result;
 
     // Sponge Recipe
     private final ItemStack spongeResult;
-    private Function<Container, ItemStack> resultFunction;
+    private final Function<Container, ItemStack> resultFunction;
 
-    public SpongeSmithingRecipeRegistration(ResourceLocation key, RecipeSerializer<?> serializer, String group, Ingredient base,
+    public SpongeSmithingRecipeRegistration(ResourceLocation key, String group, final Ingredient template, Ingredient base,
             Ingredient addition, ItemStack spongeResult, Function<Container, ItemStack> resultFunction,
             DataPack<RecipeRegistration> pack, final RecipeCategory category) {
-        super(key, serializer, spongeResult.getItem(), group, pack, category);
+        super(key, group, pack, category, RecipeSerializer.SMITHING_TRANSFORM);
+        this.template = template;
         this.base = base;
         this.addition = addition;
-        this.result = spongeResult.getItem();
         this.spongeResult = spongeResult;
         this.resultFunction = resultFunction;
     }
 
     @Override
-    public void serializeShape(JsonObject json) {
-        json.add(Constants.Recipe.SMITHING_BASE_INGREDIENT, this.base.toJson(false));
-        json.add(Constants.Recipe.SMITHING_ADDITION_INGREDIENT, this.addition.toJson(false));
+    public Recipe recipe() {
+        this.ensureCached();
+        if (SpongeRecipeRegistration.isVanillaSerializer(this.spongeResult, this.resultFunction, null, List.of(this.template, this.base, this.addition))) {
+            return (SmithingRecipe) new SmithingTransformRecipe(this.template, this.base, this.addition, this.spongeResult);
+
+        }
+        return (SmithingRecipe) new SpongeSmithingRecipe(this.template, this.base, this.addition, this.spongeResult, this.resultFunction == null ? null : this.key.toString());
     }
 
     @Override
-    public void serializeResult(JsonObject json) {
-        final JsonObject item = new JsonObject();
-        final Registry<Item> itemRegistry = BuiltInRegistries.ITEM;
-        item.addProperty(Constants.Recipe.ITEM, itemRegistry.getKey(this.result).toString());
-        json.add(Constants.Recipe.RESULT, item);
-
-        if (this.spongeResult != null) {
-            json.add(Constants.Recipe.SPONGE_RESULT, IngredientResultUtil.serializeItemStack(this.spongeResult));
-        }
-        if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, IngredientResultUtil.cacheResultFunction(this.id(), this.resultFunction));
-        }
+    public Function<Container, ItemStack> resultFunction() {
+        return this.resultFunction;
     }
 }

@@ -85,7 +85,6 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -114,6 +113,7 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
@@ -136,7 +136,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Shadow @Final private MinecraftServer server;
 
     @Shadow public abstract void levelEvent(@Nullable Player $$0, int $$1, BlockPos $$2, int $$3);
-    @Shadow @Final @Mutable @Nullable private EndDragonFight dragonFight;
+    @Shadow @Nullable private EndDragonFight dragonFight;
 
     // @formatter:on
 
@@ -397,11 +397,11 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             if (newWeather.type() == WeatherTypes.CLEAR.get()) {
                 this.serverLevelData.setThunderTime(0);
                 this.serverLevelData.setRainTime(0);
-                this.serverLevelData.setClearWeatherTime((int) newWeather.remainingDuration().ticks());
+                this.serverLevelData.setClearWeatherTime(SpongeTicks.toSaturatedIntOrInfinite(newWeather.remainingDuration()));
                 this.serverLevelData.setThundering(false);
                 this.serverLevelData.setRaining(false);
             } else {
-                final int newTime = (int) newWeather.remainingDuration().ticks();
+                final int newTime = SpongeTicks.toSaturatedIntOrInfinite(newWeather.remainingDuration());
                 this.serverLevelData.setRaining(true);
                 this.serverLevelData.setClearWeatherTime(0);
                 this.serverLevelData.setRainTime(newTime);

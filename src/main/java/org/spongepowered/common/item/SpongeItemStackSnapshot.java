@@ -24,10 +24,7 @@
  */
 package org.spongepowered.common.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -55,8 +52,10 @@ import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -79,7 +78,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @SuppressWarnings({"EqualsBetweenInconvertibleTypes", "ConstantConditions"})
     public SpongeItemStackSnapshot(final ItemStack itemStack) {
-        checkNotNull(itemStack);
+        java.util.Objects.requireNonNull(itemStack);
         if (ItemStackUtil.toNative(itemStack) == net.minecraft.world.item.ItemStack.EMPTY) {
             this.itemType = itemStack.type();
             this.quantity = 0;
@@ -132,9 +131,9 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
                                    final int quantity,
                                    final ImmutableList<DataManipulator.Immutable> manipulators,
                                    final @Nullable CompoundTag compound) {
-        this.itemType = checkNotNull(itemType);
+        this.itemType = java.util.Objects.requireNonNull(itemType);
         this.quantity = quantity;
-        this.manipulators = checkNotNull(manipulators);
+        this.manipulators = java.util.Objects.requireNonNull(manipulators);
         this.privateStack = ItemStackUtil.fromNative(new net.minecraft.world.item.ItemStack((Item) this.itemType, this.quantity));
         final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         final ImmutableSet.Builder<org.spongepowered.api.data.value.Value.Immutable<?>> valueBuilder = ImmutableSet.builder();
@@ -262,9 +261,9 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public String toString() {
         final ResourceKey resourceKey = Sponge.game().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
 
-        return MoreObjects.toStringHelper(this)
-                .add("itemType", resourceKey)
-                .add("quantity", this.quantity)
+        return new StringJoiner(", ", SpongeItemStackSnapshot.class.getSimpleName() + "[", "]")
+                .add("itemType=" + resourceKey)
+                .add("quantity=" + this.quantity)
                 .toString();
     }
 
@@ -330,15 +329,15 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         }
         final SpongeItemStackSnapshot that = (SpongeItemStackSnapshot) o;
         return this.quantity == that.quantity &&
-               this.damageValue == that.damageValue &&
-               Objects.equal(this.itemType, that.itemType) &&
-               Objects.equal(this.compound, that.compound) &&
-               Objects.equal(this.creatorUniqueId, that.creatorUniqueId);
+                this.damageValue == that.damageValue &&
+                Objects.equals(this.itemType, that.itemType) &&
+                Objects.equals(this.compound, that.compound) &&
+                Objects.equals(this.creatorUniqueId, that.creatorUniqueId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.itemType, this.quantity, this.damageValue, this.compound, this.creatorUniqueId);
+        return Objects.hash(this.itemType, this.quantity, this.damageValue, this.compound, this.creatorUniqueId);
     }
 
     @Override

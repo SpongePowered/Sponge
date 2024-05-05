@@ -26,7 +26,6 @@ package org.spongepowered.common.util;
 
 import org.spongepowered.common.SpongeCommon;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,10 +36,6 @@ import java.time.format.DateTimeFormatter;
 public final class FileUtil {
 
     private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd-hhmmss").withZone(ZoneId.systemDefault());
-
-    public static void copyCorruptedFile(final File file) {
-        FileUtil.copyCorruptedFile(file.toPath());
-    }
 
     public static void copyCorruptedFile(final Path path) {
         final Path corruptPath =

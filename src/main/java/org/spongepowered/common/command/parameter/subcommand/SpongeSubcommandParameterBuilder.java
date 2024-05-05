@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.command.parameter.subcommand;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Collection;
 import java.util.HashSet;

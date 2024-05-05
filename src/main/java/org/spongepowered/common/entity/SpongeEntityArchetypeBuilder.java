@@ -43,7 +43,6 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationTypes;
 import org.spongepowered.common.data.persistence.NBTTranslator;
-import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -132,13 +131,13 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
             Objects.requireNonNull(entity, "Cannot build an EntityArchetype for a null entity!").type(),
             "Entity is returning a null EntityType!"
         );
-        if (!((net.minecraft.world.entity.EntityType) entityType).canSerialize() && entityType != HumanEntity.TYPE) {
+        if (!((net.minecraft.world.entity.EntityType) entityType).canSerialize() && entityType != SpongeEntityTypes.HUMAN) {
             throw new IllegalArgumentException("Attempting to archetype a non-serializable entity: " + entity);
         }
         this.entityType = entityType;
         final CompoundTag compound = new CompoundTag();
         net.minecraft.world.entity.Entity mcEntity = (net.minecraft.world.entity.Entity) entity;
-        if (entityType == HumanEntity.TYPE) {
+        if (entityType == SpongeEntityTypes.HUMAN) {
             mcEntity.saveWithoutId(compound);
         } else {
             mcEntity.saveAsPassenger(compound);

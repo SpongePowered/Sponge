@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.data.provider.nbt;
 
-import static java.util.Objects.requireNonNull;
-
-import com.google.common.base.MoreObjects;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 public final class NBTDataType {
 
     private final String name;
 
     public NBTDataType(final String name) {
-        requireNonNull(name, "name");
+        Objects.requireNonNull(name, "name");
         this.name = name;
     }
 
@@ -43,8 +42,8 @@ public final class NBTDataType {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("name", this.name)
+        return new StringJoiner(", ", NBTDataType.class.getSimpleName() + "[", "]")
+                .add("name=" + this.name)
                 .toString();
     }
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.base.MoreObjects;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.math.imaginary.Quaterniond;
@@ -32,6 +31,7 @@ import org.spongepowered.math.matrix.Matrix4d;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 public final class SpongeTransform implements Transform {
 
@@ -188,10 +188,10 @@ public final class SpongeTransform implements Transform {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("position", this.position)
-                .add("rotation", this.rotation)
-                .add("scale", this.scale)
+        return new StringJoiner(", ", SpongeTransform.class.getSimpleName() + "[", "]")
+                .add("position=" + this.position)
+                .add("rotation=" + this.rotation)
+                .add("scale=" + this.scale)
                 .toString();
     }
 

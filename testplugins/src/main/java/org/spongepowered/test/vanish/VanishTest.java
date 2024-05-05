@@ -43,7 +43,7 @@ import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.util.Collection;
 
-@Plugin("vanish-test")
+@Plugin("vanish_test")
 public final class VanishTest {
 
     private final PluginContainer plugin;

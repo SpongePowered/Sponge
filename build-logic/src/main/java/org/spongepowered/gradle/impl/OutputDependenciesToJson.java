@@ -45,12 +45,9 @@ import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
@@ -211,10 +208,7 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
         final DependencyManifest manifest = new DependencyManifest(dependenciesMap);
 
         this.getLogger().info("Writing to {}", this.getOutputFile().get().getAsFile());
-        try (
-            final BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(this.getOutputFile().get().getAsFile()), StandardCharsets.UTF_8))
-        ) {
+        try (final BufferedWriter writer = Files.newBufferedWriter(this.getOutputFile().get().getAsFile().toPath())) {
             OutputDependenciesToJson.GSON.toJson(manifest, writer);
         } catch (final IOException ex) {
             throw new GradleException("Failed to write dependencies manifest", ex);
@@ -233,7 +227,7 @@ public abstract class OutputDependenciesToJson extends DefaultTask {
 
                 // Get file input stream for reading the file content
                 final String md5hash;
-                try (final InputStream in = new FileInputStream(dependency.getFile())) {
+                try (final InputStream in = Files.newInputStream(dependency.getFile().toPath())) {
                     final MessageDigest hasher = MessageDigest.getInstance("MD5");
                     final byte[] buf = new byte[4096];
                     int read;

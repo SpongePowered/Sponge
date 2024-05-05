@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.ai.goal;
 
-import com.google.common.base.MoreObjects;
 import net.minecraft.world.entity.ai.goal.Goal;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.ai.goal.GoalExecutor;
@@ -37,6 +36,7 @@ import org.spongepowered.common.bridge.world.entity.ai.GoalBridge;
 import org.spongepowered.common.registry.provider.GoalTypeProvider;
 
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 
 @Mixin(Goal.class)
@@ -72,9 +72,9 @@ public abstract class GoalMixin implements GoalBridge {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("type", this.impl$type)
-                .add("owner", this.impl$owner)
+        return new StringJoiner(", ", GoalMixin.class.getSimpleName() + "[", "]")
+                .add("type=" + this.impl$type)
+                .add("owner=" + this.impl$owner)
                 .toString();
     }
 }

@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.service.game.pagination;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.service.pagination.PaginationList;
+import org.spongepowered.common.util.Preconditions;
+
+import java.util.Objects;
 
 
 public final class SpongePaginationBuilder implements PaginationList.Builder {
@@ -52,7 +53,7 @@ public final class SpongePaginationBuilder implements PaginationList.Builder {
 
     @Override
     public PaginationList.Builder contents(final Iterable<Component> contents) {
-        checkNotNull(contents, "The contents cannot be null!");
+        Objects.requireNonNull(contents, "The contents cannot be null!");
         this.contents = contents;
         this.paginationList = null;
         return this;
@@ -60,7 +61,7 @@ public final class SpongePaginationBuilder implements PaginationList.Builder {
 
     @Override
     public PaginationList.Builder contents(final Component... contents) {
-        checkNotNull(contents, "The contents cannot be null!");
+        Objects.requireNonNull(contents, "The contents cannot be null!");
         this.contents = ImmutableList.copyOf(contents);
         this.paginationList = null;
         return this;
@@ -89,7 +90,7 @@ public final class SpongePaginationBuilder implements PaginationList.Builder {
 
     @Override
     public PaginationList.Builder padding(final Component padding) {
-        checkNotNull(padding, "The padding cannot be null!");
+        Objects.requireNonNull(padding, "The padding cannot be null!");
         this.paginationSpacer = padding;
         this.paginationList = null;
         return this;
@@ -103,7 +104,7 @@ public final class SpongePaginationBuilder implements PaginationList.Builder {
 
     @Override
     public PaginationList build() {
-        checkState(this.contents != null, "The contents of the pagination list cannot be null!");
+        Preconditions.checkState(this.contents != null, "The contents of the pagination list cannot be null!");
 
         if (this.paginationList == null) {
             this.paginationList = new SpongePaginationList(this.service, this.contents, this.title, this.header, this.footer, this.paginationSpacer,

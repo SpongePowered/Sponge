@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.persistence.DataQuery.of;
 
 import com.google.common.collect.BiMap;
@@ -43,7 +42,6 @@ import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -89,6 +87,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -254,6 +253,7 @@ public final class Constants {
             public static final class Player {
 
                 public static final String HEALTH_SCALE = "HealthScale";
+                public static final int ITEM_COOLDOWN_CANCELLED = -2;
             }
 
             public static final class Human {
@@ -272,6 +272,9 @@ public final class Constants {
                 public static final String NBT = "nbt";
             }
 
+            public static final class RangedAttackGoal {
+                public static final int INFINITE_ATTACK_TIME = -2;
+            }
         }
 
         public static final class User {
@@ -533,7 +536,7 @@ public final class Constants {
         public static final String ITEM_UNBREAKABLE = "Unbreakable";
         public static final String CUSTOM_MODEL_DATA = "CustomModelData";
         public static final String CUSTOM_POTION_COLOR = "CustomPotionColor";
-        public static final String CUSTOM_POTION_EFFECTS = "CustomPotionEffects";
+        public static final String CUSTOM_POTION_EFFECTS = "custom_potion_effects";
         public static final String LOCK = "Lock";
 
         public static final class Book {
@@ -606,6 +609,8 @@ public final class Constants {
         public static final String CATEGORY = "category";
         public static final String COUNT = "count";
 
+        public static final String SPONGE_TYPE = "sponge:type";
+        public static final String SPONGE_ID = "sponge:id";
         public static final String SPONGE_RESULT = "sponge:result";
         public static final String SPONGE_RESULTFUNCTION = "sponge:result_function";
         public static final String SPONGE_REMAINING_ITEMS = "sponge:remaining_items";
@@ -1315,7 +1320,6 @@ public final class Constants {
 
         public static final int OBJECTIVE_PACKET_ADD = 0;
         public static final int OBJECTIVE_PACKET_REMOVE = 1;
-        public static final int SCORE_NAME_LENGTH = 40;
     }
 
     public static final class Functional {
@@ -1382,7 +1386,7 @@ public final class Constants {
     public static final class DirectionFunctions {
 
         public static net.minecraft.core.Direction getFor(final Direction direction) {
-            switch (checkNotNull(direction)) {
+            switch (Objects.requireNonNull(direction)) {
                 case UP:
                     return net.minecraft.core.Direction.UP;
                 case DOWN:
@@ -1401,7 +1405,7 @@ public final class Constants {
         }
 
         public static Direction getFor(final net.minecraft.core.Direction facing) {
-            switch (checkNotNull(facing)) {
+            switch (Objects.requireNonNull(facing)) {
                 case UP:
                     return Direction.UP;
                 case DOWN:
@@ -1555,7 +1559,7 @@ public final class Constants {
         public static final double MINECRAFT_MINUTE_TICKS = TickConversions.MINECRAFT_HOUR_TICKS / 60.0;
         public static final double MINECRAFT_SECOND_TICKS = TickConversions.MINECRAFT_MINUTE_TICKS / 60.0;
         public static final int MINECRAFT_EPOCH_OFFSET = 6000;
-
+        public static final int INFINITE_TICKS = -1;
     }
 
     public static final class Universe {

@@ -1,39 +1,24 @@
-import net.fabricmc.loom.LoomGradleExtension
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import net.fabricmc.loom.api.LoomGradleExtensionAPI
 import net.fabricmc.loom.task.RemapJarTask
-import net.fabricmc.loom.task.RunGameTask
-import org.zeroturnaround.zip.transform.ZipEntryTransformer
-import java.io.StringWriter
+import org.gradle.configurationcache.extensions.capitalized
 
 buildscript {
     repositories {
+        maven("https://oss.sonatype.org/content/repositories/snapshots/")
         maven("https://repo.spongepowered.org/repository/maven-public") {
             name = "sponge"
         }
         maven("https://maven.architectury.dev/")
     }
-    dependencies {
-        classpath("dev.architectury:architectury-loom:0.7.2-SNAPSHOT") {
-            exclude("dev.architectury", "tiny-remapper")
-        }
-
-        classpath("dev.architectury:tiny-remapper") {
-            attributes {
-                attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.SHADOWED))
-            }
-            version {
-                branch = "fix/mappings-refresh"
-            }
-        }
-    }
 }
 
 plugins {
-    id("com.github.johnrengelman.shadow")
+    alias(libs.plugins.shadow)
     id("implementation-structure")
-    id("templated-resources")
+    alias(libs.plugins.blossom)
+    id("net.smoofyuniverse.loom") version "1.1-SNAPSHOT"
 }
-
-apply(plugin = "dev.architectury.loom") // we can't use the plugins block because we have to declare the dep in buildscript
 
 val commonProject = parent!!
 val transformersProject = parent!!.project(":modlauncher-transformers")
@@ -44,7 +29,7 @@ val recommendedVersion: String by project
 val organization: String by project
 val projectUrl: String by project
 
-val testplugins: Project? = rootProject.subprojects.find { "testplugins".equals(it.name) }
+val testPluginsProject: Project? = rootProject.subprojects.find { "testplugins" == it.name }
 
 description = "The SpongeAPI implementation for MinecraftForge"
 version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVersion, recommendedVersion, forgeVersion)
@@ -55,40 +40,37 @@ repositories {
     }
 }
 
-java {
-    withSourcesJar()
+// SpongeForge libraries
+val serviceLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeServiceLibraries")
+val gameLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameLibraries")
+
+val gameManagedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameManagedLibraries")
+
+val serviceShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeServiceShadedLibraries")
+val gameShadedLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeGameShadedLibraries")
+
+val runTaskOnlyConfig: NamedDomainObjectProvider<Configuration> = configurations.register("runTaskOnly")
+
+configurations.named("forgeRuntimeLibrary") {
+    extendsFrom(serviceLibrariesConfig.get())
 }
 
-extensions.configure(LoomGradleExtension::class) {
-    useFabricMixin = false
-    silentMojangMappingsLicense()
+// ModLauncher layers
+val serviceLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("serviceLayer") {
+    extendsFrom(serviceLibrariesConfig.get())
+    extendsFrom(configurations.getByName("forgeDependencies"))
+}
+val langLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("langLayer") {
+    extendsFrom(configurations.getByName("forgeDependencies"))
+}
+val gameLayerConfig: NamedDomainObjectProvider<Configuration> = configurations.register("gameLayer") {
+    extendsFrom(serviceLayerConfig.get())
+    extendsFrom(langLayerConfig.get())
+    extendsFrom(gameLibrariesConfig.get())
 
-    runs {
-        configureEach {
-            if (JavaVersion.current().isJava11Compatible) {
-                vmArgs(
-                        //"-Dfabric.log.level=debug",
-                        "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
-                        "--add-opens=java.base/java.util.jar=ALL-UNNAMED" // ModLauncher
-                )
-            }
-            programArgs("--access_widener.config", "common.accesswidener")
-            runDir(project.projectDir.resolve("run").toRelativeString(project.rootDir))
-        }
+    afterEvaluate {
+        extendsFrom(configurations.getByName("minecraftNamed"))
     }
-}
-
-// Forge extra configurations
-val forgeBootstrapLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("bootstrapLibraries")
-val mlTransformersConfig: NamedDomainObjectProvider<Configuration> = configurations.register("mltransformers")
-val forgeLibrariesConfig: NamedDomainObjectProvider<Configuration> = configurations.register("spongeLibraries") {
-    extendsFrom(mlTransformersConfig.get())
-}
-val forgeAppLaunchConfig: NamedDomainObjectProvider<Configuration> = configurations.register("applaunch") {
-    extendsFrom(forgeBootstrapLibrariesConfig.get())
-    extendsFrom(mlTransformersConfig.get())
-    extendsFrom(configurations.getByName("minecraftNamed"))
-    extendsFrom(configurations.getByName("loaderLibraries"))
 }
 
 // Common source sets and configurations
@@ -98,7 +80,6 @@ val launch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.name
 val applaunch: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("applaunch")
 val mixins: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("mixins")
 val main: NamedDomainObjectProvider<SourceSet> = commonProject.sourceSets.named("main")
-val mlTransformers: NamedDomainObjectProvider<SourceSet> = transformersProject.sourceSets.named("main")
 
 // Forge source sets
 val forgeMain by sourceSets.named("main") {
@@ -106,8 +87,9 @@ val forgeMain by sourceSets.named("main") {
     spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(commonProject, launch.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(commonProject, applaunch.get(), this, project, this.implementationConfigurationName)
+
     configurations.named(implementationConfigurationName) {
-        extendsFrom(forgeLibrariesConfig.get())
+        extendsFrom(gameLayerConfig.get())
     }
 }
 val forgeLaunch by sourceSets.register("launch") {
@@ -118,11 +100,7 @@ val forgeLaunch by sourceSets.register("launch") {
     spongeImpl.applyNamedDependencyOnOutput(project, this, forgeMain, project, forgeMain.implementationConfigurationName)
 
     configurations.named(implementationConfigurationName) {
-        extendsFrom(forgeAppLaunchConfig.get())
-        extendsFrom(forgeLibrariesConfig.get())
-    }
-    configurations.named(runtimeClasspathConfigurationName) {
-        extendsFrom(mlTransformersConfig.get())
+        extendsFrom(gameLayerConfig.get())
     }
 }
 val forgeAccessors by sourceSets.register("accessors") {
@@ -130,8 +108,7 @@ val forgeAccessors by sourceSets.register("accessors") {
     spongeImpl.applyNamedDependencyOnOutput(project, this, forgeLaunch, project, forgeLaunch.implementationConfigurationName)
 
     configurations.named(implementationConfigurationName) {
-        extendsFrom(forgeAppLaunchConfig.get())
-        extendsFrom(forgeLibrariesConfig.get())
+        extendsFrom(gameLayerConfig.get())
     }
 }
 val forgeMixins by sourceSets.register("mixins") {
@@ -144,32 +121,25 @@ val forgeMixins by sourceSets.register("mixins") {
     spongeImpl.applyNamedDependencyOnOutput(project, forgeMain, this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, forgeAccessors, this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, forgeLaunch, this, project, this.implementationConfigurationName)
+
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(gameLayerConfig.get())
+    }
+}
+val forgeLang by sourceSets.register("lang") {
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(langLayerConfig.get())
+    }
 }
 val forgeAppLaunch by sourceSets.register("applaunch") {
     // implementation (compile) dependencies
     spongeImpl.applyNamedDependencyOnOutput(commonProject, applaunch.get(), this, project, this.implementationConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, launch.get(), forgeLaunch, project, this.implementationConfigurationName)
-    // spongeImpl.applyNamedDependencyOnOutput(project, vanillaInstaller, this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, this, forgeLaunch, project, forgeLaunch.implementationConfigurationName)
-    // runtime dependencies - literally add the rest of the project, because we want to launch the game
-    spongeImpl.applyNamedDependencyOnOutput(project, forgeMixins, this, project, this.runtimeOnlyConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(project, forgeLaunch, this, project, this.runtimeOnlyConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, mixins.get(), this, project, this.runtimeOnlyConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, main.get(), this, project, this.runtimeOnlyConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.runtimeOnlyConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(project, forgeMain, this, project, this.runtimeOnlyConfigurationName)
-    spongeImpl.applyNamedDependencyOnOutput(transformersProject, mlTransformers.get(), this, project, this.runtimeOnlyConfigurationName)
+
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(serviceLayerConfig.get())
+    }
 }
-val forgeMixinsImplementation by configurations.named(forgeMixins.implementationConfigurationName) {
-    extendsFrom(forgeLibrariesConfig.get())
-    extendsFrom(forgeAppLaunchConfig.get())
-}
-configurations.named(forgeAppLaunch.implementationConfigurationName) {
-    extendsFrom(forgeAppLaunchConfig.get())
-    extendsFrom(launchConfig.get())
-    extendsFrom(mlTransformersConfig.get())
-}
-val forgeAppLaunchRuntime by configurations.named(forgeAppLaunch.runtimeOnlyConfigurationName)
 
 configurations.configureEach {
     exclude(group = "net.minecraft", module = "joined")
@@ -178,15 +148,67 @@ configurations.configureEach {
     }
 }
 
+sourceSets.configureEach {
+    val sourceSet = this
+    val isMain = "main".equals(sourceSet.name)
+    val classifier = if (isMain) "sources" else (sourceSet.name + "-sources")
+
+    val sourcesJarName: String = if (isMain) "sourcesJar" else (sourceSet.name + "SourcesJar")
+    val sourcesJarTask = tasks.register(sourcesJarName, Jar::class) {
+        group = "build"
+        archiveClassifier.set(classifier + "-dev")
+        from(sourceSet.allJava)
+    }
+
+    val remapSourcesJarName = "remap" + sourcesJarName.capitalized()
+
+    // remapSourcesJar is already registered (but disabled) by Loom
+    if (!isMain) {
+        tasks.register(remapSourcesJarName, net.fabricmc.loom.task.RemapSourcesJarTask::class)
+    }
+
+    tasks.named(remapSourcesJarName, net.fabricmc.loom.task.RemapSourcesJarTask::class) {
+        group = "loom"
+        archiveClassifier.set(classifier)
+        inputFile.set(sourcesJarTask.flatMap { it.archiveFile })
+        dependsOn(sourcesJarTask)
+        enabled = true
+    }
+}
+
+extensions.configure(LoomGradleExtensionAPI::class) {
+    silentMojangMappingsLicense()
+    accessWidenerPath.set(file("../src/main/resources/common.accesswidener"))
+
+    mixin {
+        useLegacyMixinAp.set(false)
+    }
+
+    mods {
+        named("main") {
+            sourceSet(forgeMixins)
+            sourceSet(forgeAccessors)
+            sourceSet(forgeLaunch)
+
+            sourceSet(main.get(), commonProject)
+            sourceSet(mixins.get(), commonProject)
+            sourceSet(accessors.get(), commonProject)
+            sourceSet(launch.get(), commonProject)
+
+            configuration(gameManagedLibrariesConfig.get())
+            configuration(gameShadedLibrariesConfig.get())
+        }
+    }
+}
+
 dependencies {
     "minecraft"("com.mojang:minecraft:${minecraftVersion}")
     "forge"("net.minecraftforge:forge:$minecraftVersion-$forgeVersion")
-    "mappings"(project.extensions.getByType(LoomGradleExtension::class).officialMojangMappings())
-
-    val apiAdventureVersion: String by project
-    val apiConfigurateVersion: String by project
-    val apiPluginSpiVersion: String by project
-    val log4jVersion: String by project
+    "mappings"(loom.layered {
+        officialMojangMappings {
+            nameSyntheticMembers = true
+        }
+    })
 
     api(project(":", configuration = "launch")) {
         exclude(group = "org.spongepowered", module = "mixin")
@@ -198,40 +220,44 @@ dependencies {
         exclude(group = "org.spongepowered", module = "mixin")
     }
 
-    forgeMixinsImplementation(project(commonProject.path))
+    forgeMixins.implementationConfigurationName(project(commonProject.path))
 
-    val appLaunch = forgeBootstrapLibrariesConfig.name
-    appLaunch("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
-    appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion") {
-        exclude(group = "org.checkerframework", module = "checker-qual")
-        exclude(group = "com.google.code.gson", module = "gson")
-        exclude(group = "org.apache.logging.log4j", module = "log4j-api")
-    }
-    appLaunch(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
-    appLaunch("org.spongepowered:configurate-core") {
+    val serviceLibraries = serviceLibrariesConfig.name
+    serviceLibraries(apiLibs.pluginSpi)
+    serviceLibraries(project(transformersProject.path))
+    serviceLibraries(platform(apiLibs.configurate.bom))
+    serviceLibraries(apiLibs.configurate.core) {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    appLaunch("org.spongepowered:configurate-hocon") {
+    serviceLibraries(apiLibs.configurate.hocon) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    appLaunch("org.spongepowered:configurate-jackson") {
+    serviceLibraries(libs.configurate.jackson) {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    mlTransformersConfig.name(project(transformersProject.path))
 
-    val libraries = forgeLibrariesConfig.name
-    libraries("org.spongepowered:spongeapi:$apiVersion")
-    libraries("javax.inject:javax.inject:1") // wat
-    libraries("com.zaxxer:HikariCP:2.7.8")
-    libraries("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
-    // libraries(project(commonProject.path)) // todo: this is better, but seems to be pulling in ASM for some reason
-    libraries(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
-    libraries("net.kyori:adventure-serializer-configurate4")
+    val gameLibraries = gameLibrariesConfig.name
+    gameLibraries("org.spongepowered:spongeapi:$apiVersion")
+    gameLibraries(libs.javaxInject)
+    gameLibraries(platform(apiLibs.adventure.bom))
+    gameLibraries(libs.adventure.serializerConfigurate4)
 
-    testplugins?.also {
-        forgeAppLaunchRuntime(project(it.path)) {
+    val serviceShadedLibraries = serviceShadedLibrariesConfig.name
+    serviceShadedLibraries(project(transformersProject.path)) { isTransitive = false }
+
+    val gameShadedLibraries = gameShadedLibrariesConfig.name
+    gameShadedLibraries("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
+
+    afterEvaluate {
+        spongeImpl.copyModulesExcludingProvided(serviceLibrariesConfig.get(), configurations.getByName("forgeDependencies"), serviceShadedLibrariesConfig.get())
+        spongeImpl.copyModulesExcludingProvided(gameLibrariesConfig.get(), serviceLayerConfig.get(), gameManagedLibrariesConfig.get())
+    }
+
+    val runTaskOnly = runTaskOnlyConfig.name
+    testPluginsProject?.also {
+        runTaskOnly(project(it.path)) {
             exclude(group = "org.spongepowered")
         }
     }
@@ -252,36 +278,13 @@ val forgeManifest = java.manifest {
 }
 
 val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
-val mods: ConfigurableFileCollection = extensions.getByType(LoomGradleExtension::class).unmappedModCollection
-tasks.withType(net.fabricmc.loom.task.AbstractRunTask::class) {
-    setClasspath(files(mods, sourceSets.main.get().runtimeClasspath, forgeAppLaunch.runtimeClasspath))
-    argumentProviders += CommandLineArgumentProvider {
-        mixinConfigs.asSequence()
-                // .filter { it != "mixins.sponge.core.json" }
-                .flatMap { sequenceOf("--mixin.config", it) }
-                .toList()
-    }
-}
 
 tasks {
     jar {
-        manifest {
-            from(forgeManifest)
-            attributes("MixinConfigs" to mixinConfigs.joinToString(","))
-        }
+        manifest.from(forgeManifest)
 
-        from(commonProject.sourceSets.main.map { it.output })
-        from(commonProject.sourceSets.named("mixins").map {it.output })
-        from(commonProject.sourceSets.named("accessors").map {it.output })
-        from(commonProject.sourceSets.named("launch").map {it.output })
-        from(commonProject.sourceSets.named("applaunch").map {it.output })
-        // from(sourceSets.main.map {it.output })
-        from(forgeAppLaunch.output)
-        from(forgeLaunch.output)
-        from(forgeAccessors.output)
-        from(forgeMixins.output)
-
-        duplicatesStrategy = DuplicatesStrategy.WARN
+        // Undo Loom devlibs dir
+        destinationDirectory.set(project.buildDir.resolve("libs"))
     }
     val forgeAppLaunchJar by registering(Jar::class) {
         archiveClassifier.set("applaunch")
@@ -303,80 +306,48 @@ tasks {
         manifest.from(forgeManifest)
         from(forgeMixins.output)
     }
-
-    named("runServer", RunGameTask::class) {
-        standardInput = System.`in`
-    }
-    named("remapSourcesJar", net.fabricmc.loom.task.RemapSourcesJarTask::class) {
-        inputs.files(configurations.compileClasspath)
-                .ignoreEmptyDirectories()
-                .withPropertyName("sourceClasspathWhyDoesLoomNotDoThis")
-    }
-
-    fun fixLoomCorruptedMixinJsonsAndRemapAccessWidener(jar: File, remapper: org.objectweb.asm.commons.Remapper) {
-        // strip the refmap attribute that loom forcibly adds to our json files
-        // aaaaaaa
-        val gson = com.google.gson.Gson()
-        val mixinTransformer = ZipEntryTransformer { src, zipEntry, dest ->
-            val json: com.google.gson.JsonObject
-            src.bufferedReader(Charsets.UTF_8).use {
-                json = gson.fromJson(it, com.google.gson.JsonObject::class.java)
-            }
-            json.remove("refmap")
-            zipEntry.compressedSize = -1
-            dest.putNextEntry(zipEntry)
-            dest.bufferedWriter(Charsets.UTF_8).also {
-                gson.toJson(json, it)
-                it.flush()
-            }
+    val forgeLangJar by registering(Jar::class) {
+        archiveClassifier.set("lang")
+        manifest {
+            from(forgeManifest)
+            attributes("FMLModType" to "LANGPROVIDER")
         }
-        val awTransformer = ZipEntryTransformer { src, zipEntry, dest ->
-            val named = net.fabricmc.accesswidener.AccessWidener()
-            src.bufferedReader(Charsets.UTF_8).use {
-                net.fabricmc.accesswidener.AccessWidenerReader(named).read(it)
-            }
-            val srg = net.fabricmc.accesswidener.AccessWidenerRemapper(named, remapper, "srg").remap()
-            val output = StringWriter().also {
-                net.fabricmc.accesswidener.AccessWidenerWriter(srg).write(it)
-            }.toString()
-            zipEntry.compressedSize = -1
-            dest.putNextEntry(zipEntry)
-            dest.writer(Charsets.UTF_8).also {
-                it.write(output)
-                it.flush()
-            }
-        }
-        val entries = mixinConfigs.map { org.zeroturnaround.zip.transform.ZipEntryTransformerEntry(it, mixinTransformer) } +
-            org.zeroturnaround.zip.transform.ZipEntryTransformerEntry("common.accesswidener", awTransformer)
-        org.zeroturnaround.zip.ZipUtil.transformEntries(jar, entries.toTypedArray())
+        from(forgeLang.output)
     }
 
-    named("remapJar", RemapJarTask::class) {
-        val remapper = arrayOfNulls<org.objectweb.asm.commons.Remapper>(1)
-        remapOptions {
-            this.extension(dev.architectury.tinyremapper.extension.mixin.MixinExtension())
-            this.extraStateProcessor { remapper[0] = it.remapper }
-            this.threads(1)
-        }
-        doLast {
-            fixLoomCorruptedMixinJsonsAndRemapAccessWidener(archiveFile.get().asFile, remapper[0]!!)
+    val forgeServicesDevJar by registering(Jar::class) {
+        archiveClassifier.set("services-dev")
+        manifest.from(forgeManifest)
+
+        from(commonProject.sourceSets.named("applaunch").map { it.output })
+        from(forgeAppLaunch.output)
+
+        duplicatesStrategy = DuplicatesStrategy.WARN
+    }
+
+    afterEvaluate {
+        withType(net.fabricmc.loom.task.AbstractRunTask::class) {
+            classpath += files(forgeServicesDevJar, forgeLangJar, runTaskOnlyConfig)
+
+            argumentProviders += CommandLineArgumentProvider {
+                mixinConfigs.asSequence()
+                        .flatMap { sequenceOf("--mixin.config", it) }
+                        .toList()
+            }
+
+            sourceSets.forEach {
+                dependsOn(it.classesTaskName)
+            }
         }
     }
 
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")
     forgeAppLaunch.resources.srcDir(installerResources)
 
-    /*val downloadNotNeeded = configurations.register("downloadNotNeeded") {
-        extendsFrom(forgeAppLaunchConfig.get())
-        extendsFrom(vanillaInstallerConfig.get())
-    }*/
-
     val emitDependencies by registering(org.spongepowered.gradle.impl.OutputDependenciesToJson::class) {
         group = "sponge"
-        // everything in applaunch
-        this.dependencies("main", forgeLibrariesConfig)
-        // except what we're providing through the installer
-        this.excludedDependencies(forgeAppLaunchConfig)
+        this.dependencies("main", gameManagedLibrariesConfig)
+        this.excludedDependencies(gameShadedLibrariesConfig)
 
         outputFile.set(installerResources.map { it.file("org/spongepowered/forge/applaunch/loading/moddiscovery/libraries.json") })
     }
@@ -384,69 +355,88 @@ tasks {
         dependsOn(emitDependencies)
     }
 
-    shadowJar {
-        mergeServiceFiles()
+    val forgeServicesShadowJar by register("servicesShadowJar", ShadowJar::class) {
         group = "shadow"
+        archiveClassifier.set("services")
 
-        configurations = listOf(forgeBootstrapLibrariesConfig.get())
+        mergeServiceFiles()
+        configurations = listOf(serviceShadedLibrariesConfig.get())
+        exclude("META-INF/INDEX.LIST", "META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA", "module-info.class")
 
-        archiveClassifier.set("universal-dev")
         manifest {
-            attributes(mapOf(
-                "Access-Widener" to "common.accesswidener",
-                "Superclass-Transformer" to "common.superclasschange,forge.superclasschange",
-                "Multi-Release" to true,
-                "MixinConfigs" to mixinConfigs.joinToString(",")
-            ))
+            attributes("Automatic-Module-Name" to "spongeforge.services")
+            attributes("Multi-Release" to true)
             from(forgeManifest)
         }
+
+        from(commonProject.sourceSets.named("applaunch").map { it.output })
+        from(forgeAppLaunch.output)
+
+        // Make sure to relocate access widener so that we don't conflict with other coremods
+        relocate("net.fabricmc.accesswidener", "org.spongepowered.forge.libs.accesswidener")
+    }
+
+    shadowJar {
+        group = "shadow"
+        archiveClassifier.set("mod-dev")
+
+        mergeServiceFiles()
+        configurations = listOf(gameShadedLibrariesConfig.get())
+
+        manifest {
+            attributes(
+                "Superclass-Transformer" to "common.superclasschange,forge.superclasschange",
+                "MixinConfigs" to mixinConfigs.joinToString(",")
+            )
+            from(forgeManifest)
+        }
+
         from(commonProject.sourceSets.main.map { it.output })
         from(commonProject.sourceSets.named("mixins").map {it.output })
         from(commonProject.sourceSets.named("accessors").map {it.output })
         from(commonProject.sourceSets.named("launch").map {it.output })
-        from(commonProject.sourceSets.named("applaunch").map {it.output })
-        from(transformersProject.sourceSets.named("main").map { it.output })
 
-        // Pull dependencies from the mlTransformers project
-        from(mlTransformersConfig.get().files)
-
-        from(forgeAppLaunch.output)
         from(forgeLaunch.output)
         from(forgeAccessors.output)
         from(forgeMixins.output)
-
-        // Make sure to relocate access widener so that we don't conflict with other
-        // coremods also using access widener
-        relocate("net.fabricmc.accesswidener", "org.spongepowered.forge.libs.accesswidener")
     }
 
     val remapShadowJar = register("remapShadowJar", RemapJarTask::class) {
-        input.set(shadowJar.flatMap { it.archiveFile })
+        group = "loom"
+        archiveClassifier.set("mod")
+
+        inputFile.set(shadowJar.flatMap { it.archiveFile })
+        atAccessWideners.add("common.accesswidener")
+    }
+
+    val universalJar = register("universalJar", Jar::class) {
+        group = "build"
         archiveClassifier.set("universal")
-        remapAccessWidener.set(true)
-        addNestedDependencies.set(true)
-        val remapper = arrayOfNulls<org.objectweb.asm.commons.Remapper>(1)
-        remapOptions {
-            this.extension(dev.architectury.tinyremapper.extension.mixin.MixinExtension())
-            this.extraStateProcessor { remapper[0] = it.remapper }
-            this.threads(1) // thread-safety issues?
-        }
-        doLast {
-            fixLoomCorruptedMixinJsonsAndRemapAccessWidener(archiveFile.get().asFile, remapper[0]!!)
+
+        manifest.from(forgeServicesShadowJar.manifest)
+
+        from(forgeServicesShadowJar.archiveFile.map { zipTree(it) })
+
+        into("jars") {
+            from(remapShadowJar)
+            rename("spongeforge-(.*)-mod.jar", "spongeforge-mod.jar")
+
+            from(forgeLangJar)
+            rename("spongeforge-(.*)-lang.jar", "spongeforge-lang.jar")
         }
     }
 
     assemble {
-        dependsOn(remapShadowJar)
+        dependsOn(universalJar)
     }
+}
 
-    templateResources {
-        val props = mutableMapOf(
-                "version" to project.version,
-                "description" to project.description
-        )
-        inputs.properties(props)
-        expand(props)
+sourceSets {
+    main {
+        blossom.resources {
+            property("version", project.provider { project.version.toString() })
+            property("description", project.description.toString())
+        }
     }
 }
 
@@ -493,9 +483,11 @@ publishing {
             artifact(forgeAppLaunchJar.get())
             artifact(forgeLaunchJar.get())
             artifact(forgeMixinsJar.get())
-            artifact(tasks["applaunchSourceJar"])
-            artifact(tasks["launchSourceJar"])
-            artifact(tasks["mixinsSourceJar"])
+            artifact(tasks["applaunchSourcesJar"])
+            artifact(tasks["launchSourcesJar"])
+            artifact(tasks["mixinsSourcesJar"])
+            artifact(tasks["universalJar"])
+
             pom {
                 artifactId = project.name.toLowerCase()
                 this.name.set(project.name)
@@ -518,11 +510,14 @@ publishing {
     }
 }
 
-/*configurations.forEach { set: Configuration  ->
-    val seen = mutableSetOf<Configuration>()
-    println("Parents of ${set.name}:")
-    printParents(set, "", seen)
-
+tasks.register("printConfigsHierarchy") {
+    doLast {
+        configurations.forEach { conf: Configuration  ->
+            val seen = mutableSetOf<Configuration>()
+            println("Parents of ${conf.name}:")
+            printParents(conf, "", seen)
+        }
+    }
 }
 
 fun printParents(conf: Configuration, indent: String, seen: MutableSet<Configuration>) {
@@ -534,4 +529,24 @@ fun printParents(conf: Configuration, indent: String, seen: MutableSet<Configura
         println("$indent - ${parent.name}")
         printParents(parent, indent + "  ", seen)
     }
-}*/
+}
+
+tasks.register("printConfigsResolution") {
+    doLast {
+        configurations.forEach { conf: Configuration  ->
+            println()
+            println("Artifacts of ${conf.name}:")
+            if (conf.isCanBeResolved) {
+                try {
+                    conf.forEach {
+                        println(it)
+                    }
+                } catch (e: Exception) {
+                    println("error")
+                }
+            } else {
+                println("not resolved")
+            }
+        }
+    }
+}

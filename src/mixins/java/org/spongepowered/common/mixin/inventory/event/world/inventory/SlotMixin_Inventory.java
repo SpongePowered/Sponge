@@ -24,18 +24,26 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
+import net.minecraft.world.Container;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.inventory.fabric.Fabric;
 
 @Mixin(Slot.class)
-public class SlotMixin_Inventory {
+public abstract class SlotMixin_Inventory {
+
+    // @formatter:off
+    @Shadow @Final public Container container;
+    // @formatter:on
 
     @Inject(method = "onQuickCraft(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)V", at = @At("HEAD"))
     private void inventory$onQuickCraft(final ItemStack slotStack, final ItemStack stackTaken, final CallbackInfo ci) {
@@ -45,4 +53,8 @@ public class SlotMixin_Inventory {
         }
     }
 
+    @Inject(method = "setChanged", at = @At("HEAD"))
+    public void inventory$onSetChanged(final CallbackInfo ci) {
+        ((Fabric) this.container).fabric$captureContainer();
+    }
 }

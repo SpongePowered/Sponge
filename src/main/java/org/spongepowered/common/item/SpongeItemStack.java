@@ -24,11 +24,7 @@
  */
 package org.spongepowered.common.item;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -60,6 +56,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -81,7 +78,7 @@ public final class SpongeItemStack  {
 
         @Override
         public ItemStack.Builder itemType(final ItemType itemType) {
-            checkNotNull(itemType, "Item type cannot be null");
+            Objects.requireNonNull(itemType, "Item type cannot be null");
             this.type = itemType;
             return this;
         }
@@ -93,7 +90,7 @@ public final class SpongeItemStack  {
 
         @Override
         public ItemStack.Builder quantity(final int quantity) throws IllegalArgumentException {
-            checkArgument(quantity >= 0, "Quantity must not be smaller than 0");
+            Preconditions.checkArgument(quantity >= 0, "Quantity must not be smaller than 0");
             this.quantity = quantity;
             return this;
         }
@@ -103,13 +100,13 @@ public final class SpongeItemStack  {
             if (this.keyValues == null) {
                 this.keyValues = new LinkedHashMap<>();
             }
-            this.keyValues.put(checkNotNull(key, "Key cannot be null!"), checkNotNull(value, "Value cannot be null!"));
+            this.keyValues.put(Objects.requireNonNull(key, "Key cannot be null!"), Objects.requireNonNull(value, "Value cannot be null!"));
             return this;
         }
 
         @Override
         public ItemStack.Builder fromItemStack(final ItemStack itemStack) {
-            checkNotNull(itemStack, "Item stack cannot be null");
+            Objects.requireNonNull(itemStack, "Item stack cannot be null");
             // Assumes the item stack's values don't need to be validated
             this.type = itemStack.type();
             this.quantity = itemStack.quantity();
@@ -130,9 +127,9 @@ public final class SpongeItemStack  {
 
         @Override
         public ItemStack.Builder attributeModifier(final AttributeType attributeType, final AttributeModifier modifier, final EquipmentType equipmentType) {
-            Preconditions.checkNotNull(attributeType, "AttributeType cannot be null");
-            Preconditions.checkNotNull(modifier, "AttributeModifier cannot be null");
-            Preconditions.checkNotNull(equipmentType, "EquipmentType cannot be null");
+            Objects.requireNonNull(attributeType, "AttributeType cannot be null");
+            Objects.requireNonNull(modifier, "AttributeModifier cannot be null");
+            Objects.requireNonNull(equipmentType, "EquipmentType cannot be null");
 
             // Create the compound if needed
             if (this.compound == null) {
@@ -161,19 +158,19 @@ public final class SpongeItemStack  {
         }
 
         private void writeAttributeModifier(final ListTag attributeModifiers, final net.minecraft.world.entity.ai.attributes.AttributeModifier attributeModifier, final EquipmentSlot slot) {
-            final CompoundTag modifierNbt = attributeModifier.save();
-            modifierNbt.putString(Constants.ItemStack.ATTRIBUTE_NAME, attributeModifier.getName());
-
-            if (slot != null) {
-                modifierNbt.putString(Constants.ItemStack.ATTRIBUTE_SLOT, slot.getName());
-            }
-
-            attributeModifiers.add(modifierNbt);
+//            final CompoundTag modifierNbt = attributeModifier.save();
+//            modifierNbt.putString(Constants.ItemStack.ATTRIBUTE_NAME, attributeModifier.getName());
+//
+//            if (slot != null) {
+//                modifierNbt.putString(Constants.ItemStack.ATTRIBUTE_SLOT, slot.getName());
+//            }
+//
+//            attributeModifiers.add(modifierNbt);
         }
 
         @Override
         public ItemStack.Builder fromContainer(final DataView container) {
-            checkNotNull(container);
+            Objects.requireNonNull(container);
             if (!container.contains(Constants.ItemStack.TYPE, Constants.ItemStack.COUNT)) {
                 return this;
             }
@@ -209,7 +206,7 @@ public final class SpongeItemStack  {
 
         @Override
         public ItemStack.Builder fromSnapshot(final ItemStackSnapshot snapshot) {
-            checkNotNull(snapshot, "The snapshot was null!");
+            Objects.requireNonNull(snapshot, "The snapshot was null!");
             this.itemType(snapshot.type());
             this.quantity(snapshot.quantity());
 
@@ -226,7 +223,7 @@ public final class SpongeItemStack  {
 
         @Override
         public ItemStack.Builder fromBlockSnapshot(final BlockSnapshot blockSnapshot) {
-            checkNotNull(blockSnapshot, "The snapshot was null!");
+            Objects.requireNonNull(blockSnapshot, "The snapshot was null!");
             this.reset();
             final BlockType blockType = blockSnapshot.state().type();
             final ResourceLocation blockTypeKey = SpongeCommon.vanillaRegistry(Registries.BLOCK).getKey((Block) blockType);
@@ -270,7 +267,7 @@ public final class SpongeItemStack  {
 
         @Override
         protected Optional<ItemStack> buildContent(final DataView container) throws InvalidDataException {
-            checkNotNull(container);
+            Objects.requireNonNull(container);
             if (!container.contains(Constants.ItemStack.TYPE, Constants.ItemStack.COUNT)) {
                 return Optional.empty();
             }
@@ -311,7 +308,7 @@ public final class SpongeItemStack  {
         @SuppressWarnings({"unchecked", "rawtypes", "ConstantConditions"})
         @Override
         public ItemStack build() throws IllegalStateException {
-            checkState(this.type != null, "Item type has not been set");
+            Preconditions.checkState(this.type != null, "Item type has not been set");
 
             if (this.type == null || this.quantity <= 0) {
                 // If either type is none(air) or quantity is 0 return the vanilla EMPTY item

@@ -1,5 +1,5 @@
 dependencies {
-    implementation "org.ow2.asm:asm:$asmVersion"
+    implementation libs.asm
 }
 
 // Make sure jar is present for other projects

@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.item.enchantment;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
@@ -36,7 +32,9 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.common.util.Preconditions;
 
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -51,7 +49,7 @@ public final class SpongeEnchantmentBuilder extends AbstractDataBuilder<Enchantm
 
     @Override
     public Enchantment.Builder from(final Enchantment value) {
-        checkNotNull(value, "The enchantment to create a builder from cannot be null!");
+        Objects.requireNonNull(value, "The enchantment to create a builder from cannot be null!");
         this.enchantmentType = value.type();
         this.level = value.level();
         return this;
@@ -66,28 +64,28 @@ public final class SpongeEnchantmentBuilder extends AbstractDataBuilder<Enchantm
 
     @Override
     public Enchantment.Builder type(final EnchantmentType enchantmentType) {
-        this.enchantmentType = checkNotNull(enchantmentType, "Enchantment type cannot be null!");
+        this.enchantmentType = Objects.requireNonNull(enchantmentType, "Enchantment type cannot be null!");
         return this;
     }
 
     @Override
     public Enchantment.Builder level(final int level) {
-        checkArgument(level >= Short.MIN_VALUE, "The specified level must be greater than %s (was %s)!", Short.MIN_VALUE, level);
-        checkArgument(level <= Short.MAX_VALUE, "The specified level must not be greater than %s (was %s)!", Short.MAX_VALUE, level);
+        Preconditions.checkArgument(level >= Short.MIN_VALUE, String.format("The specified level must be greater than %s (was %s)!", Short.MIN_VALUE, level));
+        Preconditions.checkArgument(level <= Short.MAX_VALUE, String.format("The specified level must not be greater than %s (was %s)!", Short.MAX_VALUE, level));
         this.level = level;
         return this;
     }
 
     @Override
     public Enchantment build() {
-        checkState(this.enchantmentType != null, "The enchantment type must be set!");
-        checkState(this.level != null, "The level of the enchantment must be set!");
+        Preconditions.checkState(this.enchantmentType != null, "The enchantment type must be set!");
+        Preconditions.checkState(this.level != null, "The level of the enchantment must be set!");
         return new SpongeEnchantment(this.enchantmentType, this.level);
     }
 
     @Override
     protected Optional<Enchantment> buildContent(final DataView container) throws InvalidDataException {
-        checkNotNull(container, "The data view cannot be null!");
+        Objects.requireNonNull(container, "The data view cannot be null!");
         if (!container.contains(Queries.ENCHANTMENT_ID, Queries.LEVEL)) {
             return Optional.empty();
         }

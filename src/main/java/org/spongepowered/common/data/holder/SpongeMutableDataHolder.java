@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.holder;
 
-import static java.util.Objects.requireNonNull;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
@@ -42,6 +40,7 @@ import org.spongepowered.common.util.DataUtil;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -228,8 +227,8 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
 
     @Override
     default DataTransactionResult copyFrom(ValueContainer that, MergeFunction function) {
-        requireNonNull(that, "that");
-        requireNonNull(function, "function");
+        Objects.requireNonNull(that, "that");
+        Objects.requireNonNull(function, "function");
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         boolean success = false;
         if (function == MergeFunction.REPLACEMENT_PREFERRED) {

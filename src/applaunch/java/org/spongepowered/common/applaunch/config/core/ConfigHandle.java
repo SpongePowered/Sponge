@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.applaunch.config.core;
 
-import static java.util.Objects.requireNonNull;
-
 import io.leangen.geantyref.TypeToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,6 +39,7 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -129,7 +128,7 @@ public class ConfigHandle<T extends Config> {
     }
 
     public CompletableFuture<T> updateAndSave(final UnaryOperator<T> updater) {
-        final T updated = requireNonNull(updater, "updater").apply(this.instance);
+        final T updated = Objects.requireNonNull(updater, "updater").apply(this.instance);
         return ConfigHandle.asyncFailableFuture(() -> {
             // TODO: Force one save at a time
             this.save();

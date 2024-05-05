@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.entity.SpongeEntityTypes;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
 @Mixin(DefaultAttributes.class)
@@ -42,8 +43,8 @@ public abstract class DefaultAttributesMixin {
         cancellable = true
     )
     private static void vanilla$humanGetSupplier(final EntityType<? extends LivingEntity> type, final CallbackInfoReturnable<AttributeSupplier> cir) {
-        if (type == HumanEntity.TYPE) {
-            cir.setReturnValue(HumanEntity.ATTRIBUTES);
+        if (type == SpongeEntityTypes.HUMAN) {
+            cir.setReturnValue(HumanEntity.createAttributes());
         }
     }
 
@@ -53,7 +54,7 @@ public abstract class DefaultAttributesMixin {
         cancellable = true
     )
     private static void vanilla$humanHasSupplier(final EntityType<?> type, final CallbackInfoReturnable<Boolean> cir) {
-        if (type == HumanEntity.TYPE) {
+        if (type == SpongeEntityTypes.HUMAN) {
             cir.setReturnValue(true);
         }
     }

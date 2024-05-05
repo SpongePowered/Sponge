@@ -47,6 +47,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.LongPredicate;
 
 @Mixin(LevelTicks.class)
@@ -75,6 +76,10 @@ public abstract class LevelTicksMixin_API<T> implements ScheduledUpdateList<T> {
     public ScheduledUpdate<T> schedule(
         final int x, final int y, final int z, final T target, final Ticks tickDelay, final TaskPriority priority
     ) {
+        Objects.requireNonNull(tickDelay);
+        if (tickDelay.isInfinite()) {
+            throw new IllegalArgumentException("Delay cannot be infinite!");
+        }
         final var blockPos = new BlockPos(x, y, z);
         final var gameTime = ((LevelTicksBridge<T>) this).bridge$getGameTime().getAsLong();
         final var subCount = ((LevelTicksBridge<T>) this).bridge$getNextSubTickCountSupplier().getAsLong();

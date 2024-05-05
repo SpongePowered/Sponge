@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.block.state;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.accessor.world.level.block.CropBlockAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.BoundedUtil;
 
@@ -40,9 +41,9 @@ public final class CropsData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
-                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, CropBlock.AGE))
-                        .get(h -> h.getValue(CropBlock.AGE))
-                        .set((h, v) -> BoundedUtil.setInteger(h, v, CropBlock.AGE))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, ((CropBlockAccessor) h.getBlock()).invoker$getAgeProperty()))
+                        .get(h -> h.getValue(((CropBlockAccessor) h.getBlock()).invoker$getAgeProperty()))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, ((CropBlockAccessor) h.getBlock()).invoker$getAgeProperty()))
                         .supports(h -> h.getBlock() instanceof CropBlock);
     }
     // @formatter:on

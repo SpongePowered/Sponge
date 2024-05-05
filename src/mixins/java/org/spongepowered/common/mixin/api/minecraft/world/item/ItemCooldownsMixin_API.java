@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemCooldowns;
@@ -35,8 +34,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.item.ItemCooldowns_CooldownInstanceAccessor;
 import org.spongepowered.common.bridge.world.item.ItemCooldownsBridge;
+import org.spongepowered.common.util.SpongeTicks;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalDouble;
 
 @Mixin(ItemCooldowns.class)
 public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.entity.living.player.CooldownTracker {
@@ -52,13 +55,13 @@ public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.en
 
     @Override
     public boolean hasCooldown(final ItemType type) {
-        checkNotNull(type, "Item type cannot be null!");
+        Objects.requireNonNull(type, "Item type cannot be null!");
         return this.shadow$isOnCooldown((Item) type);
     }
 
     @Override
     public Optional<Ticks> cooldown(final ItemType type) {
-        checkNotNull(type, "Item type cannot be null!");
+        Objects.requireNonNull(type, "Item type cannot be null!");
 
         final ItemCooldowns_CooldownInstanceAccessor cooldown = (ItemCooldowns_CooldownInstanceAccessor) this.cooldowns.get((Item) type);
 
@@ -73,8 +76,8 @@ public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.en
 
     @Override
     public boolean setCooldown(final ItemType type, final Ticks ticks) {
-        checkNotNull(type, "Item type cannot be null!");
-        this.shadow$addCooldown((Item) type, (int) ticks.ticks());
+        Objects.requireNonNull(type, "Item type cannot be null!");
+        this.shadow$addCooldown((Item) type, SpongeTicks.toSaturatedIntOrInfinite(ticks));
         return ((ItemCooldownsBridge) this).bridge$getSetCooldownResult();
     }
 

@@ -34,7 +34,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.narration.NarrationSupplier;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.vanilla.util.Bounds;
 
@@ -56,10 +55,10 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
     protected E currentHoveredEntry;
 
     public FilterableList(final Screen screen, final int x, final int y, final int width, final int height, final int entryHeight) {
-        super(Minecraft.getInstance(), width, screen.height, y, y + height, entryHeight);
+        super(Minecraft.getInstance(), width, height, y, entryHeight);
+        // TODO height/screen.height?
         this.screen = screen;
-        this.x0 = x;
-        this.x1 = x + width;
+        this.setX(x);
         this.fontRenderer = Minecraft.getInstance().font;
     }
 
@@ -67,68 +66,8 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
         return this.screen;
     }
 
-    public int getX() {
-        return this.x0;
-    }
-
-    public P setX(final int x) {
-        this.x0 = x;
-        return (P) this;
-    }
-
-    public int getY() {
-        return this.y0;
-    }
-
-    public P setY(final int y) {
-        this.y0 = y;
-        return (P) this;
-    }
-
-    public P setPosition(final int x, final int y) {
-        this.x0 = x;
-        this.y0 = y;
-        return (P) this;
-    }
-
-    public int getWidth() {
-        return this.width;
-    }
-
-    public P setWidth(final int width) {
-        this.width = width;
-        return (P) this;
-    }
-
-    public int getHeight() {
-        return this.height;
-    }
-
-    public P setHeight(final int height) {
-        this.height = height;
-        return (P) this;
-    }
-
-    public P setSize(final int width, final int height) {
-        this.width = width;
-        this.height = height;
-        return (P) this;
-    }
-
-    public P setBounds(final int x, final int y, final int width, final int height) {
-        this.x0 = x;
-        this.y0 = y;
-        this.width = width;
-        this.height = height;
-        return (P) this;
-    }
-
-    public int getRight() {
-        return this.x0 + this.width;
-    }
-
     public int getBottom() {
-        return this.y0 + this.headerHeight;
+        return this.getY() + this.headerHeight;
     }
 
     public E getCurrentHoveredEntry() {
@@ -180,12 +119,12 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
 
     @Override
     public int getRowLeft() {
-        return this.x0 + 4;
+        return this.getX() + 4;
     }
 
     @Override
     protected int getScrollbarPosition() {
-        return this.x0 + this.width - 6;
+        return this.getX() + this.width - 6;
     }
 
     @Override
@@ -195,11 +134,6 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
         }
 
         super.setSelected(entry);
-    }
-
-    @Override
-    public void render(final GuiGraphics stack, final int p_render_1_, final int p_render_2_, final float p_render_3_) {
-        super.render(stack, p_render_1_, p_render_2_, p_render_3_);
     }
 
     @Override
@@ -216,8 +150,8 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
                     return true;
                 }
             } else if (p_mouseClicked_5_ == 0) {
-                this.clickedHeader((int) (p_mouseClicked_1_ - (double) (this.x0 + this.width / 2 - this.getRowWidth() / 2)),
-                    (int) (p_mouseClicked_3_ - (double) this.y0) + (int) this.getScrollAmount() - 4);
+                this.clickedHeader((int) (p_mouseClicked_1_ - (double) (this.getX() + this.width / 2 - this.getRowWidth() / 2)),
+                    (int) (p_mouseClicked_3_ - (double) this.getY()) + (int) this.getScrollAmount() - 4);
                 return true;
             }
 
@@ -235,7 +169,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
             final String noResults = "No results...";
             final int noResultsWidth = font.width(noResults);
 
-            $$0.drawString(font, noResults, (this.width / 2) + this.x0 - (noResultsWidth / 2), this.y0 + 10, ChatFormatting.GRAY.getColor());
+            $$0.drawString(font, noResults, (this.width / 2) + this.getX() - (noResultsWidth / 2), this.getY() + 10, ChatFormatting.GRAY.getColor());
 
             return;
         }
@@ -248,7 +182,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
         for (int $$8 = 0; $$8 < $$7; ++$$8) {
             final int $$9 = this.getRowTop($$8);
             final int $$10 = this.getRowBottom($$8);
-            if ($$10 >= this.y0 && $$9 <= this.y1) {
+            if ($$10 >= this.getY() && $$9 <= this.getBottom()) {
                 this.renderItemFromList(filteredList, $$0, $$1, $$2, $$3, $$8, $$4, $$9, $$5, $$6);
             }
         }
@@ -266,7 +200,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
     }
 
     @Override
-    public void updateNarration(final @NonNull NarrationElementOutput narrationConsumer) {
+    protected void updateWidgetNarration(final NarrationElementOutput narrationConsumer) {
         final @org.checkerframework.checker.nullness.qual.Nullable E hovered = this.getCurrentHoveredEntry();
         if (hovered != null) {
             this.narrateListElementPosition(narrationConsumer, hovered);

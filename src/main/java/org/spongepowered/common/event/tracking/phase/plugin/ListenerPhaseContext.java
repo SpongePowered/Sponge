@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -33,10 +32,12 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends PluginPhaseContext<L> {
 
@@ -61,8 +62,8 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
 
     @SuppressWarnings("unchecked")
     public L player() {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        checkState(this.capturePlayer == null, "Already capturing a player object!");
+        Preconditions.checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        Preconditions.checkState(this.capturePlayer == null, "Already capturing a player object!");
         this.capturePlayer = new CapturePlayer();
         return (L) this;
     }
@@ -120,7 +121,7 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
                 return false;
             }
             final CapturePlayer that = (CapturePlayer) o;
-            return com.google.common.base.Objects.equal(this.player, that.player);
+            return Objects.equals(this.player, that.player);
         }
 
         @Override
@@ -130,9 +131,9 @@ public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends Plu
 
         @Override
         public String toString() {
-            return com.google.common.base.MoreObjects.toStringHelper(this)
-                .add("player", this.player)
-                .toString();
+            return new StringJoiner(", ", CapturePlayer.class.getSimpleName() + "[", "]")
+                    .add("player=" + this.player)
+                    .toString();
         }
 
         public void addPlayer(final ServerPlayer playerMP) {

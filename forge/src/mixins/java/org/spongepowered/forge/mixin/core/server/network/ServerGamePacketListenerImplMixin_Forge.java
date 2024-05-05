@@ -24,16 +24,22 @@
  */
 package org.spongepowered.forge.mixin.core.server.network;
 
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ChatDecorator;
+import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
+import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.Recipe;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
@@ -45,9 +51,14 @@ import org.spongepowered.common.event.tracking.context.transaction.Transactional
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class ServerGamePacketListenerImplMixin_Forge implements ServerGamePacketListener {
 
+    // @formatter:off
+    @Shadow public ServerPlayer player;
+    @Shadow protected abstract void shadow$performChatCommand(final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1);
+    //@formatter:on
+
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Redirect(method = "lambda$handlePlaceRecipe$11",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
+    @Redirect(method = "lambda$handlePlaceRecipe$14",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
     private void forge$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final net.minecraft.server.level.ServerPlayer player) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
@@ -65,13 +76,20 @@ public abstract class ServerGamePacketListenerImplMixin_Forge implements ServerG
         }
     }
 
-    @Redirect(method = "handleChat(Ljava/lang/String;)V",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraftforge/common/ForgeHooks;onServerChatEvent(Lnet/minecraft/server/network/ServerGamePacketListenerImpl;Ljava/lang/String;Lnet/minecraft/network/chat/Component;)Lnet/minecraft/network/chat/Component;") )
-    private Component forge$preventFiringForgeEvent(final ServerGamePacketListenerImpl net, final String raw, final Component comp) {
-        // We don't fire the Forge event here, we do it in our manager flow.
-        return comp;
+    @Redirect(method = "lambda$handleChat$11", at = @At(
+        value = "INVOKE",
+        target = "Lnet/minecraftforge/common/ForgeHooks;getServerChatSubmittedDecorator()Lnet/minecraft/network/chat/ChatDecorator;"
+    ))
+    private ChatDecorator forge$useSpongeChatDecorator() {
+        return SpongeCommon.server().getChatDecorator();
     }
 
+    @Redirect(method = "lambda$handleChatCommand$12", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
+    private void forge$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this.player);
+            frame.addContext(EventContextKeys.COMMAND, $$0.command());
+            this.shadow$performChatCommand($$0, $$1);
+        }
+    }
 }

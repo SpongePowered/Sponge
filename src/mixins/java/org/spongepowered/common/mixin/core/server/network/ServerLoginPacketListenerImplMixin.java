@@ -24,17 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.DefaultUncaughtExceptionHandler;
 import net.minecraft.network.Connection;
-import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
-import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
-import org.spongepowered.api.Sponge;
+import org.slf4j.Logger;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -45,25 +43,23 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
-import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerImplBridge;
-import org.spongepowered.common.bridge.server.players.PlayerListBridge;
-import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.bridge.network.ServerLoginPacketListenerImplBridge;
 
-import java.io.IOException;
-import java.util.concurrent.CompletionException;
+import java.net.SocketAddress;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
-public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginPacketListenerImplBridge, ConnectionHolderBridge {
+public abstract class ServerLoginPacketListenerImplMixin implements ConnectionHolderBridge, ServerLoginPacketListenerImplBridge {
 
     // @formatter:off
+    @Shadow @Final static Logger LOGGER;
+
     @Shadow @Final Connection connection;
     @Shadow com.mojang.authlib.GameProfile authenticatedProfile;
     @Shadow @Final MinecraftServer server;
@@ -72,6 +68,11 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     @Shadow public abstract void shadow$disconnect(Component reason);
     // @formatter:on
 
+    private static final ExecutorService impl$EXECUTOR = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
+            .setNameFormat("Sponge-LoginThread-%d")
+            .setUncaughtExceptionHandler(new DefaultUncaughtExceptionHandler(LOGGER))
+            .build());
+
     private boolean impl$accepted = false;
 
     @Override
@@ -79,92 +80,11 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         return this.connection;
     }
 
-    /**
-     * @author morph - April 27th, 2021
-     * @author dualspiral - July 17th, 2021
-     *
-     * @reason support async ban/whitelist service and user->player syncing.
-     */
-    @Inject(method = "verifyLoginAndFinishConnectionSetup", cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;", ordinal = 0))
-    private void impl$onHandleAcceptedLogin(final GameProfile $$0, final CallbackInfo ci) {
-        // TODO fix this !!!!!! may need to be moved to ServerConfigurationPacketListenerImplMixin
-        if (true) {
-            return;
-        }
-        // Sponge start - avoid #tick calling handleAcceptedLogin more than once.
-        ci.cancel(); // Return early after inject
-        if (this.impl$accepted) {
-            return;
-        }
-        this.impl$accepted = true;
-        final PlayerList playerList = this.server.getPlayerList();
-        // Sponge end
-
-        // Sponge start - completable future
-        ((PlayerListBridge) playerList).bridge$canPlayerLogin(this.connection.getRemoteAddress(), this.authenticatedProfile)
-                .handle((componentOpt, throwable) -> {
-                    if (throwable != null) {
-                        // An error occurred during login checks so we ask to abort.
-                        ((ConnectionBridge) this.connection).bridge$setKickReason(Component.literal("An error occurred checking ban/whitelist status."));
-                        SpongeCommon.logger().error("An error occurred when checking the ban/whitelist status of {}.", this.authenticatedProfile.getId().toString());
-                        SpongeCommon.logger().error(throwable);
-                    } else if (componentOpt != null) {
-                        // We handle this later
-                        ((ConnectionBridge) this.connection).bridge$setKickReason(componentOpt);
-                    }
-
-                    try {
-                        ((SpongeServer) SpongeCommon.server()).userManager().handlePlayerLogin(this.authenticatedProfile);
-                    } catch (final IOException e) {
-                        throw new CompletionException(e);
-                    }
-                    return null;
-                })
-                .handleAsync((ignored, throwable) -> {
-                    if (throwable != null) {
-                        // We're just going to disconnect here, because something went horribly wrong.
-                        if (throwable instanceof CompletionException) {
-                            throw (CompletionException) throwable;
-                        } else {
-                            throw new CompletionException(throwable);
-                        }
-                    }
-                    // Sponge end
-                    this.state = ServerLoginPacketListenerImpl.State.ACCEPTED;
-                    if (this.server.getCompressionThreshold() >= 0 && !this.connection.isMemoryConnection()) {
-                        this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), PacketSendListener.thenRun(() -> this.connection.setupCompression(this.server.getCompressionThreshold(), true)));
-                    }
-
-                    this.connection.send(new ClientboundGameProfilePacket(this.authenticatedProfile));
-                    final ServerPlayer var1 = this.server.getPlayerList().getPlayer(this.authenticatedProfile.getId());
-                    if (var1 != null) {
-                        // TODO broken this.state = ServerLoginPacketListenerImpl.State.DELAY_ACCEPT;
-                        // TODO broken this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.authenticatedProfile, playerProfilePublicKey);
-                    } else {
-                        // Sponge start - Also send the channel registrations using the minecraft channel, for compatibility
-                        final ServerSideConnection connection = (ServerSideConnection) this;
-                        ((SpongeChannelManager) Sponge.channelManager()).sendChannelRegistrations(connection);
-                        // Sponge end
-
-                        try {
-                            // TODO broken this.server.getPlayerList().placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.authenticatedProfile, playerProfilePublicKey));
-                            // invalidate just to be sure there is no user cached for the online player anymore
-                            Sponge.server().userManager().removeFromCache(this.authenticatedProfile.getId());
-                        } catch (final Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    return null;
-                }, SpongeCommon.server()).exceptionally(throwable -> {
-                    // Sponge Start
-                    // If a throwable exists, we're just going to disconnect the user, better than leaving them in limbo.
-                    if (throwable != null) {
-                        // TODO broken this.impl$disconnectError(throwable, this.state == ServerLoginPacketListenerImpl.State.ACCEPTED || this.state == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT);
-                    }
-                    return null;
-                    // Sponge End
-                });
+    @Redirect(method = "verifyLoginAndFinishConnectionSetup",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;"))
+    private Component impl$onCanPlayerLogin(final PlayerList instance, final SocketAddress $$0, final GameProfile $$1) {
+        //We check for this on the configuration handler, skip here for now.
+        return null;
     }
 
     private void impl$disconnectClient(final net.kyori.adventure.text.Component disconnectMessage) {
@@ -172,8 +92,30 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         this.shadow$disconnect(reason);
     }
 
+    @Inject(method = "startClientVerification(Lcom/mojang/authlib/GameProfile;)V",
+            at = @At(
+                    value = "FIELD",
+                    target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;state:Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;"),
+            cancellable = true)
+    private void impl$handleAuthEventCancellation(final CallbackInfo ci) {
+        ci.cancel();
+
+        if (this.server.usesAuthentication() && !this.connection.isMemoryConnection()) {
+            //We are already off the network thread for online servers.
+            this.bridge$fireAuthEvent();
+        } else {
+            //Execute the Auth event off the network thread to not block it.
+            this.bridge$getExecutor().submit(this::bridge$fireAuthEvent);
+        }
+    }
+
     @Override
-    public boolean bridge$fireAuthEvent() {
+    public ExecutorService bridge$getExecutor() {
+        return ServerLoginPacketListenerImplMixin.impl$EXECUTOR;
+    }
+
+    @Override
+    public void bridge$fireAuthEvent() {
         final net.kyori.adventure.text.Component disconnectMessage = net.kyori.adventure.text.Component.text("You are not allowed to log in to this server.");
         final Cause cause = Cause.of(EventContext.empty(), this);
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
@@ -181,26 +123,9 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         SpongeCommon.post(event);
         if (event.isCancelled()) {
             this.impl$disconnectClient(event.message());
+            return;
         }
-        return event.isCancelled();
-    }
 
-    @ModifyArg(method = "handleHello",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;startClientVerification(Lcom/mojang/authlib/GameProfile;)V"))
-    private GameProfile impl$fireAuthEventOffline(GameProfile $$0) {
-        this.authenticatedProfile = $$0;
-        if (this.bridge$fireAuthEvent()) {
-            return null;
-        }
-        return $$0;
-    }
-
-    @Inject(method = "startClientVerification(Lcom/mojang/authlib/GameProfile;)V", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$handleAuthEventCancellation(GameProfile $$0, final CallbackInfo ci) {
-        if ($$0 == null) {
-            ci.cancel();
-        }
+        this.state = ServerLoginPacketListenerImpl.State.NEGOTIATING;
     }
 }

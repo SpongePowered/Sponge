@@ -26,7 +26,6 @@ package org.spongepowered.common.data.provider.item.stack;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -39,9 +38,9 @@ import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.NBTCollectors;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public final class PotionItemStackData {
@@ -60,22 +59,18 @@ public final class PotionItemStackData {
                             tag.putInt(Constants.Item.CUSTOM_POTION_COLOR, v.rgb());
                         })
                         .delete(h -> h.removeTagKey(Constants.Item.CUSTOM_POTION_COLOR))
-                        .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION || h.getItem() == Items.LINGERING_POTION)
+                        .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION
+                                || h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
                             final List<MobEffectInstance> effects = PotionUtils.getMobEffects(h);
                             return effects.isEmpty() ? null : ImmutableList.copyOf((List<PotionEffect>) (Object) effects);
                         })
                         .set((h, v) -> {
-                            final CompoundTag tag = h.getOrCreateTag();
-                            final ListTag list = v.stream()
-                                    .map(effect -> {
-                                        final CompoundTag potionTag = new CompoundTag();
-                                        ((MobEffectInstance) effect).save(potionTag);
-                                        return potionTag;
-                                    })
-                                    .collect(NBTCollectors.toTagList());
-                            tag.put(Constants.Item.CUSTOM_POTION_EFFECTS, list);
+                            h.removeTagKey(Constants.Item.CUSTOM_POTION_EFFECTS);
+                            PotionUtils.setCustomEffects(h, v.stream()
+                                    .map(MobEffectInstance.class::cast)
+                                    .collect(Collectors.toList()));
                         })
                         .delete(h -> h.removeTagKey(Constants.Item.CUSTOM_POTION_EFFECTS))
                         .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION ||

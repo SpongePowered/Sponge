@@ -24,30 +24,31 @@
  */
 package org.spongepowered.common.network.channel;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
 import io.netty.buffer.Unpooled;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.channel.ChannelBuf;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public final class RegisterChannelUtil {
 
-    private static final char SEPARATOR = '\0';
-    private static final Splitter SPLITTER = Splitter.on(RegisterChannelUtil.SEPARATOR);
-    private static final Joiner JOINER = Joiner.on(RegisterChannelUtil.SEPARATOR);
+    private static final String SEPARATOR = "\0";
 
     public static List<ResourceKey> decodePayload(final ChannelBuf payload) {
         final byte[] content = payload.readBytes(payload.available());
-        return RegisterChannelUtil.SPLITTER.splitToList(new String(content, StandardCharsets.UTF_8))
-                .stream().map(ResourceKey::resolve).collect(Collectors.toList());
+        return Arrays.stream(new String(content, StandardCharsets.UTF_8).split(RegisterChannelUtil.SEPARATOR))
+                .map(ResourceKey::resolve)
+                .collect(Collectors.toList());
     }
 
     public static ChannelBuf encodePayload(final Iterable<ResourceKey> keys) {
-        final String content = RegisterChannelUtil.JOINER.join(keys);
+        final String content = StreamSupport.stream(keys.spliterator(), false)
+                .map(Object::toString)
+                .collect(Collectors.joining(RegisterChannelUtil.SEPARATOR));
         return ChannelBuffers.wrap(Unpooled.wrappedBuffer(content.getBytes(StandardCharsets.UTF_8)));
     }
 

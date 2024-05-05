@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command.parameter;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,6 +34,7 @@ import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
 import org.spongepowered.api.command.parameter.managed.ValueParser;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
+import org.spongepowered.common.util.Preconditions;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;

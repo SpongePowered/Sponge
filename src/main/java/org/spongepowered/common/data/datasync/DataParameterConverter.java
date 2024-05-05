@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.datasync;
 
-import com.google.common.base.MoreObjects;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -33,6 +32,7 @@ import org.spongepowered.common.bridge.network.syncher.EntityDataAccessorBridge;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 public abstract class DataParameterConverter<E> {
 
@@ -64,9 +64,9 @@ public abstract class DataParameterConverter<E> {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("parameter", this.parameter)
-            .toString();
+        return new StringJoiner(", ", DataParameterConverter.class.getSimpleName() + "[", "]")
+                .add("parameter=" + this.parameter)
+                .toString();
     }
 
     @Override

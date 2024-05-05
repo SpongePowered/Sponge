@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.game.pagination;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
@@ -41,6 +40,7 @@ import org.spongepowered.api.service.pagination.PaginationList;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -103,7 +103,7 @@ public final class SpongePaginationList implements PaginationList {
 
     @Override
     public void sendTo(final Audience receiver, final int page) {
-        checkNotNull(receiver, "The message receiver cannot be null!");
+        Objects.requireNonNull(receiver, "The message receiver cannot be null!");
 
         final PaginationCalculator calculator = new PaginationCalculator(this.linesPerPage);
         final Iterable<Map.Entry<Component, Integer>> counts = StreamSupport.stream(this.contents.spliterator(), false).map(input -> {

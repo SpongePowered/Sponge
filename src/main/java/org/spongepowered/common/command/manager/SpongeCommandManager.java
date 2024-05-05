@@ -32,6 +32,7 @@ import com.google.inject.Provider;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.leangen.geantyref.GenericTypeReflector;
@@ -44,7 +45,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.util.ComponentMessageThrowable;
-import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.MinecraftServer;
@@ -303,8 +303,6 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
             final int result = this.getDispatcher().execute(arguments, ((CommandSourceStack) CommandCause.create()));
             frame.addContext(EventContextKeys.COMMAND, arguments);
             return CommandResult.builder().result(result).build();
-        } catch (final CommandRuntimeException cre) {
-            throw new CommandException(SpongeAdventure.asAdventure(cre.getComponent()), cre);
         } catch (final CommandSyntaxException cse) {
             throw new CommandException(Component.text(cse.getMessage()), cse);
         }
@@ -556,7 +554,11 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
         );
     }
 
-    public int handleException(final String originalCommand, final String originalArgs, final CommandCause cause, final Throwable ex, final String command, final String args) throws CommandRuntimeException, CommandSyntaxException {
+    private static final DynamicCommandExceptionType ERROR_UNHANDLED_EXCEPTION = new DynamicCommandExceptionType(($$0) -> {
+        return (net.minecraft.network.chat.Component)$$0;
+    });
+
+    public int handleException(final String originalCommand, final String originalArgs, final CommandCause cause, final Throwable ex, final String command, final String args) throws CommandSyntaxException {
         if (ex instanceof SpongeCommandResultException scre) {
             final CommandResult result = scre.result();
             this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, result);
@@ -575,7 +577,7 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
             if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
                 this.prettyPrintThrowableError(ex, command, args, cause);
             }
-            throw new CommandRuntimeException(SpongeAdventure.asVanilla(ce.componentMessage()));
+            throw ERROR_UNHANDLED_EXCEPTION.create(SpongeAdventure.asVanilla(ce.componentMessage()));
         }
         if (ex instanceof CommandSyntaxException cse) {
             final CommandResult result = CommandResult.error(SpongeAdventure.asAdventure(cse.getRawMessage()));
@@ -584,13 +586,6 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
                 this.prettyPrintThrowableError(ex, command, args, cause);
             }
             throw cse;
-        } if (ex instanceof CommandRuntimeException cre) {
-            final CommandResult result = CommandResult.error(SpongeAdventure.asAdventure(cre.getComponent()));
-            this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, result);
-            if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
-                this.prettyPrintThrowableError(ex, command, args, cause);
-            }
-            throw cre;
         }
         this.prettyPrintThrowableError(ex, command, args, cause);
 
@@ -611,6 +606,6 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
         }
         final Component error = Component.text().content("Unexpected error occurred while executing command: ").append(excBuilder).build();
         this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, CommandResult.error(error));
-        throw new CommandRuntimeException(SpongeAdventure.asVanilla(error));
+        throw ERROR_UNHANDLED_EXCEPTION.create(SpongeAdventure.asVanilla(error));
     }
 }

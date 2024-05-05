@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.item.merchant;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -34,6 +33,7 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.util.RandomProvider;
 import org.spongepowered.api.util.weighted.VariableAmount;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Objects;
 
@@ -134,10 +134,10 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
 
         @Override
         public TradeOfferGenerator build() {
-            checkState(this.firstGenerator != null, "First item populators cannot be empty! Populate with some BiConsumers!");
-            checkState(this.sellingGenerator != null, "Selling item populators cannot be empty! Populate with some BiConsumers!");
-            checkState(this.baseUses != null);
-            checkState(this.maxUses != null);
+            Preconditions.checkState(this.firstGenerator != null, "First item populators cannot be empty! Populate with some BiConsumers!");
+            Preconditions.checkState(this.sellingGenerator != null, "Selling item populators cannot be empty! Populate with some BiConsumers!");
+            Preconditions.checkState(this.baseUses != null);
+            Preconditions.checkState(this.maxUses != null);
             return new SpongeTradeOfferGenerator(this);
         }
 

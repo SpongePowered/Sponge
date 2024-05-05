@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.command.parameter.managed.builder;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeChoicesValueParameter;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.HashMap;
 import java.util.function.Supplier;

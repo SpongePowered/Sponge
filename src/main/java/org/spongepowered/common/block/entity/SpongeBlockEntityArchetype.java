@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.block.entity;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -58,6 +57,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEntityType, BlockSnapshot, BlockEntity> implements
         org.spongepowered.api.block.entity.BlockEntityArchetype {
@@ -188,7 +188,10 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("type", this.type).add("state", this.blockState).add("data", this.compound).toString();
+        return new StringJoiner(", ", SpongeBlockEntityArchetype.class.getSimpleName() + "[", "]")
+                .add("type=" + this.type)
+                .add("state=" + this.blockState)
+                .add("data=" + this.compound).toString();
     }
 
     public List<DataHolder> impl$delegateDataHolder() {

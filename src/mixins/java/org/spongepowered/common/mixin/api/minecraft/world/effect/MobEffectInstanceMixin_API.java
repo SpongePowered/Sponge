@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 
 @Mixin(net.minecraft.world.effect.MobEffectInstance.class)
 public abstract class MobEffectInstanceMixin_API implements PotionEffect {
@@ -57,7 +58,7 @@ public abstract class MobEffectInstanceMixin_API implements PotionEffect {
 
     @Override
     public Ticks duration() {
-        return Ticks.of(this.duration);
+        return SpongeTicks.ticksOrInfinite(this.duration);
     }
 
     @Override

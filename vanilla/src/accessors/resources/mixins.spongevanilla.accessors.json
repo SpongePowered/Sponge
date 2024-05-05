@@ -1,0 +1,8 @@
+{
+    "required": true,
+    "parent": "mixins.sponge.parent.json",
+    "package": "org.spongepowered.vanilla.accessor",
+    "mixins": [
+        "world.level.block.entity.AbstractFurnaceBlockEntityAccessor_Vanilla"
+    ]
+}

@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.entity.player.tab;
 
-import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import net.kyori.adventure.text.Component;
@@ -43,6 +41,7 @@ import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoUpdatePacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.profile.SpongeGameProfile;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -51,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 public final class SpongeTabList implements TabList {
@@ -133,7 +133,7 @@ public final class SpongeTabList implements TabList {
     @Override
     public TabList addEntry(final TabListEntry entry) throws IllegalArgumentException {
         Objects.requireNonNull(entry, "builder");
-        checkState(entry.list().equals(this), "the provided tab list entry was not created for this tab list");
+        Preconditions.checkState(entry.list().equals(this), "the provided tab list entry was not created for this tab list");
 
         this.addEntry(entry, true);
 
@@ -150,6 +150,7 @@ public final class SpongeTabList implements TabList {
                     displayName == null ? null : SpongeAdventure.asAdventure(displayName),
                     entry.latency(),
                     (GameMode) (Object) entry.gameMode(),
+                    entry.listed(),
                     entry.chatSession() == null ? null : entry.chatSession().profilePublicKey()
             ), false);
         }
@@ -193,7 +194,7 @@ public final class SpongeTabList implements TabList {
         final RemoteChatSession.Data chatSessionData = ((SpongeTabListEntry) entry).profilePublicKey() == null ? null : new RemoteChatSession.Data(entry.profile().uuid(), ((SpongeTabListEntry) entry).profilePublicKey());
         final net.minecraft.network.chat.Component displayName = entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null;
         final ClientboundPlayerInfoUpdatePacket.Entry data = new ClientboundPlayerInfoUpdatePacket.Entry(entry.profile().uniqueId(), SpongeGameProfile.toMcProfile(entry.profile()),
-            true, entry.latency(), (GameType) (Object) entry.gameMode(), displayName, chatSessionData);
+            entry.listed(), entry.latency(), (GameType) (Object) entry.gameMode(), displayName, chatSessionData);
         ((ClientboundPlayerInfoUpdatePacketAccessor) packet).accessor$entries(List.of(data));
         this.player.connection.send(packet);
     }
@@ -223,9 +224,14 @@ public final class SpongeTabList implements TabList {
                 if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LATENCY)) {
                     ((SpongeTabListEntry) entry).updateWithoutSend();
                     entry.setLatency(update.latency());
-                } else if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE)) {
+                }
+                if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE)) {
                     ((SpongeTabListEntry) entry).updateWithoutSend();
                     entry.setGameMode((GameMode) (Object) update.gameMode());
+                }
+                if (actions.contains(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED)) {
+                    ((SpongeTabListEntry) entry).updateWithoutSend();
+                    entry.setListed(update.listed());
                 }
             });
         }
@@ -233,11 +239,11 @@ public final class SpongeTabList implements TabList {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("player", this.player)
-                .add("header", this.header)
-                .add("footer", this.footer)
-                .add("entries", this.entries)
+        return new StringJoiner(", ", SpongeTabList.class.getSimpleName() + "[", "]")
+                .add("player=" + this.player)
+                .add("header=" + this.header)
+                .add("footer=" + this.footer)
+                .add("entries=" + this.entries)
                 .toString();
     }
 

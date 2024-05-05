@@ -51,7 +51,7 @@ import org.spongepowered.test.LoadableModule;
 
 import java.util.Map;
 
-@Plugin("blockstate-test")
+@Plugin("blockstate_test")
 public class BlockStateTest implements LoadableModule {
 
     private final PluginContainer plugin;

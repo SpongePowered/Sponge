@@ -78,8 +78,11 @@ import org.spongepowered.test.LoadableModule;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -392,19 +395,17 @@ public class MapTest implements LoadableModule {
         if (map.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
-        final File file = new File("map.png");
-        if (!file.isFile()) {
+        final Path p = Path.of("map.png");
+        if (!Files.isRegularFile(p)) {
             try {
-                if (!file.createNewFile()) {
-                    throw new IOException("failed to create new file :(");
-                }
+                Files.createFile(p);
             } catch (final IOException e) {
                 e.printStackTrace();
             }
         }
         final BufferedImage image;
-        try {
-            image = ImageIO.read(file);
+        try (final InputStream is = Files.newInputStream(p)){
+            image = ImageIO.read(is);
         } catch (final IOException e) {
             throw new CommandException(Component.text(e.getMessage()), e);
         }
@@ -420,10 +421,10 @@ public class MapTest implements LoadableModule {
     }
 
     private CommandResult savePallete(final CommandContext ctx) {
-        final File file = new File("pallete.png");
+        final Path p = Path.of("pallete.png");
         try {
-            if (!file.isFile()) {
-                file.createNewFile();
+            if (!Files.isRegularFile(p)) {
+                Files.createFile(p);
             }
             final MapCanvas.Builder builder = MapCanvas.builder();
 
@@ -451,7 +452,9 @@ public class MapTest implements LoadableModule {
             }
             final MapCanvas canvas = builder.build();
             final Color color = new Color(0,0,0,0);
-            ImageIO.write((BufferedImage) canvas.toImage(color),"png", file);
+            try (final OutputStream os = Files.newOutputStream(p)) {
+                ImageIO.write((BufferedImage) canvas.toImage(color), "png", os);
+            }
         } catch (final IOException e) {
             Sponge.server().sendMessage(Component.text("IOException"));
         }
@@ -465,18 +468,18 @@ public class MapTest implements LoadableModule {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
         final Image image = map.require(Keys.MAP_INFO).require(Keys.MAP_CANVAS).toImage();
-        final File file = new File("map.png");
-        if (!file.isFile()) {
+        final Path p = Path.of("map.png");
+        if (!Files.isRegularFile(p)) {
             try {
-                if (!file.createNewFile()) {
-                    throw new IOException("failed to create new file :(");
-                }
+                Files.createFile(p);
             } catch (final IOException e) {
                 e.printStackTrace();
             }
         }
         try {
-            ImageIO.write((BufferedImage)image, "png", file);
+            try (final OutputStream os = Files.newOutputStream(p)) {
+                ImageIO.write((BufferedImage) image, "png", os);
+            }
         } catch (final IOException e) {
             e.printStackTrace();
         }

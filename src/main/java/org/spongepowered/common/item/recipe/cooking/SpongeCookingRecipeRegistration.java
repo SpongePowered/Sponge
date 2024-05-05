@@ -24,72 +24,134 @@
  */
 package org.spongepowered.common.item.recipe.cooking;
 
-import com.google.gson.JsonObject;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.BlastingRecipe;
+import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
+import net.minecraft.world.item.crafting.SmokingRecipe;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.datapack.DataPack;
+import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
-import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
-public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration {
+public class SpongeCookingRecipeRegistration extends SpongeRecipeRegistration<AbstractCookingRecipe> implements SpongeRecipeRegistration.ResultFunctionRegistration<Container>{
 
     // Vanilla Recipe
     private final Ingredient ingredient;
-    private final Item result;
     private final float experience;
     private final Ticks cookingTime;
 
     // Sponge Recipe
     private final ItemStack spongeResult;
     private final Function<Container, ItemStack> resultFunction;
+    private final RecipeType<?> type;
+    private final CookingBookCategory cookingCategory;
 
-    public SpongeCookingRecipeRegistration(final ResourceLocation key, final RecipeSerializer<?> serializer,
+    public SpongeCookingRecipeRegistration(final ResourceLocation key, final RecipeType<?> type, final RecipeSerializer<? extends AbstractCookingRecipe> serializer,
                                            final String group, final Ingredient ingredient, final float experience, final Ticks cookingTime,
                                            final ItemStack spongeResult, final Function<Container, ItemStack> resultFunction,
-                                           final DataPack<RecipeRegistration> pack, final RecipeCategory category) {
-        super(key, serializer, spongeResult.getItem(), group, pack, category);
+                                           final DataPack<RecipeRegistration> pack, final RecipeCategory category, final CookingBookCategory cookingCategory) {
+        super(key, group, pack, category, serializer);
+        this.type = type;
         this.ingredient = ingredient;
-        this.result = spongeResult.getItem();
         this.experience = experience;
         this.cookingTime = cookingTime;
-        this.spongeResult = spongeResult.hasTag() ? spongeResult : null;
+        this.spongeResult = spongeResult;
         this.resultFunction = resultFunction;
+        this.cookingCategory = cookingCategory;
     }
 
-    @Override
-    public void serializeShape(final JsonObject json) {
-        json.add(Constants.Recipe.COOKING_INGREDIENT, this.ingredient.toJson(false));
-    }
+    public static SpongeCookingRecipeRegistration of(final ResourceLocation key, final RecipeType<?> type, final @Nullable String group,
+            final Ingredient ingredient, final Float experience, final @Nullable Ticks cookingTime, final ItemStack result,
+            final Function<Container, ItemStack> resultFunction, final DataPack<RecipeRegistration> pack, final RecipeCategory recipeCategory, final CookingBookCategory cookingCategory)
+    {
+        var finalCookingTime = cookingTime;
 
-    @Override
-    public void serializeResult(final JsonObject json) {
-        final Registry<Item> itemRegistry = BuiltInRegistries.ITEM;
-        json.addProperty(Constants.Recipe.RESULT, itemRegistry.getKey(this.result).toString());
-        // Sponge Recipe
-        if (this.spongeResult != null) {
-            this.spongeResult.setCount(1);
-            json.add(Constants.Recipe.SPONGE_RESULT, IngredientResultUtil.serializeItemStack(this.spongeResult));
+        final RecipeSerializer<? extends AbstractCookingRecipe> serializer;
+        if (type == RecipeType.BLASTING) {
+            if (finalCookingTime == null) {
+                finalCookingTime = Ticks.of(100);
+            }
+            serializer = RecipeSerializer.BLASTING_RECIPE;
+        } else if (type == RecipeType.CAMPFIRE_COOKING) {
+            if (finalCookingTime == null) {
+                finalCookingTime = Ticks.of(600);
+            }
+            serializer = RecipeSerializer.CAMPFIRE_COOKING_RECIPE;
+        } else if (type == RecipeType.SMOKING) {
+            if (finalCookingTime == null) {
+                finalCookingTime = Ticks.of(100);
+            }
+            serializer = RecipeSerializer.SMOKING_RECIPE;
+        } else if (type == RecipeType.SMELTING) {
+            if (finalCookingTime == null) {
+                finalCookingTime = Ticks.of(200);
+            }
+            serializer = RecipeSerializer.SMELTING_RECIPE;
+        } else {
+            throw new IllegalArgumentException("Unknown RecipeType " + type);
         }
-        if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, IngredientResultUtil.cacheResultFunction(this.id(), this.resultFunction));
-        }
+
+        return new SpongeCookingRecipeRegistration(key, type, serializer, group,
+                ingredient, experience == null ? 0 : experience, finalCookingTime, result, resultFunction, pack, recipeCategory, cookingCategory);
     }
 
     @Override
-    public void serializeAdditional(final JsonObject json) {
-        json.addProperty(Constants.Recipe.COOKING_EXP, this.experience);
-        json.addProperty(Constants.Recipe.COOKING_TIME, this.cookingTime.ticks());
+    public Recipe recipe() {
+        this.ensureCached();
+        final int ticksCookingTime = SpongeTicks.toSaturatedIntOrInfinite(this.cookingTime);
+        final String resultFunctionId = this.resultFunction == null ? null : this.key.toString();
+
+        final List<Ingredient> ingredientList = Collections.singletonList(ingredient);
+        final boolean isVanilla = SpongeRecipeRegistration.isVanillaSerializer(this.spongeResult, this.resultFunction, null, ingredientList);
+
+        if (type == RecipeType.BLASTING) {
+            if (!isVanilla) {
+                return (CookingRecipe) new SpongeBlastingRecipe(this.group, this.cookingCategory, this.ingredient, this.spongeResult, this.experience, ticksCookingTime, resultFunctionId);
+            }
+            return (CookingRecipe) new BlastingRecipe(this.group, this.cookingCategory, this.ingredient, this.spongeResult, this.experience, ticksCookingTime);
+        }
+        if (type == RecipeType.CAMPFIRE_COOKING) {
+            if (!isVanilla) {
+                return (CookingRecipe) new SpongeCampfireCookingRecipe(this.group, this.cookingCategory, this.ingredient, this.spongeResult, this.experience, ticksCookingTime, resultFunctionId);
+            }
+            return (CookingRecipe) new CampfireCookingRecipe(this.group, this.cookingCategory, this.ingredient, this.spongeResult, this.experience, ticksCookingTime);
+        }
+        if (type == RecipeType.SMOKING) {
+            if (!isVanilla) {
+                return (CookingRecipe) new SpongeSmokingRecipe(this.group, this.cookingCategory, this.ingredient, this.spongeResult, this.experience, ticksCookingTime, resultFunctionId);
+            }
+            return (CookingRecipe) new SmokingRecipe(this.group, this.cookingCategory, this.ingredient, this.spongeResult, this.experience, ticksCookingTime);
+        }
+        if (type == RecipeType.SMELTING) {
+            if (!isVanilla) {
+                return (CookingRecipe) new SpongeSmeltingRecipe(this.group, this.cookingCategory, this.ingredient, this.spongeResult, this.experience, ticksCookingTime, resultFunctionId);
+            }
+            return (CookingRecipe) new SmeltingRecipe(this.group, this.cookingCategory, this.ingredient, this.spongeResult, this.experience, ticksCookingTime);
+        }
+        throw new IllegalArgumentException("Unknown RecipeType " + type);
+
+
+    }
+
+    @Override
+    public Function<Container, ItemStack> resultFunction() {
+        return this.resultFunction;
     }
 }

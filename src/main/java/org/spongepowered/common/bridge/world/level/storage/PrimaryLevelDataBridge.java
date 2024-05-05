@@ -43,6 +43,10 @@ import java.util.UUID;
 
 public interface PrimaryLevelDataBridge {
 
+    default boolean bridge$isVanilla() {
+        return false;
+    }
+
     boolean bridge$valid();
 
     @Nullable ServerLevel bridge$world();
@@ -55,7 +59,13 @@ public interface PrimaryLevelDataBridge {
 
     void bridge$setUniqueId(UUID uniqueId);
 
-    boolean bridge$customDifficulty();
+    /**
+     * Gets whether the world data supports custom difficulties,
+     * @return
+     */
+    default boolean bridge$customDifficulty() {
+        return true;
+    }
 
     boolean bridge$customGameType();
 

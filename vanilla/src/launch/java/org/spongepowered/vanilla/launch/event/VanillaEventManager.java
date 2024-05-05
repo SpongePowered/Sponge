@@ -25,9 +25,7 @@
 package org.spongepowered.vanilla.launch.event;
 
 import com.google.inject.Singleton;
-import org.spongepowered.common.event.filter.FilterGenerator;
-import org.spongepowered.common.event.manager.AnnotatedEventListener;
-import org.spongepowered.common.event.manager.ClassEventListenerFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.vanilla.launch.plugin.VanillaJavaPluginContainer;
@@ -38,14 +36,11 @@ import java.lang.invoke.MethodHandles;
 public final class VanillaEventManager extends SpongeEventManager {
 
     @Override
-    protected AnnotatedEventListener.Factory computeFactory(final PluginContainer key) {
-        final MethodHandles.Lookup lookup;
-        if (key instanceof VanillaJavaPluginContainer vanilla) {
-            lookup = vanilla.lookup();
-        } else {
-            lookup = SpongeEventManager.OWN_LOOKUP; // won't provide appropriate module access, but that doesn't matter in a non-modular context
+    protected MethodHandles.@Nullable Lookup getLookup(final PluginContainer plugin, final Class<?> handle) {
+        if (plugin instanceof VanillaJavaPluginContainer vanilla) {
+            return vanilla.lookup();
         }
-        return new ClassEventListenerFactory(FilterGenerator::create, lookup);
+        return null;
     }
 
 }

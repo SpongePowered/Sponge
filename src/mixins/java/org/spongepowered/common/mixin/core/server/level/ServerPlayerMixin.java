@@ -73,9 +73,10 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.level.storage.LevelData;
-import net.minecraft.world.scores.Score;
+import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -194,6 +195,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     private final PlayerOwnBorderListener impl$borderListener = new PlayerOwnBorderListener((net.minecraft.server.level.ServerPlayer) (Object) this);
     private boolean impl$sleepingIgnored;
     private boolean impl$noGameModeEvent;
+    @Nullable private WorldBorder impl$worldBorder;
 
     @Override
     public net.minecraft.network.chat.@Nullable Component bridge$getConnectionMessageToSend() {
@@ -486,7 +488,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Override
     protected final void impl$onChangingDimension(final ServerLevel target) {
-        if (this.shadow$level() == target) {
+        if (this.shadow$level() != target) {
             this.isChangingDimension = true;
         }
     }
@@ -571,7 +573,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         // Sponge Start: teleport here after all data is sent to avoid any potential "stuttering" due to slow packets.
         final net.minecraft.world.phys.Vec3 finalPos = this.shadow$position();
-        this.shadow$moveTo(finalPos.x, finalPos.y, finalPos.z);
+        this.shadow$teleportTo(finalPos.x, finalPos.y, finalPos.z);
+        this.connection.resetPosition();
         // Sponge End
 
         for (final MobEffectInstance effectinstance : this.shadow$getActiveEffects()) {
@@ -679,7 +682,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         // Sponge End
 
         this.shadow$getScoreboard().forAllObjectives(
-                ObjectiveCriteria.DEATH_COUNT, this.shadow$getScoreboardName(), Score::increment);
+                ObjectiveCriteria.DEATH_COUNT, (net.minecraft.server.level.ServerPlayer) (Object) this, sa -> sa.set(sa.get() + 1));
         final LivingEntity livingentity = this.shadow$getKillCredit();
         if (livingentity != null) {
             this.shadow$awardStat(Stats.ENTITY_KILLED_BY.get(livingentity.getType()));
@@ -821,7 +824,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    public Team shadow$getTeam() {
+    public PlayerTeam shadow$getTeam() {
         return ((net.minecraft.world.scores.Scoreboard) this.impl$scoreboard).getPlayersTeam(this.shadow$getScoreboardName());
     }
 
@@ -893,5 +896,20 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         } finally {
             this.impl$noGameModeEvent = false;
         }
+    }
+
+    @Override
+    public @Nullable WorldBorder bridge$getWorldBorder() {
+        return this.impl$worldBorder;
+    }
+
+    @Override
+    public void bridge$replaceWorldBorder(final @Nullable WorldBorder border) {
+        this.impl$worldBorder = border;
+    }
+
+    @Override
+    public boolean bridge$isTransient() {
+        return this.impl$transient;
     }
 }

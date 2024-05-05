@@ -1,0 +1,49 @@
+name: "common / integration test"
+
+on:
+  workflow_call:
+    inputs:
+      distribution:
+        type: string
+        required: false
+        default: "SpongeVanilla"
+
+jobs:
+  integrationTest:
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-latest, macos-latest]
+        java: [17, 21]
+    runs-on: "${{ matrix.os }}"
+    steps:
+      - name: Check out repository to use the build.gradle.kts as a hash file
+        uses: "actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11" # v4.1.1
+        with:
+          path: code
+      - name: Download ${{ inputs.distribution }} libraries as an additional hash file
+        uses: "actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427" # v4.1.4
+        with:
+          name: ${{ inputs.distribution }} installer libraries
+          path: "${{ github.workspace }}/code/libraries.json"
+      - name: "Setup JDK ${{ matrix.java }}"
+        uses: "actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9" # v4.2.1
+        with:
+          distribution: temurin
+          java-version: "${{ matrix.java }}"
+      - uses: "actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9" # v4.0.2
+        with:
+          path: "${{ github.workspace}}/libraries"
+          key: "${{runner.os}}-${{matrix.java}}-it-libraries-${{ hashFiles('code/build.gradle.kts') }}-${{ github.workspace }}/code/libraries.json"
+          restore-keys: "${{runner.os}}-${{matrix.java}}-it-libraries-"
+      - name: Download ${{ inputs.distribution }} server
+        uses: "actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427" # v4.1.4
+        with:
+          name: ${{ inputs.distribution }} Production Jar
+      - name: Run ${{ inputs.distribution }} Test (windows)
+        if: "runner.os == 'Windows'"
+        run: java "-Dmixin.debug.verbose=true" -jar $(gci | Where-Object NameString -Match "-universal.jar") --launchTarget sponge_server_it
+      - name: Run ${{ inputs.distribution }} Test (other)
+        if: "runner.os != 'Windows'"
+        run: java -Dmixin.debug.verbose=true -jar *-universal.jar --launchTarget sponge_server_it

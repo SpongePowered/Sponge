@@ -35,7 +35,6 @@ import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.BuilderProvider;
 import org.spongepowered.api.registry.FactoryProvider;
 import org.spongepowered.api.service.ServiceProvider;
-import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeGame;
@@ -47,7 +46,6 @@ import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
 import org.spongepowered.common.service.game.SpongeGameScopedServiceProvider;
-import org.spongepowered.common.sql.SpongeSqlManager;
 import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
 
 public final class SpongeCommonModule extends AbstractModule {
@@ -61,7 +59,6 @@ public final class SpongeCommonModule extends AbstractModule {
         this.bind(DataManager.class).to(SpongeDataManager.class);
         this.bind(ConfigManager.class).to(PluginConfigManager.class);
         this.bind(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);
-        this.bind(SqlManager.class).to(SpongeSqlManager.class);
         this.bind(ServiceProvider.GameScoped.class).to(SpongeGameScopedServiceProvider.class);
         this.bind(FactoryProvider.class).to(SpongeFactoryProvider.class);
         this.bind(BuilderProvider.class).to(SpongeBuilderProvider.class);

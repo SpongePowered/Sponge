@@ -24,7 +24,6 @@
  */
 package org.spongepowered.vanilla.launch.plugin;
 
-import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
@@ -35,6 +34,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 public final class VanillaDummyPluginContainer implements PluginContainer, DummyPluginContainer {
 
@@ -97,8 +97,8 @@ public final class VanillaDummyPluginContainer implements PluginContainer, Dummy
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .addValue(this.metadata)
-            .toString();
+        return new StringJoiner(", ", VanillaDummyPluginContainer.class.getSimpleName() + "[", "]")
+                .add("metadata= " + this.metadata)
+                .toString();
     }
 }

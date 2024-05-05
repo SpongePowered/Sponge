@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import org.spongepowered.api.block.entity.carrier.Dispenser;
@@ -35,6 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.projectile.ProjectileUtil;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Mixin(DispenserBlockEntity.class)
@@ -42,12 +42,12 @@ public abstract class DispenserBlockEntityMixin_API extends RandomizableContaine
 
     @Override
     public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType) {
-        return ProjectileUtil.launch(checkNotNull(projectileType, "projectileType"), this, null);
+        return ProjectileUtil.launch(Objects.requireNonNull(projectileType, "projectileType"), this, null);
     }
 
     @Override
     public <T extends Projectile> Optional<T> launchProjectile(final EntityType<T> projectileType, final Vector3d velocity) {
-        return ProjectileUtil.launch(checkNotNull(projectileType, "projectileType"), this, checkNotNull(velocity, "velocity"));
+        return ProjectileUtil.launch(Objects.requireNonNull(projectileType, "projectileType"), this, Objects.requireNonNull(velocity, "velocity"));
     }
 
     @Override

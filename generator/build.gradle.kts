@@ -18,16 +18,16 @@ minecraft {
 }
 
 configurations.configureEach {
-    exclude(group = "org.apache.logging.log4j", module = "log4j-slf4j2-impl")
+    val dep = libs.log4j.slf4j2.get()
+    exclude(group = dep.group, module = dep.name)
 }
 
 dependencies {
-    val tinyLogVersion: String by project
-    implementation("com.squareup:javapoet:1.13.0")
-    implementation("com.github.javaparser:javaparser-core:3.24.4")
-    implementation("org.tinylog:tinylog-api:$tinyLogVersion")
-    runtimeOnly("org.tinylog:tinylog-impl:$tinyLogVersion")
-    runtimeOnly("org.tinylog:slf4j-tinylog:$tinyLogVersion")
+    implementation(libs.javapoet)
+    implementation(libs.javaparser)
+    implementation(libs.tinylog.api)
+    runtimeOnly(libs.tinylog.impl)
+    runtimeOnly(libs.tinylog.slf4j)
 }
 
 indraSpotlessLicenser {

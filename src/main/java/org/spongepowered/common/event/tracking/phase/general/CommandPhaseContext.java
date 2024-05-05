@@ -24,21 +24,26 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
-import net.minecraft.server.level.ServerPlayer;
+import com.google.common.collect.Sets;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
-import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
-import org.spongepowered.common.event.tracking.context.transaction.effect.BroadcastInventoryChangesEffect;
-import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
+import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.util.PrettyPrinter;
+
+import java.util.Set;
 
 public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext> {
 
     @Nullable String command;
     @Nullable CommandMapping commandMapping;
+
+    private @MonotonicNonNull Set<AbstractContainerMenu> modifiedContainers;
+
+    private boolean closing;
 
     CommandPhaseContext(final IPhaseState<CommandPhaseContext> state, final PhaseTracker tracker) {
         super(state, tracker);
@@ -54,6 +59,8 @@ public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext
         super.reset();
         this.command = null;
         this.commandMapping = null;
+        this.modifiedContainers = null;
+        this.closing = false;
     }
 
     public CommandPhaseContext command(final String command) {
@@ -76,14 +83,25 @@ public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext
     }
 
     @Override
+    public boolean captureModifiedContainer(final AbstractContainerMenu container) {
+        if (this.closing) {
+            return false;
+        }
+
+        if (this.modifiedContainers == null) {
+            this.modifiedContainers = Sets.newHashSet();
+        }
+
+        this.modifiedContainers.add(container);
+        return true;
+    }
+
+    @Override
     public void close() {
-        // Make sure to broadcast any changes to capture any inventory transactions for events.
-        if (this.getSource() instanceof ServerPlayer) {
-            final TransactionalCaptureSupplier transactor = this.getTransactor();
-            transactor.logPlayerInventoryChange((ServerPlayer) this.getSource(), PlayerInventoryTransaction.EventCreator.STANDARD);
-            try (EffectTransactor ignored = BroadcastInventoryChangesEffect.transact(transactor)) {
-                ((ServerPlayer) this.getSource()).containerMenu.broadcastChanges();
-            }
+        this.closing = true;
+
+        if (this.modifiedContainers != null) {
+            InventoryUtil.postContainerEvents(this.modifiedContainers, this.getTransactor());
         }
 
         super.close();

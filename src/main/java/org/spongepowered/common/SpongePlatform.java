@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common;
 
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
@@ -33,6 +32,7 @@ import org.spongepowered.plugin.PluginContainer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public abstract class SpongePlatform implements Platform {
 
@@ -107,12 +107,12 @@ public abstract class SpongePlatform implements Platform {
 
     @Override
     public final String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("type", this.type())
-                .add("executionType", this.executionType())
-                .add("api", Launch.instance().apiPlugin().metadata().id())
-                .add("platform", Launch.instance().platformPlugin().metadata().id())
-                .add("minecraftVersion", this.minecraftVersion())
+        return new StringJoiner(", ", SpongePlatform.class.getSimpleName() + "[", "]")
+                .add("type=" + this.type())
+                .add("executionType=" + this.executionType())
+                .add("api=" + Launch.instance().apiPlugin().metadata().id())
+                .add("platform=" + Launch.instance().platformPlugin().metadata().id())
+                .add("minecraftVersion=" + this.minecraftVersion())
                 .toString();
     }
 }

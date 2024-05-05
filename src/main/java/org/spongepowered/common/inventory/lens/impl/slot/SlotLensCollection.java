@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
@@ -32,6 +31,7 @@ import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class SlotLensCollection implements SlotLensProvider {
 
@@ -50,7 +50,7 @@ public class SlotLensCollection implements SlotLensProvider {
         }
 
         public SlotLensCollection.Builder add(Class<? extends SlotAdapter> type, SlotLensProvider provider) {
-            this.slotTypes.add(Tuple.of(checkNotNull(type), provider));
+            this.slotTypes.add(Tuple.of(Objects.requireNonNull(type), provider));
             return this;
         }
 
@@ -63,7 +63,7 @@ public class SlotLensCollection implements SlotLensProvider {
         }
 
         public SlotLensCollection.Builder add(int count, Class<? extends SlotAdapter> type, SlotLensProvider provider) {
-            checkNotNull(type);
+            Objects.requireNonNull(type);
             for (int i = 0; i < count; i++) {
                 this.add(type, provider);
             }

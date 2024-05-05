@@ -30,6 +30,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import org.spongepowered.common.util.Constants;
 
 public final class SpongeSpecialCraftingRecipeSerializer<T extends SpongeSpecialRecipe> implements RecipeSerializer<T> {
 
@@ -38,7 +39,7 @@ public final class SpongeSpecialCraftingRecipeSerializer<T extends SpongeSpecial
     public SpongeSpecialCraftingRecipeSerializer(Factory<T> factory) {
         this.codec = RecordCodecBuilder.create(
                 $$1 -> $$1.group(
-                        Codec.STRING.fieldOf("sponge:id").forGetter(SpongeSpecialRecipe::id),
+                        Codec.STRING.fieldOf(Constants.Recipe.SPONGE_ID).forGetter(SpongeSpecialRecipe::id),
                         CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(CraftingRecipe::category))
                         .apply($$1, factory::create)
         );

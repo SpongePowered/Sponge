@@ -219,4 +219,10 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
 
     }
 
+    @Override
+    protected boolean shouldBuildEventAndRestartBatch(
+            final GameTransaction<@NonNull ?> pointer, final PhaseContext<@NonNull ?> context
+    ) {
+        return super.shouldBuildEventAndRestartBatch(pointer, context) || ((InventoryBasedTransaction) pointer).inventory != this.inventory;
+    }
 }

@@ -70,6 +70,11 @@ public final class SpongeTicks implements Ticks {
     }
 
     @Override
+    public boolean isInfinite() {
+        return false;
+    }
+
+    @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -84,6 +89,35 @@ public final class SpongeTicks implements Ticks {
     @Override
     public int hashCode() {
         return Objects.hash(this.ticks);
+    }
+
+    public static int toSaturatedIntOrInfinite(final Ticks ticks) {
+        return SpongeTicks.toSaturatedIntOrInfinite(ticks, Constants.TickConversions.INFINITE_TICKS);
+    }
+
+    public static int toSaturatedIntOrInfinite(final Ticks ticks, final int infiniteTicksMarker) {
+        if (ticks.isInfinite()) {
+            return infiniteTicksMarker;
+        }
+        long ticksValue = ticks.ticks();
+        if (ticksValue > Integer.MAX_VALUE) {
+            ticksValue = Integer.MAX_VALUE;
+        }
+        if (infiniteTicksMarker > 0 && ticksValue >= infiniteTicksMarker) {
+            ticksValue = infiniteTicksMarker - 1;
+        }
+        return (int) ticksValue;
+    }
+
+    public static Ticks ticksOrInfinite(final long ticks) {
+        return SpongeTicks.ticksOrInfinite(ticks, Constants.TickConversions.INFINITE_TICKS);
+    }
+
+    public static Ticks ticksOrInfinite(final long ticks, final int infiniteTicksMarker) {
+        if (ticks == infiniteTicksMarker) {
+            return SpongeInfiniteTicks.INSTANCE;
+        }
+        return new SpongeTicks(ticks);
     }
 
     public static final class Factory implements Ticks.Factory {
@@ -158,6 +192,45 @@ public final class SpongeTicks implements Ticks {
             return this.minecraftDay;
         }
 
+        @Override
+        public Ticks infinite() {
+            return SpongeInfiniteTicks.INSTANCE;
+        }
+
+    }
+
+    private static final class SpongeInfiniteTicks implements Ticks {
+
+        private static final SpongeInfiniteTicks INSTANCE = new SpongeInfiniteTicks();
+
+        @Override
+        public Duration expectedDuration(final Engine engine) {
+            throw this.isInfiniteException();
+        }
+
+        @Override
+        public long ticks() {
+            throw this.isInfiniteException();
+        }
+
+        @Override
+        public long minecraftSeconds(final Engine engine) {
+            throw this.isInfiniteException();
+        }
+
+        @Override
+        public Duration minecraftDayTimeDuration(final Engine engine) {
+            throw this.isInfiniteException();
+        }
+
+        @Override
+        public boolean isInfinite() {
+            return true;
+        }
+
+        private IllegalStateException isInfiniteException() {
+            throw new IllegalStateException("This instance represent infinite time");
+        }
     }
 
 }

@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.item.merchant;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.world.item.trading.MerchantOffer;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
@@ -40,14 +38,16 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.common.accessor.world.item.trading.MerchantOfferAccessor;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.Preconditions;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> implements TradeOffer.Builder, DataBuilder<TradeOffer> {
 
-    private ItemStackSnapshot firstItem = ItemStackSnapshot.empty();
+    @MonotonicNonNull private ItemStackSnapshot firstItem;
     private @Nullable ItemStackSnapshot secondItem;
-    private ItemStackSnapshot sellingItem = ItemStackSnapshot.empty();
+    @MonotonicNonNull private ItemStackSnapshot sellingItem;
     private int useCount;
     private int maxUses;
     private boolean allowsExperience;
@@ -62,7 +62,7 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     @Override
     public TradeOffer.Builder firstBuyingItem(final ItemStack item) {
-        checkNotNull(item, "Buying item cannot be null");
+        Objects.requireNonNull(item, "Buying item cannot be null");
         this.firstItem = item.createSnapshot();
         return this;
     }
@@ -82,14 +82,14 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     @Override
     public TradeOffer.Builder uses(final int uses) {
-        checkArgument(uses >= 0, "Usage count cannot be negative");
+        Preconditions.checkArgument(uses >= 0, "Usage count cannot be negative");
         this.useCount = uses;
         return this;
     }
 
     @Override
     public TradeOffer.Builder maxUses(final int maxUses) {
-        checkArgument(maxUses > 0, "Max usage count must be greater than 0");
+        Preconditions.checkArgument(maxUses > 0, "Max usage count must be greater than 0");
         this.maxUses = maxUses;
         return this;
     }
@@ -121,14 +121,14 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
     @SuppressWarnings("ConstantConditions")
     @Override
     public TradeOffer build() throws IllegalStateException {
-        checkState(this.firstItem != null, "Trading item has not been set");
-        checkState(this.sellingItem != null, "Selling item has not been set");
-        checkState(this.useCount <= this.maxUses, "Usage count cannot be greater than the max usage count (%s)", this.maxUses);
+        Preconditions.checkState(this.firstItem != null, "Trading item has not been set");
+        Preconditions.checkState(this.sellingItem != null, "Selling item has not been set");
+        Preconditions.checkState(this.useCount <= this.maxUses, String.format("Usage count cannot be greater than the max usage count (%d)", this.maxUses));
         final ItemStack first = this.firstItem.createStack();
         final ItemStack second = this.secondItem == null ? null : this.secondItem.createStack();
         final ItemStack selling = this.sellingItem.createStack();
         final MerchantOffer merchantOffer = new MerchantOffer(ItemStackUtil.toNative(first), ItemStackUtil.toNative(second), ItemStackUtil.toNative(selling),
-                        this.useCount, this.maxUses, this.merchantExperienceGranted, (float) this.priceGrowthMultiplier);
+                this.useCount, this.maxUses, this.merchantExperienceGranted, (float) this.priceGrowthMultiplier);
         ((MerchantOfferAccessor) merchantOffer).accessor$rewardExp(this.allowsExperience);
         ((MerchantOfferAccessor) merchantOffer).accessor$demand(this.demandBonus);
         return (TradeOffer) merchantOffer;
@@ -136,7 +136,7 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     @Override
     public TradeOffer.Builder from(final TradeOffer offer) {
-        checkNotNull(offer, "Trade offer cannot be null");
+        Objects.requireNonNull(offer, "Trade offer cannot be null");
         // Assumes the offer's values don't need to be validated
         this.firstItem = offer.firstBuyingItem();
         this.secondItem = offer.secondBuyingItem().orElse(null);
@@ -152,9 +152,9 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
 
     @Override
     public SpongeTradeOfferBuilder reset() {
-        this.firstItem = ItemStackSnapshot.empty();
+        this.firstItem = null;
         this.secondItem = null;
-        this.sellingItem = ItemStackSnapshot.empty();
+        this.sellingItem = null;
         this.useCount = Constants.Item.TradeOffer.DEFAULT_USE_COUNT;
         this.maxUses = Constants.Item.TradeOffer.DEFAULT_MAX_USES;
         this.allowsExperience = true;

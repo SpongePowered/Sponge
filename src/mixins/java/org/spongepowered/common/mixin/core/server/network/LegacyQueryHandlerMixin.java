@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
-import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
@@ -42,6 +41,7 @@ import org.spongepowered.common.network.status.SpongeStatusResponse;
 import org.spongepowered.common.util.NetworkUtil;
 
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 
 @Mixin(LegacyQueryHandler.class)
 public abstract class LegacyQueryHandlerMixin extends ChannelInboundHandlerAdapter {
@@ -161,7 +161,7 @@ public abstract class LegacyQueryHandlerMixin extends ChannelInboundHandlerAdapt
                 if (!buf.isReadable(length * 2)) {
                     break;
                 }
-                if (!buf.readBytes(length * 2).toString(Charsets.UTF_16BE).equals("MC|PingHost")) {
+                if (!buf.readBytes(length * 2).toString(StandardCharsets.UTF_16BE).equals("MC|PingHost")) {
                     return false;
                 }
                 if (!buf.isReadable(2)) {
@@ -174,7 +174,7 @@ public abstract class LegacyQueryHandlerMixin extends ChannelInboundHandlerAdapt
 
                 final int protocol = buf.readUnsignedByte();
                 length = buf.readShort();
-                final String host = buf.readBytes(length * 2).toString(Charsets.UTF_16BE);
+                final String host = buf.readBytes(length * 2).toString(StandardCharsets.UTF_16BE);
                 final int port = buf.readInt();
 
                 LegacyQueryHandlerMixin.LOGGER.debug("Ping: (1.6) from {}:{}", client.getAddress(), client.getPort());

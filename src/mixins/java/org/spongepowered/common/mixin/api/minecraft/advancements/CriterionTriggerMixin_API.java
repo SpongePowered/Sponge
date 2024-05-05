@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.advancements;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.advancements.CriterionTrigger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
@@ -32,6 +31,8 @@ import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.advancements.CriterionTriggerBridge;
+
+import java.util.Objects;
 
 @Mixin(CriterionTrigger.class)
 public interface CriterionTriggerMixin_API<C extends FilteredTriggerConfiguration> extends Trigger<C> {
@@ -43,13 +44,13 @@ public interface CriterionTriggerMixin_API<C extends FilteredTriggerConfiguratio
 
     @Override
     default void trigger(final Iterable<ServerPlayer> players) {
-        Preconditions.checkNotNull(players);
+        Objects.requireNonNull(players);
         players.forEach(((CriterionTriggerBridge) this)::bridge$trigger);
     }
 
     @Override
     default void trigger(final ServerPlayer player) {
-        Preconditions.checkNotNull(player);
+        Objects.requireNonNull(player);
         ((CriterionTriggerBridge) this).bridge$trigger(player);
         // This could possibly be implemented in all the vanilla triggers
         // and construct trigger method arguments based on context values

@@ -161,7 +161,7 @@ public class BlockStatePropertyKeysGenerator implements Generator {
 
     @Override
     public void generate(final Context ctx) throws IOException {
-        final var clazz = Types.utilityClass("BlockStateKeys", GENERATED_FILE_JAVADOCS);
+        final var clazz = Types.utilityClass("BlockStateKeys", Generator.GENERATED_FILE_JAVADOCS);
         clazz.addAnnotation(Types.suppressWarnings("unused"));
 
         final MethodSpec factoryMethod = this.factoryMethod();
@@ -221,6 +221,10 @@ public class BlockStatePropertyKeysGenerator implements Generator {
     private Map<String, Property<?>> vanillaProperties() {
         final Map<String, Property<?>> vanillaMap = new TreeMap<>();
         for (Field field : BlockStateProperties.class.getDeclaredFields()) {
+            if (field.getName().equals("TRIAL_SPAWNER_STATE")) {
+                // TODO add spawner states to API
+                continue;
+            }
             try {
                 final Object property = field.get(null);
                 if (property instanceof Property<?>) {

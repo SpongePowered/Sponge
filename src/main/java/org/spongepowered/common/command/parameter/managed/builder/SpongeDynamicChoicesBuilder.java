@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command.parameter.managed.builder;
 
-import com.google.common.base.Preconditions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
@@ -33,6 +32,7 @@ import org.spongepowered.common.command.parameter.managed.standard.SpongeChoices
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -69,8 +69,8 @@ public final class SpongeDynamicChoicesBuilder<T> implements VariableValueParame
 
     @Override
     public @NonNull ValueParameter<T> build() {
-        Preconditions.checkNotNull(this.choices, "choices must not be null");
-        Preconditions.checkNotNull(this.results, "results must not be null");
+        Objects.requireNonNull(this.choices, "choices must not be null");
+        Objects.requireNonNull(this.results, "results must not be null");
         return new SpongeChoicesValueParameter<>(this.choices, this.results, this.showInUsage, false);
     }
 

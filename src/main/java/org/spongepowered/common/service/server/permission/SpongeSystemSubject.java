@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -33,6 +32,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class SpongeSystemSubject implements Subject, SystemSubject, BridgeSubject, SubjectBridge {
@@ -74,9 +74,9 @@ public abstract class SpongeSystemSubject implements Subject, SystemSubject, Bri
 
     @Override
     public String toString() {
-      return MoreObjects.toStringHelper(this)
-          .add("identifier", this.identifier())
-          .add("reference", this.bridge$resolveOptional())
-          .toString();
+      return new StringJoiner(", ", SpongeSystemSubject.class.getSimpleName() + "[", "]")
+              .add("identifier=" + this.identifier())
+              .add("reference=" + this.bridge$resolveOptional())
+              .toString();
     }
 }

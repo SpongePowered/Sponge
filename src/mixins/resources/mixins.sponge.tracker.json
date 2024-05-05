@@ -36,7 +36,6 @@
         "world.level.LevelHeightAccessorMixin_Tracker",
         "world.level.LevelMixin_Tracker",
         "world.level.block.BlockMixin_Tracker",
-        "world.level.block.BlocksMixin_Tracker",
         "world.level.block.DispenserBlockMixin_Tracker",
         "world.level.block.LeavesBlockMixin_Tracker",
         "world.level.block.SaplingBlockMixin_Tracker",

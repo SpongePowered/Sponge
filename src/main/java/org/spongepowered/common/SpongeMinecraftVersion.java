@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common;
 
-import com.google.common.base.MoreObjects;
 import net.minecraft.SharedConstants;
 import org.spongepowered.api.MinecraftVersion;
 
 import java.util.OptionalInt;
+import java.util.StringJoiner;
 
 public final class SpongeMinecraftVersion implements MinecraftVersion {
 
@@ -78,9 +78,9 @@ public final class SpongeMinecraftVersion implements MinecraftVersion {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("name", this.name)
-                .add("protocol", this.protocol)
+        return new StringJoiner(", ", SpongeMinecraftVersion.class.getSimpleName() + "[", "]")
+                .add("name=" + this.name)
+                .add("protocol=" + this.protocol)
                 .toString();
     }
 }

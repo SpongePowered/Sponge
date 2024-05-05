@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.event;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.common.util.TypeTokenUtil;
 
 import java.lang.reflect.Type;
@@ -43,7 +42,7 @@ public final class SpongeEventContextKeyBuilder<T> extends AbstractResourceKeyed
     @SuppressWarnings("unchecked")
     @Override
     public <N> SpongeEventContextKeyBuilder<N> type(final TypeToken<N> aClass) {
-        checkArgument(aClass != null, "Class cannot be null!");
+        Preconditions.checkArgument(aClass != null, "Class cannot be null!");
         this.typeClass = aClass.getType();
         return (SpongeEventContextKeyBuilder<N>) this;
     }
@@ -51,14 +50,14 @@ public final class SpongeEventContextKeyBuilder<T> extends AbstractResourceKeyed
     @SuppressWarnings("unchecked")
     @Override
     public <N> SpongeEventContextKeyBuilder<N> type(final Class<N> aClass) {
-        checkArgument(aClass != null, "Class cannot be null!");
+        Preconditions.checkArgument(aClass != null, "Class cannot be null!");
         this.typeClass = TypeTokenUtil.requireCompleteGenerics(aClass);
         return (SpongeEventContextKeyBuilder<N>) this;
     }
 
     @Override
     public EventContextKey<T> build0() {
-        checkState(this.typeClass != null, "Allowed type cannot be null!");
+        Preconditions.checkState(this.typeClass != null, "Allowed type cannot be null!");
         return new SpongeEventContextKey<>(this);
     }
 

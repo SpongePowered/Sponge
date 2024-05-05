@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.key;
 
-import com.google.common.base.Preconditions;
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeFactory;
 import io.leangen.geantyref.TypeToken;
@@ -157,14 +156,14 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends AbstractResou
 
     @Override
     public SpongeKeyBuilder<E, V> comparator(final Comparator<? super E> comparator) {
-        Preconditions.checkNotNull(comparator);
+        Objects.requireNonNull(comparator);
         this.comparator = comparator;
         return this;
     }
 
     @Override
     public SpongeKeyBuilder<E, V> includesTester(final BiPredicate<? super E, ? super E> predicate) {
-        Preconditions.checkNotNull(predicate);
+        Objects.requireNonNull(predicate);
         this.includesTester = predicate;
         return this;
     }

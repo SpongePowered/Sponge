@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.generation;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -38,6 +36,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.util.RandomProvider;
 import org.spongepowered.api.util.weighted.WeightedTable;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -146,7 +145,7 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
 
         @Override
         public SpongeItemStackGenerator build() {
-            checkState(this.baseItem != null || !this.consumers.isEmpty(), "Must have at least a defined amount of consumers or a base item type!");
+            Preconditions.checkState(this.baseItem != null || !this.consumers.isEmpty(), "Must have at least a defined amount of consumers or a base item type!");
             return new SpongeItemStackGenerator(this);
         }
 
@@ -154,7 +153,7 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
         public ItemStackGenerator.Builder from(final ItemStackGenerator value) {
             this.reset();
             Objects.requireNonNull(value, "ItemStackGenerator cannot be null!");
-            checkArgument(value instanceof SpongeItemStackGenerator, "Cannot use from on a non-Sponge implemented ItemStackGenerator!");
+            Preconditions.checkArgument(value instanceof SpongeItemStackGenerator, "Cannot use from on a non-Sponge implemented ItemStackGenerator!");
             final SpongeItemStackGenerator generator = (SpongeItemStackGenerator) value;
             this.consumers.addAll(generator.biConsumers);
             this.baseItem = new WeightedTable<>();

@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.entity.player;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.datafix.DataFixTypes;
@@ -70,6 +69,7 @@ import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
+import org.spongepowered.common.bridge.data.TransientBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.world.entity.player.BedLocationHolderBridge;
@@ -86,15 +86,18 @@ import org.spongepowered.common.util.FileUtil;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -107,7 +110,7 @@ import java.util.function.Supplier;
  *  There should be no difference between the two.
  */
 public final class SpongeUserData implements Identifiable, DataSerializable, BedLocationHolderBridge, SpongeMutableDataHolder,
-        DataCompoundHolder, VanishableBridge, GameProfileHolderBridge, User, BridgeSubject {
+        DataCompoundHolder, VanishableBridge, GameProfileHolderBridge, User, BridgeSubject, TransientBridge {
 
     private final Map<ResourceKey, RespawnLocation> spawnLocations = Maps.newHashMap();
 
@@ -124,6 +127,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
     private boolean vanishIgnoresCollision;
     private boolean vanishPreventsTargeting;
     private final GameProfile profile;
+    private boolean isTransient;
 
     private @Nullable SpongeUserInventory inventory; // lazy load when accessing inventory
     private @Nullable PlayerEnderChestContainer enderChest; // lazy load when accessing inventory
@@ -138,15 +142,15 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         }
 
         final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.server()).accessor$storageSource();
-        final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(profile.getId().toString() + ".dat").toFile();
-        if (!file.exists()) {
+        final Path p = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(profile.getId().toString() + ".dat");
+        if (!Files.exists(p)) {
             return new SpongeUserData(profile, new CompoundTag());
         }
 
         try {
             final CompoundTag compound;
-            try (final FileInputStream in = new FileInputStream(file)) {
-                compound = NbtIo.readCompressed(in);
+            try (final InputStream in = Files.newInputStream(p)) {
+                compound = NbtIo.readCompressed(in, NbtAccounter.unlimitedHeap());
             }
             // See PlayerDataAccess - keep this line up to date.
             final int version = compound.contains("DataVersion", 3) ? compound.getInt("DataVersion") : -1;
@@ -154,8 +158,8 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
             return new SpongeUserData(profile, compound);
         } catch (final IOException e) {
             SpongeCommon.logger().warn("Unable to load corrupt user file '{}'!",
-                    file.toPath().relativize(Paths.get("")).toString(), e);
-            FileUtil.copyCorruptedFile(file);
+                    p.relativize(Paths.get("")).toString(), e);
+            FileUtil.copyCorruptedFile(p);
             throw e;
         }
     }
@@ -420,14 +424,14 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         synchronized (this) {
             final SpongeUserManager userManager = ((SpongeServer) SpongeCommon.server()).userManager();
             final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.server()).accessor$storageSource();
-            final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.uniqueId() + ".dat").toFile();
+            final Path p = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.uniqueId() + ".dat");
             this.writeCompound(this.compound);
-            try (final FileOutputStream out = new FileOutputStream(file)) {
+            try (final OutputStream out = Files.newOutputStream(p)) {
                 NbtIo.writeCompressed(this.compound, out);
                 userManager.unmarkDirty(this);
             } catch (final IOException e) {
                 // We log the message here because the error may be swallowed by a completable future.
-                SpongeCommon.logger().warn("Failed to save user file [{}]!", file, e);
+                SpongeCommon.logger().warn("Failed to save user file [{}]!", p, e);
                 throw e;
             }
         }
@@ -474,8 +478,8 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     @Override
     public boolean setLocation(final ResourceKey key, final Vector3d position) {
-        Preconditions.checkNotNull(key);
-        Preconditions.checkNotNull(position);
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(position);
 
         final Optional<ServerPlayer> player = this.player();
         if (player.isPresent()) {
@@ -500,7 +504,7 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     @Override
     public void setRotation(final Vector3d rotation) {
-        Preconditions.checkNotNull(rotation, "Rotation was null!");
+        Objects.requireNonNull(rotation, "Rotation was null!");
         final Optional<ServerPlayer> playerOpt = this.player();
         if (playerOpt.isPresent()) {
             playerOpt.get().setRotation(rotation);
@@ -593,10 +597,10 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("isOnline", this.isOnline())
-            .add("profile", this.profile())
-            .toString();
+        return new StringJoiner(", ", SpongeUserData.class.getSimpleName() + "[", "]")
+                .add("isOnline=" + this.isOnline())
+                .add("profile=" + this.profile())
+                .toString();
     }
 
     @Override
@@ -623,4 +627,13 @@ public final class SpongeUserData implements Identifiable, DataSerializable, Bed
         return this.uniqueId().toString();
     }
 
+    @Override
+    public boolean bridge$isTransient() {
+        return this.isTransient;
+    }
+
+    @Override
+    public void bridge$setTransient(final boolean value) {
+        this.isTransient = value;
+    }
 }

@@ -388,12 +388,10 @@ public final class InstallerMain {
         Logger.info("Remapping Minecraft. This may take a while...");
         final IMappingFile mappings = IMappingFile.load(serverMappings.toFile()).reverse();
 
-        Renamer.builder()
-            .input(minecraft.server().toFile())
-            .output(tempOutput.toFile())
+        final Renamer.Builder renamerBuilder = Renamer.builder()
             .add(Transformer.parameterAnnotationFixerFactory())
             .add(ctx -> {
-              final Transformer backing = Transformer.renamerFactory(mappings).create(ctx);
+              final Transformer backing = Transformer.renamerFactory(mappings, false).create(ctx);
               return new Transformer() {
 
                 @Override
@@ -430,9 +428,10 @@ public final class InstallerMain {
             .add(Transformer.parameterAnnotationFixerFactory())
             .add(Transformer.sourceFixerFactory(SourceFixerConfig.JAVA))
             .add(Transformer.signatureStripperFactory(SignatureStripperConfig.ALL))
-            .logger(Logger::debug) // quiet
-            .build()
-            .run();
+            .logger(Logger::debug); // quiet
+            try (final Renamer ren = renamerBuilder.build()) {
+                ren.run(minecraft.server.toFile(), tempOutput.toFile());
+            }
 
         // Restore file
         try {

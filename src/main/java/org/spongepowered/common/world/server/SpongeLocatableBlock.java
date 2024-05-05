@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.world.server;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.MoreObjects;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
@@ -48,6 +46,7 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Function;
 
 public final class SpongeLocatableBlock implements LocatableBlock {
@@ -59,10 +58,10 @@ public final class SpongeLocatableBlock implements LocatableBlock {
     private @Nullable ServerLocation location;
 
     SpongeLocatableBlock(final SpongeLocatableBlockBuilder builder) {
-        this.blockState = checkNotNull(builder.blockState.get(), "blockstate");
-        this.position = checkNotNull(builder.position.get(), "position");
-        this.world = checkNotNull(builder.world.get(), "world");
-        this.worldRef = new WeakReference<>(checkNotNull(builder.worldReference.get(), "reference"));
+        this.blockState = Objects.requireNonNull(builder.blockState.get(), "blockstate");
+        this.position = Objects.requireNonNull(builder.position.get(), "position");
+        this.world = Objects.requireNonNull(builder.world.get(), "world");
+        this.worldRef = new WeakReference<>(Objects.requireNonNull(builder.worldReference.get(), "reference"));
     }
 
     SpongeLocatableBlock(final ServerWorld world, final int x, final int y, final int z) {
@@ -180,9 +179,9 @@ public final class SpongeLocatableBlock implements LocatableBlock {
             return false;
         }
         final SpongeLocatableBlock that = (SpongeLocatableBlock) o;
-        return com.google.common.base.Objects.equal(this.blockState, that.blockState) &&
-               com.google.common.base.Objects.equal(this.position, that.position) &&
-               com.google.common.base.Objects.equal(this.world, that.world);
+        return Objects.equals(this.blockState, that.blockState) &&
+                Objects.equals(this.position, that.position) &&
+                Objects.equals(this.world, that.world);
     }
 
     @Override
@@ -192,10 +191,10 @@ public final class SpongeLocatableBlock implements LocatableBlock {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("blockState", this.blockState)
-            .add("world", this.world)
-            .add("position", this.position)
-            .toString();
+        return new StringJoiner(", ", SpongeLocatableBlock.class.getSimpleName() + "[", "]")
+                .add("blockState=" + this.blockState)
+                .add("world=" + this.world)
+                .add("position=" + this.position)
+                .toString();
     }
 }

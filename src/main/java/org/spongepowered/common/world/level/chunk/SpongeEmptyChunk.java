@@ -36,6 +36,8 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.value.CollectionValue;
+import org.spongepowered.api.data.value.MapValue;
 import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -63,6 +65,7 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -364,5 +367,120 @@ public final class SpongeEmptyChunk implements WorldChunk {
     @Override
     public ScheduledUpdateList<FluidType> scheduledFluidUpdates() {
         throw this.emptyChunkError();
+    }
+
+    @Override
+    public <E> DataTransactionResult offer(Key<? extends Value<E>> key, E value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult offer(Value<?> value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <E> DataTransactionResult offerSingle(Key<? extends CollectionValue<E, ?>> key, E element) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <K, V> DataTransactionResult offerSingle(Key<? extends MapValue<K, V>> key, K valueKey, V value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <K, V> DataTransactionResult offerAll(Key<? extends MapValue<K, V>> key, Map<? extends K, ? extends V> map) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult offerAll(MapValue<?, ?> value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult offerAll(CollectionValue<?, ?> value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <E> DataTransactionResult offerAll(Key<? extends CollectionValue<E, ?>> key, Collection<? extends E> elements) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <E> DataTransactionResult removeSingle(Key<? extends CollectionValue<E, ?>> key, E element) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <K> DataTransactionResult removeKey(Key<? extends MapValue<K, ?>> key, K mapKey) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult removeAll(CollectionValue<?, ?> value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <E> DataTransactionResult removeAll(Key<? extends CollectionValue<E, ?>> key, Collection<? extends E> elements) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult removeAll(MapValue<?, ?> value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <K, V> DataTransactionResult removeAll(Key<? extends MapValue<K, V>> key, Map<? extends K, ? extends V> map) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <E> DataTransactionResult tryOffer(Key<? extends Value<E>> key, E value) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult remove(Key<?> key) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult undo(DataTransactionResult result) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult copyFrom(ValueContainer that, MergeFunction function) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public <E> Optional<E> get(Key<? extends Value<E>> key) {
+        return Optional.empty();
+    }
+
+    @Override
+    public <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean supports(Key<?> key) {
+        return false;
+    }
+
+    @Override
+    public Set<Key<?>> getKeys() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<Value.Immutable<?>> getValues() {
+        return Collections.emptySet();
     }
 }

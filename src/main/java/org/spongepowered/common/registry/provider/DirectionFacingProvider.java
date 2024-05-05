@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.registry.provider;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableBiMap;
 import org.spongepowered.api.util.Direction;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public final class DirectionFacingProvider {
@@ -49,10 +49,10 @@ public final class DirectionFacingProvider {
     }
 
     public Optional<net.minecraft.core.Direction> get(Direction key) {
-        return Optional.ofNullable(this.mappings.get(checkNotNull(key)));
+        return Optional.ofNullable(this.mappings.get(Objects.requireNonNull(key)));
     }
 
     public Optional<Direction> getKey(net.minecraft.core.Direction value) {
-        return Optional.ofNullable(this.mappings.inverse().get(checkNotNull(value)));
+        return Optional.ofNullable(this.mappings.inverse().get(Objects.requireNonNull(value)));
     }
 }

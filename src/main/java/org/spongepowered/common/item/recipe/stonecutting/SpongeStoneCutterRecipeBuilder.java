@@ -24,15 +24,12 @@
  */
 package org.spongepowered.common.item.recipe.stonecutting;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
@@ -43,13 +40,12 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
-import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
-import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.Preconditions;
 
-import java.util.Collections;
+import java.util.Objects;
 import java.util.function.Function;
 
 public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, StoneCutterRecipe.Builder> implements
@@ -84,7 +80,7 @@ public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedB
 
     @Override
     public EndStep result(final ItemStack result) {
-        checkNotNull(result, "result");
+        Objects.requireNonNull(result, "result");
         this.result = result;
         this.resultFunction = null;
         return this;
@@ -92,8 +88,8 @@ public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedB
 
     @Override
     public EndStep result(Function<Inventory, ItemStack> resultFunction, ItemStack exemplaryResult) {
-        checkNotNull(exemplaryResult, "exemplaryResult");
-        checkState(!exemplaryResult.isEmpty(), "exemplaryResult must not be empty");
+        Objects.requireNonNull(exemplaryResult, "exemplaryResult");
+        Preconditions.checkState(!exemplaryResult.isEmpty(), "exemplaryResult must not be empty");
 
         this.result = exemplaryResult;
         this.resultFunction = (inv) -> ItemStackUtil.toNative(resultFunction.apply(InventoryUtil.toInventory(inv)));
@@ -114,11 +110,8 @@ public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedB
 
     @Override
     public RecipeRegistration build0() {
-        final net.minecraft.world.item.ItemStack result = ItemStackUtil.toNative(this.result);
-        final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(result, this.resultFunction, null, Collections.singleton(this.ingredient),
-                RecipeSerializer.STONECUTTER, SpongeRecipeSerializers.SPONGE_STONECUTTING);
-
-        return new SpongeStonecuttingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredient, result, this.resultFunction, this.pack, this.recipeCategory);
+        return new SpongeStonecuttingRecipeRegistration((ResourceLocation) (Object) key, this.group, this.ingredient,
+                ItemStackUtil.toNative(this.result), this.resultFunction, this.pack, this.recipeCategory);
     }
 
     @Override

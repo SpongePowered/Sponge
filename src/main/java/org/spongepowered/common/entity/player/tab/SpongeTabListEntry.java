@@ -24,11 +24,7 @@
  */
 package org.spongepowered.common.entity.player.tab;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.world.entity.player.ProfilePublicKey;
@@ -37,9 +33,12 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 
 /*
@@ -52,18 +51,20 @@ public final class SpongeTabListEntry implements TabListEntry {
     private @Nullable Component displayName;
     private int latency;
     private GameMode gameMode;
+    private boolean listed;
     private boolean updateWithoutSend;
     private final ProfilePublicKey.Data profilePublicKey;
 
     public SpongeTabListEntry(
         final TabList list, final GameProfile profile, @Nullable final Component displayName, final int latency, final GameMode gameMode,
-            final ProfilePublicKey.Data profilePublicKey) {
-        checkState(list instanceof SpongeTabList, "list is not a SpongeTabList");
+            final boolean listed, final ProfilePublicKey.Data profilePublicKey) {
+        Preconditions.checkState(list instanceof SpongeTabList, "list is not a SpongeTabList");
         this.list = (SpongeTabList) list;
-        this.profile = checkNotNull(profile, "profile");
+        this.profile = Objects.requireNonNull(profile, "profile");
         this.displayName = displayName;
         this.latency = latency;
-        this.gameMode = checkNotNull(gameMode, "game mode");
+        this.gameMode = Objects.requireNonNull(gameMode, "game mode");
+        this.listed = listed;
         this.profilePublicKey = profilePublicKey;
     }
 
@@ -108,8 +109,20 @@ public final class SpongeTabListEntry implements TabListEntry {
 
     @Override
     public TabListEntry setGameMode(final GameMode gameMode) {
-        this.gameMode = checkNotNull(gameMode, "game mode");
+        this.gameMode = java.util.Objects.requireNonNull(gameMode, "game mode");
         this.sendUpdate(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE);
+        return this;
+    }
+
+    @Override
+    public boolean listed() {
+        return this.listed;
+    }
+
+    @Override
+    public SpongeTabListEntry setListed(boolean listed) {
+        this.listed = listed;
+        this.sendUpdate(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED);
         return this;
     }
 
@@ -146,7 +159,7 @@ public final class SpongeTabListEntry implements TabListEntry {
         }
 
         final TabListEntry that = (TabListEntry) other;
-        return Objects.equal(this.profile.uniqueId(), that.profile().uniqueId());
+        return Objects.equals(this.profile.uniqueId(), that.profile().uniqueId());
     }
 
     @Override
@@ -156,11 +169,12 @@ public final class SpongeTabListEntry implements TabListEntry {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("profile", this.profile)
-                .add("latency", this.latency)
-                .add("displayName", this.displayName)
-                .add("gameMode", this.gameMode)
+        return new StringJoiner(", ", SpongeTabListEntry.class.getSimpleName() + "[", "]")
+                .add("profile=" + this.profile)
+                .add("latency=" + this.latency)
+                .add("displayName=" + this.displayName)
+                .add("gameMode=" + this.gameMode)
+                .add("listed=" + this.listed)
                 .toString();
     }
 

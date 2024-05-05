@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.map.decoration;
 
-import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -69,7 +68,7 @@ public final class SpongeMapDecorationBuilder implements MapDecoration.Builder {
 
     @Override
     public MapDecoration.Builder from(final MapDecoration value) {
-        Preconditions.checkNotNull(value, "MapDecoration cannot be null");
+        Objects.requireNonNull(value, "MapDecoration cannot be null");
         this.type = value.type();
         this.x = value.position().x();
         this.y = value.position().y();
@@ -79,7 +78,7 @@ public final class SpongeMapDecorationBuilder implements MapDecoration.Builder {
 
     @Override
     public MapDecoration.Builder rotation(final MapDecorationOrientation rot) throws IllegalArgumentException {
-        Preconditions.checkNotNull(rot, "Orientation cannot be null");
+        Objects.requireNonNull(rot, "Orientation cannot be null");
         this.rot = rot;
         return this;
     }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.api;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -45,6 +44,7 @@ import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
+import java.util.Objects;
 import java.util.Optional;
 
 // All living implementors of ArmorEquipable
@@ -83,14 +83,14 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
 
     @Override
     public ItemStack itemInHand(HandType handType) {
-        Preconditions.checkNotNull(handType);
+        Objects.requireNonNull(handType);
         final net.minecraft.world.item.ItemStack nmsItem = ((LivingEntity) (Object)this).getItemInHand((InteractionHand) (Object) handType);
         return ItemStackUtil.fromNative(nmsItem);
     }
 
     @Override
     public void setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
-        Preconditions.checkNotNull(handType);
+        Objects.requireNonNull(handType);
         ((LivingEntity) (Object)this).setItemInHand((InteractionHand) (Object) handType, ItemStackUtil.toNative(itemInHand).copy());
     }
 

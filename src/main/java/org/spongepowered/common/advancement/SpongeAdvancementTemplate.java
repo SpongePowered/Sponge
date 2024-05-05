@@ -26,6 +26,8 @@ package org.spongepowered.common.advancement;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
@@ -68,8 +70,9 @@ public record SpongeAdvancementTemplate(ResourceKey key,
     }
 
     public static JsonElement encode(final net.minecraft.advancements.Advancement advancement) {
-        final JsonObject element = advancement.serializeToJson();
-        if (element.get("rewards").isJsonNull()) {
+        final DataResult<JsonElement> encoded = net.minecraft.advancements.Advancement.CODEC.encodeStart(JsonOps.INSTANCE, advancement);
+        final JsonObject element = encoded.result().get().getAsJsonObject();
+        if (element.get("rewards") != null && element.get("rewards").isJsonNull()) {
             element.remove("rewards");
         }
         return element;

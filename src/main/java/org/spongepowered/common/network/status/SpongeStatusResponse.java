@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.network.status;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -43,6 +42,7 @@ import org.spongepowered.api.network.status.StatusClient;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.NetworkUtil;
 
@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -58,21 +59,21 @@ import javax.imageio.ImageIO;
 
 public final class SpongeStatusResponse implements ClientPingServerEvent.Response {
 
+    private final ServerStatus originalStatus;
+
     private net.minecraft.network.chat.Component description;
     private SpongeStatusPlayers players;
     private boolean hiddenPlayers;
     private SpongeStatusVersion version;
     private ServerStatus.Favicon favicon;
-    private final boolean enforcesSecureChat;
-
 
     private SpongeStatusResponse(ServerStatus status) {
+        this.originalStatus = status;
         this.description = status.description();
         this.players = new SpongeStatusPlayers(status.players().orElse(null));
         this.hiddenPlayers = false;
         this.version = new SpongeStatusVersion(status.version().orElse(null));
         this.favicon = status.favicon().orElse(null);
-        this.enforcesSecureChat = status.enforcesSecureChat();
     }
 
     public final static class SpongeStatusPlayers implements ClientPingServerEvent.Response.Players {
@@ -146,7 +147,7 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
 
         @Override
         public void setName(String name) {
-            this.name = checkNotNull(name, "name");
+            this.name = Objects.requireNonNull(name, "name");
         }
 
         @Override
@@ -176,7 +177,7 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
 
     @Override
     public void setDescription(final Component description) {
-        this.description = SpongeAdventure.asVanilla(checkNotNull(description, "description"));
+        this.description = SpongeAdventure.asVanilla(Objects.requireNonNull(description, "description"));
     }
 
     @Override
@@ -223,11 +224,12 @@ public final class SpongeStatusResponse implements ClientPingServerEvent.Respons
     }
 
     private ServerStatus toVanilla() {
-        return new ServerStatus(this.description,
+        return PlatformHooks.INSTANCE.getGeneralHooks().createServerStatus(
+                this.originalStatus,
+                this.description,
                 Optional.ofNullable(this.hiddenPlayers || this.players == null ? null : this.players.toVanilla()),
                 Optional.of(this.version.toVanilla()),
-                Optional.ofNullable(this.favicon),
-                this.enforcesSecureChat);
+                Optional.ofNullable(this.favicon));
     }
 
     public String motd()

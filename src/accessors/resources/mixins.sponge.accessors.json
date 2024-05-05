@@ -131,9 +131,6 @@
         "world.item.DiggerItemAccessor",
         "world.item.ItemCooldowns_CooldownInstanceAccessor",
         "world.item.RecordItemAccessor",
-        "world.item.crafting.IngredientAccessor",
-        "world.item.crafting.ShapedRecipeAccessor",
-        "world.item.crafting.ShapelessRecipeAccessor",
         "world.item.trading.MerchantOfferAccessor",
         "world.level.BaseCommandBlockAccessor",
         "world.level.BaseSpawnerAccessor",
@@ -149,6 +146,7 @@
         "world.level.block.AbstractSkullBlockAccessor",
         "world.level.block.BaseFireBlockAccessor",
         "world.level.block.BedBlockAccessor",
+        "world.level.block.CropBlockAccessor",
         "world.level.block.DispenserBlockAccessor",
         "world.level.block.EnderChestBlockAccessor",
         "world.level.block.entity.AbstractFurnaceBlockEntityAccessor",
@@ -175,6 +173,7 @@
         "world.level.chunk.LevelChunk$RebindableTickingBlockEntityWrapperAccessor",
         "world.level.chunk.LevelChunkAccessor",
         "world.level.chunk.storage.ChunkStorageAccessor",
+        "world.level.chunk.storage.IOWorker$PendingStoreAccessor",
         "world.level.dimension.DimensionTypeAccessor",
         "world.level.entity.EntityTickListAccessor",
         "world.level.entity.PersistentEntitySectionManagerAccessor",
@@ -183,9 +182,7 @@
         "world.level.storage.LevelStorageSource_LevelStorageAccessAccessor",
         "world.level.storage.PlayerDataStorageAccessor",
         "world.phys.AABBAccessor",
-        "world.scores.ObjectiveAccessor",
         "world.scores.PlayerTeamAccessor",
-        "world.scores.ScoreAccessor",
         "world.entity.decoration.PaintingAccessor",
         "world.scores.ScoreboardAccessor",
         "world.level.biome.MobSpawnSettingsAccessor",
@@ -201,8 +198,7 @@
         "world.entity.Display_TextDisplayAccessor",
         "world.entity.Display_ItemDisplayAccessor",
         "world.entity.DisplayAccessor",
-        "world.entity.Display_BlockDisplayAccessor",
-        "world.item.crafting.ShapedRecipe_SerializerAccessor"
+        "world.entity.Display_BlockDisplayAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"

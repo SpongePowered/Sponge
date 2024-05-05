@@ -29,6 +29,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.item.inventory.ContainerType;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedMenuBridge;
 
 public class CustomContainer extends AbstractContainerMenu {
 
@@ -50,6 +51,8 @@ public class CustomContainer extends AbstractContainerMenu {
         for (int col = 0; col < 9; col++) {
             this.addSlot(new Slot(player.getInventory(), col, 0, 0));
         }
+
+        ((TrackedMenuBridge) inventory).bridge$trackContainerMenu(this);
     }
 
     @Override

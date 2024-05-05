@@ -27,9 +27,12 @@ package org.spongepowered.common.advancement;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.JsonOps;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.advancements.CriterionTrigger;
-import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.server.PlayerAdvancements;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -60,6 +63,17 @@ public class SpongeCriterionTrigger implements CriterionTrigger<SpongeFilteredTr
     final @Nullable Consumer<CriterionEvent.Trigger> eventHandler;
     private final String name;
 
+
+    @Override
+    public Codec<SpongeFilteredTrigger> codec() {
+        return Codec.PASSTHROUGH.comapFlatMap(in -> {
+                    var json = in.convert(JsonOps.INSTANCE).getValue().getAsJsonObject();
+                    final FilteredTriggerConfiguration config = this.constructor.apply(json);
+                    return DataResult.success(new SpongeFilteredTrigger(config));
+                }, trigger -> new Dynamic<>(JsonOps.INSTANCE, trigger.serializeToJson())
+        );
+    }
+
     SpongeCriterionTrigger(final Type triggerConfigurationType,
         final Function<JsonObject, FilteredTriggerConfiguration> constructor,
         final @Nullable Consumer<CriterionEvent.Trigger> eventHandler,
@@ -87,11 +101,6 @@ public class SpongeCriterionTrigger implements CriterionTrigger<SpongeFilteredTr
     @Override
     public void removePlayerListeners(final PlayerAdvancements playerAdvancementsIn) {
         this.listeners.removeAll(playerAdvancementsIn);
-    }
-
-    @Override
-    public SpongeFilteredTrigger createInstance(final JsonObject json, final DeserializationContext arrayParser) {
-        return new SpongeFilteredTrigger(this.constructor.apply(json));
     }
 
     @Override

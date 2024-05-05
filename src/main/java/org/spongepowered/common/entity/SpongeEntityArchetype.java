@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
@@ -57,6 +56,7 @@ import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.StringJoiner;
 
 public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity>
     implements EntityArchetype, DataContainerHolder.Mutable {
@@ -250,9 +250,9 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("position", this.position)
-                .add("type", this.type)
+        return new StringJoiner(", ", SpongeEntityArchetype.class.getSimpleName() + "[", "]")
+                .add("position=" + this.position)
+                .add("type=" + this.type)
                 .toString();
     }
 }

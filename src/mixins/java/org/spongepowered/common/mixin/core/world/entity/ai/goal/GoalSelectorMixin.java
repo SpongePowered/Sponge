@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.ai.goal;
 
-import com.google.common.base.MoreObjects;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
@@ -49,6 +48,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.Set;
+import java.util.StringJoiner;
 
 @Mixin(GoalSelector.class)
 public abstract class GoalSelectorMixin implements GoalSelectorBridge {
@@ -146,9 +146,9 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .addValue(this.bridge$getOwner())
-                .addValue(this.bridge$getType())
+        return new StringJoiner(", ", GoalSelectorMixin.class.getSimpleName() + "[", "]")
+                .add("owner=" + this.bridge$getOwner())
+                .add("type=" + this.bridge$getType())
                 .toString();
     }
 }

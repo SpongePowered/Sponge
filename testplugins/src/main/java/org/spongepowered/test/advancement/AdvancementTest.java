@@ -137,7 +137,7 @@ public final class AdvancementTest implements LoadableModule {
     }
 
     @Listener
-    private void onTriggerRegistry(final RegisterRegistryValueEvent.GameScoped event) {
+    private void onTriggerRegistry(final RegisterRegistryValueEvent.BuiltIn<Trigger<?>> event) {
         Sponge.dataManager().registerBuilder(InventoryChangeTriggerConfig.class, new InventoryChangeTriggerConfig.Builder());
         this.inventoryChangeTrigger = Trigger.builder()
                 .dataSerializableConfig(InventoryChangeTriggerConfig.class)

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import net.minecraft.core.NonNullList;
@@ -47,6 +46,7 @@ import org.spongepowered.common.data.provider.item.stack.ShieldItemStackData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Mixin(BannerBlockEntity.class)
 public abstract class BannerBlockEntityMixin extends BlockEntityMixin implements BannerBlockEntityBridge, CustomNameableBridge {
@@ -103,7 +103,7 @@ public abstract class BannerBlockEntityMixin extends BlockEntityMixin implements
     @SuppressWarnings("ConstantConditions")
     @Override
     public void bridge$setBaseColor(final DyeColor baseColor) {
-        checkNotNull(baseColor, "Null DyeColor!");
+        Objects.requireNonNull(baseColor, "Null DyeColor!");
         try {
             this.baseColor = (net.minecraft.world.item.DyeColor) (Object) baseColor;
         } catch (final Exception e) {

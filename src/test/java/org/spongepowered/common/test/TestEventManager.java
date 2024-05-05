@@ -25,12 +25,11 @@
 package org.spongepowered.common.test;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.event.filter.FilterGenerator;
-import org.spongepowered.common.event.manager.AnnotatedEventListener;
-import org.spongepowered.common.event.manager.ClassEventListenerFactory;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.common.util.DefinableClassLoader;
 import org.spongepowered.plugin.PluginContainer;
+
+import java.lang.invoke.MethodHandles;
 
 public class TestEventManager extends SpongeEventManager {
 
@@ -44,11 +43,8 @@ public class TestEventManager extends SpongeEventManager {
         this.loader = null;
     }
 
-
     @Override
-    protected AnnotatedEventListener.Factory computeFactory(
-        final PluginContainer key
-    ) {
-        return new ClassEventListenerFactory(FilterGenerator::create, this.loader != null ? this.loader.lookup() : SpongeEventManager.OWN_LOOKUP);
+    protected MethodHandles.@Nullable Lookup getLookup(PluginContainer plugin, Class<?> handle) {
+        return this.loader == null ? null : this.loader.lookup();
     }
 }

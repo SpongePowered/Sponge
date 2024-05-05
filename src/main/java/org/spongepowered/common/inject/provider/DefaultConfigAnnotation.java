@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.inject.provider;
 
-import com.google.common.base.MoreObjects;
 import org.spongepowered.api.config.DefaultConfig;
 
 import java.lang.annotation.Annotation;
+import java.util.StringJoiner;
 
 public class DefaultConfigAnnotation implements DefaultConfig {
 
@@ -70,8 +70,8 @@ public class DefaultConfigAnnotation implements DefaultConfig {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper('@' + this.getClass().getName())
-                .add("shared", this.shared)
+        return new StringJoiner(", ", '@' + this.getClass().getSimpleName() + "[", "]")
+                .add("shared=" + this.shared)
                 .toString();
     }
 

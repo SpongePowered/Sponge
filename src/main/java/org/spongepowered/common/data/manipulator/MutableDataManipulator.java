@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,6 +38,7 @@ import org.spongepowered.common.util.DataUtil;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -67,9 +67,9 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
     @Override
     public Mutable copyFrom(final ValueContainer valueContainer, final MergeFunction overlap,
         final Predicate<Key<?>> predicate) {
-        checkNotNull(valueContainer, "valueContainer");
-        checkNotNull(predicate, "predicate");
-        checkNotNull(overlap, "overlap");
+        Objects.requireNonNull(valueContainer, "valueContainer");
+        Objects.requireNonNull(predicate, "predicate");
+        Objects.requireNonNull(overlap, "overlap");
         if (valueContainer instanceof SpongeDataManipulator) {
             // Do this to prevent unnecessary object allocations
             final SpongeDataManipulator manipulator = (SpongeDataManipulator) valueContainer;
@@ -114,9 +114,9 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
     @Override
     public Mutable copyFrom(final ValueContainer valueContainer, final MergeFunction overlap,
         final Iterable<Key<?>> keys) {
-        checkNotNull(valueContainer, "valueContainer");
-        checkNotNull(overlap, "overlap");
-        checkNotNull(keys, "keys");
+        Objects.requireNonNull(valueContainer, "valueContainer");
+        Objects.requireNonNull(overlap, "overlap");
+        Objects.requireNonNull(keys, "keys");
         if (valueContainer instanceof SpongeDataManipulator) {
             // Do this to prevent unnecessary object allocations
             final SpongeDataManipulator manipulator = (SpongeDataManipulator) valueContainer;
@@ -129,8 +129,8 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
 
     @Override
     public Mutable copyFrom(final ValueContainer valueContainer, final MergeFunction overlap) {
-        checkNotNull(valueContainer, "valueContainer");
-        checkNotNull(overlap, "overlap");
+        Objects.requireNonNull(valueContainer, "valueContainer");
+        Objects.requireNonNull(overlap, "overlap");
         MutableDataManipulator.copyFrom(this.values, valueContainer, overlap);
         return this;
     }
@@ -167,15 +167,15 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
 
     @Override
     public <E> Mutable set(final Key<? extends Value<E>> key, final E value) {
-        checkNotNull(key, "key");
-        checkNotNull(value, "value");
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(value, "value");
         this.values.put(key, CopyHelper.copy(value));
         return this;
     }
 
     @Override
     public Mutable remove(final Key<?> key) {
-        checkNotNull(key, "key");
+        Objects.requireNonNull(key, "key");
         this.values.remove(key);
         return this;
     }

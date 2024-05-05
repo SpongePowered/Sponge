@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.advancement;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.advancements.FrameType;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.AdvancementTypes;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.util.Preconditions;
+
+import java.util.Objects;
 
 public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
 
@@ -51,28 +52,28 @@ public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
 
     @Override
     public DisplayInfo.Builder type(final AdvancementType advancementType) {
-        checkNotNull(advancementType, "advancementType");
+        Objects.requireNonNull(advancementType, "advancementType");
         this.advancementType = advancementType;
         return this;
     }
 
     @Override
     public DisplayInfo.Builder description(final Component description) {
-        checkNotNull(description, "description");
+        Objects.requireNonNull(description, "description");
         this.description = description;
         return this;
     }
 
     @Override
     public DisplayInfo.Builder title(final Component title) {
-        checkNotNull(title, "title");
+        Objects.requireNonNull(title, "title");
         this.title = title;
         return this;
     }
 
     @Override
     public DisplayInfo.Builder icon(final ItemStackSnapshot itemStackSnapshot) {
-        checkNotNull(itemStackSnapshot, "itemStackSnapshot");
+        Objects.requireNonNull(itemStackSnapshot, "itemStackSnapshot");
         this.icon = itemStackSnapshot;
         return this;
     }
@@ -98,12 +99,12 @@ public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
     @SuppressWarnings("ConstantConditions")
     @Override
     public DisplayInfo build() {
-        checkState(this.title != null, "Title has not been set");
-        checkState(this.icon != null, "Icon has not been set");
+        Preconditions.checkState(this.title != null, "Title has not been set");
+        Preconditions.checkState(this.icon != null, "Icon has not been set");
         final net.minecraft.network.chat.Component title = SpongeAdventure.asVanilla(this.title);
         final net.minecraft.network.chat.Component description = SpongeAdventure.asVanilla(this.description);
-        final FrameType frameType = (FrameType) (Object) this.advancementType;
-        final net.minecraft.world.item.ItemStack icon = (net.minecraft.world.item.ItemStack) (Object) this.icon.createStack();
+        final net.minecraft.advancements.AdvancementType frameType = (net.minecraft.advancements.AdvancementType) (Object) this.advancementType;
+        final ItemStack icon = (ItemStack) (Object) this.icon.createStack();
         return (DisplayInfo) new net.minecraft.advancements.DisplayInfo(icon, title, description, null,
                 frameType, this.showToast, this.announceToChat, this.hidden);
     }

@@ -24,41 +24,33 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
 import net.minecraft.server.ServerScoreboard;
-import net.minecraft.server.ServerScoreboard.Method;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Score;
+import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
-import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.scores.PlayerTeamAccessor;
 import org.spongepowered.common.accessor.world.scores.ScoreboardAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
-import org.spongepowered.common.bridge.world.scores.ScoreBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.SpongeScore;
 import org.spongepowered.common.util.Constants;
@@ -67,7 +59,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -76,46 +67,36 @@ import java.util.stream.Collectors;
 @Mixin(ServerScoreboard.class)
 public abstract class ServerScoreboardMixin extends Scoreboard implements ServerScoreboardBridge {
 
-    @Shadow protected abstract void shadow$setDirty();
 
     private final List<ServerPlayer> impl$players = new ArrayList<>();
 
-    // Update objective in display slot
+    private boolean impl$apiCall;
 
-    @Override
-    public void bridge$updateDisplaySlot(@Nullable final Objective objective, final DisplaySlot displaySlot) throws IllegalStateException {
-        if (objective != null && !objective.scoreboards().contains(this)) {
-            throw new IllegalStateException("Attempting to set an objective's display slot that does not exist on this scoreboard!");
-        }
-        if (objective == null) {
-            ((ScoreboardAccessor) this).accessor$displayObjectives().remove(displaySlot);
-        } else {
-            ((ScoreboardAccessor) this).accessor$displayObjectives().put((net.minecraft.world.scores.DisplaySlot) (Object) displaySlot, ((SpongeObjective) objective).getObjectiveFor(this));
-        }
-        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new ClientboundSetDisplayObjectivePacket((net.minecraft.world.scores.DisplaySlot) (Object) displaySlot, ((ScoreboardAccessor) this).accessor$displayObjectives().get(displaySlot)));
-    }
 
     // Get objectives
 
     @Override
-    public void bridge$addObjective(final Objective objective) {
-        final net.minecraft.world.scores.Objective nmsObjective = this.getObjective(objective.name());
-
-        if (nmsObjective != null) {
-            throw new IllegalArgumentException(String.format("An objective with the name '%s' already exists!", objective.name()));
+    public void bridge$addAPIObjective(final Objective objective) {
+        if (objective instanceof SpongeObjective so) {
+            this.impl$apiCall = true;
+            var mcObjective = this.addObjective(objective.name(),
+                    (ObjectiveCriteria) objective.criterion(),
+                    SpongeAdventure.asVanilla(objective.displayName()),
+                    (ObjectiveCriteria.RenderType) (Object) objective.displayMode(),
+                    so.displayAutoUpdate(),
+                    so.numberFormat());
+            this.impl$apiCall = false;
+            ((ObjectiveBridge) mcObjective).bridge$setSpongeObjective(so);
+            so.register(this);
         }
-        final net.minecraft.world.scores.Objective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
-        List<net.minecraft.world.scores.Objective> objectives = ((ScoreboardAccessor) this).accessor$objectivesByCriteria().get(objective.criterion());
-        if (objectives == null) {
-            objectives = new ArrayList<>();
-            ((ScoreboardAccessor) this).accessor$objectivesByCriteria().put((ObjectiveCriteria) objective.criterion(), objectives);
+    }
+
+    @Override
+    public void bridge$addMCObjective(final net.minecraft.world.scores.Objective mcObjective) {
+        if (!this.impl$apiCall) {
+            final SpongeObjective objective = SpongeObjective.fromVanilla(mcObjective);
+            objective.register(this);
         }
-
-        objectives.add(scoreObjective);
-        ((ScoreboardAccessor) this).accessor$objectivesByName().put(objective.name(), scoreObjective);
-        this.onObjectiveAdded(scoreObjective);
-
-        ((SpongeObjective) objective).updateScores(this);
     }
 
     @Override
@@ -143,36 +124,35 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     }
 
     @Override
-    public void bridge$removeObjective(final Objective objective) {
-        final net.minecraft.world.scores.Objective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
-        ((ScoreboardAccessor) this).accessor$objectivesByName().remove(scoreObjective.getName());
-
-        ((ScoreboardAccessor) this).accessor$displayObjectives().forEach((displaySlot, objective1) -> {
-            if (objective1 == scoreObjective) {
-                ((ScoreboardAccessor) this).accessor$displayObjectives().remove(displaySlot);
-            }
-        });
-
-        ((ServerScoreboardBridge) this).bridge$sendToPlayers(new ClientboundSetObjectivePacket(scoreObjective, Constants.Scoreboards.OBJECTIVE_PACKET_REMOVE));
-
-        final List list = ((ScoreboardAccessor) this).accessor$objectivesByCriteria().get(scoreObjective.getCriteria());
-
-        if (list != null)
-        {
-            list.remove(scoreObjective);
+    public void bridge$removeAPIObjective(final Objective objective) {
+        if (objective instanceof SpongeObjective so) {
+            this.impl$apiCall = true;
+            final net.minecraft.world.scores.Objective mcObjective = this.getObjective(objective.name());
+            this.removeObjective(mcObjective);
+            this.impl$apiCall = false;
+            so.unregister(this);
         }
 
-        for (final Map<net.minecraft.world.scores.Objective, Score> scoreMap : ((ScoreboardAccessor) this).accessor$playerScores().values()) {
-            final Score score = scoreMap.remove(scoreObjective);
-            if (score != null) {
-                ((ScoreBridge) score).bridge$getSpongeScore().removeScoreFor(scoreObjective);
-            }
+        for (final org.spongepowered.api.scoreboard.Score score : objective.scores().values()) {
+            objective.removeScore(score);
         }
-
-        this.shadow$setDirty();
-
-        ((SpongeObjective) objective).removeObjectiveFor(this);
     }
+
+    @Override
+    public void bridge$removeMCObjective(final net.minecraft.world.scores.Objective mcObjective) {
+        if (!this.impl$apiCall) {
+            this.bridge$removeAPIObjective(((ObjectiveBridge) mcObjective).bridge$getSpongeObjective());
+        }
+    }
+
+    @Override
+    public void bridge$removeMCScore(final ScoreHolder holder, final net.minecraft.world.scores.Objective mcObjective) {
+        if (!this.impl$apiCall) {
+            final SpongeObjective objective = ((ObjectiveBridge) mcObjective).bridge$getSpongeObjective();
+            objective.removeScore(holder.getScoreboardName());
+        }
+    }
+
 
     // Add team
 
@@ -218,12 +198,13 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
                         player.connection.send(new ClientboundSetDisplayObjectivePacket(displaySlot, objective));
                     }
                 });
-                for (final Score score : this.getPlayerScores(objective)) {
+                for (final var score : this.listPlayerScores(objective)) {
                     final ClientboundSetScorePacket packetIn = new ClientboundSetScorePacket(
-                            Method.CHANGE,
-                            score.getObjective().getName(),
-                            score.getOwner(),
-                            score.getScore());
+                            score.owner(),
+                            objective.getName(),
+                            score.value(),
+                            score.display(),
+                            score.numberFormatOverride());
                     player.connection.send(packetIn);
                 }
             }
@@ -239,49 +220,9 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     }
 
     @Override
-    public net.minecraft.world.scores.Objective addObjective(final String name, final ObjectiveCriteria criteria, final net.minecraft.network.chat.Component text,
-            final ObjectiveCriteria.RenderType type) {
-        final SpongeObjective objective = new SpongeObjective(name, (Criterion) criteria);
-        objective.setDisplayMode((ObjectiveDisplayMode) (Object) type);
-        objective.setDisplayName(SpongeAdventure.asAdventure(text));
-        ((org.spongepowered.api.scoreboard.Scoreboard) this).addObjective(objective);
-        return objective.getObjectiveFor(this);
-    }
-
-    @Override
-    public void removeObjective(final net.minecraft.world.scores.Objective objective) {
-        this.bridge$removeObjective(((ObjectiveBridge) objective).bridge$getSpongeObjective());
-    }
-
-    @Override
     public void removePlayerTeam(final PlayerTeam team) {
         super.removePlayerTeam(team);
         ((PlayerTeamAccessor) team).accessor$scoreboard(null);
-    }
-
-    @Override
-    public Score getOrCreatePlayerScore(final String name, final net.minecraft.world.scores.Objective objective) {
-        return ((SpongeScore) ((ObjectiveBridge) objective).bridge$getSpongeObjective().findOrCreateScore(LegacyComponentSerializer.legacySection().deserialize(name)))
-                .getScoreFor(objective);
-    }
-
-    @Override
-    public void resetPlayerScore(final String name, final net.minecraft.world.scores.Objective objective) {
-        final LegacyComponentSerializer lcs = LegacyComponentSerializer.legacySection();
-        if (objective != null) {
-            final SpongeObjective spongeObjective = ((ObjectiveBridge) objective).bridge$getSpongeObjective();
-            final Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.findScore(lcs.deserialize(name));
-            if (score.isPresent()) {
-                spongeObjective.removeScore(score.get());
-            } else {
-                SpongeCommon.logger().warn("Objective {} did have have the score", name);
-            }
-        } else {
-            final Component textName = lcs.deserialize(name);
-            for (final net.minecraft.world.scores.Objective scoreObjective : this.getObjectives()) {
-                ((ObjectiveBridge) scoreObjective).bridge$getSpongeObjective().removeScore(textName);
-            }
-        }
     }
 
     @Redirect(method = "onScoreChanged",
@@ -315,20 +256,6 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Inject(method = "onObjectiveAdded", at = @At("RETURN"))
     private void impl$UpdatePlayersScoreObjective(final net.minecraft.world.scores.Objective objective, final CallbackInfo ci) {
         this.bridge$sendToPlayers(new ClientboundSetObjectivePacket(objective, Constants.Scoreboards.OBJECTIVE_PACKET_ADD));
-    }
-
-    /**
-     * @author Aaron1011 - December 28th, 2015
-     * @reason use our mixin scoreboard implementation.
-     *
-     * @param slot The slot of the display
-     * @param objective The objective
-     */
-    @Override
-    @Overwrite
-    public void setDisplayObjective(final net.minecraft.world.scores.DisplaySlot slot, final net.minecraft.world.scores.@Nullable Objective objective) {
-        final Objective apiObjective = objective == null ? null : ((ObjectiveBridge) objective).bridge$getSpongeObjective();
-        this.bridge$updateDisplaySlot(apiObjective, (DisplaySlot) (Object) slot);
     }
 
     @Redirect(method = "addPlayerToTeam",
@@ -406,5 +333,15 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         for (final net.minecraft.world.scores.Objective objective : this.getObjectives()) {
             player.connection.send(new ClientboundSetObjectivePacket(objective, 1));
         }
+    }
+
+    @Override
+    public void bridge$removeAPIScore(final Objective spongeObjective, final Score spongeScore) {
+        this.impl$apiCall = true;
+        final ScoreHolder holder = ((SpongeScore) spongeScore).holder;
+        final net.minecraft.world.scores.Objective mcObjective = this.getObjective(spongeObjective.name());
+        this.resetSinglePlayerScore(holder, mcObjective);
+        ((SpongeScore) spongeScore).unregister(mcObjective);
+        this.impl$apiCall = false;
     }
 }

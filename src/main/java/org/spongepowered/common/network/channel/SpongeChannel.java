@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.network.channel;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.Multimap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,6 +47,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("unchecked")
@@ -94,8 +94,8 @@ public abstract class SpongeChannel implements Channel {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("key", this.key)
+        return new StringJoiner(", ", SpongeChannel.class.getSimpleName() + "[", "]")
+                .add("key=" + this.key)
                 .toString();
     }
 

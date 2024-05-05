@@ -31,8 +31,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.WildcardTypeName;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.FrameType;
+import net.minecraft.advancements.AdvancementType;
 import net.minecraft.commands.Commands.CommandSelection;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.RegistryAccess;
@@ -206,12 +205,6 @@ public final class GeneratorMain {
         // Enum-backed (automatically-named) catalogs can be added later as necessary
         return List.of(
             new MapEntriesValidator<>(
-                "advancement.criteria.trigger",
-                "Triggers",
-                CriteriaTriggers.class,
-                "CRITERIA"
-            ),
-            new MapEntriesValidator<>(
                 "world.gamerule",
                 "GameRules",
                 GameRules.class,
@@ -305,8 +298,8 @@ public final class GeneratorMain {
             new EnumEntriesValidator<>(
                  "advancement",
                  "AdvancementTypes",
-                 FrameType.class,
-                 "getName",
+                 AdvancementType.class,
+                 "getSerializedName",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
@@ -557,6 +550,15 @@ public final class GeneratorMain {
                 $ -> true, RegistryScope.GAME
             ),
             new RegistryEntriesGenerator<>(
+                "advancement.criteria.trigger",
+                "Triggers",
+                "TRIGGER",
+                ParameterizedTypeName.get(context.relativeClass("advancement.criteria.trigger", "Trigger"), WildcardTypeName.subtypeOf(Object.class)),
+                Registries.TRIGGER_TYPE,
+                $ -> true,
+                RegistryScope.GAME
+            ),
+            new RegistryEntriesGenerator<>(
                 "data.type",
                 "VillagerTypes",
                 "VILLAGER_TYPE",
@@ -572,6 +574,7 @@ public final class GeneratorMain {
                 $ -> true,
                 RegistryScope.SERVER
             ),
+            new BlockStateDataProviderGenerator(),
             new BlockStatePropertiesGenerator(),
             new BlockStatePropertyKeysGenerator(),
             new RegistryEntriesGenerator<>(

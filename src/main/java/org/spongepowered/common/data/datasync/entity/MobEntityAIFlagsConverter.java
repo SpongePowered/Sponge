@@ -41,19 +41,52 @@ public final class MobEntityAIFlagsConverter extends DataParameterConverter<Byte
 
     @Override
     public Optional<DataTransactionResult> createTransaction(final Entity entity, final Byte currentValue, final Byte value) {
-        final boolean oldHasAi = (currentValue & 1) == 0;
-        final boolean newHasAi = (value & 1) == 0;
-        return Optional.of(DataTransactionResult.builder()
-                .replace(Value.immutableOf(Keys.IS_AI_ENABLED, oldHasAi))
-                .success(Value.immutableOf(Keys.IS_AI_ENABLED, newHasAi))
-                .result(DataTransactionResult.Type.SUCCESS)
-                .build());
+        final boolean noAi = this.getFlag(currentValue, MobEntityAIFlagsConverter.NO_AI_MASK);
+        final boolean leftHanded = this.getFlag(currentValue, MobEntityAIFlagsConverter.LEFT_HANDED_MASK);
+        final boolean aggressive = this.getFlag(currentValue, MobEntityAIFlagsConverter.AGGRESSIVE_MASK);
+
+        final boolean newNoAi = this.getFlag(value, MobEntityAIFlagsConverter.NO_AI_MASK);
+        final boolean newLeftHanded = this.getFlag(value, MobEntityAIFlagsConverter.LEFT_HANDED_MASK);
+        final boolean newAggressive = this.getFlag(value, MobEntityAIFlagsConverter.AGGRESSIVE_MASK);
+
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+
+        boolean changed = false;
+        if (noAi != newNoAi) {
+            builder.replace(Value.immutableOf(Keys.IS_AI_ENABLED, !noAi));
+            builder.success(Value.immutableOf(Keys.IS_AI_ENABLED, !newNoAi));
+            changed = true;
+        }
+
+        builder.result(DataTransactionResult.Type.SUCCESS);
+        return changed ? Optional.of(builder.build()) : Optional.empty();
     }
 
     @Override
     public Byte getValueFromEvent(final Byte originalValue, final DataTransactionResult result) {
-        return result.successfulValue(Keys.IS_AI_ENABLED)
-                .map(v -> v.get() ? (byte) (originalValue & -2) : (byte) (originalValue | 1))
-                .orElse(originalValue);
+        if (result.successfulData().isEmpty()) {
+            // Short circuit when there are no changes.
+            return originalValue;
+        }
+
+        final boolean noAi = result.successfulValue(Keys.IS_AI_ENABLED)
+                .map(v -> !v.get())
+                .orElseGet(() -> this.getFlag(originalValue, MobEntityAIFlagsConverter.NO_AI_MASK));
+        final boolean leftHanded = this.getFlag(originalValue, MobEntityAIFlagsConverter.LEFT_HANDED_MASK);
+        final boolean aggressive = this.getFlag(originalValue, MobEntityAIFlagsConverter.AGGRESSIVE_MASK);
+
+        byte newValue = (byte) (noAi ? MobEntityAIFlagsConverter.NO_AI_MASK : 0);
+        newValue |= (byte) (leftHanded ? MobEntityAIFlagsConverter.LEFT_HANDED_MASK : 0);
+        newValue |= (byte) (aggressive ? MobEntityAIFlagsConverter.AGGRESSIVE_MASK : 0);
+
+        return newValue;
     }
+
+    private boolean getFlag(final byte value, final int mask) {
+        return (value & mask) != 0;
+    }
+
+    public static final int NO_AI_MASK          = 0b00000001; // 0x01
+    public static final int LEFT_HANDED_MASK    = 0b00000010; // 0x02
+    public static final int AGGRESSIVE_MASK     = 0b00000100; // 0x04
 }

@@ -76,6 +76,11 @@ public abstract class FoodDataMixin implements FoodDataBridge {
         this.foodLevel = this.impl$fireEventAndGetValue(Keys.FOOD_LEVEL, this.foodLevel, value);
     }
 
+    @Redirect(method = "setSaturation", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;saturationLevel:F", opcode = Opcodes.PUTFIELD))
+    private void impl$setSaturationLevel(final FoodData self, final float value) {
+        this.saturationLevel = this.impl$fireEventAndGetValue(Keys.SATURATION, (double) this.saturationLevel, (double) value).floatValue();
+    }
+
     @Redirect(method = "eat(IF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;saturationLevel:F", opcode = Opcodes.PUTFIELD))
     private void impl$eatSetSaturationLevel(final FoodData self, final float value) {
         this.saturationLevel = this.impl$fireEventAndGetValue(Keys.SATURATION, (double) this.saturationLevel, (double) value).floatValue();
@@ -84,6 +89,11 @@ public abstract class FoodDataMixin implements FoodDataBridge {
     @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;saturationLevel:F", opcode = Opcodes.PUTFIELD))
     private void impl$tickDrainSaturationLevel(final FoodData self, final float value) {
         this.saturationLevel = this.impl$fireEventAndGetValue(Keys.SATURATION, (double) this.saturationLevel, (double) value).floatValue();
+    }
+
+    @Redirect(method = "setExhaustion", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;exhaustionLevel:F", opcode = Opcodes.PUTFIELD))
+    private void impl$setExhaustion(final FoodData self, final float value) {
+        this.exhaustionLevel = this.impl$fireEventAndGetValue(Keys.EXHAUSTION, (double) this.exhaustionLevel, (double) value).floatValue();
     }
 
     @Redirect(method = "addExhaustion", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;exhaustionLevel:F", opcode = Opcodes.PUTFIELD))

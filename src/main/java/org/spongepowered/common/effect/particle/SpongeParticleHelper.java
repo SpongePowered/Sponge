@@ -40,6 +40,7 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.gameevent.BlockPositionSource;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -53,7 +54,9 @@ import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3f;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
@@ -75,22 +78,23 @@ public final class SpongeParticleHelper {
     }
 
     public static List<Packet<?>> toPackets(final ParticleEffect effect, final Vector3d position) {
-        SpongeParticleEffect spongeEffect = (SpongeParticleEffect) effect;
-
-        CachedParticlePacket cachedPacket = spongeEffect.cachedPacket;
-        if (cachedPacket == null) {
-            // Also save the generated packet cache for repeated uses.
-            cachedPacket = spongeEffect.cachedPacket = SpongeParticleHelper.getCachedPacket(spongeEffect);
-        }
-
         final List<Packet<?>> packets = new ArrayList<>();
-        cachedPacket.process(position, packets);
+        SpongeParticleHelper.getCachedPacket((SpongeParticleEffect) effect).process(position, packets);
         return packets;
     }
 
+    public static net.minecraft.core.particles.@Nullable ParticleOptions vanillaParticleOptions(final ParticleEffect effect) {
+        return SpongeParticleHelper.getCachedPacket((SpongeParticleEffect) effect).particleOptions();
+    }
+
     private static CachedParticlePacket getCachedPacket(final SpongeParticleEffect effect) {
-        final ParticleType type = effect.type();
-        return SpongeParticleHelper.getNamedPacket(effect, (net.minecraft.core.particles.ParticleType<?>) type);
+        if (effect.cachedPacket == null) {
+            final ParticleType type = effect.type();
+
+            effect.cachedPacket = SpongeParticleHelper.getNamedPacket(effect, (net.minecraft.core.particles.ParticleType<?>) type);
+        }
+
+        return effect.cachedPacket;
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
@@ -215,12 +219,62 @@ public final class SpongeParticleHelper {
                 .orElse(0);
     }
 
+    public static ParticleEffect spongeParticleOptions(final net.minecraft.core.particles.ParticleOptions effect) {
+        final net.minecraft.core.particles.ParticleType<?> type = effect.getType();
+        if (type instanceof SimpleParticleType) {
+            return new SpongeParticleEffect((ParticleType) type, Collections.emptyMap());
+        }
+
+        if (type.getDeserializer() == BlockParticleOption.DESERIALIZER) {
+            final BlockParticleOption particleData = (BlockParticleOption) effect;
+            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.BLOCK_STATE.get(), particleData.getState()));
+        } else if (type.getDeserializer() == DustColorTransitionOptions.DESERIALIZER) {
+            final DustColorTransitionOptions particleData = (DustColorTransitionOptions) effect;
+            return new SpongeParticleEffect((ParticleType) type, Map.of(
+                    ParticleOptions.COLOR.get(), Color.of(
+                            Vector3f.from(particleData.getFromColor().x, particleData.getFromColor().y, particleData.getFromColor().z).mul(255)),
+                    ParticleOptions.TO_COLOR.get(), Color.of(
+                            Vector3f.from(particleData.getToColor().x, particleData.getToColor().y, particleData.getToColor().z).mul(255)),
+                    ParticleOptions.SCALE.get(), particleData.getScale()
+            ));
+        } else if (type.getDeserializer() == DustParticleOptions.DESERIALIZER) {
+            // This particle type supports a color option.
+            final DustParticleOptions particleData = (DustParticleOptions) effect;
+            return new SpongeParticleEffect((ParticleType) type, Map.of(
+                    ParticleOptions.COLOR.get(), Color.of(
+                            Vector3f.from(particleData.getColor().x, particleData.getColor().y, particleData.getColor().z).mul(255)),
+                    ParticleOptions.SCALE.get(), particleData.getScale()
+            ));
+        } else if (type.getDeserializer() == ItemParticleOption.DESERIALIZER) {
+            // This particle type supports an item option.
+            final ItemParticleOption particleData = (ItemParticleOption) effect;
+            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.BLOCK_STATE.get(), particleData.getItem().copy()));
+        } else if (type.getDeserializer() == SculkChargeParticleOptions.DESERIALIZER) {
+            final SculkChargeParticleOptions particleData = (SculkChargeParticleOptions) effect;
+            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.ROLL.get(), particleData.roll()));
+        } else if (type.getDeserializer() == ShriekParticleOption.DESERIALIZER) {
+            final ShriekParticleOption particleData = (ShriekParticleOption) effect;
+            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.DELAY.get(), particleData.getDelay()));
+        } else if (type.getDeserializer() == VibrationParticleOption.DESERIALIZER) {
+            // TODO add position source
+            final VibrationParticleOption particleData = (VibrationParticleOption) effect;
+            return new SpongeParticleEffect((ParticleType) type, Map.of(ParticleOptions.TRAVEL_TIME.get(), Ticks.of(particleData.getArrivalInTicks())));
+        }
+
+        return new SpongeParticleEffect((ParticleType) type, Collections.emptyMap());
+    }
+
     private static final class EmptyCachedPacket implements CachedParticlePacket {
 
         public static final EmptyCachedPacket INSTANCE = new EmptyCachedPacket();
 
         @Override
         public void process(final Vector3d position, final List<Packet<?>> output) {
+        }
+
+        @Override
+        public net.minecraft.core.particles.@Nullable ParticleOptions particleOptions() {
+            return null;
         }
     }
 
@@ -279,6 +333,11 @@ public final class SpongeParticleHelper {
                     output.add(message);
                 }
             }
+        }
+
+        @Override
+        public net.minecraft.core.particles.@Nullable ParticleOptions particleOptions() {
+            return this.particleData;
         }
     }
 }

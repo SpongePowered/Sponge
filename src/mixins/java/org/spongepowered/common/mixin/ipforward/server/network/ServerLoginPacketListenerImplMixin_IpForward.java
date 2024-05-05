@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.ipforward.server.network;
 
-import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Charsets;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.login.ServerboundHelloPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,27 +43,34 @@ import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.network.ConnectionBridge_IpForward;
 import org.spongepowered.common.ipforward.velocity.VelocityForwardingInfo;
+import org.spongepowered.common.util.Preconditions;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin_IpForward {
 
     // @formatter:off
-    @Shadow @Final private MinecraftServer server;
-    @Shadow @Final public Connection connection;
+    @Shadow @Final MinecraftServer server;
+    @Shadow @Final Connection connection;
+    @Shadow @Nullable String requestedUsername;
     // @formatter:on
 
     private boolean ipForward$sentVelocityForwardingRequest;
 
     // Velocity
     @Inject(method = "handleHello", at = @At("HEAD"), cancellable = true)
-    private void ipForward$sendVelocityIndicator(final CallbackInfo info) {
+    private void ipForward$sendVelocityIndicator(final ServerboundHelloPacket packet, final CallbackInfo info) {
         if (!this.server.usesAuthentication() && SpongeConfigs.getCommon().get().ipForwarding.mode == IpForwardingCategory.Mode.MODERN) {
-            checkState(!this.ipForward$sentVelocityForwardingRequest, "Sent additional login start message!");
+            Preconditions.checkState(!this.ipForward$sentVelocityForwardingRequest, "Sent additional login start message!");
             this.ipForward$sentVelocityForwardingRequest = true;
 
+            this.requestedUsername = packet.name();
+
             VelocityForwardingInfo.sendQuery((ServerLoginPacketListenerImpl) (Object) this);
+
+            info.cancel();
         }
     }
 
@@ -79,7 +86,7 @@ public abstract class ServerLoginPacketListenerImplMixin_IpForward {
             if (((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID() != null) {
                 uuid = ((ConnectionBridge_IpForward) this.connection).bungeeBridge$getSpoofedUUID();
             } else {
-                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + $$0.getName()).getBytes(Charsets.UTF_8));
+                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + $$0.getName()).getBytes(StandardCharsets.UTF_8));
             }
 
             $$0 = new GameProfile(uuid, $$0.getName());

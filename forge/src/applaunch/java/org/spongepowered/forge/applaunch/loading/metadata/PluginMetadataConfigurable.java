@@ -46,20 +46,15 @@ public final class PluginMetadataConfigurable implements IConfigurable {
         if (key.length != 1) {
             return Optional.empty();
         }
-        final String query = key[0];
-        if ("modId".equals(query)) {
-            return Optional.of((T) this.metadata.id());
-        }
-        if ("version".equals(query)) {
-            return Optional.of((T) this.metadata.version().toString());
-        }
-        if ("displayName".equals(query)) {
-            return (Optional<T>) this.metadata.name();
-        }
-        if ("description".equals(query)) {
-            return (Optional<T>) this.metadata.description();
-        }
-        return Optional.empty();
+
+        return switch (key[0]) {
+            case "modId" -> Optional.of((T) this.metadata.id());
+            case "version" -> Optional.of((T) this.metadata.version().toString());
+            case "displayName" -> (Optional<T>) this.metadata.name();
+            case "description" -> (Optional<T>) this.metadata.description();
+            case "displayTest" -> Optional.of((T) "IGNORE_SERVER_VERSION");
+            default -> Optional.empty();
+        };
     }
 
     @Override

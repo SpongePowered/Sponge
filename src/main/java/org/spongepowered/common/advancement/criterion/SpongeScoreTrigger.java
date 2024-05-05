@@ -24,50 +24,41 @@
  */
 package org.spongepowered.common.advancement.criterion;
 
-import com.google.gson.JsonObject;
-import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancements.critereon.ContextAwarePredicate;
-import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
-import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.ExtraCodecs;
 
 import java.util.Optional;
 
-public final class SpongeScoreTrigger extends SimpleCriterionTrigger<SpongeScoreTrigger.Instance> {
+public final class SpongeScoreTrigger extends SimpleCriterionTrigger<SpongeScoreTrigger.TriggerInstance> {
 
-    public static final SpongeScoreTrigger SCORE_TRIGGER = CriteriaTriggersAccessor.invoker$register("sponge:score", new SpongeScoreTrigger());
+    public static final SpongeScoreTrigger SCORE_TRIGGER = Registry.register(BuiltInRegistries.TRIGGER_TYPES, "sponge:score", new SpongeScoreTrigger());
 
 
     private SpongeScoreTrigger() {
     }
 
-
     @Override
-    protected Instance createInstance(final JsonObject jsonObject, final Optional<ContextAwarePredicate> andPredicate,
-            final DeserializationContext conditionArrayParser) {
-        return new SpongeScoreTrigger.Instance(andPredicate, -1);
+    public Codec<TriggerInstance> codec() {
+        return TriggerInstance.CODEC;
     }
 
-    public static class Instance extends AbstractCriterionTriggerInstance {
+    public record TriggerInstance(Optional<ContextAwarePredicate> player, int triggerTimes) implements SimpleCriterionTrigger.SimpleInstance {
 
-        private final int triggerTimes;
+        public static final Codec<TriggerInstance> CODEC = RecordCodecBuilder.create(($$0) -> $$0.group(
+                ExtraCodecs.strictOptionalField(EntityPredicate.ADVANCEMENT_CODEC, "player").forGetter(TriggerInstance::player),
+                ExtraCodecs.strictOptionalField(Codec.INT, "triggerTimes", -1).forGetter(TriggerInstance::triggerTimes)
+        ).apply($$0, TriggerInstance::new));
 
-        public Instance(final Optional<ContextAwarePredicate> andPredicate, final int triggerTimes) {
-            super(andPredicate);
-            this.triggerTimes = triggerTimes;
+
+        public static TriggerInstance of(int triggerTimes) {
+            return new TriggerInstance(Optional.empty(), triggerTimes);
         }
 
-        public static Instance of(int triggerTimes) {
-            return new Instance(Optional.empty(), triggerTimes);
-        }
-
-        @Override
-        public JsonObject serializeToJson() {
-            return new JsonObject();
-        }
-
-        public int getTriggerTimes() {
-            return this.triggerTimes;
-        }
     }
 }

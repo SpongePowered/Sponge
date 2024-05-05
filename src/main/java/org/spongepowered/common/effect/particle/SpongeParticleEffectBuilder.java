@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.effect.particle;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.Sponge;
@@ -39,10 +37,12 @@ import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.DataDeserializer;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
@@ -83,7 +83,7 @@ public final class SpongeParticleEffectBuilder extends AbstractDataBuilder<Parti
 
     @Override
     public ParticleEffect.Builder type(ParticleType particleType) {
-        this.type = checkNotNull(particleType, "particleType");
+        this.type = Objects.requireNonNull(particleType, "particleType");
         return this;
     }
 
@@ -97,8 +97,8 @@ public final class SpongeParticleEffectBuilder extends AbstractDataBuilder<Parti
     @SuppressWarnings("rawtypes")
     @Override
     public <V> ParticleEffect.Builder option(ParticleOption<V> option, V value) throws IllegalArgumentException {
-        checkNotNull(option, "option");
-        checkNotNull(value, "value");
+        Objects.requireNonNull(option, "option");
+        Objects.requireNonNull(value, "value");
         IllegalArgumentException exception = ((SpongeParticleOption<V>) option).validateValue(value);
         if (exception != null) {
             throw exception;
@@ -112,7 +112,7 @@ public final class SpongeParticleEffectBuilder extends AbstractDataBuilder<Parti
 
     @Override
     public ParticleEffect build() {
-        checkArgument(this.type != null, "ParticleType must be set");
+        Preconditions.checkArgument(this.type != null, "ParticleType must be set");
         return new SpongeParticleEffect(this.type, this.options);
     }
 }

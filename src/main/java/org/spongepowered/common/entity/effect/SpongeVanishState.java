@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.entity.effect;
 
-import com.google.common.base.Objects;
 import org.spongepowered.api.effect.VanishState;
+
+import java.util.Objects;
 
 public final class SpongeVanishState implements VanishState {
     private static final VanishState VISIBLE = new SpongeVanishState(false, true, false, true, true, true, true);
@@ -242,7 +243,7 @@ public final class SpongeVanishState implements VanishState {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.vanished, this.ignoresCollisions, this.untargetable,
+        return Objects.hash(this.vanished, this.ignoresCollisions, this.untargetable,
                 this.affectsSpawning, this.createsSounds, this.createsParticles);
     }
 

@@ -29,8 +29,6 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.authlib.yggdrasil.ProfileResult;
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -52,7 +50,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -68,7 +65,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.scores.Team;
+import net.minecraft.world.scores.PlayerTeam;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.property.ProfileProperty;
@@ -100,18 +97,14 @@ import java.util.stream.Stream;
 public final class HumanEntity extends PathfinderMob implements TeamMember, RangedAttackMob {
     public static final ResourceKey<EntityType<?>> KEY = ResourceKey.create(Registries.ENTITY_TYPE, new ResourceLocation("sponge", "human"));
 
-    public static final EntityType<HumanEntity> TYPE = Registry.register(BuiltInRegistries.ENTITY_TYPE, HumanEntity.KEY,
-        EntityType.Builder.of(HumanEntity::new, MobCategory.MISC)
-            .noSave()
-            .clientTrackingRange(Constants.Entity.Player.TRACKING_RANGE)
-            .build("sponge:human")
-    );
-    public static final AttributeSupplier ATTRIBUTES = Mob.createMobAttributes()
-        .add(Attributes.ATTACK_DAMAGE, 1.0d) // Player
-        .add(Attributes.MOVEMENT_SPEED, (double) 0.23f) // Player (custom value)
-        .add(Attributes.ATTACK_SPEED) // Player
-        .add(Attributes.LUCK) // Player
-        .build();
+    public static AttributeSupplier createAttributes() {
+        return Mob.createMobAttributes()
+                .add(Attributes.ATTACK_DAMAGE, 1.0d) // Player
+                .add(Attributes.MOVEMENT_SPEED, (double) 0.23f) // Player (custom value)
+                .add(Attributes.ATTACK_SPEED) // Player
+                .add(Attributes.LUCK) // Player
+                .build();
+    }
 
     // A queue of packets waiting to send to players tracking this human
     private final Map<UUID, List<Stream<Packet<?>>>> playerPacketMap = new HashMap<>();
@@ -120,7 +113,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     private boolean aiDisabled = false, leftHanded = false;
 
     public HumanEntity(final EntityType<? extends HumanEntity> type, final Level world) {
-        super(HumanEntity.TYPE, world);
+        super(type, world);
         this.fakeProfile = new GameProfile(this.uuid, "");
         this.setCanPickUpLoot(true);
         this.entityData.set(PlayerAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), Constants.Sponge.Entity.Human.PLAYER_MODEL_FLAG_ALL);
@@ -137,7 +130,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         this.entityData.define(LivingEntityAccessor.accessor$DATA_STINGER_COUNT_ID(), 0);
         this.entityData.define(LivingEntityAccessor.accessor$SLEEPING_POS_ID(), Optional.empty());
 
-        // PlayerEntity
+        // Player
         this.entityData.define(PlayerAccessor.accessor$DATA_PLAYER_ABSORPTION_ID(), 0.0F);
         this.entityData.define(PlayerAccessor.accessor$DATA_SCORE_ID(), 0);
         this.entityData.define(PlayerAccessor.accessor$DATA_PLAYER_MODE_CUSTOMISATION(), (byte) 0);
@@ -171,7 +164,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     @Override
-    public Team getTeam() {
+    public PlayerTeam getTeam() {
         return this.level().getScoreboard().getPlayersTeam(this.fakeProfile.getName());
     }
 
@@ -510,7 +503,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     @Override
     public void performRangedAttack(final LivingEntity target, final float distanceFactor) {
         // Borrowed from Skeleton
-        final Arrow entitytippedarrow = new Arrow(this.level(), this);
+        final Arrow entitytippedarrow = new Arrow(this.level(), this, new ItemStack(Items.ARROW));
         final double d0 = target.getX() - this.getX();
         final double d1 = target.getBoundingBox().minY + target.getBbHeight() / 3.0F - entitytippedarrow.getY();
         final double d2 = target.getZ() - this.getZ();

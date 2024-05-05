@@ -42,6 +42,7 @@ import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PotionEffectUtil;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Collection;
@@ -77,8 +78,11 @@ public final class LivingData {
                     .create(Keys.AUTO_SPIN_ATTACK_TICKS)
                         .get(h -> Ticks.of(((LivingEntityAccessor)h).accessor$autoSpinAttackTicks()))
                         .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
                             if (h instanceof final Player p) {
-                                p.startAutoSpinAttack((int) v.ticks());
+                                p.startAutoSpinAttack(SpongeTicks.toSaturatedIntOrInfinite(v));
                                 return true;
                             }
                             return false;

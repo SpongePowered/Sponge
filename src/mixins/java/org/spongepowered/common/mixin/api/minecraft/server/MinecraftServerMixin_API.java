@@ -114,7 +114,7 @@ import java.util.stream.Stream;
 public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRegistryHolder {
 
     // @formatter:off
-    @Shadow @Final public long[] tickTimes;
+    @Shadow @Final public long[] tickTimesNanos;
     @Shadow @Final protected WorldData worldData;
 
     @Shadow public abstract net.minecraft.world.item.crafting.RecipeManager shadow$getRecipeManager();
@@ -349,7 +349,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
     @Override
     public double averageTickTime() {
-        return SpongeCommand.getAverage(this.tickTimes) / 1000000;
+        return SpongeCommand.getAverage(this.tickTimesNanos) / 1000000;
     }
 
     @Override

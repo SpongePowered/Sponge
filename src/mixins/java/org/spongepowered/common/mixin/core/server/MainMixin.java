@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import com.mojang.serialization.DynamicOps;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.Main;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
@@ -36,18 +32,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 
 
 @Mixin(Main.class)
 public abstract class MainMixin {
-
-    @Redirect(method = "lambda$main$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/HolderLookup$Provider;)Lnet/minecraft/resources/RegistryOps;"))
-    private static <T> RegistryOps<T> impl$captureBootstrapOps(final DynamicOps<T> $$0, final HolderLookup.Provider $$1) {
-        final RegistryOps<T> ops = RegistryOps.create($$0, $$1);
-        SpongeWorldManager.bootstrapOps = (RegistryOps<Tag>) ops;
-        return ops;
-    }
 
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/repository/ServerPacksSource;createPackRepository(Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;)Lnet/minecraft/server/packs/repository/PackRepository;"))
     private static PackRepository impl$configurePackRepository(LevelStorageSource.LevelStorageAccess levelSave) {

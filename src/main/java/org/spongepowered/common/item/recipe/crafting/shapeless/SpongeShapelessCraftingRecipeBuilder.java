@@ -24,16 +24,14 @@
  */
 package org.spongepowered.common.item.recipe.crafting.shapeless;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.datapack.DataPack;
 import org.spongepowered.api.datapack.DataPacks;
@@ -43,13 +41,13 @@ import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
-import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
-import org.spongepowered.common.item.recipe.cooking.SpongeRecipeSerializers;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -64,6 +62,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
     private DataPack<RecipeRegistration> pack = DataPacks.RECIPE;
 
     private RecipeCategory recipeCategory = RecipeCategory.MISC; // TODO support category
+    private CraftingBookCategory craftingBookCategory = CraftingBookCategory.MISC; // TODO support category
 
     @Override
     public ResultStep addIngredients(ItemType... ingredients) {
@@ -101,7 +100,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
 
     @Override
     public EndStep result(final ItemStackSnapshot result) {
-        checkNotNull(result, "result");
+        Objects.requireNonNull(result, "result");
         this.result = result.createStack();
         this.resultFunction = null;
         return this;
@@ -109,7 +108,7 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
 
     @Override
     public EndStep result(org.spongepowered.api.item.inventory.ItemStack result) {
-        checkNotNull(result, "result");
+        Objects.requireNonNull(result, "result");
         this.result = result;
         this.resultFunction = null;
         return this;
@@ -136,13 +135,10 @@ public class SpongeShapelessCraftingRecipeBuilder extends AbstractResourceKeyedB
 
     @Override
     public RecipeRegistration build0() {
-        checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
-
-        final ItemStack resultStack = ItemStackUtil.toNative(this.result);
-        final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(resultStack, this.resultFunction, this.remainingItemsFunction,
-                this.ingredients, RecipeSerializer.SHAPELESS_RECIPE, SpongeRecipeSerializers.SPONGE_CRAFTING_SHAPELESS);
-        return new SpongeShapelessCraftingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredients, resultStack, this.resultFunction, this.remainingItemsFunction, this.pack,
-                this.recipeCategory);
+        Preconditions.checkState(!this.ingredients.isEmpty(), "The ingredients are not set.");
+        return new SpongeShapelessCraftingRecipeRegistration((ResourceLocation) (Object) key, this.group, this.ingredients,
+                ItemStackUtil.toNative(this.result), this.resultFunction, this.remainingItemsFunction, this.pack,
+                this.recipeCategory, this.craftingBookCategory);
     }
 
     @Override

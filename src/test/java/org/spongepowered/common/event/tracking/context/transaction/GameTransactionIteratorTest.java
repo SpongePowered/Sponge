@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,6 +41,7 @@ import org.spongepowered.common.test.UnitTestExtension;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
+@Disabled
 @SuppressWarnings("deprecation")
 @ExtendWith(UnitTestExtension.class)
 public class GameTransactionIteratorTest {

@@ -24,10 +24,17 @@
  */
 package org.spongepowered.common.inventory.fabric;
 
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedMenuBridge;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * A fabric is an underlying view of an indexed container, this allows raw
@@ -63,4 +70,19 @@ public interface Fabric {
         return OffsetFabric.of(this, by);
     }
 
+    default Set<AbstractContainerMenu> fabric$containerMenus() {
+        if (this instanceof final TrackedMenuBridge trackedMenuBridge) {
+            return trackedMenuBridge.bridge$containerMenus();
+        }
+
+        return Collections.emptySet();
+    }
+
+    default void fabric$captureContainer() {
+        for (final AbstractContainerMenu containerMenu : this.fabric$containerMenus()) {
+            final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
+
+            context.captureModifiedContainer(containerMenu);
+        }
+    }
 }

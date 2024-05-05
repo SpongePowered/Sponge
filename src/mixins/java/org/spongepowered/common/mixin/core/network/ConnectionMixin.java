@@ -46,6 +46,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeMinecraftVersion;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
@@ -80,6 +81,8 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
     private net.minecraft.network.chat.@Nullable Component impl$kickReason;
 
     private ClientType impl$clientType = ClientType.VANILLA;
+
+    private volatile boolean impl$disconnected;
 
     @Override
     public TransactionStore bridge$getTransactionStore() {
@@ -209,6 +212,22 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
             if (consumer instanceof SpongePacketHolder packetHolder) {
                 packetHolder.apply(new IOException("Connection has been closed."));
             }
+        }
+    }
+
+    @Inject(method = "disconnect", at = @At(value = "INVOKE", target = "Lio/netty/channel/ChannelFuture;awaitUninterruptibly()Lio/netty/channel/ChannelFuture;"), cancellable = true)
+    private void impl$disconnectAsync(final CallbackInfo ci) {
+        ci.cancel(); //This can cause deadlock within the event loop
+
+        //Because we are now disconnecting asynchronously the channel might not
+        //be immediately flagged as closed so special case it
+        this.impl$disconnected = true;
+    }
+
+    @Inject(method = "isConnected", at = @At("HEAD"), cancellable = true)
+    private void impl$onIsConnected(final CallbackInfoReturnable<Boolean> cir) {
+        if (this.impl$disconnected) {
+            cir.setReturnValue(false);
         }
     }
 }

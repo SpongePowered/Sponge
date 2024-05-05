@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
@@ -35,8 +33,10 @@ import org.spongepowered.common.util.CopyHelper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 
 @SuppressWarnings("unchecked")
 abstract class SpongeDataManipulator implements DataManipulator {
@@ -57,13 +57,13 @@ abstract class SpongeDataManipulator implements DataManipulator {
 
     @Override
     public <E> Optional<E> get(final Key<? extends Value<E>> key) {
-        checkNotNull(key, "key");
+        Objects.requireNonNull(key, "key");
         return Optional.ofNullable((E) CopyHelper.copy(this.values.get(key)));
     }
 
     @Override
     public <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
-        checkNotNull(key, "key");
+        Objects.requireNonNull(key, "key");
         final E element = (E) CopyHelper.copy(this.values.get(key));
         return element == null ? Optional.empty() : Optional.of(Value.genericMutableOf(key, element));
     }
@@ -83,9 +83,9 @@ abstract class SpongeDataManipulator implements DataManipulator {
 
     @Override
     public String toString() {
-        final MoreObjects.ToStringHelper builder = MoreObjects.toStringHelper(this);
+        final StringJoiner builder = new StringJoiner(", ", SpongeDataManipulator.class.getSimpleName() + "[", "]");
         for (final Map.Entry<Key<?>, Object> entry : this.values.entrySet()) {
-            builder.add(entry.getKey().key().toString(), entry.getValue());
+            builder.add(entry.getKey().key() + "= " + entry.getValue());
         }
         return builder.toString();
     }

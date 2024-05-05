@@ -24,16 +24,23 @@
  */
 package org.spongepowered.common.item.recipe.crafting.shapeless;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import net.minecraft.world.level.Level;
+import org.spongepowered.common.bridge.world.item.crafting.RecipeResultBridge;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
+import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,18 +57,67 @@ import java.util.Set;
  */
 public class SpongeShapelessRecipe extends ShapelessRecipe {
 
+
+    public static final MapCodec<SpongeShapelessRecipe> SPONGE_CODEC = RecordCodecBuilder.mapCodec(
+            $$0 -> $$0.group(
+                            Codec.STRING.fieldOf(Constants.Recipe.SPONGE_TYPE).forGetter(t -> "custom"), // important to fail early when decoding vanilla recipes
+                            ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(ShapelessRecipe::getGroup),
+                            CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(ShapelessRecipe::category),
+                            ItemStack.ITEM_WITH_COUNT_CODEC.fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
+                            Ingredient.CODEC_NONEMPTY
+                                    .listOf()
+                                    .fieldOf(Constants.Recipe.SHAPELESS_INGREDIENTS)
+                                    .flatXmap(
+                                            $$0x -> {
+                                                Ingredient[] $$1 = $$0x.stream().filter($$0xx -> !$$0xx.isEmpty()).toArray(Ingredient[]::new);
+                                                if ($$1.length == 0) {
+                                                    return DataResult.error(() -> "No ingredients for shapeless recipe");
+                                                } else {
+                                                    return $$1.length > 9
+                                                            ? DataResult.error(() -> "Too many ingredients for shapeless recipe")
+                                                            : DataResult.success(NonNullList.of(Ingredient.EMPTY, $$1));
+                                                }
+                                            },
+                                            DataResult::success
+                                    )
+                                    .forGetter(ShapelessRecipe::getIngredients),
+                            ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$spongeResult()),
+                            IngredientResultUtil.CACHED_RESULT_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULTFUNCTION).forGetter(SpongeShapelessRecipe::resultFunctionId),
+                            IngredientResultUtil.CACHED_REMAINING_FUNC_CODEC.optionalFieldOf(Constants.Recipe.SPONGE_REMAINING_ITEMS).forGetter(SpongeShapelessRecipe::remainingItemsFunctionId)
+                    )
+                    .apply($$0, SpongeShapelessRecipe::of)
+    );
     private final boolean onlyVanillaIngredients;
 
     private final String resultFunctionId;
     private final String remainingItemsFunctionId;
 
-    public SpongeShapelessRecipe(String groupIn, CraftingBookCategory category, ItemStack recipeOutputIn, NonNullList<Ingredient> recipeItemsIn,
-            ItemStack spongeResultStack,
-            Optional<String> resultFunctionId, Optional<String> remainingItemsFunctionId) {
-        super(groupIn, category, spongeResultStack.isEmpty() ? recipeOutputIn : spongeResultStack, recipeItemsIn);
+
+    public static SpongeShapelessRecipe of(
+           final String spongeType,
+           final String groupIn,
+           final CraftingBookCategory category,
+           final ItemStack recipeOutputIn,
+           final NonNullList<Ingredient> recipeItemsIn,
+           final ItemStack spongeResultStack,
+           final Optional<String> resultFunctionId,
+           final Optional<String> remainingItemsFunctionId)
+    {
+        return new SpongeShapelessRecipe(groupIn, category, recipeItemsIn,
+                spongeResultStack.isEmpty() ? recipeOutputIn : spongeResultStack,
+                resultFunctionId.orElse(null), remainingItemsFunctionId.orElse(null));
+    }
+
+    public SpongeShapelessRecipe(final String groupIn,
+            final CraftingBookCategory category,
+            final NonNullList<Ingredient> recipeItemsIn,
+            final ItemStack spongeResultStack,
+            final String resultFunctionId,
+            final String remainingItemsFunctionId) {
+        super(groupIn, category, spongeResultStack, recipeItemsIn);
         this.onlyVanillaIngredients = recipeItemsIn.stream().noneMatch(i -> i instanceof SpongeIngredient);
-        this.resultFunctionId = resultFunctionId.orElse(null);
-        this.remainingItemsFunctionId = remainingItemsFunctionId.orElse(null);
+        this.resultFunctionId = resultFunctionId;
+        this.remainingItemsFunctionId = remainingItemsFunctionId;
     }
 
     public Optional<String> resultFunctionId() {
@@ -106,9 +162,9 @@ public class SpongeShapelessRecipe extends ShapelessRecipe {
 
     @Override
     public ItemStack getResultItem(final RegistryAccess $$1) {
-        if (this.resultFunctionId != null) {
-            return ItemStack.EMPTY;
-        }
+//        if (this.resultFunctionId != null) {
+//            return ItemStack.EMPTY;
+//        }
         return super.getResultItem($$1);
     }
 

@@ -59,6 +59,7 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 @Mixin(ProtoChunk.class)
 public abstract class ProtoChunkMixin_API extends ChunkAccess implements GenerationChunk, SpongeServerLocationBaseDataHolder {
@@ -145,6 +146,10 @@ public abstract class ProtoChunkMixin_API extends ChunkAccess implements Generat
 
     @Override
     public void setInhabitedTime(final Ticks newInhabitedTime) {
+        Objects.requireNonNull(newInhabitedTime);
+        if (newInhabitedTime.isInfinite()) {
+            throw new IllegalArgumentException("Inhabited time cannot be infinite!");
+        }
         this.setInhabitedTime(newInhabitedTime.ticks());
     }
     public void removeBlockEntity(final int x, final int y, final int z) {

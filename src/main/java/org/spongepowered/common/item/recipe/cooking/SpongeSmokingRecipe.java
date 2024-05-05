@@ -30,7 +30,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.SmokingRecipe;
+import org.spongepowered.common.item.recipe.ResultFunctionRecipe;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
+
+import java.util.Optional;
 
 public class SpongeSmokingRecipe extends SmokingRecipe implements ResultFunctionRecipe {
 
@@ -42,8 +45,8 @@ public class SpongeSmokingRecipe extends SmokingRecipe implements ResultFunction
     }
 
     @Override
-    public String resultFunctionId() {
-        return this.resultFunctionId;
+    public Optional<String> resultFunctionId() {
+        return Optional.ofNullable(this.resultFunctionId);
     }
 
 
@@ -64,5 +67,6 @@ public class SpongeSmokingRecipe extends SmokingRecipe implements ResultFunction
         }
         return super.getResultItem($$1);
     }
+
 
 }

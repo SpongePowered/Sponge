@@ -79,7 +79,7 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
     @Override
     public @NonNull T redirect(final @NonNull CommandTreeNode<@NonNull ?> to) {
         Objects.requireNonNull(to);
-        if (this.redirect != null) {
+        if (this.children != null) {
             throw new IllegalStateException("There must be no children if using a redirect");
         }
         this.redirect = to;

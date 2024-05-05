@@ -29,6 +29,7 @@ import net.minecraft.world.entity.monster.RangedAttackMob;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.RangedAttackAgainstAgentGoal;
 import org.spongepowered.api.entity.living.Ranger;
 import org.spongepowered.api.util.Ticks;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.Objects;
@@ -86,6 +87,6 @@ public final class SpongeRangedAttackAgainstAgentGoalBuilder implements RangedAt
             throw new IllegalArgumentException("Ranger must be an IRangedAttackMob!");
         }
         return (RangedAttackAgainstAgentGoal) new RangedAttackGoal((RangedAttackMob) owner, this.maxSpeed,
-                (int) this.delayBetweenAttacks.ticks(), this.attackRadius);
+                SpongeTicks.toSaturatedIntOrInfinite(this.delayBetweenAttacks, Constants.Sponge.Entity.RangedAttackGoal.INFINITE_ATTACK_TIME), this.attackRadius);
     }
 }

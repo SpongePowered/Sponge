@@ -24,15 +24,18 @@
  */
 package org.spongepowered.common.world;
 
-import com.google.common.base.Preconditions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion.BlockInteraction;
+import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.bridge.world.level.ExplosionBridge;
+import org.spongepowered.common.util.Preconditions;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Objects;
@@ -152,9 +155,13 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
 
         final World<?, ?> world = this.location.world();
         final Vector3d origin = this.location.position();
-        final net.minecraft.world.level.Explosion explosion = new net.minecraft.world.level.Explosion((net.minecraft.world.level.Level) world,
+        final net.minecraft.world.level.Explosion explosion = new net.minecraft.world.level.Explosion((Level) world,
                 (Entity) this.sourceExplosive, null, null, origin.x(), origin.y(), origin.z(), this.radius,
-                this.canCauseFire, this.shouldBreakBlocks ? BlockInteraction.DESTROY : BlockInteraction.KEEP);
+                this.canCauseFire, this.shouldBreakBlocks ? BlockInteraction.DESTROY : BlockInteraction.KEEP,
+                // TODO configurable explosion particles & sound?
+                ParticleTypes.EXPLOSION,
+                ParticleTypes.EXPLOSION_EMITTER,
+                SoundEvents.GENERIC_EXPLODE);
         ((ExplosionBridge) explosion).bridge$setShouldBreakBlocks(this.shouldBreakBlocks);
         ((ExplosionBridge) explosion).bridge$setShouldDamageEntities(this.shouldDamageEntities);
         ((ExplosionBridge) explosion).bridge$setShouldPlaySmoke(this.shouldSmoke);

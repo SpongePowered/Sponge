@@ -28,10 +28,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.PacketUtils;
-import net.minecraft.network.protocol.common.ClientboundResourcePackPacket;
-import net.minecraft.network.protocol.common.ServerboundResourcePackPacket;
-import net.minecraft.network.protocol.game.ServerGamePacketListener;
+import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -42,10 +39,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.bridge.network.protocol.game.ClientboundResourcePackPacketBridge;
 
 @Mixin(ServerCommonPacketListenerImpl.class)
-public abstract class ServerCommonPacketListenerImplMixin {
+public abstract class ServerCommonPacketListenerImplMixin implements ConnectionHolderBridge {
 
     // @formatter:off
     @Shadow @Final protected Connection connection;
@@ -56,9 +54,9 @@ public abstract class ServerCommonPacketListenerImplMixin {
 
     @Nullable public ResourcePack impl$lastReceivedPack;
 
-    @Inject(method = "handleResourcePackResponse", at = @At("HEAD"))
-    public void impl$handleResourcePackResponse(final ServerboundResourcePackPacket packet, final CallbackInfo callbackInfo) {
-        PacketUtils.ensureRunningOnSameThread(packet, (ServerGamePacketListener) this, this.server);
+    @Override
+    public Connection bridge$getConnection() {
+        return this.connection;
     }
 
     @Inject(
@@ -70,9 +68,8 @@ public abstract class ServerCommonPacketListenerImplMixin {
 
     }
 
-    public void impl$modifyClientBoundPacket(final Packet<?> packet)
-    {
-        if (packet instanceof ClientboundResourcePackPacket) {
+    public void impl$modifyClientBoundPacket(final Packet<?> packet) {
+        if (packet instanceof ClientboundResourcePackPushPacket) {
             final ResourcePack pack = ((ClientboundResourcePackPacketBridge) packet).bridge$getSpongePack();
             this.impl$lastReceivedPack = pack;
         }

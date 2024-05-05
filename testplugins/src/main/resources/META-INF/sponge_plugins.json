@@ -245,25 +245,25 @@
             "description": "Pack Testing"
         },
         {
-            "id": "vanish-test",
+            "id": "vanish_test",
             "name": "Vanish Test",
             "entrypoint": "org.spongepowered.test.vanish.VanishTest",
             "description": "Vanish Testing"
         },
         {
-            "id": "logging-test",
+            "id": "logging_test",
             "name": "Logging Test",
             "entrypoint": "org.spongepowered.test.logging.LoggingTest",
             "description": "Logging Testing"
         },
         {
-            "id": "blockstate-test",
+            "id": "blockstate_test",
             "name": "BlockState Test",
             "entrypoint": "org.spongepowered.test.blockstate.BlockStateTest",
             "description": "BlockState Testing"
         },
         {
-            "id": "key-test",
+            "id": "key_test",
             "name": "Key Listener Test",
             "entrypoint": "org.spongepowered.test.keys.KeyTest",
             "description": "Key Listener Testing"
@@ -291,6 +291,30 @@
             "name": "Sign Test",
             "entrypoint": "org.spongepowered.test.sign.SignTest",
             "description": "Testing Sign Changes"
+        },
+        {
+            "id": "customregistrytest",
+            "name": "Custom Registry Test",
+            "entrypoint": "org.spongepowered.test.customregistry.CustomRegistryTest",
+            "description": "Testing Custom Registry"
+        },
+        {
+            "id": "scoreboardtest",
+            "name": "Scoreboard Test",
+            "entrypoint": "org.spongepowered.test.scoreboard.ScoreboardTest",
+            "description": "Testing Custom Registry"
+        },
+        {
+            "id": "clickcontainereventcancelledtest",
+            "name": "Click Container Event Cancelled Test",
+            "entrypoint": "org.spongepowered.test.interact.ClickContainerEventCancelledTest",
+            "description": "Testing Cancelling Click Container Primary Event"
+        },
+        {
+            "id": "infiniteticksdatatest",
+            "name": "Infinite Ticks Data Test",
+            "entrypoint": "org.spongepowered.test.data.InfiniteTicksDataTest",
+            "description": "Testing Infinite Ticks Data"
         }
     ]
 }

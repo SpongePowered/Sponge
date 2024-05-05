@@ -27,6 +27,7 @@ package org.spongepowered.common.advancement;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.critereon.CriterionValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
@@ -54,7 +55,6 @@ public final class SpongeFilteredTrigger implements CriterionTriggerInstance, Fi
         return this.configuration;
     }
 
-    @Override
     public JsonObject serializeToJson() {
         if (this.configuration instanceof DataSerializable) {
             final DataContainer dataContainer = ((DataSerializable) this.configuration).toContainer();
@@ -68,4 +68,10 @@ public final class SpongeFilteredTrigger implements CriterionTriggerInstance, Fi
 
         return SpongeFilteredTrigger.GSON.toJsonTree(this.configuration).getAsJsonObject();
     }
+
+    @Override
+    public void validate(final CriterionValidator var1) {
+
+    }
+
 }

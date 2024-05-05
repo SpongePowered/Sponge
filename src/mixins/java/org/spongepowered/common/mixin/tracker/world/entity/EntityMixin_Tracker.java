@@ -35,7 +35,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.entity.EntityInLevelCallback;
-import net.minecraft.world.scores.Team;
+import net.minecraft.world.scores.PlayerTeam;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -72,7 +72,7 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     @Shadow @Final protected RandomSource random;
     @Shadow private EntityInLevelCallback levelCallback;
 
-    @Shadow @Nullable public abstract Team getTeam();
+    @Shadow @Nullable public abstract PlayerTeam getTeam();
     @Shadow public abstract UUID shadow$getUUID();
     @Shadow public abstract double shadow$getEyeY();
     @Shadow public abstract double shadow$getX();
@@ -86,7 +86,6 @@ public abstract class EntityMixin_Tracker implements DelegatingConfigTrackableBr
     @Shadow public abstract Level shadow$level();
 
     //@formatter:on
-
 
     protected @MonotonicNonNull EffectTransactor tracker$dropsTransactor = null;
 

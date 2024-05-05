@@ -118,15 +118,15 @@ public abstract class ServerEntityMixin {
             return;
         }
         // Adds the GameProfile to the client
-        consumer.accept(human.createPlayerListPacket(EnumSet.allOf(ClientboundPlayerInfoUpdatePacket.Action.class)));
+        consumer.accept(human.createPlayerListPacket(EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)));
         // Actually spawn the human (a player)
         consumer.accept((Packet<?>) spawnPacket);
-        // Remove from tab list
+        // Remove from the player map
         final ClientboundPlayerInfoRemovePacket removePacket = new ClientboundPlayerInfoRemovePacket(List.of(human.getUUID()));
         if (human.canRemoveFromListImmediately()) {
             consumer.accept(removePacket);
         } else {
-            // TODO - find out if this is still needed.
+            // Human is a Player entity on the client and needs to tick once for the skin to render
             human.removeFromTabListDelayed(null, removePacket);
         }
     }

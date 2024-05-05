@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.scoreboard.builder;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.server.ServerScoreboard;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -34,6 +33,7 @@ import org.spongepowered.common.SpongeCommon;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public final class SpongeScoreboardBuilder implements Scoreboard.Builder {
 
@@ -42,13 +42,13 @@ public final class SpongeScoreboardBuilder implements Scoreboard.Builder {
 
     @Override
     public Scoreboard.Builder objectives(List<Objective> objectives) {
-        this.objectives = checkNotNull(objectives, "Objectives cannot be null!");
+        this.objectives = Objects.requireNonNull(objectives, "Objectives cannot be null!");
         return this;
     }
 
     @Override
     public Scoreboard.Builder teams(List<Team> teams) {
-        this.teams = checkNotNull(teams, "Teams cannot be null!");
+        this.teams = Objects.requireNonNull(teams, "Teams cannot be null!");
         return this;
     }
 

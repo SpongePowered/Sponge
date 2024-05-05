@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.apache.logging.log4j.Level;
@@ -48,6 +47,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -246,7 +246,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
 
         private Registration(final Class<T> clazz, final T object, final PluginContainer pluginContainer) {
             this.clazz = clazz;
-            this.object = Preconditions.checkNotNull(object, "The service must have an implementation!");
+            this.object = Objects.requireNonNull(object, "The service must have an implementation!");
             this.pluginContainer = pluginContainer;
         }
 

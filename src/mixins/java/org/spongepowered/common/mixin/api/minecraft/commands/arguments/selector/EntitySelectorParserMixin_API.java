@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.commands.arguments.selector;
 
-import com.google.common.base.Preconditions;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -63,6 +62,7 @@ import org.spongepowered.common.accessor.advancements.critereon.MinMaxBounds_Dou
 import org.spongepowered.common.accessor.advancements.critereon.MinMaxBounds_IntsAccessor;
 import org.spongepowered.common.bridge.commands.arguments.selector.EntitySelectorParserBridge;
 import org.spongepowered.common.command.selector.SpongeSelectorSortAlgorithm;
+import org.spongepowered.common.util.Preconditions;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -197,7 +197,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
 
     @Override
     public Selector.@NonNull Builder sortAlgorithm(final @NonNull SelectorSortAlgorithm algorithm) {
-        Preconditions.checkArgument(algorithm instanceof SpongeSelectorSortAlgorithm, "Must be a SpongeSelectorSortAlgorithm");
+        org.spongepowered.common.util.Preconditions.checkArgument(algorithm instanceof SpongeSelectorSortAlgorithm, "Must be a SpongeSelectorSortAlgorithm");
         this.shadow$setSorted(true);
         this.order = ((SpongeSelectorSortAlgorithm) algorithm).getSortAlgorithm();
         return this;

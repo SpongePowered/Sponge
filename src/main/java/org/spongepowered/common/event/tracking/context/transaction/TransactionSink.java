@@ -46,6 +46,7 @@ import net.minecraft.world.ticks.ScheduledTick;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
@@ -53,7 +54,6 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.inventory.InventoryMenuAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
@@ -79,6 +79,8 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Con
 import org.spongepowered.common.event.tracking.context.transaction.inventory.CraftingPreviewTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.CraftingTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.DropFromPlayerInventoryTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.ExplicitInventoryOmittedTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.InventoryTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.OpenMenuTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlaceRecipeTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
@@ -88,8 +90,6 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Set
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ShiftCraftingResultTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.world.EntityPerformingDropsTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.world.SpawnEntityTransaction;
-import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
-import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -301,14 +301,6 @@ interface TransactionSink {
     ) {
         // Inventory change during event or command
         if (abstractContainerMenu instanceof InventoryMenu) {
-            if (phaseContext instanceof EventListenerPhaseContext) {
-                this.logPlayerInventoryChange(((InventoryMenuAccessor) abstractContainerMenu).accessor$owner(),
-                    PlayerInventoryTransaction.EventCreator.STANDARD);
-            }
-            if (phaseContext instanceof CommandPhaseContext) {
-                this.logPlayerInventoryChange(((InventoryMenuAccessor) abstractContainerMenu).accessor$owner(),
-                    PlayerInventoryTransaction.EventCreator.STANDARD);
-            }
             if (phaseContext instanceof UnwindingPhaseContext) {
                 return;
             }
@@ -406,5 +398,17 @@ interface TransactionSink {
         @Nullable final RecipeHolder<CraftingRecipe> lastRecipe) {
         final CraftingTransaction transaction = new CraftingTransaction(player, craftedStack, craftInv, lastRecipe);
         this.logTransaction(transaction);
+    }
+
+    default EffectTransactor logIgnoredInventory(AbstractContainerMenu containerMenu) {
+        final ExplicitInventoryOmittedTransaction transaction = new ExplicitInventoryOmittedTransaction(containerMenu);
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+    }
+
+    default EffectTransactor logInventoryTransaction(final AbstractContainerMenu containerMenu) {
+        final InventoryTransaction transaction = new InventoryTransaction((Inventory) containerMenu);
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 }

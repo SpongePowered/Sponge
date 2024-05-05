@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 
 public class SimpleItemLaunchLogic<P extends Projectile> extends SimpleEntityLaunchLogic<P> {
 
-    private final Item item;
+    protected final Item item;
 
     public SimpleItemLaunchLogic(final Supplier<EntityType<P>> projectileType, final Item item) {
         super(projectileType);

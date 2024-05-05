@@ -1,113 +1,17 @@
-# This workflow will build a Java project with Gradle
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
-
 name: Java CI with Gradle
 
 on:
   push:
     branches-ignore: [ 'api-*' ]
-    tags-ignore: ["*"]
+    tags-ignore: ["**"]
   pull_request:
     branches-ignore: [ stable-7 ]
 
-env:
-  CACHE_REV: "1"
-
 jobs:
   build:
-    # Only run on PRs if the source branch is on someone else's repo
-    if: "${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}"
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ${{ github.workspace}}/buildSrc/.gradle/
-            ${{ github.workspace}}/forge/build/fg_cache
-            ${{ github.workspace}}/.gradle/
-          key: "${{ runner.os }}-minecraft-${{ env.CACHE_REV }}-${{ hashFiles('**/*.gradle*') }}"
-          restore-keys: |
-            ${{ runner.os }}-minecraft-${{ env.CACHE_REV }}-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: 17
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1
-      - name: Setup workspace
-        run: |
-          echo "GIT_COMMIT=${GITHUB_SHA}" >> $GITHUB_ENV
-          echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
-      - name: Build with Gradle
-        run: ./gradlew -PenableTestPlugins=true -PenableSpongeForge=true build --stacktrace
-        env:
-          CI_SYSTEM: Github Actions
-      - name: Archive artifacts for build
-        uses: actions/upload-artifact@v3
-        with:
-          name: Sponge Jars
-          path: |
-            ${{ github.workspace }}/SpongeAPI/build/libs/*.jar
-            ${{ github.workspace }}/build/libs/*.jar
-            ${{ github.workspace }}/vanilla/build/libs/*.jar
-            ${{ github.workspace }}/forge/build/libs/*.jar
-      - name: SpongeVanilla Production Jar
-        uses: actions/upload-artifact@v3
-        with:
-          name: SpongeVanilla Production Jar
-          path: "${{ github.workspace }}/vanilla/build/libs/*-universal.jar"
-      - name: SpongeForge Production Jar
-        uses: actions/upload-artifact@v3
-        with:
-          name: SpongeForge Production Jar
-          path: "${{ github.workspace }}/forge/build/libs/*-universal.jar"
-      - name: SpongeVanilla libraries
-        uses: actions/upload-artifact@v3
-        with:
-          name: SpongeVanilla installer libraries
-          path: "${{ github.workspace }}/vanilla/build/resources/installer/libraries.json"
+    uses: ./.github/workflows/common-run-build.yaml
+    secrets: inherit
   integrationTest:
     needs: build
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-22.04, windows-latest, macos-latest]
-        java: [17]
-    runs-on: "${{ matrix.os }}"
-    steps:
-      - name: Check out repository to use the build.gradle.kts as a hash file
-        uses: actions/checkout@v2
-        with:
-          path: code
-      - name: Download SpongeVanilla libraries as an additional hash file
-        uses: actions/download-artifact@v3
-        with:
-          name: SpongeVanilla installer libraries
-          path: "${{ github.workspace }}/code/libraries.json"
-      - name: "Setup JDK ${{ matrix.java }}"
-        uses: actions/setup-java@v3
-        with:
-          distribution: temurin
-          java-version: "${{ matrix.java }}"
-      - uses: actions/cache@v3
-        with:
-          path: "${{ github.workspace}}/libraries"
-          key: "${{runner.os}}-${{matrix.java}}-it-libraries-${{ hashFiles('code/build.gradle.kts') }}-${{ github.workspace }}/code/libraries.json"
-          restore-keys: "${{runner.os}}-${{matrix.java}}-it-libraries-"
-      - name: Download SpongeVanilla server
-        uses: actions/download-artifact@v3
-        with:
-          name: SpongeVanilla Production Jar
-      - name: Run SpongeVanilla Test (windows)
-        if: "runner.os == 'Windows'"
-        run: java "-Dmixin.debug.verbose=true" -jar $(gci | Where-Object NameString -Match "-universal.jar") --launchTarget sponge_server_it
-      - name: Run SpongeVanilla Test (other)
-        if: "runner.os != 'Windows'"
-        run: java -Dmixin.debug.verbose=true -jar *-universal.jar --launchTarget sponge_server_it
+    uses: ./.github/workflows/common-integration-test.yaml
+    secrets: inherit

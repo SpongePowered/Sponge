@@ -110,6 +110,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         ThrowableItemProjectileData.register(this.registrator);
         TNTData.register(this.registrator);
         TraderLlamaData.register(this.registrator);
+        TransientData.register(this.registrator);
         TropicalFishData.register(this.registrator);
         TurtleData.register(this.registrator);
         VanishableData.register(this.registrator);

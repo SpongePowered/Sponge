@@ -24,10 +24,7 @@
  */
 package org.spongepowered.common.data;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -47,6 +44,7 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.common.data.builder.Coerce;
 import org.spongepowered.common.registry.provider.KeyProvider;
+import org.spongepowered.common.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +54,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -73,7 +72,7 @@ public class MemoryDataView implements DataView {
     private final DataView.SafetyMode safety;
 
     MemoryDataView(final DataView.SafetyMode safety) {
-        checkState(this instanceof DataContainer, "Cannot construct a root MemoryDataView without a container!");
+        Preconditions.checkState(this instanceof DataContainer, "Cannot construct a root MemoryDataView without a container!");
         this.path = DataQuery.of();
         this.parent = this;
         this.container = (DataContainer) this;
@@ -81,7 +80,7 @@ public class MemoryDataView implements DataView {
     }
 
     private MemoryDataView(final DataView parent, final DataQuery path, final DataView.SafetyMode safety) {
-        checkArgument(path.parts().size() >= 1, "Path must have at least one part");
+        Preconditions.checkArgument(path.parts().size() >= 1, "Path must have at least one part");
         this.parent = parent;
         this.container = parent.container();
         this.path = parent.currentPath().then(path);
@@ -229,9 +228,9 @@ public class MemoryDataView implements DataView {
     public DataView set(final DataQuery path, final Object value) {
         Objects.requireNonNull(path, "path");
         Objects.requireNonNull(value, "value");
-        checkState(this.container != null);
-        checkState(!path.parts().isEmpty(), "The path is empty");
-        checkArgument(value != this, "Cannot set a DataView to itself.");
+        Preconditions.checkState(this.container != null);
+        Preconditions.checkState(!path.parts().isEmpty(), "The path is empty");
+        Preconditions.checkArgument(value != this, "Cannot set a DataView to itself.");
 
         final List<String> parts = path.parts();
         final String key = parts.get(0);
@@ -251,7 +250,7 @@ public class MemoryDataView implements DataView {
 
         final Object serialized = DataSerializer.serialize(this.safetyMode(), value);
 
-        checkArgument(this.isEmpty() || !this.equals(serialized), "Cannot insert self-referencing DataView!");
+        Preconditions.checkArgument(this.isEmpty() || !this.equals(serialized), "Cannot insert self-referencing DataView!");
         if (serialized instanceof DataView) {
             // always have to copy a data view to avoid overwriting existing
             // views and to set the interior path correctly.
@@ -292,7 +291,7 @@ public class MemoryDataView implements DataView {
 
         final int sz = queryParts.size();
 
-        checkArgument(sz != 0, "The size of the query must be at least 1");
+        Preconditions.checkArgument(sz != 0, "The size of the query must be at least 1");
 
         final String key = queryParts.get(0);
         final DataQuery keyQuery = DataQuery.of(key);
@@ -714,17 +713,17 @@ public class MemoryDataView implements DataView {
         }
         final MemoryDataView other = (MemoryDataView) obj;
 
-        return com.google.common.base.Objects.equal(this.map.entrySet(), other.map.entrySet())
-            && com.google.common.base.Objects.equal(this.path, other.path);
+        return Objects.equals(this.map.entrySet(), other.map.entrySet())
+                && Objects.equals(this.path, other.path);
     }
 
     @Override
     public String toString() {
-        final MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper(this);
+        final StringJoiner helper = new StringJoiner(", ", MemoryDataView.class.getSimpleName() + "[", "]");
         if (!this.path.toString().isEmpty()) {
-            helper.add("path", this.path);
+            helper.add("path=" + this.path);
         }
-        helper.add("safety", this.safety.name());
-        return helper.add("map", this.map).toString();
+        helper.add("safety=" + this.safety.name());
+        return helper.add("map=" + this.map).toString();
     }
 }

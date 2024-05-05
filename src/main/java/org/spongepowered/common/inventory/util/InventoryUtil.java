@@ -26,6 +26,7 @@ package org.spongepowered.common.inventory.util;
 
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -45,6 +46,8 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.entity.player.SpongeUserData;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
@@ -55,6 +58,7 @@ import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Optional;
+import java.util.Set;
 
 public final class InventoryUtil {
 
@@ -181,5 +185,13 @@ public final class InventoryUtil {
     public static <T extends Carrier> CarriedInventory<T> carriedWrapperInventory(
         final net.minecraft.world.Container inventory, final T carrier) {
         return (CarriedInventory<T>) new CarriedWrapperInventory(inventory, carrier);
+    }
+
+    public static void postContainerEvents(final Set<AbstractContainerMenu> containers, final TransactionalCaptureSupplier transactor) {
+        for (final AbstractContainerMenu container : containers) {
+            try (final EffectTransactor ignore = transactor.logInventoryTransaction(container)) {
+                container.broadcastChanges();
+            }
+        }
     }
 }

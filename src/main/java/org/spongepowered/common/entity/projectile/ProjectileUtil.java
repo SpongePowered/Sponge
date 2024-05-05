@@ -177,7 +177,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<Arrow> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final net.minecraft.world.entity.projectile.Arrow arrow = new net.minecraft.world.entity.projectile.Arrow(source.level(), source);
+                final net.minecraft.world.entity.projectile.Arrow arrow = new net.minecraft.world.entity.projectile.Arrow(source.level(), source, new ItemStack(this.item));
                 arrow.shoot(source.getXRot(), source.getYRot(), 0.0F, 3.0F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Arrow) arrow);
             }
@@ -187,7 +187,7 @@ public final class ProjectileUtil {
 
             @Override
             protected Optional<SpectralArrow> createProjectile(final LivingEntity source, final ServerLocation loc) {
-                final net.minecraft.world.entity.projectile.SpectralArrow arrow = new net.minecraft.world.entity.projectile.SpectralArrow(source.level(), source);
+                final net.minecraft.world.entity.projectile.SpectralArrow arrow = new net.minecraft.world.entity.projectile.SpectralArrow(source.level(), source, new ItemStack(this.item));
                 arrow.shoot(source.getXRot(), source.getYRot(), 0.0F, 3.0F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (SpectralArrow) arrow);
             }

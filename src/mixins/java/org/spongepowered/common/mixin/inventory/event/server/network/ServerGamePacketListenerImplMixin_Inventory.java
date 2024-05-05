@@ -33,10 +33,9 @@ import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.HasCustomInventoryScreen;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
@@ -131,16 +130,6 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         // TrackingUtil.processBlockCaptures called by UseItemPacketState
     }
 
-    @Redirect(method = "handlePlayerCommand",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/HasCustomInventoryScreen;openCustomInventoryScreen(Lnet/minecraft/world/entity/player/Player;)V"))
-    private void impl$onHandlePlayerCommandOpenInventory(final HasCustomInventoryScreen customInventoryScreenHaver, final Player player) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-        try (final EffectTransactor ignored = context.getTransactor().logOpenInventory(player)) {
-            customInventoryScreenHaver.openCustomInventoryScreen(player);
-            context.getTransactor().logContainerSet(player);
-        }
-    }
-
     @Redirect(method = "handleContainerClose",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;doCloseContainer()V"))
     private void impl$onHandleContainerClose(final ServerPlayer player) {
@@ -149,6 +138,16 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         try (final EffectTransactor ignored = transactor.logCloseInventory(player, true)) {
             this.player.containerMenu.removed(player);
             this.player.containerMenu.broadcastChanges();
+        }
+    }
+
+    @Redirect(method = "handleRenameItem(Lnet/minecraft/network/protocol/game/ServerboundRenameItemPacket;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AnvilMenu;setItemName(Ljava/lang/String;)Z"))
+    private boolean impl$onHandleRenameItem(final AnvilMenu menu, final String name) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        try (final var ignored = transactor.logIgnoredInventory(this.player.containerMenu)) {
+            return menu.setItemName(name);
         }
     }
 

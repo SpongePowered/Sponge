@@ -30,7 +30,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.contents.PlainTextContents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -115,7 +115,7 @@ public class AdventureTextComponent implements net.minecraft.network.chat.Compon
     @Override
     public ComponentContents getContents() {
         if (this.wrapped instanceof final TextComponent tc) {
-            return new LiteralContents(tc.content());
+            return PlainTextContents.create(tc.content());
         } else {
             return this.deepConverted().getContents();
         }

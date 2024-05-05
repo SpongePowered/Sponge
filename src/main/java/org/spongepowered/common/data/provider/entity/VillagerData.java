@@ -35,6 +35,7 @@ import org.spongepowered.api.data.type.VillagerType;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.common.accessor.world.entity.npc.AbstractVillagerAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.stream.Collectors;
 
@@ -72,6 +73,17 @@ public final class VillagerData {
                     .create(Keys.VILLAGER_TYPE)
                         .get(h -> (VillagerType) (Object) h.getVillagerData().getType())
                         .set((h, v) -> h.setVillagerData(h.getVillagerData().setType((net.minecraft.world.entity.npc.VillagerType) (Object) v)))
+                    .create(Keys.IS_UNHAPPY)
+                        .get(h -> h.getUnhappyCounter() > 0)
+                    .create(Keys.UNHAPPY_TIME)
+                        .get(x -> new SpongeTicks(x.getUnhappyCounter()))
+                        .setAnd((h, v) -> {
+                            if (v.isInfinite()) {
+                                return false;
+                            }
+                            h.setUnhappyCounter(SpongeTicks.toSaturatedIntOrInfinite(v));
+                            return true;
+                        })
                 .asMutable(WanderingTrader.class)
                     .create(Keys.TRADE_OFFERS)
                     .get(h -> h.getOffers().stream().map(TradeOffer.class::cast).collect(Collectors.toList()))

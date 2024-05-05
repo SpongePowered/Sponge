@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.advancements;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.advancements.AdvancementProgress;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -34,6 +33,7 @@ import org.spongepowered.api.advancement.criteria.ScoreCriterionProgress;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
+import org.spongepowered.common.util.Preconditions;
 
 import java.time.Instant;
 import java.util.Map;
@@ -65,7 +65,7 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
 
     @Override
     public Optional<CriterionProgress> get(AdvancementCriterion criterion) {
-        Preconditions.checkNotNull(criterion, "criterion");
+        Objects.requireNonNull(criterion, "criterion");
         final Map<String, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
         Preconditions.checkState(map != null, "progressMap isn't initialized");
         return Optional.ofNullable((CriterionProgress) map.get(criterion.name()));
@@ -73,7 +73,7 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
 
     @Override
     public Optional<ScoreCriterionProgress> get(ScoreAdvancementCriterion criterion) {
-        Preconditions.checkNotNull(criterion);
+        Objects.requireNonNull(criterion);
         final Map<String, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
         Preconditions.checkState(map != null, "progressMap isn't initialized");
         return Optional.ofNullable((ScoreCriterionProgress) map.get(criterion.name()));

@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.advancement.criterion;
 
-import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.util.Mth;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.advancement.criteria.CriterionProgress;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreCriterionProgress;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -41,6 +41,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.Preconditions;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -78,7 +79,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
 
     @Override
     public Optional<Instant> set(final int score) {
-        checkState(score >= 0 && score <= this.goal(), "Score cannot be negative or greater than the goal.");
+        Preconditions.checkState(score >= 0 && score <= this.goal(), "Score cannot be negative or greater than the goal.");
         int lastScore = this.score();
         if (lastScore == score) {
             return this.get();
@@ -106,7 +107,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
         if (score == this.goal()) {
             Instant instant = null;
             for (final AdvancementCriterion criterion : this.criterion.internalCriteria) {
-                final org.spongepowered.api.advancement.criteria.CriterionProgress progress = this.progress.get(criterion).get();
+                final CriterionProgress progress = this.progress.get(criterion).get();
                 if (!progress.achieved()) {
                     instant = progress.grant();
                 }
@@ -115,13 +116,13 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
             return Optional.of(instant == null ? Instant.now() : instant);
         }
         for (final AdvancementCriterion criterion : this.criterion.internalCriteria) {
-            final org.spongepowered.api.advancement.criteria.CriterionProgress progress = this.progress.get(criterion).get();
+            final CriterionProgress progress = this.progress.get(criterion).get();
             // We don't have enough score, grant more criteria
             if (lastScore < score && !progress.achieved()) {
                 progress.grant();
                 lastScore++;
 
-            // We have too much score, revoke more criteria
+                // We have too much score, revoke more criteria
             } else if (lastScore > score && progress.achieved()) {
                 progress.revoke();
                 lastScore--;

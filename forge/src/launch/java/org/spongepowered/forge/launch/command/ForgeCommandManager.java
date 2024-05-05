@@ -30,12 +30,15 @@ import com.google.inject.Provider;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
@@ -53,9 +56,11 @@ public final class ForgeCommandManager extends SpongeCommandManager {
     }
 
     @Override
-    protected CommandResult processCommand(final CommandCause cause, final CommandMapping mapping,
-            final String original, final String command, final String args)
-            throws Throwable {
+    public CommandResult processCommand(final CommandCause cause, final CommandMapping mapping,
+            final String command, final String args)
+            throws CommandException {
+        final String original = args.isEmpty() ? command : (command + " " + args); // TODO SF 1.19.4, should we pass the original string as a param?
+
         final CommandRegistrar<?> registrar = mapping.registrar();
         final boolean isBrig = registrar instanceof BrigadierBasedRegistrar;
         final ParseResults<CommandSourceStack> parseResults;
@@ -86,7 +91,11 @@ public final class ForgeCommandManager extends SpongeCommandManager {
         }
 
         if (isBrig) {
-            return CommandResult.builder().result(this.getDispatcher().execute(parseResults)).build();
+            try {
+                return CommandResult.builder().result(this.getDispatcher().execute(parseResults)).build();
+            } catch (CommandSyntaxException e) {
+                throw new CommandException(Component.empty(), e); // TODO SF 1.19.4, what message should we put there?
+            }
         } else {
             return mapping.registrar().process(cause, mapping, command, args);
         }

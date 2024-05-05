@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.accessor.world.entity.item.PrimedTntAccessor;
@@ -44,7 +45,10 @@ public final class TNTData {
                         .get(h -> (Living) h.getOwner())
                         .set((h, v) -> ((PrimedTntAccessor) h).accessor$owner((LivingEntity) v))
                     .create(Keys.IS_PRIMED)
-                        .get(h -> !h.isRemoved() && h.getFuse() > 0);
+                        .get(h -> !h.isRemoved() && h.getFuse() > 0)
+                    .create(Keys.BLOCK_STATE)
+                        .get(h -> (BlockState) h.getBlockState())
+                        .set((h, v) -> h.setBlockState((net.minecraft.world.level.block.state.BlockState) v));
     }
     // @formatter:on
 }
