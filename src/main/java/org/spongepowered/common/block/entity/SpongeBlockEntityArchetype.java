@@ -198,7 +198,8 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
         if (this.cachedBlockEntity == null) {
             final CompoundTag compound = this.compound.copy();
             compound.putString(Constants.Item.BLOCK_ENTITY_ID, SpongeCommon.vanillaRegistry(Registries.BLOCK_ENTITY_TYPE).getKey((net.minecraft.world.level.block.entity.BlockEntityType<?>) this.type).toString());
-            this.cachedBlockEntity = net.minecraft.world.level.block.entity.BlockEntity.loadStatic(new BlockPos(0, 0, 0), (net.minecraft.world.level.block.state.BlockState) this.blockState, compound);
+            //TODO fixme
+            //this.cachedBlockEntity = net.minecraft.world.level.block.entity.BlockEntity.loadStatic(new BlockPos(0, 0, 0), (net.minecraft.world.level.block.state.BlockState) this.blockState, compound);
         }
         return Arrays.asList(this, (DataHolder) this.cachedBlockEntity);
     }
