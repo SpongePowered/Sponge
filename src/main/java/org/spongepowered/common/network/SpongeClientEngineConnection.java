@@ -22,22 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.client.multiplayer;
+package org.spongepowered.common.network;
 
-import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.network.Connection;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
+import org.spongepowered.api.network.ClientSideConnection;
 
-@Mixin(ClientHandshakePacketListenerImpl.class)
-public abstract class ClientHandshakePacketListenerImplMixin implements ConnectionHolderBridge {
+public final class SpongeClientEngineConnection extends SpongeEngineConnection implements ClientSideConnection {
 
-    @Shadow @Final private Connection connection;
-
-    @Override
-    public Connection bridge$getConnection() {
-        return this.connection;
+    public SpongeClientEngineConnection(final Connection connection) {
+        super(connection);
     }
 }

@@ -22,18 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.client.multiplayer;
+package org.spongepowered.common.bridge.server.network;
 
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import org.spongepowered.api.entity.living.player.client.LocalPlayer;
-import org.spongepowered.api.network.LocalPlayerConnection;
-import org.spongepowered.asm.mixin.Mixin;
+public interface ServerHandshakePacketListenerImplBridge {
 
-@Mixin(ClientPacketListener.class)
-public abstract class ClientPacketListenerMixin_API extends ClientCommonPacketListenerImpl_API implements LocalPlayerConnection {
-
-    @Override
-    public LocalPlayer player() {
-        return (LocalPlayer) this.minecraft.player;
-    }
+    boolean bridge$transferred();
 }

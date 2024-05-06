@@ -24,22 +24,15 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.network;
 
-import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
-import net.minecraft.network.protocol.game.ServerboundChatCommandPacket;
-import net.minecraft.network.protocol.game.ServerboundInteractPacket;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
@@ -47,7 +40,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
-import org.spongepowered.common.hooks.PlatformHooks;
 
 @Mixin(value = ServerGamePacketListenerImpl.class, priority = 999)
 public abstract class ServerGamePacketListenerImplMixin_Vanilla extends ServerCommonPacketListenerImplMixin_Vanilla implements ServerGamePacketListener {

@@ -39,11 +39,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.bridge.network.protocol.game.ClientboundResourcePackPacketBridge;
 
 @Mixin(ServerCommonPacketListenerImpl.class)
-public abstract class ServerCommonPacketListenerImplMixin implements ConnectionHolderBridge {
+public abstract class ServerCommonPacketListenerImplMixin {
 
     // @formatter:off
     @Shadow @Final protected Connection connection;
@@ -53,11 +52,6 @@ public abstract class ServerCommonPacketListenerImplMixin implements ConnectionH
     // @formatter:on
 
     @Nullable public ResourcePack impl$lastReceivedPack;
-
-    @Override
-    public Connection bridge$getConnection() {
-        return this.connection;
-    }
 
     @Inject(
             method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V",

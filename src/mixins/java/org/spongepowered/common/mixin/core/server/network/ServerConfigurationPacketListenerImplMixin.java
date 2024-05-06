@@ -25,8 +25,10 @@
 package org.spongepowered.common.mixin.core.server.network;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
+import net.minecraft.network.protocol.game.GameProtocols;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
 import org.spongepowered.api.network.EngineConnection;
@@ -96,7 +98,9 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
                         }
                     }
 
-                    ((SpongeChannelManager) SpongeCommon.game().channelManager()).sendChannelRegistrations((EngineConnection) this);
+                    //TODO: Fix me
+                    /*((SpongeChannelManager) SpongeCommon.game().channelManager()).sendChannelRegistrations(
+                            ((ConnectionBridge) this.connection).bridge$getEngineConnection());*/
 
                     try {
                         this.impl$skipBanService = true;

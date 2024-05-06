@@ -47,7 +47,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ServerLoginPacketListenerImplBridge;
 
 import java.net.SocketAddress;
@@ -55,7 +55,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
-public abstract class ServerLoginPacketListenerImplMixin implements ConnectionHolderBridge, ServerLoginPacketListenerImplBridge {
+public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginPacketListenerImplBridge {
 
     // @formatter:off
     @Shadow @Final static Logger LOGGER;
@@ -119,7 +119,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ConnectionHo
         final net.kyori.adventure.text.Component disconnectMessage = net.kyori.adventure.text.Component.text("You are not allowed to log in to this server.");
         final Cause cause = Cause.of(EventContext.empty(), this);
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
-                cause, disconnectMessage, disconnectMessage, (ServerSideConnection) this);
+                cause, disconnectMessage, disconnectMessage, (ServerSideConnection) ((ConnectionBridge) this.connection).bridge$getEngineConnection());
         SpongeCommon.post(event);
         if (event.isCancelled()) {
             this.impl$disconnectClient(event.message());

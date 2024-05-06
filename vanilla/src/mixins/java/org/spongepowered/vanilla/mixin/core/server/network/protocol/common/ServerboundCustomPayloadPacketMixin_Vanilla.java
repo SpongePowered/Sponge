@@ -24,16 +24,10 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.network.protocol.common;
 
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerboundCustomPayloadPacket.class)
 public abstract class ServerboundCustomPayloadPacketMixin_Vanilla {

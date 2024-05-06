@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.bridge.network;
 
+import net.minecraft.network.Connection;
+
 import java.util.concurrent.ExecutorService;
 
 public interface ServerLoginPacketListenerImplBridge {
@@ -31,4 +33,6 @@ public interface ServerLoginPacketListenerImplBridge {
     ExecutorService bridge$getExecutor();
 
     void bridge$fireAuthEvent();
+
+    Connection bridge$getConnection();
 }

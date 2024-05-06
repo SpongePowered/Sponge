@@ -41,14 +41,14 @@ import java.util.function.Supplier;
  */
 public final class TransactionStore {
 
-    private final Supplier<EngineConnection> connection;
+    private final EngineConnection connection;
 
     private final ConcurrentMap<Integer, Entry> lookup = Caffeine.newBuilder()
             .expireAfterAccess(15, TimeUnit.SECONDS)
             .removalListener((RemovalListener<Integer, Entry>) (key, value, cause) -> {
                 if (cause == RemovalCause.EXPIRED && value != null) {
                     value.getChannel().handleTransactionResponse(
-                        this.getConnection(), value.getData(), TransactionResult.failure(new TimeoutException()));
+                        this.connection(), value.getData(), TransactionResult.failure(new TimeoutException()));
                 }
             })
             .build().asMap();
@@ -72,7 +72,7 @@ public final class TransactionStore {
         }
     }
 
-    public TransactionStore(final Supplier<EngineConnection> connection) {
+    public TransactionStore(final EngineConnection connection) {
         this.connection = connection;
     }
 
@@ -81,8 +81,8 @@ public final class TransactionStore {
      *
      * @return The engine connection
      */
-    public EngineConnection getConnection() {
-        return this.connection.get();
+    public EngineConnection connection() {
+        return this.connection;
     }
 
     /**

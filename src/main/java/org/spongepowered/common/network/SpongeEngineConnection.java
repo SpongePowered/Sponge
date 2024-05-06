@@ -22,40 +22,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.client.network;
+package org.spongepowered.common.network;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import org.spongepowered.api.network.ClientSideConnection;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.network.Connection;
+import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
-import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 
 import java.net.InetSocketAddress;
 
-@Mixin({ ClientHandshakePacketListenerImpl.class, ClientPacketListener.class })
-public abstract class ClientNetHandlerMixin_API implements ClientSideConnection {
+public abstract class SpongeEngineConnection implements EngineConnection {
 
-    @Override
-    public void close() {
-        ((ConnectionHolderBridge) this).bridge$getConnection().disconnect(
-                net.minecraft.network.chat.Component.translatable("disconnect.disconnected"));
+    protected final Connection connection;
+
+    public SpongeEngineConnection(final Connection connection) {
+        this.connection = connection;
     }
 
     @Override
-    public void close(final Component reason) {
-        ((ConnectionHolderBridge) this).bridge$getConnection().disconnect(SpongeAdventure.asVanilla(reason));
+    public EngineConnectionState state() {
+        return (EngineConnectionState) this.connection.getPacketListener();
     }
 
     @Override
     public InetSocketAddress address() {
-        return ((ConnectionBridge) ((ConnectionHolderBridge) this).bridge$getConnection()).bridge$getAddress();
+        return ((ConnectionBridge) this.connection).bridge$getAddress();
     }
 
     @Override
     public InetSocketAddress virtualHost() {
-        return ((ConnectionBridge) ((ConnectionHolderBridge) this).bridge$getConnection()).bridge$getVirtualHost();
+        return ((ConnectionBridge) this.connection).bridge$getVirtualHost();
+    }
+
+    @Override
+    public void close() {
+        this.connection.disconnect(net.minecraft.network.chat.Component.translatable("disconnect.disconnected"));
+    }
+
+    @Override
+    public void close(final Component reason) {
+        this.connection.disconnect(SpongeAdventure.asVanilla(reason));
+    }
+
+    public Connection connection() {
+        return this.connection;
     }
 }

@@ -289,7 +289,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final ServerLocation location = player.serverLocation();
         final Vector3d rotation = player.rotation();
         // player.connection() cannot be used here, because it's still be null at this point
-        final ServerSideConnection connection = (ServerSideConnection) networkManager.getPacketListener();
+        final ServerSideConnection connection = (ServerSideConnection) ((ConnectionBridge) networkManager).bridge$getEngineConnection();
 
         // The user is not yet in the player list, so we need to make special provision.
         final User user = SpongeUserView.createLoginEventUser(player);

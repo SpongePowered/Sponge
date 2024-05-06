@@ -22,19 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.client.multiplayer;
+package org.spongepowered.common.mixin.api.minecraft.server.network;
 
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.network.Connection;
+import net.minecraft.server.network.ServerHandshakePacketListenerImpl;
+import org.spongepowered.api.network.ServerConnectionIntentState;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
-import org.spongepowered.common.mixin.api.minecraft.client.multiplayer.ClientCommonPacketListenerImpl_API;
+import org.spongepowered.common.bridge.server.network.ServerHandshakePacketListenerImplBridge;
 
-@Mixin(ClientPacketListener.class)
-public abstract class ClientPacketListenerMixin extends ClientCommonPacketListenerImpl_API implements ConnectionHolderBridge {
+@Mixin(ServerHandshakePacketListenerImpl.class)
+public abstract class ServerHandshakePacketListenerImplMixin_API implements ServerConnectionIntentState {
 
     @Override
-    public Connection bridge$getConnection() {
-        return this.connection;
+    public boolean transferred() {
+        return ((ServerHandshakePacketListenerImplBridge) this).bridge$transferred();
     }
 }

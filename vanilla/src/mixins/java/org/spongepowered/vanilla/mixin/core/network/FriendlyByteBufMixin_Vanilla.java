@@ -24,12 +24,8 @@
  */
 package org.spongepowered.vanilla.mixin.core.network;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
 
 @Mixin(FriendlyByteBuf.class)

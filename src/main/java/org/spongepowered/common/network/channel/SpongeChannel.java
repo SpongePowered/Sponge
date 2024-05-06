@@ -32,9 +32,6 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionSide;
-import org.spongepowered.api.network.LocalPlayerConnection;
-import org.spongepowered.api.network.PlayerConnection;
-import org.spongepowered.api.network.ServerPlayerConnection;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.network.channel.Channel;
 import org.spongepowered.api.network.channel.ChannelBuf;
@@ -147,14 +144,15 @@ public abstract class SpongeChannel implements Channel {
 
     public static <H> @Nullable H getRequestHandler(final EngineConnection connection, final Map<Class<?>, H> handlersMap) {
         H handler = null;
-        if (connection instanceof LocalPlayerConnection) {
+        //TODO: Fix me
+        /*if (connection instanceof LocalPlayerConnection) {
             handler = handlersMap.get(LocalPlayerConnection.class);
         } else if (connection instanceof ServerPlayerConnection) {
             handler = handlersMap.get(ServerPlayerConnection.class);
         }
         if (handler == null && connection instanceof PlayerConnection) {
             handler = handlersMap.get(PlayerConnection.class);
-        }
+        }*/
         if (handler == null) {
             if (connection instanceof ClientSideConnection) {
                 handler = handlersMap.get(ClientSideConnection.class);

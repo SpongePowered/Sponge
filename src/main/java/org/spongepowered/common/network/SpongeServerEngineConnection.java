@@ -22,31 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.server.network;
+package org.spongepowered.common.network;
 
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.network.ServerPlayerConnection;
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.profile.SpongeGameProfile;
+import net.minecraft.network.Connection;
+import org.spongepowered.api.network.ServerSideConnection;
 
-@Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerGamePacketListenerImplMixin_API extends ServerCommonPacketListenerImplMixin_API implements ServerPlayerConnection {
+public final class SpongeServerEngineConnection extends SpongeEngineConnection implements ServerSideConnection {
 
-    // @formatter:off
-    @Shadow public net.minecraft.server.level.ServerPlayer player;
-    // @formatter:on
-
-    @Override
-    public GameProfile profile() {
-        return SpongeGameProfile.of(this.player.getGameProfile());
-    }
-
-    @Override
-    public ServerPlayer player() {
-        return (ServerPlayer) this.player;
+    public SpongeServerEngineConnection(final Connection connection) {
+        super(connection);
     }
 
 }

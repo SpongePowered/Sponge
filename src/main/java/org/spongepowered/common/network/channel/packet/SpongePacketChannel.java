@@ -30,6 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.ChannelException;
@@ -337,7 +338,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         this.handleTransactionResponse(connection, transactionData, result, dynamicOpcode);
     }
 
-    private <C extends EngineConnection> void handleRequestPacket(final C connection,
+    private void handleRequestPacket(final EngineConnection connection,
             final int opcode, final int transactionId, final ChannelBuf payload) {
         final SpongePacketBinding<Packet> binding = this.requireBinding(opcode);
 
@@ -355,8 +356,8 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
 
         // TODO: Send cause of failure somehow?
         if (binding instanceof SpongeTransactionalPacketBinding) {
-            final RequestPacketHandler<RequestPacket<Packet>, Packet, C> handler =
-                    ((SpongeTransactionalPacketBinding) binding).getRequestHandler(connection);
+            final RequestPacketHandler<RequestPacket<Packet>, Packet, ? super EngineConnectionState> handler =
+                    ((SpongeTransactionalPacketBinding) binding).getRequestHandler(connection.state());
 
             if (handler != null) {
                 final SpongeRequestPacketResponse<Packet> requestPacketResponse = new SpongeRequestPacketResponse<Packet>() {
@@ -373,7 +374,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                     }
                 };
                 try {
-                    handler.handleRequest((RequestPacket) request, connection, requestPacketResponse);
+                    handler.handleRequest((RequestPacket) request, connection.state(), requestPacketResponse);
                     success = true;
                 } catch (final Throwable ex) {
                     this.handleException(connection, new ChannelException("Failed to handle request packet", ex), null);

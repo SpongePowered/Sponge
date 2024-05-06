@@ -31,6 +31,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.ChannelException;
 import org.spongepowered.api.network.channel.ChannelIOException;
@@ -279,8 +280,8 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
             // A transactional packet binding
             final SpongeTransactionalPacketBinding<RequestPacket<Packet>, Packet> transactionalBinding =
                     (SpongeTransactionalPacketBinding) binding;
-            final RequestPacketHandler<Packet, Packet, EngineConnection> handler =
-                    (RequestPacketHandler<Packet, Packet, EngineConnection>) transactionalBinding.getRequestHandler(connection);
+            final RequestPacketHandler<Packet, Packet, EngineConnectionState> handler =
+                    (RequestPacketHandler<Packet, Packet, EngineConnectionState>) transactionalBinding.getRequestHandler(connection.state());
             boolean success = false;
             if (handler != null) {
                 final SpongeRequestPacketResponse<Packet> response = new SpongeRequestPacketResponse<Packet>() {
@@ -305,7 +306,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
                     }
                 };
                 try {
-                    handler.handleRequest(packet, connection, response);
+                    handler.handleRequest(packet, connection.state(), response);
                     success = true;
                 } catch (final Throwable ex) {
                     this.handleException(connection, new ChannelIOException("Failed to handle request packet", ex), null);
