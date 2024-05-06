@@ -56,6 +56,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
@@ -72,7 +73,6 @@ import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -334,6 +334,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         return (ServerLevelData) SpongeCommon.server().getLevel(Level.OVERWORLD).getLevelData();
     }
 
+    @Unique
     void impl$updateWorldForDifficultyChange(final ServerLevel world, final boolean isLocked) {
         final MinecraftServer server = world.getServer();
         final Difficulty difficulty = ((LevelData) this).getDifficulty();
@@ -381,7 +382,8 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
                 .forEach(value -> {
                     final Integer playerIndex = this.impl$playerUniqueIdMap.inverse().get(value);
                     if (playerIndex == null) {
-                        this.impl$playerUniqueIdMap.put(this.impl$trackedUniqueIdCount++, value);
+                        final int newIndex = this.impl$playerUniqueIdMap.size();
+                        this.impl$playerUniqueIdMap.put(newIndex, value);
                     }
                 });
     }

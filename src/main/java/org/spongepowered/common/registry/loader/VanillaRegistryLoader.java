@@ -26,6 +26,7 @@ package org.spongepowered.common.registry.loader;
 
 import com.google.common.base.CaseFormat;
 import net.minecraft.advancements.AdvancementType;
+import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.resources.ResourceLocation;
@@ -99,6 +100,7 @@ import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.criteria.Criteria;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
+import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.MushroomCow_MushroomTypeAccessor;
 import org.spongepowered.common.accessor.world.entity.boss.enderdragon.phases.EnderDragonPhaseAccessor;
 import org.spongepowered.common.accessor.world.item.ArmorMaterialsAccessor;
@@ -142,8 +144,6 @@ public final class VanillaRegistryLoader {
             map.put(EnderDragonPhase.HOVERING, "hover");
         }, phase -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, ((EnderDragonPhaseAccessor) phase).accessor$name()));
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape());
-        this.holder.createRegistry(RegistryTypes.TRIGGER, VanillaRegistryLoader.trigger(), true,
-                (k, trigger) -> CriteriaTriggersAccessor.invoker$register((CriterionTrigger<?>) trigger), false);
         this.knownName(RegistryTypes.GAME_RULE, GameRulesAccessor.accessor$GAME_RULE_TYPES().keySet(), rule -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, rule.getId()));
     }
 

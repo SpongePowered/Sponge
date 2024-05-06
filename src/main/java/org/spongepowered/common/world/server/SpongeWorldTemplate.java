@@ -44,6 +44,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
@@ -198,8 +199,8 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
 
         @NotNull
         private static Holder<DimensionType> dimensionTypeHolder(final WorldType worldType) {
-            final Registry<DimensionType> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
-            final ResourceLocation key = registry.getKey((DimensionType) (Object) worldType);
+            final Registry<@Nullable DimensionType> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
+            final @Nullable ResourceLocation key = registry.getKey((DimensionType) (Object) worldType);
             if (key == null) {
                 return Holder.direct((DimensionType) (Object) worldType);
             }
