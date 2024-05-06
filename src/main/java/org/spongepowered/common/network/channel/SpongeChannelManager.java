@@ -263,7 +263,7 @@ public final class SpongeChannelManager implements ChannelManager {
 
     public void sendChannelRegistrations(final EngineConnection connection) {
         final Packet<?> mcPacket = PacketUtil.createPlayPayload(new SpongeRegisterChannelPayload(this.channels.keySet()), connection.side());
-        // TODO this is currently broken PacketSender.sendTo(connection, mcPacket);/
+        PacketSender.sendTo(connection, mcPacket);
     }
 
     /**
@@ -306,12 +306,12 @@ public final class SpongeChannelManager implements ChannelManager {
     }
 
     public boolean handlePlayPayload(final EngineConnection connection, final CustomPacketPayload payload) {
-//        final ResourceKey channel = (ResourceKey) (Object) payload.id();
-//        final ChannelBuf buf = this.bufferAllocator.buffer();
-//        payload.write((FriendlyByteBuf) buf);
-//
-//        return this.handlePlayPayload(connection, channel, buf);
-        return false; // TODO fix me
+        final ResourceKey channel = (ResourceKey) (Object) payload.type().id();
+        final ChannelBuf buf = this.bufferAllocator.buffer();
+        //TODO fixme
+        //payload.type((FriendlyByteBuf) buf);
+
+        return this.handlePlayPayload(connection, channel, buf);
     }
 
     private void handleRegisterChannel(final EngineConnection connection, final ChannelBuf payload,

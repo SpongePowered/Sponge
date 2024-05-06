@@ -33,7 +33,7 @@ import java.util.List;
 public interface AdvancementBridge {
 
 
-     AdvancementCriterion bridge$getCriterion();
+    AdvancementCriterion bridge$getCriterion();
 
     void bridge$setCriterion(AdvancementCriterion criterion);
 
