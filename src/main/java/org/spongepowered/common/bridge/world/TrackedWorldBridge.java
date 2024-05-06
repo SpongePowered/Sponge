@@ -47,6 +47,7 @@ import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.UseBlockPipeline;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.UseItemAtPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.UseItemOnBlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.UseItemPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
@@ -123,5 +124,7 @@ public interface TrackedWorldBridge {
 
     UseBlockPipeline bridge$startInteractionChange(Level worldIn, ServerPlayer playerIn, InteractionHand handIn, BlockHitResult blockRaytraceResultIn, BlockState blockstate, ItemStack copiedStack);
 
-    UseItemPipeline bridge$startItemInteractionChange(Level worldIn, ServerPlayer playerIn, InteractionHand handIn, ItemStack copiedStack, BlockHitResult blockRaytraceResult, boolean creative);
+    UseItemAtPipeline bridge$startItemInteractionChange(Level worldIn, ServerPlayer playerIn, InteractionHand handIn, ItemStack copiedStack, BlockHitResult blockRaytraceResult, boolean creative);
+
+    UseItemPipeline bridge$startItemInteractionUseChange(Level worldIn, ServerPlayer playerIn, InteractionHand handIn, ItemStack copiedStack);
 }

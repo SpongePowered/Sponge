@@ -175,7 +175,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
         );
         boolean cancelledAny = false;
         for (final EventByTransaction<@NonNull ?> eventWithTransactions : batched) {
-            final Event event = eventWithTransactions.event;
+            final Event event = eventWithTransactions.event();
             if (eventWithTransactions.isParentOrDeciderCancelled()) {
                 cancelledAny = true;
                 eventWithTransactions.markCancelled();
@@ -186,12 +186,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
                 eventWithTransactions.markCancelled();
                 cancelledAny = true;
             }
-            if (((GameTransaction) eventWithTransactions.decider).markCancelledTransactions(event, eventWithTransactions.transactions)) {
+            if (((GameTransaction) eventWithTransactions.decider()).markCancelledTransactions(event, eventWithTransactions.transactions())) {
                 cancelledAny = true;
             }
-            for (final GameTransaction<@NonNull ?> transaction : eventWithTransactions.transactions) {
+            for (final GameTransaction<@NonNull ?> transaction : eventWithTransactions.transactions()) {
                 if (transaction.cancelled) {
-                    ((GameTransaction) transaction).markEventAsCancelledIfNecessary(eventWithTransactions.event);
+                    ((GameTransaction) transaction).markEventAsCancelledIfNecessary(eventWithTransactions.event());
                 }
                 if (!transaction.cancelled) {
                     ((GameTransaction) transaction).postProcessEvent(context, event);
@@ -200,12 +200,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
         }
         if (cancelledAny) {
             for (final EventByTransaction<@NonNull ?> eventByTransaction : batched.reverse()) {
-                if (eventByTransaction.decider.cancelled) {
-                    ((GameTransaction) eventByTransaction.decider).markEventAsCancelledIfNecessary(eventByTransaction.event);
+                if (eventByTransaction.decider().cancelled) {
+                    ((GameTransaction) eventByTransaction.decider()).markEventAsCancelledIfNecessary(eventByTransaction.event());
                 }
-                for (final GameTransaction<@NonNull ?> gameTransaction : eventByTransaction.transactions.reverse()) {
+                for (final GameTransaction<@NonNull ?> gameTransaction : eventByTransaction.transactions().reverse()) {
                     if (gameTransaction.cancelled) {
-                        ((GameTransaction) gameTransaction).restore(context, eventByTransaction.event);
+                        ((GameTransaction) gameTransaction).restore(context, eventByTransaction.event());
                     }
                 }
             }
@@ -311,13 +311,16 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
                 if (transaction.sideEffects == null || transaction.sideEffects.isEmpty()) {
                     continue;
                 }
-                generatedEvent.ifPresent(frame::pushCause);
+                generatedEvent.ifPresent(e -> transaction.pushCause(frame, e));
                 for (final ResultingTransactionBySideEffect sideEffect : transaction.sideEffects) {
                     if (sideEffect.head == null) {
                         continue;
                     }
-                    builder.addAll(TransactionalCaptureSupplier.batchTransactions(sideEffect.head, pointer, context, transactionPostEventBuilder));
+                    final var elements = TransactionalCaptureSupplier.batchTransactions(sideEffect.head, pointer, context, transactionPostEventBuilder);
+                    generatedEvent.ifPresent(e -> transaction.associateSideEffectEvents(e, elements.stream().map(EventByTransaction::event)));
+                    builder.addAll(elements);
                 }
+                generatedEvent.ifPresent(transaction::finalizeSideEffects);
             }
         }
     }

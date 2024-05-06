@@ -9,5 +9,8 @@ insert_final_newline = false
 max_line_length = 120
 tab_width = 4
 
-[*mixins*.json]
+[{*.json,*.jsonc,*.png.mcmeta,mcmod.info,pack.mcmeta}]
+indent_size = 2
+
+[*mixins.*.json]
 indent_size = 4
