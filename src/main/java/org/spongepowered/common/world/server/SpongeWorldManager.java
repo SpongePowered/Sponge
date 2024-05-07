@@ -49,7 +49,6 @@ import net.minecraft.world.entity.npc.WanderingTraderSpawner;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.ForcedChunksSavedData;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelSettings;
@@ -304,7 +303,7 @@ public abstract class SpongeWorldManager implements WorldManager {
         final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
         final ServerLevel world;
         try {
-            world = this.createLevel(registryKey, levelStem, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
+            world = this.createNonDefaultLevel(registryKey, levelStem, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
         } catch (final IOException e) {
             return FutureUtil.completedWithException(new RuntimeException(String.format("Failed to create level data for world '%s'!", worldKey), e));
         }
@@ -330,13 +329,14 @@ public abstract class SpongeWorldManager implements WorldManager {
         final GameType gameType = levelStemBridge.bridge$gameMode();
         final Boolean hardcore = levelStemBridge.bridge$hardcore();
         final Difficulty difficulty = levelStemBridge.bridge$difficulty();
-        final Boolean commands = levelStemBridge.bridge$commands();
-        return new LevelSettings(directoryName,
+        final Boolean allowCommands = levelStemBridge.bridge$allowCommands();
+        return new LevelSettings(
+                directoryName,
                 gameType == null ? defaultLevelData.getGameType() : gameType,
                 hardcore == null ? defaultLevelData.isHardcore() : hardcore,
                 difficulty == null ? defaultLevelData.getDifficulty() : difficulty,
-                commands == null ? defaultLevelData.getAllowCommands() : commands,
-                new GameRules(),
+                allowCommands == null ? defaultLevelData.getAllowCommands() : allowCommands,
+                defaultLevelData.getGameRules().copy(),
                 defaultLevelData.getDataConfiguration());
     }
 
@@ -729,7 +729,7 @@ public abstract class SpongeWorldManager implements WorldManager {
                 this.prepareWorld(world);
             } else {
                 try {
-                    final ServerLevel world = this.createLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
+                    final ServerLevel world = this.createNonDefaultLevel(registryKey, template, worldKey, worldTypeKey.orElse(null), chunkStatusListener);
                     // Ensure that the world border is registered.
                     world.getWorldBorder().applySettings(((PrimaryLevelData) world.getLevelData()).getWorldBorder());
                     this.prepareWorld(world);
@@ -782,7 +782,8 @@ public abstract class SpongeWorldManager implements WorldManager {
         return levelData == null ? null : (PrimaryLevelData) levelData.worldData();
     }
 
-    private ServerLevel createLevel(
+    // Do not call this for the default world, that is handled very special in loadLevel()
+    private ServerLevel createNonDefaultLevel(
             final net.minecraft.resources.ResourceKey<Level> registryKey,
             final LevelStem levelStem,
             final ResourceKey worldKey,

@@ -42,8 +42,8 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
@@ -122,11 +122,6 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
             SpongeWorldTemplate.SPONGE_CODEC, (type, data) -> ((LevelStemBridge) (Object) type).bridge$decorateData(data),
             type -> ((LevelStemBridge) (Object) type).bridge$createData()));
 
-    @Override
-    public List<DataHolder> impl$delegateDataHolder() {
-        return List.of((DataHolder) (Object) this.levelStem, this);
-    }
-
     public static LevelStem decodeStem(final JsonElement pack, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
         SpongeWorldTemplate.fixDimensionDatapack(pack);
@@ -136,6 +131,14 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
     public static WorldTemplate decode(final DataPack<WorldTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {
         final LevelStem stem = SpongeWorldTemplate.decodeStem(packEntry, registryAccess);
         return new SpongeWorldTemplate(key, stem, pack);
+    }
+
+    public static JsonElement encode(final WorldTemplate s, final RegistryAccess registryAccess) {
+        if (s instanceof final SpongeWorldTemplate t) {
+            final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+            return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(ops, t.levelStem).getOrThrow(false, e -> {});
+        }
+        throw new IllegalArgumentException("WorldTemplate is not a SpongeWorldTemplate");
     }
 
     // TODO datafixer?
@@ -152,13 +155,18 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
     }
 
     @Override
+    public List<DataHolder> impl$delegateDataHolder() {
+        return List.of((DataHolder) (Object) this.levelStem, this);
+    }
+
+    @Override
     public int contentVersion() {
         return 0;
     }
 
     @Override
     public DataContainer toContainer() {
-        final JsonElement serialized = SpongeWorldTemplate.serialize(this, SpongeCommon.server().registryAccess());
+        final JsonElement serialized = SpongeWorldTemplate.encode(this, SpongeCommon.server().registryAccess());
         try {
             final DataContainer container = DataFormats.JSON.get().read(serialized.toString());
             container.set(Queries.CONTENT_VERSION, this.contentVersion());
@@ -166,15 +174,6 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         } catch (final IOException e) {
             throw new IllegalStateException("Could not read deserialized LevelStem:\n" + serialized, e);
         }
-    }
-
-    public static JsonElement serialize(final WorldTemplate s, final RegistryAccess registryAccess) {
-        if (s instanceof final SpongeWorldTemplate t) {
-            final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-            return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(ops, t.levelStem).getOrThrow(false, e -> {
-            });
-        }
-        throw new IllegalArgumentException("WorldTemplate is not a SpongeWorldTemplate");
     }
 
     public record SpongeDataSection(@Nullable Component displayName,
@@ -195,7 +194,17 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
     public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTemplate, WorldTemplate.Builder>
             implements WorldTemplate.Builder {
 
-        private static DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(LevelStem.class);
+        private static final DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(LevelStem.class);
+
+        @NotNull
+        private static Holder<DimensionType> dimensionTypeHolder(final WorldType worldType) {
+            final Registry<DimensionType> registry = SpongeCommon.server().registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
+            final ResourceLocation key = registry.getKey((DimensionType) (Object) worldType);
+            if (key == null) {
+                return Holder.direct((DimensionType) (Object) worldType);
+            }
+            return registry.getHolderOrThrow(net.minecraft.resources.ResourceKey.create(Registries.DIMENSION_TYPE, key));
+        }
 
         private DataManipulator.Mutable data = DataManipulator.mutableOf();
         private DataPack<WorldTemplate> pack = DataPacks.WORLD;
@@ -212,6 +221,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         @Override
         public Builder reset() {
             super.reset();
+            this.key = null;
             this.data = DataManipulator.mutableOf();
             this.data.set(Keys.WORLD_TYPE, WorldTypes.OVERWORLD.get());
             this.data.set(Keys.CHUNK_GENERATOR, ChunkGenerator.overworld());
@@ -251,7 +261,6 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         @Override
         public Builder from(final ServerWorldProperties properties) {
             final PrimaryLevelDataBridge bridge = (PrimaryLevelDataBridge) properties;
-            this.key = properties.key();
             properties.displayName().ifPresent(name -> this.data.set(Keys.DISPLAY_NAME, name));
             this.data.set(Keys.WORLD_TYPE, properties.worldType());
             if (bridge.bridge$customGameType()) {
@@ -286,17 +295,6 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
             ((LevelStemBridge) (Object) levelStem).bridge$decorateData(this.data);
             return new SpongeWorldTemplate(this.key, levelStem, this.pack);
         }
-
-        @NonNull
-        private static Holder<DimensionType> dimensionTypeHolder(final WorldType worldType) {
-            final Registry<DimensionType> dimensionTypeRegistry = SpongeCommon.server().registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
-            final ResourceLocation key = dimensionTypeRegistry.getKey((DimensionType) (Object) worldType);
-            if (key == null) {
-                return Holder.direct((DimensionType) (Object) worldType);
-            }
-            return dimensionTypeRegistry.getHolderOrThrow(net.minecraft.resources.ResourceKey.create(Registries.DIMENSION_TYPE, key));
-        }
-
     }
 
     public static final class FactoryImpl implements WorldTemplate.Factory {

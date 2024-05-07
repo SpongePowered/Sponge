@@ -912,4 +912,14 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     public boolean bridge$isTransient() {
         return this.impl$transient;
     }
+
+    /**
+     * @author Zidane
+     * @reason Have PVP check if the world allows it or not
+     * @return True if PVP allowed
+     */
+    @Overwrite
+    private boolean isPvpAllowed() {
+        return ((ServerWorld) this.shadow$serverLevel()).properties().pvp();
+    }
 }
