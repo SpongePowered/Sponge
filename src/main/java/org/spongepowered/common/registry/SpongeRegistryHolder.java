@@ -47,21 +47,13 @@ public interface SpongeRegistryHolder extends RegistryHolder {
     }
 
     default <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final @Nullable InitialRegistryData<T> defaultValues,
-        final boolean isDynamic, final @Nullable BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback) {
-        return this.registryHolder().createRegistry(type, defaultValues, this.registryHolder().registrySupplier(isDynamic, callback));
-    }
-
-    default <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final @Nullable Map<ResourceKey, T> defaultValues) {
-        return this.createRegistry(type, defaultValues != null ? () -> defaultValues : null, false);
-    }
-
-    default <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final @Nullable Supplier<Map<ResourceKey, T>> defaultValues) {
-        return this.createRegistry(type, defaultValues, false);
+        final boolean isDynamic, final @Nullable BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback, final boolean replace) {
+        return this.registryHolder().createRegistry(type, defaultValues, this.registryHolder().registrySupplier(isDynamic, callback), replace);
     }
 
     default <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final @Nullable Supplier<Map<ResourceKey, T>> defaultValues,
         final boolean isDynamic) {
-        return this.createRegistry(type, InitialRegistryData.noIds(defaultValues), isDynamic, null);
+        return this.createRegistry(type, InitialRegistryData.noIds(defaultValues), isDynamic, null, false);
     }
 
     default <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final RegistryLoader<T> loader) {
@@ -76,9 +68,17 @@ public interface SpongeRegistryHolder extends RegistryHolder {
         return registry;
     }
 
+    default <T> org.spongepowered.api.registry.Registry<T> createOrReplaceFrozenRegistry(final RegistryType<T> type, final RegistryLoader<T> loader) {
+        final org.spongepowered.api.registry.Registry<T> registry = this.createRegistry(type, loader, false, null, true);
+        if (registry instanceof MappedRegistry<?> toFreeze) {
+            toFreeze.freeze();
+        }
+        return registry;
+    }
+
     default <T> org.spongepowered.api.registry.Registry<T> createRegistry(final RegistryType<T> type, final RegistryLoader<T> loader,
         final boolean isDynamic) {
-        return this.createRegistry(type, loader, isDynamic, null);
+        return this.createRegistry(type, loader, isDynamic, null, false);
     }
 
     @Override

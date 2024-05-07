@@ -22,23 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level;
+package org.spongepowered.common.bridge.core;
 
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.LevelSettings;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 
-@Mixin(LevelSettings.class)
-public interface LevelSettingsAccessor {
+public interface MappedRegistryBridge<T> {
 
-    @Accessor("difficulty")
-    @Mutable void accessor$difficulty(final Difficulty difficulty);
-
-    @Accessor("hardcore")
-    @Mutable void accessor$harcore(final boolean hardcore);
-
-    @Accessor("allowCommands")
-    @Mutable void accessor$allowCommands(final boolean allowCommands);
+    void bridge$forceRemoveValue(ResourceKey<Registry<T>> key);
 }

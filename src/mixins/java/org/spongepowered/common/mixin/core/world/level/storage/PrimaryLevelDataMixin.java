@@ -58,6 +58,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
+import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -71,7 +72,6 @@ import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -123,17 +123,17 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public @Nullable ServerLevel bridge$world() {
         if (!Sponge.isServerAvailable()) {
-            return null;
+            throw new IllegalStateException("The server is not available yet!");
         }
 
         final ServerLevel world = SpongeCommon.server().getLevel(SpongeWorldManager.createRegistryKey(this.impl$key));
         if (world == null) {
-            return null;
+            throw new IllegalStateException("The world is not available yet!");
         }
 
         final ServerLevelData levelData = (ServerLevelData) world.getLevelData();
         if (levelData != this) {
-            return null;
+            throw new IllegalStateException(String.format("The reference for the data for key '%s' does not match this object. This object is stale.", this.impl$key));
         }
 
         return world;
@@ -155,11 +155,6 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     }
 
     @Override
-    public void bridge$setUniqueId(final UUID uniqueId) {
-        this.impl$uniqueId = uniqueId;
-    }
-
-    @Override
     public boolean bridge$customDifficulty() {
         return this.impl$customDifficulty;
     }
@@ -177,7 +172,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public void bridge$forceSetDifficulty(final Difficulty difficulty) {
         this.impl$customDifficulty = true;
-        this.settings = this.settings.withDifficulty(difficulty);
+        ((LevelSettingsAccessor) (Object) this.settings).accessor$difficulty(difficulty);
         this.impl$updateWorldForDifficultyChange(this.bridge$world(), this.shadow$isDifficultyLocked());
     }
 
@@ -266,42 +261,39 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
 
     @Override
     public void bridge$populateFromLevelStem(final LevelStem dimension) {
-        final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) dimension;
+        final LevelStemBridge bridge = (LevelStemBridge) (Object) dimension;
         this.impl$dimensionType = dimension.type().value();
-        this.impl$displayName = levelStemBridge.bridge$displayName();
-        final Difficulty difficulty = levelStemBridge.bridge$difficulty();
-        final GameType gameType = levelStemBridge.bridge$gameMode();
-        final Boolean isHardcore = levelStemBridge.bridge$hardcore();
+        this.impl$displayName = bridge.bridge$displayName();
+        final Difficulty difficulty = bridge.bridge$difficulty();
+        final GameType gameType = bridge.bridge$gameMode();
+        final Boolean isHardcore = bridge.bridge$hardcore();
+        final Boolean allowCommands = bridge.bridge$allowCommands();
         if (difficulty != null) {
             this.impl$customDifficulty = true;
         }
         if (gameType != null) {
             this.impl$customGameType = true;
         }
-        this.settings = new LevelSettings(this.settings.levelName(),
+        this.settings = new LevelSettings(
+                this.settings.levelName(),
                 gameType == null ? this.settings.gameType() : gameType,
-                this.settings.allowCommands(),
-                difficulty == null ? this.settings.difficulty() : difficulty,
                 isHardcore == null ? this.settings.hardcore() : isHardcore,
+                difficulty == null ? this.settings.difficulty() : difficulty,
+                allowCommands == null ? this.settings.allowCommands() : allowCommands,
                 this.settings.gameRules(),
                 this.settings.getDataConfiguration());
 
-        final Vector3i spawnPos = levelStemBridge.bridge$spawnPosition();
+        final Vector3i spawnPos = bridge.bridge$spawnPosition();
         if (spawnPos != null) {
             this.shadow$setSpawn(VecHelper.toBlockPos(spawnPos), this.spawnAngle);
             this.impl$customSpawnPosition = true;
         }
 
-        this.impl$serializationBehavior = levelStemBridge.bridge$serializationBehavior();
-        this.impl$pvp = levelStemBridge.bridge$pvp();
-        this.impl$loadOnStartup = levelStemBridge.bridge$loadOnStartup();
-        this.impl$performsSpawnLogic = levelStemBridge.bridge$performsSpawnLogic();
-        this.impl$viewDistance = levelStemBridge.bridge$viewDistance();
-    }
-
-    @Override
-    public void bridge$setMapUUIDIndex(final BiMap<Integer, UUID> index) {
-        this.impl$mapUUIDIndex = index;
+        this.impl$serializationBehavior = bridge.bridge$serializationBehavior();
+        this.impl$pvp = bridge.bridge$pvp();
+        this.impl$loadOnStartup = bridge.bridge$loadOnStartup();
+        this.impl$performsSpawnLogic = bridge.bridge$performsSpawnLogic();
+        this.impl$viewDistance = bridge.bridge$viewDistance();
     }
 
     @Override
@@ -336,10 +328,6 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     }
 
     void impl$updateWorldForDifficultyChange(final ServerLevel world, final boolean isLocked) {
-        if (world == null) {
-            return;
-        }
-
         final MinecraftServer server = world.getServer();
         final Difficulty difficulty = ((LevelData) this).getDifficulty();
 
@@ -355,22 +343,28 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     }
 
     @Override
+    public void bridge$hardcore(final boolean hardcore) {
+        ((LevelSettingsAccessor) (Object) this.settings).accessor$harcore(hardcore);
+    }
+
+    @Override
+    public void bridge$allowCommands(final boolean allowCommands) {
+        ((LevelSettingsAccessor) (Object) this.settings).accessor$allowCommands(allowCommands);
+    }
+
+    @Override
     @SuppressWarnings("deprecated")
     public void bridge$readSpongeLevelData(final Dynamic<Tag> dynamic) {
-        if (dynamic == null) {
-            this.bridge$setUniqueId(UUID.randomUUID());
-            return;
-        }
+        dynamic.get(Constants.Sponge.World.UNIQUE_ID).read(UUIDUtil.CODEC).result().ifPresent(value -> this.impl$uniqueId = value);
 
-        this.bridge$setUniqueId(dynamic.get(Constants.Sponge.World.UNIQUE_ID).read(UUIDUtil.CODEC).result().orElse(UUID.randomUUID()));
-
-        final List<Pair<String, UUID>> mapIndexList = dynamic.get(Constants.Map.MAP_UUID_INDEX).readMap(Codec.STRING, UUIDUtil.CODEC).result().orElse(Collections.emptyList());
-        final BiMap<Integer, UUID> mapIndex = HashBiMap.create();
-        for (final Pair<String, UUID> pair : mapIndexList) {
-            final int id = Integer.parseInt(pair.getFirst());
-            mapIndex.put(id, pair.getSecond());
-        }
-        this.bridge$setMapUUIDIndex(mapIndex);
+        dynamic.get(Constants.Map.MAP_UUID_INDEX).readMap(Codec.STRING, UUIDUtil.CODEC).result().ifPresent(value -> {
+            final BiMap<Integer, UUID> mapIndex = HashBiMap.create();
+            for (final Pair<String, UUID> pair : value) {
+                final int id = Integer.parseInt(pair.getFirst());
+                mapIndex.put(id, pair.getSecond());
+            }
+            this.impl$mapUUIDIndex = mapIndex;
+        });
 
         // TODO Move this to Schema
         dynamic.get(Constants.Sponge.LEGACY_SPONGE_PLAYER_UUID_TABLE).readList(LegacyUUIDCodec.CODEC).result().orElseGet(() ->
@@ -381,11 +375,11 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Override
     public CompoundTag bridge$writeSpongeLevelData() {
         final CompoundTag data = new CompoundTag();
-        data.putUUID(Constants.Sponge.World.UNIQUE_ID, this.bridge$uniqueId());
+        data.putUUID(Constants.Sponge.World.UNIQUE_ID, this.impl$uniqueId);
 
         // Map Storage
         final CompoundTag mapUUIDIndexTag = new CompoundTag();
-        MapUtil.saveMapUUIDIndex(mapUUIDIndexTag, this.bridge$getMapUUIDIndex());
+        MapUtil.saveMapUUIDIndex(mapUUIDIndexTag, this.impl$mapUUIDIndex);
         data.put(Constants.Map.MAP_UUID_INDEX, mapUUIDIndexTag);
 
         final ListTag playerIdList = new ListTag();
@@ -393,16 +387,6 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         this.impl$playerUniqueIdMap.values().forEach(uuid -> playerIdList.add(new IntArrayTag(UUIDUtil.uuidToIntArray(uuid))));
 
         return data;
-    }
-
-    @Override
-    public void bridge$hardcore(final boolean hardcore) {
-        this.settings = new LevelSettings(this.settings.levelName(), this.settings.gameType(), hardcore, this.settings.difficulty(), this.settings.allowCommands(), this.settings.gameRules(), this.settings.getDataConfiguration());
-    }
-
-    @Override
-    public void bridge$allowCommands(final boolean commands) {
-        this.settings = new LevelSettings(this.settings.levelName(), this.settings.gameType(), this.settings.allowCommands(), this.settings.difficulty(), commands, this.settings.gameRules(), this.settings.getDataConfiguration());
     }
 
     @Override
