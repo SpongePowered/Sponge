@@ -260,14 +260,6 @@ dependencies {
     }
 
     val runTaskOnly = runTaskOnlyConfig.name
-    /* TODO fix
-    testPluginsProject?.also {
-        runTaskOnly(project(it.path)) {
-            exclude(group = "org.spongepowered")
-        }
-    }
-    */
-
     // Arch-loom bug, fix support of MOD_CLASSES
     runTaskOnly("net.minecraftforge:bootstrap-dev:2.1.0")
 
@@ -344,6 +336,14 @@ tasks {
                     configurations.getByName("forgeRuntimeLibrary"),
                     forgeServicesDevJar, forgeLangJar, runTaskOnlyConfig
             )
+
+            testPluginsProject?.also {
+                val testPluginsOutput = it.sourceSets.getByName("main").output
+                val dirs: MutableList<File> = mutableListOf()
+                dirs.add(testPluginsOutput.resourcesDir!!)
+                dirs.addAll(testPluginsOutput.classesDirs)
+                environment["SPONGE_PLUGINS"] = dirs.joinToString("&")
+            }
 
             argumentProviders += CommandLineArgumentProvider {
                 mixinConfigs.asSequence()

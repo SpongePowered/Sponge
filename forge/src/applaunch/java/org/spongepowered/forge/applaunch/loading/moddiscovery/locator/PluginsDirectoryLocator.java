@@ -24,65 +24,57 @@
  */
 package org.spongepowered.forge.applaunch.loading.moddiscovery.locator;
 
-import net.minecraftforge.fml.loading.ClasspathLocatorUtils;
+import cpw.mods.modlauncher.api.LamdbaExceptionUtils;
+import net.minecraftforge.fml.loading.ModDirTransformerDiscoverer;
+import net.minecraftforge.fml.loading.StringUtils;
 import net.minecraftforge.fml.loading.moddiscovery.AbstractModProvider;
+import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.ModFileParsers;
 
-import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
-public final class ClasspathPluginLocator extends AbstractModProvider implements IModLocator {
+public final class PluginsDirectoryLocator extends AbstractModProvider implements IModLocator {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
     public List<ModFileOrException> scanMods() {
-        try {
-            return locatePlugins(PluginPlatformConstants.METADATA_FILE_LOCATION, "classpath_plugin")
-                    .stream().map(this::createMod).toList();
-        } catch (IOException e) {
-            ClasspathPluginLocator.LOGGER.fatal("Error trying to find resources", e);
-            throw new RuntimeException(e);
+        final List<Path> pluginDirectories = AppLaunch.pluginPlatform().pluginDirectories();
+
+        final List<ModFileOrException> modFiles = new ArrayList<>();
+
+        for (final Path pluginDirectory : pluginDirectories) {
+            PluginsDirectoryLocator.LOGGER.debug("Scanning plugins directory '{}' for plugins", pluginDirectory);
+            this.scanForModsIn(pluginDirectory).map((f) -> new ModFileOrException(f, null)).forEach(modFiles::add);
         }
+
+        return modFiles;
     }
 
-    @Override
-    protected ModFileOrException createMod(Path path) {
-        return new ModFileOrException(ModFileParsers.newPluginInstance(this, path), null);
+    private Stream<ModFile> scanForModsIn(final Path pluginsDirectory) {
+        final List<Path> excluded = ModDirTransformerDiscoverer.allExcluded();
+        return LamdbaExceptionUtils.uncheck(() -> Files.list(pluginsDirectory))
+            .filter((p) -> !excluded.contains(p) && StringUtils.toLowerCase(p.getFileName().toString()).endsWith(".jar"))
+            .sorted(Comparator.comparing((path) -> StringUtils.toLowerCase(path.getFileName().toString())))
+            .map((p) -> ModFileParsers.newPluginInstance(this, p))
+            .filter(ModFile::identifyMods);
     }
 
     @Override
     public String name() {
-        return "plugin classpath";
+        return "plugins directory";
     }
 
     @Override
     public void initArguments(final Map<String, ?> arguments) {
-    }
-
-    private static List<Path> locatePlugins(final String resource, final String name) throws IOException {
-        final List<Path> result = new ArrayList<>();
-
-        final Enumeration<URL> pluginJsons = ClassLoader.getSystemClassLoader().getResources(resource);
-        while (pluginJsons.hasMoreElements()) {
-            final URL url = pluginJsons.nextElement();
-            final Path path = ClasspathLocatorUtils.findJarPathFor(resource, name, url);
-            if (Files.isDirectory(path))
-                continue;
-
-            ClasspathPluginLocator.LOGGER.debug("Found classpath plugin: {}", path);
-            result.add(path);
-        }
-
-        return result;
     }
 }
