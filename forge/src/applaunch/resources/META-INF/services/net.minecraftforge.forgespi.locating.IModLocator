@@ -1,3 +1,3 @@
 org.spongepowered.forge.applaunch.loading.moddiscovery.SpongeForgeModLocator
-org.spongepowered.forge.applaunch.loading.moddiscovery.locator.ClasspathPluginLocator
-org.spongepowered.forge.applaunch.loading.moddiscovery.locator.PluginsFolderLocator
+org.spongepowered.forge.applaunch.loading.moddiscovery.locator.EnvironmentPluginLocator
+org.spongepowered.forge.applaunch.loading.moddiscovery.locator.PluginsDirectoryLocator

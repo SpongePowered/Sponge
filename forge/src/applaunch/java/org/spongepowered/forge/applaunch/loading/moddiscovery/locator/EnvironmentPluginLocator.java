@@ -24,57 +24,56 @@
  */
 package org.spongepowered.forge.applaunch.loading.moddiscovery.locator;
 
-import cpw.mods.modlauncher.api.LamdbaExceptionUtils;
-import net.minecraftforge.fml.loading.ModDirTransformerDiscoverer;
-import net.minecraftforge.fml.loading.StringUtils;
 import net.minecraftforge.fml.loading.moddiscovery.AbstractModProvider;
-import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.ModFileParsers;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public final class PluginsFolderLocator extends AbstractModProvider implements IModLocator {
-    private static final Logger LOGGER = LogManager.getLogger();
+public final class EnvironmentPluginLocator extends AbstractModProvider implements IModLocator {
 
     @Override
     public List<ModFileOrException> scanMods() {
-        final List<Path> pluginDirectories = AppLaunch.pluginPlatform().pluginDirectories();
-
         final List<ModFileOrException> modFiles = new ArrayList<>();
-
-        for (final Path pluginDirectory : pluginDirectories) {
-            PluginsFolderLocator.LOGGER.debug("Scanning plugins directory '{}' for plugins", pluginDirectory);
-            this.scanForModsIn(pluginDirectory).map((f) -> new ModFileOrException(f, null)).forEach(modFiles::add);
+        for (final Path[] paths : getPluginsPaths()) {
+            modFiles.add(new ModFileOrException(ModFileParsers.newPluginInstance(this, paths), null));
         }
-
         return modFiles;
     }
 
-    private Stream<ModFile> scanForModsIn(final Path pluginsDirectory) {
-        final List<Path> excluded = ModDirTransformerDiscoverer.allExcluded();
-        return LamdbaExceptionUtils.uncheck(() -> Files.list(pluginsDirectory))
-            .filter((p) -> !excluded.contains(p) && StringUtils.toLowerCase(p.getFileName().toString()).endsWith(".jar"))
-            .sorted(Comparator.comparing((path) -> StringUtils.toLowerCase(path.getFileName().toString())))
-            .map((p) -> ModFileParsers.newPluginInstance(this, p))
-            .filter(ModFile::identifyMods);
+    @Override
+    protected ModFileOrException createMod(Path path) {
+        return new ModFileOrException(ModFileParsers.newPluginInstance(this, path), null);
     }
 
     @Override
     public String name() {
-        return "plugins directory";
+        return "plugin classpath";
     }
 
     @Override
     public void initArguments(final Map<String, ?> arguments) {
+    }
+
+    private static List<Path[]> getPluginsPaths() {
+        final String env = System.getenv("SPONGE_PLUGINS");
+        if (env == null) {
+            return Collections.emptyList();
+        }
+
+        List<Path[]> plugins = new ArrayList<>();
+        for (final String entry : env.split(";")) {
+            if (entry.isBlank()) {
+                continue;
+            }
+            plugins.add(Stream.of(entry.split("&")).map(Path::of).toArray(Path[]::new));
+        }
+
+        return plugins;
     }
 }
