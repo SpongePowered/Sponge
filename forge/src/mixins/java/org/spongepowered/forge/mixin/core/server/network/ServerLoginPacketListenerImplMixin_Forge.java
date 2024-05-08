@@ -27,34 +27,24 @@ package org.spongepowered.forge.mixin.core.server.network;
 import net.minecraft.network.protocol.login.ServerLoginPacketListener;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.network.ServerLoginPacketListenerImplBridge;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin_Forge implements ServerLoginPacketListener, ServerLoginPacketListenerImplBridge {
 
-    // TODO SF 1.20.4
-    /**
-     * @reason Forge alters {@link ServerLoginPacketListenerImpl#handleHello(ServerboundHelloPacket)} to switch
-     * from {@link ServerLoginPacketListenerImpl.State#READY_TO_ACCEPT} to {@link ServerLoginPacketListenerImpl.State#NEGOTIATING}
-     * to verify mods. We need to clarify that the player is authenticating finally at the point when we really
-     * transition to READY_TO_ACCEPT.
-     *
-     * @param ci The callback info to cancel
-     */
-    /* @Inject(method = "tick()V",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;READY_TO_ACCEPT:Lnet/minecraft/server/network/ServerLoginPacketListenerImpl$State;",
-            opcode = Opcodes.GETSTATIC),
-        cancellable = true)
-    private void forge$fireAuthEventOffline(final CallbackInfo ci) {
-        // Move this check up here, so that the UUID isn't null when we fire the event
-        if (!this.gameProfile.isComplete()) {
-            this.gameProfile = this.shadow$createFakeProfile(this.gameProfile);
-        }
+    // @formatter:off
+    @Shadow private ServerLoginPacketListenerImpl.State state;
+    // @formatter:on
 
-        if (this.bridge$fireAuthEvent()) {
-            ci.cancel();
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void impl$onTick(final CallbackInfo ci) {
+        // In SpongeVanilla we do channel registration during this state, not sure if we need to do anything in SpongeForge
+        if (this.state == ServerLoginPacketListenerImpl.State.NEGOTIATING) {
+            this.state = ServerLoginPacketListenerImpl.State.VERIFYING;
         }
-    }*/
+    }
 }
