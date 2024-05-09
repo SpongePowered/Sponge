@@ -452,7 +452,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     }
 
     @Redirect(method = "updateSignText",
-            at = @At(value = "INVOKE", remap = false, target = "Lnet/minecraft/world/level/block/entity/SignBlockEntity;updateSignText(Lnet/minecraft/world/entity/player/Player;ZLjava/util/List;)V"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/SignBlockEntity;updateSignText(Lnet/minecraft/world/entity/player/Player;ZLjava/util/List;)V"))
     private void impl$callChangeSignEvent(final SignBlockEntity sign, final Player player, final boolean isFrontText, final List<FilteredText> list) {
         final SignText oldText = isFrontText ? sign.getFrontText() : sign.getBackText();
         final ListValue.Immutable<Component> originalLines = ((Sign.SignText) oldText).lines().asImmutable();
