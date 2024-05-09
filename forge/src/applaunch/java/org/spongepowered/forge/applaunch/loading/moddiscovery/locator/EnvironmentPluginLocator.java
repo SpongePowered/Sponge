@@ -53,7 +53,7 @@ public final class EnvironmentPluginLocator extends AbstractModProvider implemen
 
     @Override
     public String name() {
-        return "plugin classpath";
+        return "environment plugin";
     }
 
     @Override
