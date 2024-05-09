@@ -75,15 +75,6 @@ public abstract class ServerGamePacketListenerImplMixin_Forge implements ServerG
         }
     }
 
-    // TODO SF 1.20.4
-    /* @Redirect(method = "lambda$handleChat$11", at = @At(
-        value = "INVOKE",
-        target = "Lnet/minecraftforge/common/ForgeHooks;getServerChatSubmittedDecorator()Lnet/minecraft/network/chat/ChatDecorator;"
-    ))
-    private ChatDecorator forge$useSpongeChatDecorator() {
-        return SpongeCommon.server().getChatDecorator();
-    } */
-
     @Redirect(method = "lambda$handleChatCommand$8", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
     private void forge$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandPacket $$0, final LastSeenMessages $$1) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
