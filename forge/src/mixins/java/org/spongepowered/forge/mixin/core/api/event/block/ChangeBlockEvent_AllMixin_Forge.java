@@ -24,16 +24,23 @@
  */
 package org.spongepowered.forge.mixin.core.api.event.block;
 
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.Event;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.forge.hook.EventMappingUtils;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.forge.launch.bridge.event.SpongeEventBridge_Forge;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Mixin(value = ChangeBlockEvent.All.class, remap = false)
 public interface ChangeBlockEvent_AllMixin_Forge extends SpongeEventBridge_Forge {
@@ -41,10 +48,19 @@ public interface ChangeBlockEvent_AllMixin_Forge extends SpongeEventBridge_Forge
     @Override
     default @Nullable Collection<? extends Event> bridge$createForgeEvents() {
         final ChangeBlockEvent.All thisEvent = ((ChangeBlockEvent.All) this);
-        // TODO: Other event types may go here - break is a PoC.
-        return thisEvent.transactions(Operations.BREAK.get())
-            .map(EventMappingUtils.extractBlockBreak(thisEvent))
-            .collect(Collectors.toList());
+        final Player player = thisEvent.cause().first(Player.class).orElse(null);
+        final Operation breakOp = Operations.BREAK.get();
+
+        final List<Event> forgeEvents = new ArrayList<>();
+        for (final BlockTransaction transaction : thisEvent.transactions()) {
+            if (player != null && transaction.operation() == breakOp) {
+                forgeEvents.add(new BlockEvent.BreakEvent((Level) thisEvent.world(),
+                        VecHelper.toBlockPos(transaction.original().position()),
+                        (BlockState) transaction.original().state(), player));
+            }
+            // TODO: Other event types may go here - break is a PoC.
+        }
+        return forgeEvents;
     }
 
 }
