@@ -28,8 +28,10 @@ import com.google.inject.Inject;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.lifecycle.RegisterChannelEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
+import org.spongepowered.api.network.ClientConnectionState;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionSide;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.network.channel.Channel;
 import org.spongepowered.api.network.channel.NoResponseException;
@@ -164,7 +166,7 @@ public final class ChannelTest {
 
 //    @Listener
     private void onConnectionLogin(final ServerSideConnectionEvent.Login event) {
-        this.plugin.logger().info("Player \"" + event.profile().name().orElse("unknown") + "\" is logging in.");
+        this.plugin.logger().info("Player \"" + event.user().profile().name().orElse("unknown") + "\" is logging in.");
     }
 
 //    @Listener
@@ -187,11 +189,19 @@ public final class ChannelTest {
                 });
     }
 
-    private static String getName(final EngineConnectionSide<?> side) {
+    private static String getName(final EngineConnectionSide side) {
         return side == EngineConnectionSide.CLIENT ? "client" : "server";
+    }
+
+    private static String getName(final EngineConnectionState side) {
+        return side instanceof ClientConnectionState ? "client" : "server";
     }
 
     private void logReceived(final Channel channel, final Object packet, final EngineConnection connection) {
         this.plugin.logger().info("Received {} through {} on the {} side.", packet, channel.key(), ChannelTest.getName(connection.side()));
+    }
+
+    private void logReceived(final Channel channel, final Object packet, final EngineConnectionState connection) {
+        this.plugin.logger().info("Received {} through {} on the {} side.", packet, channel.key(), ChannelTest.getName(connection));
     }
 }

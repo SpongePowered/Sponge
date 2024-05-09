@@ -22,23 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level;
+package org.spongepowered.common.accessor.core;
 
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.LevelSettings;
+import net.minecraft.core.MappedRegistry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(LevelSettings.class)
-public interface LevelSettingsAccessor {
+@Mixin(MappedRegistry.class)
+public interface MappedRegistryAccessor<T> {
 
-    @Accessor("difficulty")
-    @Mutable void accessor$difficulty(final Difficulty difficulty);
+    @Accessor("frozen")
+    boolean accessor$frozen();
 
-    @Accessor("hardcore")
-    @Mutable void accessor$harcore(final boolean hardcore);
-
-    @Accessor("allowCommands")
-    @Mutable void accessor$allowCommands(final boolean allowCommands);
+    @Accessor("frozen")
+    @Mutable
+    void accessor$frozen(boolean frozen);
 }

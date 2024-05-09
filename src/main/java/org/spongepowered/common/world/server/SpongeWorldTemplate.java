@@ -138,6 +138,14 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         return new SpongeWorldTemplate(key, stem, pack);
     }
 
+    public static JsonElement encode(final WorldTemplate s, final RegistryAccess registryAccess) {
+        if (s instanceof final SpongeWorldTemplate t) {
+            final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
+            return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(ops, t.levelStem).getOrThrow();
+        }
+        throw new IllegalArgumentException("WorldTemplate is not a SpongeWorldTemplate");
+    }
+
     // TODO datafixer?
     // TODO make it automatically work when loading API8 created worlds
     private static void fixDimensionDatapack(final JsonElement element) {
@@ -158,7 +166,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
 
     @Override
     public DataContainer toContainer() {
-        final JsonElement serialized = SpongeWorldTemplate.serialize(this, SpongeCommon.server().registryAccess());
+        final JsonElement serialized = SpongeWorldTemplate.encode(this, SpongeCommon.server().registryAccess());
         try {
             final DataContainer container = DataFormats.JSON.get().read(serialized.toString());
             container.set(Queries.CONTENT_VERSION, this.contentVersion());
@@ -166,14 +174,6 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         } catch (final IOException e) {
             throw new IllegalStateException("Could not read deserialized LevelStem:\n" + serialized, e);
         }
-    }
-
-    public static JsonElement serialize(final WorldTemplate s, final RegistryAccess registryAccess) {
-        if (s instanceof final SpongeWorldTemplate t) {
-            final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-            return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(ops, t.levelStem).getOrThrow();
-        }
-        throw new IllegalArgumentException("WorldTemplate is not a SpongeWorldTemplate");
     }
 
     public record SpongeDataSection(@Nullable Component displayName,
@@ -194,7 +194,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
     public static final class BuilderImpl extends AbstractResourceKeyedBuilder<WorldTemplate, WorldTemplate.Builder>
             implements WorldTemplate.Builder {
 
-        private static DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(LevelStem.class);
+        private static final DataProviderLookup PROVIDER_LOOKUP = SpongeDataManager.getProviderRegistry().getProviderLookup(LevelStem.class);
 
         private DataManipulator.Mutable data = DataManipulator.mutableOf();
         private DataPack<WorldTemplate> pack = DataPacks.WORLD;
@@ -211,6 +211,7 @@ public record SpongeWorldTemplate(ResourceKey key, LevelStem levelStem, DataPack
         @Override
         public Builder reset() {
             super.reset();
+            this.key = null;
             this.data = DataManipulator.mutableOf();
             this.data.set(Keys.WORLD_TYPE, WorldTypes.OVERWORLD.get());
             this.data.set(Keys.CHUNK_GENERATOR, ChunkGenerator.overworld());

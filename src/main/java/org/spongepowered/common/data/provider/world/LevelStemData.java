@@ -63,7 +63,7 @@ public final class LevelStemData {
                     .create(Keys.HARDCORE)
                         .get(LevelStemBridge::bridge$hardcore)
                     .create(Keys.COMMANDS)
-                        .get(LevelStemBridge::bridge$commands)
+                        .get(LevelStemBridge::bridge$allowCommands)
                     .create(Keys.PVP)
                         .get(LevelStemBridge::bridge$pvp)
                     .create(Keys.VIEW_DISTANCE)

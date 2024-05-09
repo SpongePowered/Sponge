@@ -53,13 +53,12 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
 
     @Nullable private GameType impl$gameMode;
     @Nullable private Difficulty impl$difficulty;
-    @Nullable private SerializationBehavior impl$serializationBehavior = null;
-    @Nullable private Component impl$displayName = null;
-    private Integer impl$viewDistance = null;
+    @Nullable private SerializationBehavior impl$serializationBehavior;
+    @Nullable private Component impl$displayName;
+    @Nullable private Integer impl$viewDistance;
     @Nullable private Vector3i impl$spawnPosition;
-    @Nullable private Boolean impl$hardcore, impl$pvp, impl$commands;
+    @Nullable private Boolean impl$hardcore, impl$pvp, impl$allowCommands;
     @Nullable private Long impl$seed;
-
     private boolean impl$loadOnStartup = true;
     private boolean impl$performsSpawnLogic = false;
 
@@ -114,8 +113,8 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
     }
 
     @Override
-    public @Nullable Boolean bridge$commands() {
-        return this.impl$commands;
+    public @Nullable Boolean bridge$allowCommands() {
+        return this.impl$allowCommands;
     }
 
     @Override
@@ -130,16 +129,16 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
 
     @Override
     public LevelStem bridge$decorateData(final SpongeWorldTemplate.SpongeDataSection data) {
+        this.impl$displayName = data.displayName();
         this.impl$gameMode = data.gameMode();
         this.impl$difficulty = data.difficulty();
         this.impl$serializationBehavior = data.serializationBehavior();
-        this.impl$displayName = data.displayName();
         this.impl$viewDistance = data.viewDistance();
         this.impl$spawnPosition = data.spawnPosition();
         this.impl$loadOnStartup = data.loadOnStartup() == null || data.loadOnStartup();
         this.impl$performsSpawnLogic = data.performsSpawnLogic() != null && data.performsSpawnLogic();
         this.impl$hardcore = data.hardcore();
-        this.impl$commands = data.commands();
+        this.impl$allowCommands = data.commands();
         this.impl$pvp = data.pvp();
         this.impl$seed = data.seed();
         return (LevelStem) (Object) this;
@@ -147,16 +146,16 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
 
     @Override
     public LevelStem bridge$decorateData(final DataManipulator data) {
+        this.impl$displayName = data.getOrNull(Keys.DISPLAY_NAME);
         this.impl$gameMode = (GameType) (Object) data.get(Keys.GAME_MODE).orElse(null);
         this.impl$difficulty = (Difficulty) (Object) data.get(Keys.WORLD_DIFFICULTY).orElse(null);
         this.impl$serializationBehavior = data.getOrElse(Keys.SERIALIZATION_BEHAVIOR, SerializationBehavior.AUTOMATIC);
-        this.impl$displayName = data.getOrNull(Keys.DISPLAY_NAME);
         this.impl$viewDistance = data.getOrNull(Keys.VIEW_DISTANCE);
         this.impl$spawnPosition = data.getOrNull(Keys.SPAWN_POSITION);
         this.impl$loadOnStartup = data.getOrElse(Keys.IS_LOAD_ON_STARTUP, true);
         this.impl$performsSpawnLogic = data.getOrElse(Keys.PERFORM_SPAWN_LOGIC, false);
         this.impl$hardcore = data.getOrNull(Keys.HARDCORE);
-        this.impl$commands = data.getOrNull(Keys.COMMANDS);
+        this.impl$allowCommands = data.getOrNull(Keys.COMMANDS);
         this.impl$pvp = data.getOrNull(Keys.PVP);
         this.impl$seed = data.getOrNull(Keys.SEED);
         return (LevelStem) (Object) this;
@@ -164,13 +163,19 @@ public abstract class LevelStemMixin implements LevelStemBridge, SpongeDataHolde
 
     @Override
     public SpongeWorldTemplate.SpongeDataSection bridge$createData() {
-        return new SpongeWorldTemplate.SpongeDataSection(this.bridge$displayName(),
+        return new SpongeWorldTemplate.SpongeDataSection(
+            this.impl$displayName,
             this.impl$gameMode,
             this.impl$difficulty,
             this.impl$serializationBehavior,
-            this.impl$viewDistance, this.impl$spawnPosition,
-            this.impl$loadOnStartup, this.impl$performsSpawnLogic,
-            this.impl$hardcore, this.impl$commands,
-            this.impl$pvp, this.impl$seed);
+            this.impl$viewDistance,
+            this.impl$spawnPosition,
+            this.impl$loadOnStartup,
+            this.impl$performsSpawnLogic,
+            this.impl$hardcore,
+            this.impl$allowCommands,
+            this.impl$pvp,
+            this.impl$seed
+        );
     }
 }
