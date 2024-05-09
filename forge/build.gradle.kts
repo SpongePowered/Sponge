@@ -351,7 +351,7 @@ tasks {
                         .toList()
             }
 
-            jvmArguments.add("-Dbsl.debug=true")
+            // jvmArguments.add("-Dbsl.debug=true") // Uncomment to debug bootstrap classpath
 
             sourceSets.forEach {
                 dependsOn(it.classesTaskName)
