@@ -66,7 +66,7 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Pla
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
-@Mixin(ServerPlayerGameMode.class)
+@Mixin(value = ServerPlayerGameMode.class, priority = 998)
 public abstract class ServerPlayerGameModeMixin_Tracker {
     @Shadow private GameType gameModeForPlayer;
 
