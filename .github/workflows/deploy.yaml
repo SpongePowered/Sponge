@@ -76,6 +76,11 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-latest, macos-latest]
         java: [8, 11, 16]
+        exclude:
+          - os: macos-latest
+            java: 8
+          - os: macos-latest
+            java: 16
     runs-on: "${{ matrix.os }}"
     steps:
       - name: Check out repository to use the build.gradle.kts as a hash file
