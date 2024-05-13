@@ -26,6 +26,7 @@ package org.spongepowered.common.world.volume;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
@@ -44,6 +45,7 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.entity.EntitySection;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -175,7 +177,10 @@ public final class VolumeStreamUtils {
         final int maskedX = x & 3;
         final int maskedY = y & 3;
         final int maskedZ = z & 3;
-        // TODO section.getBiomes().set(maskedX, maskedY, maskedZ, Holder.direct((Biome) (Object) biome));
+        final var old = ((PalettedContainer<Holder<Biome>>) section.getBiomes()).getAndSet(maskedX, maskedY, maskedZ, Holder.direct((Biome) (Object) biome));
+        if (old.value() == (Object) biome) {
+            return false;
+        }
 
         finalizer.run();
         return true;

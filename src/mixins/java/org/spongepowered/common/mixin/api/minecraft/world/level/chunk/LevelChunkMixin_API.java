@@ -128,9 +128,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        // TODO ChunkBiomeContainerAccessor is dead
-        //return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.biomes, () -> this.setUnsaved(true));
-        return false;
+        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> this.getSection(this.getSectionIndex(y)), () -> this.setUnsaved(true));
     }
 
     @Intrinsic
