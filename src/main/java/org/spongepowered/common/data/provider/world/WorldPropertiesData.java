@@ -42,7 +42,6 @@ import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridg
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.weather.SpongeWeather;
-import org.spongepowered.math.vector.Vector3i;
 
 public final class WorldPropertiesData {
 

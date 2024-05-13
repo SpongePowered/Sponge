@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.network.channel.packet;
 
-import org.spongepowered.api.network.EngineConnection;
-import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.packet.HandlerPacketBinding;
 import org.spongepowered.api.network.channel.packet.Packet;

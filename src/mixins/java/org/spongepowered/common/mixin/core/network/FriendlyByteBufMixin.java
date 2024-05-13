@@ -24,20 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.network;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.adventure.NativeComponentRenderer;
 import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
-import org.spongepowered.common.util.Constants;
 
 import java.util.Locale;
 

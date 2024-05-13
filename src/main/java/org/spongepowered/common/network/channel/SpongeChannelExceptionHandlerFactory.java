@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.network.channel;
 
-import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.ChannelExceptionHandler;
 

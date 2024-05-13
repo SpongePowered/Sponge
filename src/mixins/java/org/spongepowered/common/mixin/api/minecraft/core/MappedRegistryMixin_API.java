@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.core;
 
-import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.MappedRegistry;

@@ -26,8 +26,6 @@ package org.spongepowered.common.hooks;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.Sponge;
 
 import java.util.Optional;

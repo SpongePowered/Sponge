@@ -31,7 +31,6 @@ import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.HashBiMap;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import jdk.jfr.Percentage;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.BlockPos;

@@ -24,17 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.network;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.PacketEncoder;
 import net.minecraft.network.PacketListener;
-import net.minecraft.network.protocol.Packet;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
 
 @Mixin(PacketEncoder.class)
 public class PacketEncoderMixin<T extends PacketListener> {

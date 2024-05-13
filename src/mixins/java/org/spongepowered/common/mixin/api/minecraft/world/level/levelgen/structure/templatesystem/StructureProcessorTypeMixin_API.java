@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.struct
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.resources.RegistryOps;

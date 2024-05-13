@@ -39,7 +39,6 @@ import org.spongepowered.common.data.DataUtil;
 
 import java.io.File;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 @Mixin(DimensionDataStorage.class)
 public abstract class DimensionDataStorageMixin {

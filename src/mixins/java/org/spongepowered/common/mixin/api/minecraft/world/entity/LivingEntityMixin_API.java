@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
 import net.minecraft.core.Holder;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import org.spongepowered.api.data.Keys;

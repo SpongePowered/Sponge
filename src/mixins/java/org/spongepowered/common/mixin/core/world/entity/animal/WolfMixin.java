@@ -78,13 +78,13 @@ public abstract class WolfMixin extends AgableMobMixin implements AggressiveEnti
             PhaseTracker.getCauseStackManager().popCause();
         }
     }
-    
+
     @Inject(method = "tryToTame",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/Wolf;tame(Lnet/minecraft/world/entity/player/Player;)V"),
         cancellable = true)
     private void impl$onTame(final Player player, final CallbackInfo ci) {
         try {
-            
+
             PhaseTracker.getCauseStackManager().pushCause(player);
             if (!SpongeCommon.post(SpongeEventFactory.createTameEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (Wolf) this))) {
                 this.shadow$level().broadcastEntityEvent((net.minecraft.world.entity.animal.Wolf) (Object) this, (byte)6);

@@ -34,7 +34,6 @@ import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ClientConnectionState;
-import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.api.network.EngineConnectionStates;
 import org.spongepowered.api.network.channel.packet.PacketChannel;
 import org.spongepowered.common.SpongeCommon;

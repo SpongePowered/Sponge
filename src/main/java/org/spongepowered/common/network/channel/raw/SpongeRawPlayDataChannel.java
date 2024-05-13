@@ -26,7 +26,6 @@ package org.spongepowered.common.network.channel.raw;
 
 import net.minecraft.network.protocol.Packet;
 import org.spongepowered.api.network.EngineConnection;
-import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.raw.play.RawPlayDataChannel;
