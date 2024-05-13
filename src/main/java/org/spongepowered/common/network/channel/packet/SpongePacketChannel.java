@@ -340,6 +340,11 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
 
     private void handleRequestPacket(final EngineConnection connection,
             final int opcode, final int transactionId, final ChannelBuf payload) {
+        final @Nullable EngineConnectionState state = connection.state().orElse(null);
+        if (state == null) {
+            return;
+        }
+
         final SpongePacketBinding<Packet> binding = this.requireBinding(opcode);
 
         final Packet request;
@@ -357,7 +362,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         // TODO: Send cause of failure somehow?
         if (binding instanceof SpongeTransactionalPacketBinding) {
             final RequestPacketHandler<RequestPacket<Packet>, Packet, ? super EngineConnectionState> handler =
-                    ((SpongeTransactionalPacketBinding) binding).getRequestHandler(connection.state());
+                    ((SpongeTransactionalPacketBinding) binding).getRequestHandler(state);
 
             if (handler != null) {
                 final SpongeRequestPacketResponse<Packet> requestPacketResponse = new SpongeRequestPacketResponse<Packet>() {
@@ -374,7 +379,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                     }
                 };
                 try {
-                    handler.handleRequest((RequestPacket) request, connection.state(), requestPacketResponse);
+                    handler.handleRequest((RequestPacket) request, state, requestPacketResponse);
                     success = true;
                 } catch (final Throwable ex) {
                     this.handleException(connection, new ChannelException("Failed to handle request packet", ex), null);

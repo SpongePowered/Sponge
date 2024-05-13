@@ -24,26 +24,51 @@
  */
 package org.spongepowered.common.network;
 
+import com.mojang.authlib.GameProfile;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionState;
+import org.spongepowered.api.network.ServerSideConnection;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.net.InetSocketAddress;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class SpongeEngineConnection implements EngineConnection {
 
     protected final Connection connection;
 
+    private final AtomicReference<EventFireState> eventFireState;
+
+    private @MonotonicNonNull GameProfile gameProfile;
+
     public SpongeEngineConnection(final Connection connection) {
         this.connection = connection;
+
+        this.eventFireState = new AtomicReference<>(EventFireState.NONE);
     }
 
     @Override
-    public EngineConnectionState state() {
-        return (EngineConnectionState) this.connection.getPacketListener();
+    public boolean active() {
+        return this.connection.isConnected();
+    }
+
+    @Override
+    public Optional<EngineConnectionState> state() {
+        if (this.active()) {
+            return Optional.of((EngineConnectionState) this.connection.getPacketListener());
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -66,7 +91,47 @@ public abstract class SpongeEngineConnection implements EngineConnection {
         this.connection.disconnect(SpongeAdventure.asVanilla(reason));
     }
 
+    public void setGameProfile(final GameProfile gameProfile) {
+        this.gameProfile = gameProfile;
+    }
+
     public Connection connection() {
         return this.connection;
+    }
+
+    public void disconnected() {
+        if (this.eventFireState.getAndSet(EventFireState.DISCONNECTED).shouldFireDisconnectionImmediately()) {
+            this.fireDisconnectEvent();
+        }
+    }
+
+    public boolean postGuardedEvent(final ServerSideConnectionEvent event) {
+        if (!this.eventFireState.compareAndSet(EventFireState.NONE, EventFireState.IN_FLIGHT)
+                && !this.eventFireState.compareAndSet(EventFireState.POST, EventFireState.IN_FLIGHT)) {
+            return false;
+        }
+        SpongeCommon.post(event);
+        if (!this.eventFireState.compareAndSet(EventFireState.IN_FLIGHT, EventFireState.POST)) {
+            this.fireDisconnectEvent();
+        }
+        return event instanceof Cancellable cancellable && cancellable.isCancelled();
+    }
+
+    private void fireDisconnectEvent() {
+        this.eventFireState.set(EventFireState.DISCONNECTED);
+        final ServerSideConnectionEvent.Disconnect event = SpongeEventFactory.createServerSideConnectionEventDisconnect(
+                PhaseTracker.getCauseStackManager().currentCause(), (ServerSideConnection) this, Optional.ofNullable(this.gameProfile).map(SpongeGameProfile::of));
+        SpongeCommon.post(event);
+    }
+
+    private enum EventFireState {
+        NONE,
+        IN_FLIGHT,
+        POST,
+        DISCONNECTED;
+
+        boolean shouldFireDisconnectionImmediately() {
+            return this == EventFireState.POST;
+        }
     }
 }

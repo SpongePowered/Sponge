@@ -29,6 +29,7 @@ import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -49,6 +50,7 @@ public abstract class ServerCommonPacketListenerImplMixin {
     @Shadow @Final protected MinecraftServer server;
     @Shadow public abstract void shadow$send(final Packet<?> $$0, @Nullable final PacketSendListener $$1);
     @Shadow public abstract void shadow$disconnect(Component reason);
+    @Shadow public void shadow$handleCustomPayload(final ServerboundCustomPayloadPacket $$0) { }
     // @formatter:on
 
     @Nullable public ResourcePack impl$lastReceivedPack;

@@ -22,15 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.network;
+package org.spongepowered.common.mixin.api.minecraft.server.network;
 
-import net.minecraft.network.Connection;
+import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
+import org.spongepowered.api.network.ServerConnectionState;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
-import java.util.concurrent.ExecutorService;
+@Mixin(ServerConfigurationPacketListenerImpl.class)
+public abstract class ServerConfigurationPacketListenerImplMixin_API extends ServerCommonPacketListenerImplMixin_API implements ServerConnectionState.Configuration {
 
-public interface ServerLoginPacketListenerImplBridge {
-
-    ExecutorService bridge$getExecutor();
-
-    Connection bridge$getConnection();
+    @Override
+    public GameProfile profile() {
+        return SpongeGameProfile.of(this.shadow$playerProfile());
+    }
 }

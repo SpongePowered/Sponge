@@ -24,16 +24,37 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.server.network;
 
-import net.minecraft.server.network.ServerHandshakePacketListenerImpl;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ServerConnectionState;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.server.network.ServerHandshakePacketListenerImplBridge;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
-@Mixin(ServerHandshakePacketListenerImpl.class)
-public abstract class ServerHandshakePacketListenerImplMixin_API implements ServerConnectionState.Intent {
+@Mixin(ServerGamePacketListenerImpl.class)
+@Implements(@Interface(iface = ServerConnectionState.Game.class, prefix = "api$", remap = Interface.Remap.NONE))
+public abstract class ServerGamePacketListenerImplMixin_API extends ServerCommonPacketListenerImplMixin_API implements ServerConnectionState.Game {
+
+    // @formatter:off
+    @Shadow public net.minecraft.server.level.ServerPlayer player;
+    // @formatter:on
 
     @Override
-    public boolean transferred() {
-        return ((ServerHandshakePacketListenerImplBridge) this).bridge$transferred();
+    public GameProfile profile() {
+        return SpongeGameProfile.of(this.shadow$playerProfile());
     }
+
+    @Override
+    public ServerPlayer player() {
+        return (ServerPlayer) this.player;
+    }
+
+    //TODO: Fix me
+    /*@Intrinsic
+    public int api$latency() {
+        return this.shadow$latency();
+    }*/
 }

@@ -22,15 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.network;
+package org.spongepowered.common.mixin.api.minecraft.server.network;
 
-import net.minecraft.network.Connection;
+import net.minecraft.server.network.MemoryServerHandshakePacketListenerImpl;
+import org.spongepowered.api.network.ServerConnectionState;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.server.network.ServerHandshakePacketListenerImplBridge;
 
-import java.util.concurrent.ExecutorService;
+@Mixin(MemoryServerHandshakePacketListenerImpl.class)
+public abstract class MemoryServerHandshakePacketListenerImplMixin_API implements ServerConnectionState.Intent {
 
-public interface ServerLoginPacketListenerImplBridge {
-
-    ExecutorService bridge$getExecutor();
-
-    Connection bridge$getConnection();
+    @Override
+    public boolean transferred() {
+        return ((ServerHandshakePacketListenerImplBridge) this).bridge$transferred();
+    }
 }

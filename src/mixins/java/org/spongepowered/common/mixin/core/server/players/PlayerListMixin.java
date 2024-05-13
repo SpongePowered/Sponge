@@ -155,7 +155,6 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final net.minecraft.server.level.@Nullable ServerPlayer $$2, final ChatType.Bound $$4);
     // @formatter:on
 
-
     private boolean impl$isGameMechanicRespawn = false;
     private boolean impl$isDuringSystemMessageEvent = false;
 
@@ -296,7 +295,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         final Cause cause = Cause.of(EventContext.empty(), connection, user);
         final ServerSideConnectionEvent.Login event = SpongeEventFactory.createServerSideConnectionEventLogin(cause, disconnectMessage,
-                disconnectMessage, location, location, rotation, rotation, connection, user);
+                disconnectMessage, location, location, rotation, rotation, connection, SpongeGameProfile.of(mcPlayer.getGameProfile()), user);
         if (kickReason != null) {
             event.setCancelled(true);
         }
@@ -431,7 +430,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final Component joinComponent = SpongeAdventure.asAdventure(((ServerPlayerBridge) mcPlayer).bridge$getConnectionMessageToSend());
 
         final ServerSideConnectionEvent.Join event = SpongeEventFactory.createServerSideConnectionEventJoin(cause, audience,
-                Optional.of(audience), joinComponent, joinComponent, connection, player, false);
+                Optional.of(audience), joinComponent, joinComponent, connection, player, SpongeGameProfile.of(mcPlayer.getGameProfile()), false);
         SpongeCommon.post(event);
         if (!event.isMessageCancelled()) {
             event.audience().ifPresent(audience1 -> audience1.sendMessage(Identity.nil(), event.message()));

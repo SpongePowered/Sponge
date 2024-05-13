@@ -40,7 +40,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,12 +56,14 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeMinecraftVersion;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.network.SpongeClientEngineConnection;
 import org.spongepowered.common.network.SpongeEngineConnection;
 import org.spongepowered.common.network.SpongePacketHolder;
 import org.spongepowered.common.network.SpongeServerEngineConnection;
 import org.spongepowered.common.network.channel.PacketSender;
 import org.spongepowered.common.network.channel.TransactionStore;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
@@ -208,13 +213,9 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         return instance.add(consumer);
     }
 
-    @Inject(method = "handleDisconnection",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/network/Connection;disconnectionHandled:Z",
-            opcode = Opcodes.PUTFIELD,
-            shift = At.Shift.AFTER))
+    @Inject(method = "handleDisconnection", at = @At("RETURN"))
     private void impl$onDisconnected(final CallbackInfo ci) {
+        this.impl$engineConnection.disconnected();
         Consumer<Connection> consumer;
         while ((consumer = this.pendingActions.poll()) != null) {
             if (consumer instanceof SpongePacketHolder packetHolder) {

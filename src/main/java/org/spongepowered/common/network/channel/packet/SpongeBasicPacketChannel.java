@@ -265,6 +265,10 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
     protected void handleLoginRequestPayload(final EngineConnection connection, final int transactionId, final ChannelBuf payload) {
         // Is currently always executed on the client,
         // the server always expects a response
+        final @Nullable EngineConnectionState state = connection.state().orElse(null);
+        if (state == null) {
+            return;
+        }
 
         final int opcode = this.readOpcode(payload);
         final SpongePacketBinding<Packet> binding = this.requireBinding(opcode);
@@ -281,7 +285,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
             final SpongeTransactionalPacketBinding<RequestPacket<Packet>, Packet> transactionalBinding =
                     (SpongeTransactionalPacketBinding) binding;
             final RequestPacketHandler<Packet, Packet, EngineConnectionState> handler =
-                    (RequestPacketHandler<Packet, Packet, EngineConnectionState>) transactionalBinding.getRequestHandler(connection.state());
+                    (RequestPacketHandler<Packet, Packet, EngineConnectionState>) transactionalBinding.getRequestHandler(state);
             boolean success = false;
             if (handler != null) {
                 final SpongeRequestPacketResponse<Packet> response = new SpongeRequestPacketResponse<Packet>() {
@@ -306,7 +310,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
                     }
                 };
                 try {
-                    handler.handleRequest(packet, connection.state(), response);
+                    handler.handleRequest(packet, state, response);
                     success = true;
                 } catch (final Throwable ex) {
                     this.handleException(connection, new ChannelIOException("Failed to handle request packet", ex), null);

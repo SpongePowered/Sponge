@@ -104,6 +104,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.CommandUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
@@ -431,11 +432,13 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             frame.pushCause(this.player);
             final Component message = SpongeAdventure.asAdventure($$0);
             final Audience audience = Sponge.server().broadcastAudience();
-            final ServerSideConnectionEvent.Disconnect event = SpongeEventFactory.createServerSideConnectionEventDisconnect(
+            final ServerSideConnectionEvent.Leave event = SpongeEventFactory.createServerSideConnectionEventLeave(
                     PhaseTracker.getCauseStackManager().currentCause(), audience, Optional.of(audience), message, message,
-                    spongePlayer.connection(), spongePlayer);
+                    spongePlayer.connection(), spongePlayer, SpongeGameProfile.of(this.player.getGameProfile()), false);
             SpongeCommon.post(event);
-            event.audience().ifPresent(a -> a.sendMessage(spongePlayer, event.message()));
+            if (!event.isMessageCancelled()) {
+                event.audience().ifPresent(a -> a.sendMessage(spongePlayer, event.message()));
+            }
         }
 
         ((ServerPlayerBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();

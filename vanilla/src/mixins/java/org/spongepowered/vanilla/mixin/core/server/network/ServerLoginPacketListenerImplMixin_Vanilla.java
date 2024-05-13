@@ -58,6 +58,7 @@ import org.spongepowered.common.bridge.network.ServerLoginPacketListenerImplBrid
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.channel.TransactionStore;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -81,6 +82,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
     @Shadow @Final Connection connection;
     @Shadow @Final private byte[] challenge;
     @Shadow @Nullable String requestedUsername;
+    @Shadow private GameProfile authenticatedProfile;
 
     @Shadow public abstract void shadow$disconnect(Component reason);
     @Shadow abstract void shadow$startClientVerification(GameProfile $$0);
@@ -124,7 +126,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
                 ((SpongeChannelManager) Sponge.channelManager()).sendLoginChannelRegistry(connection).thenAccept(result -> {
                     final Cause cause = Cause.of(EventContext.empty(), this);
                     final ServerSideConnectionEvent.Handshake event =
-                            SpongeEventFactory.createServerSideConnectionEventHandshake(cause, connection);
+                            SpongeEventFactory.createServerSideConnectionEventHandshake(cause, connection, SpongeGameProfile.of(this.authenticatedProfile));
                     SpongeCommon.post(event);
                     this.impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_SYNC_PLUGIN_DATA;
                 });
