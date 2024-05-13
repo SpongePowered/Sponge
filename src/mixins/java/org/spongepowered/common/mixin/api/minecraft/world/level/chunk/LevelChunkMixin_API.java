@@ -123,7 +123,7 @@ public abstract class LevelChunkMixin_API extends ChunkAccess implements WorldCh
         if (!this.contains(x, y, z)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), Constants.World.BLOCK_MIN, Constants.World.BLOCK_MAX);
         }
-        return (Biome) (Object) this.level.getBiome(new BlockPos(x, y, z));
+        return (Biome) (Object) this.level.getBiome(new BlockPos(x, y, z)).value();
     }
 
     @Override
