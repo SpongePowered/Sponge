@@ -44,6 +44,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -106,7 +107,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
         ci.cancel();
 
         final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
-        this.server.execute(() -> channelRegistry.handleLoginResponsePayload(((ConnectionBridge) this.connection).bridge$getEngineConnection(), packet));
+        this.server.execute(() -> channelRegistry.handleLoginResponsePayload(((ConnectionBridge) this.connection).bridge$getEngineConnection(), (EngineConnectionState) this, packet));
     }
 
     @Inject(method = "tick", at = @At("HEAD"))

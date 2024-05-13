@@ -22,6 +22,7 @@
         "commands.CommandsMixin_Vanilla",
         "network.FriendlyByteBufMixin_Vanilla",
         "network.protocol.common.ClientboundCustomPayloadPacketMixin",
+        "network.protocol.login.ClientboundCustomQueryPacketMixin",
         "server.BootstrapMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",
         "server.commands.SpreadPlayersCommandMixin_Vanilla",

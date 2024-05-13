@@ -22,25 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.network.channel.packet;
+package org.spongepowered.common.network.channel;
 
-import org.spongepowered.api.network.EngineConnectionState;
-import org.spongepowered.api.network.channel.packet.Packet;
-import org.spongepowered.api.network.channel.packet.PacketHandler;
-import org.spongepowered.api.network.channel.packet.RequestPacket;
-import org.spongepowered.api.network.channel.packet.ResponsePacketHandler;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.common.util.Constants;
 
-public final class PacketToResponseHandler<P extends RequestPacket<R>, R extends Packet, S extends EngineConnectionState>
-        implements ResponsePacketHandler<P, R, S> {
+import java.util.ArrayList;
 
-    private final PacketHandler<? super R, ? super S> handler;
+@SuppressWarnings({"rawtypes", "unchecked"})
+public final class ChannelUtils {
+    public static final CustomPacketPayload.Type<SpongeChannelPayload> REGISTER = CustomPacketPayload.createType(Constants.Channels.REGISTER_KEY.toString());
 
-    public PacketToResponseHandler(final PacketHandler<? super R, ? super S> handler) {
-        this.handler = handler;
+    public static ArrayList spongeChannelCodecs(final int maxPayloadSize) {
+        ArrayList channels = new ArrayList<>();
+        channels.add(new CustomPacketPayload.TypeAndCodec<>(ChannelUtils.REGISTER, SpongeChannelPayload.streamCodec(ChannelUtils.REGISTER, maxPayloadSize)));
+        Sponge.game().channelManager().channels().forEach(c ->
+                channels.add(new CustomPacketPayload.TypeAndCodec<>(((SpongeChannel) c).payloadType(), SpongeChannelPayload.streamCodec(((SpongeChannel) c).payloadType(), maxPayloadSize))));
+        return channels;
     }
 
-    @Override
-    public void handleResponse(final R responsePacket, final P requestPacket, final S state) {
-        this.handler.handle(responsePacket, state);
+    private ChannelUtils() {
     }
+
 }

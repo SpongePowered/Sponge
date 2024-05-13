@@ -41,6 +41,7 @@ import org.spongepowered.api.network.channel.packet.PacketChannel;
 import org.spongepowered.api.network.channel.packet.RequestPacket;
 import org.spongepowered.api.network.channel.packet.RequestPacketHandler;
 import org.spongepowered.common.network.PacketUtil;
+import org.spongepowered.common.network.SpongeEngineConnection;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.PacketSender;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
@@ -94,10 +95,8 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         super(type, key, manager);
     }
 
-    private <P extends RequestPacket<R>, R extends Packet> void sendRequestPacketTo(final EngineConnection connection, final P packet,
-            final CompletableFuture<?> future,
-            final @Nullable Consumer<R> response,
-            final @Nullable Runnable sendSuccess) {
+    private <P extends RequestPacket<R>, R extends Packet> void sendRequestPacketTo(final EngineConnection connection, final EngineConnectionState state,
+            final P packet, final CompletableFuture<?> future, final @Nullable Consumer<R> response, final @Nullable Runnable sendSuccess) {
         final SpongeTransactionalPacketBinding<P, R> binding =
                 (SpongeTransactionalPacketBinding) this.requireBinding(packet.getClass());
 
@@ -136,13 +135,13 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         } else {
             payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_REQUEST, transactionId));
             payload.writeVarInt(binding.opcode());
-            mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.key(), payload, side);
+            mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.payloadType(), payload, side);
         }
 
         try {
             this.encodePayload(payload, packet);
         } catch (final Throwable ex) {
-            this.handleException(connection, ex, future);
+            this.handleException(connection, state, ex, future);
             return;
         }
 
@@ -154,7 +153,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         final net.minecraft.network.protocol.Packet<?> mcPacket = mcPacketSupplier.get();
         PacketSender.sendTo(connection, mcPacket, throwable -> {
             if (throwable != null) {
-                this.handleException(connection, throwable, future);
+                this.handleException(connection, state, throwable, future);
                 // Failed before it could reach the client, so complete it
                 // and remove it from the store
                 if (response != null) {
@@ -167,7 +166,8 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
     }
 
     private <P extends RequestPacket<R>, R extends Packet> void sendResponsePacketTo(final EngineConnection connection,
-            final @Nullable SpongeTransactionalPacketBinding<P, R> requestBinding, final @Nullable R packet, final int transactionId) {
+            final EngineConnectionState state, final @Nullable SpongeTransactionalPacketBinding<P, R> requestBinding,
+             final @Nullable R packet, final int transactionId) {
         final boolean isLoginPhase = ConnectionUtil.isLoginPhase(connection);
         final EngineConnectionSide<?> side = connection.side();
 
@@ -199,7 +199,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                 }
             } else {
                 payload.writeVarLong(SpongePacketChannel.packTypeAndValue(type, transactionId));
-                mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.key(), payload, side);
+                mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.payloadType(), payload, side);
             }
         } else {
             // Dynamic opcode
@@ -229,15 +229,17 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             } else {
                 payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_DYNAMIC_RESPONSE, transactionId));
                 payload.writeVarInt(opcode);
-                mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.key(), payload, side);
+                mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.payloadType(), payload, side);
             }
         }
 
-        try {
-            this.encodePayload(payload, packet);
-        } catch (final Throwable ex) {
-            this.handleException(connection, new ChannelIOException("Failed to encode request response", ex), null);
-            return;
+        if (packet != null) {
+            try {
+                this.encodePayload(payload, packet);
+            } catch (final Throwable ex) {
+                this.handleException(connection, state, new ChannelIOException("Failed to encode request response", ex), null);
+                return;
+            }
         }
 
         final net.minecraft.network.protocol.Packet<?> mcPacket = mcPacketSupplier.get();
@@ -279,7 +281,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             }
         } else {
             payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_NORMAL, binding.opcode()));
-            mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.key(), payload, side);
+            mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.payloadType(), payload, side);
         }
 
         try {
@@ -295,11 +297,12 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
 
     @Override
     public <R extends Packet> CompletableFuture<R> sendTo(final EngineConnection connection, final RequestPacket<R> packet) {
+        final EngineConnectionState state = (EngineConnectionState) ((SpongeEngineConnection) connection).connection().getPacketListener();
         final CompletableFuture<R> future = new CompletableFuture<>();
-        if (!this.checkSupported(connection, future)) {
+        if (!this.checkSupported(connection, state, future)) {
             return future;
         }
-        this.sendRequestPacketTo(connection, packet, future, future::complete, null);
+        this.sendRequestPacketTo(connection, state, packet, future, future::complete, null);
         return future;
     }
 
@@ -311,12 +314,13 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
 
     @Override
     public CompletableFuture<Void> sendTo(final EngineConnection connection, final Packet packet) {
+        final EngineConnectionState state = (EngineConnectionState) ((SpongeEngineConnection) connection).connection().getPacketListener();
         final CompletableFuture<Void> future = new CompletableFuture<>();
-        if (!this.checkSupported(connection, future)) {
+        if (!this.checkSupported(connection, state, future)) {
             return future;
         }
         if (packet instanceof RequestPacket) {
-            this.sendRequestPacketTo(connection, (RequestPacket<Packet>) packet,
+            this.sendRequestPacketTo(connection, state, (RequestPacket<Packet>) packet,
                     future, null, () -> future.complete(null));
         } else {
             this.sendNormalPacketTo(connection, packet, future);
@@ -324,7 +328,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         return future;
     }
 
-    private void handleResponsePacket(final EngineConnection connection, final int transactionId, final @Nullable ChannelBuf payload,
+    private void handleResponsePacket(final EngineConnection connection, final EngineConnectionState state, final int transactionId, final @Nullable ChannelBuf payload,
             final int dynamicOpcode) {
         final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
         final TransactionStore.Entry stored = store.remove(transactionId);
@@ -335,24 +339,19 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                 (TransactionData<RequestPacket<Packet>, Packet>) stored.getData();
         final TransactionResult result = payload == null ?
                 TransactionResult.failure(new NoResponseException()) : TransactionResult.success(payload);
-        this.handleTransactionResponse(connection, transactionData, result, dynamicOpcode);
+        this.handleTransactionResponse(connection, state, transactionData, result, dynamicOpcode);
     }
 
-    private void handleRequestPacket(final EngineConnection connection,
+    private void handleRequestPacket(final EngineConnection connection, final EngineConnectionState state,
             final int opcode, final int transactionId, final ChannelBuf payload) {
-        final @Nullable EngineConnectionState state = connection.state().orElse(null);
-        if (state == null) {
-            return;
-        }
-
         final SpongePacketBinding<Packet> binding = this.requireBinding(opcode);
 
         final Packet request;
         try {
             request = this.decodePayload(binding.getPacketConstructor(), payload);
         } catch (final Throwable ex) {
-            this.sendResponsePacketTo(connection, null, null, transactionId);
-            this.handleException(connection, new ChannelIOException("Failed to decode request packet", ex), null);
+            this.sendResponsePacketTo(connection, state, null, null, transactionId);
+            this.handleException(connection, state, new ChannelIOException("Failed to decode request packet", ex), null);
             return;
         }
 
@@ -370,86 +369,86 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                     @Override
                     protected void fail0(final ChannelException exception) {
                         // TODO: Use response failure?
-                        SpongePacketChannel.this.sendResponsePacketTo(connection, null, null, transactionId);
+                        SpongePacketChannel.this.sendResponsePacketTo(connection, state, null, null, transactionId);
                     }
 
                     @Override
                     protected void success0(final Packet response) {
-                        SpongePacketChannel.this.sendResponsePacketTo(connection, (SpongeTransactionalPacketBinding) binding, response, transactionId);
+                        SpongePacketChannel.this.sendResponsePacketTo(connection, state, (SpongeTransactionalPacketBinding) binding, response, transactionId);
                     }
                 };
                 try {
                     handler.handleRequest((RequestPacket) request, state, requestPacketResponse);
                     success = true;
                 } catch (final Throwable ex) {
-                    this.handleException(connection, new ChannelException("Failed to handle request packet", ex), null);
+                    this.handleException(connection, state, new ChannelException("Failed to handle request packet", ex), null);
                     responseFailure = ex;
                 }
             }
         }
         if (!success) {
             // TODO: Use response failure?
-            this.sendResponsePacketTo(connection, null, null, transactionId);
+            this.sendResponsePacketTo(connection, state, null, null, transactionId);
         }
     }
 
-    private void handleNormalPacket(final EngineConnection connection, final int opcode, final ChannelBuf payload) {
+    private void handleNormalPacket(final EngineConnection connection, final EngineConnectionState state, final int opcode, final ChannelBuf payload) {
         final SpongePacketBinding<Packet> binding = this.requireBinding(opcode);
         final Packet packet = this.decodePayload(binding.getPacketConstructor(), payload);
 
         if (binding instanceof SpongeHandlerPacketBinding) {
-            this.handle(connection, (SpongeHandlerPacketBinding<Packet>) binding, packet);
+            this.handle(connection, state, (SpongeHandlerPacketBinding<Packet>) binding, packet);
         }
     }
 
     @Override
-    protected void handlePlayPayload(final EngineConnection connection, final ChannelBuf payload) {
+    protected void handlePlayPayload(final EngineConnection connection, final EngineConnectionState state, final ChannelBuf payload) {
         final long typeAndValue = payload.readVarLong();
 
         final int type = SpongePacketChannel.extractType(typeAndValue);
         final int value = SpongePacketChannel.extractValue(typeAndValue);
 
         if (type == SpongePacketChannel.TYPE_NORMAL) {
-            this.handleNormalPacket(connection, value, payload);
+            this.handleNormalPacket(connection, state, value, payload);
         } else if (type == SpongePacketChannel.TYPE_REQUEST) {
             final int opcode = payload.readVarInt();
-            this.handleRequestPacket(connection, opcode, value, payload);
+            this.handleRequestPacket(connection, state, opcode, value, payload);
         } else if (type == SpongePacketChannel.TYPE_RESPONSE) {
-            this.handleResponsePacket(connection, value, payload, SpongePacketChannel.NO_DYNAMIC_OPCODE);
+            this.handleResponsePacket(connection, state, value, payload, SpongePacketChannel.NO_DYNAMIC_OPCODE);
         } else if (type == SpongePacketChannel.TYPE_NO_RESPONSE) {
-            this.handleResponsePacket(connection, value, null, SpongePacketChannel.NO_DYNAMIC_OPCODE);
+            this.handleResponsePacket(connection, state, value, null, SpongePacketChannel.NO_DYNAMIC_OPCODE);
         } else if (type == SpongePacketChannel.TYPE_DYNAMIC_RESPONSE) {
             final int opcode = payload.readVarInt();
-            this.handleResponsePacket(connection, value, payload, opcode);
+            this.handleResponsePacket(connection, state, value, payload, opcode);
         } else {
-            this.handleException(connection, new ChannelIOException("Unknown packet type: " + type), null);
+            this.handleException(connection, state, new ChannelIOException("Unknown packet type: " + type), null);
         }
     }
 
     @Override
-    protected void handleLoginRequestPayload(final EngineConnection connection, final int transactionId, final ChannelBuf payload) {
+    protected void handleLoginRequestPayload(final EngineConnection connection, EngineConnectionState state, final int transactionId, final ChannelBuf payload) {
         final long typeAndValue = payload.readVarLong();
 
         final int type = SpongePacketChannel.extractType(typeAndValue);
         final int value = SpongePacketChannel.extractValue(typeAndValue);
 
         if (type == SpongePacketChannel.TYPE_NORMAL) {
-            this.handleNormalPacket(connection, value, payload);
+            this.handleNormalPacket(connection, state, value, payload);
         } else if (type == SpongePacketChannel.TYPE_REQUEST) {
-            this.handleRequestPacket(connection, value, transactionId, payload);
+            this.handleRequestPacket(connection, state, value, transactionId, payload);
         } else if (type == SpongePacketChannel.TYPE_RESPONSE) {
-            this.handleResponsePacket(connection, transactionId, payload, SpongePacketChannel.NO_DYNAMIC_OPCODE);
+            this.handleResponsePacket(connection, state, transactionId, payload, SpongePacketChannel.NO_DYNAMIC_OPCODE);
         } else if (type == SpongePacketChannel.TYPE_NO_RESPONSE) {
-            this.handleResponsePacket(connection, transactionId, null, SpongePacketChannel.NO_DYNAMIC_OPCODE);
+            this.handleResponsePacket(connection, state, transactionId, null, SpongePacketChannel.NO_DYNAMIC_OPCODE);
         } else if (type == SpongePacketChannel.TYPE_DYNAMIC_RESPONSE) {
-            this.handleResponsePacket(connection, transactionId, payload, value);
+            this.handleResponsePacket(connection, state, transactionId, payload, value);
         } else {
-            this.handleException(connection, new ChannelIOException("Unknown packet type: " + type), null);
+            this.handleException(connection, state, new ChannelIOException("Unknown packet type: " + type), null);
         }
     }
 
     @Override
-    protected void handleTransactionResponse(final EngineConnection connection, final Object stored, final TransactionResult result) {
+    protected void handleTransactionResponse(final EngineConnection connection, EngineConnectionState state, final Object stored, final TransactionResult result) {
         if (result.isSuccess()) {
             final ChannelBuf payload = result.getPayload();
             final long typeAndValue = payload.readVarLong();
@@ -463,22 +462,22 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                 final TransactionData<RequestPacket<Packet>, Packet> transactionData =
                         (TransactionData<RequestPacket<Packet>, Packet>) stored;
                 if (type == SpongePacketChannel.TYPE_RESPONSE) {
-                    this.handleTransactionResponse(connection, transactionData, result, SpongePacketChannel.NO_DYNAMIC_OPCODE);
+                    this.handleTransactionResponse(connection, state, transactionData, result, SpongePacketChannel.NO_DYNAMIC_OPCODE);
                 } else if (type == SpongePacketChannel.TYPE_NO_RESPONSE) {
-                    this.handleTransactionResponse(connection, transactionData,
+                    this.handleTransactionResponse(connection, state, transactionData,
                             TransactionResult.failure(new NoResponseException()), SpongePacketChannel.NO_DYNAMIC_OPCODE
                     );
                 } else {
-                    this.handleTransactionResponse(connection, transactionData, result, value);
+                    this.handleTransactionResponse(connection, state, transactionData, result, value);
                 }
             } else {
-                this.handleException(connection, new ChannelIOException("Unknown packet type: " + type), null);
+                this.handleException(connection, state, new ChannelIOException("Unknown packet type: " + type), null);
             }
         }
     }
 
     private <P extends RequestPacket<R>, R extends Packet> void handleTransactionResponse(final EngineConnection connection,
-            final TransactionData<P, R> transactionData, final TransactionResult result, final int dynamicOpcode) {
+            EngineConnectionState state, final TransactionData<P, R> transactionData, final TransactionResult result, final int dynamicOpcode) {
         if (result.isSuccess()) {
             final ChannelBuf payload = result.getPayload();
 
@@ -500,22 +499,22 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             try {
                 packet = this.decodePayload(packetSupplier, payload);
             } catch (final Throwable ex) {
-                this.handleException(connection, new ChannelIOException("Failed to decode packet", ex), transactionData.future);
+                this.handleException(connection, state, new ChannelIOException("Failed to decode packet", ex), transactionData.future);
                 return;
             }
 
             if (responseBinding != null) {
-                this.handle(connection, (SpongeHandlerPacketBinding<Packet>) responseBinding, packet);
+                this.handle(connection, state, (SpongeHandlerPacketBinding<Packet>) responseBinding, packet);
             } else {
-                this.handleResponse(connection, transactionData.binding, transactionData.request, packet);
+                this.handleResponse(connection, state, transactionData.binding, transactionData.request, packet);
             }
 
             if (transactionData.success != null) {
                 transactionData.success.accept(packet);
             }
         } else {
-            this.handleException(connection, result.getCause(), transactionData.future);
-            this.handleResponseFailure(connection, transactionData.binding, transactionData.request, result.getCause());
+            this.handleException(connection, state, result.getCause(), transactionData.future);
+            this.handleResponseFailure(connection, state, transactionData.binding, transactionData.request, result.getCause());
         }
     }
 

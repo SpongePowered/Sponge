@@ -25,23 +25,35 @@
 package org.spongepowered.vanilla.mixin.core.network.protocol.common;
 
 import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.network.channel.ChannelUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 @Mixin(ClientboundCustomPayloadPacket.class)
 public abstract class ClientboundCustomPayloadPacketMixin {
 
-    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Ljava/util/List;of(Ljava/lang/Object;)Ljava/util/List;"))
-    private static List vanilla$registerCustomPacketPayloads(Object registrations) {
-        final List allRegistrations = new ArrayList<>(List.of(registrations));
-        allRegistrations.add(new CustomPacketPayload.TypeAndCodec<>(SpongeChannelManager.SpongeRegisterChannelPayload.TYPE, SpongeChannelManager.SpongeRegisterChannelPayload.STREAM_CODEC));
+    // @formatter: off
+    @Shadow @Final private static int MAX_PAYLOAD_SIZE;
+    // @formatter: on
+
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList([Ljava/lang/Object;)Ljava/util/ArrayList;"), remap = false)
+    private static ArrayList vanilla$registerCustomPacketPayloadsGame(final Object[] registrations) {
+        final ArrayList allRegistrations = new ArrayList<>(List.of(registrations));
+        allRegistrations.addAll(ChannelUtils.spongeChannelCodecs(ClientboundCustomPayloadPacketMixin.MAX_PAYLOAD_SIZE));
         return allRegistrations;
     }
 
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Ljava/util/List;of(Ljava/lang/Object;)Ljava/util/List;"))
+    private static List vanilla$registerCustomPacketPayloadsConfiguration(final Object registrations) {
+        final List allRegistrations = new ArrayList<>(List.of(registrations));
+        allRegistrations.addAll(ChannelUtils.spongeChannelCodecs(ClientboundCustomPayloadPacketMixin.MAX_PAYLOAD_SIZE));
+        return allRegistrations;
+    }
 }

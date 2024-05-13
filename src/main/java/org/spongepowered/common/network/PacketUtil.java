@@ -39,6 +39,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.packet.Packet;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -84,35 +85,14 @@ public final class PacketUtil {
         }
     }
 
-    public static net.minecraft.network.protocol.Packet<?> createPlayPayload(final ResourceKey channel, final ChannelBuf payload, final EngineConnectionSide<?> side) {
-        // TODO fix me
-//        if (side == EngineConnectionSide.CLIENT) {
-//            return new ServerboundCustomPayloadPacket(new CustomPacketPayload() {
-//                @Override
-//                public void write(FriendlyByteBuf var1) {
-//                    var1.writeBytes((FriendlyByteBuf)payload);
-//                }
-//
-//                @Override
-//                public ResourceLocation id() {
-//                    return (ResourceLocation) (Object) channel;
-//                }
-//            });
-//        } else if (side == EngineConnectionSide.SERVER) {
-//            return new ClientboundCustomPayloadPacket(new CustomPacketPayload() {
-//                @Override
-//                public void write(FriendlyByteBuf var1) {
-//                    var1.writeBytes((FriendlyByteBuf)payload);
-//                }
-//
-//                @Override
-//                public ResourceLocation id() {
-//                    return (ResourceLocation) (Object) channel;
-//                }
-//            });
-//        } else {
+    public static net.minecraft.network.protocol.Packet<?> createPlayPayload(final CustomPacketPayload.Type<? extends CustomPacketPayload> channel, final ChannelBuf payload, final EngineConnectionSide<?> side) {
+        if (side == EngineConnectionSide.CLIENT) {
+            return new ServerboundCustomPayloadPacket(new SpongeChannelPayload(channel, (FriendlyByteBuf) payload));
+        } else if (side == EngineConnectionSide.SERVER) {
+            return new ClientboundCustomPayloadPacket(new SpongeChannelPayload(channel, (FriendlyByteBuf) payload));
+        } else {
             throw new UnsupportedOperationException();
-//        }
+        }
     }
 
     // TODO: Use Lmbda instead?

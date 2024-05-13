@@ -29,12 +29,13 @@ import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.benmanes.caffeine.cache.RemovalListener;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.TimeoutException;
+import org.spongepowered.common.network.SpongeEngineConnection;
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 /**
  * A storage for transaction id mappings.
@@ -47,8 +48,9 @@ public final class TransactionStore {
             .expireAfterAccess(15, TimeUnit.SECONDS)
             .removalListener((RemovalListener<Integer, Entry>) (key, value, cause) -> {
                 if (cause == RemovalCause.EXPIRED && value != null) {
+                    final EngineConnectionState state = (EngineConnectionState) ((SpongeEngineConnection) this.connection()).connection().getPacketListener();
                     value.getChannel().handleTransactionResponse(
-                        this.connection(), value.getData(), TransactionResult.failure(new TimeoutException()));
+                        this.connection(), state, value.getData(), TransactionResult.failure(new TimeoutException()));
                 }
             })
             .build().asMap();

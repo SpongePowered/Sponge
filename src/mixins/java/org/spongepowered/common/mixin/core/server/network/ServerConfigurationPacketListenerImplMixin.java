@@ -49,6 +49,7 @@ import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.network.channel.ConnectionUtil;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
@@ -111,10 +112,6 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
                             throw new CompletionException(throwable);
                         }
                     }
-
-                    //TODO: Fix me
-                    /*((SpongeChannelManager) SpongeCommon.game().channelManager()).sendChannelRegistrations(
-                            ((ConnectionBridge) this.connection).bridge$getEngineConnection());*/
 
                     try {
                         this.impl$skipBanService = true;
@@ -179,5 +176,12 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
         if (store.isEmpty()) {
             this.shadow$finishCurrentTask(ServerConfigurationPacketListenerImplMixin.impl$SPONGE_CONFIGURATION_TYPE);
         }
+    }
+
+    @Inject(method = "handleConfigurationFinished", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/players/PlayerList;getPlayerForLogin(Lcom/mojang/authlib/GameProfile;Lnet/minecraft/server/level/ClientInformation;)Lnet/minecraft/server/level/ServerPlayer;"))
+    private void impl$sendChannels(final CallbackInfo ci) {
+        ((SpongeChannelManager) SpongeCommon.game().channelManager()).sendChannelRegistrations(
+                ((ConnectionBridge) this.connection).bridge$getEngineConnection());
     }
 }

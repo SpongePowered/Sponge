@@ -32,6 +32,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -49,7 +50,7 @@ public abstract class ClientPacketListenerMixin_Vanilla extends ClientCommonPack
     @Inject(method = "handleCustomPayload", cancellable = true, at = @At(value = "HEAD"))
     private void vanilla$handleCustomPayload(final CustomPacketPayload packet, CallbackInfo ci) {
         final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
-        if (channelRegistry.handlePlayPayload(((ConnectionBridge) this.connection).bridge$getEngineConnection(), packet)) {
+        if (channelRegistry.handlePlayPayload(((ConnectionBridge) this.connection).bridge$getEngineConnection(), (EngineConnectionState) this, packet)) {
             ci.cancel();
         }
     }

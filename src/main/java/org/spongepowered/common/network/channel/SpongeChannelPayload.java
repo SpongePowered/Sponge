@@ -22,25 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.network.channel.packet;
+package org.spongepowered.common.network.channel;
 
-import org.spongepowered.api.network.EngineConnectionState;
-import org.spongepowered.api.network.channel.packet.Packet;
-import org.spongepowered.api.network.channel.packet.PacketHandler;
-import org.spongepowered.api.network.channel.packet.RequestPacket;
-import org.spongepowered.api.network.channel.packet.ResponsePacketHandler;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public final class PacketToResponseHandler<P extends RequestPacket<R>, R extends Packet, S extends EngineConnectionState>
-        implements ResponsePacketHandler<P, R, S> {
+public record SpongeChannelPayload(Type<? extends CustomPacketPayload> type, FriendlyByteBuf payload) implements CustomPacketPayload {
 
-    private final PacketHandler<? super R, ? super S> handler;
+    public static StreamCodec<FriendlyByteBuf, SpongeChannelPayload> streamCodec(final Type<? extends CustomPacketPayload> type, final int maxPayloadSize) {
+        return CustomPacketPayload.codec(
+                SpongeChannelPayload::write, (b) -> {
+                    int readableBytes = b.readableBytes();
+                    if (readableBytes >= 0 && readableBytes <= maxPayloadSize) {
+                        return new SpongeChannelPayload(type, new FriendlyByteBuf(b.readBytes(b.readableBytes())));
+                    }
+                    throw new IllegalArgumentException("Payload may not be larger than " + maxPayloadSize + " bytes");
+                });
+    }
 
-    public PacketToResponseHandler(final PacketHandler<? super R, ? super S> handler) {
-        this.handler = handler;
+    private void write(FriendlyByteBuf $$0) {
+        $$0.writeBytes(this.payload);
     }
 
     @Override
-    public void handleResponse(final R responsePacket, final P requestPacket, final S state) {
-        this.handler.handle(responsePacket, state);
+    public Type<? extends CustomPacketPayload> type() {
+        return this.type;
     }
 }
