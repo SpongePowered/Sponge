@@ -131,14 +131,4 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
     public NBTDataType data$getNBTDataType() {
         return NBTDataTypes.ITEMSTACK;
     }
-
-    @Inject(method = "setEntityRepresentation", at = @At("HEAD"), cancellable = true)
-    private void impl$onSetEntityRepresentation(final CallbackInfo ci) {
-        //If a plugin or a mod spawns in an air item entity it will end up rooting
-        //the entity and its assigned world in the static EMPTY item stack. Prevent this.
-        //Or even Minecraft itself... MC-268011
-        if ((Object) this == ItemStack.EMPTY) {
-            ci.cancel();
-        }
-    }
 }
