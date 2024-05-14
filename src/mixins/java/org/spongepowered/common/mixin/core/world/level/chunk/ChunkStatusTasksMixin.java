@@ -46,6 +46,7 @@ public abstract class ChunkStatusTasksMixin {
     /**
      * @author aromaa - December 17th, 2023 - 1.19.4
      * @author aromaa - December 18th, 2023 - Updated to 1.20.2
+     * @author aromaa - May 14th, 2024 - Updated to 1.20.6
      * @reason Fixes a deadlock when the world is unloading/unloaded.
      * The Blender#of method calls to the IOWorker#isOldChunkAround which
      * submits a task to the main thread while blocking the current thread
@@ -54,6 +55,10 @@ public abstract class ChunkStatusTasksMixin {
      * indefinitely. Fixes this by special casing the IOWorker#isOldChunkAround
      * to throw a special exception when the IOWorker has finished up its work
      * and catches it here to convert it to a ChunkLoadingFailure.
+     *
+     * In previous versions you were able to return ChunkResult here but this
+     * is no longer the case, so we instead return null here which
+     * needs to be checking for in ChunkMap.
      *
      * See IOWorkerMixin#createOldDataForRegion
      */
@@ -69,7 +74,6 @@ public abstract class ChunkStatusTasksMixin {
                 throw e;
             }
 
-            // TODO what to return here? return ChunkHolder.UNLOADED_CHUNK_FUTURE;
             return null;
         } //Sponge end
     }

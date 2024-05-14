@@ -70,6 +70,7 @@ import org.spongepowered.common.world.level.chunk.storage.SpongeIOWorkerType;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin implements ChunkMapBridge {
@@ -208,5 +209,21 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         if (!((ServerLevelBridge) this.level).bridge$isLoaded()) {
             cir.setReturnValue(ChunkHolder.UNLOADED_CHUNK_FUTURE);
         }
+    }
+
+    @Redirect(method = "lambda$scheduleChunkGeneration$30",
+            at = @At(value = "INVOKE",
+                    target = "Ljava/util/concurrent/CompletableFuture;thenApply(Ljava/util/function/Function;)Ljava/util/concurrent/CompletableFuture;",
+                    remap = false),
+            slice = @Slice(
+                    from = @At(value = "INVOKE",
+                            target = "Lnet/minecraft/server/level/progress/ChunkProgressListener;onStatusChange(Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/chunk/status/ChunkStatus;)V")))
+    private CompletableFuture<ChunkResult<ChunkAccess>> impl$guardForUnloadedChunkOnGenerate(final CompletableFuture<ChunkAccess> instance,
+                                                                                             final Function<ChunkAccess, ChunkResult<ChunkAccess>> function) {
+        //See ChunkStatusTasksMixin, only applies for when generation is cancelled due to world unload
+        if (instance != null) {
+            return instance.thenApply(function);
+        }
+        return ChunkHolder.UNLOADED_CHUNK_FUTURE;
     }
 }
