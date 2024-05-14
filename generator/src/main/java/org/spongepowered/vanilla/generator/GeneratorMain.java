@@ -55,7 +55,6 @@ import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.horse.Markings;
 import net.minecraft.world.entity.animal.horse.Variant;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
@@ -221,7 +220,7 @@ public final class GeneratorMain {
                  "item",
                  "FireworkShapes",
                   FireworkExplosion.Shape.class,
-                 "getName",
+                 "getSerializedName",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
@@ -238,12 +237,12 @@ public final class GeneratorMain {
                  "getName",
                  "sponge"
             ),
-            new EnumEntriesValidator<>(
+            new RegistryEntriesGenerator<>(
                  "data.type",
                  "ArmorMaterials",
-                 ArmorMaterials.class,
-                 "getName",
-                 "sponge"
+                 "ArmorMaterials",
+                 context.relativeClass("data.type", "ArmorMaterial"),
+                 Registries.ARMOR_MATERIAL
             ),
             new EnumEntriesValidator<>(
                  "data.type",
@@ -575,7 +574,8 @@ public final class GeneratorMain {
             ),
             new BlockStateDataProviderGenerator(),
             new BlockStatePropertiesGenerator(),
-            new BlockStatePropertyKeysGenerator(),
+            // TODO fix me
+            //new BlockStatePropertyKeysGenerator(),
             new RegistryEntriesGenerator<>(
                     "world.generation.feature",
                     "PlacedFeatures",
