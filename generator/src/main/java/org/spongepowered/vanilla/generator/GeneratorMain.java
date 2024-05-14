@@ -55,14 +55,13 @@ import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.horse.Markings;
 import net.minecraft.world.entity.animal.horse.Variant;
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.level.DataPackConfig;
+import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.block.state.properties.BambooLeaves;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import org.tinylog.Logger;
@@ -147,7 +146,7 @@ public final class GeneratorMain {
         // and call to WorldStem.load in net.minecraft.server.Main
         // We don't currently try to load any datapacks here
         final var packRepository = ServerPacksSource.createVanillaTrustedRepository();
-        MinecraftServer.configurePackRepository(packRepository, DataPackConfig.DEFAULT, /* safeMode = */ false, FeatureFlags.DEFAULT_FLAGS);
+        MinecraftServer.configurePackRepository(packRepository, WorldDataConfiguration.DEFAULT, /* safeMode = */ false, true);
         final CloseableResourceManager resourceManager = new MultiPackResourceManager(PackType.SERVER_DATA, packRepository.openAllSelected());
 
         // WorldLoader.load
@@ -165,7 +164,7 @@ public final class GeneratorMain {
         final RegistryAccess.Frozen compositeRegistries = withDimensions.getAccessForLoading(RegistryLayer.RELOADABLE);
         final var resourcesFuture = ReloadableServerResources.loadResources(
             resourceManager,
-            compositeRegistries,
+            withDimensions,
             packRepository.getRequestedFeatureFlags(),
             CommandSelection.ALL,
             2, // functionPermissionLevel
@@ -176,7 +175,7 @@ public final class GeneratorMain {
                 resourceManager.close();
             }
         }).thenApply(resources -> {
-            resources.updateRegistryTags(compositeRegistries);
+            resources.updateRegistryTags();
             return resources;
         });
 
@@ -221,7 +220,7 @@ public final class GeneratorMain {
             new EnumEntriesValidator<>(
                  "item",
                  "FireworkShapes",
-                  FireworkRocketItem.Shape.class,
+                  FireworkExplosion.Shape.class,
                  "getName",
                  "sponge"
             ),
