@@ -240,7 +240,7 @@ public final class GeneratorMain {
             new RegistryEntriesGenerator<>(
                  "data.type",
                  "ArmorMaterials",
-                 "ArmorMaterials",
+                 "ARMOR_MATERIAL",
                  context.relativeClass("data.type", "ArmorMaterial"),
                  Registries.ARMOR_MATERIAL
             ),
