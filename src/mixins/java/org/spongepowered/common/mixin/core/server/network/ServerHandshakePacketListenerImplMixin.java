@@ -24,23 +24,38 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
+import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
+import net.minecraft.network.protocol.login.LoginProtocols;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerHandshakePacketListenerImpl;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.network.ServerSideConnectionEvent;
+import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
-import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
+import org.spongepowered.common.bridge.server.network.ServerHandshakePacketListenerImplBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.network.SpongeEngineConnection;
 import org.spongepowered.common.util.NetworkUtil;
 
 @Mixin(ServerHandshakePacketListenerImpl.class)
-public abstract class ServerHandshakePacketListenerImplMixin implements ConnectionHolderBridge {
+public abstract class ServerHandshakePacketListenerImplMixin implements ServerHandshakePacketListenerImplBridge {
 
     @Shadow @Final private Connection connection;
+
+    private boolean impl$transferred;
 
     @Inject(method = "handleIntention", at = @At("HEAD"))
     private void impl$updateVersionAndHost(final ClientIntentionPacket packetIn, final CallbackInfo ci) {
@@ -50,7 +65,48 @@ public abstract class ServerHandshakePacketListenerImplMixin implements Connecti
     }
 
     @Override
-    public Connection bridge$getConnection() {
-        return this.connection;
+    public boolean bridge$transferred() {
+        return this.impl$transferred;
+    }
+
+    @Inject(method = "handleIntention", at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/network/ServerHandshakePacketListenerImpl;beginLogin(Lnet/minecraft/network/protocol/handshake/ClientIntentionPacket;Z)V"),
+            slice = @Slice(
+                    to = @At(
+                            value = "INVOKE",
+                            target = "Lnet/minecraft/server/MinecraftServer;getStatus()Lnet/minecraft/network/protocol/status/ServerStatus;")),
+            cancellable = true)
+    private void impl$onLogin(final ClientIntentionPacket $$0, final CallbackInfo ci) {
+        final SpongeEngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
+        final Component message = Component.text("You are not allowed to log in to this server.");
+        final ServerSideConnectionEvent.Intent event = SpongeEventFactory.createServerSideConnectionEventIntent(
+                PhaseTracker.getCauseStackManager().currentCause(), message, message, (ServerSideConnection) connection, false);
+        if (connection.postGuardedEvent(event)) {
+            final net.minecraft.network.chat.Component kickReason = SpongeAdventure.asVanilla(event.message());
+            this.connection.setupOutboundProtocol(LoginProtocols.CLIENTBOUND);
+            this.connection.send(new ClientboundLoginDisconnectPacket(kickReason));
+            this.connection.disconnect(kickReason);
+            ci.cancel();
+        }
+    }
+
+    @Redirect(method = "handleIntention", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;acceptsTransfers()Z"))
+    private boolean impl$onTransfer(final MinecraftServer instance) {
+        this.impl$transferred = true;
+        final SpongeEngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
+        final Component message = Component.translatable("multiplayer.disconnect.transfers_disabled");
+        final ServerSideConnectionEvent.Intent event = SpongeEventFactory.createServerSideConnectionEventIntent(
+                PhaseTracker.getCauseStackManager().currentCause(), message, message, (ServerSideConnection) connection, true);
+        event.setCancelled(!instance.acceptsTransfers());
+        if (connection.postGuardedEvent(event)) {
+            ((ConnectionBridge) this.connection).bridge$setKickReason(SpongeAdventure.asVanilla(event.message()));
+        }
+        return !event.isCancelled();
+    }
+
+    @ModifyArg(method = "handleIntention", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/login/ClientboundLoginDisconnectPacket;<init>(Lnet/minecraft/network/chat/Component;)V"))
+    private net.minecraft.network.chat.Component impl$setTransferDisconnectMessage(final net.minecraft.network.chat.Component component) {
+        return ((ConnectionBridge) this.connection).bridge$getKickReason();
     }
 }

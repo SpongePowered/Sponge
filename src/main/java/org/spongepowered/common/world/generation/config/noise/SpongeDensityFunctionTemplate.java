@@ -68,12 +68,12 @@ public record SpongeDensityFunctionTemplate(ResourceKey key, DensityFunction rep
     }
 
     public static JsonElement encode(final DensityFunctionTemplate template, final RegistryAccess registryAccess) {
-        return DensityFunction.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, (DensityFunction) template.densityFunction()).getOrThrow(false, e -> {});
+        return DensityFunction.DIRECT_CODEC.encodeStart(JsonOps.INSTANCE, (DensityFunction) template.densityFunction()).getOrThrow();
     }
 
     public static DensityFunction decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return DensityFunction.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+        return DensityFunction.DIRECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static SpongeDensityFunctionTemplate decode(final DataPack<DensityFunctionTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {

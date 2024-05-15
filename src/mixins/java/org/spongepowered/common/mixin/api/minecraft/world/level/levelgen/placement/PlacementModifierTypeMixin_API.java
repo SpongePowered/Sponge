@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.placem
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.resources.RegistryOps;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataView;
@@ -41,7 +41,7 @@ import org.spongepowered.common.SpongeCommon;
 public interface PlacementModifierTypeMixin_API<P extends net.minecraft.world.level.levelgen.placement.PlacementModifier> extends PlacementModifierType {
 
     //@formatter:off
-    @Shadow Codec<P> shadow$codec();
+    @Shadow MapCodec<P> shadow$codec();
     //@formatter:on
 
     @Override
@@ -49,7 +49,7 @@ public interface PlacementModifierTypeMixin_API<P extends net.minecraft.world.le
         try {
             final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(config));
             final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
-            return (PlacementModifier) this.shadow$codec().parse(ops, json).getOrThrow(false, e -> {});
+            return (PlacementModifier) this.shadow$codec().codec().parse(ops, json).getOrThrow();
         } catch (Exception e) {
             throw new IllegalArgumentException("Could not configure PlacementModifier." , e);
         }

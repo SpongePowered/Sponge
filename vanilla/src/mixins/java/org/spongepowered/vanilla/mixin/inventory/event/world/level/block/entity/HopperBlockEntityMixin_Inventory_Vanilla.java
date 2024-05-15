@@ -30,7 +30,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,14 +51,12 @@ public abstract class HopperBlockEntityMixin_Inventory_Vanilla {
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;isFullContainer(Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Z"))
     private static boolean vanilla$throwTransferPreIfNotFull(
-        final Container attachedContainer, final Direction direction, final Level level, final BlockPos pos, final BlockState state,
-        final Container container
-    ) {
+        final Container attachedContainer, final Direction direction, final Level level, final BlockPos pos, final HopperBlockEntity hopper) {
         final boolean result = HopperBlockEntityAccessor.invoker$isFullContainer(attachedContainer, direction);
         if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
             return result;
         }
-        return InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(container), InventoryUtil.toInventory(attachedContainer)).isCancelled();
+        return InventoryEventFactory.callTransferPre(InventoryUtil.toInventory(hopper), InventoryUtil.toInventory(attachedContainer)).isCancelled();
     }
 
 
@@ -70,17 +67,21 @@ public abstract class HopperBlockEntityMixin_Inventory_Vanilla {
             target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z",
             ordinal = 1))
     private static void vanilla$afterPutStackInSlots(
-        final Level var0, final BlockPos var1, final BlockState var2, final Container var3,
+        final Level var0, final BlockPos var1, final HopperBlockEntity var3,
         final CallbackInfoReturnable<Boolean> cir, final Container iInventory, final Direction enumFacing,
-        final int i, final ItemStack itemStack, final ItemStack itemStack1
+        final int i, final ItemStack itemStack, int count, final ItemStack itemStack1
     ) {
         // after putStackInInventoryAllSlots if the transfer worked
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack1.isEmpty()) {
             // Capture Insert in Origin
             final TrackedInventoryBridge capture = InventoryUtil.forCapture(var3);
-            final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) var3, i, itemStack);
+            int newCount = itemStack.getCount();
+            itemStack.setCount(count);
+            var originalStack = itemStack.copy();
+            itemStack.setCount(newCount);
+            final SlotTransaction sourceSlotTransaction = InventoryEventFactory.captureTransaction(capture, (Inventory) var3, i, originalStack);
             // Call event
-            InventoryEventFactory.callTransferPost(capture, (Inventory) iInventory, InventoryUtil.toInventory(iInventory), itemStack, sourceSlotTransaction);
+            InventoryEventFactory.callTransferPost(capture, (Inventory) iInventory, InventoryUtil.toInventory(iInventory), originalStack, sourceSlotTransaction);
         }
     }
 

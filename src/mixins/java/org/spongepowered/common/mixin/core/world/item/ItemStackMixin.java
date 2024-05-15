@@ -24,13 +24,18 @@
  */
 package org.spongepowered.common.mixin.core.world.item;
 
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.ItemLike;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,17 +55,16 @@ import java.util.Optional;
 public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataCompoundHolder {
 
     // @formatter:off
-    @Shadow private CompoundTag tag;
+    @Shadow public abstract boolean shadow$isEmpty();
+    @Shadow @Final private PatchedDataComponentMap components;
 
-    @Shadow public abstract void shadow$setTag(@Nullable CompoundTag nbt);
-    @Shadow @Nullable public abstract CompoundTag shadow$getTag();
     // @formatter:on
 
-    @Shadow public abstract boolean isEmpty();
+
 
     @Override
     public <E> Optional<E> bridge$get(final Key<@NonNull ? extends Value<E>> key) {
-        if (this.isEmpty()) {
+        if (this.shadow$isEmpty()) {
             return Optional.empty();
         }
         return DataHolderProcessor.bridge$get(this, key);
@@ -68,7 +72,7 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
 
     @Override
     public <E> DataTransactionResult bridge$offer(final Key<@NonNull ? extends Value<E>> key, final E value) {
-        if (this.isEmpty()) {
+        if (this.shadow$isEmpty()) {
             return DataTransactionResult.failNoData();
         }
         return DataHolderProcessor.bridge$offer(this, key, value);
@@ -76,7 +80,7 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
 
     @Override
     public <E> DataTransactionResult bridge$remove(final Key<@NonNull ? extends Value<E>> key) {
-        if (this.isEmpty()) {
+        if (this.shadow$isEmpty()) {
             return DataTransactionResult.failNoData();
         }
         return DataHolderProcessor.bridge$remove(this, key);
@@ -84,12 +88,12 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
 
     @Override
     public CompoundTag data$getCompound() {
-        return this.shadow$getTag();
+        return this.components.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe();
     }
 
     @Override
     public void data$setCompound(final CompoundTag nbt) {
-        this.shadow$setTag(nbt);
+        this.components.set(DataComponents.CUSTOM_DATA, nbt == null ? CustomData.EMPTY : CustomData.of(nbt));
     }
 
     // Add our manipulators when creating copies from this ItemStack:
@@ -106,24 +110,18 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
     }
 
     // Read custom data from nbt
-    @Inject(method = "<init>(Lnet/minecraft/nbt/CompoundTag;)V", at = @At("RETURN"))
-    private void impl$onRead(final CompoundTag compound, final CallbackInfo info) {
-        if (!this.isEmpty()) {
+    @Inject(method = "<init>(Lnet/minecraft/world/level/ItemLike;ILnet/minecraft/core/component/PatchedDataComponentMap;)V", at = @At("RETURN"))
+    private void impl$onRead(final ItemLike $$0, final int $$1, final PatchedDataComponentMap $$2, final CallbackInfo ci) {
+        if (!this.shadow$isEmpty()) {
             DataUtil.syncTagToData(this); // Deserialize
             DataUtil.syncDataToTag(this); // Sync back after reading
         }
-        // Prune empty stack tag compound if its empty to enable stacking.
-        if (this.tag != null && this.tag.isEmpty()) {
-            this.tag = null;
-        }
     }
 
-    @Inject(method = "setTag", at = @At("RETURN"))
-    private void impl$onSet(final CompoundTag compound, final CallbackInfo callbackInfo) {
-        if (this.shadow$getTag() != compound) {
+    @Inject(method = "set", at = @At("RETURN"))
+    private <T> void impl$onSetCustomData(final DataComponentType<? super T> $$0, final T $$1, final CallbackInfoReturnable<T> cir) {
+        if ($$0.equals(DataComponents.CUSTOM_DATA)) {
             this.bridge$clear();
-        }
-        if (compound != null && !compound.isEmpty()) {
             DataUtil.syncTagToData(this); // Deserialize
             DataUtil.syncDataToTag(this); // Sync back after reading
         }
@@ -132,15 +130,5 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
     @Override
     public NBTDataType data$getNBTDataType() {
         return NBTDataTypes.ITEMSTACK;
-    }
-
-    @Inject(method = "setEntityRepresentation", at = @At("HEAD"), cancellable = true)
-    private void impl$onSetEntityRepresentation(final CallbackInfo ci) {
-        //If a plugin or a mod spawns in an air item entity it will end up rooting
-        //the entity and its assigned world in the static EMPTY item stack. Prevent this.
-        //Or even Minecraft itself... MC-268011
-        if ((Object) this == ItemStack.EMPTY) {
-            ci.cancel();
-        }
     }
 }

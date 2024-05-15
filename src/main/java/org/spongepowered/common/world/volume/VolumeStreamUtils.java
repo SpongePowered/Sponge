@@ -41,12 +41,12 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.entity.EntitySection;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -260,14 +260,14 @@ public final class VolumeStreamUtils {
         final boolean shouldCarbonCopy, final ObjectArrayMutableBlockEntityBuffer backingVolume, final @Nullable Level level
     ) {
         return shouldCarbonCopy ? (pos, tile) -> {
-            final CompoundTag nbt = tile.saveWithFullMetadata();
+            final CompoundTag nbt = tile.saveWithFullMetadata(tile.getLevel().registryAccess()); // TODO NPE possible?
             final BlockState state = tile.getBlockState();
             final net.minecraft.world.level.block.entity.@Nullable BlockEntity cloned = tile.getType().create(pos, state);
             Objects.requireNonNull(
                 cloned,
                 () -> String.format(
                     "TileEntityType[%s] creates a null TileEntity!", BlockEntityType.getKey(tile.getType()))
-            ).load(nbt);
+            ).loadWithComponents(nbt, tile.getLevel().registryAccess()); // TODO NPE possible?
 
             if (level != null) {
                 ((BlockEntityAccessor) cloned).accessor$level(level);

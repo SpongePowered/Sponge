@@ -24,36 +24,23 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.item.enchantment.SpongeEnchantment;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.NBTCollectors;
-import org.spongepowered.common.util.NBTStreams;
 import org.spongepowered.common.util.Predicates;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class BookPagesItemStackData {
-
-    private static final String NBTKeyAppliedEnchantments = Constants.Item.ITEM_ENCHANTMENT_LIST;
-    private static final String NBTKeyStoredEnchantments = Constants.Item.ITEM_STORED_ENCHANTMENTS_LIST;
 
     private BookPagesItemStackData() {
     }
@@ -63,64 +50,38 @@ public final class BookPagesItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.APPLIED_ENCHANTMENTS)
-                        .get(h -> BookPagesItemStackData.get(h, BookPagesItemStackData.NBTKeyAppliedEnchantments))
-                        .set((h, v) -> BookPagesItemStackData.set(h, v, iv -> iv.stream().filter(Predicates.distinctBy(Enchantment::type)), BookPagesItemStackData.NBTKeyAppliedEnchantments))
-                        .delete(h -> BookPagesItemStackData.delete(h, BookPagesItemStackData.NBTKeyAppliedEnchantments))
+                        .get(h -> BookPagesItemStackData.get(h, DataComponents.ENCHANTMENTS))
+                        .set((h, v) -> BookPagesItemStackData.set(h, v, iv -> iv.stream().filter(Predicates.distinctBy(Enchantment::type)), DataComponents.ENCHANTMENTS))
+                        .delete(h -> BookPagesItemStackData.delete(h, DataComponents.ENCHANTMENTS))
                     .create(Keys.STORED_ENCHANTMENTS)
-                        .get(h -> BookPagesItemStackData.get(h, BookPagesItemStackData.NBTKeyStoredEnchantments))
-                        .set((h, v) -> BookPagesItemStackData.set(h, v, Collection::stream, BookPagesItemStackData.NBTKeyStoredEnchantments))
-                        .delete(h -> BookPagesItemStackData.delete(h, BookPagesItemStackData.NBTKeyStoredEnchantments))
+                        .get(h -> BookPagesItemStackData.get(h, DataComponents.STORED_ENCHANTMENTS))
+                        .set((h, v) -> BookPagesItemStackData.set(h, v, Collection::stream, DataComponents.STORED_ENCHANTMENTS))
+                        .delete(h -> BookPagesItemStackData.delete(h, DataComponents.STORED_ENCHANTMENTS))
                         .supports(h -> h.getItem() == Items.ENCHANTED_BOOK);
     }
     // @formatter:on
 
-    private static List<Enchantment> get(final ItemStack holder, final String nbtKey) {
-        final CompoundTag tag = holder.getTag();
-        if (tag == null || !tag.contains(nbtKey, Constants.NBT.TAG_LIST)) {
-            return new ArrayList<>();
-        }
-        final ListTag list = tag.getList(nbtKey, Constants.NBT.TAG_COMPOUND);
-        return NBTStreams.toCompounds(list)
-                .map(BookPagesItemStackData::enchantmentFromNbt)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+    private static List<Enchantment> get(final ItemStack holder, final DataComponentType<ItemEnchantments> component) {
+        return holder.getOrDefault(component, ItemEnchantments.EMPTY).entrySet().stream()
+                .map(e -> Enchantment.of((EnchantmentType) e.getKey().value(), e.getIntValue())).toList();
     }
 
     private static boolean set(final ItemStack holder, final List<Enchantment> value, final Function<List<Enchantment>, Stream<Enchantment>> filter,
-            final String nbtKey) {
+            final DataComponentType<ItemEnchantments> component) {
         if (value.isEmpty()) {
-            return BookPagesItemStackData.delete(holder, nbtKey);
+            return BookPagesItemStackData.delete(holder, component);
         }
-        final CompoundTag tag = holder.getOrCreateTag();
-        final ListTag list = filter.apply(value)
-                .map(BookPagesItemStackData::enchantmentToNbt)
-                .collect(NBTCollectors.toTagList());
-        tag.put(nbtKey, list);
+        holder.update(component, ItemEnchantments.EMPTY, ench -> {
+            final ItemEnchantments.Mutable mutable = new ItemEnchantments.Mutable(ench);
+            mutable.keySet().clear();
+            value.forEach(e -> mutable.set((net.minecraft.world.item.enchantment.Enchantment) e.type(), e.level()));
+            return mutable.toImmutable();
+        });
         return true;
     }
 
-    private static boolean delete(final ItemStack holder, final String nbtKey) {
-        final CompoundTag tag = holder.getTag();
-        if (tag != null) {
-            tag.remove(nbtKey);
-        }
+    private static boolean delete(final ItemStack holder, final DataComponentType<ItemEnchantments> component) {
+        holder.remove(component);
         return true;
-    }
-
-    private static Enchantment enchantmentFromNbt(final CompoundTag compound) {
-        final String enchantmentId = compound.getString(Constants.Item.ITEM_ENCHANTMENT_ID);
-        final int level = compound.getInt(Constants.Item.ITEM_ENCHANTMENT_LEVEL);
-        final Registry<net.minecraft.world.item.enchantment.Enchantment> enchantmentRegistry = SpongeCommon.vanillaRegistry(Registries.ENCHANTMENT);
-        final EnchantmentType enchantment = (EnchantmentType) enchantmentRegistry.getOptional(ResourceLocation.tryParse(enchantmentId)).orElse(null);
-        return enchantment == null ? null : new SpongeEnchantment(enchantment, level);
-    }
-
-    private static CompoundTag enchantmentToNbt(final Enchantment enchantment) {
-        final CompoundTag compound = new CompoundTag();
-        final Registry<net.minecraft.world.item.enchantment.Enchantment> enchantmentRegistry = SpongeCommon.vanillaRegistry(Registries.ENCHANTMENT);
-        final String enchantmentId = String.valueOf(enchantmentRegistry.getKey((net.minecraft.world.item.enchantment.Enchantment) enchantment.type()));
-        compound.putString(Constants.Item.ITEM_ENCHANTMENT_ID, enchantmentId);
-        compound.putShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, (short) ((byte) enchantment.level()));
-        return compound;
     }
 }

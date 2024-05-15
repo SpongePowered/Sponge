@@ -32,7 +32,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.BlastingRecipe;
@@ -60,8 +59,8 @@ import java.util.function.Function;
 public abstract class SimpleCookingSerializerMixin<T extends AbstractCookingRecipe> {
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE",
-            target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"))
-    private Codec<T> impl$onCreateCodec(
+            target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;mapCodec(Ljava/util/function/Function;)Lcom/mojang/serialization/MapCodec;"))
+    private MapCodec<T> impl$onCreateCodec(
             final Function<RecordCodecBuilder.Instance<T>, ? extends App<RecordCodecBuilder.Mu<T>, T>> builder,
             final AbstractCookingRecipe.Factory<T> $$0,
             final int defaultCookingTime) {
@@ -76,7 +75,7 @@ public abstract class SimpleCookingSerializerMixin<T extends AbstractCookingReci
                             return Either.left(si);
                         }
                         return Either.right(fr);
-                    }).codec();
+                    });
         }
 
         if (constructed instanceof CampfireCookingRecipe) {
@@ -87,7 +86,7 @@ public abstract class SimpleCookingSerializerMixin<T extends AbstractCookingReci
                             return Either.left(si);
                         }
                         return Either.right(fr);
-                    }).codec();
+                    });
         }
 
 
@@ -99,7 +98,7 @@ public abstract class SimpleCookingSerializerMixin<T extends AbstractCookingReci
                             return Either.left(si);
                         }
                         return Either.right(fr);
-                    }).codec();
+                    });
         }
 
 
@@ -112,11 +111,11 @@ public abstract class SimpleCookingSerializerMixin<T extends AbstractCookingReci
                             return Either.left(si);
                         }
                         return Either.right(fr);
-                    }).codec();
+                    });
         }
 
         // TODO no sponge handling?
-        return mcMapCodec.codec();
+        return mcMapCodec;
     }
 
    private static <S extends AbstractCookingRecipe & ResultFunctionRecipe> MapCodec<S> impl$buildCodec(CookingRecipeFactory<S> factory, int defaultCookingTime)
@@ -124,7 +123,7 @@ public abstract class SimpleCookingSerializerMixin<T extends AbstractCookingReci
        return RecordCodecBuilder.mapCodec(
                $$2 -> $$2.group(
                                Codec.STRING.fieldOf(SPONGE_TYPE).forGetter(a -> "custom"),
-                               ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(AbstractCookingRecipe::getGroup),
+                               Codec.STRING.optionalFieldOf("group", "").forGetter(AbstractCookingRecipe::getGroup),
                                CookingBookCategory.CODEC.fieldOf("category").orElse(CookingBookCategory.MISC).forGetter(AbstractCookingRecipe::category),
                                Ingredient.CODEC_NONEMPTY.fieldOf(Constants.Recipe.COOKING_INGREDIENT).forGetter($$0x -> $$0x.getIngredients().get(0)),
                                BuiltInRegistries.ITEM.byNameCodec().xmap(ItemStack::new, ItemStack::getItem).fieldOf(Constants.Recipe.RESULT).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),

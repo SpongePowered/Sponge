@@ -26,9 +26,10 @@ package org.spongepowered.common.mixin.api.minecraft.world.item;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Rarity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemRarity;
@@ -51,14 +52,15 @@ import java.util.stream.Collectors;
 public abstract class ItemMixin_API implements ItemType, SpongeImmutableDataHolder<ItemType> {
 
     // @formatter:off
-    @Shadow @Final private Rarity rarity;
     @Shadow @Final private Holder.Reference<Item> builtInRegistryHolder;
+    @Shadow @Final private DataComponentMap components;
 
-    @Shadow public abstract int shadow$getMaxStackSize();
     @Shadow public abstract String shadow$getDescriptionId();
     @Shadow @Nullable public abstract Item shadow$getCraftingRemainingItem();
 
+    @Shadow public abstract int shadow$getDefaultMaxStackSize();
     // @formatter:on
+
 
     @Nullable protected BlockType api$blockType = null;
 
@@ -69,12 +71,12 @@ public abstract class ItemMixin_API implements ItemType, SpongeImmutableDataHold
 
     @Override
     public int maxStackQuantity() {
-        return this.shadow$getMaxStackSize();
+        return this.shadow$getDefaultMaxStackSize();
     }
 
     @Override
     public ItemRarity rarity() {
-        return (ItemRarity) (Object) this.rarity;
+        return (ItemRarity) (Object) this.components.get(DataComponents.RARITY);
     }
 
     @Override

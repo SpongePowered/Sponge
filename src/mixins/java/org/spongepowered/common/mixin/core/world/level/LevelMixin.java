@@ -76,7 +76,6 @@ import java.util.function.Predicate;
 public abstract class LevelMixin implements LevelBridge, LevelAccessor {
 
     // @formatter: off
-    @Mutable @Shadow @Final private net.minecraft.resources.ResourceKey<DimensionType> dimensionTypeId;
     @Mutable @Shadow @Final private Holder<DimensionType> dimensionTypeRegistration;
     @Shadow protected float oRainLevel;
     @Shadow protected float rainLevel;
@@ -109,7 +108,6 @@ public abstract class LevelMixin implements LevelBridge, LevelAccessor {
     @Override
     public void bridge$adjustDimensionLogic(final DimensionType dimensionType) {
         this.dimensionTypeRegistration = Holder.direct(dimensionType);
-        this.dimensionTypeId = dimensionTypeRegistration.unwrapKey().orElseThrow(() -> new IllegalArgumentException("Dimension must be registered, got " + dimensionTypeRegistration));
 
         // TODO Minecraft 1.16.4 - Re-create the WorldBorder due to new coordinate scale, send that updated packet to players
     }

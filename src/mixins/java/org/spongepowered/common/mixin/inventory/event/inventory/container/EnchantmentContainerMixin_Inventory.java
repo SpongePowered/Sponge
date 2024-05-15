@@ -28,6 +28,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.EnchantmentMenu;
@@ -73,7 +74,7 @@ public abstract class EnchantmentContainerMixin_Inventory {
     }
 
     @Inject(method = "getEnchantmentList", cancellable = true, at = @At(value = "RETURN"))
-    private void impl$onBuildEnchantmentList(
+    private void impl$onBuildEnchantmentList(final FeatureFlagSet ffs,
         final ItemStack stack, final int enchantSlot, final int level, final CallbackInfoReturnable<List<EnchantmentInstance>> cir) {
         final List<EnchantmentInstance> newList = InventoryEventFactory
                 .callEnchantEventEnchantmentList((EnchantmentMenu) (Object) this, this.enchantmentSeed.get(), stack, enchantSlot, level, cir.getReturnValue());

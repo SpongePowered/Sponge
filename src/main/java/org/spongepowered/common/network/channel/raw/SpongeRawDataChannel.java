@@ -26,6 +26,7 @@ package org.spongepowered.common.network.channel.raw;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.raw.RawDataChannel;
 import org.spongepowered.api.network.channel.raw.handshake.RawHandshakeDataChannel;
@@ -56,17 +57,17 @@ public class SpongeRawDataChannel extends SpongeChannel implements RawDataChanne
     }
 
     @Override
-    protected void handlePlayPayload(final EngineConnection connection, final ChannelBuf payload) {
-        this.play.handlePayload(connection, payload);
+    protected void handlePlayPayload(final EngineConnection connection, final EngineConnectionState state, final ChannelBuf payload) {
+        this.play.handlePayload(state, payload);
     }
 
     @Override
-    protected void handleLoginRequestPayload(EngineConnection connection, int transactionId, ChannelBuf payload) {
-        this.login.handleRequestPayload(connection, payload, transactionId);
+    protected void handleLoginRequestPayload(final EngineConnection connection, final EngineConnectionState state, final int transactionId, final ChannelBuf payload) {
+        this.login.handleRequestPayload(connection, state, payload, transactionId);
     }
 
     @Override
-    protected void handleTransactionResponse(EngineConnection connection, Object stored, TransactionResult result) {
+    protected void handleTransactionResponse(final EngineConnection connection, final EngineConnectionState state, final Object stored, final TransactionResult result) {
         this.login.handleTransactionResponse(connection, stored, result);
     }
 

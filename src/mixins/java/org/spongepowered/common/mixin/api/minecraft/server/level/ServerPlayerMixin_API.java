@@ -41,6 +41,7 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.MessageSignature;
 import net.minecraft.network.chat.PlayerChatMessage;
@@ -85,7 +86,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.message.PlayerChatEvent;
 import org.spongepowered.api.event.world.ChangeWorldBorderEvent;
-import org.spongepowered.api.network.ServerPlayerConnection;
+import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -102,6 +103,7 @@ import org.spongepowered.common.accessor.server.network.ServerCommonPacketListen
 import org.spongepowered.common.accessor.server.network.ServerGamePacketListenerImplAccessor;
 import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
@@ -212,8 +214,9 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public ServerPlayerConnection connection() {
-        return (ServerPlayerConnection) this.connection;
+    public ServerSideConnection connection() {
+        final Connection connection = ((ServerCommonPacketListenerImplAccessor) this.connection).accessor$connection();
+        return (ServerSideConnection) ((ConnectionBridge) connection).bridge$getEngineConnection();
     }
 
     /**
@@ -274,7 +277,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     public void sendResourcePack(final ResourcePack pack) {
         Objects.requireNonNull(pack, "pack");
         final UUID uuid = UUID.nameUUIDFromBytes(pack.name().getBytes(StandardCharsets.UTF_8));
-        this.connection.send(new ClientboundResourcePackPushPacket(uuid, ((SpongeResourcePack) pack).getUrlString(), pack.hash().orElse(""), false, SpongeAdventure.asVanilla(pack.prompt())));
+        this.connection.send(new ClientboundResourcePackPushPacket(uuid, ((SpongeResourcePack) pack).getUrlString(), pack.hash().orElse(""), false, Optional.ofNullable(SpongeAdventure.asVanilla(pack.prompt()))));
     }
 
     @Override

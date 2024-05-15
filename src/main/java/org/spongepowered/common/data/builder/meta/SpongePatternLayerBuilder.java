@@ -25,6 +25,9 @@
 package org.spongepowered.common.data.builder.meta;
 
 
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.block.entity.BannerPattern;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.meta.BannerPatternLayer;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -34,7 +37,6 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.Preconditions;
 
@@ -61,15 +63,16 @@ public final class SpongePatternLayerBuilder extends AbstractDataBuilder<BannerP
             return Optional.empty();
         }
         final BannerPatternShape shape = container.getRegistryValue(Constants.TileEntity.Banner.SHAPE, RegistryTypes.BANNER_PATTERN_SHAPE,
-                Sponge.game())
-                .orElseThrow(() -> new InvalidDataException("The provided container has an invalid banner pattern shape entry!"));
+                Sponge.game()).orElseThrow(() -> new InvalidDataException("The provided container has an invalid banner pattern shape entry!"));
 
 
         // Now we need to validate the dye color of course...
         final DyeColor color = container.getRegistryValue(Constants.TileEntity.Banner.COLOR, RegistryTypes.DYE_COLOR, Sponge.game())
                 .orElseThrow(() -> new InvalidDataException("The provided container has an invalid dye color entry!"));
 
-        return Optional.of(new SpongePatternLayer(shape, color));
+
+        final Holder<BannerPattern> mcPattern = Holder.direct((BannerPattern) (Object) shape);
+        return Optional.of((BannerPatternLayer) (Object) new BannerPatternLayers.Layer(mcPattern, (net.minecraft.world.item.DyeColor) (Object) color));
     }
 
     @Override
@@ -102,6 +105,7 @@ public final class SpongePatternLayerBuilder extends AbstractDataBuilder<BannerP
     public BannerPatternLayer build() {
         Preconditions.checkState(this.shape != null);
         Preconditions.checkState(this.color != null);
-        return new SpongePatternLayer(this.shape, this.color);
+        final Holder<BannerPattern> mcPattern = Holder.direct((BannerPattern) (Object) shape);
+        return (BannerPatternLayer) (Object) new BannerPatternLayers.Layer(mcPattern, (net.minecraft.world.item.DyeColor) (Object) color);
     }
 }

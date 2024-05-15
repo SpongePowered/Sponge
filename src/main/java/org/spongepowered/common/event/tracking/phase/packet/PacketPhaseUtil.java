@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
@@ -302,7 +303,7 @@ public final class PacketPhaseUtil {
 
         if (item == Items.NAME_TAG) {
             // ItemNameTag.itemInteractionForEntity
-            return entity instanceof LivingEntity && !(entity instanceof Player) && stack.hasCustomHoverName() ? EntityAccessor.accessor$DATA_CUSTOM_NAME() : null;
+            return entity instanceof LivingEntity && !(entity instanceof Player) && stack.has(DataComponents.CUSTOM_NAME) ? EntityAccessor.accessor$DATA_CUSTOM_NAME() : null;
         }
 
         if (item == Items.SADDLE) {

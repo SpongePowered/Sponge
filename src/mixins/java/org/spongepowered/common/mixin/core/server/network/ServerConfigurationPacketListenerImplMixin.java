@@ -26,10 +26,16 @@ package org.spongepowered.common.mixin.core.server.network;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
+import net.minecraft.server.network.ConfigurationTask;
 import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
-import org.spongepowered.api.network.EngineConnection;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.network.ServerSideConnectionEvent;
+import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -41,11 +47,17 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.network.channel.TransactionStore;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.Queue;
 import java.util.concurrent.CompletionException;
+import java.util.function.Consumer;
 
 
 @Mixin(ServerConfigurationPacketListenerImpl.class)
@@ -53,9 +65,14 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
 
     // @formatter:off
     @Shadow @Final private GameProfile gameProfile;
+    @Shadow @Final private Queue<ConfigurationTask> configurationTasks;
+    @Shadow @Nullable private ConfigurationTask currentTask;
 
     @Shadow public abstract void shadow$handleConfigurationFinished(ServerboundFinishConfigurationPacket $$0);
+    @Shadow protected abstract void shadow$finishCurrentTask(ConfigurationTask.Type $$0);
     // @formatter:on
+
+    private static final ConfigurationTask.Type impl$SPONGE_CONFIGURATION_TYPE = new ConfigurationTask.Type("sponge_configuration");
 
     private boolean impl$skipBanService;
 
@@ -96,8 +113,6 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
                         }
                     }
 
-                    ((SpongeChannelManager) SpongeCommon.game().channelManager()).sendChannelRegistrations((EngineConnection) this);
-
                     try {
                         this.impl$skipBanService = true;
                         this.shadow$handleConfigurationFinished($$0);
@@ -111,7 +126,7 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
 
                     return null;
                 }, SpongeCommon.server()).exceptionally(throwable -> {
-                    SpongeCommon.logger().error("Forcibly disconnecting user {} due to an error during login.", this.gameProfile, throwable);
+                    SpongeCommon.logger().error("Forcibly disconnecting user {}({}) due to an error during login.", this.gameProfile.getName(), this.gameProfile.getId(), throwable);
                     this.shadow$disconnect(Component.literal("Internal Server Error: unable to complete login."));
                     return null;
                 });
@@ -124,4 +139,49 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
         return null;
     }
 
+    @Inject(method = "addOptionalTasks", at = @At("TAIL"))
+    private void impl$callConfigurationEvent(final CallbackInfo ci) {
+        this.configurationTasks.add(new ConfigurationTask() {
+            @Override
+            public void start(final Consumer<Packet<?>> var1) {
+                final ServerSideConnection connection = (ServerSideConnection) ((ConnectionBridge) ServerConfigurationPacketListenerImplMixin.this.connection).bridge$getEngineConnection();
+                final ServerSideConnectionEvent.Configuration event = SpongeEventFactory.createServerSideConnectionEventConfiguration(
+                        PhaseTracker.getCauseStackManager().currentCause(),
+                        connection,
+                        SpongeGameProfile.of(ServerConfigurationPacketListenerImplMixin.this.gameProfile));
+                SpongeCommon.post(event);
+                final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
+                if (store.isEmpty()) {
+                    ServerConfigurationPacketListenerImplMixin.this.shadow$finishCurrentTask(ServerConfigurationPacketListenerImplMixin.impl$SPONGE_CONFIGURATION_TYPE);
+                }
+            }
+
+            @Override
+            public Type type() {
+                return ServerConfigurationPacketListenerImplMixin.impl$SPONGE_CONFIGURATION_TYPE;
+            }
+        });
+    }
+
+    @Override
+    public void shadow$handleCustomPayload(final ServerboundCustomPayloadPacket $$0) {
+        super.shadow$handleCustomPayload($$0);
+
+        if (this.currentTask == null || this.currentTask.type() != ServerConfigurationPacketListenerImplMixin.impl$SPONGE_CONFIGURATION_TYPE) {
+            return;
+        }
+
+        final ServerSideConnection connection = (ServerSideConnection) ((ConnectionBridge) this.connection).bridge$getEngineConnection();
+        final TransactionStore store = ConnectionUtil.getTransactionStore(connection);
+        if (store.isEmpty()) {
+            this.shadow$finishCurrentTask(ServerConfigurationPacketListenerImplMixin.impl$SPONGE_CONFIGURATION_TYPE);
+        }
+    }
+
+    @Inject(method = "handleConfigurationFinished", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/players/PlayerList;getPlayerForLogin(Lcom/mojang/authlib/GameProfile;Lnet/minecraft/server/level/ClientInformation;)Lnet/minecraft/server/level/ServerPlayer;"))
+    private void impl$sendChannels(final CallbackInfo ci) {
+        ((SpongeChannelManager) SpongeCommon.game().channelManager()).sendChannelRegistrations(
+                ((ConnectionBridge) this.connection).bridge$getEngineConnection());
+    }
 }

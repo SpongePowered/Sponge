@@ -24,17 +24,18 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.network.protocol.common;
 
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.network.channel.ChannelUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@SuppressWarnings({"rawtypes", "unchecked"})
 @Mixin(ServerboundCustomPayloadPacket.class)
 public abstract class ServerboundCustomPayloadPacketMixin_Vanilla {
 
@@ -42,25 +43,10 @@ public abstract class ServerboundCustomPayloadPacketMixin_Vanilla {
     @Shadow @Final private static int MAX_PAYLOAD_SIZE;
     // @formatter: on
 
-    @Inject(method = "readPayload", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/common/ServerboundCustomPayloadPacket;readUnknownPayload(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/network/FriendlyByteBuf;)Lnet/minecraft/network/protocol/common/custom/DiscardedPayload;"), cancellable = true)
-    private static void impl$onReadUnknownPayload(ResourceLocation id, FriendlyByteBuf buf, final CallbackInfoReturnable<CustomPacketPayload> cir) {
-        int readableBytes = buf.readableBytes();
-        if (readableBytes >= 0 && readableBytes <= ServerboundCustomPayloadPacketMixin_Vanilla.MAX_PAYLOAD_SIZE) {
-            final var payload = new FriendlyByteBuf(buf.readBytes(readableBytes));
-
-            cir.setReturnValue(new CustomPacketPayload() {
-                @Override
-                public void write(FriendlyByteBuf buf) {
-                    buf.writeBytes(payload.copy());
-                }
-
-                @Override
-                public ResourceLocation id() {
-                    return id;
-                }
-            });
-        } else {
-            throw new IllegalArgumentException("Payload may not be larger than " + ServerboundCustomPayloadPacketMixin_Vanilla.MAX_PAYLOAD_SIZE + " bytes");
-        }
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList([Ljava/lang/Object;)Ljava/util/ArrayList;"), remap = false)
+    private static ArrayList vanilla$registerCustomPacketPayloads(final Object[] registrations) {
+        final ArrayList allRegistrations = new ArrayList<>(List.of(registrations));
+        allRegistrations.addAll(ChannelUtils.spongeChannelCodecs(ServerboundCustomPayloadPacketMixin_Vanilla.MAX_PAYLOAD_SIZE));
+        return allRegistrations;
     }
 }

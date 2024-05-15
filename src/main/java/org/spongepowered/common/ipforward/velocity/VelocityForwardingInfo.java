@@ -45,6 +45,8 @@ import org.spongepowered.api.network.channel.raw.handshake.RawHandshakeDataChann
 import org.spongepowered.common.accessor.network.ConnectionAccessor;
 import org.spongepowered.common.accessor.server.network.ServerLoginPacketListenerImplAccessor;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
+import org.spongepowered.common.bridge.network.ServerLoginPacketListenerImplBridge;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -74,7 +76,7 @@ public class VelocityForwardingInfo {
     }
 
     public static void sendQuery(final ServerLoginPacketListenerImpl mcConn) {
-        final EngineConnection conn = (EngineConnection) mcConn;
+        final EngineConnection conn = ((ConnectionBridge) ((ServerLoginPacketListenerImplBridge) mcConn).bridge$getConnection()).bridge$getEngineConnection();
         VelocityChannel.CHANNEL
             .sendTo(conn, cbuf -> {})
             .whenComplete((response, error) -> {

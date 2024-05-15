@@ -24,23 +24,22 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import com.mojang.datafixers.util.Pair;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.Item;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.PickaxeItem;
+import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.Tool;
+import net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -50,11 +49,8 @@ import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.NestedTableEntry;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.item.DiggerItemAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.NBTCollectors;
 
 import java.util.List;
 import java.util.Set;
@@ -72,12 +68,12 @@ public final class ItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.APPLICABLE_POTION_EFFECTS)
                         .get(h -> {
-                            if (h.isEdible()) {
-                                final List<Pair<MobEffectInstance,Float>> itemEffects = h.getItem().getFoodProperties().getEffects();
+                            if (h.has(DataComponents.FOOD)) {
+                                final var itemEffects = h.get(DataComponents.FOOD).effects();
                                 final WeightedTable<PotionEffect> effects = new WeightedTable<>();
                                 final ChanceTable<PotionEffect> chance = new ChanceTable<>();
-                                for (final Pair<MobEffectInstance,Float> effect : itemEffects) {
-                                    chance.add((PotionEffect) effect.getFirst(), effect.getSecond());
+                                for (final var effect : itemEffects) {
+                                    chance.add((PotionEffect) effect.effect(), effect.probability());
                                 }
                                 effects.add(new NestedTableEntry<>(1, chance));
                                 return effects;
@@ -95,13 +91,17 @@ public final class ItemStackData {
                     .create(Keys.CAN_HARVEST)
                         .get(h -> {
                             final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
-                            final Item item = h.getItem();
-                            if (item instanceof DiggerItemAccessor && !(item instanceof PickaxeItem)) {
-                                return blockRegistry.getTag(((DiggerItemAccessor) item).accessor$blocks()).stream().flatMap(HolderSet.ListBacked::stream).map(Holder::value).map(BlockType.class::cast).collect(Collectors.toSet());
+                            final Tool tool = h.get(DataComponents.TOOL);
+                            if (tool != null) {
+                                return tool.rules().stream().map(Tool.Rule::blocks)
+                                        .flatMap(HolderSet::stream)
+                                        .map(Holder::value)
+                                        .map(BlockType.class::cast)
+                                        .collect(Collectors.toSet());
                             }
 
                             final Set<BlockType> blockTypes = blockRegistry.stream()
-                                    .filter(b -> item.isCorrectToolForDrops(b.defaultBlockState()))
+                                    .filter(b -> h.isCorrectToolForDrops(b.defaultBlockState()))
                                     .map(BlockType.class::cast)
                                     .collect(Collectors.toUnmodifiableSet());
                             return blockTypes.isEmpty() ? null : blockTypes;
@@ -111,119 +111,85 @@ public final class ItemStackData {
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
                     .create(Keys.CUSTOM_MODEL_DATA)
-                        .get(h -> {
-                            final CompoundTag tag = h.getTag();
-                            if (tag == null || !tag.contains(Constants.Item.CUSTOM_MODEL_DATA, Constants.NBT.TAG_INT)) {
-                                return null;
-                            }
-                            return tag.getInt(Constants.Item.CUSTOM_MODEL_DATA);
-                        })
-                        .set((h, v) -> {
-                            final CompoundTag tag = h.getOrCreateTag();
-                            tag.putInt(Constants.Item.CUSTOM_MODEL_DATA, v);
-                        })
-                        .delete(h -> {
-                            h.removeTagKey(Constants.Item.CUSTOM_MODEL_DATA);
-                        })
+                        .get(h -> h.getOrDefault(DataComponents.CUSTOM_MODEL_DATA, CustomModelData.DEFAULT).value())
+                        .set((h, v) -> h.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(v)))
+                        .delete(h -> h.remove(DataComponents.CUSTOM_MODEL_DATA))
                     .create(Keys.CUSTOM_NAME)
                         .get(h -> {
-                            if (h.hasCustomHoverName()) {
+                            if (h.has(DataComponents.CUSTOM_NAME)) {
                                 return SpongeAdventure.asAdventure(h.getHoverName());
                             }
                             if (h.getItem() == Items.WRITTEN_BOOK) {
                                 // When no custom name is set on a written book fallback to its title
                                 // The custom name has a higher priority than the title so no setter is needed.
-                                final CompoundTag tag = h.getTag();
-                                if (tag != null) {
-                                    final String title = tag.getString(Constants.Item.Book.ITEM_BOOK_TITLE);
-                                    return LegacyComponentSerializer.legacySection().deserialize(title);
+                                var bookContent = h.get(DataComponents.WRITTEN_BOOK_CONTENT);
+                                if (bookContent != null) {
+                                    final String rawTitle = bookContent.title().raw();
+                                    if (!StringUtil.isBlank(rawTitle)) {
+                                        return LegacyComponentSerializer.legacySection().deserialize(rawTitle);
+                                    }
                                 }
                             }
                             return null;
                         })
-                        .set((h, v) -> h.setHoverName(SpongeAdventure.asVanilla(v)))
-                        .delete(ItemStack::resetHoverName)
+                        .set((h, v) -> h.set(DataComponents.CUSTOM_NAME, SpongeAdventure.asVanilla(v)))
+                        .delete(h -> h.remove(DataComponents.CUSTOM_NAME))
                     .create(Keys.IS_UNBREAKABLE)
-                        .get(h -> {
-                            final CompoundTag tag = h.getTag();
-                            if (tag == null || !tag.contains(Constants.Item.ITEM_UNBREAKABLE, Constants.NBT.TAG_BYTE)) {
-                                return false;
-                            }
-                            return tag.getBoolean(Constants.Item.ITEM_UNBREAKABLE);
-                        })
+                        .get(h -> h.has(DataComponents.UNBREAKABLE))
                         .set(ItemStackData::setIsUnbrekable)
                         .delete(h -> ItemStackData.setIsUnbrekable(h, false))
                     .create(Keys.LORE)
                         .get(h -> {
-                            final CompoundTag tag = h.getTag();
-                            if (tag == null || !tag.contains(Constants.Item.ITEM_DISPLAY)) {
+                            final List<Component> lines = h.getOrDefault(DataComponents.LORE, ItemLore.EMPTY).lines();
+                            if (lines.isEmpty()) {
                                 return null;
                             }
-                            final CompoundTag displayCompound = tag.getCompound(Constants.Item.ITEM_DISPLAY);
-                            final ListTag list = displayCompound.getList(Constants.Item.ITEM_LORE, Constants.NBT.TAG_STRING);
-                            return list.isEmpty() ? null : SpongeAdventure.json(list.stream().collect(NBTCollectors.toStringList()));
+                            return lines.stream().map(SpongeAdventure::asAdventure).toList();
                         })
                         .set((h, v) -> {
                             if (v.isEmpty()) {
-                                ItemStackData.deleteLore(h);
+                                h.remove(DataComponents.LORE);
                                 return;
                             }
-                            final ListTag list = SpongeAdventure.listTagJson(v);
-                            h.getOrCreateTagElement(Constants.Item.ITEM_DISPLAY).put(Constants.Item.ITEM_LORE, list);
+                            h.set(DataComponents.LORE, new ItemLore(v.stream().map(SpongeAdventure::asVanilla).toList()));
                         })
-                        .delete(ItemStackData::deleteLore)
+                        .delete(h -> h.remove(DataComponents.LORE))
                     .create(Keys.MAX_DURABILITY)
-                        .get(h -> h.getItem().canBeDepleted() ? h.getItem().getMaxDamage() : null)
-                        .supports(h -> h.getItem().canBeDepleted())
+                        .get(h -> h.getMaxDamage() != 0 ? h.getMaxDamage() : null)
+                        .supports(h -> h.getMaxDamage() != 0)
                     .create(Keys.ITEM_DURABILITY)
                         .get(stack -> stack.getMaxDamage() - stack.getDamageValue())
                         .set((stack, durability) -> stack.setDamageValue(stack.getMaxDamage() - durability))
-                        .supports(h -> h.getItem().canBeDepleted())
+                        .supports(h -> h.getMaxDamage() != 0)
                     .create(Keys.ITEM_RARITY)
                         .get(stack -> (ItemRarity) (Object) stack.getRarity())
                     .create(Keys.REPLENISHED_FOOD)
                         .get(h -> {
-                            if (h.getItem().isEdible()) {
-                                final FoodProperties food = h.getItem().getFoodProperties();
-                                return food == null ? null : food.getNutrition();
+                            final var food = h.get(DataComponents.FOOD);
+                            if (food != null) {
+                                return food.nutrition();
                             }
                             return null;
                         })
-                        .supports(h -> h.getItem().isEdible())
                     .create(Keys.REPLENISHED_SATURATION)
                         .get(h -> {
-                            if (h.getItem().isEdible()) {
-                                final FoodProperties food = h.getItem().getFoodProperties();
-                                if (food != null) {
-                                    // Translate's Minecraft's weird internal value to the actual saturation value
-                                    return food.getSaturationModifier() * food.getNutrition() * 2.0;
-                                }
+                            final var food = h.get(DataComponents.FOOD);
+                            if (food != null) {
+                                // Translate's Minecraft's weird internal value to the actual saturation value
+                                return (double)food.saturation();
                             }
                             return null;
                         })
-                    .supports(h -> h.getItem().isEdible());
+                    ;
     }
     // @formatter:on
 
     private static void setIsUnbrekable(final ItemStack stack, final Boolean value) {
-        if (value == null || (!value && !stack.hasTag())) {
-            return;
-        }
         if (value) {
-            final CompoundTag tag = stack.getOrCreateTag();
-            tag.putBoolean(Constants.Item.ITEM_UNBREAKABLE, true);
+            stack.set(DataComponents.UNBREAKABLE, new Unbreakable(true));
         } else {
-            stack.removeTagKey(Constants.Item.ITEM_UNBREAKABLE);
+            stack.remove(DataComponents.UNBREAKABLE);
         }
     }
 
-    private static void deleteLore(final ItemStack stack) {
-        final @Nullable CompoundTag tag = stack.getTagElement(Constants.Item.ITEM_DISPLAY);
-        if (tag != null) {
-            tag.remove(Constants.Item.ITEM_LORE);
-            if (tag.isEmpty()) {
-                stack.removeTagKey(Constants.Item.ITEM_DISPLAY);
-            }
-        }
-    }
 }

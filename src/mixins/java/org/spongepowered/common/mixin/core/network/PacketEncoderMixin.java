@@ -24,31 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.network;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.Attribute;
-import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.PacketEncoder;
-import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.PacketListener;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
 
 @Mixin(PacketEncoder.class)
-public class PacketEncoderMixin {
+public class PacketEncoderMixin<T extends PacketListener> {
 
-    @Inject(method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;Lio/netty/buffer/ByteBuf;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;writeVarInt(I)Lnet/minecraft/network/FriendlyByteBuf;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void applyLocaleToBuffer(final ChannelHandlerContext ctx, final Packet<?> pkt, final ByteBuf orig, final CallbackInfo ci,
-            final Attribute<ConnectionProtocol.CodecData<?>> $$3,
-            final ConnectionProtocol.CodecData<?> $$4,
-            final int unused$id,
-            final FriendlyByteBuf buffer) {
-        ((FriendlyByteBufBridge) buffer).bridge$setLocale(ctx.channel().attr(SpongeAdventure.CHANNEL_LOCALE).get());
-    }
+    // TODO find out how we can still translate serverside see FriendlyByteBufMixin
+//    @Inject(method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;Lio/netty/buffer/ByteBuf;)V",
+//            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/StreamCodec;encode(Ljava/lang/Object;Ljava/lang/Object;)V"))
+//    private void applyLocaleToBuffer(final ChannelHandlerContext ctx, final Packet<T> $$1, final ByteBuf $$2, final CallbackInfo ci) {
+//        ((FriendlyByteBufBridge) $$2).bridge$setLocale(ctx.channel().attr(SpongeAdventure.CHANNEL_LOCALE).get()); // TODO check if this correct, it is not
+//    }
 }

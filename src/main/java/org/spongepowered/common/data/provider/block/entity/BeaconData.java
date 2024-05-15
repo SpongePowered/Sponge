@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
 import org.spongepowered.api.data.Keys;
@@ -56,24 +57,24 @@ public final class BeaconData {
     }
     // @formatter:on
 
-    private static PotionEffectType get(final BeaconBlockEntity holder, final Function<BeaconBlockEntityAccessor, MobEffect> getter) {
-        return (PotionEffectType) getter.apply((BeaconBlockEntityAccessor) holder);
+    private static PotionEffectType get(final BeaconBlockEntity holder, final Function<BeaconBlockEntityAccessor, Holder<MobEffect>> getter) {
+        return (PotionEffectType) getter.apply((BeaconBlockEntityAccessor) holder).value();
     }
 
     private static boolean set(final BeaconBlockEntity holder, final PotionEffectType value,
-            final BiConsumer<BeaconBlockEntityAccessor, MobEffect> setter) {
+            final BiConsumer<BeaconBlockEntityAccessor, Holder<MobEffect>> setter) {
         final BeaconBlockEntityAccessor accessor = (BeaconBlockEntityAccessor) holder;
         final MobEffect effect = (MobEffect) value;
         if (!BeaconBlockEntityAccessor.accessor$VALID_EFFECTS().contains(effect)) {
             return false;
         }
-        setter.accept(accessor, (MobEffect) value);
+        setter.accept(accessor, Holder.direct((MobEffect) value));
         holder.setChanged();
         return true;
     }
 
-    private static boolean delete(final BeaconBlockEntity holder, final Function<BeaconBlockEntityAccessor, MobEffect> getter,
-            final BiConsumer<BeaconBlockEntityAccessor, MobEffect> setter) {
+    private static boolean delete(final BeaconBlockEntity holder, final Function<BeaconBlockEntityAccessor, Holder<MobEffect>> getter,
+            final BiConsumer<BeaconBlockEntityAccessor, Holder<MobEffect>> setter) {
         final BeaconBlockEntityAccessor accessor = (BeaconBlockEntityAccessor) holder;
         if (accessor.accessor$primaryPower() != null) {
             setter.accept(accessor, null);

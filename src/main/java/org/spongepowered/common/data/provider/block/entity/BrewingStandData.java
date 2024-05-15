@@ -48,12 +48,12 @@ public final class BrewingStandData {
                             return true;
                         })
                     .create(Keys.REMAINING_BREW_TIME)
-                        .get(h -> BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$items()) ? new SpongeTicks(h.accessor$brewTime()) : null)
+                        .get(h -> BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$level().potionBrewing(), h.accessor$items()) ? new SpongeTicks(h.accessor$brewTime()) : null)
                         .setAnd((h, v) -> {
                             if (v.isInfinite()) {
                                 return false;
                             }
-                            if (BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$items())) {
+                            if (BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$level().potionBrewing(), h.accessor$items())) {
                                 h.accessor$brewTime(SpongeTicks.toSaturatedIntOrInfinite(v));
                                 return true;
                             }

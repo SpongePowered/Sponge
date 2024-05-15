@@ -33,6 +33,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -577,7 +578,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 final CompoundTag nbt = new CompoundTag();
                 // Some mods like OpenComputers assert if attempting to save robot while moving
                 try {
-                    tileEntity.saveWithFullMetadata();
+                    tileEntity.saveWithFullMetadata(tileEntity.getLevel().registryAccess());
                     builder.addUnsafeCompound(nbt);
                 } catch (final Throwable t) {
                     // ignore
@@ -721,7 +722,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             peek.associateNeighborStateNotifier(immutableFrom, targetBlockState.getBlock(), immutableTarget, ((ServerLevel) (Object) this), PlayerTracker.Type.NOTIFIER);
             // Sponge End
 
-            targetBlockState.neighborChanged(((ServerLevel) (Object) this), immutableTarget, blockIn, immutableFrom, false);
+            DebugPackets.sendNeighborsUpdatePacket(((ServerLevel) (Object) this), immutableTarget);
+            // TODO targetBlockState.neighborChanged(((ServerLevel) (Object) this), immutableTarget, blockIn, immutableFrom, false);
 
         } catch (final Throwable throwable) {
             final CrashReport crashreport = CrashReport.forThrowable(throwable, "Exception while updating neighbours");

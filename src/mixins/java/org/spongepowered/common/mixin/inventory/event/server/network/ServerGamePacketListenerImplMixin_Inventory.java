@@ -68,10 +68,10 @@ public class ServerGamePacketListenerImplMixin_Inventory {
     private void impl$onBroadcastCreativeActionResult(final InventoryMenu inventoryMenu, final ServerboundSetCreativeModeSlotPacket packetIn) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        final ItemStack itemstack = packetIn.getItem();
+        final ItemStack itemstack = packetIn.itemStack();
 
         // TODO handle vanilla sending a bunch of creative events (previously ignoring events within 100ms)
-        try (final EffectTransactor ignored = transactor.logCreativeClickContainer(packetIn.getSlotNum(), ItemStackUtil.snapshotOf(itemstack), this.player)) {
+        try (final EffectTransactor ignored = transactor.logCreativeClickContainer(packetIn.slotNum(), ItemStackUtil.snapshotOf(itemstack), this.player)) {
         }
         inventoryMenu.broadcastChanges();
     }

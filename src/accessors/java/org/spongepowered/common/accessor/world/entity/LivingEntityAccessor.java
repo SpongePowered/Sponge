@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.world.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,6 +36,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedAccessorError;
 
+import java.util.List;
 import java.util.Optional;
 
 @Mixin(LivingEntity.class)
@@ -50,8 +52,8 @@ public interface LivingEntityAccessor {
         throw new UntransformedAccessorError();
     }
 
-    @Accessor("DATA_EFFECT_COLOR_ID")
-    static EntityDataAccessor<Integer> accessor$DATA_EFFECT_COLOR_ID() {
+    @Accessor("DATA_EFFECT_PARTICLES")
+    static EntityDataAccessor<List<ParticleOptions>> accessor$DATA_EFFECT_PARTICLES() {
         throw new UntransformedAccessorError();
     }
 

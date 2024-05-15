@@ -24,22 +24,18 @@
  */
 package org.spongepowered.vanilla.mixin.core.network;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
 
 @Mixin(FriendlyByteBuf.class)
 public abstract class FriendlyByteBufMixin_Vanilla implements FriendlyByteBufBridge {
 
-    @Redirect(method = "writeItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;writeNbt(Lnet/minecraft/nbt/Tag;)Lnet/minecraft/network/FriendlyByteBuf;"))
-    public FriendlyByteBuf renderItemComponents(final FriendlyByteBuf buf, final Tag tag) {
-        if (tag instanceof CompoundTag compoundTag) {
-            return buf.writeNbt(bridge$renderItemComponents(compoundTag));
-        }
-        return buf.writeNbt(tag);
-    }
+//    @Redirect(method = "writeItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;writeNbt(Lnet/minecraft/nbt/Tag;)Lnet/minecraft/network/FriendlyByteBuf;"))
+//    public FriendlyByteBuf renderItemComponents(final FriendlyByteBuf buf, final Tag tag) {
+//        if (tag instanceof CompoundTag compoundTag) {
+//            return buf.writeNbt(bridge$renderItemComponents(compoundTag));
+//        }
+//        return buf.writeNbt(tag);
+//    }
 }

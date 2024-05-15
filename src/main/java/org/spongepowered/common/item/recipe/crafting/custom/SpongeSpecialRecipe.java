@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.item.recipe.crafting.custom;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -74,7 +74,7 @@ public final class SpongeSpecialRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(final CraftingContainer inv, final RegistryAccess $$1) {
+    public ItemStack assemble(final CraftingContainer inv, final HolderLookup.Provider $$1) {
         return ItemStackUtil.toNative(this.resultFunction.apply(InventoryUtil.toSpongeInventory(inv)));
     }
 

@@ -42,7 +42,6 @@ import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridg
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.weather.SpongeWeather;
-import org.spongepowered.math.vector.Vector3i;
 
 public final class WorldPropertiesData {
 
@@ -54,21 +53,21 @@ public final class WorldPropertiesData {
         registrator
                 .asMutable(LevelData.class)
                     .create(Keys.SPAWN_POSITION)
-                        .get(h -> new Vector3i(h.getXSpawn(), h.getYSpawn(), h.getZSpawn()))
+                        .get(h -> VecHelper.toVector3i(h.getSpawnPos()))
                     .create(Keys.HARDCORE)
                         .get(LevelData::isHardcore)
                     .create(Keys.WORLD_DIFFICULTY)
                         .get(h -> (Difficulty) (Object) h.getDifficulty())
                 .asMutable(WritableLevelData.class)
                     .create(Keys.SPAWN_POSITION)
-                        .get(h -> new Vector3i(h.getXSpawn(), h.getYSpawn(), h.getZSpawn()))
+                        .get(h -> VecHelper.toVector3i(h.getSpawnPos()))
                         .set((h, v) -> h.setSpawn(VecHelper.toBlockPos(v), h.getSpawnAngle()))
                 .asMutable(ServerLevelData.class)
                     .create(Keys.GAME_MODE)
                         .get(h -> (GameMode) (Object) h.getGameType())
                         .set((h, v) -> h.setGameType((GameType) (Object) v))
                     .create(Keys.COMMANDS)
-                        .get(ServerLevelData::getAllowCommands)
+                        .get(ServerLevelData::isAllowCommands)
                     .create(Keys.INITIALIZED)
                         .get(ServerLevelData::isInitialized)
                     .create(Keys.WORLD_BORDER)

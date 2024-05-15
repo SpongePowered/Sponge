@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.levelgen.struct
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
@@ -45,14 +45,14 @@ import java.io.IOException;
 public interface StructureProcessorTypeMixin_API<P extends StructureProcessor> extends ProcessorType {
 
     // @formatter:off
-    @Shadow Codec<P> shadow$codec();
+    @Shadow MapCodec<P> shadow$codec();
     // @formatter:on
 
     @Override
     default Processor configure(final DataView dataView) throws IOException {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, SpongeCommon.server().registryAccess());
         final JsonElement json = JsonParser.parseString(DataFormats.JSON.get().write(dataView));
-        final P processor = this.shadow$codec().parse(ops, json).getOrThrow(false, e -> {});
+        final P processor = this.shadow$codec().codec().parse(ops, json).getOrThrow();
         return (Processor) processor;
     }
 }

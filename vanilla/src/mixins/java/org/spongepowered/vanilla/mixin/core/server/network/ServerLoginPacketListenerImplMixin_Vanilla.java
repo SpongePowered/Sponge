@@ -44,7 +44,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
-import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -54,10 +54,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ServerLoginPacketListenerImplBridge;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.channel.TransactionStore;
+import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.math.BigInteger;
 import java.net.InetAddress;
@@ -81,6 +83,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
     @Shadow @Final Connection connection;
     @Shadow @Final private byte[] challenge;
     @Shadow @Nullable String requestedUsername;
+    @Shadow private GameProfile authenticatedProfile;
 
     @Shadow public abstract void shadow$disconnect(Component reason);
     @Shadow abstract void shadow$startClientVerification(GameProfile $$0);
@@ -104,13 +107,13 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
         ci.cancel();
 
         final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
-        this.server.execute(() -> channelRegistry.handleLoginResponsePayload((EngineConnection) this, packet));
+        this.server.execute(() -> channelRegistry.handleLoginResponsePayload(((ConnectionBridge) this.connection).bridge$getEngineConnection(), (EngineConnectionState) this, packet));
     }
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void impl$onTick(final CallbackInfo ci) {
         if (this.state == ServerLoginPacketListenerImpl.State.NEGOTIATING) {
-            final ServerSideConnection connection = (ServerSideConnection) this;
+            final ServerSideConnection connection = (ServerSideConnection) ((ConnectionBridge) this.connection).bridge$getEngineConnection();
             if (this.impl$handshakeState == ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_NOT_STARTED) {
                 this.impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_CLIENT_TYPE;
 
@@ -124,7 +127,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
                 ((SpongeChannelManager) Sponge.channelManager()).sendLoginChannelRegistry(connection).thenAccept(result -> {
                     final Cause cause = Cause.of(EventContext.empty(), this);
                     final ServerSideConnectionEvent.Handshake event =
-                            SpongeEventFactory.createServerSideConnectionEventHandshake(cause, connection);
+                            SpongeEventFactory.createServerSideConnectionEventHandshake(cause, connection, SpongeGameProfile.of(this.authenticatedProfile));
                     SpongeCommon.post(event);
                     this.impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_SYNC_PLUGIN_DATA;
                 });

@@ -40,6 +40,7 @@ import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.RegionFile;
+import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelResource;
@@ -348,7 +349,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
             .flatMap(stream -> StreamSupport.stream(stream.spliterator(), false)
             .flatMap(path -> {
                 try { // For every region file
-                    RegionFile regionFile = new RegionFile(path, regionPath, true);
+                    RegionFile regionFile = new RegionFile(new RegionStorageInfo("sponge:chunkPosStream:" + this.shadow$dimension(), this.shadow$dimension(), "chunk"), path, regionPath, true);
                     final Vector4i regionBound = this.api$pathToRegionPos(path);
                     // Find all chunks in bounds
                     final Stream<ChunkPos> chunkPosStream = IntStream.rangeClosed(regionBound.x(), regionBound.z())

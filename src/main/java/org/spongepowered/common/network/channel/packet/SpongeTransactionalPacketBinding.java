@@ -25,8 +25,7 @@
 package org.spongepowered.common.network.channel.packet;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.network.EngineConnection;
-import org.spongepowered.api.network.EngineConnectionSide;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.packet.Packet;
 import org.spongepowered.api.network.channel.packet.PacketHandler;
 import org.spongepowered.api.network.channel.packet.RequestPacket;
@@ -53,77 +52,55 @@ public class SpongeTransactionalPacketBinding<P extends RequestPacket<R>, R exte
         super(opcode, requestPacketType);
     }
 
-    public <C extends EngineConnection> @Nullable RequestPacketHandler<? super P, ? extends R, C> getRequestHandler(final C connection) {
-        return (RequestPacketHandler<? super P, ? extends R, C>) SpongeChannel.getRequestHandler(connection, this.requestHandlers);
+    public <S extends EngineConnectionState> @Nullable RequestPacketHandler<? super P, ? extends R, S> getRequestHandler(final S state) {
+        return (RequestPacketHandler<? super P, ? extends R, S>) SpongeChannel.getRequestHandler(state, this.requestHandlers);
     }
 
     @Override
-    public <C extends EngineConnection> TransactionalPacketBinding<P, R> setRequestHandler(
-            final EngineConnectionSide<C> side, final RequestPacketHandler<? super P, ? extends R, ? super C> handler) {
-        Objects.requireNonNull(side, "side");
-        return this.setRequestHandler(SpongeChannel.getConnectionClass(side), handler);
-    }
-
-    @Override
-    public <C extends EngineConnection> TransactionalPacketBinding<P, R> setRequestHandler(final Class<C> connectionType,
-            final RequestPacketHandler<? super P, ? extends R, ? super C> handler) {
-        Objects.requireNonNull(connectionType, "connectionType");
+    public <S extends EngineConnectionState> TransactionalPacketBinding<P, R> setRequestHandler(final Class<S> connectioState,
+            final RequestPacketHandler<? super P, ? extends R, ? super S> handler) {
+        Objects.requireNonNull(connectioState, "connectionType");
         Objects.requireNonNull(handler, "handler");
-        this.requestHandlers.put(connectionType, handler);
+        this.requestHandlers.put(connectioState, handler);
         return this;
     }
 
     @Override
-    public TransactionalPacketBinding<P, R> setRequestHandler(final RequestPacketHandler<? super P, ? extends R, EngineConnection> handler) {
+    public TransactionalPacketBinding<P, R> setRequestHandler(final RequestPacketHandler<? super P, ? extends R, EngineConnectionState> handler) {
         Objects.requireNonNull(handler, "handler");
-        return this.setRequestHandler(EngineConnection.class, handler);
+        return this.setRequestHandler(EngineConnectionState.class, handler);
     }
 
     @Override
-    public <C extends EngineConnection> TransactionalPacketBinding<P, R> addResponseHandler(
-            final EngineConnectionSide<C> side, final PacketHandler<? super R, ? super C> handler) {
-        Objects.requireNonNull(side, "side");
-        return this.addResponseHandler(SpongeChannel.getConnectionClass(side), handler);
+    public <S extends EngineConnectionState> TransactionalPacketBinding<P, R> addResponseHandler(final Class<S> connectionState,
+            final PacketHandler<? super R, ? super S> handler) {
+        Objects.requireNonNull(handler, "handler");
+        return this.addResponseHandler(connectionState, new PacketToResponseHandler<>(handler));
     }
 
     @Override
-    public <C extends EngineConnection> TransactionalPacketBinding<P, R> addResponseHandler(final Class<C> connectionType,
-            final PacketHandler<? super R, ? super C> handler) {
+    public <S extends EngineConnectionState> TransactionalPacketBinding<P, R> addResponseHandler(final Class<S> connectionState,
+            final ResponsePacketHandler<? super P, ? super R, ? super S> handler) {
+        Objects.requireNonNull(connectionState, "connectionType");
         Objects.requireNonNull(handler, "handler");
-        return this.addResponseHandler(connectionType, new PacketToResponseHandler<>(handler));
-    }
-
-    @Override
-    public <C extends EngineConnection> TransactionalPacketBinding<P, R> addResponseHandler(
-            final EngineConnectionSide<C> side, final ResponsePacketHandler<? super P, ? super R, ? super C> handler) {
-        Objects.requireNonNull(side, "side");
-        Objects.requireNonNull(handler, "handler");
-        return this.addResponseHandler(SpongeChannel.getConnectionClass(side), handler);
-    }
-
-    @Override
-    public <C extends EngineConnection> TransactionalPacketBinding<P, R> addResponseHandler(final Class<C> connectionType,
-            final ResponsePacketHandler<? super P, ? super R, ? super C> handler) {
-        Objects.requireNonNull(connectionType, "connectionType");
-        Objects.requireNonNull(handler, "handler");
-        this.responseHandlers.modify(map -> map.put(connectionType, handler));
+        this.responseHandlers.modify(map -> map.put(connectionState, handler));
         return this;
     }
 
     @Override
     public TransactionalPacketBinding<P, R> addResponseHandler(
-            final PacketHandler<? super R, EngineConnection> handler) {
+            final PacketHandler<? super R, EngineConnectionState> handler) {
         Objects.requireNonNull(handler, "handler");
         return this.addResponseHandler(new PacketToResponseHandler<>(handler));
     }
 
     @Override
-    public TransactionalPacketBinding<P, R> addResponseHandler(final ResponsePacketHandler<? super P, ? super R, EngineConnection> handler) {
-        return this.addResponseHandler(EngineConnection.class, handler);
+    public TransactionalPacketBinding<P, R> addResponseHandler(final ResponsePacketHandler<? super P, ? super R, EngineConnectionState> handler) {
+        return this.addResponseHandler(EngineConnectionState.class, handler);
     }
 
-    public <C extends EngineConnection> Collection<ResponsePacketHandler<? super P, ? super R, ? super C>> getResponseHandlers(final C connection) {
-        return (Collection) SpongeChannel.getResponseHandlers(connection, this.responseHandlers.get());
+    public <S extends EngineConnectionState> Collection<ResponsePacketHandler<? super P, ? super R, ? super S>> getResponseHandlers(final S state) {
+        return (Collection) SpongeChannel.getResponseHandlers(state, this.responseHandlers.get());
     }
 
     @Override

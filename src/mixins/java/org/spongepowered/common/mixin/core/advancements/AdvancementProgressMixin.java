@@ -136,10 +136,15 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
         if (!PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) {
             return;
         }
-        final Optional<Advancement> advancement = this.getOptionalAdvancement();
+        final Optional<Advancement> advancement = this.impl$getOptionalAdvancement();
         if (advancement.isPresent()) {
             this.impl$progressMap = new LinkedHashMap<>();
-            this.impl$processProgressMap(advancement.get().criterion(), this.impl$progressMap);
+            if (advancement.get().criterion() != null) {
+                this.impl$processProgressMap(advancement.get().criterion(), this.impl$progressMap);
+            } else {
+                // TODO fix me
+                SpongeCommon.logger().warn("advancement has null criterion");
+            }
         } else {
             this.impl$progressMap = null;
         }
@@ -160,7 +165,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
         for (final List<String> reqs : requirements.requirements()) {
             for (final String req : reqs) {
                 if (!criteria.containsKey(req)) { // TODO was parameter is now field, correct?
-                    final String advName = this.getOptionalAdvancement()
+                    final String advName = this.impl$getOptionalAdvancement()
                             .map(Objects::toString)
                             .orElse("unknown");
                     throw new IllegalStateException("Found a requirement which does not exist in the criteria, "
@@ -212,10 +217,15 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             return;
         }
 
-        final Advancement advancement = this.getOptionalAdvancement().orElse(null);
+        final Advancement advancement = this.impl$getOptionalAdvancement().orElse(null);
         if (advancement != null) {
-            final ImplementationBackedCriterionProgress bridge = this.impl$progressMap.get(advancement.criterion().name());
-            ci.setReturnValue(bridge != null && ((CriterionProgress) bridge).achieved());
+            if (advancement.criterion() != null) {
+                final ImplementationBackedCriterionProgress bridge = this.impl$progressMap.get(advancement.criterion().name());
+                ci.setReturnValue(bridge != null && ((CriterionProgress) bridge).achieved());
+            } else {
+                // TODO fix me
+                SpongeCommon.logger().warn("advancement has null criterion");
+            }
         }
     }
 
@@ -340,7 +350,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
      *
      * @return The advancement
      */
-    private Optional<Advancement> getOptionalAdvancement() {
+    private Optional<Advancement> impl$getOptionalAdvancement() {
         Preconditions.checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         Preconditions.checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
         final AdvancementHolder advancement = SpongeCommon.server().getAdvancements().get(this.impl$advancementKey);

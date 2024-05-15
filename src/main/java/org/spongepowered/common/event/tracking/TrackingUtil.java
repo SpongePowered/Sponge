@@ -457,7 +457,7 @@ public final class TrackingUtil {
         final SpongeBlockSnapshot.BuilderImpl builder) {
         // TODO - gather custom data.
         try {
-            final CompoundTag compound = existing.saveWithFullMetadata();
+            final CompoundTag compound = existing.saveWithFullMetadata(existing.getLevel().registryAccess());
             builder.addUnsafeCompound(compound);
         }
         catch (final Throwable t) {

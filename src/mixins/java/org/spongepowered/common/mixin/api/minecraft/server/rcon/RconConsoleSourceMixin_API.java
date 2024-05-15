@@ -94,4 +94,9 @@ public abstract class RconConsoleSourceMixin_API implements RconConsoleSourceBri
     public @NonNull Pointers pointers() {
         return RconConsoleSourceMixin_API.API$POINTERS;
     }
+
+    @Override
+    public boolean active() {
+        return this.bridge$getClient().isRunning();
+    }
 }

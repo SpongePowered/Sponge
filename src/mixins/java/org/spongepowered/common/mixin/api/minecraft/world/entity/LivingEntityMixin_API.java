@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
-import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
@@ -49,14 +49,15 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
 
     // @formatter:off
     @Shadow public abstract float shadow$getHealth();
-    @Shadow public abstract AttributeInstance shadow$getAttribute(net.minecraft.world.entity.ai.attributes.Attribute attribute);
-    @Shadow public abstract boolean addEffect(MobEffectInstance p_195064_1_);
+    @Shadow public abstract AttributeMap shadow$getAttributes();
+
     // @formatter:on
 
     @Override
     public Optional<Attribute> attribute(final AttributeType type) {
         Objects.requireNonNull(type, "AttributeType cannot be null");
-        return Optional.ofNullable((Attribute) this.shadow$getAttribute((net.minecraft.world.entity.ai.attributes.Attribute) type));
+
+        return Optional.ofNullable((Attribute) this.shadow$getAttributes().getInstance(Holder.direct((net.minecraft.world.entity.ai.attributes.Attribute) type)));
     }
 
     @Override

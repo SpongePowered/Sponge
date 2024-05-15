@@ -26,16 +26,19 @@ package org.spongepowered.vanilla.mixin.core.client.multiplayer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
+import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.login.ClientLoginPacketListener;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.network.EngineConnection;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.network.channel.PacketSender;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
@@ -45,6 +48,7 @@ public abstract class ClientHandshakePacketListenerImplMixin_Vanilla implements 
 
     // @formatter:off
     @Shadow @Final private Minecraft minecraft;
+    @Shadow @Final private Connection connection;
     // @formatter:on
 
     @Inject(method = "handleCustomQuery", at = @At(value = "INVOKE",
@@ -54,8 +58,8 @@ public abstract class ClientHandshakePacketListenerImplMixin_Vanilla implements 
 
         final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
         this.minecraft.execute(() -> {
-            final EngineConnection connection = (EngineConnection) this;
-            if (!channelRegistry.handleLoginRequestPayload(connection, packet)) {
+            final EngineConnection connection = ((ConnectionBridge) this.connection).bridge$getEngineConnection();
+            if (!channelRegistry.handleLoginRequestPayload(connection,  (EngineConnectionState) this, packet)) {
                 PacketSender.sendTo(connection, PacketUtil.createLoginPayloadResponse(null, packet.transactionId()));
             }
         });

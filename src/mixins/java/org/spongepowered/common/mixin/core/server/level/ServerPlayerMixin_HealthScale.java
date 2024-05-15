@@ -123,7 +123,7 @@ public abstract class ServerPlayerMixin_HealthScale extends PlayerMixin implemen
         boolean foundMax = false; // Sometimes the max health isn't modified and no longer dirty
         for (final Iterator<AttributeInstance> iter = set.iterator(); iter.hasNext(); ) {
             final AttributeInstance dirtyInstance = iter.next();
-            if ("attribute.name.generic.maxHealth".equals(dirtyInstance.getAttribute().getDescriptionId())) {
+            if ("attribute.name.generic.maxHealth".equals(dirtyInstance.getAttribute().value().getDescriptionId())) {
                 foundMax = true;
                 attribute = dirtyInstance;
                 iter.remove();

@@ -24,11 +24,22 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.advancements.critereon.BlockPredicate;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.Unit;
+import net.minecraft.world.item.AdventureModePredicate;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.Unbreakable;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.accessor.world.item.AdventureModePredicateAccessor;
+import org.spongepowered.common.accessor.world.item.enchantment.ItemEnchantmentsAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
+
+import java.util.Collections;
+import java.util.List;
 
 public final class HideFlagsItemStackData {
 
@@ -40,46 +51,44 @@ public final class HideFlagsItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.HIDE_ATTRIBUTES)
-                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.MODIFIERS))
-                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.MODIFIERS, v))
+                        .get(h -> h.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY).showInTooltip())
+                        .set((h, v) -> h.update(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY, p -> new ItemAttributeModifiers(p.modifiers(), !v)))
                     .create(Keys.HIDE_CAN_DESTROY)
-                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.CAN_DESTROY))
-                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.CAN_DESTROY, v))
+                        .get(h -> h.has(DataComponents.CAN_BREAK) && !h.get(DataComponents.CAN_BREAK).showInTooltip())
+                        .set((h, v) -> h.set(DataComponents.CAN_BREAK, HideFlagsItemStackData.newAdventureModePredicate(h, !v)))
                     .create(Keys.HIDE_CAN_PLACE)
-                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.CAN_PLACE))
-                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.CAN_PLACE, v))
+                        .get(h -> h.has(DataComponents.CAN_PLACE_ON) && !h.get(DataComponents.CAN_BREAK).showInTooltip())
+                        .set((h, v) -> h.set(DataComponents.CAN_PLACE_ON, HideFlagsItemStackData.newAdventureModePredicate(h, !v)))
                     .create(Keys.HIDE_ENCHANTMENTS)
-                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.ENCHANTMENTS))
-                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.ENCHANTMENTS, v))
+                        .get(h -> ((ItemEnchantmentsAccessor)h.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY)).accessor$showInTooltip())
+                        .set((h, v) -> h.set(DataComponents.ENCHANTMENTS, HideFlagsItemStackData.newItemEnchantments(h, v)))
                     .create(Keys.HIDE_MISCELLANEOUS)
-                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.ADDITIONAL))
-                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.ADDITIONAL, v))
+                        .get(h -> h.get(DataComponents.HIDE_ADDITIONAL_TOOLTIP) != Unit.INSTANCE)
+                        .set((h, v) -> h.set(DataComponents.HIDE_ADDITIONAL_TOOLTIP, v ? Unit.INSTANCE : null))
                     .create(Keys.HIDE_UNBREAKABLE)
-                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.UNBREAKABLE))
-                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.UNBREAKABLE, v));
+                        .get(h -> h.has(DataComponents.UNBREAKABLE) && !h.get(DataComponents.UNBREAKABLE).showInTooltip())
+                        .set((h, v) -> {
+                            if (h.has(DataComponents.UNBREAKABLE)) {
+                                h.set(DataComponents.UNBREAKABLE, new Unbreakable(v));
+                            } // else TODO not supported?
+                        });
+        // TODO missing show_in_tooltip (DYED_COLOR, more?)
     }
     // @formatter:on
 
-    private static boolean get(final ItemStack stack, final ItemStack.TooltipPart flag) {
-        final CompoundTag tag = stack.getTag();
-        if (tag == null || !tag.contains(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_ANY_NUMERIC)) {
-            return false;
+    @NotNull
+    private static AdventureModePredicate newAdventureModePredicate(final ItemStack h, final boolean showInTooltip) {
+        if (h.has(DataComponents.CAN_BREAK)) {
+            final List<BlockPredicate> $$0 = ((AdventureModePredicateAccessor) h.get(DataComponents.CAN_BREAK)).accessor$predicates();
+            return new AdventureModePredicate($$0, showInTooltip);
         }
-        return (tag.getInt(Constants.Item.ITEM_HIDE_FLAGS) & flag.getMask()) == 0;
+        return new AdventureModePredicate(Collections.emptyList(), showInTooltip);
     }
 
-    public static void set(final ItemStack stack, final ItemStack.TooltipPart flag, final boolean value) {
-        final CompoundTag tag = stack.getOrCreateTag();
-        int flags = tag.getInt(Constants.Item.ITEM_HIDE_FLAGS);
-        if (value) {
-            tag.putInt(Constants.Item.ITEM_HIDE_FLAGS, flags | flag.getMask());
-        } else {
-            flags = flags & ~flag.getMask();
-            if (flags == 0) {
-                tag.remove(Constants.Item.ITEM_HIDE_FLAGS);
-            } else {
-                tag.putInt(Constants.Item.ITEM_HIDE_FLAGS, flags);
-            }
-        }
+    @NotNull
+    private static ItemEnchantments newItemEnchantments(final ItemStack h, final boolean showInTooltip) {
+        final ItemEnchantmentsAccessor enchantments = (ItemEnchantmentsAccessor) h.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);;
+        return ItemEnchantmentsAccessor.invoker$new(enchantments.accessor$enchantments(), showInTooltip);
     }
+
 }

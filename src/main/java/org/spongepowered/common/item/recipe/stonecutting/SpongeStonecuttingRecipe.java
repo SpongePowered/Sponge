@@ -29,9 +29,8 @@ import static org.spongepowered.common.util.Constants.Recipe.SPONGE_TYPE;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -58,7 +57,7 @@ public class SpongeStonecuttingRecipe extends StonecutterRecipe implements Resul
     public static final MapCodec<SpongeStonecuttingRecipe> SPONGE_CODEC = RecordCodecBuilder.mapCodec(
             $$1 -> $$1.group(
                             Codec.STRING.fieldOf(SPONGE_TYPE).forGetter(a -> "custom"),
-                            ExtraCodecs.strictOptionalField(Codec.STRING, "group", "").forGetter(SingleItemRecipe::getGroup),
+                            Codec.STRING.optionalFieldOf("group", "").forGetter(SingleItemRecipe::getGroup),
                             Ingredient.CODEC_NONEMPTY.fieldOf(Constants.Recipe.STONECUTTING_INGREDIENT).forGetter($$0x -> $$0x.getIngredients().get(0)),
                             RESULT_CODEC.forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$result()),
                             ItemStack.CODEC.optionalFieldOf(Constants.Recipe.SPONGE_RESULT, ItemStack.EMPTY).forGetter($$0x -> ((RecipeResultBridge)$$0x).bridge$spongeResult()),
@@ -89,7 +88,7 @@ public class SpongeStonecuttingRecipe extends StonecutterRecipe implements Resul
     }
 
     @Override
-    public ItemStack assemble(final Container container, final RegistryAccess $$1) {
+    public ItemStack assemble(final Container container, final HolderLookup.Provider $$1) {
         if (this.resultFunctionId != null) {
             return IngredientResultUtil.cachedResultFunction(this.resultFunctionId).apply(container);
         }
@@ -97,7 +96,7 @@ public class SpongeStonecuttingRecipe extends StonecutterRecipe implements Resul
     }
 
     @Override
-    public ItemStack getResultItem(final RegistryAccess $$1) {
+    public ItemStack getResultItem(final HolderLookup.Provider $$1) {
 //        if (this.resultFunctionId != null) {
 //            return ItemStack.EMPTY;
 //        }

@@ -80,12 +80,12 @@ public record SpongePlacedFeatureTemplate(ResourceKey key, net.minecraft.world.l
 
     public static JsonElement encode(final PlacedFeatureTemplate template, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return net.minecraft.world.level.levelgen.placement.PlacedFeature.DIRECT_CODEC.encodeStart(ops, (net.minecraft.world.level.levelgen.placement.PlacedFeature) (Object) template.feature()).getOrThrow(false, e -> {});
+        return net.minecraft.world.level.levelgen.placement.PlacedFeature.DIRECT_CODEC.encodeStart(ops, (net.minecraft.world.level.levelgen.placement.PlacedFeature) (Object) template.feature()).getOrThrow();
     }
 
     public static net.minecraft.world.level.levelgen.placement.PlacedFeature decode(final JsonElement json, final RegistryAccess registryAccess) {
         final RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
-        return net.minecraft.world.level.levelgen.placement.PlacedFeature.DIRECT_CODEC.parse(ops, json).getOrThrow(false, e -> {});
+        return net.minecraft.world.level.levelgen.placement.PlacedFeature.DIRECT_CODEC.parse(ops, json).getOrThrow();
     }
 
     public static PlacedFeatureTemplate decode(final DataPack<PlacedFeatureTemplate> pack, final ResourceKey key, final JsonElement packEntry, final RegistryAccess registryAccess) {

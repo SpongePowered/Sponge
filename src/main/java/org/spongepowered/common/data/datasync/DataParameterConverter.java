@@ -41,7 +41,7 @@ public abstract class DataParameterConverter<E> {
     @SuppressWarnings("unchecked")
     public DataParameterConverter(final EntityDataAccessor<E> parameter) {
         this.parameter = parameter;
-        ((EntityDataAccessorBridge<E>) parameter).bridge$setDataConverter(this);
+        ((EntityDataAccessorBridge<E>) (Object) parameter).bridge$setDataConverter(this);
     }
 
     public EntityDataAccessor<E> getParameter() {

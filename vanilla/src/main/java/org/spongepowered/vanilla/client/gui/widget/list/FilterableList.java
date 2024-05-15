@@ -160,7 +160,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
     }
 
     @Override
-    protected void renderList(final GuiGraphics $$0, final int $$1, final int $$2, final float $$3) {
+    protected void renderListItems(final GuiGraphics $$0, final int $$1, final int $$2, final float $$3) {
         // Most of this is based on AbstractList::renderList logic
         final List<E> filteredList = this.filterSupplier == null ? this.children() : this.filterSupplier.get();
 

@@ -31,7 +31,7 @@ public interface RecipeResultBridge {
     ItemStack bridge$result();
     default ItemStack bridge$spongeResult() {
         final ItemStack result = this.bridge$result();
-        return result.hasTag() ? result : ItemStack.EMPTY;
+        return !result.getComponents().isEmpty() ? result : ItemStack.EMPTY;
     }
 
 }

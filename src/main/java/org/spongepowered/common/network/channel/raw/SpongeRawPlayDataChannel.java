@@ -26,11 +26,12 @@ package org.spongepowered.common.network.channel.raw;
 
 import net.minecraft.network.protocol.Packet;
 import org.spongepowered.api.network.EngineConnection;
-import org.spongepowered.api.network.EngineConnectionSide;
+import org.spongepowered.api.network.EngineConnectionState;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.raw.play.RawPlayDataChannel;
 import org.spongepowered.api.network.channel.raw.play.RawPlayDataHandler;
 import org.spongepowered.common.network.PacketUtil;
+import org.spongepowered.common.network.SpongeEngineConnection;
 import org.spongepowered.common.network.channel.ConcurrentMultimap;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.PacketSender;
@@ -63,22 +64,15 @@ public class SpongeRawPlayDataChannel implements RawPlayDataChannel {
     }
 
     @Override
-    public void addHandler(final RawPlayDataHandler<EngineConnection> handler) {
-        this.addHandler(EngineConnection.class, handler);
+    public void addHandler(final RawPlayDataHandler<EngineConnectionState> handler) {
+        this.addHandler(EngineConnectionState.class, handler);
     }
 
     @Override
-    public <C extends EngineConnection> void addHandler(final EngineConnectionSide<C> side, final RawPlayDataHandler<? super C> handler) {
-        Objects.requireNonNull(side, "side");
+    public <S extends EngineConnectionState> void addHandler(final Class<S> connectionState, final RawPlayDataHandler<? super S> handler) {
+        Objects.requireNonNull(connectionState, "connectionType");
         Objects.requireNonNull(handler, "handler");
-        this.addHandler(SpongeChannel.getConnectionClass(side), handler);
-    }
-
-    @Override
-    public <C extends EngineConnection> void addHandler(final Class<C> connectionType, final RawPlayDataHandler<? super C> handler) {
-        Objects.requireNonNull(connectionType, "connectionType");
-        Objects.requireNonNull(handler, "handler");
-        this.handlers.modify(map -> map.put(connectionType, handler));
+        this.handlers.modify(map -> map.put(connectionState, handler));
     }
 
     @Override
@@ -88,16 +82,10 @@ public class SpongeRawPlayDataChannel implements RawPlayDataChannel {
     }
 
     @Override
-    public <C extends EngineConnection> void removeHandler(final EngineConnectionSide<C> side, final RawPlayDataHandler<? super C> handler) {
-        Objects.requireNonNull(side, "side");
-        this.removeHandler(SpongeChannel.getConnectionClass(side), handler);
-    }
-
-    @Override
-    public <C extends EngineConnection> void removeHandler(final Class<C> connectionType, final RawPlayDataHandler<? super C> handler) {
-        Objects.requireNonNull(connectionType, "connectionType");
+    public <S extends EngineConnectionState> void removeHandler(final Class<S> connectionState, final RawPlayDataHandler<? super S> handler) {
+        Objects.requireNonNull(connectionState, "connectionType");
         Objects.requireNonNull(handler, "handler");
-        this.handlers.modify(map -> map.entries().removeIf(entry -> entry.getKey().isAssignableFrom(connectionType) && entry.getValue() == handler));
+        this.handlers.modify(map -> map.entries().removeIf(entry -> entry.getKey().isAssignableFrom(connectionState) && entry.getValue() == handler));
     }
 
     @Override
@@ -107,27 +95,29 @@ public class SpongeRawPlayDataChannel implements RawPlayDataChannel {
 
         ConnectionUtil.checkPlayPhase(connection);
 
+        final EngineConnectionState state = (EngineConnectionState) ((SpongeEngineConnection) connection).connection().getPacketListener();
+
         final CompletableFuture<Void> future = new CompletableFuture<>();
         final ChannelBuf payload;
         try {
             payload = this.parent.encodePayload(consumer);
         } catch (final Throwable ex) {
-            this.parent.handleException(connection, ex, future);
+            this.parent.handleException(connection, state, ex, future);
             return future;
         }
 
-        final Packet<?> mcPacket = PacketUtil.createPlayPayload(this.parent.key(), payload, connection.side());
+        final Packet<?> mcPacket = PacketUtil.createPlayPayload(this.parent.payloadType(), payload, connection.side());
         PacketSender.sendTo(connection, mcPacket, future);
         return future;
     }
 
-    private <C extends EngineConnection> Collection<RawPlayDataHandler<? super C>> getHandlers(final C connection) {
-        return (Collection) SpongeChannel.getResponseHandlers(connection, this.handlers.get());
+    private <S extends EngineConnectionState> Collection<RawPlayDataHandler<? super S>> getHandlers(final S state) {
+        return (Collection) SpongeChannel.getResponseHandlers(state, this.handlers.get());
     }
 
-    <C extends EngineConnection> void handlePayload(final C connection, final ChannelBuf payload) {
-        for (final RawPlayDataHandler<? super C> handler : this.getHandlers(connection)) {
-            handler.handlePayload(payload.slice(), connection);
+    <S extends EngineConnectionState> void handlePayload(final S state, final ChannelBuf payload) {
+        for (final RawPlayDataHandler<? super S> handler : this.getHandlers(state)) {
+            handler.handlePayload(payload.slice(), state);
         }
     }
 }

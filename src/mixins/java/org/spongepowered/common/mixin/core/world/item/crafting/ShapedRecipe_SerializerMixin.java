@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.item.crafting;
 import com.mojang.datafixers.kinds.App;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,8 +40,8 @@ import java.util.function.Function;
 @Mixin(ShapedRecipe.Serializer.class)
 public abstract class ShapedRecipe_SerializerMixin {
 
-    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"))
-    private static Codec<ShapedRecipe> impl$onCreateCodec(final Function<RecordCodecBuilder.Instance<ShapedRecipe>, ? extends App<RecordCodecBuilder.Mu<ShapedRecipe>, ShapedRecipe>> builder) {
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;mapCodec(Ljava/util/function/Function;)Lcom/mojang/serialization/MapCodec;"))
+    private static MapCodec<ShapedRecipe> impl$onCreateCodec(final Function<RecordCodecBuilder.Instance<ShapedRecipe>, ? extends App<RecordCodecBuilder.Mu<ShapedRecipe>, ShapedRecipe>> builder) {
         final var mcMapCodec = RecordCodecBuilder.mapCodec(builder);
         return Codec.mapEither(SpongeShapedRecipe.SPONGE_CODEC, mcMapCodec).xmap(to -> to.map(si -> si, i -> i),
                 fr -> {
@@ -48,6 +49,6 @@ public abstract class ShapedRecipe_SerializerMixin {
                         return Either.left(si);
                     }
                     return Either.right(fr);
-                }).codec();
+                });
     }
 }

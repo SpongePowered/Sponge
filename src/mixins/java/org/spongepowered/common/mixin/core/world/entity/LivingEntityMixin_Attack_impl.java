@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity;
 
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
@@ -66,7 +67,7 @@ public abstract class LivingEntityMixin_Attack_impl extends EntityMixin
     @Shadow @Nullable protected Player lastHurtByPlayer;
     @Shadow private long lastDamageStamp;
 
-    @Shadow public abstract boolean shadow$hasEffect(MobEffect param0);
+    @Shadow public abstract boolean shadow$hasEffect(Holder<MobEffect> param0);
     @Shadow public abstract boolean shadow$isSleeping();
     @Shadow public abstract void shadow$stopSleeping();
     @Shadow public abstract boolean shadow$isDamageSourceBlocked(DamageSource param0);

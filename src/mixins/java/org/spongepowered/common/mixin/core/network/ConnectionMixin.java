@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.network;
 
 import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalAddress;
 import io.netty.util.concurrent.Future;
@@ -34,11 +35,10 @@ import net.minecraft.network.PacketListener;
 import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketFlow;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -47,10 +47,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeMinecraftVersion;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
+import org.spongepowered.common.network.SpongeClientEngineConnection;
+import org.spongepowered.common.network.SpongeEngineConnection;
 import org.spongepowered.common.network.SpongePacketHolder;
+import org.spongepowered.common.network.SpongeServerEngineConnection;
 import org.spongepowered.common.network.channel.PacketSender;
 import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.util.Constants;
@@ -73,7 +77,7 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
     @Shadow @Final private Queue<Consumer<Connection>> pendingActions;
     @Shadow public abstract SocketAddress getRemoteAddress();
 
-    private final TransactionStore impl$transactionStore = new TransactionStore(() -> (EngineConnection) this.packetListener);
+    private TransactionStore impl$transactionStore;
     private final Set<ResourceKey> impl$registeredChannels = Sets.newConcurrentHashSet();
 
     @Nullable private InetSocketAddress impl$virtualHost;
@@ -83,6 +87,8 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
     private ClientType impl$clientType = ClientType.VANILLA;
 
     private volatile boolean impl$disconnected;
+
+    private SpongeEngineConnection impl$engineConnection;
 
     @Override
     public TransactionStore bridge$getTransactionStore() {
@@ -156,7 +162,7 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         this.impl$version = new SpongeMinecraftVersion(String.valueOf(version), version);
     }
 
-    @Inject(method = "lambda$doSendPacket$10", at = @At(value = "INVOKE", target = "Lio/netty/util/concurrent/Future;isSuccess()Z"))
+    @Inject(method = "lambda$doSendPacket$13", at = @At(value = "INVOKE", target = "Lio/netty/util/concurrent/Future;isSuccess()Z"))
     public void impl$onPacketSent(final PacketSendListener $$0x, final Future $$1x, final CallbackInfo ci) {
         if ($$0x instanceof final PacketSender.SpongePacketSendListener spongeListener) {
             spongeListener.accept($$1x.cause());
@@ -200,13 +206,9 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         return instance.add(consumer);
     }
 
-    @Inject(method = "handleDisconnection",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/network/Connection;disconnectionHandled:Z",
-            opcode = Opcodes.PUTFIELD,
-            shift = At.Shift.AFTER))
+    @Inject(method = "handleDisconnection", at = @At("RETURN"))
     private void impl$onDisconnected(final CallbackInfo ci) {
+        this.impl$engineConnection.disconnected();
         Consumer<Connection> consumer;
         while ((consumer = this.pendingActions.poll()) != null) {
             if (consumer instanceof SpongePacketHolder packetHolder) {
@@ -229,5 +231,25 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         if (this.impl$disconnected) {
             cir.setReturnValue(false);
         }
+    }
+
+    @Inject(method = "exceptionCaught", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;disconnect(Lnet/minecraft/network/chat/Component;)V"))
+    private void impl$onExceptionDisconnect(final ChannelHandlerContext $$0, final Throwable $$1, final CallbackInfo ci) {
+        SpongeCommon.logger().error("Disconnected due to error", $$1);
+    }
+
+    @Override
+    public SpongeEngineConnection bridge$getEngineConnection() {
+        return this.impl$engineConnection;
+    }
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void impl$onInit(final PacketFlow packetFlow, final CallbackInfo ci) {
+        if (packetFlow == PacketFlow.CLIENTBOUND) {
+            this.impl$engineConnection = new SpongeClientEngineConnection((Connection) (Object) this);
+        } else if (packetFlow == PacketFlow.SERVERBOUND) {
+            this.impl$engineConnection = new SpongeServerEngineConnection((Connection) (Object) this);
+        }
+        this.impl$transactionStore = new TransactionStore(this.impl$engineConnection);
     }
 }

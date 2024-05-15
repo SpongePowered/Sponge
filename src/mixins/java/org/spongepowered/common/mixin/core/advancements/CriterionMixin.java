@@ -70,10 +70,10 @@ public abstract class CriterionMixin<T extends CriterionTriggerInstance> impleme
         @SuppressWarnings("deprecation")
         var mcCodec = ExtraCodecs.dispatchOptionalValue($$0, $$1, $$2, $$3, $$4);
 
-        final var triggerTimesCodec = Codec.optionalField("trigger_times", Codec.INT);
+        final var triggerTimesCodec = Codec.INT.optionalFieldOf("trigger_times");
         var tmpCodec = CriterionMixin.impl$dependent(mcCodec, triggerTimesCodec, CriterionBridge::bridge$getScoreGoal, CriterionBridge::bridge$setScoreGoal);
 
-        final var criterionCodec = Codec.optionalField("criterion", Codec.STRING);
+        final var criterionCodec = Codec.STRING.optionalFieldOf("criterion");
         tmpCodec = CriterionMixin.impl$dependent(tmpCodec, criterionCodec,
                 bridge -> bridge.bridge$getScoreCriterion() == null ? null : bridge.bridge$getScoreCriterion().name(),
                 CriterionBridge::bridge$setScoreCriterionName);

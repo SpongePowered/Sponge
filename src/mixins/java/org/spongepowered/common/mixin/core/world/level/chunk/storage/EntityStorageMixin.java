@@ -29,7 +29,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.storage.EntityStorage;
-import net.minecraft.world.level.chunk.storage.IOWorker;
+import net.minecraft.world.level.chunk.storage.SimpleRegionStorage;
 import net.minecraft.world.level.entity.ChunkEntities;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -44,6 +44,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.level.chunk.storage.SimpleRegionStorageAccessor;
 import org.spongepowered.common.bridge.world.level.chunk.storage.IOWorkerBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -54,18 +55,18 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 @Mixin(EntityStorage.class)
 public abstract class EntityStorageMixin {
 
     // @formatter:off
-    @Shadow @Final private IOWorker worker;
     @Shadow @Final private ServerLevel level;
     // @formatter:on
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void impl$setIOWorkerDimension(final CallbackInfo ci) {
-        ((IOWorkerBridge) this.worker).bridge$setDimension(SpongeIOWorkerType.ENTITY, this.level.dimension());
+    private void impl$setIOWorkerDimension(final SimpleRegionStorage $$0, final ServerLevel $$1, final Executor $$2, final CallbackInfo ci) {
+        ((IOWorkerBridge) ((SimpleRegionStorageAccessor) $$0).accessor$worker()).bridge$setDimension(SpongeIOWorkerType.ENTITY, this.level.dimension());
     }
 
     @Inject(method = "lambda$loadEntities$0", at = @At("RETURN"), cancellable = true)

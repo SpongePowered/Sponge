@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world.item.crafting;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,7 +39,7 @@ public abstract class IngredientMixin {
     @Inject(method = "codec", at = @At(value = "RETURN"), cancellable = true)
     private static void impl$modifyCodec(final boolean $$0, final CallbackInfoReturnable<Codec<Ingredient>> cir) {
         final Codec<Ingredient> original = cir.getReturnValue();
-        var combinedCodec = ExtraCodecs.xor(SpongeIngredient.CODEC, original).xmap(to -> to.map(si -> si, i -> i),
+        var combinedCodec = Codec.xor(SpongeIngredient.CODEC, original).xmap(to -> to.map(si -> si, i -> i),
                 fr -> {
                     if (fr instanceof SpongeIngredient si) {
                         return Either.left(si);

@@ -29,6 +29,7 @@ import net.minecraft.network.PacketSendListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.ClientboundResourcePackPushPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,25 +40,20 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.bridge.network.protocol.game.ClientboundResourcePackPacketBridge;
 
 @Mixin(ServerCommonPacketListenerImpl.class)
-public abstract class ServerCommonPacketListenerImplMixin implements ConnectionHolderBridge {
+public abstract class ServerCommonPacketListenerImplMixin {
 
     // @formatter:off
     @Shadow @Final protected Connection connection;
     @Shadow @Final protected MinecraftServer server;
     @Shadow public abstract void shadow$send(final Packet<?> $$0, @Nullable final PacketSendListener $$1);
     @Shadow public abstract void shadow$disconnect(Component reason);
+    @Shadow public void shadow$handleCustomPayload(final ServerboundCustomPayloadPacket $$0) { }
     // @formatter:on
 
     @Nullable public ResourcePack impl$lastReceivedPack;
-
-    @Override
-    public Connection bridge$getConnection() {
-        return this.connection;
-    }
 
     @Inject(
             method = "send(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketSendListener;)V",

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -64,7 +65,7 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     @Shadow protected boolean remove;
 
     @Shadow public abstract BlockPos shadow$getBlockPos();
-    @Shadow public abstract CompoundTag shadow$saveWithFullMetadata();
+    @Shadow public abstract CompoundTag shadow$saveWithFullMetadata(HolderLookup.Provider $$0);
     //@formatter:on
 
     @Shadow @Final protected BlockPos worldPosition;
@@ -114,7 +115,7 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
             .set(Queries.POSITION_Y, this.shadow$getBlockPos().getY())
             .set(Queries.POSITION_Z, this.shadow$getBlockPos().getZ())
             .set(Constants.TileEntity.TILE_TYPE, key);
-        final CompoundTag compound = this.shadow$saveWithFullMetadata();
+        final CompoundTag compound = this.shadow$saveWithFullMetadata(this.level.registryAccess());
         Constants.NBT.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         container.set(Constants.Sponge.UNSAFE_NBT, NBTTranslator.INSTANCE.translateFrom(compound));
         return container;

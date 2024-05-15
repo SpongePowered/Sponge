@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.core;
 
-import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistrationInfo;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -55,7 +55,7 @@ import java.util.stream.Stream;
 @Implements(@Interface(iface = Registry.class, prefix = "registry$", remap = Interface.Remap.NONE))
 public abstract class MappedRegistryMixin_API<T> implements Registry<T> {
 
-    @Shadow public abstract Holder.Reference<T> shadow$register(final net.minecraft.resources.ResourceKey<T> $$0, final T $$1, final Lifecycle $$2);
+    @Shadow public abstract Holder.Reference<T> shadow$register(final net.minecraft.resources.ResourceKey<T> $$0, final T $$1, final RegistrationInfo $$2);
 
     @Shadow public abstract net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> shadow$key();
     @Shadow @Nullable public abstract T shadow$get(@Nullable ResourceLocation var1);
@@ -162,7 +162,7 @@ public abstract class MappedRegistryMixin_API<T> implements Registry<T> {
 
         if (this.isDynamic()) {
             final net.minecraft.resources.ResourceKey<T> mcKey = net.minecraft.resources.ResourceKey.create(this.shadow$key(), (ResourceLocation) (Object) key);
-            this.shadow$register(mcKey, value, Lifecycle.stable());
+            this.shadow$register(mcKey, value, RegistrationInfo.BUILT_IN);
             return ((RegistryBridge) this).bridge$get(key);
         }
         return Optional.empty();

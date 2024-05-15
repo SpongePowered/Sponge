@@ -24,20 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.network;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.adventure.NativeComponentRenderer;
 import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
-import org.spongepowered.common.util.Constants;
 
 import java.util.Locale;
 
@@ -46,94 +36,95 @@ public abstract class FriendlyByteBufMixin implements FriendlyByteBufBridge {
 
     private @Nullable Locale impl$locale;
 
-    @ModifyVariable(method = "writeComponent", at = @At("HEAD"), argsOnly = true)
-    private Component localizeComponent(final Component input) {
-        return NativeComponentRenderer.apply(input, this.impl$locale == null ? Locales.DEFAULT : this.impl$locale);
-    }
+    // TODO mc is using codec now to write to the Buffer, it might even not be a FriendlyByteBuf anymore
+//    @ModifyVariable(method = "writeComponent", at = @At("HEAD"), argsOnly = true)
+//    private Component localizeComponent(final Component input) {
+//        return NativeComponentRenderer.apply(input, this.impl$locale == null ? Locales.DEFAULT : this.impl$locale);
+//    }
 
-    @Override
-    public CompoundTag bridge$renderItemComponents(CompoundTag tag) {
-        if (tag == null || !tag.contains(Constants.Item.ITEM_DISPLAY, 10)) {
-            return tag;
-        }
-
-        final Locale locale = this.impl$locale == null ? Locales.DEFAULT : this.impl$locale;
-        CompoundTag display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
-        boolean copy = true;
-
-        if (display.contains(Constants.Item.ITEM_NAME, 8)) {
-            final String nameStr = display.getString(Constants.Item.ITEM_NAME);
-            final Component name = Component.Serializer.fromJson(nameStr);
-            final Component renderedName = NativeComponentRenderer.apply(name, locale);
-
-            if (!renderedName.equals(name)) {
-                if (copy) {
-                    tag = tag.copy();
-                    display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
-                    copy = false;
-                }
-
-                display.putString(Constants.Item.ITEM_ORIGINAL_NAME, nameStr);
-                display.putString(Constants.Item.ITEM_NAME, Component.Serializer.toJson(renderedName));
-            }
-        }
-
-        if (display.contains(Constants.Item.ITEM_LORE, 9)) {
-            final ListTag lore = display.getList(Constants.Item.ITEM_LORE, 8);
-
-            final Component[] renderedLines = new Component[lore.size()];
-            boolean equal = true;
-
-            for (int i = 0; i < renderedLines.length; i++) {
-                final String lineStr = lore.getString(i);
-                final Component line = Component.Serializer.fromJson(lineStr);
-                final Component renderedLine = NativeComponentRenderer.apply(line, locale);
-
-                renderedLines[i] = renderedLine;
-                equal = equal && renderedLine.equals(line);
-            }
-
-            if (!equal) {
-                if (copy) {
-                    tag = tag.copy();
-                    display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
-                    copy = false;
-                }
-
-                final ListTag newLore = new ListTag();
-                for (Component renderedLine : renderedLines) {
-                    newLore.add(StringTag.valueOf(Component.Serializer.toJson(renderedLine)));
-                }
-
-                display.put(Constants.Item.ITEM_ORIGINAL_LORE, lore);
-                display.put(Constants.Item.ITEM_LORE, newLore);
-            }
-        }
-        return tag;
-    }
-
-    @Redirect(method = "readItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;readNbt()Lnet/minecraft/nbt/CompoundTag;"))
-    public CompoundTag restoreItemComponents(final FriendlyByteBuf buf) {
-        CompoundTag tag = buf.readNbt();
-        if (tag == null || !tag.contains(Constants.Item.ITEM_DISPLAY, 10)) {
-            return tag;
-        }
-
-        final CompoundTag display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
-
-        if (display.contains(Constants.Item.ITEM_ORIGINAL_NAME, 8)) {
-            final String name = display.getString(Constants.Item.ITEM_ORIGINAL_NAME);
-            display.remove(Constants.Item.ITEM_ORIGINAL_NAME);
-            display.putString(Constants.Item.ITEM_NAME, name);
-        }
-
-        if (display.contains(Constants.Item.ITEM_ORIGINAL_LORE, 9)) {
-            final ListTag lore = display.getList(Constants.Item.ITEM_ORIGINAL_LORE, 8);
-            display.remove(Constants.Item.ITEM_ORIGINAL_LORE);
-            display.put(Constants.Item.ITEM_LORE, lore);
-        }
-        return tag;
-    }
+//    @Override
+//    public CompoundTag bridge$renderItemComponents(CompoundTag tag) {
+//        if (tag == null || !tag.contains(Constants.Item.ITEM_DISPLAY, 10)) {
+//            return tag;
+//        }
+//
+//        final Locale locale = this.impl$locale == null ? Locales.DEFAULT : this.impl$locale;
+//        CompoundTag display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
+//        boolean copy = true;
+//
+//        if (display.contains(Constants.Item.ITEM_NAME, 8)) {
+//            final String nameStr = display.getString(Constants.Item.ITEM_NAME);
+//            final Component name = Component.Serializer.fromJson(nameStr);
+//            final Component renderedName = NativeComponentRenderer.apply(name, locale);
+//
+//            if (!renderedName.equals(name)) {
+//                if (copy) {
+//                    tag = tag.copy();
+//                    display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
+//                    copy = false;
+//                }
+//
+//                display.putString(Constants.Item.ITEM_ORIGINAL_NAME, nameStr);
+//                display.putString(Constants.Item.ITEM_NAME, Component.Serializer.toJson(renderedName));
+//            }
+//        }
+//
+//        if (display.contains(Constants.Item.ITEM_LORE, 9)) {
+//            final ListTag lore = display.getList(Constants.Item.ITEM_LORE, 8);
+//
+//            final Component[] renderedLines = new Component[lore.size()];
+//            boolean equal = true;
+//
+//            for (int i = 0; i < renderedLines.length; i++) {
+//                final String lineStr = lore.getString(i);
+//                final Component line = Component.Serializer.fromJson(lineStr);
+//                final Component renderedLine = NativeComponentRenderer.apply(line, locale);
+//
+//                renderedLines[i] = renderedLine;
+//                equal = equal && renderedLine.equals(line);
+//            }
+//
+//            if (!equal) {
+//                if (copy) {
+//                    tag = tag.copy();
+//                    display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
+//                    copy = false;
+//                }
+//
+//                final ListTag newLore = new ListTag();
+//                for (Component renderedLine : renderedLines) {
+//                    newLore.add(StringTag.valueOf(Component.Serializer.toJson(renderedLine)));
+//                }
+//
+//                display.put(Constants.Item.ITEM_ORIGINAL_LORE, lore);
+//                display.put(Constants.Item.ITEM_LORE, newLore);
+//            }
+//        }
+//        return tag;
+//    }
+//
+//    @Redirect(method = "readItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;readNbt()Lnet/minecraft/nbt/CompoundTag;"))
+//    public CompoundTag restoreItemComponents(final FriendlyByteBuf buf) {
+//        CompoundTag tag = buf.readNbt();
+//        if (tag == null || !tag.contains(Constants.Item.ITEM_DISPLAY, 10)) {
+//            return tag;
+//        }
+//
+//        final CompoundTag display = tag.getCompound(Constants.Item.ITEM_DISPLAY);
+//
+//        if (display.contains(Constants.Item.ITEM_ORIGINAL_NAME, 8)) {
+//            final String name = display.getString(Constants.Item.ITEM_ORIGINAL_NAME);
+//            display.remove(Constants.Item.ITEM_ORIGINAL_NAME);
+//            display.putString(Constants.Item.ITEM_NAME, name);
+//        }
+//
+//        if (display.contains(Constants.Item.ITEM_ORIGINAL_LORE, 9)) {
+//            final ListTag lore = display.getList(Constants.Item.ITEM_ORIGINAL_LORE, 8);
+//            display.remove(Constants.Item.ITEM_ORIGINAL_LORE);
+//            display.put(Constants.Item.ITEM_LORE, lore);
+//        }
+//        return tag;
+//    }
 
     @Override
     public void bridge$setLocale(final Locale locale) {

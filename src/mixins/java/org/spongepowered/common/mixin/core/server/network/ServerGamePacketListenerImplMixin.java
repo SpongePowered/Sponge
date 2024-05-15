@@ -31,15 +31,16 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.minecraft.SharedConstants;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.LastSeenMessages;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveVehiclePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ServerboundChatCommandSignedPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket;
@@ -50,6 +51,7 @@ import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.FilteredText;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.RelativeMovement;
@@ -102,6 +104,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.CommandUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
@@ -127,6 +130,8 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
 
     @Shadow public abstract void shadow$teleport(double x, double y, double z, float yaw, float pitch, Set<RelativeMovement> relativeArguments);
     @Shadow protected abstract CompletableFuture<List<FilteredText>> shadow$filterTextPacket(final List<String> $$0);
+    @Shadow protected abstract void shadow$performUnsignedChatCommand(final String $$0);
+    @Shadow protected abstract void shadow$performSignedChatCommand(ServerboundChatCommandSignedPacket $$0, LastSeenMessages $$1);
     @Shadow protected abstract ParseResults<CommandSourceStack> shadow$parseCommand(final String $$0);
     // @formatter:on
 
@@ -427,11 +432,13 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             frame.pushCause(this.player);
             final Component message = SpongeAdventure.asAdventure($$0);
             final Audience audience = Sponge.server().broadcastAudience();
-            final ServerSideConnectionEvent.Disconnect event = SpongeEventFactory.createServerSideConnectionEventDisconnect(
+            final ServerSideConnectionEvent.Leave event = SpongeEventFactory.createServerSideConnectionEventLeave(
                     PhaseTracker.getCauseStackManager().currentCause(), audience, Optional.of(audience), message, message,
-                    spongePlayer.connection(), spongePlayer);
+                    spongePlayer.connection(), spongePlayer, SpongeGameProfile.of(this.player.getGameProfile()), false);
             SpongeCommon.post(event);
-            event.audience().ifPresent(a -> a.sendMessage(spongePlayer, event.message()));
+            if (!event.isMessageCancelled()) {
+                event.audience().ifPresent(a -> a.sendMessage(spongePlayer, event.message()));
+            }
         }
 
         ((ServerPlayerBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();
@@ -458,7 +465,7 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             // TODO is this still needed?
             // Sponge Start - While Vanilla does some strip formatting, it doesn't catch everything. This patches an exploit that allows color
             // signs to be created.
-            newLines.add(Component.text(SharedConstants.filterText(line.filtered())));
+            newLines.add(Component.text(StringUtil.filterText(line.filtered())));
         }
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -495,6 +502,24 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
         } else {
             // TODO maybe not ignore this?
             // LOGGER.warn("Player {} just tried to change non-editable sign", $$0.getName().getString());
+        }
+    }
+
+    @Redirect(method = "lambda$handleChatCommand$7", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performUnsignedChatCommand(Ljava/lang/String;)V"))
+    public void impl$onPerformChatCommand(final ServerGamePacketListenerImpl instance, final String $$0) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this.player);
+            frame.addContext(EventContextKeys.COMMAND, $$0);
+            this.shadow$performUnsignedChatCommand($$0);
+        }
+    }
+
+    @Redirect(method = "lambda$handleSignedChatCommand$8", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;performSignedChatCommand(Lnet/minecraft/network/protocol/game/ServerboundChatCommandSignedPacket;Lnet/minecraft/network/chat/LastSeenMessages;)V"))
+    public void impl$onPerformSignedChatCommand(final ServerGamePacketListenerImpl instance, final ServerboundChatCommandSignedPacket $$0, final LastSeenMessages $$1) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(this.player);
+            frame.addContext(EventContextKeys.COMMAND, $$0.command());
+            this.shadow$performSignedChatCommand($$0, $$1);
         }
     }
 

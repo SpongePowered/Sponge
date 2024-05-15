@@ -29,7 +29,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.world.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
@@ -44,7 +43,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     // @formatter:off
-    @Shadow @Final private net.minecraft.world.item.enchantment.Enchantment.Rarity rarity;
     @Shadow public abstract int shadow$getMinLevel();
     @Shadow public abstract int shadow$getMaxLevel();
     @Shadow public abstract int shadow$getMinCost(int level);
@@ -53,11 +51,14 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
     @Shadow protected abstract String shadow$getOrCreateDescriptionId();
     @Shadow public abstract boolean shadow$isTreasureOnly();
     @Shadow public abstract boolean shadow$isCurse();
+    @Shadow public abstract int shadow$getWeight();
+
     // @formatter:on
+
 
     @Override
     public int weight() {
-        return this.rarity.getWeight();
+        return this.shadow$getWeight();
     }
 
     @Override

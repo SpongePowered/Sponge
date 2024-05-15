@@ -59,8 +59,10 @@ public abstract class ScoreboardMixin implements ScoreboardBridge {
 
     @Inject(method = "getOrCreatePlayerScore(Lnet/minecraft/world/scores/ScoreHolder;Lnet/minecraft/world/scores/Objective;Z)Lnet/minecraft/world/scores/ScoreAccess;", at = @At("RETURN"), cancellable = true)
     private void impl$onGetScoreAccess(final ScoreHolder $$0, final Objective $$1, final boolean $$2, final CallbackInfoReturnable<ScoreAccess> cir) {
-        // wrap to intercept setting data
-        cir.setReturnValue(new SpongeScore.SpongeScoreAccess($$0, $$1, cir.getReturnValue()));
+        if ((Scoreboard) (Object) this instanceof ServerScoreboard) {
+            // wrap to intercept setting data
+            cir.setReturnValue(new SpongeScore.SpongeScoreAccess($$0, $$1, cir.getReturnValue()));
+        }
     }
 
     @Inject(method = "addObjective", at = @At("RETURN"))

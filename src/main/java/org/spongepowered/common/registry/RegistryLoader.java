@@ -66,19 +66,19 @@ public final class RegistryLoader<T> extends InitialRegistryData<T> {
     }
 
 
-    public RegistryLoader<T> add(final int id, final RegistryKey<? extends T> key, final Supplier<? extends T> supplier) {
-        return this.add0(id, key, supplier.get());
+    public RegistryLoader<T> addWithId(final int id, final RegistryKey<? extends T> key, final Supplier<? extends T> supplier) {
+        return this.addWithId0(id, key, supplier.get());
     }
 
-    public RegistryLoader<T> add(final int id, final RegistryKey<? extends T> key, final Function<ResourceKey, ? extends T> function) {
-        return this.add0(id, key, function.apply(key.location()));
+    public RegistryLoader<T> addWithId(final int id, final RegistryKey<? extends T> key, final Function<ResourceKey, ? extends T> function) {
+        return this.addWithId0(id, key, function.apply(key.location()));
     }
 
-    public <MC> RegistryLoader<T> add(final MC mcType, final RegistryKey<? extends T> key, final Function<MC, ? extends T> function, final Function<MC, Integer> idFunction) {
-        return this.add0(idFunction.apply(mcType), key, function.apply(mcType));
+    public <MC> RegistryLoader<T> addWithId(final MC mcType, final RegistryKey<? extends T> key, final Function<MC, ? extends T> function, final Function<MC, Integer> idFunction) {
+        return this.addWithId0(idFunction.apply(mcType), key, function.apply(mcType));
     }
 
-    private RegistryLoader<T> add0(final int id, final RegistryKey<? extends T> key, final T value) {
+    private RegistryLoader<T> addWithId0(final int id, final RegistryKey<? extends T> key, final T value) {
         this.values.put(key.location(), value);
         if (this.ids == null) {
             this.ids = new HashMap<>();
@@ -117,10 +117,6 @@ public final class RegistryLoader<T> extends InitialRegistryData<T> {
 
     public Map<ResourceKey, T> values() {
         return this.values;
-    }
-
-    public @Nullable Map<ResourceKey, Integer> ids() {
-        return this.ids;
     }
 
     @Override

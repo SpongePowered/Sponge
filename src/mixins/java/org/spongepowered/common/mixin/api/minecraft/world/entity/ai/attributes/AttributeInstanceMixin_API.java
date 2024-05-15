@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.ai.attributes;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import org.spongepowered.api.entity.attribute.Attribute;
 import org.spongepowered.api.entity.attribute.AttributeModifier;
@@ -37,6 +38,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -47,7 +49,7 @@ import java.util.UUID;
 public abstract class AttributeInstanceMixin_API implements Attribute {
 
     // @formatter:off
-    @Shadow public abstract net.minecraft.world.entity.ai.attributes.Attribute shadow$getAttribute();
+    @Shadow public abstract Holder<net.minecraft.world.entity.ai.attributes.Attribute> shadow$getAttribute();
     @Shadow public abstract double shadow$getBaseValue();
     @Shadow public abstract void shadow$setBaseValue(double baseValue);
     @Shadow public abstract double shadow$getValue();
@@ -56,13 +58,13 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
     @Shadow protected abstract void shadow$addModifier(net.minecraft.world.entity.ai.attributes.AttributeModifier modifier);
     @Shadow public abstract void shadow$removeModifier(net.minecraft.world.entity.ai.attributes.AttributeModifier modifier);
     @Shadow public abstract void shadow$removeModifier(UUID uuid);
-    @Shadow public abstract Set<net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getModifiers(net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation p_225504_1_);
+    @Shadow abstract Map<UUID, net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getModifiers(net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation p_225504_1_);
     @Shadow public abstract Set<net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getModifiers();
     // @formatter:on
 
     @Override
     public AttributeType type() {
-        return (AttributeType) this.shadow$getAttribute();
+        return (AttributeType) this.shadow$getAttribute().value();
     }
 
     @Override
@@ -87,27 +89,27 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
 
     @Override
     public Collection<AttributeModifier> modifiers(final AttributeOperation operation) {
-        return (Collection) this.shadow$getModifiers((net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation) (Object) Objects.requireNonNull(operation, "operation"));
+        return (Collection) this.shadow$getModifiers((net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation) (Object) Objects.requireNonNull(operation, "operation")).values();
     }
 
     @Override
     public boolean hasModifier(final AttributeModifier modifier) {
-        return this.shadow$hasModifier((net.minecraft.world.entity.ai.attributes.AttributeModifier) Objects.requireNonNull(modifier, "modifier"));
+        return this.shadow$hasModifier((net.minecraft.world.entity.ai.attributes.AttributeModifier) (Object) Objects.requireNonNull(modifier, "modifier"));
     }
 
     @Override
     public Optional<AttributeModifier> modifier(final UUID uniqueId) {
-        return Optional.ofNullable((AttributeModifier) this.shadow$getModifier(Objects.requireNonNull(uniqueId, "uniqueId")));
+        return Optional.ofNullable((AttributeModifier) (Object) this.shadow$getModifier(Objects.requireNonNull(uniqueId, "uniqueId")));
     }
 
     @Override
     public void addModifier(final AttributeModifier modifier) {
-        this.shadow$addModifier((net.minecraft.world.entity.ai.attributes.AttributeModifier) Objects.requireNonNull(modifier, "modifier"));
+        this.shadow$addModifier((net.minecraft.world.entity.ai.attributes.AttributeModifier) (Object) Objects.requireNonNull(modifier, "modifier"));
     }
 
     @Override
     public void removeModifier(final AttributeModifier modifier) {
-        this.shadow$removeModifier((net.minecraft.world.entity.ai.attributes.AttributeModifier) Objects.requireNonNull(modifier, "modifier"));
+        this.shadow$removeModifier((net.minecraft.world.entity.ai.attributes.AttributeModifier) (Object) Objects.requireNonNull(modifier, "modifier"));
     }
 
     @Intrinsic

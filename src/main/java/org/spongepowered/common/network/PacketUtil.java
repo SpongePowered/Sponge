@@ -32,13 +32,12 @@ import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.network.protocol.login.custom.CustomQueryAnswerPayload;
 import net.minecraft.network.protocol.login.custom.CustomQueryPayload;
-import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.packet.Packet;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -74,31 +73,21 @@ public final class PacketUtil {
         return new ClientboundCustomQueryPacket(transactionId, payload);
     }
 
-    public static net.minecraft.network.protocol.Packet<?> createPlayPayload(final ResourceKey channel, final ChannelBuf payload, final EngineConnectionSide<?> side) {
+    public static net.minecraft.network.protocol.Packet<?> createPlayPayload(final CustomPacketPayload payload, final EngineConnectionSide<?> side) {
         if (side == EngineConnectionSide.CLIENT) {
-            return new ServerboundCustomPayloadPacket(new CustomPacketPayload() {
-                @Override
-                public void write(FriendlyByteBuf var1) {
-                    var1.writeBytes((FriendlyByteBuf)payload);
-                }
-
-                @Override
-                public ResourceLocation id() {
-                    return (ResourceLocation) (Object) channel;
-                }
-            });
+            return new ServerboundCustomPayloadPacket(payload);
         } else if (side == EngineConnectionSide.SERVER) {
-            return new ClientboundCustomPayloadPacket(new CustomPacketPayload() {
-                @Override
-                public void write(FriendlyByteBuf var1) {
-                    var1.writeBytes((FriendlyByteBuf)payload);
-                }
+            return new ClientboundCustomPayloadPacket(payload);
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
 
-                @Override
-                public ResourceLocation id() {
-                    return (ResourceLocation) (Object) channel;
-                }
-            });
+    public static net.minecraft.network.protocol.Packet<?> createPlayPayload(final CustomPacketPayload.Type<? extends CustomPacketPayload> channel, final ChannelBuf payload, final EngineConnectionSide<?> side) {
+        if (side == EngineConnectionSide.CLIENT) {
+            return new ServerboundCustomPayloadPacket(new SpongeChannelPayload(channel, (FriendlyByteBuf) payload));
+        } else if (side == EngineConnectionSide.SERVER) {
+            return new ClientboundCustomPayloadPacket(new SpongeChannelPayload(channel, (FriendlyByteBuf) payload));
         } else {
             throw new UnsupportedOperationException();
         }
