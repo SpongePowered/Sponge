@@ -136,6 +136,7 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
     }
 
     // Slot definition Impl:
+    @Override
     public BuildingStep slotsAtIndizes(List<Slot> source, List<Integer> at) {
         Validate.isTrue(source.size() == at.size(), "Source and index list sizes differ");
         for (int i = 0; i < at.size(); i++) {
@@ -148,10 +149,12 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
     }
 
     // complex redirects - (source/index list generation)
+    @Override
     public BuildingStep slotsAtPositions(List<Slot> source, List<Vector2i> at) {
         return this.slotsAtIndizes(source, at.stream().map(this::posToIndex).collect(Collectors.toList()));
     }
 
+    @Override
     public DummyStep fillDummy() {
         Slot slot = this.newDummySlot();
         List<Integer> indizes = IntStream.range(0, this.info.size).boxed().filter(idx -> !this.slotDefinitions.containsKey(idx)).collect(Collectors.toList());
@@ -160,6 +163,7 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
         return this;
     }
 
+    @Override
     public DummyStep dummySlots(int count, int offset) {
         Slot slot = this.newDummySlot();
         List<Slot> source = Stream.generate(() -> slot).limit(count).collect(Collectors.toList());
@@ -167,11 +171,13 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
         return this;
     }
 
+    @Override
     public BuildingStep slots(List<Slot> source, int offset) {
         List<Integer> indizes = IntStream.range(offset, offset + source.size()).boxed().collect(Collectors.toList());
         return this.slotsAtIndizes(source, indizes);
     }
 
+    @Override
     public DummyStep dummyGrid(Vector2i size, Vector2i offset) {
         Slot slot = this.newDummySlot();
         List<Slot> source = Stream.generate(() -> slot).limit(size.x() * size.y()).collect(Collectors.toList());
@@ -179,6 +185,7 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
         return this;
     }
 
+    @Override
     public BuildingStep grid(List<Slot> source, Vector2i size, Vector2i offset) {
         int xMin = offset.x();
         int yMin = offset.y();
@@ -196,14 +203,17 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
 
     // simple redirects
 
+    @Override
     public DummyStep dummySlots(int count, Vector2i offset) {
         return this.dummySlots(count, this.posToIndex(offset));
     }
 
+    @Override
     public BuildingStep slots(List<Slot> source, Vector2i offset) {
         return this.slots(source, this.posToIndex(offset));
     }
 
+    @Override
     public DummyStep dummyGrid(Vector2i size, int offset) {
         return this.dummyGrid(size, this.indexToPos(offset));
     }
@@ -225,6 +235,7 @@ public final class SpongeViewableInventoryBuilder implements ViewableInventory.B
         return this;
     }
 
+    @Override
     public EndStep identity(UUID uuid) {
         this.identity = uuid;
         return this;
