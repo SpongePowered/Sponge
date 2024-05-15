@@ -38,6 +38,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.EnchantmentMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
@@ -239,9 +240,8 @@ public class InventoryEventFactory {
         return true;
     }
 
-    public static @org.checkerframework.checker.nullness.qual.Nullable AbstractContainerMenu displayContainer(final ServerPlayer player, final Inventory inventory, final Component displayName) {
-        final net.minecraft.world.inventory.AbstractContainerMenu previousContainer = player.containerMenu;
-        final net.minecraft.world.inventory.AbstractContainerMenu container;
+    public static @Nullable AbstractContainerMenu displayContainer(final ServerPlayer player, final Inventory inventory, final Component displayName) {
+        final AbstractContainerMenu previousContainer = player.containerMenu;
 
         Optional<ViewableInventory> viewable = inventory.asViewable();
         if (viewable.isPresent()) {
@@ -276,8 +276,7 @@ public class InventoryEventFactory {
             horse.openCustomInventoryScreen(player);
         }
 
-        container = player.containerMenu;
-
+        final AbstractContainerMenu container = player.containerMenu;
         if (previousContainer == container) {
             return null;
         }
@@ -298,6 +297,27 @@ public class InventoryEventFactory {
         }
 
         return container;
+    }
+
+    public static @Nullable AbstractContainerMenu displayContainer(final ServerPlayer player, final MenuType<?> type, Component displayName) {
+        final AbstractContainerMenu previousContainer = player.containerMenu;
+
+        if (displayName == null) {
+            displayName = Component.text("CustomContainer");
+        }
+
+        final MenuProvider menuProvider = new SimpleMenuProvider((menuId, playerInv, p) -> type.create(menuId, playerInv), SpongeAdventure.asVanilla(displayName));
+        player.openMenu(menuProvider);
+        final AbstractContainerMenu container = player.containerMenu;
+        if (previousContainer == container) {
+            return null;
+        }
+
+        if (!InventoryEventFactory.callInteractContainerOpenEvent(player)) {
+            return null;
+        }
+
+        return player.containerMenu;
     }
 
     public static TransferInventoryEvent.Pre callTransferPre(final Inventory source, final Inventory destination) {
