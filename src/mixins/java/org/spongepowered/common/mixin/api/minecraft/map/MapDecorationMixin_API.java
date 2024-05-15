@@ -33,6 +33,7 @@ import org.spongepowered.api.map.decoration.MapDecorationType;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
@@ -49,9 +50,9 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
 
     // @formatter:off
     @Shadow @Final private Holder<net.minecraft.world.level.saveddata.maps.MapDecorationType> type;
-    @Shadow @Final private byte x;
-    @Shadow @Final private byte y;
-    @Shadow @Final private byte rot;
+    @Shadow @Final @Mutable private byte x;
+    @Shadow @Final @Mutable private byte y;
+    @Shadow @Final @Mutable private byte rot;
     @Shadow @Final private Optional<Component> name;
     // @formatter:on
 
