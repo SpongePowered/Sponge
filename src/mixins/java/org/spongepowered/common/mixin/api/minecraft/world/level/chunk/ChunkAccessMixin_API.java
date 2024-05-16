@@ -24,12 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.fluid.FluidType;
@@ -40,11 +43,14 @@ import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.chunk.ChunkState;
+import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.schematic.PaletteWrapper;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -63,6 +69,15 @@ public abstract class ChunkAccessMixin_API<P extends Chunk<P>> implements Chunk<
     @Shadow public abstract LevelChunkSection shadow$getSection(int p_187657_);
     @Shadow public abstract void shadow$setUnsaved(boolean p_62094_);
     // @formatter:on
+    @SuppressWarnings("unchecked")
+    @Override
+    public Palette<BlockState, BlockType> blockPalette() {
+        return PaletteWrapper.of(
+            PaletteTypes.BLOCK_STATE_PALETTE.get(),
+            Block.BLOCK_STATE_REGISTRY,
+            (org.spongepowered.api.registry.Registry<BlockType>) Registries.BLOCK
+        );
+    }
 
     @Override
     public void addEntity(final Entity entity) {

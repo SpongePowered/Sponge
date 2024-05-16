@@ -66,7 +66,7 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic, 
 
     @Override
     public Palette<BlockState, BlockType> blockPalette() {
-        return this.volume.getBlockPalette();
+        return this.volume.blockPalette();
     }
 
     @Override

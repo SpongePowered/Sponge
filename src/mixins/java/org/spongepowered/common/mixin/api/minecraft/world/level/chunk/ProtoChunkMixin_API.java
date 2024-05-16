@@ -27,8 +27,10 @@ package org.spongepowered.common.mixin.api.minecraft.world.level.chunk;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
@@ -38,20 +40,25 @@ import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.generation.GenerationChunk;
+import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.holder.SpongeServerLocationBaseDataHolder;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.SpongeTicks;
+import org.spongepowered.common.world.schematic.PaletteWrapper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.math.vector.Vector3i;
@@ -81,6 +88,16 @@ public abstract class ProtoChunkMixin_API extends ChunkAccess implements Generat
         final LevelChunkSection[] $$5, final BlendingData $$6
     ) {
         super($$0, $$1, $$2, $$3, $$4, $$5, $$6);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Palette<BlockState, BlockType> blockPalette() {
+        return PaletteWrapper.of(
+            PaletteTypes.BLOCK_STATE_PALETTE.get(),
+            Block.BLOCK_STATE_REGISTRY,
+            (org.spongepowered.api.registry.Registry<BlockType>) SpongeCommon.vanillaRegistry(Registries.BLOCK)
+        );
     }
 
     @Override

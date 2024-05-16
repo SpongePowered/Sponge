@@ -29,11 +29,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.util.transformation.Transformation;
 import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.archetype.entity.EntityArchetypeEntry;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
@@ -176,6 +178,11 @@ public final class ArchetypeVolumeTest {
         @Override
         public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
             return false;
+        }
+
+        @Override
+        public Palette<BlockState, BlockType> blockPalette() {
+            return null;
         }
 
         @Override
