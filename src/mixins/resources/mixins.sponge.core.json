@@ -53,6 +53,7 @@
         "server.MainMixin",
         "server.MinecraftServerMixin",
         "server.PlayerAdvancementsMixin",
+        "server.ReloadableServerRegistriesMixin",
         "server.ServerFunctionManagerMixin",
         "server.ServerScoreboardMixin",
         "server.WorldLoaderMixin",
