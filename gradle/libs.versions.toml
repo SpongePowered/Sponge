@@ -13,7 +13,7 @@ guava = "32.1.2-jre"
 mockito = "5.11.0"
 jline = "3.25.1"
 tinylog = "2.7.0"
-vineflower = "1.9.3"
+vineflower = "1.10.1"
 
 [libraries]
 # common
