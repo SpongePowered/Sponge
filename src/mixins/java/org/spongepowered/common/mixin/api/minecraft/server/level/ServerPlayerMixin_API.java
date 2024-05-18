@@ -468,7 +468,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        this.connection.sendDisguisedChatMessage(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(this.level.registryAccess(), boundChatType));
+        this.connection.sendDisguisedChatMessage(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(this.shadow$level().registryAccess(), boundChatType));
     }
 
     @Override
@@ -479,7 +479,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         // TODO: implement once we actually expose a way to get signed messages in-api
         this.connection.sendDisguisedChatMessage(
             SpongeAdventure.asVanilla(Objects.requireNonNullElse(signedMessage.unsignedContent(), Component.text(signedMessage.message()))),
-            SpongeAdventure.asVanilla(this.level.registryAccess(), boundChatType)
+            SpongeAdventure.asVanilla(this.shadow$level().registryAccess(), boundChatType)
         );
     }
 
