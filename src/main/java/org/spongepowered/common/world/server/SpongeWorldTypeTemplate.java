@@ -58,7 +58,6 @@ import org.spongepowered.api.util.Range;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
-import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -123,8 +122,7 @@ public record SpongeWorldTypeTemplate(
 
         @Override
         public Function<WorldTypeTemplate, WorldType> valueExtractor() {
-            // TODO fix me
-            return w -> WorldTypes.OVERWORLD.get();
+            return (w) -> (WorldType) (Object) ((SpongeWorldTypeTemplate) w).dimensionType;
         }
 
         @Override
