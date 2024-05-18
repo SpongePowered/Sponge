@@ -470,15 +470,7 @@ public abstract class MinecraftServerMixin_API implements SpongeServer, SpongeRe
 
     @Override
     public void sendMessage(final Identity identity, final Component message, final MessageType type) {
-        if (type == MessageType.SYSTEM) {
-            this.shadow$getPlayerList().broadcastSystemMessage(SpongeAdventure.asVanilla(message), false);
-        } else {
-//            final ResourceKey<ChatType> chatTypeResourceKey = SpongeAdventure.asVanilla(type);
-
-//            this.shadow$getPlayerList().broadcastChatMessage(SpongeAdventure.asVanilla(message), );
-        }
-
-        // TODO identity this.shadow$getPlayerList().broadcastMessage(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type), identity.uuid());
+        this.shadow$getPlayerList().broadcastSystemMessage(SpongeAdventure.asVanilla(message), false);
     }
 
     @Override
