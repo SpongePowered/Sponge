@@ -373,15 +373,6 @@ public final class TrackingUtil {
         return result;
     }
 
-    static boolean forceModify(final Block originalBlock, final Block newBlock) {
-        if (originalBlock instanceof RepeaterBlock && newBlock instanceof RepeaterBlock) {
-            return true;
-        } else if (originalBlock instanceof RedstoneTorchBlock && newBlock instanceof RedstoneTorchBlock) {
-            return true;
-        } else
-            return originalBlock instanceof RedstoneLampBlock && newBlock instanceof RedstoneLampBlock;
-    }
-
     private TrackingUtil() {
     }
 
