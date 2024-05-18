@@ -321,6 +321,12 @@
             "name": "Connection Tests",
             "entrypoint": "org.spongepowered.test.connection.ConnectionTests",
             "description": "Connection Tests"
+        },
+        {
+            "id": "resourcepacktests",
+            "name": "Resource Pack Tests",
+            "entrypoint": "org.spongepowered.test.resourcepack.ResourcePackTest",
+            "description": "Resource Pack Tests"
         }
     ]
 }

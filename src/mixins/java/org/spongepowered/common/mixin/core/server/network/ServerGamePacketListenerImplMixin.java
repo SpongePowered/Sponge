@@ -82,7 +82,6 @@ import org.spongepowered.api.event.block.entity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
-import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -134,8 +133,6 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
     @Shadow protected abstract void shadow$performSignedChatCommand(ServerboundChatCommandSignedPacket $$0, LastSeenMessages $$1);
     @Shadow protected abstract ParseResults<CommandSourceStack> shadow$parseCommand(final String $$0);
     // @formatter:on
-
-    @Nullable private ResourcePack impl$lastAcceptedPack;
 
     private int impl$ignorePackets;
 
@@ -521,22 +518,5 @@ public abstract class ServerGamePacketListenerImplMixin extends ServerCommonPack
             frame.addContext(EventContextKeys.COMMAND, $$0.command());
             this.shadow$performSignedChatCommand($$0, $$1);
         }
-    }
-
-    @Override
-    public @Nullable ResourcePack bridge$popReceivedResourcePack(final boolean markAccepted) {
-        final ResourcePack pack = this.impl$lastReceivedPack;
-        this.impl$lastReceivedPack = null;
-        if (markAccepted) {
-            this.impl$lastAcceptedPack = pack;
-        }
-        return pack;
-    }
-
-    @Override
-    public @Nullable ResourcePack bridge$popAcceptedResourcePack() {
-        final ResourcePack pack = this.impl$lastAcceptedPack;
-        this.impl$lastAcceptedPack = null;
-        return pack;
     }
 }

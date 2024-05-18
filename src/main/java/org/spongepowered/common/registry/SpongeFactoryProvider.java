@@ -62,7 +62,6 @@ import org.spongepowered.api.registry.TypeNotFoundException;
 import org.spongepowered.api.resource.ResourcePath;
 import org.spongepowered.api.resource.pack.PackStatus;
 import org.spongepowered.api.resource.pack.PackType;
-import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.ScoreFormat;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.service.permission.NodeTree;
@@ -131,7 +130,6 @@ import org.spongepowered.common.profile.SpongeProfilePropertyFactory;
 import org.spongepowered.common.resource.SpongeResourcePath;
 import org.spongepowered.common.resource.pack.SpongePackStatusFactory;
 import org.spongepowered.common.resource.pack.SpongePackTypeFactory;
-import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
 import org.spongepowered.common.scoreboard.SpongeScoreFormatFactory;
 import org.spongepowered.common.service.server.permission.SpongeNodeTree;
@@ -214,7 +212,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(CommandTreeNode.NodeFactory.class, new SpongeCommandTreeBuilderFactory())
                 .registerFactory(ItemStackSnapshot.Factory.class, () -> SpongeItemStackSnapshot.EMPTY)
                 .registerFactory(Parameter.Value.Factory.class, new SpongeParameterFactory())
-                .registerFactory(ResourcePack.Factory.class, new SpongeResourcePack.Factory())
                 .registerFactory(ServerLocation.Factory.class, new SpongeServerLocation.Factory())
                 .registerFactory(SpongeComponents.Factory.class, new SpongeAdventure.Factory())
                 .registerFactory(Transform.Factory.class, new SpongeTransform.Factory())

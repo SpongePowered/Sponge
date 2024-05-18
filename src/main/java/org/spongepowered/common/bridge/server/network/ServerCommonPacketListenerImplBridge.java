@@ -22,49 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.resourcepack;
+package org.spongepowered.common.bridge.server.network;
 
-import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.kyori.adventure.resource.ResourcePackRequest;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.UUID;
 
+public interface ServerCommonPacketListenerImplBridge {
 
-public final class SpongeURIResourcePack extends SpongeResourcePack {
+    void bridge$sendResourcePacks(final @NonNull ResourcePackRequest request);
 
-    private final URI uri;
-    private final String name;
+    void bridge$removeResourcePacks(final @NonNull UUID id, final @NonNull UUID @NonNull... others);
 
-    public SpongeURIResourcePack(final URI uri, final @Nullable String hash, final Component component) {
-        super(hash, component);
-        this.uri = uri;
-        this.name = this.getName0();
-    }
-
-    public SpongeURIResourcePack(final String uri, final @Nullable String hash, final Component component) throws URISyntaxException {
-        this(new URI(uri), hash, component);
-    }
-
-    private String getName0() {
-        String name = this.uri.getPath();
-        name = name.substring(name.lastIndexOf("/") + 1);
-        return name.replaceAll("\\W", "");
-    }
-
-    @Override
-    public String getUrlString() {
-        return this.uri.toString();
-    }
-
-    @Override
-    public String name() {
-        return this.name;
-    }
-
-    @Override
-    public URI uri() {
-        return this.uri;
-    }
-
+    void bridge$clearResourcePacks();
 }

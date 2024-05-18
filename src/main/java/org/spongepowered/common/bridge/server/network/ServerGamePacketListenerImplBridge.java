@@ -24,15 +24,9 @@
  */
 package org.spongepowered.common.bridge.server.network;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.world.server.ServerLocation;
 
 public interface ServerGamePacketListenerImplBridge {
-
-    @Nullable ResourcePack bridge$popReceivedResourcePack(boolean markAccepted);
-
-    @Nullable ResourcePack bridge$popAcceptedResourcePack();
 
     void bridge$setLastMoveLocation(ServerLocation location);
 

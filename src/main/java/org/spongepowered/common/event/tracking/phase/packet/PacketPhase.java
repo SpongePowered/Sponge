@@ -92,7 +92,6 @@ import org.spongepowered.common.event.tracking.phase.packet.player.MovementPacke
 import org.spongepowered.common.event.tracking.phase.packet.player.PacketCommandState;
 import org.spongepowered.common.event.tracking.phase.packet.player.PlaceBlockPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.PlayerCommandPhaseContext;
-import org.spongepowered.common.event.tracking.phase.packet.player.ResourcePackState;
 import org.spongepowered.common.event.tracking.phase.packet.player.StopSleepingPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.UnknownPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.UseItemPacketState;
@@ -130,7 +129,6 @@ public final class PacketPhase {
         static final IPhaseState<BasicPacketContext> TAB_COMPLETE = new BasicPacketState();
         public static final IPhaseState<BasicPacketContext> CLOSE_WINDOW = new CloseWindowState();
         public static final IPhaseState<BasicPacketContext> UPDATE_SIGN = new BasicPacketState();
-        static final IPhaseState<BasicPacketContext> RESOURCE_PACK = new ResourcePackState();
         static final IPhaseState<BasicPacketContext> STOP_RIDING_JUMP = new BasicPacketState();
         static final IPhaseState<BasicPacketContext> HANDLED_EXTERNALLY = new UnknownPacketState();
         static final IPhaseState<BasicPacketContext> START_FALL_FLYING = new BasicPacketState();
@@ -333,7 +331,7 @@ public final class PacketPhase {
         });
         this.packetTranslationMap.put(ServerboundCustomPayloadPacket.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(ServerboundTeleportToEntityPacket.class, packet -> PacketPhase.General.IGNORED);
-        this.packetTranslationMap.put(ServerboundResourcePackPacket.class, packet -> PacketPhase.General.RESOURCE_PACK);
+        this.packetTranslationMap.put(ServerboundResourcePackPacket.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(ServerboundPlaceRecipePacket.class, packet -> PacketPhase.Inventory.PLACE_RECIPE);
     }
 
