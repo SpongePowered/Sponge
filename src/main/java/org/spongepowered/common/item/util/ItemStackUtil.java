@@ -135,6 +135,9 @@ public abstract class ItemStackUtil {
     }
 
     public static ItemStackSnapshot snapshotOf(net.minecraft.world.item.ItemStack itemStack) {
+        if (itemStack == null) {
+            return ItemStackSnapshot.empty();
+        }
         return itemStack.isEmpty() ? ItemStackSnapshot.empty() : ItemStackUtil.fromNative(itemStack).createSnapshot();
     }
 

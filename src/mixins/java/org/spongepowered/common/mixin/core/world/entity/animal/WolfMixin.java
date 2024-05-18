@@ -86,7 +86,7 @@ public abstract class WolfMixin extends AgableMobMixin implements AggressiveEnti
         try {
 
             PhaseTracker.getCauseStackManager().pushCause(player);
-            if (!SpongeCommon.post(SpongeEventFactory.createTameEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (Wolf) this))) {
+            if (SpongeCommon.post(SpongeEventFactory.createTameEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (Wolf) this))) {
                 this.shadow$level().broadcastEntityEvent((net.minecraft.world.entity.animal.Wolf) (Object) this, (byte)6);
                 ci.cancel();
             }
