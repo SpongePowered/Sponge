@@ -444,6 +444,8 @@ public final class Constants {
 
         // Highest ticket level that will cause loading a full chunk, plus one.
         public static final int MAX_FULL_CHUNK_DISTANCE = ChunkTicket.MAX_FULL_CHUNK_TICKET_LEVEL + 1;
+
+        public static final int INFINITE_TIMEOUT = 0;
     }
 
     public static final class Networking {
