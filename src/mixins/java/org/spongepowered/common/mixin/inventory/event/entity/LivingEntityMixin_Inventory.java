@@ -89,7 +89,8 @@ public abstract class LivingEntityMixin_Inventory extends Entity {
         map.entrySet().forEach(entry -> {
             final Slot slotAdapter = this.impl$getSpongeSlot(entry.getKey());
             final ItemStack oldStack = switch (entry.getKey().getType()) {
-                case HAND, ARMOR -> this.shadow$getLastHandItem(entry.getKey());
+                case HAND -> this.shadow$getLastHandItem(entry.getKey());
+                case ARMOR -> this.shadow$getLastArmorItem(entry.getKey());
                 case BODY -> this.lastBodyItemStack;
             };
             entry.setValue(this.impl$callEquipmentEvent(entry.getKey(), slotAdapter, entry.getValue(), oldStack));
