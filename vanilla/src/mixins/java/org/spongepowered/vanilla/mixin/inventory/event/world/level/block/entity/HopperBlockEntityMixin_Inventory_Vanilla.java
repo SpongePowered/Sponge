@@ -69,7 +69,7 @@ public abstract class HopperBlockEntityMixin_Inventory_Vanilla {
     private static void vanilla$afterPutStackInSlots(
         final Level var0, final BlockPos var1, final HopperBlockEntity var3,
         final CallbackInfoReturnable<Boolean> cir, final Container iInventory, final Direction enumFacing,
-        final int i, final ItemStack itemStack, int count, final ItemStack itemStack1
+        final int i, final ItemStack itemStack, final int count, final ItemStack itemStack1
     ) {
         // after putStackInInventoryAllSlots if the transfer worked
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack1.isEmpty()) {

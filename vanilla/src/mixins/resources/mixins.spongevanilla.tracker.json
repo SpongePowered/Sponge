@@ -7,6 +7,6 @@
   "priority": 1302,
   "mixins": [
     "server.level.ServerPlayerGameModeMixin_Vanilla_Tracker",
-    "world.level.block.BlocksMixin_Tracker"
+    "world.level.block.BlocksMixin_Vanilla_Tracker"
   ]
 }

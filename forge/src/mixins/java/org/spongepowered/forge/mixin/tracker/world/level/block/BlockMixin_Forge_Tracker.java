@@ -38,7 +38,6 @@ import org.spongepowered.forge.mixin.tracker.world.level.block.state.BlockBehavi
 public abstract class BlockMixin_Forge_Tracker extends BlockBehaviorMixin_Forge_Tracker implements RegistryBackedTrackableBridge<Block> {
 
     //@formatter:off
-    @Shadow public abstract boolean isRandomlyTicking(BlockState $$0);
     @Shadow public abstract BlockState defaultBlockState();
     //@formatter:on
 

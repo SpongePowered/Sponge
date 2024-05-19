@@ -40,10 +40,10 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 @Mixin(FireBlock.class)
 public class FireBlockMixin_Forge {
     // forge changes the signature of this method
-    @Inject(method = "tryCatchFire",
+    @Inject(method = "checkBurnOut",
             at = @At(
-                value = "INVOKE",
-                target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"),
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/level/Level;setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;I)Z"),
             require = 0,
             expect = 0,
             cancellable = true)
@@ -56,10 +56,10 @@ public class FireBlockMixin_Forge {
         }
     }
 
-    @Inject(method = "tryCatchFire",
+    @Inject(method = "checkBurnOut",
             at = @At(
-                value = "INVOKE",
-                target = "Lnet/minecraft/world/level/Level;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"),
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/level/Level;removeBlock(Lnet/minecraft/core/BlockPos;Z)Z"),
             require = 0,
             expect = 0,
             cancellable = true)
