@@ -1,7 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 import net.fabricmc.loom.task.RemapJarTask
-import org.gradle.configurationcache.extensions.capitalized
 
 buildscript {
     repositories {
@@ -16,7 +15,7 @@ plugins {
     alias(libs.plugins.shadow)
     id("implementation-structure")
     alias(libs.plugins.blossom)
-    id("dev.architectury.loom") version "1.5-SNAPSHOT"
+    id("dev.architectury.loom") version "1.6-SNAPSHOT"
 }
 
 val commonProject = parent!!
@@ -145,33 +144,10 @@ configurations.configureEach {
     if (name != "minecraft") { // awful terrible hack sssh
         exclude(group = "com.mojang", module = "minecraft")
     }
-}
 
-sourceSets.configureEach {
-    val sourceSet = this
-    val isMain = "main".equals(sourceSet.name)
-    val classifier = if (isMain) "sources" else (sourceSet.name + "-sources")
-
-    val sourcesJarName: String = if (isMain) "sourcesJar" else (sourceSet.name + "SourcesJar")
-    val sourcesJarTask = tasks.register(sourcesJarName, Jar::class) {
-        group = "build"
-        archiveClassifier.set(classifier + "-dev")
-        from(sourceSet.allJava)
-    }
-
-    val remapSourcesJarName = "remap" + sourcesJarName.capitalized()
-
-    // remapSourcesJar is already registered (but disabled) by Loom
-    if (!isMain) {
-        tasks.register(remapSourcesJarName, net.fabricmc.loom.task.RemapSourcesJarTask::class)
-    }
-
-    tasks.named(remapSourcesJarName, net.fabricmc.loom.task.RemapSourcesJarTask::class) {
-        group = "loom"
-        archiveClassifier.set(classifier)
-        inputFile.set(sourcesJarTask.flatMap { it.archiveFile })
-        dependsOn(sourcesJarTask)
-        enabled = true
+    // Fix that can be found in Forge MDK too
+    resolutionStrategy {
+        force("net.sf.jopt-simple:jopt-simple:5.0.4")
     }
 }
 
@@ -261,10 +237,7 @@ dependencies {
 
     val runTaskOnly = runTaskOnlyConfig.name
     // Arch-loom bug, fix support of MOD_CLASSES
-    runTaskOnly("net.minecraftforge:bootstrap-dev:2.1.0")
-
-    // Upgrade to fix SecureModules issue #3
-    "forgeDependencies"("net.minecraftforge:securemodules:2.2.19")
+    runTaskOnly("net.minecraftforge:bootstrap-dev:2.1.1")
 }
 
 val forgeManifest = java.manifest {
@@ -320,7 +293,7 @@ tasks {
     }
 
     val forgeServicesDevJar by registering(Jar::class) {
-        archiveClassifier.set("services-dev")
+        archiveClassifier.set("services")
         manifest.from(forgeManifest)
 
         from(commonProject.sourceSets.named("applaunch").map { it.output })
@@ -396,7 +369,7 @@ tasks {
 
     shadowJar {
         group = "shadow"
-        archiveClassifier.set("mod-dev")
+        archiveClassifier.set("mod")
 
         mergeServiceFiles()
         configurations = listOf(gameShadedLibrariesConfig.get())
@@ -419,12 +392,18 @@ tasks {
         from(forgeMixins.output)
     }
 
-    val remapShadowJar = register("remapShadowJar", RemapJarTask::class) {
+    /*val remapShadowJar = register("remapShadowJar", RemapJarTask::class) {
         group = "loom"
-        archiveClassifier.set("mod")
+        archiveClassifier.set("mod-remapped")
 
         inputFile.set(shadowJar.flatMap { it.archiveFile })
         atAccessWideners.add("common.accesswidener")
+
+        targetNamespace.set(sourceNamespace)
+    }*/
+
+    remapJar {
+        enabled = false
     }
 
     val universalJar = register("universalJar", Jar::class) {
@@ -436,7 +415,7 @@ tasks {
         from(forgeServicesShadowJar.archiveFile.map { zipTree(it) })
 
         into("jars") {
-            from(remapShadowJar)
+            from(shadowJar)
             rename("spongeforge-(.*)-mod.jar", "spongeforge-mod.jar")
 
             from(forgeLangJar)
@@ -489,7 +468,8 @@ val forgeMixinsJar by tasks.existing
 publishing {
     publications {
         register("sponge", MavenPublication::class) {
-            artifact(tasks.named("remapJar")) {
+            // TODO
+            /*artifact(tasks.named("remapJar")) {
                 builtBy(tasks.named("remapJar"))
             }
             artifact(sourcesJar) {
@@ -497,7 +477,7 @@ publishing {
             }
             artifact(tasks.named("remapShadowJar")) {
                 builtBy(tasks.named("remapShadowJar"))
-            }
+            }*/
             artifact(forgeAppLaunchJar.get())
             artifact(forgeLaunchJar.get())
             artifact(forgeMixinsJar.get())
@@ -529,6 +509,7 @@ publishing {
 }
 
 tasks.register("printConfigsHierarchy") {
+    group = "debug"
     doLast {
         configurations.forEach { conf: Configuration  ->
             val seen = mutableSetOf<Configuration>()
@@ -550,6 +531,7 @@ fun printParents(conf: Configuration, indent: String, seen: MutableSet<Configura
 }
 
 tasks.register("printConfigsResolution") {
+    group = "debug"
     doLast {
         configurations.forEach { conf: Configuration  ->
             println()

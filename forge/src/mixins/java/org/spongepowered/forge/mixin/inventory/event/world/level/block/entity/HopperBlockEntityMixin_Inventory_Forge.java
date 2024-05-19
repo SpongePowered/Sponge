@@ -30,7 +30,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,9 +49,9 @@ public abstract class HopperBlockEntityMixin_Inventory_Forge {
 
     @Redirect(method = "ejectItems",
             at = @At(value = "INVOKE",
-                     target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;isFullContainer(Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Z"))
+                    target = "Lnet/minecraft/world/level/block/entity/HopperBlockEntity;isFullContainer(Lnet/minecraft/world/Container;Lnet/minecraft/core/Direction;)Z"))
     private static boolean forge$throwTransferPreIfNotFull(
-        final Container attachedContainer, final Direction direction, final Level level, final BlockPos pos, final BlockState state, final HopperBlockEntity block
+            final Container attachedContainer, final Direction direction, final Level level, final BlockPos pos, final HopperBlockEntity block
     ) {
         final boolean result = HopperBlockEntityAccessor.invoker$isFullContainer(attachedContainer, direction);
         if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
@@ -68,9 +67,9 @@ public abstract class HopperBlockEntityMixin_Inventory_Forge {
                      target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z",
                      ordinal = 1))
     private static void forge$afterPutStackInSlots(
-        final Level var0, final BlockPos var1, final BlockState var2, final HopperBlockEntity var3,
+        final Level var0, final BlockPos var1, final HopperBlockEntity var3,
         final CallbackInfoReturnable<Boolean> cir, final Container iInventory, final Direction enumFacing,
-        final int i, final ItemStack itemStack, final ItemStack itemStack1
+        final int i, final ItemStack itemStack, final int count,final ItemStack itemStack1
     ) {
         // after putStackInInventoryAllSlots if the transfer worked
         if (ShouldFire.TRANSFER_INVENTORY_EVENT_POST && itemStack1.isEmpty()) {

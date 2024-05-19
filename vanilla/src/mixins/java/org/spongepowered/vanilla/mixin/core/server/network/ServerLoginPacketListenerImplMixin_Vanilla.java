@@ -25,6 +25,7 @@
 package org.spongepowered.vanilla.mixin.core.server.network;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.login.ServerLoginPacketListener;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.server.MinecraftServer;

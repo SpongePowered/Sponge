@@ -35,7 +35,7 @@ import org.spongepowered.common.accessor.world.level.block.state.BlockBehaviourA
 import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
 
 @Mixin(Blocks.class)
-public abstract class BlocksMixin_Tracker {
+public abstract class BlocksMixin_Vanilla_Tracker {
 
     @Redirect(method = "<clinit>",
             at = @At(
