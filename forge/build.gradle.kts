@@ -320,6 +320,8 @@ tasks {
                 dirs.add(testPluginsOutput.resourcesDir!!)
                 dirs.addAll(testPluginsOutput.classesDirs)
                 environment["SPONGE_PLUGINS"] = dirs.joinToString("&")
+
+                dependsOn(it.tasks.classes)
             }
 
             argumentProviders += CommandLineArgumentProvider {
