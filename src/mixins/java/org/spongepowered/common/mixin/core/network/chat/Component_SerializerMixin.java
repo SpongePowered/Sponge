@@ -24,42 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.network.chat;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.minecraft.core.HolderLookup;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.adventure.AdventureTextComponent;
 
 @Mixin(net.minecraft.network.chat.Component.Serializer.class)
 public abstract class Component_SerializerMixin {
-    @Shadow
-    static JsonElement shadow$serialize(final net.minecraft.network.chat.Component text, HolderLookup.Provider $$1) {
-        throw new UnsupportedOperationException("Shadowed createLegacyDisconnectPacket");
-    }
-
-    @Shadow @Final private static Gson GSON;
-
-    @Inject(method = "serialize", at = @At("HEAD"), cancellable = true)
-    private static void impl$writeComponentText(final net.minecraft.network.chat.Component text, final HolderLookup.Provider $$1, final CallbackInfoReturnable<JsonElement> cir) {
-        if(text instanceof AdventureTextComponent atc) {
-            final net.minecraft.network.chat.@Nullable Component converted = ((AdventureTextComponent) text).deepConvertedIfPresent();
-            if(converted != null) {
-                cir.setReturnValue(Component_SerializerMixin.shadow$serialize(text, $$1));
-            } else {
-                // TODO actually fix this
-                // cir.setReturnValue(ctx.serialize(((AdventureTextComponent) text).wrapped(), Component.class));
-            }
-        }
-    }
 
     // inject into the anonymous function to build a gson instance
     @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "com/google/gson/GsonBuilder.disableHtmlEscaping()Lcom/google/gson/GsonBuilder;", remap = false), remap = false)
@@ -68,12 +40,4 @@ public abstract class Component_SerializerMixin {
         GsonComponentSerializer.gson().populator().apply(gson);
         return gson;
     }
-
-    @Inject(method = "serialize", at = @At("HEAD"), cancellable = true)
-    private static void impl$redirectSerialization(final net.minecraft.network.chat.Component component, HolderLookup.Provider $$1, final CallbackInfoReturnable<JsonElement> cir) {
-        if (component instanceof AdventureTextComponent atc) {
-            cir.setReturnValue(GSON.toJsonTree(atc.wrapped()));
-        }
-    }
-
 }
