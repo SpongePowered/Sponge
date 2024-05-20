@@ -32,6 +32,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.ItemLike;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
@@ -88,7 +89,11 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
 
     @Override
     public CompoundTag data$getCompound() {
-        return this.components.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe();
+        final @Nullable CustomData customData = this.components.get(DataComponents.CUSTOM_DATA);
+        if (customData != null && customData != CustomData.EMPTY) {
+            return customData.getUnsafe();
+        }
+        return null;
     }
 
     @Override
