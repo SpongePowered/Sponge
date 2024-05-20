@@ -50,6 +50,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.network.SpongeEngineConnection;
 import org.spongepowered.common.network.channel.packet.SpongeBasicPacketChannel;
@@ -235,9 +236,8 @@ public final class SpongeChannelManager implements ChannelManager {
     }
 
     public void sendChannelRegistrations(final EngineConnection connection) {
-        final Packet<?> mcPacket = PacketUtil.createPlayPayload(ChannelUtils.REGISTER, RegisterChannelUtil.encodePayload(this.channels.keySet()), connection.side());
-        // TODO SF 1.20.6 Fix conflict with ForgePayload
-        // PacketSender.sendTo(connection, mcPacket);
+        final Packet<?> mcPacket = PlatformHooks.INSTANCE.getChannelHooks().createRegisterPayload(RegisterChannelUtil.encodePayload(this.channels.keySet()), connection.side());
+        PacketSender.sendTo(connection, mcPacket);
     }
 
     /**
