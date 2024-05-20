@@ -1,6 +1,13 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import dev.architectury.at.AccessTransformSet
+import dev.architectury.at.io.AccessTransformFormats
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
-import net.fabricmc.loom.task.RemapJarTask
+import net.fabricmc.loom.util.Constants
+import net.fabricmc.loom.util.FileSystemUtil
+import net.fabricmc.loom.util.LfWriter
+import net.fabricmc.loom.util.aw2at.Aw2At
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 
 buildscript {
     repositories {
@@ -259,9 +266,6 @@ val mixinConfigs: MutableSet<String> = spongeImpl.mixinConfigurations
 tasks {
     jar {
         manifest.from(forgeManifest)
-
-        // Undo Loom devlibs dir
-        destinationDirectory.set(project.buildDir.resolve("libs"))
     }
     val forgeAppLaunchJar by registering(Jar::class) {
         archiveClassifier.set("applaunch")
@@ -390,20 +394,29 @@ tasks {
         from(forgeLaunch.output)
         from(forgeAccessors.output)
         from(forgeMixins.output)
-    }
 
-    /*val remapShadowJar = register("remapShadowJar", RemapJarTask::class) {
-        group = "loom"
-        archiveClassifier.set("mod-remapped")
+        val accessWideners = listOf("common.accesswidener")
 
-        inputFile.set(shadowJar.flatMap { it.archiveFile })
-        atAccessWideners.add("common.accesswidener")
+        doLast {
+            // Convert AW to AT
+            val at = AccessTransformSet.create()
+            FileSystemUtil.getJarFileSystem(archiveFile.get().asFile, false).use { fsDelegate ->
+                val fs = fsDelegate.get()
+                val atPath = fs.getPath(Constants.Forge.ACCESS_TRANSFORMER_PATH)
 
-        targetNamespace.set(sourceNamespace)
-    }*/
+                for (aw in accessWideners) {
+                    val awPath = fs.getPath(aw)
+                    Files.newBufferedReader(awPath, StandardCharsets.UTF_8).use { reader ->
+                        at.merge(Aw2At.toAccessTransformSet(reader))
+                    }
+                    Files.delete(awPath)
+                }
 
-    remapJar {
-        enabled = false
+                LfWriter(Files.newBufferedWriter(atPath)).use { writer ->
+                    AccessTransformFormats.FML.write(writer, at)
+                }
+            }
+        }
     }
 
     val universalJar = register("universalJar", Jar::class) {
@@ -460,34 +473,28 @@ indraSpotlessLicenser {
     property("url", projectUrl)
 }
 
-val sourcesJar by tasks.existing
-val forgeAppLaunchJar by tasks.existing
-val forgeLaunchJar by tasks.existing
-val forgeMixinsJar by tasks.existing
-
 publishing {
     publications {
         register("sponge", MavenPublication::class) {
-            // TODO
-            /*artifact(tasks.named("remapJar")) {
-                builtBy(tasks.named("remapJar"))
-            }
-            artifact(sourcesJar) {
-                builtBy(tasks.named("remapSourcesJar"))
-            }
-            artifact(tasks.named("remapShadowJar")) {
-                builtBy(tasks.named("remapShadowJar"))
-            }*/
-            artifact(forgeAppLaunchJar.get())
-            artifact(forgeLaunchJar.get())
-            artifact(forgeMixinsJar.get())
-            artifact(tasks["applaunchSourcesJar"])
-            artifact(tasks["launchSourcesJar"])
-            artifact(tasks["mixinsSourcesJar"])
             artifact(tasks["universalJar"])
 
+            artifact(tasks["jar"])
+            artifact(tasks["sourcesJar"])
+
+            artifact(tasks["forgeMixinsJar"])
+            artifact(tasks["mixinsSourcesJar"])
+
+            artifact(tasks["forgeAccessorsJar"])
+            artifact(tasks["accessorsSourcesJar"])
+
+            artifact(tasks["forgeLaunchJar"])
+            artifact(tasks["launchSourcesJar"])
+
+            artifact(tasks["forgeAppLaunchJar"])
+            artifact(tasks["applaunchSourcesJar"])
+
             pom {
-                artifactId = project.name.toLowerCase()
+                artifactId = project.name.lowercase()
                 this.name.set(project.name)
                 this.description.set(project.description)
                 this.url.set(projectUrl)
