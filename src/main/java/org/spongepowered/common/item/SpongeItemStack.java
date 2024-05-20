@@ -340,10 +340,18 @@ public final class SpongeItemStack  {
 
     private static <T> void fillComponents(DataContainer container, TypedDataComponent<T> component) {
         final ResourceLocation componentTypeKey = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component.type());
+        if (componentTypeKey == null) {
+            return;
+        }
         final DataResult<Object> value = component.type().codec().encodeStart(JavaOps.INSTANCE, component.value());
-        container.set(DataQuery.of(':', componentTypeKey.toString()), value.result().orElse(null));
+        final var raw = value.result().orElse(null);
+        if (raw == null) {
+            return;
+        }
+        container.set(DataQuery.of(':', componentTypeKey.toString()), raw);
 
     }
+
     @NotNull
     public static DataContainer getDataContainer(final net.minecraft.world.item.ItemStack mcStack) {
         final ResourceLocation key = BuiltInRegistries.ITEM.getKey(mcStack.getItem());

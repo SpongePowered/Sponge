@@ -77,8 +77,6 @@ import javax.annotation.Nullable;
 public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutable, ComponentLike, HoverEventSource<HoverEvent.ShowItem> {       // conflict from overriding ValueContainer#copy() from DataHolder
 
     // @formatter:off
-    @Shadow @Final private static Logger LOGGER;
-
     @Shadow public abstract int shadow$getCount();
     @Shadow public abstract void shadow$setCount(int size); // Do not use field directly as Minecraft tracks the empty state
     @Shadow public abstract int shadow$getMaxStackSize();
@@ -91,10 +89,6 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Shadow @Nullable public abstract <T> T shadow$update(final DataComponentType<T> $$0, final T $$1, final UnaryOperator<T> $$2);
 
     // @formatter:on
-
-    @Shadow public abstract void enchant(final Enchantment $$0, final int $$1);
-
-    @Shadow public abstract Rarity getRarity();
 
     public int itemStack$quantity() {
         return this.shadow$getCount();
