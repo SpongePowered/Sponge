@@ -37,7 +37,7 @@ import java.util.List;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 @Mixin(ClientboundCustomPayloadPacket.class)
-public abstract class ClientboundCustomPayloadPacketMixin {
+public abstract class ClientboundCustomPayloadPacketMixin_Vanilla {
 
     // @formatter: off
     @Shadow @Final private static int MAX_PAYLOAD_SIZE;
@@ -46,14 +46,14 @@ public abstract class ClientboundCustomPayloadPacketMixin {
     @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList([Ljava/lang/Object;)Ljava/util/ArrayList;"), remap = false)
     private static ArrayList vanilla$registerCustomPacketPayloadsGame(final Object[] registrations) {
         final ArrayList allRegistrations = new ArrayList<>(List.of(registrations));
-        allRegistrations.addAll(ChannelUtils.spongeChannelCodecs(ClientboundCustomPayloadPacketMixin.MAX_PAYLOAD_SIZE));
+        allRegistrations.addAll(ChannelUtils.spongeChannelCodecs(ClientboundCustomPayloadPacketMixin_Vanilla.MAX_PAYLOAD_SIZE));
         return allRegistrations;
     }
 
     @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Ljava/util/List;of(Ljava/lang/Object;)Ljava/util/List;"))
     private static List vanilla$registerCustomPacketPayloadsConfiguration(final Object registrations) {
         final List allRegistrations = new ArrayList<>(List.of(registrations));
-        allRegistrations.addAll(ChannelUtils.spongeChannelCodecs(ClientboundCustomPayloadPacketMixin.MAX_PAYLOAD_SIZE));
+        allRegistrations.addAll(ChannelUtils.spongeChannelCodecs(ClientboundCustomPayloadPacketMixin_Vanilla.MAX_PAYLOAD_SIZE));
         return allRegistrations;
     }
 }

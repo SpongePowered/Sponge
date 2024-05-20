@@ -22,23 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.server.network.protocol.login;
+package org.spongepowered.vanilla.mixin.core.network.protocol.common;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
-import net.minecraft.network.protocol.login.custom.CustomQueryAnswerPayload;
+import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.network.channel.ChannelUtils;
 
-@Mixin(ServerboundCustomQueryAnswerPacket.class)
-public abstract class ServerboundCustomQueryAnswerPacketMixin_Vanilla {
+import java.util.ArrayList;
+import java.util.List;
 
-    @Inject(method = "readUnknownPayload", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;skipBytes(I)Lnet/minecraft/network/FriendlyByteBuf;"), cancellable = true)
-    private static void impl$onReadUnknownPayload(final FriendlyByteBuf $$0, final CallbackInfoReturnable<CustomQueryAnswerPayload> cir) {
-        final var payload = $$0.readNullable(buf -> new FriendlyByteBuf(buf.readBytes(buf.readableBytes())));
+@SuppressWarnings({"rawtypes", "unchecked"})
+@Mixin(ServerboundCustomPayloadPacket.class)
+public abstract class ServerboundCustomPayloadPacketMixin_Vanilla {
 
-        cir.setReturnValue(payload == null ? null : buf -> buf.writeBytes(payload.copy()));
+    // @formatter: off
+    @Shadow @Final private static int MAX_PAYLOAD_SIZE;
+    // @formatter: on
+
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/google/common/collect/Lists;newArrayList([Ljava/lang/Object;)Ljava/util/ArrayList;"), remap = false)
+    private static ArrayList vanilla$registerCustomPacketPayloads(final Object[] registrations) {
+        final ArrayList allRegistrations = new ArrayList<>(List.of(registrations));
+        allRegistrations.addAll(ChannelUtils.spongeChannelCodecs(ServerboundCustomPayloadPacketMixin_Vanilla.MAX_PAYLOAD_SIZE));
+        return allRegistrations;
     }
 }

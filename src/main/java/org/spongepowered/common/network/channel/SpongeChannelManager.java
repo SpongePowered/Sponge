@@ -236,7 +236,8 @@ public final class SpongeChannelManager implements ChannelManager {
 
     public void sendChannelRegistrations(final EngineConnection connection) {
         final Packet<?> mcPacket = PacketUtil.createPlayPayload(ChannelUtils.REGISTER, RegisterChannelUtil.encodePayload(this.channels.keySet()), connection.side());
-        PacketSender.sendTo(connection, mcPacket);
+        // TODO SF 1.20.6 Fix conflict with ForgePayload
+        // PacketSender.sendTo(connection, mcPacket);
     }
 
     /**
