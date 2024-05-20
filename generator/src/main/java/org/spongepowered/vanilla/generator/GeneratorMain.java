@@ -460,7 +460,9 @@ public final class GeneratorMain {
                 "BannerPatternShapes",
                 "BANNER_PATTERN_SHAPE",
                 context.relativeClass("data.type", "BannerPatternShape"),
-                Registries.BANNER_PATTERN
+                Registries.BANNER_PATTERN,
+                $ -> true,
+                RegistryScope.SERVER
             ),
             new RegistryEntriesGenerator<>(
                 "data.type",
