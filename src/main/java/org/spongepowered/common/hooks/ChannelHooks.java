@@ -22,29 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.network.channel;
+package org.spongepowered.common.hooks;
 
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.common.hooks.PlatformHooks;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.api.network.EngineConnectionSide;
+import org.spongepowered.api.network.channel.ChannelBuf;
+import org.spongepowered.common.network.PacketUtil;
+import org.spongepowered.common.network.channel.ChannelUtils;
+import org.spongepowered.common.network.channel.SpongeChannelPayload;
 
-import java.util.ArrayList;
+import java.util.function.Consumer;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
-public final class ChannelUtils {
-    public static final CustomPacketPayload.Type<SpongeChannelPayload> REGISTER = CustomPacketPayload.createType(Constants.Channels.REGISTER_KEY.toString());
+public interface ChannelHooks {
 
-    public static ArrayList spongeChannelCodecs(final int maxPayloadSize) {
-        ArrayList channels = new ArrayList<>();
-        PlatformHooks.INSTANCE.getChannelHooks().registerPlatformChannels(c ->
-                channels.add(new CustomPacketPayload.TypeAndCodec<>(c, SpongeChannelPayload.streamCodec(c, maxPayloadSize))));
-        Sponge.game().channelManager().channels().forEach(c ->
-                channels.add(new CustomPacketPayload.TypeAndCodec<>(((SpongeChannel) c).payloadType(), SpongeChannelPayload.streamCodec(((SpongeChannel) c).payloadType(), maxPayloadSize))));
-        return channels;
+    default void registerPlatformChannels(final Consumer<CustomPacketPayload.Type<SpongeChannelPayload>> consumer) {
+        consumer.accept(ChannelUtils.REGISTER);
     }
 
-    private ChannelUtils() {
+    default Packet<?> createRegisterPayload(final ChannelBuf payload, final EngineConnectionSide<?> side) {
+        return PacketUtil.createPlayPayload(ChannelUtils.REGISTER, payload, side);
     }
-
 }
