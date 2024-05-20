@@ -73,16 +73,6 @@ public final class PacketUtil {
         return new ClientboundCustomQueryPacket(transactionId, payload);
     }
 
-    public static net.minecraft.network.protocol.Packet<?> createPlayPayload(final CustomPacketPayload payload, final EngineConnectionSide<?> side) {
-        if (side == EngineConnectionSide.CLIENT) {
-            return new ServerboundCustomPayloadPacket(payload);
-        } else if (side == EngineConnectionSide.SERVER) {
-            return new ClientboundCustomPayloadPacket(payload);
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
     public static net.minecraft.network.protocol.Packet<?> createPlayPayload(final CustomPacketPayload.Type<? extends CustomPacketPayload> channel, final ChannelBuf payload, final EngineConnectionSide<?> side) {
         if (side == EngineConnectionSide.CLIENT) {
             return new ServerboundCustomPayloadPacket(new SpongeChannelPayload(channel, (FriendlyByteBuf) payload));
