@@ -27,6 +27,7 @@ package org.spongepowered.common.data.provider.item.stack;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -72,7 +73,7 @@ public final class PotionItemStackData {
                     .create(Keys.POTION_TYPE)
                         .get(h -> (PotionType) h.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY).potion().map(Holder::value).orElse(null)) // TODO empty POTION gone?
                         .set((h, v) -> {
-                            final var potion = Optional.ofNullable(v).map(Potion.class::cast).map(Holder::direct); // TODO set empty POTION? same as delete?
+                            final var potion = Optional.ofNullable(v).map(Potion.class::cast).map(BuiltInRegistries.POTION::wrapAsHolder); // TODO set empty POTION? same as delete?
                             h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(potion, contents.customColor(), contents.customEffects()));
                         })
                         .delete(h -> h.update(DataComponents.POTION_CONTENTS, PotionContents.EMPTY, contents -> new PotionContents(Optional.empty(), contents.customColor(), contents.customEffects())))
