@@ -29,21 +29,18 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.event.HoverEventSource;
-import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
-import net.minecraft.world.item.enchantment.Enchantment;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.slf4j.Logger;
 import org.spongepowered.api.data.SerializableDataHolder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
@@ -54,7 +51,6 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Interface.Remap;
@@ -169,7 +165,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         };
 
         this.shadow$update(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY, component ->
-                component.withModifierAdded(Holder.direct((Attribute) attributeType),
+                component.withModifierAdded(BuiltInRegistries.ATTRIBUTE.wrapAsHolder((Attribute) attributeType),
                                             (net.minecraft.world.entity.ai.attributes.AttributeModifier) (Object) modifier,
                                             group));
     }

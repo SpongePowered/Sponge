@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
-import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import org.spongepowered.api.data.Keys;
@@ -57,7 +57,7 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
     public Optional<Attribute> attribute(final AttributeType type) {
         Objects.requireNonNull(type, "AttributeType cannot be null");
 
-        return Optional.ofNullable((Attribute) this.shadow$getAttributes().getInstance(Holder.direct((net.minecraft.world.entity.ai.attributes.Attribute) type)));
+        return Optional.ofNullable((Attribute) this.shadow$getAttributes().getInstance(BuiltInRegistries.ATTRIBUTE.wrapAsHolder((net.minecraft.world.entity.ai.attributes.Attribute) type)));
     }
 
     @Override
