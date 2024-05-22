@@ -172,7 +172,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
     @Override
     public int contentVersion() {
-        return 1;
+        return 3;
     }
 
     @Override

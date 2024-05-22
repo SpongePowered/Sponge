@@ -31,6 +31,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JavaOps;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -75,7 +76,7 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.Preconditions;
 
 import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -127,13 +128,20 @@ public final class SpongeItemStack  {
             this.type = itemStack.type();
             this.quantity = itemStack.quantity();
             if ((Object) itemStack instanceof net.minecraft.world.item.ItemStack mcStack) {
-                components = DataComponentMap.builder().addAll(mcStack.getComponents()).build();
+                final DataComponentPatch componentsPatch = mcStack.getComponentsPatch();
+                // check if component is present on patch too - if not it is a default value
+                final DataComponentMap componentMap = mcStack.getComponents().filter(p -> componentsPatch.get(p) != null);
+                components = DataComponentMap.builder().addAll(componentMap).build();
                 //            this.itemDataSet.addAll(((CustomDataHolderBridge) itemStack).bridge$getCustomManipulators());
 
             } else {
                 //            this.itemDataSet.addAll(itemStack.getValues());
             }
             return this;
+        }
+
+        private static <T> void extracted(final Map.Entry<DataComponentType<T>, Optional<T>> entry, final DataComponentMap.Builder builder) {
+            builder.set(entry.getKey(), entry.getValue().orElse(null));
         }
 
         @Override
@@ -179,38 +187,12 @@ public final class SpongeItemStack  {
 
         @Override
         public ItemStack.Builder fromContainer(final DataView container) {
-            Objects.requireNonNull(container);
-            if (!container.contains(Constants.ItemStack.V2.TYPE, Constants.ItemStack.V2.COUNT)) {
-                return this;
+            final Optional<ItemStack> stack = SpongeItemStack.createItemStack(container);
+            if (stack.isPresent()) {
+                this.reset();
+                return this.fromItemStack(stack.get());
             }
-            this.reset();
-
-            final int count = container.getInt(Constants.ItemStack.V2.COUNT).get();
-            this.quantity(count);
-
-            final ItemType itemType = container.getRegistryValue(Constants.ItemStack.V2.TYPE, RegistryTypes.ITEM_TYPE, SpongeCommon.game()).get();
-            this.itemType(itemType);
-
-            if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-                final CompoundTag compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
-                if (compound.contains(Constants.Sponge.Data.V2.SPONGE_DATA, Constants.NBT.TAG_COMPOUND)) {
-                    compound.remove(Constants.Sponge.Data.V2.SPONGE_DATA);
-                }
-                if (!compound.isEmpty()) {
-                    this.components = net.minecraft.world.item.ItemStack.parse(SpongeCommon.server().registryAccess(), compound).map(
-                            net.minecraft.world.item.ItemStack::getComponents).orElse(DataComponentMap.EMPTY);
-                } else {
-                    this.components = DataComponentMap.EMPTY;
-                }
-            }
-            if (container.contains(Constants.Sponge.DATA_MANIPULATORS)) {
-                final List<DataView> views = container.getViewList(Constants.Sponge.DATA_MANIPULATORS).get();
-                // TODO -
-                //            final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
-                //            final List<Mutable<?, ?>> manipulators = transaction.deserializedManipulators;
-                //            this.itemDataSet = new HashSet<>();
-                //            manipulators.forEach(this.itemDataSet::add);
-            }
+            SpongeCommon.logger().warn("Invalid ItemStack Container");
             return this;
         }
 
@@ -363,7 +345,8 @@ public final class SpongeItemStack  {
         SpongeItemStack.cleanupOldCustomData(mcStack);
         // Serialize all DataComponents...
         DataContainer components = DataContainer.createNew();
-        mcStack.getComponents().forEach(tdc -> SpongeItemStack.fillComponents(components, tdc));
+        final DataComponentPatch componentsPatch = mcStack.getComponentsPatch();
+        mcStack.getComponents().filter(dct -> componentsPatch.get(dct) != null).forEach(tdc -> SpongeItemStack.fillComponents(components, tdc));
         container.set(Constants.ItemStack.COMPONENTS, components);
         // TODO handle Sponge/Plugin Data, register our own DataComponentTypes?
         return container;
@@ -384,10 +367,21 @@ public final class SpongeItemStack  {
     public static Optional<ItemStack> createItemStack(final DataView container) {
         Objects.requireNonNull(container);
 
+        // Update Data if needed
         final Integer version = container.getInt(Queries.CONTENT_VERSION).orElse(1);
-        final DataUpdaterDelegate delegate = new DataUpdaterDelegate(STACK_UPDATERS, version, Constants.ItemStack.Data.CURRENT_VERSION);
+        ImmutableList.Builder<DataContentUpdater> builder = ImmutableList.builder();
+        int lastUpdaterVersion = version;
+        for (final DataContentUpdater updater : STACK_UPDATERS) {
+            if (lastUpdaterVersion == updater.inputVersion()) {
+                lastUpdaterVersion = updater.outputVersion();
+                builder.add(updater);
+            }
+        }
+
+        final DataUpdaterDelegate delegate = new DataUpdaterDelegate(builder.build(), version, Constants.ItemStack.Data.CURRENT_VERSION);
         final DataView updatedContainer = delegate.update(container);
 
+        // Check if we have valid updated stack
         if (!updatedContainer.contains(Constants.ItemStack.TYPE, Constants.ItemStack.COUNT)) {
             return Optional.empty();
         }
@@ -398,7 +392,8 @@ public final class SpongeItemStack  {
                 .orElseThrow(() -> new IllegalStateException("Unable to find item with id: "));
         final var mcStack = new net.minecraft.world.item.ItemStack((Item) itemType, count);
         if (!mcStack.isEmpty()) { // ignore components when the stack is empty anyways
-            mcStack.applyComponents(SpongeItemStack.patchFromData(container));
+            // Read and apply components from container to mc stack
+            mcStack.applyComponents(SpongeItemStack.patchFromData(updatedContainer));
         }
         return Optional.of((ItemStack) (Object) mcStack);
     }

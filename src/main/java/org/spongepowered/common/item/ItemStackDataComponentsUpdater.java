@@ -24,9 +24,15 @@
  */
 package org.spongepowered.common.item;
 
+import com.mojang.serialization.Dynamic;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.datafix.fixes.References;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 
 class ItemStackDataComponentsUpdater implements DataContentUpdater {
@@ -35,7 +41,7 @@ class ItemStackDataComponentsUpdater implements DataContentUpdater {
 
     @Override
     public int inputVersion() {
-        return Constants.ItemStack.Data.DUPLICATE_MANIPULATOR_DATA_VERSION;
+        return Constants.ItemStack.Data.REMOVED_DUPLICATE_DATA;
     }
 
     @Override
@@ -53,12 +59,21 @@ class ItemStackDataComponentsUpdater implements DataContentUpdater {
         updated.set(Constants.ItemStack.COUNT, count);
 
         final DataContainer components = DataContainer.createNew();
-        content.getInt(Constants.ItemStack.V2.DAMAGE_VALUE).ifPresent(dmg -> components.set(Constants.ItemStack.DAMAGE, dmg));
+        content.getInt(Constants.ItemStack.V2.DAMAGE_VALUE).filter(dmg -> dmg != 0).ifPresent(dmg -> components.set(Constants.ItemStack.DAMAGE, dmg));
+
         content.getView(Constants.Sponge.UNSAFE_NBT).ifPresent(unsafe -> {
-            // TODO unsafe contains the entire old nbt tag
-            // TODO update plugin/sponge data
-            // TODO apply ItemStackComponentizationFix for vanilla data
-            components.set(Constants.ItemStack.CUSTOM_DATA, unsafe);
+            // Get unsafe nbt data
+            final CompoundTag tag = NBTTranslator.INSTANCE.translate(unsafe);
+            // Build full ItemStack nbt
+            final CompoundTag itemStackTag = new CompoundTag();
+            itemStackTag.putString("id", type);
+            itemStackTag.putInt("Count", count);
+            itemStackTag.put("tag", tag);
+            // Call the vanilla DataFixer
+            var dataFixed = DataFixers.getDataFixer().update(References.ITEM_STACK, new Dynamic<>(NbtOps.INSTANCE, itemStackTag), 3817, 3818);
+            // Convert the components back to our format
+            var newComponents = NBTTranslator.INSTANCE.translate((CompoundTag) dataFixed.getElement("components", new CompoundTag()));
+            newComponents.values(false).forEach(components::set);
         });
 
         updated.set(Constants.ItemStack.COMPONENTS, components);
