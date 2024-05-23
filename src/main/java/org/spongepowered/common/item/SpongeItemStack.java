@@ -27,6 +27,7 @@ package org.spongepowered.common.item;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Dynamic;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
@@ -36,6 +37,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
@@ -384,7 +386,8 @@ public final class SpongeItemStack  {
         return container.getView(Constants.ItemStack.COMPONENTS).map(NBTTranslator.INSTANCE::translate).flatMap(compound -> {
             // TODO check if enchantment-data is still broken
             // BuilderImpl.fixEnchantmentData(itemType, compound);
-            return DataComponentPatch.CODEC.decode(NbtOps.INSTANCE, compound).result().map(Pair::getFirst);
+            var dynamic = new Dynamic<>(RegistryOps.create(NbtOps.INSTANCE, SpongeCommon.server().registryAccess()), compound);
+            return DataComponentPatch.CODEC.decode(dynamic).result().map(Pair::getFirst);
         }).orElse(DataComponentPatch.EMPTY);
     }
 

@@ -70,7 +70,7 @@ class ItemStackDataComponentsUpdater implements DataContentUpdater {
             itemStackTag.putInt("Count", count);
             itemStackTag.put("tag", tag);
             // Call the vanilla DataFixer
-            var dataFixed = DataFixers.getDataFixer().update(References.ITEM_STACK, new Dynamic<>(NbtOps.INSTANCE, itemStackTag), 3817, 3818);
+            var dataFixed = DataFixers.getDataFixer().update(References.ITEM_STACK, new Dynamic<>(NbtOps.INSTANCE, itemStackTag), 3692, 3833);
             // Convert the components back to our format
             var newComponents = NBTTranslator.INSTANCE.translate((CompoundTag) dataFixed.getElement("components", new CompoundTag()));
             newComponents.values(false).forEach(components::set);
