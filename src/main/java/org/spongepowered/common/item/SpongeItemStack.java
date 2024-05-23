@@ -27,13 +27,10 @@ package org.spongepowered.common.item;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.JavaOps;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -56,7 +53,6 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
-import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
@@ -320,20 +316,6 @@ public final class SpongeItemStack  {
         }
     }
 
-    private static <T> void fillComponents(DataContainer container, TypedDataComponent<T> component) {
-        final ResourceLocation componentTypeKey = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(component.type());
-        if (componentTypeKey == null) {
-            return;
-        }
-        final DataResult<Object> value = component.type().codec().encodeStart(JavaOps.INSTANCE, component.value());
-        final var raw = value.result().orElse(null);
-        if (raw == null) {
-            return;
-        }
-        container.set(DataQuery.of(':', componentTypeKey.toString()), raw);
-
-    }
-
     @NotNull
     public static DataContainer getDataContainer(final net.minecraft.world.item.ItemStack mcStack) {
         final ResourceLocation key = BuiltInRegistries.ITEM.getKey(mcStack.getItem());
@@ -344,9 +326,8 @@ public final class SpongeItemStack  {
         // Cleanup Old Custom Data
         SpongeItemStack.cleanupOldCustomData(mcStack);
         // Serialize all DataComponents...
-        DataContainer components = DataContainer.createNew();
-        final DataComponentPatch componentsPatch = mcStack.getComponentsPatch();
-        mcStack.getComponents().filter(dct -> componentsPatch.get(dct) != null).forEach(tdc -> SpongeItemStack.fillComponents(components, tdc));
+        var componentsTag = DataComponentPatch.CODEC.encodeStart(NbtOps.INSTANCE, mcStack.getComponentsPatch());
+        var components = NBTTranslator.INSTANCE.translate((CompoundTag) componentsTag.getOrThrow());
         container.set(Constants.ItemStack.COMPONENTS, components);
         // TODO handle Sponge/Plugin Data, register our own DataComponentTypes?
         return container;
@@ -400,8 +381,7 @@ public final class SpongeItemStack  {
 
     public static DataComponentPatch patchFromData(final DataView container) {
         // TODO update data?
-        return container.getView(Constants.ItemStack.COMPONENTS).flatMap(components -> {
-            final CompoundTag compound = NBTTranslator.INSTANCE.translate(components);
+        return container.getView(Constants.ItemStack.COMPONENTS).map(NBTTranslator.INSTANCE::translate).flatMap(compound -> {
             // TODO check if enchantment-data is still broken
             // BuilderImpl.fixEnchantmentData(itemType, compound);
             return DataComponentPatch.CODEC.decode(NbtOps.INSTANCE, compound).result().map(Pair::getFirst);
