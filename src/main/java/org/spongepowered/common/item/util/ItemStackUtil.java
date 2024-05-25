@@ -65,6 +65,10 @@ public abstract class ItemStackUtil {
         return items.stream().map(ItemStackUtil::fromSnapshotToNative).toArray(net.minecraft.world.item.ItemStack[]::new);
     }
 
+    public static List<net.minecraft.world.item.ItemStack> fromSnapshotToNativeList(List<ItemStackSnapshot> items) {
+        return items.stream().map(ItemStackUtil::fromSnapshotToNative).toList();
+    }
+
     public static ItemStack fromNative(net.minecraft.world.item.ItemStack stack) {
         if ((Object) stack instanceof ItemStack) {
             return (ItemStack) (Object) stack;
@@ -145,6 +149,10 @@ public abstract class ItemStackUtil {
         return itemStack == null ? ItemStackSnapshot.empty() : itemStack.isEmpty() ? ItemStackSnapshot.empty() : itemStack.createSnapshot();
     }
 
+    public static List<ItemStackSnapshot> snapshotOf(final List<net.minecraft.world.item.ItemStack> items) {
+        return items.stream().map(ItemStackUtil::snapshotOf).toList();
+    }
+
     public static net.minecraft.world.item.ItemStack fromSnapshotToNative(@Nullable ItemStackSnapshot snapshot) {
         return snapshot == null ? ItemStackUtil.emptyNative() : snapshot == ItemStackSnapshot.empty() ? ItemStackUtil.emptyNative() : ItemStackUtil
             .toNative(snapshot.createStack());
@@ -161,4 +169,5 @@ public abstract class ItemStackUtil {
     public static net.minecraft.world.item.ItemStack emptyNative() {
         return net.minecraft.world.item.ItemStack.EMPTY;
     }
+
 }

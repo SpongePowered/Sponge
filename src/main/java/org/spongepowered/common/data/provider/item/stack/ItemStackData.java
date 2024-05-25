@@ -34,6 +34,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.Tool;
@@ -51,6 +52,7 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
 import java.util.Set;
@@ -188,6 +190,10 @@ public final class ItemStackData {
                         .get(h -> h.get(DataComponents.ENCHANTMENT_GLINT_OVERRIDE))
                         .set((stack, value) -> stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, value))
                         .delete(stack -> stack.remove(DataComponents.ENCHANTMENT_GLINT_OVERRIDE))
+                    .create(Keys.CHARGED_PROJECTILES)
+                        .get(h -> ItemStackUtil.snapshotOf(h.getOrDefault(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).getItems()))
+                        .set((stack, value) -> stack.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.of(ItemStackUtil.fromSnapshotToNativeList(value))))
+                        .delete(stack -> stack.remove(DataComponents.CHARGED_PROJECTILES))
                     ;
     }
     // @formatter:on
