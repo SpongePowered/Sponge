@@ -74,7 +74,13 @@ public final class HideFlagsItemStackData {
                             if (h.has(DataComponents.UNBREAKABLE)) {
                                 h.set(DataComponents.UNBREAKABLE, new Unbreakable(v));
                             } // else TODO not supported?
-                        });
+                        })
+                    .create(Keys.HIDE_TOOLTIP)
+                        .get(h -> h.get(DataComponents.HIDE_ADDITIONAL_TOOLTIP) != Unit.INSTANCE)
+                        .set((h, v) -> h.set(DataComponents.HIDE_ADDITIONAL_TOOLTIP, v ? Unit.INSTANCE : null))
+        ;
+
+
         // TODO missing show_in_tooltip (DYED_COLOR, more?)
     }
     // @formatter:on

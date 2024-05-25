@@ -83,6 +83,8 @@ public final class ItemStackData {
         // TODO DataComponents.BUCKET_ENTITY_DATA maybe expose as raw DataContainer?
         // TODO DataComponents.BEES maybe expose as raw DataContainer? + [min_]ticks_in_hive
         // TODO DataComponents.TRIM + TrimMaterial + TrimPattern + showInToolTip @HideFlagsItemStackData
+        // TODO DataComponents.INSTRUMENT goat horn + API type + duration + range
+        // TODO DataComponents.RECIPES - for Items.KNOWLEDGE_BOOK
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.APPLICABLE_POTION_EFFECTS)
