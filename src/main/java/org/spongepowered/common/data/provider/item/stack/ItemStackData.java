@@ -180,6 +180,10 @@ public final class ItemStackData {
                             }
                             return null;
                         })
+                    .create(Keys.REPAIR_COST)
+                        .get(h -> h.getOrDefault(DataComponents.REPAIR_COST, 0))
+                        .set((stack, cost) -> stack.set(DataComponents.REPAIR_COST, cost))
+                        .delete(stack -> stack.remove(DataComponents.REPAIR_COST))
                     ;
     }
     // @formatter:on
