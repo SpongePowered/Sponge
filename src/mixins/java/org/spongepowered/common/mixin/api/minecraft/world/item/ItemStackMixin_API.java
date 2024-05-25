@@ -63,6 +63,7 @@ import org.spongepowered.common.item.SpongeItemStack;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
 
@@ -81,7 +82,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Shadow public abstract Item shadow$getItem();
     @Shadow public abstract net.minecraft.network.chat.Component shadow$getDisplayName();
     @Shadow public abstract void shadow$applyComponents(final DataComponentPatch $$0);
-    @Shadow public abstract DataComponentMap shadow$getComponents();
+    @Shadow public abstract DataComponentPatch shadow$getComponentsPatch();
     @Shadow @Nullable public abstract <T> T shadow$update(final DataComponentType<T> $$0, final T $$1, final UnaryOperator<T> $$2);
 
     // @formatter:on
@@ -203,10 +204,11 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
     @Override
     public @NonNull HoverEvent<HoverEvent.ShowItem> asHoverEvent(@NonNull final UnaryOperator<HoverEvent.ShowItem> op) {
-        final HoverEvent.ShowItem event = HoverEvent.ShowItem.of(
+        final HoverEvent.ShowItem event = HoverEvent.ShowItem.showItem(
             SpongeAdventure.asAdventure(SpongeCommon.vanillaRegistry(Registries.ITEM).getKey(this.shadow$getItem())),
             this.shadow$getCount(),
-            SpongeAdventure.asBinaryTagHolder(this.shadow$getComponents())
+                Map.of()
+            //SpongeAdventure.asBinaryTagHolder(this.shadow$getComponentsPatch())
         );
         return HoverEvent.showItem(Objects.requireNonNull(op, "op").apply(event));
     }

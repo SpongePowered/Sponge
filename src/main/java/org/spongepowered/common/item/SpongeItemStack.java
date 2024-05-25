@@ -84,7 +84,7 @@ public final class SpongeItemStack  {
         private ItemType type;
         private int quantity;
         private @Nullable LinkedHashMap<Key<?>, Object> keyValues;
-        private DataComponentMap components = DataComponentMap.EMPTY;
+        private DataComponentPatch components = DataComponentPatch.EMPTY;
 
         public BuilderImpl() {
             super(ItemStack.class, 1);
@@ -126,10 +126,7 @@ public final class SpongeItemStack  {
             this.type = itemStack.type();
             this.quantity = itemStack.quantity();
             if ((Object) itemStack instanceof net.minecraft.world.item.ItemStack mcStack) {
-                final DataComponentPatch componentsPatch = mcStack.getComponentsPatch();
-                // check if component is present on patch too - if not it is a default value
-                final DataComponentMap componentMap = mcStack.getComponents().filter(p -> componentsPatch.get(p) != null);
-                components = DataComponentMap.builder().addAll(componentMap).build();
+                this.components = mcStack.getComponentsPatch();
                 //            this.itemDataSet.addAll(((CustomDataHolderBridge) itemStack).bridge$getCustomManipulators());
 
             } else {
@@ -148,7 +145,8 @@ public final class SpongeItemStack  {
             Objects.requireNonNull(modifier, "AttributeModifier cannot be null");
             Objects.requireNonNull(equipmentType, "EquipmentType cannot be null");
 
-            if (!this.components.has(DataComponents.ATTRIBUTE_MODIFIERS)) {
+
+            if (this.components.get(DataComponents.ATTRIBUTE_MODIFIERS).isPresent()) {
 
             }
 
@@ -206,7 +204,7 @@ public final class SpongeItemStack  {
 
             if (snapshot instanceof SpongeItemStackSnapshot) {
 
-                this.components = ((SpongeItemStackSnapshot) snapshot).getComponents();
+                this.components = ((SpongeItemStackSnapshot) snapshot).getComponentsPatch();
             }
 
             return this;
@@ -222,8 +220,10 @@ public final class SpongeItemStack  {
             this.itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockTypeKey)));
             this.quantity(1);
             if (blockSnapshot instanceof SpongeBlockSnapshot) {
-                ((SpongeBlockSnapshot) blockSnapshot).getCompound().ifPresent(compoundTag ->
-                        this.components = DataComponentMap.builder().set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(compoundTag)).build());
+                ((SpongeBlockSnapshot) blockSnapshot).getCompound().ifPresent(compoundTag -> {
+                    this.components = DataComponentPatch.builder().set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(compoundTag)).build();
+                });
+
                 // todo probably needs more testing, but this'll do donkey...
             } else { // TODO handle through the API specifically handling the rest of the data stuff
                 //            blockSnapshot.getContainers().forEach(this::itemData);
@@ -262,7 +262,7 @@ public final class SpongeItemStack  {
         public ItemStack.Builder reset() {
             this.type = null;
             this.quantity = 1;
-            this.components = DataComponentMap.EMPTY;
+            this.components = DataComponentPatch.EMPTY;
             return this;
         }
 

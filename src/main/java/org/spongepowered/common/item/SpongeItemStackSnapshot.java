@@ -28,7 +28,7 @@ package org.spongepowered.common.item;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -70,7 +70,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     private final transient ItemStack privateStack; // only for internal use since the processors have a huge say
     private final ImmutableSet<Key<?>> keys;
     private final ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> values;
-    private final DataComponentMap components;
+    private final DataComponentPatch components;
     private @Nullable UUID creatorUniqueId;
 
     @SuppressWarnings({"EqualsBetweenInconvertibleTypes", "ConstantConditions"})
@@ -84,7 +84,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
             this.privateStack = itemStack;
             this.keys = ImmutableSet.of();
             this.values = ImmutableSet.of();
-            this.components = DataComponentMap.EMPTY;
+            this.components = DataComponentPatch.EMPTY;
             return;
         }
         this.itemType = itemStack.type();
@@ -101,8 +101,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         this.privateStack = itemStack.copy();
         this.keys = keyBuilder.build();
         this.values = valueBuilder.build();
-
-        this.components = DataComponentMap.builder().addAll(ItemStackUtil.toNative(this.privateStack).getComponents()).build(); // copy
+        this.components = ItemStackUtil.toNative(this.privateStack).getComponentsPatch();
     }
 
     @Override
@@ -216,7 +215,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         return this.damageValue;
     }
 
-    public DataComponentMap getComponents() {
+    public DataComponentPatch getComponentsPatch() {
         return this.components;
     }
 
@@ -284,6 +283,6 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public HoverEvent<HoverEvent.ShowItem> asHoverEvent(final UnaryOperator<HoverEvent.ShowItem> op) {
         final ResourceKey resourceKey = Sponge.game().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
-        return HoverEvent.showItem(op.apply(HoverEvent.ShowItem.of(resourceKey, this.quantity(), SpongeAdventure.asBinaryTagHolder(this.getComponents()))));
+        return HoverEvent.showItem(op.apply(HoverEvent.ShowItem.showItem(resourceKey, this.quantity(), SpongeAdventure.asAdventure(this.getComponentsPatch()))));
     }
 }
