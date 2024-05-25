@@ -22,12 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.world.entity.animal;
+package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.armadillo;
 
 import org.spongepowered.api.entity.living.animal.Armadillo;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(net.minecraft.world.entity.animal.armadillo.Armadillo.class)
-public abstract class ArmadilloMixin_API extends AnimalMixin_API implements Armadillo {
-
+public abstract class ArmadilloMixin_API implements Armadillo {
 }

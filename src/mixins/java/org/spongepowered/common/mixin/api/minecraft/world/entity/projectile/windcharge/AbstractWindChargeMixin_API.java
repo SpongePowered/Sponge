@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile.windcharge;
 
-import org.spongepowered.api.entity.projectile.windcharge.WindCharge;
+import net.minecraft.world.entity.projectile.windcharge.AbstractWindCharge;
+import org.spongepowered.api.entity.projectile.windcharge.WindChargeLike;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(net.minecraft.world.entity.projectile.windcharge.WindCharge.class)
-public abstract class WindChargeMixin_API extends AbstractWindChargeMixin_API implements WindCharge {
+@Mixin(AbstractWindCharge.class)
+public abstract class AbstractWindChargeMixin_API implements WindChargeLike {
 }
