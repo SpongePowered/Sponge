@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.accessor.world.level.block.entity.SkullBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
@@ -47,7 +50,13 @@ public final class SkullData {
                             return null;
                         })
                         .set((h, v) -> h.setOwner(new ResolvableProfile(SpongeGameProfile.toMcProfile(v))))
-                        .delete(h -> h.setOwner(null));
+                        .delete(h -> h.setOwner(null))
+                .asMutable(SkullBlockEntityAccessor.class)
+                    .create(Keys.NOTE_BLOCK_SOUND)
+                        .get(h -> (ResourceKey) (Object) h.accessor$noteBlockSound())
+                        .set((h, v) -> h.accessor$noteBlockSound((ResourceLocation) (Object) v))
+                        .delete(h -> h.accessor$noteBlockSound(null))
+        ;
     }
     // @formatter:on
 }

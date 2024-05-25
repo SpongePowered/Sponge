@@ -75,6 +75,10 @@ public final class ItemStackData {
         // TODO DataComponents.SUSPICIOUS_STEW_EFFECTS
         // TODO maybe DataComponents.ATTRIBUTE_MODIFIERS as keys?
         // TODO DataComponents.BUNDLE_CONTENTS also check for Shulker Boxes? - removing the component prevents using the bundle
+        // TODO DataComponents.CONTAINER_LOOT for containers with loottable data, also for blockentity?
+        // TODO DataComponents.BLOCK_ENTITY_DATA maybe expose as raw DataContainer? (id MUST have block entity type)
+        // TODO DataComponents.BLOCK_STATE - actually StateProperties
+        // TODO DataComponents.POT_DECORATIONS - List<ItemType>
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.APPLICABLE_POTION_EFFECTS)
