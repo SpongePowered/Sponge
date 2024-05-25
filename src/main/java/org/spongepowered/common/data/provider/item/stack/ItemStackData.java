@@ -37,22 +37,27 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.component.Unbreakable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.ItemRarity;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.NestedTableEntry;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
@@ -67,6 +72,9 @@ public final class ItemStackData {
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
+        // TODO DataComponents.SUSPICIOUS_STEW_EFFECTS
+        // TODO maybe DataComponents.ATTRIBUTE_MODIFIERS as keys?
+        // TODO DataComponents.BUNDLE_CONTENTS also check for Shulker Boxes? - removing the component prevents using the bundle
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.APPLICABLE_POTION_EFFECTS)
@@ -205,9 +213,31 @@ public final class ItemStackData {
                             }
                         })
                         .delete(stack -> stack.remove(DataComponents.INTANGIBLE_PROJECTILE))
+                    .create(Keys.INVENTORY)
+                        .get(h -> ItemStackData.inventoryFromItemContainerContents(h.get(DataComponents.CONTAINER)))
+                        .set((h, value) -> {
+                            final List<ItemStack> items = value.slots().stream().map(Slot::peek).map(ItemStackUtil::toNative).toList();
+                            h.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(items));
+                        })
+                        .delete(stack -> stack.remove(DataComponents.CONTAINER))
                     ;
     }
     // @formatter:on
+
+    private static Inventory inventoryFromItemContainerContents(final ItemContainerContents contents) {
+        if (contents == null) {
+            return null;
+        }
+        var slots = contents.stream().map(ItemStackUtil::cloneDefensive).toList();
+        if (slots.isEmpty()) {
+            return new EmptyInventoryImpl(null);
+        }
+        final Inventory inventory = Inventory.builder().slots(slots.size()).completeStructure()
+                .plugin(SpongeCommon.game().platform().container(Platform.Component.IMPLEMENTATION))
+                .build();
+        slots.forEach(inventory::offer);
+        return inventory;
+    }
 
     private static void setIsUnbrekable(final ItemStack stack, final Boolean value) {
         if (value) {
