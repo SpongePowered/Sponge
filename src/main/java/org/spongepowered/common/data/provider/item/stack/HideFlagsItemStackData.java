@@ -61,7 +61,7 @@ public final class HideFlagsItemStackData {
                         .set((h, v) -> h.set(DataComponents.CAN_PLACE_ON, HideFlagsItemStackData.newAdventureModePredicate(h, !v)))
                     .create(Keys.HIDE_ENCHANTMENTS)
                         .get(h -> ((ItemEnchantmentsAccessor)h.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY)).accessor$showInTooltip())
-                        .set((h, v) -> h.set(DataComponents.ENCHANTMENTS, HideFlagsItemStackData.newItemEnchantments(h, v)))
+                        .set((h, v) -> h.set(DataComponents.ENCHANTMENTS, HideFlagsItemStackData.newItemEnchantments(h, !v)))
                     .create(Keys.HIDE_MISCELLANEOUS)
                         .get(h -> h.get(DataComponents.HIDE_ADDITIONAL_TOOLTIP) != Unit.INSTANCE)
                         .set((h, v) -> h.set(DataComponents.HIDE_ADDITIONAL_TOOLTIP, v ? Unit.INSTANCE : null))
