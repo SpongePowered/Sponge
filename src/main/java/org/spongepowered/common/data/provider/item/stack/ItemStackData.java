@@ -32,6 +32,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
+import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ChargedProjectiles;
@@ -194,6 +195,16 @@ public final class ItemStackData {
                         .get(h -> ItemStackUtil.snapshotOf(h.getOrDefault(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY).getItems()))
                         .set((stack, value) -> stack.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.of(ItemStackUtil.fromSnapshotToNativeList(value))))
                         .delete(stack -> stack.remove(DataComponents.CHARGED_PROJECTILES))
+                    .create(Keys.INTANGIBLE_PROJECTILE)
+                        .get(h -> h.get(DataComponents.INTANGIBLE_PROJECTILE) != null)
+                        .set((stack, value) -> {
+                            if (value) {
+                                stack.set(DataComponents.INTANGIBLE_PROJECTILE, Unit.INSTANCE);
+                            } else {
+                                stack.remove(DataComponents.INTANGIBLE_PROJECTILE);
+                            }
+                        })
+                        .delete(stack -> stack.remove(DataComponents.INTANGIBLE_PROJECTILE))
                     ;
     }
     // @formatter:on
