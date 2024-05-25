@@ -51,6 +51,7 @@ import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Markings;
@@ -257,6 +258,13 @@ public final class GeneratorMain {
                  "DyeColors",
                  DyeColor.class,
                  "getName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "MooshroomTypes",
+                 MushroomCow.MushroomType.class,
+                 "getSerializedName",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
