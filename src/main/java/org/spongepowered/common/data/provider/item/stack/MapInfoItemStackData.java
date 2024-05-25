@@ -44,6 +44,8 @@ public final class MapInfoItemStackData {
 
     // @formatter:off
 	public static void register(final DataProviderRegistrator registrator) {
+		// TODO DataComponents.MAP_DECORATIONS - Keys.MAP_DECORATIONS? How does this work?
+		// TODO DataComponents.MAP_COLOR?
 		registrator
 				.asMutable(ItemStack.class)
 					.create(Keys.MAP_INFO)

@@ -79,6 +79,10 @@ public final class ItemStackData {
         // TODO DataComponents.BLOCK_ENTITY_DATA maybe expose as raw DataContainer? (id MUST have block entity type)
         // TODO DataComponents.BLOCK_STATE - actually StateProperties
         // TODO DataComponents.POT_DECORATIONS - List<ItemType>
+        // TODO DataComponents.ENTITY_DATA maybe expose as raw DataContainer? (applies to spawneggs/armorstand) (id MUST have entity type)
+        // TODO DataComponents.BUCKET_ENTITY_DATA maybe expose as raw DataContainer?
+        // TODO DataComponents.BEES maybe expose as raw DataContainer? + [min_]ticks_in_hive
+        // TODO DataComponents.TRIM + TrimMaterial + TrimPattern + showInToolTip @HideFlagsItemStackData
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.APPLICABLE_POTION_EFFECTS)
