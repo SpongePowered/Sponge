@@ -46,6 +46,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.CloseableResourceManager;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageEffects;
 import net.minecraft.world.damagesource.DamageScaling;
 import net.minecraft.world.entity.Display;
@@ -257,6 +258,13 @@ public final class GeneratorMain {
                  "DyeColors",
                  DyeColor.class,
                  "getName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "world.difficulty",
+                 "Difficulties",
+                 Difficulty.class,
+                 "getSerializedName",
                  "sponge"
             ),
             new EnumEntriesValidator<>(
