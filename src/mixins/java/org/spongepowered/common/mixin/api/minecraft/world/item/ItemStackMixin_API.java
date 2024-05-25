@@ -35,7 +35,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
@@ -153,21 +152,10 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         Objects.requireNonNull(modifier, "Attribute modifier cannot be null");
         Objects.requireNonNull(equipmentType, "Equipment type cannot be null");
 
-        // TODO expose EquipmentSlotGroup?
-        var group = switch (((EquipmentSlot) (Object) equipmentType)) {
-            case MAINHAND -> EquipmentSlotGroup.MAINHAND;
-            case OFFHAND -> EquipmentSlotGroup.OFFHAND;
-            case FEET -> EquipmentSlotGroup.FEET;
-            case LEGS -> EquipmentSlotGroup.LEGS;
-            case CHEST -> EquipmentSlotGroup.CHEST;
-            case HEAD -> EquipmentSlotGroup.HEAD;
-            case BODY -> EquipmentSlotGroup.ANY; // TODO no mapping
-        };
-
         this.shadow$update(DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY, component ->
                 component.withModifierAdded(BuiltInRegistries.ATTRIBUTE.wrapAsHolder((Attribute) attributeType),
                                             (net.minecraft.world.entity.ai.attributes.AttributeModifier) (Object) modifier,
-                                            group));
+                                            SpongeItemStack.asEquipmentSlotGroup(equipmentType)));
     }
 
     @Override
