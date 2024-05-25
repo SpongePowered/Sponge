@@ -184,6 +184,10 @@ public final class ItemStackData {
                         .get(h -> h.getOrDefault(DataComponents.REPAIR_COST, 0))
                         .set((stack, cost) -> stack.set(DataComponents.REPAIR_COST, cost))
                         .delete(stack -> stack.remove(DataComponents.REPAIR_COST))
+                    .create(Keys.ENCHANTMENT_GLINT_OVERRIDE)
+                        .get(h -> h.get(DataComponents.ENCHANTMENT_GLINT_OVERRIDE))
+                        .set((stack, value) -> stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, value))
+                        .delete(stack -> stack.remove(DataComponents.ENCHANTMENT_GLINT_OVERRIDE))
                     ;
     }
     // @formatter:on
