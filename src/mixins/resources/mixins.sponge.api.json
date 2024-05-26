@@ -300,6 +300,7 @@
         "minecraft.world.item.TiersMixin_API",
         "minecraft.world.item.alchemy.PotionMixin_API",
         "minecraft.world.item.component.FireworkExplosionMixin_API",
+        "minecraft.world.item.component.Tool_RuleMixin_API",
         "minecraft.world.item.crafting.AbstractCookingRecipeMixin_API",
         "minecraft.world.item.crafting.CraftingRecipeMixin_API",
         "minecraft.world.item.crafting.CustomRecipeMixin_API",

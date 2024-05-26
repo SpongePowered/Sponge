@@ -281,7 +281,9 @@ public final class SpongeItemStack  {
         // Cleanup Old Custom Data
         SpongeItemStack.cleanupOldCustomData(mcStack);
         // Serialize all DataComponents...
-        var componentsTag = DataComponentPatch.CODEC.encodeStart(NbtOps.INSTANCE, mcStack.getComponentsPatch());
+
+        var ops = RegistryOps.create(NbtOps.INSTANCE, SpongeCommon.server().registryAccess());
+        var componentsTag = DataComponentPatch.CODEC.encodeStart(ops, mcStack.getComponentsPatch());
         var components = NBTTranslator.INSTANCE.translate((CompoundTag) componentsTag.getOrThrow());
         container.set(Constants.ItemStack.COMPONENTS, components);
         return container;

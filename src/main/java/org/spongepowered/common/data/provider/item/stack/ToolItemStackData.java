@@ -34,6 +34,7 @@ import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.ToolRule;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -66,16 +67,7 @@ public final class ToolItemStackData {
                             }
                             h.set(DataComponents.TOOL, new Tool(List.of(), v.floatValue(), 1));
                         })
-                        .delete(h -> {
-                            final Tool tool = h.get(DataComponents.TOOL);
-                            if (tool != null) {
-                                if (tool.rules().isEmpty()) {
-                                    h.remove(DataComponents.TOOL);
-                                } else {
-                                    h.set(DataComponents.TOOL, new Tool(tool.rules(), 1f, tool.damagePerBlock()));
-                                }
-                            }
-                        })
+                        .delete(h -> h.remove(DataComponents.TOOL))
                 .create(Keys.TOOL_DAMAGE_PER_BLOCK)
                     .get(h -> {
                         final Tool tool = h.get(DataComponents.TOOL);
@@ -92,15 +84,29 @@ public final class ToolItemStackData {
                         }
                         h.set(DataComponents.TOOL, new Tool(List.of(), 1f, v));
                     })
+                .create(Keys.TOOL_RULES)
+                    .get(h -> {
+                        final Tool tool = h.get(DataComponents.TOOL);
+                        if (tool == null) {
+                            return null;
+                        }
+                        return tool.rules().stream().map(ToolRule.class::cast).toList();
+                    })
+                    .set((h, v) -> {
+                        var mcValue = v.stream().map(Tool.Rule.class::cast).toList();
+                        final Tool tool = h.get(DataComponents.TOOL);
+                        if (tool != null) {
+                            h.set(DataComponents.TOOL, new Tool(mcValue, tool.defaultMiningSpeed(), tool.damagePerBlock()));
+                            return;
+                        }
+                        h.set(DataComponents.TOOL, new Tool(mcValue, 1f, 1));
+                    })
                     .delete(h -> {
                         final Tool tool = h.get(DataComponents.TOOL);
                         if (tool != null) {
-                            if (tool.rules().isEmpty()) {
-                                h.remove(DataComponents.TOOL);
-                            }
+                            h.set(DataComponents.TOOL, new Tool(List.of(), tool.defaultMiningSpeed(), tool.damagePerBlock()));
                         }
                     })
-                // TODO DataComponents.TOOL rules (blocks, speed, correct_for_drops)
                 .create(Keys.CAN_HARVEST)
                     .get(h -> {
                         final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);

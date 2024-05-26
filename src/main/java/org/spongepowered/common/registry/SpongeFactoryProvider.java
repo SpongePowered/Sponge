@@ -41,6 +41,7 @@ import org.spongepowered.api.command.parameter.managed.standard.VariableValuePar
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.type.ToolRule;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.effect.VanishState;
@@ -122,6 +123,7 @@ import org.spongepowered.common.event.SpongeEventListenerRegistration;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.item.SpongeItemStack;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
+import org.spongepowered.common.item.SpongeToolRuleFactory;
 import org.spongepowered.common.item.util.SpongeItemStackComparatorFactory;
 import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlerFactory;
 import org.spongepowered.common.network.status.SpongeFavicon;
@@ -275,6 +277,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(NaturalSpawnCost.Factory.class, new SpongeNaturalSpawnerCostFactory())
                 .registerFactory(NaturalSpawner.Factory.class, new SpongeNaturalSpawnerFactory())
                 .registerFactory(ScoreFormat.Factory.class, new SpongeScoreFormatFactory())
+                .registerFactory(ToolRule.Factory.class, new SpongeToolRuleFactory())
         ;
     }
 }
