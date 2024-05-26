@@ -68,7 +68,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
