@@ -24,11 +24,22 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.Tool;
+import net.minecraft.world.level.block.Block;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class ToolItemStackData {
 
@@ -42,11 +53,73 @@ public final class ToolItemStackData {
                     .create(Keys.EFFICIENCY)
                         .get(h -> {
                             final Tool tool = h.get(DataComponents.TOOL);
-                            if (tool!= null) {
+                            if (tool != null) {
                                 return (double) tool.defaultMiningSpeed();
                             }
                             return null;
-                        });
+                        })
+                        .set((h, v) -> {
+                            final Tool tool = h.get(DataComponents.TOOL);
+                            if (tool != null) {
+                                h.set(DataComponents.TOOL, new Tool(tool.rules(), v.floatValue(), tool.damagePerBlock()));
+                                return;
+                            }
+                            h.set(DataComponents.TOOL, new Tool(List.of(), v.floatValue(), 1));
+                        })
+                        .delete(h -> {
+                            final Tool tool = h.get(DataComponents.TOOL);
+                            if (tool != null) {
+                                if (tool.rules().isEmpty()) {
+                                    h.remove(DataComponents.TOOL);
+                                } else {
+                                    h.set(DataComponents.TOOL, new Tool(tool.rules(), 1f, tool.damagePerBlock()));
+                                }
+                            }
+                        })
+                .create(Keys.TOOL_DAMAGE_PER_BLOCK)
+                    .get(h -> {
+                        final Tool tool = h.get(DataComponents.TOOL);
+                        if (tool != null) {
+                            return tool.damagePerBlock();
+                        }
+                        return null;
+                    })
+                    .set((h, v) -> {
+                        final Tool tool = h.get(DataComponents.TOOL);
+                        if (tool != null) {
+                            h.set(DataComponents.TOOL, new Tool(tool.rules(), tool.defaultMiningSpeed(), v));
+                            return;
+                        }
+                        h.set(DataComponents.TOOL, new Tool(List.of(), 1f, v));
+                    })
+                    .delete(h -> {
+                        final Tool tool = h.get(DataComponents.TOOL);
+                        if (tool != null) {
+                            if (tool.rules().isEmpty()) {
+                                h.remove(DataComponents.TOOL);
+                            }
+                        }
+                    })
+                // TODO DataComponents.TOOL rules (blocks, speed, correct_for_drops)
+                .create(Keys.CAN_HARVEST)
+                    .get(h -> {
+                        final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
+                        final Tool tool = h.get(DataComponents.TOOL);
+                        if (tool != null) {
+                            return tool.rules().stream().map(Tool.Rule::blocks)
+                                    .flatMap(HolderSet::stream)
+                                    .map(Holder::value)
+                                    .map(BlockType.class::cast)
+                                    .collect(Collectors.toSet());
+                        }
+
+                        final Set<BlockType> blockTypes = blockRegistry.stream()
+                                .filter(b -> h.isCorrectToolForDrops(b.defaultBlockState()))
+                                .map(BlockType.class::cast)
+                                .collect(Collectors.toUnmodifiableSet());
+                        return blockTypes.isEmpty() ? null : blockTypes;
+                    })
+        ;
     }
     // @formatter:on
 }

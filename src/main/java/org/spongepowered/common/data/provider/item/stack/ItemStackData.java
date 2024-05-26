@@ -25,11 +25,7 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.Unit;
@@ -42,12 +38,9 @@ import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.ItemContainerContents;
 import net.minecraft.world.item.component.ItemLore;
-import net.minecraft.world.item.component.Tool;
 import net.minecraft.world.item.component.Unbreakable;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import org.spongepowered.api.Platform;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.ItemRarity;
@@ -68,8 +61,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
 public final class ItemStackData {
@@ -95,7 +86,6 @@ public final class ItemStackData {
         // TODO DataComponents.INSTRUMENT goat horn + API type + duration + range
         // TODO DataComponents.RECIPES - for Items.KNOWLEDGE_BOOK
         // TODO DataComponents.MAX_STACK_SIZE; incompatible with MAX_DAMAGE?
-        // TODO DataComponents.TOOL rules (blocks, speed, correct_for_drops) + default_mining_speed + damage_per_block
         // TODO DataComponents.OMINOUS_BOTTLE_AMPLIFIER 1.21
         registrator
                 .asMutable(ItemStack.class)
@@ -139,24 +129,6 @@ public final class ItemStackData {
                                 return burnTime;
                             }
                             return null;
-                        })
-                    .create(Keys.CAN_HARVEST)
-                        .get(h -> {
-                            final Registry<Block> blockRegistry = SpongeCommon.vanillaRegistry(Registries.BLOCK);
-                            final Tool tool = h.get(DataComponents.TOOL);
-                            if (tool != null) {
-                                return tool.rules().stream().map(Tool.Rule::blocks)
-                                        .flatMap(HolderSet::stream)
-                                        .map(Holder::value)
-                                        .map(BlockType.class::cast)
-                                        .collect(Collectors.toSet());
-                            }
-
-                            final Set<BlockType> blockTypes = blockRegistry.stream()
-                                    .filter(b -> h.isCorrectToolForDrops(b.defaultBlockState()))
-                                    .map(BlockType.class::cast)
-                                    .collect(Collectors.toUnmodifiableSet());
-                            return blockTypes.isEmpty() ? null : blockTypes;
                         })
                     .create(Keys.CONTAINER_ITEM)
                         .get(h -> (ItemType) h.getItem().getCraftingRemainingItem())
