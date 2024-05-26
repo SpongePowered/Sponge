@@ -95,7 +95,6 @@ public final class ItemStackData {
         // TODO DataComponents.INSTRUMENT goat horn + API type + duration + range
         // TODO DataComponents.RECIPES - for Items.KNOWLEDGE_BOOK
         // TODO DataComponents.MAX_STACK_SIZE; incompatible with MAX_DAMAGE?
-        // TODO DataComponents.FIRE_RESISTANT
         // TODO DataComponents.TOOL rules (blocks, speed, correct_for_drops) + default_mining_speed + damage_per_block
         // TODO DataComponents.ITEM_NAME (which can be hidden by CUSTOM_NAME)
         // TODO DataComponents.OMINOUS_BOTTLE_AMPLIFIER 1.21
@@ -276,6 +275,16 @@ public final class ItemStackData {
                             h.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(items));
                         })
                         .delete(stack -> stack.remove(DataComponents.CONTAINER))
+                    .create(Keys.FIRE_RESISTANT)
+                        .get(h -> h.get(DataComponents.FIRE_RESISTANT) != null)
+                        .set((h, value) -> {
+                            if (value) {
+                                h.set(DataComponents.FIRE_RESISTANT, Unit.INSTANCE);
+                            } else {
+                                h.remove(DataComponents.FIRE_RESISTANT);
+                            }
+                        })
+                        .delete(stack -> stack.remove(DataComponents.FIRE_RESISTANT))
                     ;
     }
     // @formatter:on
