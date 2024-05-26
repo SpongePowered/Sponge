@@ -37,6 +37,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.ItemContainerContents;
@@ -95,6 +96,9 @@ public final class ItemStackData {
         // TODO DataComponents.RECIPES - for Items.KNOWLEDGE_BOOK
         // TODO DataComponents.MAX_STACK_SIZE; incompatible with MAX_DAMAGE?
         // TODO DataComponents.FIRE_RESISTANT
+        // TODO DataComponents.TOOL rules (blocks, speed, correct_for_drops) + default_mining_speed + damage_per_block
+        // TODO DataComponents.ITEM_NAME (which can be hidden by CUSTOM_NAME)
+        // TODO DataComponents.OMINOUS_BOTTLE_AMPLIFIER 1.21
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.APPLICABLE_POTION_EFFECTS)
@@ -214,6 +218,7 @@ public final class ItemStackData {
                         .supports(h -> h.getMaxDamage() != 0)
                     .create(Keys.ITEM_RARITY)
                         .get(stack -> (ItemRarity) (Object) stack.getRarity())
+                        .set((h, v) -> h.set(DataComponents.RARITY, (Rarity) (Object) v))
                     .create(Keys.REPLENISHED_FOOD)
                         .get(h -> {
                             final var food = h.get(DataComponents.FOOD);
