@@ -1402,7 +1402,7 @@ public final class DataTest  {
         if (gotValue.isPresent()) {
             final List<T> actual = gotValue.get().get(new Random());
             if (!Objects.deepEquals(actual.toArray(), expected.toArray())) {
-                this.plugin.logger().error("Value differs om {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder),
+                this.plugin.logger().error("Value differs on {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder),
                         key.key().asString(), expected, actual);
             }
         } else {

@@ -33,6 +33,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
 import net.minecraft.util.Unit;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ChargedProjectiles;
@@ -51,8 +53,11 @@ import org.spongepowered.api.item.ItemRarity;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.NestedTableEntry;
+import org.spongepowered.api.util.weighted.TableEntry;
+import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -60,12 +65,16 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
 public final class ItemStackData {
+
+    public static final FoodProperties DEFAULT_FOOD_PROPERTIES = new FoodProperties(0, 0, false, 1.6F, List.of());
 
     private ItemStackData() {
     }
@@ -97,10 +106,29 @@ public final class ItemStackData {
                                     chance.add((PotionEffect) effect.effect(), effect.probability());
                                 }
                                 effects.add(new NestedTableEntry<>(1, chance));
+
+
                                 return effects;
                             }
                             return null;
                         })
+                        .set((h, v) -> {
+                            List<FoodProperties.PossibleEffect> newEffects = new ArrayList<>();
+                            for (final TableEntry<PotionEffect> entry : v.entries()) {
+                                if (entry instanceof NestedTableEntry<PotionEffect> nestedTableEntry) {
+                                    if (nestedTableEntry.getNestedTable() instanceof ChanceTable<PotionEffect> chanceTable) {
+                                        for (final TableEntry<PotionEffect> te : chanceTable.entries()) {
+                                            if (te instanceof WeightedObject<PotionEffect> wo) {
+                                                newEffects.add(new FoodProperties.PossibleEffect((MobEffectInstance) wo.get(), (float) te.weight()));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
+                                    fp -> new FoodProperties(fp.nutrition(), fp.saturation(), fp.canAlwaysEat(), fp.eatSeconds(), newEffects));
+                        })
+
                     .create(Keys.BURN_TIME)
                         .get(h -> {
                             final Integer burnTime = AbstractFurnaceBlockEntity.getFuel().get(h.getItem());
@@ -187,21 +215,32 @@ public final class ItemStackData {
                     .create(Keys.REPLENISHED_FOOD)
                         .get(h -> {
                             final var food = h.get(DataComponents.FOOD);
-                            if (food != null) {
-                                return food.nutrition();
-                            }
-                            return null;
+                            return food == null ? null : food.nutrition();
                         })
+                        .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
+                                fp -> new FoodProperties(v, fp.saturation(), fp.canAlwaysEat(), fp.eatSeconds(), fp.effects())))
                     .create(Keys.REPLENISHED_SATURATION)
                         .get(h -> {
                             final var food = h.get(DataComponents.FOOD);
-                            if (food != null) {
-                                // Translate's Minecraft's weird internal value to the actual saturation value
-                                return (double)food.saturation();
-                            }
-                            return null;
+                            return food == null ? null : (double) food.saturation();
+                            })
+                        .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
+                                fp -> new FoodProperties(fp.nutrition(), v.floatValue(), fp.canAlwaysEat(), fp.eatSeconds(), fp.effects())))
+                    .create(Keys.CAN_ALWAYS_EAT)
+                        .get(h -> {
+                            final var food = h.get(DataComponents.FOOD);
+                            return food == null ? null : food.canAlwaysEat();
                         })
-                    .create(Keys.REPAIR_COST)
+                        .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
+                                fp -> new FoodProperties(fp.nutrition(), fp.saturation(), v, fp.eatSeconds(), fp.effects())))
+                    .create(Keys.EATING_TIME)
+                        .get(h -> {
+                            final var food = h.get(DataComponents.FOOD);
+                            return food == null ? null : Ticks.of(food.eatDurationTicks());
+                        })
+                        .set((h, v) -> h.update(DataComponents.FOOD, DEFAULT_FOOD_PROPERTIES,
+                                fp -> new FoodProperties(fp.nutrition(), fp.saturation(), fp.canAlwaysEat(), v.ticks() / 20f, fp.effects())))
+                .create(Keys.REPAIR_COST)
                         .get(h -> h.getOrDefault(DataComponents.REPAIR_COST, 0))
                         .set((stack, cost) -> stack.set(DataComponents.REPAIR_COST, cost))
                         .delete(stack -> stack.remove(DataComponents.REPAIR_COST))
