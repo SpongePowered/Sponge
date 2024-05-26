@@ -93,6 +93,8 @@ public final class ItemStackData {
         // TODO DataComponents.TRIM + TrimMaterial + TrimPattern + showInToolTip @HideFlagsItemStackData
         // TODO DataComponents.INSTRUMENT goat horn + API type + duration + range
         // TODO DataComponents.RECIPES - for Items.KNOWLEDGE_BOOK
+        // TODO DataComponents.MAX_STACK_SIZE; incompatible with MAX_DAMAGE?
+        // TODO DataComponents.FIRE_RESISTANT
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.APPLICABLE_POTION_EFFECTS)
@@ -204,6 +206,7 @@ public final class ItemStackData {
                         .delete(h -> h.remove(DataComponents.LORE))
                     .create(Keys.MAX_DURABILITY)
                         .get(h -> h.getMaxDamage() != 0 ? h.getMaxDamage() : null)
+                        .set((h, v) -> h.set(DataComponents.MAX_DAMAGE, v))
                         .supports(h -> h.getMaxDamage() != 0)
                     .create(Keys.ITEM_DURABILITY)
                         .get(stack -> stack.getMaxDamage() - stack.getDamageValue())
