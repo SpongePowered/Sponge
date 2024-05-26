@@ -1,13 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import dev.architectury.at.AccessTransformSet
-import dev.architectury.at.io.AccessTransformFormats
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
-import net.fabricmc.loom.util.Constants
-import net.fabricmc.loom.util.FileSystemUtil
-import net.fabricmc.loom.util.LfWriter
-import net.fabricmc.loom.util.aw2at.Aw2At
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
 
 buildscript {
     repositories {
@@ -382,6 +374,7 @@ tasks {
 
         manifest {
             attributes(
+                "Access-Widener" to "common.accesswidener",
                 "Superclass-Transformer" to "common.superclasschange,forge.superclasschange",
                 "MixinConfigs" to mixinConfigs.joinToString(",")
             )
@@ -396,29 +389,6 @@ tasks {
         from(forgeLaunch.output)
         from(forgeAccessors.output)
         from(forgeMixins.output)
-
-        val accessWideners = listOf("common.accesswidener")
-
-        doLast {
-            // Convert AW to AT
-            val at = AccessTransformSet.create()
-            FileSystemUtil.getJarFileSystem(archiveFile.get().asFile, false).use { fsDelegate ->
-                val fs = fsDelegate.get()
-                val atPath = fs.getPath(Constants.Forge.ACCESS_TRANSFORMER_PATH)
-
-                for (aw in accessWideners) {
-                    val awPath = fs.getPath(aw)
-                    Files.newBufferedReader(awPath, StandardCharsets.UTF_8).use { reader ->
-                        at.merge(Aw2At.toAccessTransformSet(reader))
-                    }
-                    Files.delete(awPath)
-                }
-
-                LfWriter(Files.newBufferedWriter(atPath)).use { writer ->
-                    AccessTransformFormats.FML.write(writer, at)
-                }
-            }
-        }
     }
 
     val universalJar = register("universalJar", Jar::class) {
