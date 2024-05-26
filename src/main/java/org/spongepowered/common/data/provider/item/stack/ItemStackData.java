@@ -96,7 +96,6 @@ public final class ItemStackData {
         // TODO DataComponents.RECIPES - for Items.KNOWLEDGE_BOOK
         // TODO DataComponents.MAX_STACK_SIZE; incompatible with MAX_DAMAGE?
         // TODO DataComponents.TOOL rules (blocks, speed, correct_for_drops) + default_mining_speed + damage_per_block
-        // TODO DataComponents.ITEM_NAME (which can be hidden by CUSTOM_NAME)
         // TODO DataComponents.OMINOUS_BOTTLE_AMPLIFIER 1.21
         registrator
                 .asMutable(ItemStack.class)
@@ -285,6 +284,16 @@ public final class ItemStackData {
                             }
                         })
                         .delete(stack -> stack.remove(DataComponents.FIRE_RESISTANT))
+                    .create(Keys.ITEM_NAME)
+                        .get(h -> {
+                            final Component component = h.get(DataComponents.ITEM_NAME);
+                            if (component == null) {
+                                return null;
+                            }
+                            return SpongeAdventure.asAdventure(component);
+                        })
+                        .set((h, value) -> h.set(DataComponents.ITEM_NAME, SpongeAdventure.asVanilla(value)))
+                        .delete(stack -> stack.remove(DataComponents.ITEM_NAME))
                     ;
     }
     // @formatter:on
