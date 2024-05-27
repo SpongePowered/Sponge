@@ -22,26 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.hooks;
+package org.spongepowered.forge.hook;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.common.ToolActions;
+import org.spongepowered.common.hooks.ItemHooks;
 
-public interface ItemHooks {
-
-    default boolean canEnchantmentBeAppliedToItem(final Enchantment enchantment, final ItemStack stack) {
-        return enchantment.canEnchant(stack);
+public class ForgeItemHooks implements ItemHooks {
+    @Override
+    public boolean canPerformSweepAttack(ItemStack heldItem) {
+        return heldItem.canPerformAction(ToolActions.SWORD_SWEEP);
     }
 
-    default boolean canPerformSweepAttack(ItemStack heldItem) {
-        return heldItem.getItem() instanceof SwordItem;
-    }
-
-    default AABB getSweepingHitBox(Player player, ItemStack itemStack, Entity targetEntity) {
-        return targetEntity.getBoundingBox().inflate(1.0D, 0.25D, 1.0D);
+    @Override
+    public AABB getSweepingHitBox(Player player, ItemStack itemStack, Entity targetEntity) {
+        return itemStack.getSweepHitBox(player, targetEntity);
     }
 }

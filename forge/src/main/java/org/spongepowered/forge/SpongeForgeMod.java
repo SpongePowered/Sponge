@@ -57,6 +57,7 @@ import org.spongepowered.forge.hook.ForgeChannelHooks;
 import org.spongepowered.forge.hook.ForgeEntityHooks;
 import org.spongepowered.forge.hook.ForgeEventHooks;
 import org.spongepowered.forge.hook.ForgeGeneralHooks;
+import org.spongepowered.forge.hook.ForgeItemHooks;
 import org.spongepowered.forge.hook.ForgeWorldHooks;
 
 @Mod("spongeforge")
@@ -84,6 +85,7 @@ public final class SpongeForgeMod {
         PlatformHooks.INSTANCE.setWorldHooks(new ForgeWorldHooks());
         PlatformHooks.INSTANCE.setGeneralHooks(new ForgeGeneralHooks());
         PlatformHooks.INSTANCE.setChannelHooks(new ForgeChannelHooks());
+        PlatformHooks.INSTANCE.setItemHooks(new ForgeItemHooks());
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent event) {
