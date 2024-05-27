@@ -24,17 +24,30 @@
  */
 package org.spongepowered.common.mixin.core.network;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.PacketEncoder;
 import net.minecraft.network.PacketListener;
+import net.minecraft.network.protocol.Packet;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
 @Mixin(PacketEncoder.class)
 public class PacketEncoderMixin<T extends PacketListener> {
 
-    // TODO find out how we can still translate serverside see FriendlyByteBufMixin
-//    @Inject(method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;Lio/netty/buffer/ByteBuf;)V",
-//            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/StreamCodec;encode(Ljava/lang/Object;Ljava/lang/Object;)V"))
-//    private void applyLocaleToBuffer(final ChannelHandlerContext ctx, final Packet<T> $$1, final ByteBuf $$2, final CallbackInfo ci) {
-//        ((FriendlyByteBufBridge) $$2).bridge$setLocale(ctx.channel().attr(SpongeAdventure.CHANNEL_LOCALE).get()); // TODO check if this correct, it is not
-//    }
+    @Inject(method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;Lio/netty/buffer/ByteBuf;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/StreamCodec;encode(Ljava/lang/Object;Ljava/lang/Object;)V"))
+    private void impl$setLocaleBeforeEncode(final ChannelHandlerContext ctx, final Packet<T> $$1, final ByteBuf $$2, final CallbackInfo ci) {
+        SpongeAdventure.ENCODING_LOCALE.set(ctx.channel().attr(SpongeAdventure.CHANNEL_LOCALE).get());
+    }
+
+    @Inject(method = "encode(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;Lio/netty/buffer/ByteBuf;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/codec/StreamCodec;encode(Ljava/lang/Object;Ljava/lang/Object;)V",
+                    shift = At.Shift.AFTER))
+    private void impl$clearLocaleAfterEncode(final ChannelHandlerContext ctx, final Packet<T> $$1, final ByteBuf $$2, final CallbackInfo ci) {
+        SpongeAdventure.ENCODING_LOCALE.remove();
+    }
 }

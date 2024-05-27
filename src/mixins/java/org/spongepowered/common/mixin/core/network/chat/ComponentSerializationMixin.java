@@ -22,20 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.network;
+package org.spongepowered.common.mixin.core.network.chat;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.common.adventure.NativeComponentRenderer;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
-@Mixin(FriendlyByteBuf.class)
-public abstract class FriendlyByteBufMixin_Vanilla implements FriendlyByteBufBridge {
+import java.util.Locale;
 
-//    @Redirect(method = "writeItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;writeNbt(Lnet/minecraft/nbt/Tag;)Lnet/minecraft/network/FriendlyByteBuf;"))
-//    public FriendlyByteBuf renderItemComponents(final FriendlyByteBuf buf, final Tag tag) {
-//        if (tag instanceof CompoundTag compoundTag) {
-//            return buf.writeNbt(bridge$renderItemComponents(compoundTag));
-//        }
-//        return buf.writeNbt(tag);
-//    }
+@Mixin(ComponentSerialization.class)
+public abstract class ComponentSerializationMixin {
+
+    @ModifyVariable(method = "lambda$createCodec$6", at = @At(value = "HEAD"), argsOnly = true)
+    private static Component impl$localizeComponent(final Component input) {
+        final Locale locale = SpongeAdventure.ENCODING_LOCALE.get();
+        return NativeComponentRenderer.apply(input, locale == null ? Locales.DEFAULT : locale);
+    }
+
+    //TODO: Do this for ItemStacks too
 }

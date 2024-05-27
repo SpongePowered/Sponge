@@ -169,6 +169,8 @@ public final class SpongeAdventure {
 
     private static final Set<ServerBossEvent> ACTIVE_BOSS_BARS = ConcurrentHashMap.newKeySet();
 
+    public static final ThreadLocal<Locale> ENCODING_LOCALE = new ThreadLocal<>();
+
     // --------------
     // ---- Core ----
     // --------------

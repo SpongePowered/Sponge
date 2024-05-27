@@ -25,8 +25,10 @@
 package org.spongepowered.common.mixin.core.server.network;
 
 import com.mojang.authlib.GameProfile;
+import io.netty.channel.Channel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.common.ServerboundClientInformationPacket;
 import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.configuration.ServerboundFinishConfigurationPacket;
 import net.minecraft.server.network.ConfigurationTask;
@@ -45,6 +47,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
+import org.spongepowered.common.accessor.network.ConnectionAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -52,13 +56,13 @@ import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.profile.SpongeGameProfile;
+import org.spongepowered.common.util.LocaleCache;
 
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.Queue;
 import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
-
 
 @Mixin(ServerConfigurationPacketListenerImpl.class)
 public abstract class ServerConfigurationPacketListenerImplMixin extends ServerCommonPacketListenerImplMixin {
@@ -183,5 +187,11 @@ public abstract class ServerConfigurationPacketListenerImplMixin extends ServerC
     private void impl$sendChannels(final CallbackInfo ci) {
         ((SpongeChannelManager) SpongeCommon.game().channelManager()).sendChannelRegistrations(
                 ((ConnectionBridge) this.connection).bridge$getEngineConnection());
+    }
+
+    @Inject(method = "handleClientInformation", at = @At("TAIL"))
+    private void impl$onHandleClientInformation(final ServerboundClientInformationPacket packet, final CallbackInfo ci) {
+        final Channel channel = ((ConnectionAccessor) this.connection).accessor$channel();
+        channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(LocaleCache.getLocale(packet.information().language()));
     }
 }

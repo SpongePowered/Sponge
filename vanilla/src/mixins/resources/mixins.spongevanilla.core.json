@@ -21,7 +21,6 @@
         "brigadier.exceptions.CommandSyntaxExceptionMixin_Vanilla",
         "commands.CommandsMixin_Vanilla",
         "network.ConnectionMixin_Vanilla",
-        "network.FriendlyByteBufMixin_Vanilla",
         "network.protocol.common.ClientboundCustomPayloadPacketMixin_Vanilla",
         "network.protocol.common.ServerboundCustomPayloadPacketMixin_Vanilla",
         "network.protocol.login.ClientboundCustomQueryPacketMixin_Vanilla",
