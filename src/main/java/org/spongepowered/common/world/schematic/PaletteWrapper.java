@@ -79,10 +79,10 @@ public class PaletteWrapper<NT, T, R> implements Palette.Immutable<T, R> {
     @Override
     public OptionalInt get(T type) {
         final var id = this.proxy.getId((NT) type);
-        if (id <= 0) {
-            return OptionalInt.empty();
+        if (id >= 0) {
+            return OptionalInt.of(id);
         }
-        return OptionalInt.of(id);
+        return OptionalInt.empty();
     }
 
     @SuppressWarnings("unchecked")
