@@ -22,7 +22,6 @@
     "minecraftforge.registries.RegistryManagerMixin_Forge",
     "minecraftforge.util.ITeleporterMixin_Forge",
     "network.ConnectionMixin_Forge",
-    "network.FriendlyByteBufMixin_Forge",
     "server.BootstrapMixin_Forge",
     "server.MinecraftServerMixin_Forge",
     "server.commands.SpreadPlayersCommandMixin_Forge",
