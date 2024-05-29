@@ -22,18 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.inventory.container;
+package org.spongepowered.common.bridge.world.inventory;
 
-import net.minecraft.world.inventory.Slot;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
+public interface AbstractContainerMenu_InventoryBridge {
 
-public interface MenuBridge {
-
-    void bridge$setMenu(@Nullable SpongeInventoryMenu menu);
-
-    @Nullable SpongeInventoryMenu bridge$getMenu();
-
-    boolean bridge$isReadonlyMenu(Slot slot);
-
+    void bridge$markDirty();
 }
