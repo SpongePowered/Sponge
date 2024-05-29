@@ -57,7 +57,7 @@ public final class SpongeResourceKeyBuilder implements ResourceKey.Builder {
         Preconditions.checkState(this.value != null, "Value cannot be empty");
 
         try {
-            final ResourceLocation resourceLocation = new ResourceLocation(this.namespace, this.value);
+            final ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(this.namespace, this.value);
             return (ResourceKey) (Object) resourceLocation;
         } catch (ResourceLocationException e) {
             throw new IllegalStateException(e);

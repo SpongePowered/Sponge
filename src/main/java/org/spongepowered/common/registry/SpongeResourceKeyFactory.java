@@ -34,7 +34,7 @@ public final class SpongeResourceKeyFactory implements ResourceKey.Factory {
     @Override
     public ResourceKey of(final String namespace, final String value) {
         try {
-            final ResourceLocation resourceLocation = new ResourceLocation(namespace, value);
+            final ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(namespace, value);
             return (ResourceKey) (Object) resourceLocation;
         } catch (ResourceLocationException e) {
             throw new IllegalStateException(e);
@@ -44,7 +44,7 @@ public final class SpongeResourceKeyFactory implements ResourceKey.Factory {
     @Override
     public ResourceKey of(final PluginContainer plugin, final String value) {
         try {
-            final ResourceLocation resourceLocation = new ResourceLocation(plugin.metadata().id(), value);
+            final ResourceLocation resourceLocation = ResourceLocation.fromNamespaceAndPath(plugin.metadata().id(), value);
             return (ResourceKey) (Object) resourceLocation;
         } catch (ResourceLocationException e) {
             throw new IllegalStateException(e);
@@ -54,7 +54,7 @@ public final class SpongeResourceKeyFactory implements ResourceKey.Factory {
     @Override
     public ResourceKey resolve(final String formatted) {
         try {
-            final ResourceLocation resourceLocation = new ResourceLocation(formatted);
+            final ResourceLocation resourceLocation = ResourceLocation.parse(formatted);
             return (ResourceKey) (Object) resourceLocation;
         } catch (ResourceLocationException e) {
             throw new IllegalStateException(e);

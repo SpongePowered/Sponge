@@ -212,7 +212,7 @@ public final class GeneratorMain {
                     final Map<ResourceLocation, Object> out = new HashMap<>(map.size());
                     map.forEach((BiConsumer<Object, Object>) (k, v) -> {
                         var key = (GameRules.Key<?>) k;
-                        out.put(new ResourceLocation("sponge:" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.getId())), v);
+                        out.put(ResourceLocation.fromNamespaceAndPath("sponge", CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, key.getId())), v);
                     });
                     return out;
                 }
@@ -419,7 +419,7 @@ public final class GeneratorMain {
                 "EntityTypes",
                 Registries.ENTITY_TYPE,
                 $ -> true,
-                Set.of(new ResourceLocation("sponge", "human")) // Sponge's Human type is an extra addition
+                Set.of(ResourceLocation.fromNamespaceAndPath("sponge", "human")) // Sponge's Human type is an extra addition
             ),
             new RegistryEntriesGenerator<>(
                 "fluid",

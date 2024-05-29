@@ -762,7 +762,7 @@ public final class SpongeAdventure {
         if ((Object) key instanceof ResourceLocation) {
             return (ResourceLocation) (Object) key;
         }
-        return new ResourceLocation(key.namespace(), key.value());
+        return ResourceLocation.fromNamespaceAndPath(key.namespace(), key.value());
     }
 
     public static @Nullable ResourceLocation asVanillaNullable(final @Nullable Key key) {

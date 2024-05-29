@@ -121,7 +121,7 @@ public final class MobSpawnerData {
 
         final String resourceLocation = logic.accessor$nextSpawnData().entityToSpawn().getString(Constants.Entity.ENTITY_TYPE_ID);
         final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
-        final EntityType<?> type = entityTypeRegistry.getOptional(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
+        final EntityType<?> type = entityTypeRegistry.getOptional(ResourceLocation.parse(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
         final CompoundTag data = logic.accessor$nextSpawnData().entityToSpawn();
 
@@ -152,7 +152,7 @@ public final class MobSpawnerData {
 
             final String resourceLocation = nbt.getString(Constants.Entity.ENTITY_TYPE_ID);
             final Registry<net.minecraft.world.entity.EntityType<?>> entityTypeRegistry = SpongeCommon.vanillaRegistry(Registries.ENTITY_TYPE);
-            final EntityType<?> type = entityTypeRegistry.getOptional(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
+            final EntityType<?> type = entityTypeRegistry.getOptional(ResourceLocation.parse(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
             final EntityArchetype archetype = SpongeEntityArchetypeBuilder.pooled()
                     .type(type)

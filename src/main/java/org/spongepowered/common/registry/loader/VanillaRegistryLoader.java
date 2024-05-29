@@ -341,7 +341,7 @@ public final class VanillaRegistryLoader {
                 // To address Vanilla shortcomings, some mods will manually prefix their modid onto values they put into Vanilla registry-like
                 // registrars. We need to account for that possibility
                 if (rawId.contains(":")) {
-                    map.put((ResourceKey) (Object) new ResourceLocation(rawId), (A) value.getKey());
+                    map.put((ResourceKey) (Object) ResourceLocation.parse(rawId), (A) value.getKey());
                 } else {
                     map.put(ResourceKey.sponge(rawId), (A) value.getKey());
                 }

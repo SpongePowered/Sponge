@@ -98,7 +98,7 @@ public final class PluginPackResources extends AbstractPackResources {
                         .map(namespaceDir::relativize)
                         .map(Object::toString)
 // TODO filter needed?                   .filter(p -> filterValidPath(namespace, p, fileNameValidator))
-                        .map(s -> new ResourceLocation(namespace, s))
+                        .map(s -> ResourceLocation.fromNamespaceAndPath(namespace, s))
                         .forEach(loc -> {
                             out.accept(loc, this.getResource(type, loc));
                         });

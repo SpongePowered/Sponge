@@ -73,7 +73,7 @@ public abstract class SpongeRecipeRegistration<R extends Recipe<? extends Contai
         this.advancement = Advancement.Builder.advancement()
                 .addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(key))
                 .rewards(AdvancementRewards.Builder.recipe(key))
-                .build(new ResourceLocation(key.getNamespace(), "recipes/" + recipeCategory.getFolderName() + "/" + key.getPath()));
+                .build(ResourceLocation.fromNamespaceAndPath(key.getNamespace(), "recipes/" + recipeCategory.getFolderName() + "/" + key.getPath()));
         this.group = group == null ? "" : group;
     }
 
