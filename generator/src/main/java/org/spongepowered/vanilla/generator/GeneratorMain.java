@@ -52,6 +52,7 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.animal.TropicalFish;
+import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.animal.horse.Markings;
 import net.minecraft.world.entity.animal.horse.Variant;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -262,6 +263,13 @@ public final class GeneratorMain {
                  "data.type",
                  "FoxTypes",
                  Fox.Type.class,
+                 "getSerializedName",
+                 "sponge"
+            ),
+            new EnumEntriesValidator<>(
+                 "data.type",
+                 "LlamaTypes",
+                 Llama.Variant.class,
                  "getSerializedName",
                  "sponge"
             ),
