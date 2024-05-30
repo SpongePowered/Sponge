@@ -82,7 +82,31 @@ public final class LivingData {
                                 return false;
                             }
                             if (h instanceof final Player p) {
-                                p.startAutoSpinAttack(SpongeTicks.toSaturatedIntOrInfinite(v));
+                                final var dmg = ((LivingEntityAccessor)h).accessor$autoSpinAttackDmg();
+                                final var stack = ((LivingEntityAccessor)h).accessor$autoSpinAttackItemStack();
+                                p.startAutoSpinAttack(SpongeTicks.toSaturatedIntOrInfinite(v), dmg == 0 ? 8.0F : dmg, stack);
+                                return true;
+                            }
+                            return false;
+                        })
+                    .create(Keys.AUTO_SPIN_ATTACK_DAMAGE)
+                        .get(h -> (double) ((LivingEntityAccessor)h).accessor$autoSpinAttackDmg())
+                        .setAnd((h, v) -> {
+                            if (h instanceof final Player p) {
+                                final var stack = ((LivingEntityAccessor)h).accessor$autoSpinAttackItemStack();
+                                final var ticks = ((LivingEntityAccessor)h).accessor$autoSpinAttackTicks();
+                                p.startAutoSpinAttack(ticks, v.floatValue(), stack);
+                                return true;
+                            }
+                            return false;
+                        })
+                    .create(Keys.AUTO_SPIN_ATTACK_WEAPON)
+                        .get(h -> ItemStackUtil.snapshotOf(((LivingEntityAccessor)h).accessor$autoSpinAttackItemStack()))
+                        .setAnd((h, v) -> {
+                            if (h instanceof final Player p) {
+                                final var ticks = ((LivingEntityAccessor)h).accessor$autoSpinAttackTicks();
+                                final var dmg = ((LivingEntityAccessor)h).accessor$autoSpinAttackDmg();
+                                p.startAutoSpinAttack(ticks, dmg, ItemStackUtil.fromSnapshotToNative(v));
                                 return true;
                             }
                             return false;
