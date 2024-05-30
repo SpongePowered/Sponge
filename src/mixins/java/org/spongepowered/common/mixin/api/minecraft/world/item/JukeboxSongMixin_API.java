@@ -22,16 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.item;
+package org.spongepowered.common.mixin.api.minecraft.world.item;
 
+import net.minecraft.core.Holder;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.item.JukeboxSong;
+import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.effect.sound.music.MusicDisc;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(RecordItem.class)
-public interface RecordItemAccessor {
+@Mixin(JukeboxSong.class)
+public abstract class JukeboxSongMixin_API implements MusicDisc {
 
-    @Accessor("sound") SoundEvent accessor$sound();
+    @Shadow @Final private Holder<SoundEvent> soundEvent;
 
+    @Override
+    public SoundType sound() {
+        return (SoundType) this.soundEvent.value();
+    }
 }

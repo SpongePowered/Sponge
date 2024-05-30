@@ -297,6 +297,7 @@
     "minecraft.world.item.ItemDisplayContextMixin_API",
     "minecraft.world.item.ItemMixin_API",
     "minecraft.world.item.ItemStackMixin_API",
+        "minecraft.world.item.JukeboxSongMixin_API",
     "minecraft.world.item.RarityMixin_API",
     "minecraft.world.item.TiersMixin_API",
     "minecraft.world.item.alchemy.PotionMixin_API",

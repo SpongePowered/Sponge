@@ -27,8 +27,6 @@ package org.spongepowered.common.registry.loader;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorPreset;
 import net.minecraft.world.level.material.MapColor;
 import org.spongepowered.api.ResourceKey;
@@ -51,8 +49,6 @@ import org.spongepowered.api.data.type.SkinParts;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.api.effect.sound.music.MusicDisc;
-import org.spongepowered.api.effect.sound.music.MusicDiscs;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorTypes;
 import org.spongepowered.api.entity.ai.goal.GoalType;
@@ -126,7 +122,6 @@ import org.spongepowered.common.data.type.SpongeSkinPart;
 import org.spongepowered.common.economy.SpongeAccountDeletionResultType;
 import org.spongepowered.common.economy.SpongeTransactionType;
 import org.spongepowered.common.effect.particle.SpongeParticleOption;
-import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.ai.SpongeGoalExecutorType;
 import org.spongepowered.common.entity.ai.goal.SpongeGoalType;
 import org.spongepowered.common.event.cause.entity.SpongeDismountType;
@@ -298,27 +293,6 @@ public final class SpongeRegistryLoader {
                 MovementTypes.PLUGIN,
                 MovementTypes.PORTAL
         )));
-    }
-
-    public static RegistryLoader<MusicDisc> musicDisc() {
-        return RegistryLoader.of(l -> {
-            // TODO ItemTags.MUSIC_DISCS to check for completion
-            l.add(MusicDiscs.BLOCKS, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_BLOCKS));
-            l.add(MusicDiscs.CAT, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_CAT));
-            l.add(MusicDiscs.CHIRP, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_CHIRP));
-            l.add(MusicDiscs.FAR, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_FAR));
-            l.add(MusicDiscs.MALL, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_MALL));
-            l.add(MusicDiscs.MELLOHI, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_MELLOHI));
-            l.add(MusicDiscs.MUSIC_DISC_5, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_5));
-            l.add(MusicDiscs.MUSIC_DISC_11, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_11));
-            l.add(MusicDiscs.MUSIC_DISC_13, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_13));
-            l.add(MusicDiscs.OTHERSIDE, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_OTHERSIDE));
-            l.add(MusicDiscs.PIGSTEP, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_PIGSTEP));
-            l.add(MusicDiscs.STAL, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_STAL));
-            l.add(MusicDiscs.STRAD, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_STRAD));
-            l.add(MusicDiscs.WAIT, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_WAIT));
-            l.add(MusicDiscs.WARD, k -> new SpongeMusicDisc((RecordItem) Items.MUSIC_DISC_WARD));
-        });
     }
 
     public static RegistryLoader<NotePitch> notePitch() {
