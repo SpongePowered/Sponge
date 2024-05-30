@@ -51,6 +51,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
+import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
@@ -66,6 +67,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.JukeboxSong;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -109,7 +111,6 @@ import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.network.ServerCommonPacketListenerImplBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
-import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.player.SpongeUserView;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -117,6 +118,7 @@ import org.spongepowered.common.mixin.api.minecraft.world.entity.player.PlayerMi
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.BookUtil;
 import org.spongepowered.common.util.NetworkUtil;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -263,12 +265,15 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public void playMusicDisc(final Vector3i position, final MusicDisc recordType) {
-        this.connection.send(SpongeMusicDisc.createPacket(Objects.requireNonNull(position, "position"), Objects.requireNonNull(recordType, "recordType")));
+        Objects.requireNonNull(position, "position");
+        Objects.requireNonNull(recordType, "recordType");
+        int songId = this.shadow$level().registryAccess().registryOrThrow(Registries.JUKEBOX_SONG).getId((JukeboxSong) (Object) recordType);
+        this.connection.send(new ClientboundLevelEventPacket(1010, VecHelper.toBlockPos(position), songId, false));
     }
 
     @Override
     public void stopMusicDisc(final Vector3i position) {
-        this.connection.send(SpongeMusicDisc.createPacket(position, null));
+        this.connection.send(new ClientboundLevelEventPacket(1011, VecHelper.toBlockPos(position), 0, false));
     }
 
     @Override

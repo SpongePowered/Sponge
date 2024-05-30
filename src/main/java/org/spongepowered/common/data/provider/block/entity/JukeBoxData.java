@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -44,8 +44,8 @@ public final class JukeBoxData {
                         .get(h -> h.getItem(0).isEmpty() ? null : ItemStackUtil.snapshotOf(h.getItem(0)))
                         .setAnd((h, v) -> {
                             final ItemStack record = ItemStackUtil.fromSnapshotToNative(v);
-                            if (record.getItem() instanceof RecordItem) {
-                                h.setItem(0, record);
+                            if (record.has(DataComponents.JUKEBOX_PLAYABLE)) {
+                                h.setTheItem(record);
                                 return true;
                             }
                             if (record.isEmpty()) {
